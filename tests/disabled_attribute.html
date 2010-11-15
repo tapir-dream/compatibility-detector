@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html chrome_comp_test="disabled_attribute">
+  <head>
+  </head>
+  <body>
+    <div style="background:#DDD;">
+      None of Disabled
+      <div id='id'><a href="#" style="color:blue;">Anchor Element</a></div>
+      <p style="background:gold;">Paragraph Element</p>
+      <input type="text" /><input type="submit" onclick="alert('A');" />
+    </div>
+    <br />
+    <div style="background:#CCC;">
+      Part of Disabled
+      <div><a href="#" disabled expectedProblems="HF3005">Anchor Element</a></div>
+      <p style="background:gold;">Paragraph Element</p>
+      <input type="text" disabled />
+      <input type="submit" disabled onclick="alert('A');" />
+      <select disabled>
+        <option>a</option>
+        <option>b</option>
+        <option>c</option>
+      </select>
+      <select>
+        <option disabled expectedProblems="HF3013">a</option>
+        <option>b</option>
+        <option>c</option>
+      </select>
+    </div>
+    <br />
+    <div disabled style="background:#BBB;" expectedProblems="HF3005">
+      All Disabled
+      <div><a href="#">Anchor Element</a></div>
+      <p style="background:gold;">Paragraph Element</p>
+      <input type="text" /><input type="submit" onclick="alert('A');"/>
+    </div>
+  </body>
+</html>

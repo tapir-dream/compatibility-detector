@@ -1,0 +1,64 @@
+<html chrome_comp_test="word_wrap_spaces">
+<head>
+</head>
+<body>
+
+<div style="word-wrap:break-word">
+<div style="float:left; background:gold; border:1px solid black; padding:3px"
+    expectedProblemsChild15="RT1008"
+    expectedProblemsChild17="RT1008"> 
+    <input type="hidden"/> <img width="10" height="10" style="display: none"/>
+    <input type="button" value="button"/><br>
+    <input type="hidden"/> <img width="10" height="10" style="display: none"/> 
+    <input type="button" value="button"/>
+    <input type="hidden"/> <img width="10" height="10" style="display: none"/> 
+</div>
+<div style="clear: both">white-space: normal</div>
+
+<div style="float:left; background:gold; border:1px solid black; padding:3px;"
+    expectedProblemsChild6="RT1008"> 
+    <input type="button" value="button"/> <input type="button"/> <input type="hidden"/>  <input/>
+    A <img width="10" height="10" style="visibility: hidden"/><span>
+    B </span><img width="10" height="10" style="display: none"/><span expectedProblemsChild0="RT1008"> C </span>
+    D <span style="display: none">E</span><span expectedProblemsChild0="RT1008"> F </span><span style="visibility: hidden">hidden</span>
+    <!-- xyz -->
+    <script>var x=1;</script>
+    <style>a { }</style>
+</div>
+<div style="float:left; background:pink;">123</div>
+
+<div style="clear: both">white-space: pre</div>
+<div style="float:left; background:gold; border:1px solid black; padding:3px; white-space: pre"> 
+    <input type="button" value="button"/> <input type="button"/> <input type="hidden"/>  <input/>
+    X <img width="10" height="10" style="visibility: hidden"/><span> Y </span><img width="10" height="10" style="display: none"/><span> </span>AFTER SPAN 
+    Z <span style="display: none">SPAN</span> A <span style="visibility: hidden">hidden</span>
+</div>
+<div style="float:left; background:pink;">123</div>
+
+<div style="clear: both">white-space: nowrap</div>
+<div style="float:left; background:gold; border:1px solid black; padding:3px; white-space: nowrap" 
+    expectedProblemsChild6="RT1008"> 
+    <input type="button" value="button"/> <input type="button"/> <input type="hidden"/>  <input/>
+    A <img width="10" height="10" style="visibility: hidden"/><span>
+    B </span><img width="10" height="10" style="display: none"/><span expectedProblemsChild0="RT1008"> C </span>
+    D <span style="display: none">E</span><span expectedProblemsChild0="RT1008"> F </span><span style="visibility: hidden">hidden</span>
+    <!-- xyz -->
+    <script>var x=1;</script>
+    <style>a { }</style>
+</div>
+<div style="float:left; background:pink;">123</div>
+
+<div style="clear: both">No Problem cases:</div>
+<div style="float:left; background:gold; border:1px solid black; padding:3px;"> 
+  <div style="border:2px dotted;">SPAN1</div> <div style="display:none;">span</div> <div style="display:none;">span</div> 
+  <span style="display: none">SPAN</span> <span style="border:2px dotted;">SPAN2</span>
+</div> 
+</div>
+<!-- Out of word-wrap:break-word div -->
+<div style="clear: both; float:left; background:gold; border:1px solid black; padding:3px;"> 
+    <input type="button" value="button"/> <input type="button"/> <input type="hidden"/>  <input/>
+    X <img width="10" height="10" style="visibility: hidden"/><span> Y </span><img width="10" height="10" style="display: none"/><span> </span>AFTER SPAN 
+    Z <span style="display: none">SPAN</span> A <span style="visibility: hidden">hidden</span>
+</div>
+</body>
+</html>

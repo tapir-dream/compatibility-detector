@@ -1,0 +1,71 @@
+<html chrome_comp_test="percent_height_in_auto_height"> 
+<head> 
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/> 
+<style> 
+    * { margin:0; padding:0; font:16px/100% Simsun; vertical-align:top; }
+</style> 
+</head> 
+<body style="height:100px"> 
+<div style="width:40px; background:#DDD; float:left; margin-right:5px;"> 
+    <table cellpadding="0" cellspacing="0" style="width:100%; height:100%; float:left;" expectedProblems="RE8010"> 
+        <tr> 
+            <td> 
+                <table cellpadding="0" cellspacing="0" style="width:90%; height:100%; background:#999;"> 
+                    <tr> 
+                        <td>AAA</td> 
+                    </tr> 
+                </table> 
+                <table cellpadding="0" cellspacing="0" style="width:90%; height:100%; background:#BBB;"> 
+                    <tr> 
+                        <td>BBB</td> 
+                    </tr> 
+                </table> 
+            </td> 
+        </tr> 
+    </table> 
+</div> 
+<div style="width:40px; background:#DDD; float:left; margin-right:5px;"> 
+    <div style="display:table; width:100%; height:100%; float:left;" expectedProblems="RD8026"> 
+        <div style="display:table; width:90%; height:100%; background:#999;">AAA</div> 
+        <div style="display:table; width:90%; height:100%; background:#BBB;">BBB</div> 
+    </div> 
+</div> 
+<div style="width:40px; background:#DDD; float:left;"> 
+    <div style="display:block; width:100%; height:100%; float:left;" expectedProblems="RD8026"> 
+        <div style="display:block; width:90%; height:100%; background:#999;">AAA</div> 
+        <div style="display:block; width:90%; height:100%; background:#BBB;">BBB</div> 
+    </div>
+</div>
+<div>No problem cases</div>
+<div style="width:40px; height:50px; background:#DDD; float:left; margin-right:5px;"> 
+    <table cellpadding="0" cellspacing="0" style="width:100%; height:100%; float:left;"> 
+        <tr> 
+            <td> 
+                <table cellpadding="0" cellspacing="0" style="width:90%; height:100%; background:#999;"> 
+                    <tr> 
+                        <td>AAA</td> 
+                    </tr> 
+                </table> 
+                <table cellpadding="0" cellspacing="0" style="width:90%; height:100%; background:#BBB;"> 
+                    <tr> 
+                        <td>BBB</td> 
+                    </tr> 
+                </table> 
+            </td> 
+        </tr> 
+    </table> 
+</div> 
+<div style="width:40px; height:50px; background:#DDD; float:left; margin-right:5px;"> 
+    <div style="display:table; width:100%; height:100%; float:left;"> 
+        <div style="display:table; width:90%; height:100%; background:#999;">AAA</div> 
+        <div style="display:table; width:90%; height:100%; background:#BBB;">BBB</div> 
+    </div> 
+</div> 
+<div style="width:40px; height:50px; background:#DDD; float:left;"> 
+    <div style="display:block; width:100%; height:100%; float:left;"> 
+        <div style="display:block; width:90%; height:100%; background:#999;">AAA</div> 
+        <div style="display:block; width:90%; height:100%; background:#BBB;">BBB</div> 
+    </div> 
+</div> 
+</body> 
+</html>

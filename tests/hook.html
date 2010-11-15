@@ -1,0 +1,208 @@
+<html>
+<script>
+var allPassed = true;
+var passed;
+
+var hookThisObjs = [];
+var hookArgs = [];
+
+function hook0() {
+  hookThisObjs[0] = this;
+  hookArgs[0] = arguments;
+}
+
+function hook1() {
+  hookThisObjs[1] = this;
+  hookArgs[1] = arguments;
+}
+
+function ASSERT(b, msg) {
+  if (!b)
+    throw new Error(msg);
+}
+
+var DONT_CHECK = {};
+
+function isNativeFunc(func) {
+  return func.toString().indexOf('{ [native code] }') > 0;
+}
+
+function checkArgs(index, expectedThis, expected) {
+  ASSERT(hookThisObjs[index] == expectedThis, "this");
+  var actual = hookArgs[index];
+  ASSERT(actual.length == expected.length, "length");
+  for (var i = 0; i < expected.length; i++) {
+    if (expected[i] instanceof Array) {
+      ASSERT(actual[i].length == expected[i].length, "length: " + i);
+      for (var j = 0; j < expected[i].length; j++)
+        ASSERT(actual[i][j] == expected[i][j], "param: " + i + "," + j);
+    } else if (expected[i] != DONT_CHECK) {
+      ASSERT(actual[i] == expected[i], "param: " + i);
+    }
+  }
+  hookArgs[index] = undefined;
+}
+/*
+(function testHookExistingMethodToObject() {
+  ASSERT(isNativeFunc(document.createElement));
+  ASSERT(isNativeFunc(Document.prototype.createElement));
+  ASSERT(chrome_comp.CompDetect.registerExistingMethodHook(
+      document, 'createElement', hook0));
+  ASSERT(!isNativeFunc(document.createElement));
+  ASSERT(isNativeFunc(Document.prototype.createElement));
+  var ele = document.createElement('div');
+  ASSERT(ele.tagName == 'DIV');
+  checkArgs(0, document, [ ele, [ 'div' ], DONT_CHECK ]);
+
+  ASSERT(chrome_comp.CompDetect.registerExistingMethodHook(
+      document, 'createElement', hook1));
+  ele = document.createElement('script');
+  ASSERT(ele.tagName == 'SCRIPT');
+  var expected = [ ele, [ 'script' ], DONT_CHECK ];
+  checkArgs(0, document, expected);
+  checkArgs(1, document, expected);
+
+  chrome_comp.enableHooks(false);
+  ele = document.createElement('span');
+  ASSERT(ele.tagName == 'SPAN');
+  ASSERT(hookArgs[0] == undefined);
+  ASSERT(hookArgs[1] == undefined);
+
+  chrome_comp.enableHooks(true);
+  ele = document.createElement('font');
+  ASSERT(ele.tagName == 'FONT');
+  var expected = [ ele, [ 'font' ], DONT_CHECK];
+  checkArgs(0, document, expected);
+  checkArgs(1, document, expected);
+
+  ASSERT(!chrome_comp.CompDetect.registerExistingMethodHook(
+      document, 'createElement', hook0));
+  ASSERT(chrome_comp.CompDetect.unregisterExistingMethodHook(
+      document, 'createElement', hook1));
+  ASSERT(!isNativeFunc(document.createElement));
+
+  ele = document.createElement('table');
+  ASSERT(ele.tagName == 'TABLE');
+  var expected = [ ele, [ 'table' ], DONT_CHECK ];
+  checkArgs(0, document, expected);
+  ASSERT(hookArgs[1] == undefined);
+
+  ASSERT(!chrome_comp.CompDetect.unregisterExistingMethodHook(
+      Document.prototype, 'createElement', hook0));
+  ASSERT(chrome_comp.CompDetect.unregisterExistingMethodHook(
+      document, 'createElement', hook0));
+  ASSERT(isNativeFunc(document.createElement));
+})();
+
+(function testHookExistingMethodToPrototype() {
+  var div = document.createElement('div');
+
+  ASSERT(isNativeFunc(Element.prototype.setAttribute));
+  ASSERT(Element.prototype.setAttribute == div.setAttribute);
+  ASSERT(isNativeFunc(Element.prototype.getAttribute));
+  ASSERT(Element.prototype.getAttribute == div.getAttribute);
+
+  ASSERT(chrome_comp.CompDetect.registerExistingMethodHook(
+      Element.prototype, 'setAttribute', hook0));
+  ASSERT(!isNativeFunc(Element.prototype.setAttribute));
+  ASSERT(Element.prototype.setAttribute == div.setAttribute);
+  ASSERT(chrome_comp.CompDetect.registerExistingMethodHook(
+      Element.prototype, 'getAttribute', hook1));
+  ASSERT(!isNativeFunc(Element.prototype.getAttribute));
+  ASSERT(Element.prototype.getAttribute == div.getAttribute);
+
+  div.setAttribute('attr', 'value');
+  ASSERT('value', div.getAttribute('attr'));
+  checkArgs(0, div, [ undefined, [ 'attr', 'value' ], DONT_CHECK ]);
+  checkArgs(1, div, [ 'value', [ 'attr' ], DONT_CHECK ]);
+
+  ASSERT(!chrome_comp.CompDetect.unregisterExistingMethodHook(
+      Element.prototype, 'setAttribute', hook1));
+  ASSERT(!chrome_comp.CompDetect.unregisterExistingMethodHook(
+      Element.prototype, 'getAttribute', hook0));
+  ASSERT(chrome_comp.CompDetect.unregisterExistingMethodHook(
+      Element.prototype, 'setAttribute', hook0));
+  ASSERT(chrome_comp.CompDetect.unregisterExistingMethodHook(
+      Element.prototype, 'getAttribute', hook1));
+  ASSERT(isNativeFunc(Element.prototype.setAttribute));
+  ASSERT(Element.prototype.setAttribute == div.setAttribute);
+  ASSERT(isNativeFunc(Element.prototype.getAttribute));
+  ASSERT(Element.prototype.getAttribute == div.getAttribute);
+})();
+
+(function testHookExistingPropertyToObject() {
+  function hook0r() {
+    hook0.apply(this, arguments);
+    return arguments[1];
+  }
+  var orgDocumentElement = document.documentElement;
+  var scrollWidth = document.documentElement.scrollWidth;
+  ASSERT(chrome_comp.CompDetect.registerExistingPropertyHook(
+      document, 'documentElement', 'scrollWidth', hook0r));
+  ASSERT(scrollWidth == document.documentElement.scrollWidth);
+  ASSERT(document.documentElement.chrome_comp_getInternalObject() ==
+      orgDocumentElement);
+  checkArgs(0, document.documentElement, [ scrollWidth, scrollWidth, 'get' ]);
+  document.documentElement.scrollWidth = 100;
+  checkArgs(0, document.documentElement, [ scrollWidth, 100, 'set' ]);
+  ASSERT(document.documentElement.__lookupGetter__('scrollWidth'));
+  ASSERT(document.documentElement.__lookupSetter__('scrollWidth'));
+
+  chrome_comp.enableHooks(false);
+  ASSERT(scrollWidth == document.documentElement.scrollWidth);
+  ASSERT(hookArgs[0] == undefined);
+
+  chrome_comp.enableHooks(true);
+  var scrollWidth = document.documentElement.scrollWidth;
+  ASSERT(!chrome_comp.CompDetect.registerExistingPropertyHook(
+      document, 'documentElement', 'scrollWidth', hook0r));
+  ASSERT(scrollWidth == document.documentElement.scrollWidth);
+  checkArgs(0, document.documentElement, [ scrollWidth, scrollWidth, 'get' ]);
+  document.documentElement.scrollWidth = 200;
+  checkArgs(0, document.documentElement, [ scrollWidth, 200, 'set' ]);
+
+  ASSERT(chrome_comp.CompDetect.unregisterExistingPropertyHook(
+      document, 'documentElement', 'scrollWidth', hook0r));
+  ASSERT(document.documentElement.chrome_comp_getInternalObject() ==
+      orgDocumentElement);
+  ASSERT(!document.documentElement.__lookupGetter__('scrollWidth'));
+  ASSERT(!document.documentElement.__lookupSetter__('scrollWidth'));
+})();
+*/
+(function testMissingProperty() {
+  function hook0r() {
+    hook0.apply(this, arguments);
+    return arguments[1];
+  }
+  function A() { }
+  var a = new A();
+  ASSERT(chrome_comp.CompDetect.registerMissingPropertyHook(
+      A.prototype, 'xyz', hook0r));
+  ASSERT(a.__lookupGetter__('xyz'));
+  ASSERT(a.__lookupSetter__('xyz'));
+  ASSERT(undefined == a.xyz);
+  checkArgs(0, a, [ undefined, undefined, 'get' ]);
+  a.xyz = 100;
+  checkArgs(0, a, [ undefined, 100, 'set' ]);
+
+  chrome_comp.enableHooks(false);
+  ASSERT(100 == a.xyz);
+  ASSERT(hookArgs[0] == undefined);
+
+  chrome_comp.enableHooks(true);
+  ASSERT(!chrome_comp.CompDetect.registerMissingPropertyHook(
+      A.prototype, 'xyz', hook0r));
+  ASSERT(100 == a.xyz);
+  checkArgs(0, a, [ 100, 100, 'get' ]);
+  a.xyz = 200;
+  checkArgs(0, a, [ 100, 200, 'set' ]);
+
+  ASSERT(chrome_comp.CompDetect.unregisterMissingPropertyHook(
+      A.prototype, 'xyz', hook0r));
+  ASSERT(!a.__lookupGetter__('xyz'));
+  ASSERT(!a.__lookupSetter__('xyz'));
+})();
+
+document.write('All passed: ' + (allPassed ? 'YES' : 'NO'));
+</script>
+</html>

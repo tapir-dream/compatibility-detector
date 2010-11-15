@@ -1,0 +1,69 @@
+<!DOCTYPE HTML>
+<html chrome_comp_test="onreadystatechange">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<script>
+  function OnStateChangeImage(image) {
+    document.getElementById('img-info').innerHTML += '<br> The image readyState: ' + image.readyState;
+  }
+  function OnStateChangeScript(script) {
+    document.getElementById('script-info').innerHTML += '<br> The script readyState: ' + script.readyState;
+  }
+  function OnStateChangeLink(link) {
+    document.getElementById('link-info').innerHTML += '<br>The link readyState: ' + link.readyState;
+  }
+  function loadJS(url) {
+    var domScript = document.createElement('script');
+    domScript.onload = domScript.onreadystatechange = function() {
+      var divElement = document.createElement('div');
+      divElement.appendChild(document.createTextNode('readyState:'+ domScript.readyState +' 动态创建的 SCRIPT 标记可以触发 onreadystatechange 事件'));
+      document.body.appendChild(divElement);
+    }
+    domScript.src = url;
+    document.getElementsByTagName('head')[0].appendChild(domScript);
+  }
+  function loadIMG(url) {
+    var domImage = document.createElement('img');
+    domImage.onreadystatechange = function() {
+      var divElement = document.createElement('div');
+      divElement.appendChild(document.createTextNode('readyState:'+ domImage.readyState +' 动态创建的 IMG 标记可以触发 onreadystatechange 事件'));
+      document.body.appendChild(divElement);
+    }
+    domImage.src = url;
+    domImage.setAttribute('expectedProblems', 'BX9021');
+    document.body.appendChild(domImage);
+  }
+  function loadCSS(url) {
+    var domLink = document.createElement('link');
+    domLink.onreadystatechange = function() {
+      var divElement = document.createElement('div');
+      divElement.appendChild(document.createTextNode('readyState:'+ domLink.readyState +' 动态创建的 LINK 标记可以触发 onreadystatechange 事件'));
+      document.body.appendChild(divElement);
+    }
+    domLink.rel = 'stylesheet';
+    domLink.type = 'text/css';
+    domLink.href = url;
+    // Onload event is unsupported on link nodes
+    domLink.onload = domLink.onreadystatechange;
+    domLink.setAttribute('expectedProblems', 'BX9021');
+    document.getElementsByTagName('head')[0].appendChild(domLink);
+  }
+  window.onload=function (){
+    //执行动态加载外部 JS 文件
+    loadJS('jquery.js');
+    //执行动态加载图片文件
+    loadIMG('img.png');
+    //执行动态加载css文件
+    loadCSS('article.css');
+  }
+</script>
+<link expectedProblems="BX9021" rel="stylesheet" type="text/css" href="article.css" onreadystatechange="OnStateChangeLink(this)">
+</head>
+<body>
+<span id="link-info">The link is loading.</span><br>
+<span id="img-info" >The image is loading.</span> <br>
+<span id="script-info">The script is loading.</span><br>
+<img onload="OnStateChangeImage(this)" src="img.png" onreadystatechange="OnStateChangeImage(this)"> <br>
+<script expectedProblems="BX9021" src="jquery.js" onreadystatechange= "OnStateChangeScript(this)"></script>
+</body>
+</html>

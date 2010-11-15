@@ -1,0 +1,60 @@
+<!doctype html>
+<html chrome_comp_test="table_cellspacing_border_collapse">
+  <body>
+    <table cellspacing="20" style="border-collapse:collapse; background:#999; border:10px solid black;"
+           expectedProblems="RX1008">
+      <tbody><tr>
+          <td style="background:#DDD; border:10px solid #444;">TABLE TD</td>
+          <td style="background:#DDD; border:10px solid #444;">TABLE TD</td>
+      </tr>
+      <tr>
+          <td style="background:#DDD; border:10px solid #444;">TABLE TD</td>
+          <td style="background:#DDD; border:10px solid #444;">TABLE TD</td>
+      </tr></tbody>
+    </table>
+    <table style="border-spacing:5px 5px;border-collapse:collapse; background:red;border: 10px solid gold;">
+      <tbody><tr>
+        <td style="background:#DDD; border:10px solid blue;">TABLE TD</td>
+        <td style="background:#DDD; border:10px solid blue;">TABLE TD</td>
+      </tr>
+      <tr>
+        <td style="background:#DDD; border:10px solid blue;">TABLE TD</td>
+        <td style="background:#DDD; border:10px solid blue;">TABLE TD</td>
+      </tr></tbody>
+    </table>
+    <div style="display:none">
+      <table cellspacing="20" style="border-collapse:collapse; background:#999; border:10px solid black;">
+        <tbody><tr>
+            <td style="background:#DDD; border:10px solid #444;">TABLE TD</td>
+            <td style="background:#DDD; border:10px solid #444;">TABLE TD</td>
+        </tr>
+        <tr>
+            <td style="background:#DDD; border:10px solid #444;">TABLE TD</td>
+            <td style="background:#DDD; border:10px solid #444;">TABLE TD</td>
+        </tr></tbody>
+      </table>
+    </div>
+    <table style="border-spacing:5px 5px; border-collapse:separate; background:#999; border:10px solid black;"
+           expectedProblems="RE1020">
+      <tbody><tr>
+          <td style="background:#DDD; border:10px solid #444;">TABLE TD</td>
+          <td style="background:#DDD; border:10px solid #444;">TABLE TD</td>
+      </tr>
+      <tr>
+          <td style="background:#DDD; border:10px solid #444;">TABLE TD</td>
+          <td style="background:#DDD; border:10px solid #444;">TABLE TD</td>
+      </tr></tbody>
+    </table>
+    <table cellspacing=20 style="border-spacing:5px 5px; border-collapse:separate; background:#999; border:10px solid black;"
+           expectedProblems="RE1020">
+      <tbody><tr>
+          <td style="background:#DDD; border:10px solid #444;">TABLE TD</td>
+          <td style="background:#DDD; border:10px solid #444;">TABLE TD</td>
+      </tr>
+      <tr>
+          <td style="background:#DDD; border:10px solid #444;">TABLE TD</td>
+          <td style="background:#DDD; border:10px solid #444;">TABLE TD</td>
+      </tr></tbody>
+    </table>
+  </body>
+</html>

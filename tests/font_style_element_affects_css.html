@@ -1,0 +1,82 @@
+<html chrome_comp_test="font_style_element_affects_css">
+<body>
+<a href><u style='text-decoration: none' expectedProblems="RX3007">A - U</u></a><br>
+<a href=#><i style='text-decoration: none' expectedProblems="RX3007">A - I</i></a><br>
+<a href=#><s style='text-decoration: none' expectedProblems="RX3007">A - S</s></a><br>
+<a href=#><span style='text-decoration: none' expectedProblems="RX3007">A - SPAN</span></a><br>
+<a href=#><b><i><u style='text-decoration: none' expectedProblems="RX3007">A - B - I - U</u></i></b></a><br>
+<a href=#><div style='text-decoration: none' expectedProblems="RX3007">A - DIV</div></a><br>
+<a href=# style='display: block'><div style='text-decoration: none' expectedProblems="RX3007">BLOCK A - DIV</div></a><br>
+<a href=# style='text-decoration: none'><span style='text-decoration: none'>A with text-decoration: none</span></a><br>
+<br>
+<u><a href=# style='text-decoration: none' expectedProblems="RX3007">U - A</a></u><br>
+<u><u style='text-decoration: none' expectedProblems="RX3007">U - U</u></u><br>
+<u><i style='text-decoration: none'>U - I</i></u><br>
+<u><s style='text-decoration: none'>U - S</s></u><br>
+<u><span style='text-decoration: none'>U - SPAN</span></u><br>
+<u><b><i><u style='text-decoration: none' expectedProblems="RX3007">U - B - I - U</u></i></b></u><br>
+<u style='text-decoration: none'><span style='text-decoration: none'>U with text-decoration: none</span></u><br>
+<br>
+<span style='text-decoration: underline'><a href=# style='text-decoration: none' expectedProblems="RX3007">SPAN - A</a></span><br>
+<span style='text-decoration: underline'><u style='text-decoration: none' expectedProblems="RX3007">SPAN - U</u></span><br>
+<span style='text-decoration: underline'><i style='text-decoration: none'>SPAN - I</i></span><br>
+<span style='text-decoration: underline'><s style='text-decoration: none'>SPAN - S</s></span><br>
+<span style='text-decoration: underline'><span style='text-decoration: none'>SPAN - SPAN</span></span><br>
+<span style='text-decoration: underline'><b><i><u style='text-decoration: none' expectedProblems="RX3007">SPAN - B - I - U</u></i></b></span><br>
+<br>
+<s><a href=# style='text-decoration: none'>S - A</a></s><br>
+<s><u style='text-decoration: none'>S - U</u></s><br>
+<s><i style='text-decoration: none'>S - I</i></s><br>
+<s><s style='text-decoration: none' expectedProblems="RX3007">S - S</s></s><br>
+<s><strike style='text-decoration: none' expectedProblems="RX3007">S - STRIKE</strike></s><br>
+<s><span style='text-decoration: none'>S - SPAN</span></s><br>
+<s><b><i><s style='text-decoration: none' expectedProblems="RX3007">S - B - I - S</s></i></b></s><br>
+<s style='text-decoration: none'><span style='text-decoration: none'>S with text-decoration: none</span></s><br>
+<br>
+<strike><a href=# style='text-decoration: none'>STRIKE - A</a></strike><br>
+<strike><u style='text-decoration: none'>STRIKE - U</u></strike><br>
+<strike><i style='text-decoration: none'>STRIKE - I</i></strike><br>
+<strike><strike style='text-decoration: none' expectedProblems="RX3007">STRIKE - STRIKE</strike></strike><br>
+<strike><s style='text-decoration: none' expectedProblems="RX3007">STRIKE - S</s></strike><br>
+<strike><span style='text-decoration: none'>STRIKE - SPAN</span></strike><br>
+<strike><b><i><strike style='text-decoration: none' expectedProblems="RX3007">STRIKE - B - I - STRIKE</strike></i></b></strike><br>
+<strike style='text-decoration: none'><span style='text-decoration: none'>STRIKE with text-decoration: none</span></strike><br>
+<br>
+<span style='text-decoration: line-through'><a href=# style='text-decoration: none'>SPAN - A</a></span><br>
+<span style='text-decoration: line-through'><u style='text-decoration: none'>SPAN - U</u></span><br>
+<span style='text-decoration: line-through'><i style='text-decoration: none'>SPAN - I</i></span><br>
+<span style='text-decoration: line-through'><s style='text-decoration: none' expectedProblems="RX3007">SPAN - S</s></span><br>
+<span style='text-decoration: line-through'><span style='text-decoration: none'>SPAN - SPAN</span></span><br>
+<span style='text-decoration: line-through'><b><i><s style='text-decoration: none' expectedProblems="RX3007">SPAN - B - I - S</s></i></b></span><br>
+
+    <style type="text/css"> 
+      #lt a {
+        text-decoration : line-through;
+      }
+    </style> 
+    <div id="ul"> 
+      <a href="#"><span style="text-decoration:none;"></span></a> 
+      <a href="#"><span style="text-decoration:none; display:none;">x</span></a> 
+      <a href="#"><span style="text-decoration:none;" expectedProblems="RX3007">x</span></a> 
+      <a href="#"><br  style="text-decoration:none;"/></a>
+      <a href="#">    </a>
+      <a href="#"><input style="text-decoration:none;"></a> 
+      <a href="#"><input style="text-decoration:none;" type="hidden" name="xx"/></a> 
+      <a href="#"><hr style="text-decoration:none;"/></a> 
+      <a href="#"><img src="img.png" style="text-decoration:none; border:none;" /></a> 
+    </div> 
+    
+    <div id="lt"> 
+      <a href="#"><span style="text-decoration:none;"></span></a> 
+      <a href="#"><span style="text-decoration:none; display:none;">x</span></a> 
+      <a href="#"><span style="text-decoration:none;">x</span></a> 
+      <a href="#"><br  style="text-decoration:none;"/></a>
+      <a href="#">    </a>
+      <a href="#"><input style="text-decoration:none;"></a> 
+      <a href="#"><input style="text-decoration:none;" type="hidden" name="xx"/></a> 
+      <a href="#"><hr style="text-decoration:none;"/></a> 
+      <a href="#"><img src="img.png" style="text-decoration:none; border:none;" /></a> 
+    </div> 
+
+</body>
+</html>

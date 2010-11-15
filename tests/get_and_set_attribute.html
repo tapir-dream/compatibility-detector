@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html chrome_comp_test="get_and_set_attribute">
+<head>
+<script>
+  function $(id) { return document.getElementById(id); }
+  window.onload = function () {
+    var b1 = $("b1");
+    var b2 = $("b2");
+    var psw = $("psw");
+    b1.setAttribute("onclick", "x=1");
+    chrome_comp.expectProblems(b2.setAttribute("onclick", function() { x=1; }), "SD9006");
+    b1.className = "b1";
+    chrome_comp.expectProblems(b2.getAttribute("className"), "SD9006");
+    b2.setAttribute("class", "b2");
+    chrome_comp.expectProblems(b2.setAttribute("className", "b2"), "SD9006");
+    b2.getAttribute("id");
+    chrome_comp.expectProblems(psw.setAttribute("value", "new value"), "SD9006");
+  }
+</script>
+</head>
+<body>
+  <div><button id="b1" type="button" onmouseover="">funcStr1</button></div><span id="s1">N/A</span><br />
+  <div><button id="b2" type="button" onmouseover="">new Function(funcStr2)</button></div><span id="s2">N/A</span><br />
+  <div id="cont"><input id="psw" type="text" value="old value" /></div>
+</body>
+</html>

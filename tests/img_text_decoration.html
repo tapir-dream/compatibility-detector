@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html chrome_comp_test="img_text_decoration">
+<head>
+<script>
+chrome_comp.CompDetectorConfig.maxProblemsPerType = 1000;
+</script>
+</head>
+<body>
+
+<div id='problem'>Problem cases 
+<div style="text-decoration:underline;">
+<img src='img.png' expectedProblems='RT3001'/>
+text
+</div>
+
+<div>
+<span style="text-decoration:underline;">
+<img src='img.png' expectedProblems='RT3001' />
+text
+</span>
+</div>
+
+<div style="text-decoration:underline;">
+<br />
+<span>
+<img src='img.png' expectedProblems='RT3001' />
+<span>
+<img src='img.png' expectedProblems='RT3001' />
+</span>
+<img src='img.png' expectedProblems='RT3001' />
+</span>
+<!-- comment tests -->
+<br />
+<span>text</span>
+</div>
+
+<div style="text-decoration:underline;">
+<br />
+<span><img src='img.png' expectedProblems='RT3001' /></span>
+<!-- comment tests -->
+<span>text</span>
+</div>
+
+<div style="text-decoration:underline; white-space: pre">
+<br />
+<img src='img.png' expectedProblems='RT3001' />
+</div>
+</div>
+
+<div>No problem cases
+<div style="text-decoration:underline;">
+<img src='img.png' />
+<img src='img.png' />
+</div>
+
+<div style="text-decoration:underline; white-space: pre"><br /><img src='img.png' /></div>
+
+<br />
+<div style="text-decoration:underline;">
+<img src='img.png' />
+<span style='display:block'></span>
+<span></span>
+</div>
+
+<br />
+<div style="text-decoration:underline;">
+  <div style="display:inline-block">
+    <img src='img.png' />
+    <span>text</span>
+  </div>
+</div>
+
+<br />
+<div style="text-decoration:underline">
+  <img src='img.png' style='display:block' />
+  <span>text</span>
+</div>
+
+<div style="text-decoration:underline;position:relative"> 
+before absolute <img src="img.png" style="position:absolute;top:200px; left: 300px"> after absolute
+</div> 
+<div style="text-decoration:underline"> 
+before fixed <img src="img.png" style="position:fixed; top:200px; left: 200px"> after fixed
+</div>
+</div>
+</body>
+</html>
