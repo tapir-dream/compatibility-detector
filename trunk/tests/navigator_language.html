@@ -1,0 +1,33 @@
+<!DOCTYPE html> 
+<html> 
+<head> 
+</head> 
+<body> 
+<script>
+function getLanguage() {
+  return (navigator.language || navigator.userLanguage).toLowerCase();
+}
+function getLanguage1() {
+  return navigator.language;
+}
+function getLanguage2() {
+  return navigator.language || navigator.browserLanguage;
+}
+function getLanguage3() {
+  return (navigator.browserLanguage || navigator.language).toUpperCase();
+}
+function getLanguage4() {
+  return navigator.browserLanguage;
+}
+document.write('navigator.language:'+navigator.language);
+document.write('<br>navigator.userLanguage:'+navigator.userLanguage);
+document.write('<br>navigator.browserLanguage:'+navigator.browserLanguage);
+document.write('<br>navigator.systemLanguage:'+navigator.systemLanguage);
+document.write('<br>getLanguage():'+getLanguage());
+document.write('<br>getLanguage():'+getLanguage1());
+document.write('<br>getLanguage():'+getLanguage2());
+document.write('<br>getLanguage():'+getLanguage3());
+document.write('<br>getLanguage():'+getLanguage4());
+</script> 
+</body> 
+</html>

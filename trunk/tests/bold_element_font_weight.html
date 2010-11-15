@@ -1,0 +1,99 @@
+<!DOCTYPE html> 
+<html> 
+<head> 
+<style type="text/css"> 
+    * { font-size: 12px; margin: 0; }
+</style> 
+</head> 
+<body> 
+<script> 
+    window.onload = function() {
+        function $(id) {
+            return document.getElementById(id);
+        }
+ 
+        function $s($target, styleName) {
+            return document.defaultView ? document.defaultView.getComputedStyle($target, null).getPropertyValue(styleName)
+                    : $target.currentStyle[styleName.replace(/-[a-z]/g, function() {
+                return arguments[0].charAt(1).toUpperCase();
+            })];
+        }
+        $("da1").innerHTML = "computed:" + $s($("a1"), "font-weight");
+        $("da2").innerHTML = "computed:" + $s($("a2"), "font-weight");
+        $("da3").innerHTML = "computed:" + $s($("a3"), "font-weight");
+        $("da4").innerHTML = "computed:" + $s($("a4"), "font-weight");
+        $("da5").innerHTML = "computed:" + $s($("a5"), "font-weight");
+        $("da6").innerHTML = "computed:" + $s($("a6"), "font-weight");
+        $("da7").innerHTML = "computed:" + $s($("a7"), "font-weight");
+        $("da8").innerHTML = "computed:" + $s($("a8"), "font-weight");
+    }
+</script> 
+<div style="font-weight:100"><b id="a1">DIV{font-weight:100} > B</b></div> 
+<div style="background:#CCC;" id="da1"></div> 
+ 
+<div style="font-weight:100"><strong id="a2">DIV{font-weight:100} > SRTONG</strong></div> 
+<div style="background:#CCC;" id="da2"></div> 
+ 
+<div style="font-weight:100"><h3 id="a3">DIV{font-weight:100} > H3</h3></div> 
+<div style="background:#CCC;" id="da3"></div> 
+ 
+<div style="font-weight:100"><table><tr><th id="a4">DIV{font-weight:100} > TH</th></tr></table></div> 
+<div style="background:#CCC;" id="da4"></div> 
+ 
+<br /> 
+<div style="font-weight:normal"><b id="a5">DIV{font-weight:normal} > B</b></div> 
+<div style="background:#CCC;" id="da5"></div> 
+ 
+<div style="font-weight:normal"><strong id="a6">DIV{font-weight:normal} > SRTONG</strong></div> 
+<div style="background:#CCC;" id="da6"></div> 
+ 
+<div style="font-weight:normal"><h3 id="a7">DIV{font-weight:normal} > H3</h3></div> 
+<div style="background:#CCC;" id="da7"></div> 
+ 
+<div style="font-weight:normal"><table><tr><th id="a8">DIV{font-weight:normal} > TH</th></tr></table></div> 
+<div style="background:#CCC;" id="da8"></div> 
+
+<style>
+    * { font-size:12px; font-family:Tahoma; margin: 0; }
+    table { border-collapse;collapse; border-top:1px solid black; border-left:1px solid black; }
+    td, th { border-right:1px solid black; border-bottom:1px solid black; }
+</style>
+<script> 
+    window.onload = function() {
+        function $(id) {
+            return document.getElementById(id);
+        }
+ 
+        function $s($target, styleName) {
+            return document.defaultView ? document.defaultView.getComputedStyle($target, null).getPropertyValue(styleName)
+                    : $target.currentStyle[styleName.replace(/-[a-z]/g, function() {
+                return arguments[0].charAt(1).toUpperCase();
+            })];
+        }
+ 
+        var values = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, "normal", "bold"];
+        
+        var str1 = [];
+        str1.push('<table cellpadding="2" cellspacing="0"><tr><th>V</th><th>P</th><th>B</th><th>L</th></tr>');
+        for (var i = 0, j = values.length; i < j; i++) {
+            var p = values[i];
+            str1.push('<tr><td>' + p + '</td>'
+                + '<td><div id="div' + p + '" style="font-weight:' + p + '"></div></td>'
+                + '<td><div style="font-weight:' + p + '"><span id="span' + p + '" style="font-weight:bolder;"></span></div></td>'
+                + '<td><div style="font-weight:' + p + '"><span id="spanl' + p + '" style="font-weight:lighter;"></span></div></td></tr>');
+        }
+        str1.push('</table>');
+        $("table").innerHTML = str1.join("");
+        
+        for (var i = 0, j = values.length; i < j; i++) {
+            var p = values[i];
+            $("div" + p).innerHTML = $s($("div" + p), "font-weight");
+            $("span" + p).innerHTML = $s($("span" + p), "font-weight");
+            $("spanl" + p).innerHTML = $s($("spanl" + p), "font-weight");
+        }
+        
+    }
+</script> 
+<div id="table"></div> 
+</body> 
+</html>

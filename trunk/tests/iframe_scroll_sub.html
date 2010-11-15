@@ -1,0 +1,43 @@
+<!DOCTYPE html> 
+<html> 
+<head>
+<style>
+html {
+  border: 1px solid red;
+}
+body {
+  border: 1px solid yellow;
+  margin: 3px;
+  font-size: 12px;
+}
+</style>
+</head>
+<body>
+<script>
+var hash = location.hash.substring(1);
+if (!hash) {
+  document.getElementById('iframes').style.display = 'block';
+} else {
+  var parts = hash.split('-');
+  if (parts[0])
+    document.documentElement.style.overflow = parts[0];
+  if (parts[1])
+    document.body.style.overflow = parts[1];
+  if (parts[2])
+    document.documentElement.style.width = document.documentElement.style.height = parts[2];
+  if (parts[3])
+    document.body.style.width = document.body.style.height = parts[3];
+  document.write(
+      'html scroll: ' + parts[0] + '<br>' +
+      'body scroll: ' + parts[1] + '<br>' +
+      'html w/h: ' + parts[2] + '<br>' +
+      'body w/h: ' + parts[3] + '<br>'
+  );
+  document.write('<div>');
+  for (var i = 0; i < 30; i++)
+    document.write('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ');
+  document.write('</div>');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+/*
+ * Copyright 2010 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+{
+  "name": "__MSG_extensionName__",
+  "version": "1.2",
+  "description": "__MSG_extensionDescription__",
+  "background_page": "background.html",
+  "default_locale": "zh_CN",
+  "icons": {
+    "128": "icon_128.png"
+  },
+  // "options_page": "options.html",
+  "permissions": [ "tabs", "http://*/*", "https://*/*" ],
+  "browser_action": {
+    "default_icon": "icon_normal.png",
+    "default_title": "__MSG_resultNotAvailable__"
+  },
+  "content_scripts": [
+  {
+    "matches": [ "http://*/*", "https://*/*", "file://*" ],
+    "js": [
+      "loader.js",
+      "framework.js",
+      "config.js",
+      "w3help_issues.js",
+      "non_w3help_issues.js",
+
+      "detectors/useragent_check.js",
+      "detectors/document_all.js",
+      "detectors/scroll_top_left.js",
+      "detectors/getelementbyid.js",
+      "detectors/plugin.js",
+      "detectors/minimal_font_size.js",
+      "detectors/absolute_font_size.js",
+      "detectors/colspan_width_adjustment.js",
+      "detectors/disabled_attribute.js",
+      "detectors/invalid_list_item.js",
+      "detectors/overflow.js",
+      "detectors/decoration_font_color.js",
+      "detectors/get_year.js",
+      "detectors/haslayout_full_shape_space.js",
+      "detectors/full_shape_space_no_wrap.js",
+      "detectors/shrink_to_fit_percentage_child.js",
+      "detectors/missing_tags.js",
+      "detectors/table_border_color.js",
+      "detectors/conditional_comments.js",
+      "detectors/img_text_decoration.js",
+      "detectors/text_align.js",
+      "detectors/tr_height.js",
+      "detectors/empty_cell.js",
+      "detectors/stretched_cell_align.js",
+      "detectors/style_attribute_value_in_braces.js",
+      "detectors/img_padding.js",
+      "detectors/font_style_element_affects_css.js",
+      "detectors/table_margin_affects_align_center.js",
+      "detectors/text_overflow_ellipsis.js",
+      "detectors/get_and_set_attribute.js",
+      "detectors/table_cellspacing_border_collapse.js",
+      "detectors/td_nowrap_inheritence.js",
+      "detectors/text_decoration_propagation.js",
+      "detectors/bold_element_font_weight.js",
+      "detectors/word_wrap_spaces.js",
+      "detectors/fieldset_width.js",
+      "detectors/percent_height_in_auto_height.js",
+      "detectors/iframe_scroll.js",
+      "detectors/onreadystatechange.js",
+      "detectors/align_nowrap.js",
+      "detectors/marquee_width.js",
+      "detectors/navigator_language.js",
+      "detectors/mouse_enter_leave.js",
+      "detectors/script_language_type.js",
+      "detectors/img_alt_title.js",
+      "detectors/center_element.js",
+      "detectors/align_middle.js",
+      "detectors/white_space_after_iframe_object.js",
+      "detectors/nbsp_before_object.js",
+      "detectors/meta_content_separator.js",
+
+      "annotation.js"
+    ],
+    "run_at": "document_start"
+  }]
+}

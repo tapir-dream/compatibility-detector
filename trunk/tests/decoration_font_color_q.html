@@ -1,0 +1,18 @@
+<html chrome_comp_test='decoration_font_color'>
+<style>
+  body { font-size:32px; font-family:Verdana; }
+  a { color:blue; }
+  span { text-decoration:underline; color:blue; } 
+</style>
+<body>
+  <div><a href="#"><font style="color:green" expectedProblems="RX3011">A - FONT style</font></a></div>
+  <div><span><font style="color:green" expectedProblems="RX3011">SPAN - FONT style</font></span></div>
+  <div>No problem cases</div>
+  <div><a href="#"><font color="red">A - FONT color</font></a></div>
+  <div><span><font color="red">SPAN - FONT color</font></span></div>
+  <div><a href="#"><font color="blue">A - FONT color</font></a></div>
+  <div><span><font color="blue">SPAN - FONT color</font></span></div>
+  <div><a href="#"><span style="color:green">A - SPAN style</span></a></div>
+  <div><span><span style="color:green">SPAN - SPAN style</span></span></div>
+</body>
+</html>

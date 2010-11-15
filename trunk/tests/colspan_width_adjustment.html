@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+
+<script type="text/javascript">
+    window.onload = function() {
+        function $(id) {
+            return document.getElementById(id);
+        }
+
+        $("info").innerHTML =
+                "<br/>red cell width : " + $("td1").clientWidth +
+                "<br/>blue cell width : " + $("td2").clientWidth +
+                "<br/>black cell width : " + $("td4").clientWidth;
+    }
+</script>
+
+<table style="color:white;" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="td0" style="background-color:gold;width:200px" colspan="2">td0</td>
+    </tr>
+    <tr>
+        <td id="td1" style="background-color:red;">td1</td>
+        <td id="td2" style="background-color:blue;width:100px">td2</td>
+    </tr>
+    <tr>
+        <td id="td3" style="background-color:gold;" colspan="2">td3</td>
+    </tr>
+    <tr>
+        <td id="td4" style="background-color:black;width:200px" colspan="2">td4</td>
+    </tr>
+</table>
+
+<span>computed clientWidth:</span>
+<div id="info" style="border:1px dashed red; width:300px;"></div>
+
+</body>
+</html>

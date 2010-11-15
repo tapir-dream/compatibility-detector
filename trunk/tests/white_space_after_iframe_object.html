@@ -1,0 +1,32 @@
+<html chrome_comp_test="white_space_after_iframe_object">
+<head> 
+<style> 
+    object, iframe, embed, img { width:40px; height:40px; border:1px solid black; }
+</style> 
+</head> 
+<body> 
+<div> 
+<iframe style="background:#888;" allowtransparency="true" frameborder="0" scrolling="no" src="img.png" expectedProblems="HT1001"></iframe> 
+<embed type="application/x-shockwave-flash" quality="high" expectedProblems="HT1001"> 
+<object type="application/x-shockwave-flash" data="xyz.swf" expectedProblems="HT1001"></object> 
+<object type="application/x-shockwave-flash" data="xyz.swf" expectedProblems="HT1001"></object> 
+
+<img src='img.png'>
+<img src='img.png'>
+</div>
+
+<iframe style="background:#888;display:block" allowtransparency="true" frameborder="0" scrolling="no" src="img.png"></iframe> 
+<iframe style="background:#888;display:block" allowtransparency="true" frameborder="0" scrolling="no" src="img.png"></iframe> 
+
+<pre>
+<iframe style="background:#AAA;" allowtransparency="true" frameborder="0" scrolling="no" src="img.png"></iframe> 
+<embed type="application/x-shockwave-flash" quality="high"> 
+<object type="application/x-shockwave-flash" data="xyz.swf"></object><span></span>
+<object type="application/x-shockwave-flash" data="xyz.swf"></object>
+
+<img src='img.png'>
+<img src='img.png'>
+</pre>
+
+</body>
+</html>

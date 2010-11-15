@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h1>Table element without setting margin (Should not report)</h1> 
+<div style="width:300px; background:silver; padding: 20px"> 
+  <table width="201" style="background:gold;" align="center"> 
+    <tr> 
+      <td>Text</td> 
+    </tr> 
+  </table> 
+</div>
+
+<h1>margin-left == margin-right == the auto margin (Should not report)</h1> 
+<div style="width:300px; background:silver; padding: 20px"> 
+  <table cellspacing="0" style="width:200px; margin:0 50px; padding: 20px; background:gold;" align="center"> 
+    <tr>
+      <td>Text</td> 
+    </tr> 
+  </table> 
+</div> 
+
+<h1>Set margin-left which is not same as the center margin (Should report)</h1> 
+<div style="width:300px; background:silver;"> 
+  <table cellspacing="0" style="width:200px; margin-left:10px; background:gold;" align="center"> 
+    <tr> 
+      <td>Text</td> 
+    </tr> 
+  </table> 
+</div> 
+
+<h1>ALIGN="CENTER" (Should report)</h1> 
+<div style="width:300px; background:silver"> 
+  <table cellspacing="0" style="width:200px; margin:10px; background:gold" ALIGN="CENTER"> 
+    <tr> 
+      <td>Text</td> 
+    </tr> 
+  </table> 
+</div> 
+
+</body>
+</html>

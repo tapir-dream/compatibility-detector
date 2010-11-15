@@ -1,0 +1,60 @@
+<style>
+  table { background:#888; border:1px solid black; }
+  td { background:#AAA; text-align:right; border:1px solid black; }
+  div { background:#DDD; }
+</style>
+
+<table>
+<tr>
+  <td style="width:200px;">
+    <div>cell</div>
+  </td>
+</tr>
+<tr>
+  <td style="width:150px;">
+    <div>stretched cell</div>
+  </td>
+</tr>
+</table>
+
+<br>
+<span>No Problem Case</span>
+<br><br>
+
+<table>
+<tr>
+  <td style="width:10;">
+    <div>overflow</div>
+  </td>
+</tr>
+</table>
+
+<br>
+<table>
+<tr>
+  <td style="width:200px;">
+    <div>cell</div>
+  </td>
+</tr>
+<tr>
+  <td style="width:150px;">
+    <div style="float:left">float left cell</div>
+  </td>
+</tr>
+</table>
+
+<br>
+<style>
+.test td.a{width:50px; font-size:2em; background:gold;}
+</style>
+<table border="0" cellspacing="0" cellpadding="0" class="test" style="width:150px; border-collapse:collapse;"> 
+  <tr> 
+    <td class="a" style="text-align:right;"> 
+      cell
+    </td> 
+    <td style="width:100px; text-align:center;"> 
+      cell
+    </td> 
+  </tr> 
+</table> 
+

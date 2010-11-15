@@ -1,0 +1,64 @@
+<html chrome_comp_test="shrink_to_fit_percentage_child">
+<style>
+  * { margin:0; padding:0; font:16px Simsun; }
+</style>
+<h1>50% div in auto width float left div</h1>
+<div style="float:left; background:green; word-wrap:break-word">
+  <div>YYYYYYYYYY</div>
+  <div style="width:50%; float:left" expectedProblems="RX8017">XXXXXXXXXX</div>
+</div>
+<br clear="all">
+<h1>100% div in inline-block</h1>
+<span style="display:inline-block; background:silver;">
+  <div>LongTextLongTextLongTextLongTextLongText</div>
+  <div style="width:100%; height:100px; background:gold;" expectedProblems="RX8017">Text</div>
+</span>
+<br clear="all">
+<h1>100% div in absolute positioned div</h1>
+<div style="position:absolute; background:silver;">
+  <div>LongTextLongTextLongTextLongTextLongText</div>
+  <div>
+    <div style="width:100%; height:100px; background:gold;" expectedProblems="RX8017">Text</div>
+  </div>
+</div>
+<br clear="all">
+<h1>100% div in auto width div in float left div</h1>
+<div style="float:left; background:silver;">
+  <div>LongTextLongTextLongTextLongTextLongText</div>
+  <div>
+    <div style="width:100%; height:100px; background:gold;" expectedProblems="RX8017">Text</div>
+  </div>
+</div>
+<br clear="all">
+<h1>No problem cases</h1>
+<h1>Child is absolute positioned</h1>
+<div style="float:left; background:blue; word-wrap:break-word">
+  <div>YYYYYYYYYY</div>
+  <div style="width:50%; position:absolute; background: red">XXXXXXXXXX</div>
+</div>
+<br clear="all">
+<h1>Width just fit (not actually shrunk)</h1>
+<div style="width:500px; background:red; height:50px">
+  <div style="float:left; background:silver;">
+    <div style="width:50%; height:100px; margin-left:250px; background:gold;">
+      <div style="width:250px;">text</div>
+    </div>
+  </div>
+</div>
+<br clear="all"><br>
+<h1>Child is invisible</h1>
+<div style="width:100px;">
+  <div style="float:left; background:silver;">
+    <div style="float:left; width:100px; height:100px; background:red;">Float 1</div>
+    <div style="clear:left; width:100%; height:10px"></div>
+    <div style="float:left; width:100px; height:100px; background:blue;">Float 2</div>
+  </div>
+</div>
+<br clear="all"><br>
+<h1>Not shrint-to-fit</h1>
+<div style="background:blue; word-wrap:break-word">
+  <div>YYYYYYYYYY</div>
+  <div style="width:50%; background: red">XXXXXXXXXX</div>
+</div>
+</html>
+

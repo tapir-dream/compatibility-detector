@@ -1,0 +1,16 @@
+<table style="border:1px solid black;">
+  <tr id="tr1" style="height:60px;">
+    <td id="td1" style="height:40px; background:#CCC;">1</td>
+  </tr>
+  <tr id="tr2" style="height:40px;">
+    <td id="td2" style="height:60px; background:#AAA;">2</td>
+  </tr>
+</table>
+
+<script>
+  function $(id) { return document.getElementById(id); }
+  $("td1").innerHTML = "TR defined height: " + $("tr1").style.height + " offsetHeight: " +
+                       $("tr1").offsetHeight + "px" + "<br /> TD defined height: " + $("td1").style.height + " offsetHeight: " + $("td1").offsetHeight + "px";
+  $("td2").innerHTML = "TR defined height: " + $("tr2").style.height + " offsetHeight: " +
+                       $("tr2").offsetHeight + "px" + "<br /> TD defined height: " + $("td2").style.height + " offsetHeight: " + $("td2").offsetHeight + "px";
+</script>

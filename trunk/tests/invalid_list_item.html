@@ -1,0 +1,28 @@
+<html chrome_comp_test="invalid_list_item">
+  <body>
+    <ol id='id' expectedProblemsChild8="HY1005">
+      aaaaa
+      <li>List A</li>
+      <li>List B</li>
+      <span style="background:gold; text-decoration:line-through;" expectedProblems="HY1005">CCC</span>
+      <li>List C</li>
+      Non blank Text
+    </ol>
+  <li style="border:3px solid blue;">LI</li>
+  <script>
+  /*SCRIPT*/
+  </script>
+  <style>
+  /*STYLE*/
+  </style>
+  <div style="display: none">Display none</div>
+  <dt style="border:3px solid red;" expectedProblems="HY1005">DT</dt>
+  <div style="float: left" expectedProblems="HY1005">Left</div>
+  <div style="position: absolute">Absolute</div>
+  <span>SPAN</span>
+  <p>P</p>
+  <h1>H1</h1>
+  <dd style="border:3px solid black;">DD</dd>
+  <dd style="border:3px solid black;">DD</dd>
+  </body>
+</html>

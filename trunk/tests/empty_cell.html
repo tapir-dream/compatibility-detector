@@ -1,0 +1,118 @@
+<html chrome_comp_test="empty_cell">
+<table border=1 cellpadding="0" cellspacing="5">
+  <tr>
+    <td>aaa</td>
+    <td expectedProblems="RE1012"></td>
+    <td>bbb</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>bbb</td>
+  </tr>
+</table>
+
+<br><br>
+<table border=1 cellpadding="5" cellspacing="5">
+  <tr>
+    <td expectedProblems="RE1012 RE1013"></td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+  </tr>
+</table>
+
+<br><br>
+<table border=1 cellpadding="5" cellspacing="5">
+  <tr>
+    <td>&nbsp;</td>
+    <td style="empty-cells:hide;"></td>
+  </tr>
+  <tr>
+    <td>text</td>
+    <td expectedProblems="RE1012"></td>
+  </tr>
+</table>
+
+<br><br>
+<table border="1" bordercolor="red" cellpadding="5" cellspacing="5">
+  <tr>
+    <td>empty cell</td>
+    <td>empty element</td>
+    <td>empty elements</td>
+    <td>br</td>
+    <td>hasLayout</td>
+    <td>relative</td>
+    <td>absolute</td>
+    <td>margin 1</td>
+    <td>margin 2</td>
+    <td>margin 3</td>
+    <td>margin 4</td>
+    <td>padding 1</td>
+    <td>padding 2</td>
+    <td>padding 3</td>
+    <td>padding 4</td>
+    <td>border 1</td>
+    <td>border 2</td>
+    <td>border 3</td>
+    <td>border 4</td>
+  </tr>
+  <tr>
+    <td expectedProblems="RE1012">     </td>
+    <td expectedProblems="RE1012"><div></div></td>
+    <td expectedProblems="RE1012"><div><span></span></div><h1></h1></td>
+    <td><br></td>
+    <td><div><span style="zoom:1;"></span></div><h1></h1></td>
+    <td><div><span></span></div><h1 style="position:relative;"></h1></td>
+    <td expectedProblems="RE1012"><div><span></span></div><h1 style="position:absolute;"></h1></td>
+    <td expectedProblems="RE1012"><h1 style="margin:5px;"></h1>  </td>
+    <td><span style="margin:5px;"></span></td>
+    <td expectedProblems="RE1012"><div><div></div><h1 style="margin:5px;"></h1></div></td>
+    <td expectedProblems="RE1012"><div><span></span></div><h1 style="margin:5px;"></h1></td>
+    <td expectedProblems="RE1012"><h1 style="padding:5px;"></h1>  </td>
+    <td><span style="padding:5px;"></span></td>
+    <td><div><div></div><h1 style="padding:5px;"></h1></div></td>
+    <td expectedProblems="RE1012"><div><span></span></div><h1 style="padding:5px;"></h1></td> 
+    <td expectedProblems="RE1012"><div></div><h1 style="border:5px solid blue;"></h1>  </td>
+    <td><span style="border:5px solid blue;"></span></td>
+    <td><div><div></div><h1 style="border:5px solid blue;"></h1></div></td>
+    <td expectedProblems="RE1012"><div><span></span></div><h1 style="border:5px solid blue;"></h1></td>
+  </tr>
+</table>
+
+<h1>Has specified height</h1>
+<table border="1" bordercolor="red" cellpadding="5" cellspacing="5">
+  <tr>
+    <td style="padding:50px; height:50px;" expectedProblems="RE1012 RE1013"></td>
+  </tr>
+  <tr>
+    <td style="padding:50px; height:102px;" expectedProblems="RE1012"></td>
+  </tr>
+  <tr>
+    <td>1</td>
+  </tr>
+</table>
+
+<h1>Higher cell in the same line</h1>
+<table border="1" bordercolor="red" cellpadding="5" cellspacing="5">
+  <tr>
+    <td expectedProblems="RE1012"></td>
+    <td>text</td>
+  </tr>
+</table>
+
+<br><br>
+<span>No problem case:</span>
+<br><br>
+<table cellpadding="0" cellspacing="5">
+  <tr>
+    <td></td>
+    <td>aaa</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>bbb</td>
+  </tr>
+</table>
+
+<div>div <span style='display: inline-block; width: 10px'>test span</span> div</div>
+</html>
