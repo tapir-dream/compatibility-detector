@@ -93,6 +93,13 @@
       //sundongguo
       "detectors/right_floats_stretch_parent_elements_detector.js",
       "detectors/z_index_auto_detector.js",
+	  
+	   //lzq add
+      "empty_table_width_height_is_zero_detector.js",
+      "zero_hight_flow_element_detector.js",
+      "clear_property_on_flow_element_detector.js",
+      "float_element_overflow_container_detector.js",
+      "empty_float_left_element_in_auto_tablelayout.js",
 
 
       "annotation.js"
