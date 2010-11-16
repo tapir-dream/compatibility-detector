@@ -540,5 +540,14 @@
   "BX1039_suggestion": { "message": "1. 可以为WBR元素添加一个 :after 伪元素，强迫其后插入一个软换行符。" },
   "BX2040_suggestion": { "message": "可以使用下面的代码获取当前浏览器语言：" },
   "BX9041_suggestion": { "message": "判断浏览器版本，使用不同的 XMLHttpRequest 对象创建方式。如：" },
-  "BX8042_suggestion": { "message": "放弃使用 LAYER 元素，改用 CSS 中的绝对定位样式 'position:absloute' 处理相关情况。" }
+  "BX8042_suggestion": { "message": "放弃使用 LAYER 元素，改用 CSS 中的绝对定位样式 'position:absloute' 处理相关情况。" },
+  
+  //liuzhiqiang  add
+  "RE1016": { "message": "IE6 IE7 IE8(Q) 中空 TABLE 的宽度和高度均为 0" },
+  "RM8008": { "message": "IE6 IE7 IE8(Q) 中对浮动元素上 'clear' 特性的解释出现错误，使其自身位置和其后浮动元素的位置与其他浏览器中不同" },
+  "RM1004": { "message": "IE6 IE7 IE8(Q) 中零高度的浮动元素会阻挡其兄弟浮动元素" },
+  "RE1016_suggestion": { "message": "避免出现空 TABLE ，保证各浏览器兼容。" },
+  "RM8008_suggestion": { "message": "不要将 'clear' 特性应用在浮动元素上，以免出现上述不兼容的问题。" },
+  "RM1004_suggestion": { "message": "如果希望一个浮动元素能阻挡与其向相同方向浮动的兄弟元素，请确保其高度不为零，以使页面布局在各浏览器中的表现一致。反之，如果不希望零高度的浮动元素阻挡其兄弟浮动元素，请隐藏该元素，如使用 'display:none'。但要注意，这样做也会使其可能存在的绝对定位的内容也不可见。" }
+
 }
