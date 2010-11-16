@@ -90,6 +90,11 @@
       "detectors/nbsp_before_object.js",
       "detectors/meta_content_separator.js",
 
+      //sundongguo
+      "detectors/right_floats_stretch_parent_elements_detector.js",
+      "detectors/z_index_auto_detector.js",
+
+
       "annotation.js"
     ],
     "run_at": "document_start"
