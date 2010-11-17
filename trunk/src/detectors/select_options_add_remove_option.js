@@ -27,6 +27,11 @@ chrome_comp.CompDetect.NonScanDomBaseDetector,
 function constructor(rootNode) {
   var that = this;
   
+  /*
+   * hook select.add()
+   * select.add(option, null), select.add(option, option), 
+   * select.add(option, index) and select.add(option) all have compatibility problem.
+   */
   this.selectAdd_ = function(result, originalArguments, callStack){
     var arg1 = originalArguments[1];
     if (originalArguments.length > 0 && _isOption(originalArguments[0])){
@@ -41,6 +46,11 @@ function constructor(rootNode) {
     }
   }
   
+  /*
+   * hook options.add
+   * options.add(option, null) and options.add(option, option) have compatibility problem.
+   */
+  
   this.optionsAdd_ = function(result, originalArguments, callStack){
     if (originalArguments.length > 1 && _isOption(originalArguments[0])){
       var arg1 = originalArguments[1];
@@ -53,6 +63,10 @@ function constructor(rootNode) {
     }
   }
   
+  /*
+   * hook options.remove()
+   * options.remove(index) and options.remove(option) have compatibility problem.
+   */
   this.optionsRemove_ = function(result, originalArguments, callStack){
       debugger;
     if (originalArguments.length > 0){
