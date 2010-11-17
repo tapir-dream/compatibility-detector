@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html chrome_comp_test="right_floats_stretch_parent_elements">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+<h1>1</h1>
+<div style="position:absolute; margin-left:100px; margin-right:100px; border:1px dashed black;">x</div>
+
+
+<h1>2</h1>
+<div style="float:left; border:1px dashed black;">
+	<div style="float:right;" expectedProblems="RD8006">float:right</div>
+</div>
+
+
+<h1>3</h1>
+<div id="Container" style="width:300px; position:relative;">
+	<div id="STF_1" style="height:50px; background:lightgrey; position:absolute;">
+		<div id="STF_2" style="float:left; height:40px; background:darkgray;">
+			<div id="Wrapper" style="border-top:10px solid dimgray;">
+				<div id="Right" style="float:right; width:100px; height:30px; background:url(x.gif);" expectedProblems="RD8006"></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<h1>4</h1>
+<div style="position:fixed; border:1px dashed black;">
+	<div style="float:right;" align='left' expectedProblems="RD8006">float:right</div>
+</div>
+
+</body>
+</html>

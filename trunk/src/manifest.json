@@ -91,16 +91,15 @@
       "detectors/meta_content_separator.js",
 
       //sundongguo
-      "detectors/right_floats_stretch_parent_elements_detector.js",
-      "detectors/z_index_auto_detector.js",
-	  
-	   //lzq add
+      "detectors/right_floats_stretch_parent_elements.js",
+      "detectors/z_index_auto.js",
+
+      //lzq add
       "detectors/empty_table_width_height_is_zero.js",
       "detectors/zero_hight_flow_element.js",
       "detectors/clear_property_on_flow_element.js",
       "detectors/float_element_overflow_container.js",
       "detectors/empty_float_left_element_in_auto_tablelayout.js",
-
 
       "annotation.js"
     ],

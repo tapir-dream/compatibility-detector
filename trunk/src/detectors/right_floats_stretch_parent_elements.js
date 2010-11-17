@@ -18,23 +18,18 @@ addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'right_floats_stretch_parent_elements_detector',
+'right_floats_stretch_parent_elements',
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
 null, // constructor
 /*
-【思路】
-找到右浮动元素（暂不考虑 direction:rtl 的情况）。
-顺次向上检查其父元素，直到遇到明确定义宽度的元素或 BODY 或表格元素（将表格元素认定为已明确设定宽度的元素）为止。
-在上述元素中再从外向内找到宽度为 shrink-to-fit 的，检查该元素的可用横向空间是否更大。
-如果更大，则可以报告。否则不报。不再继续检测（目前尚未想到需要继续向内检测的案例）。
-
-【遇到的问题】
-getDefinedStylePropertyByName 的问题：
-	!important 的判定失误。
-	UA/跨域的情况无法取值。
-	属性换算成的样式无法获取，如 TABLE width=xxx/DIV align=xxx。
+[train of thought]
+Find a right floating element (gloss over 'direction:rtl' for now).
+Check its ancestor elements one bye one and push them in an array, until find an element which 'width' is clearly defined, or its a TABLE/BODY element.
+Find a 'shrink-to-fit' width element in the found elements from the outside toward the center, and check the available horizontal space of the element.
+If the available horizontal space is greater then its width, report an error.
+(There were no cases need to continue inward to find another element now.)
 */
 function checkNode(node, additionalData) {
 	function isTableElement(node) {
@@ -50,9 +45,11 @@ function checkNode(node, additionalData) {
 		var cWidth = computedStyle.width;
 		node.style.width = '';		//!important bug.
 		node.style.width = oInlineWidth;
-		if (!node.style.cssText) node.removeAttribute('style');	//for test.
-		if (cWidth == oWidth) {		//auto width like.
+		if (!node.style.cssText) node.removeAttribute('style');
+		if (cWidth == oWidth) {
 			return true;
+			//todo: check 'width' property need another function that is accurate.
+			//todo: the 'width' maybe affected by its STF ancestor elements.
 //			console.log(oWidth,cWidth);
 //			var oBorderLeftWidth = computedStyle.borderLeftWidth;
 //			var oInlineBorderLeftWidth = node.style.borderLeftWidth;
@@ -61,7 +58,7 @@ function checkNode(node, additionalData) {
 		}
 		return false;
 	}
-	function widthIsShrinkToFit(node) {	//仅本页内有效，如果提取出去，还需考虑表格和 BUTTON 元素。
+	function widthIsShrinkToFit(node) {	//Only in this context, if extract from here, need to consider TABLE and BUTTON elements.
 		var computedStyle = chrome_comp.getComputedStyle(node);
 		return widthIsAuto(node) && computedStyle.display != 'none' && (
 			((computedStyle.position == 'absolute' || computedStyle.position == 'fixed') && (computedStyle.left == 'auto' || computedStyle.right == 'auto')) ||
