@@ -35,17 +35,19 @@ function constructor(rootNode) {
   this.getElementsByNameHandle_ = function(result, originalArguments, callStack) {
     if(result.length == 0){
       var elements = document.querySelectorAll("[name]"),
+	      length = elements.length,
+		  i = length - 1,
           name = originalArguments[0].toLowerCase();
-      Array.prototype.forEach.call(elements, function(element){
-        if(element.getAttribute("name").toLowerCase() == name){
+	  for (;i >= 0;i--){
+	    if (elements[i].getAttribute("name").toLowerCase() == name){
           that.addProblem('SD9012', {
             nodes: [this],
             details: "document.getElementsByName(" + originalArguments[0] + ")",
             needsStack: true
           });
-          return;
+          break;
         }
-      });
+	  }
     }
   };
 },
