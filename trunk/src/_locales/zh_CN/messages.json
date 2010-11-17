@@ -542,6 +542,14 @@
   "BX9041_suggestion": { "message": "判断浏览器版本，使用不同的 XMLHttpRequest 对象创建方式。如：" },
   "BX8042_suggestion": { "message": "放弃使用 LAYER 元素，改用 CSS 中的绝对定位样式 'position:absloute' 处理相关情况。" },
   
+  //wangjun
+  "HF3012": {"message": "IE6 Firefox Chrome(Q) Safari(Q) 不支持 OPTION 元素的 label 属性"},
+  "HF3012_suggestion": { "message": "尽量避免在 OPTION 元素上使用 label 属性，如果想替代 OPTION 原有的内容值，请使用 Javascript。" },
+  "HF3013": {"message": "IE6 IE7 不支持 OPTION 和 OPTGROUP 元素的 disabled 属性"},
+  "HF3013_suggestion": { "message": "使用其他方式使想要 disabled 的 OPTION 和 OPTGROUP 无效，比如使用脚本动态删除 OPTION 或 OPTGROUP。" },
+  "SD9030": {"message": "为 SELECT 对象增加或删除选项的方法在各浏览器中的支持情况不同"},
+  "SD9030_suggestion": { "message": "1. 在添加 OPTION 元素时，如果需要向指定索引前插入 OPTION，可以使用 options.add(option, index)；" },
+  
   //liuzhiqiang  add
   "RE1016": { "message": "IE6 IE7 IE8(Q) 中空 TABLE 的宽度和高度均为 0" },
   "RM8008": { "message": "IE6 IE7 IE8(Q) 中对浮动元素上 'clear' 特性的解释出现错误，使其自身位置和其后浮动元素的位置与其他浏览器中不同" },
