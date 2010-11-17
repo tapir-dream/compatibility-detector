@@ -31,35 +31,42 @@ chrome_comp.CompDetect.NonScanDomBaseDetector,
 
 function constructor(rootNode) {
   var that = this;
+  var names;
 
-  this.getElementsByNameHandle_ = function(result, originalArguments, callStack) {
-    if(result.length == 0){
-      var elements = document.querySelectorAll("[name]"),
-	      length = elements.length,
-		  i = length - 1,
-          name = originalArguments[0].toLowerCase();
-	  for (;i >= 0;i--){
-	    if (elements[i].getAttribute("name").toLowerCase() == name){
-          that.addProblem('SD9012', {
-            nodes: [this],
-            details: "document.getElementsByName(" + originalArguments[0] + ")",
-            needsStack: true
-          });
-          break;
-        }
-	  }
+  this.getElementsByNameHandler_ = function(result, originalArguments, callStack) {
+  	var arg0 = originalArguments[0];
+	var lowerCaseNames = getNames();
+    if(result.length == 0 && lowerCaseNames.indexOf(arg0.toLowerCase()) >= 0){
+      that.addProblem('SD9012', {
+		nodes: [this],
+		details: 'document.getElementsByName(' + arg0 + ')',
+		needsStack: true
+	  });
     }
   };
+  
+  function getNames(){
+  	if(!names){
+      names = [];
+  	  var elements = document.querySelectorAll('[name]');
+      var length = elements.length;
+      var i = length - 1;
+      for (;i >= 0;i--){
+  	    names.push(elements[i].getAttribute('name').toLowerCase());
+      }
+	}
+	return names;
+  }
 },
 
 function setUp() {
   chrome_comp.CompDetect.registerExistingMethodHook(
-      Document.prototype, 'getElementsByName', this.getElementsByNameHandle_);
+      Document.prototype, 'getElementsByName', this.getElementsByNameHandler_);
 },
 
 function cleanUp() {
   chrome_comp.CompDetect.unregisterExistingMethodHook(
-      Document.prototype, 'getElementsByName', this.getElementsByNameHandle_);
+      Document.prototype, 'getElementsByName', this.getElementsByNameHandler_);
 }
 ); // declareDetector
 
