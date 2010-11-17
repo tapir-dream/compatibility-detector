@@ -23,27 +23,14 @@ chrome_comp.CompDetect.declareDetector(
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
 null, // constructor
-/*测试页面：http://sports.sina.com.cn/nba/live.html?id=2010110214*/
-/*
- *【思路】
- *分为两种情况：
-  1、前两个节点浮动方向不同，并且后一个节点清除了上一个节点方向上的浮动；
-  2、存在至少三个节点，并且前两个节点的浮动方向相同，第三个浮动节点没有清除该方向上的浮动
- *
- *【messages.json】
- * "RM8008": { "message": "IE6 IE7 IE8(Q) 中对浮动元素上 'clear' 特性的解释出现错误，使其自身位置和其后浮动元素的位置与其他浏览器中不同"},
- * "RM8008_suggestion": { "message": "不要将 'clear' 特性应用在浮动元素上，以免出现上述不兼容的问题。" },
- *
- */
+
 function checkNode(node, additionalData) {
 	
   if (Node.ELEMENT_NODE != node.nodeType)
     return;
-  var continuousNodeCount =1;	//记录连续节点的个数
-  //获得第一个（当前）节点CSS特性值
+  var continuousNodeCount =1;	//record the number of nodes
   var firstNodeDisplayStyle = chrome_comp.getComputedStyle(node).display;
   var firstNodeFloatStyle = chrome_comp.getComputedStyle(node).float;
-  //获得第二个节点的CSS特性值
   if(node.nextElementSibling){
 	  var secondNode = node.nextElementSibling;
 	  var secondNodeDisplayStyle = chrome_comp.getComputedStyle(secondNode).display;
@@ -51,9 +38,8 @@ function checkNode(node, additionalData) {
 	  var secondNodeFloatStyle = chrome_comp.getComputedStyle(secondNode).float;
 	  continuousNodeCount++;
   }
-  else             //不存在第二个节点则退出
+  else            
     return;
-  //获得第三个节点的CSS特性值
   if(secondNode.nextElementSibling){
 	  var thirdNode = secondNode.nextElementSibling;
 	  var thirdNodeDisplayStyle = chrome_comp.getComputedStyle(thirdNode).display;
@@ -64,18 +50,16 @@ function checkNode(node, additionalData) {
   }
   /*====*/
   if(node.offsetHeight!='0' && node.offsetWidth!='0' && firstNodeFloatStyle!='none' && firstNodeDisplayStyle!='none')  
-  //判断是否为空的浮动元素及是否可见(占据空间,visibility:hidden 也占据空间)
 	  if(secondNode.offsetHeight!='0' && secondNode.offsetWidth!='0' && secondNodeFloatStyle!='none' && secondNodeDisplayStyle!='none'){
-		  if(continuousNodeCount >= 2){  //至少存在2个连续节点
-			 if(firstNodeFloatStyle != secondNodeFloatStyle){   //前后节点浮动方向不同
-				if(secondNodeClearStyle == firstNodeFloatStyle || secondNodeClearStyle == 'both' || secondNodeClearStyle =='all')  //第二个节点清除了上个节点同方向上的浮动
+		  if(continuousNodeCount >= 2){  // exist at least two continuous nodes
+ 			 if(firstNodeFloatStyle != secondNodeFloatStyle){   
+				if(secondNodeClearStyle == firstNodeFloatStyle || secondNodeClearStyle == 'both' || secondNodeClearStyle =='all')  
 					this.addProblem('RM8008', [secondNode]);
 			  }
 		 	 if(firstNodeFloatStyle == secondNodeFloatStyle && continuousNodeCount == 3 && thirdNodeFloatStyle!='none' ){ 
-				  //存在3个连续节点，前后节点浮动方向相同,并且第三个节点为浮动元素
-				if(secondNodeClearStyle == firstNodeFloatStyle || secondNodeClearStyle == 'both' || secondNodeClearStyle =='all'){  //第二个节点清除了上个节点同方向上的浮动
+				  //exist three continuous nodes
+				if(secondNodeClearStyle == firstNodeFloatStyle || secondNodeClearStyle == 'both' || secondNodeClearStyle =='all'){  
 					if(thirdNodeFloatStyle == firstNodeFloatStyle && (thirdNodeClearStyle == firstNodeFloatStyle || thirdNodeClearStyle == 'both' || thirdNodeClearStyle                        =='all')){
-							//第三个节点与前两个节点的浮动方向相同，并且清除了该方向的浮动（此时无浏览器差异）
 						}
 					else{
 						  var div = document.createElement('div');
@@ -85,9 +69,9 @@ function checkNode(node, additionalData) {
 						  div.style.border = '0px';
 						  div.style.overflow = 'hidden';
 						  node.parentNode.insertBefore(div, secondNode);
-						  remainSpace = chrome_comp.getComputedStyle(div).width;  //包含块框剩余宽度
+						  remainSpace = chrome_comp.getComputedStyle(div).width;  //the leaving space of containner
                           //node.parentNode.removeChild(div);
-						if(parseInt(thirdNodeWidthStyle) <= parseInt(remainSpace)) //当第三个节点的宽度小于等于第一个节点所在行所剩宽度
+						if(parseInt(thirdNodeWidthStyle) <= parseInt(remainSpace)) 
 							this.addProblem('RM8008', [secondNode]);
 						node.parentNode.removeChild(div);	
 					}
