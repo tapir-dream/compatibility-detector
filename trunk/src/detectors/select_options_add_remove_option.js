@@ -35,12 +35,12 @@ function constructor(rootNode) {
   this.selectAdd_ = function(result, originalArguments, callStack){
     var arg1 = originalArguments[1];
     if (originalArguments.length > 0 && _isOption(originalArguments[0])){
-      var tmp = "";
+      var tmp = '';
       if(arg1 !== undefined)
-        tmp = ", " + (arg1 == null ? "null" : _isOption(arg1) ? "option" : "index");
+        tmp = ', ' + (arg1 == null ? 'null' : _isOption(arg1) ? 'option' : 'index');
       that.addProblem('SD9030', {
         nodes: [this],
-        details: "select.add(option" + tmp + ")",
+        details: 'select.add(option' + tmp + ')',
         needsStack: true
       });
     }
@@ -57,7 +57,7 @@ function constructor(rootNode) {
       if (arg1 === null || _isOption(arg1) || _isTextNode(arg1))
         that.addProblem('SD9030', {
           nodes: [this],
-          details: "options.add(option, " + (arg1 === null ? "null" : "option") + ")",
+          details: 'options.add(option, ' + (arg1 === null ? 'null' : 'option') + ')',
           needsStack: true
         });
     }
@@ -73,7 +73,7 @@ function constructor(rootNode) {
       if (parseInt(arg0) >= 0 || _isOption(arg0) || _isTextNode(arg0))
         that.addProblem('SD9030', {
           nodes: [this],
-          details: "options.remove(" + (parseInt(arg0) >= 0 ? "index" : "option") + ")",
+          details: 'options.remove(' + (parseInt(arg0) >= 0 ? 'index' : 'option') + ')',
           needsStack: true
         });
     }

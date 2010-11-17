@@ -25,11 +25,11 @@ chrome_comp.CompDetect.ScanDomBaseDetector,
 null, // constructor
 
 function checkNode(node, context) {
-  if (Node.ELEMENT_NODE != node.nodeType || node.tagName != "OPTION" ||
-      !node.hasAttribute("label") || context.isDisplayNone())
+  if (Node.ELEMENT_NODE != node.nodeType || node.tagName != 'OPTION' ||
+      !node.hasAttribute('label') || context.isDisplayNone())
     return;
 	
-  if(node.innerText.trim() == node.getAttribute("label").trim())
+  if(node.innerText.trim() == node.getAttribute('label').trim())
     return;
 		
   this.addProblem('HF3012', [node]);

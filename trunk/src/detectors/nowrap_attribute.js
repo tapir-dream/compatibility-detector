@@ -46,16 +46,16 @@ function checkNode(node, context) {
   var tagName = node.tagName;
   //if BODY has nowrap attribute, DIV and P can inherit from BODY and apply 'white-space : nowrap' in IE6 IE7 IE8(Q)
   //The page may has problem when only detecting BODY 
-  if ((tagName != "BODY" && tagName != "DIV" && tagName != "DT" && tagName != "DD") || 
+  if ((tagName != 'BODY' && tagName != 'DIV' && tagName != 'DT' && tagName != 'DD') || 
        context.isDisplayNone())
     return;
 	
-  var computedStyle = chrome_comp.getComputedStyle(node),
-      defStyle = chrome_comp.getDefinedStylePropertyByName(node, "", "white-space");
+  var computedStyle = chrome_comp.getComputedStyle(node);
+  var defStyle = chrome_comp.getDefinedStylePropertyByName(node, '', 'white-space');
 	
 	//main
-  if ((node.hasAttribute("nowrap") && computedStyle.whiteSpace != "nowrap" && 
-      (!node.hasOwnProperty("noWrap") || node.noWrap)) || (node.noWrap && !defStyle) ){
+  if ((node.hasAttribute('nowrap') && computedStyle.whiteSpace != 'nowrap' && 
+      (!node.hasOwnProperty('noWrap') || node.noWrap)) || (node.noWrap && !defStyle) ){
     this.addProblem('HE1003', [node]);
   }
 }
