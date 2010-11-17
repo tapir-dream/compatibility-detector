@@ -95,10 +95,10 @@
       "detectors/z_index_auto_detector.js",
 	  
 	   //lzq add
-      "detectors/empty_table_width_height_is_zero_detector.js",
-      "detectors/zero_hight_flow_element_detector.js",
-      "detectors/clear_property_on_flow_element_detector.js",
-      "detectors/float_element_overflow_container_detector.js",
+      "detectors/empty_table_width_height_is_zero.js",
+      "detectors/zero_hight_flow_element.js",
+      "detectors/clear_property_on_flow_element.js",
+      "detectors/float_element_overflow_container.js",
       "detectors/empty_float_left_element_in_auto_tablelayout.js",
 
 
