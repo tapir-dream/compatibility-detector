@@ -1,10 +1,12 @@
 = Coding style =
 
-The JavaScript source files should follow the following coding style as much as possible: http://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml
+The JavaScript source files should follow the coding style as much as possible: http://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml
 
 Each source file should contain proper copyright notice and Apache 2.0 license declaration at the top of the file.
 
 All comments in source files should be in English.
+
+Please be careful when using third-party sources to conform to their license agreements.
 
 = Unit test =
 
@@ -17,17 +19,21 @@ In rare cases, a detector needs more than one unit tests, for example, the detec
 The unit test file should use auto-test constructs as follows:
 
   * In the top level tag, declare which detector to test:
-`<html chrome_comp_test="detector_name">`
+  `<html chrome_comp_test="detector_name">`
 
   * In each element which is expected have problem(s), declare the expected problems:
-`<button expectedProblems="SG9001 SD2002">`
+  `<button expectedProblems="SG9001 SD2002">`
 
   * For a non-element node which is expected to have problem(s), declare in the containing element:
-`<button expectedProblemsChild8="ST3002" expectedProblemsChild10="AB2003">`
+  `<button expectedProblemsChild8="ST3002" expectedProblemsChild10="AB2003">`
+  
+  The number after `expectedProblemsChild` is the index of the child which is expected to have problems.
 
-The number after `expectedProblemsChild` is the index of the child which is expected to have problems.
+  * For script problems, use
+  `chrome_comp.expectProblems(javascript_expression, "AB1234");`
 
-When a unit test is loaded in the browser with the detector extension installed, only the declared detector (with `chrome_comp_test` attribute) will be enabled. If there are any mismatches between expectations and actual results, the mismatches will be displayed in the developer tool console. All mismatches should be eliminated before submitting a detector as well as its unit test(s). 
+
+When a unit test is loaded in the browser with the detector extension installed, the declared detector (with `chrome_comp_test` attribute) will be tested. If there are any mismatches between expected and actual results, the mismatches will be displayed in the developer tool console. All mismatches should be eliminated before a detector as well as its unit tests are submitted.
 
 = Code review =
 
