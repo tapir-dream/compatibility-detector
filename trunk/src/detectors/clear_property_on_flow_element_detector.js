@@ -70,7 +70,6 @@ function checkNode(node, additionalData) {
 						  div.style.overflow = 'hidden';
 						  node.parentNode.insertBefore(div, secondNode);
 						  remainSpace = chrome_comp.getComputedStyle(div).width;  //the leaving space of containner
-                          //node.parentNode.removeChild(div);
 						if(parseInt(thirdNodeWidthStyle) <= parseInt(remainSpace)) 
 							this.addProblem('RM8008', [secondNode]);
 						node.parentNode.removeChild(div);	
