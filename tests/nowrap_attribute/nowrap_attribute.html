@@ -1,0 +1,26 @@
+<!DOCTYPE html> 
+<html chrome_comp_test="nowrap_attribute"> 
+<head> 
+</head> 
+<body style="font:12px Arial;">
+	<div expectedProblems="HE1003" nowrap="nowrap" id="d0" style="width:100px;background:#DDD;">nowrap nowrap nowrap attribute</div>
+	<dl>
+        <dt expectedProblems="HE1003" nowrap id="dt" style="width:100px;background:#DDD;">DT: DT: DT: DT: DT: DT: </dt>
+        <dd expectedProblems="HE1003" nowrap style="width:100px;background:#DDD;">DD: DD: DD: DD: DD: DD: </dd>
+    </dl>
+	<div expectedProblems="HE1003" id="d1" style="width:100px;background:#DDD;">object.noWrap = true without 'white-space' of CSS property</div>
+	<br />
+	<div id="d2" style="width:100px;background:#DDD;white-space:normal;">object.noWrap = true with 'white-space' of CSS property</div>
+	<br />
+	<div id="d3" nowrap style="width:100px;background:#DDD;">object.noWrap = false and has nowrap attribute</div>
+	<br/>
+	<div id="d4" nowrap style="width:100px;background:#DDD;">object.noWrap = undefined and has nowrap attribute</div>
+	
+	
+	<script type="text/javascript">
+		document.getElementById("d1").noWrap = true;
+		document.getElementById("d3").noWrap = false;
+		document.getElementById("d4").noWrap = undefined;
+	</script>
+</body>
+</html>
