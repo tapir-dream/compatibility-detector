@@ -1,0 +1,94 @@
+<html chrome_comp_test="select_options_add_remove_option">	<head></head><body>
+<style type="text/css">select {height:100px;}</style>
+<table>
+	<tbody>
+		<tr>
+			<td>
+				<select id="s1" multiple="multiple" expectedProblems="SD9030 SD9030 SD9030">
+					<option value="1">111</option>
+					<option value="2">222</option>
+				</select>
+			</td>
+			<td>
+				<select id="s2" multiple="multiple" expectedProblems="SD9030">
+					<option value="1">111</option>
+				</select>
+			</td>
+			<td>
+				<select id="s3" multiple="multiple">
+					<option value="1">111</option>
+					<option value="2">222</option>
+				</select>
+			</td>
+			<td>
+				<select id="s4" multiple="multiple">
+					<option value="1">111</option>
+				</select>
+			</td>
+			<td>
+				<select id="s5" multiple="multiple">
+					<option value="1">111</option>
+				</select>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+<div style="border:2px solid;padding:3px;width:800px;" id="info"></div>
+
+<script type="text/javascript">
+	function $(id){return document.getElementById(id);}
+	function newOpt(text, val){return new Option(text, val);}
+	function info(method, msg){$("info").innerHTML += "<strong>" + method + "</strong> : " + msg + "<br />";}
+	
+	var opt1 = newOpt("select.add(option, null)", 2),
+		opt2 = newOpt("select.add(option)", 2),
+		opt3 = newOpt("options.add(option, null)", 2),
+		opt4 = newOpt("options.add(option)", 2),
+		opt5 = newOpt("options[index] = option", 2),
+		opt6 = newOpt("xselect.add(option, option)", 2),
+		opt7 = newOpt("select.add(option, index)", 2),
+		opt8 = newOpt("options.add(option, option)", 2),
+		opt9 = newOpt("options.add(option, index)", 2),
+		s1 = $("s1"),
+		s2 = $("s2"),
+		s3 = $("s3"),
+		s4 = $("s4"),
+		s5 = $("s5");
+	
+	try { chrome_comp.expectProblems(s1.add(opt1, null), "SD9030"); } catch(e) { info("select.add(option, null)", e) }
+	try { chrome_comp.expectProblems(s2.add(opt2), "SD9030"); } catch(e) { info("select.add(option)", e) }
+	try { chrome_comp.expectProblems(s3.options.add(opt3, null), "SD9030"); } catch(e) { info("options.add(option, null)", e) }
+	try { s4.options.add(opt4); } catch(e) { info("options.add(option)", e) }
+	try { s5.options[1] = opt5; } catch(e) { info("options[index] = option", e) }
+	
+	try { chrome_comp.expectProblems(s1.add(opt6, s1.lastChild), "SD9030"); } catch(e) { info("select.add(option, option)", e) }
+	try { chrome_comp.expectProblems(s1.add(opt7, 1), "SD9030"); } catch(e) { info("select.add(option, index)", e) }
+	try { chrome_comp.expectProblems(s3.options.add(opt8, s3.lastChild), "SD9030"); } catch(e) { info("options.add(option, option)", e) }
+	try { s3.options.add(opt9, 1); } catch(e) { info("options.add(option, index)", e) }
+	
+	function remove(type){
+		try {
+			switch (type) {
+				case 1:
+					s1.remove(0);
+					break;
+				case 2:
+					s2.remove(s2.firstChild);
+					break;
+				case 3:
+					chrome_comp.expectProblems(s3.options.remove(0), "SD9030");
+					break;
+				case 4:
+					chrome_comp.expectProblems(s4.options.remove(s4.firstChild), "SD9030");
+					break;
+				case 5:
+					s5.options[1] = null;
+					break;
+			}
+		} 
+		catch (e) {}
+	}
+	for(var i=1;i<6;i++)
+		remove(i);
+</script></body></html>
