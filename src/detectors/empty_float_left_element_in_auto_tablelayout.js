@@ -18,7 +18,7 @@ addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'emptyFloatLeftElementInAutoTableLayout',
+'empty_float_left_element_in_auto_tablelayout',
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
