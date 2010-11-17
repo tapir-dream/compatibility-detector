@@ -18,7 +18,7 @@ addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'flowElementClear',
+'clear_property_on_flow_element',
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 

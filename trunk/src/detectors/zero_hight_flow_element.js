@@ -18,7 +18,7 @@ addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'zeroHeightFlowElement',
+'zero_hight_flow_element',
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 

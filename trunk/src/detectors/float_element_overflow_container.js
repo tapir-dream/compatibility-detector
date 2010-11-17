@@ -18,7 +18,7 @@ addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'floatElementOverflowContainer',
+'float_element_overflow_container',
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 

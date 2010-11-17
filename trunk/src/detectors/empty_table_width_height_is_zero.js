@@ -18,7 +18,7 @@ addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'emptyTableElementDetector',
+'empty_table_width_height_is_zero',
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
