@@ -1,0 +1,24 @@
+<!DOCTYPE html> 
+<html chrome_comp_test="option_label_attribute">
+<body>
+	<select name="s1" id="">
+		<option label="option_text   " value="1">option_text </option>
+	</select>
+	
+	<select name="s2" multiple="multiple">
+		<option expectedProblems="HF3012" label="from label" value="1">from text</option>
+		<option expectedProblems="HF3012" label="from label" value="1">from text</option>
+		<option expectedProblems="HF3012" label="from label" value="1">from text</option>
+	</select>
+	
+	<select name="s2" id="">
+		<option value="1">from text</option>
+	</select>
+	
+	<select name="s2" multiple="multiple" style="display:none;">
+		<option label="from label" value="1">from text</option>
+		<option label="from label" value="1">from text</option>
+		<option label="from label" value="1">from text</option>
+	</select>
+</body>
+</html>
