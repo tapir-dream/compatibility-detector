@@ -288,8 +288,11 @@ var issueIds = [
   'BX2040',
   'BX9041',
   'BX8042',
+  //wangjun
+  'HF3012',
+  'SD9030',
    // lzq add
-  'RE1016',
+  'RE1016'
 ];
 
 var issues = { };
