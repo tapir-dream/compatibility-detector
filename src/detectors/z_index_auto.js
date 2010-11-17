@@ -18,28 +18,23 @@ addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'z_index_auto_detector',
+'z_index_auto',
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
 null, // constructor
 /*
-【思路】
-找到 position 非 static 并且 z-index 为 auto 的元素。
-检查此元素内是否还有其他 position 非 static 的元素。
-如果有则报错。
-
-【遇到的问题】
-对于有些报错的情况，在没有其他定位元素与检测到的元素有重叠关系时，并无表现上的差异。
-
+[train of thought]
+Find elements which 'position' is not 'static' and 'z-index' is 'auto'.
+Check the found element has a descendant element which 'pisition' is not 'static'.
 */
-function checkNode(node, additionalData) {
+function checkNode(node, context) {
 	if (node.nodeType != Node.ELEMENT_NODE) return;
 	var computedStyle = chrome_comp.getComputedStyle(node);
 	if (computedStyle.position != 'static' && computedStyle.zIndex == 'auto') {
 		var childrenElements = node.children;
 		for (var i = 0; i < childrenElements.length; i++) {
-			if (chrome_comp.getComputedStyle(childrenElements[i]).position != 'static') {	//display = none 也检查，多数菜单都是先 none 再 block。
+			if (chrome_comp.getComputedStyle(childrenElements[i]).position != 'static') {	//Check 'display = none' too, many menus set element's display to 'none' first.
 				this.addProblem('RM8015', [node]);
 				return;
 			}
