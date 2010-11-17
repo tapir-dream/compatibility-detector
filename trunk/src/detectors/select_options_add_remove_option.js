@@ -68,7 +68,6 @@ function constructor(rootNode) {
    * options.remove(index) and options.remove(option) have compatibility problem.
    */
   this.optionsRemove_ = function(result, originalArguments, callStack){
-      debugger;
     if (originalArguments.length > 0){
       var arg0 = originalArguments[0];
       if (parseInt(arg0) >= 0 || _isOption(arg0) || _isTextNode(arg0))
