@@ -100,6 +100,12 @@
       "detectors/clear_property_on_flow_element.js",
       "detectors/float_element_overflow_container.js",
       "detectors/empty_float_left_element_in_auto_tablelayout.js",
+	  
+	  //wangjun
+	  "detectors/option_label_attribute.js",
+	  "detectors/select_options_add_remove_option.js",
+	  "detectors/nowrap_attribute.js",
+	  "detectors/getelementsbyname_case_sensitive.js",
 
       "annotation.js"
     ],
