@@ -1,0 +1,10 @@
+<!doctype html>
+<html chrome_comp_test="getelementsbyname_case_sensitive">	<head></head>	<body>
+		<input class="main_w" type="text" name="aa" />
+		<input type="text" name="aA" />
+		<script type="text/javascript">
+		  document.getElementsByName("aa");
+		  chrome_comp.expectProblems(document.getElementsByName("AA"), "SD9012");
+		  chrome_comp.expectProblems(document.getElementsByName("Aa"), "SD9012");
+		</script>
+	</body></html>
