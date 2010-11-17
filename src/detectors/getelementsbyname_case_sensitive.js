@@ -35,12 +35,12 @@ function constructor(rootNode) {
   this.getElementsByNameHandle_ = function(result, originalArguments, callStack) {
     if(result.length == 0){
       var elements = document.querySelectorAll("[name]"),
-          name = originalArguments[0];
-      Array.prototype.forEach.call(elements, function(n){
-        if(n.getAttribute("name").toLowerCase() == name.toLowerCase()){
+          name = originalArguments[0].toLowerCase();
+      Array.prototype.forEach.call(elements, function(element){
+        if(element.getAttribute("name").toLowerCase() == name){
           that.addProblem('SD9012', {
             nodes: [this],
-            details: "document.getElementsByName(" + name + ")",
+            details: "document.getElementsByName(" + originalArguments[0] + ")",
             needsStack: true
           });
           return;
