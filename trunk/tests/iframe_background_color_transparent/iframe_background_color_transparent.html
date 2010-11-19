@@ -1,0 +1,13 @@
+<!doctype html>
+<html chrome_comp_test="iframe_background_color_transparent">	<head>
+		<style type="text/css">
+			iframe{
+				border: 5px solid;
+				margin: 5px;
+			}
+		</style>
+	</head>	<body style="background:gold;">
+		<iframe allowtransparency src="iframe.html" frameborder="0"></iframe>
+		<iframe allowtransparency style="background:gold;" src="iframe.html" frameborder="0"></iframe>
+		<iframe expectedProblems="RC3001" src="iframe.html" frameborder="0"></iframe>
+	</body></html>
