@@ -1,0 +1,26 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+</head>
+
+<body>
+<div id="Container" style="width:260px; height:30px; background:lightgrey;">
+    <div id="Zero_Height" style="float:right; width:50px; background:black;"><div></div></div>
+    <div id="Floating" style="float:right; width:100px; height:30px; background:darkgray;"></div>
+</div>
+<br />
+不应该报的：
+<div id="Container" style="width:260px; height:30px; background:lightgrey;">
+    <div id="Zero_Height" style="float:right; width:50px; background:black;"><div></div></div>
+    <div id="Floating" style="float:right; clear:right;width:100px; height:30px; background:darkgray;"></div>
+</div>
+<br />
+不应该报的：
+<div id="Container" style="width:260px; height:30px; background:lightgrey;">
+    <div id="Zero_Height" style="float:right; width:200px; background:black;"><div></div></div>
+    <div id="Floating" style="float:right; width:100px; height:30px; background:darkgray;"></div>
+</div>
+</body>
+</html>
