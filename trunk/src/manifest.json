@@ -106,6 +106,8 @@
 	  "detectors/select_options_add_remove_option.js",
 	  "detectors/nowrap_attribute.js",
 	  "detectors/getelementsbyname_case_sensitive.js",
+	  "detectors/block_formatting_context_haslayout.js",
+	  "detectors/background_attachment_scroll.js",
 
       "annotation.js"
     ],

@@ -291,6 +291,7 @@ var issueIds = [
   //wangjun
   'HF3012',
   'SD9030',
+  'RC3003',
    // lzq add
   'RE1016'
 ];
