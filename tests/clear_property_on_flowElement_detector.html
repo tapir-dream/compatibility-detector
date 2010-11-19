@@ -1,0 +1,43 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>rm8008</title>
+</head>
+
+<body>
+<!--两元素不同方向浮动 清除前一个方向上的浮动，影响自身位置-->
+<div id= "Container " style= "background-color:silver;width:300px;height:200px;">
+	<div id= "Float " style= "float:right; width:100px; height:100px; background-color: green;">1:float:right</div>
+	<div id= "Clear " style= "clear:right; float:left; width:100px; height:100px;background-color:yellow;filter:alpha(opacity=50);-moz-opacity:0.5; opacity: 0.5; ">2:clear:right; float:left</div>
+</div>
+<br />
+<!--前两个元素相同方向浮动 清除前一个方向上的浮动，第三个元素不论浮动方向如何，其位置都会受影响-->
+<div id= "Container" style= "width:400px; height:200px; border:1px solid red;">
+        <div id= "DIV1" style= "float:right; width:150px; height: 50px; background-color:darkgray; ">1 float:right;</div>
+        <div id= "DIV2" style= "clear:right; float:right; width:250px; height: 50px; background-color:silver; ">2 clear:right; float:right;</div>
+        <div id= "DIV3" style= "float:right;  width:100px; height: 50px; background-color:gray; ">3 float:right;</div>
+</div>
+<br />
+不应该报的（宽度问题）：
+<div id= "Container" style= "width:400px; height:200px; border:1px solid red;">
+        <div id= "DIV1" style= "float:right; width:150px; height: 50px; background-color:darkgray; ">1 float:right;</div>
+        <div id= "DIV2" style= "clear:right; float:right; width:250px; height: 50px; background-color:silver; ">2 clear:right; float:right;</div>
+        <div id= "DIV3" style= "float:right;  width:300px; height: 50px; background-color:gray; ">3 float:right;</div>
+</div>
+<br />
+不应该报的：
+<div id= "C2" style= "width:400px; height:200px; border:1px solid red;">
+        <div id= "DIV1" style= "float:right; width:350px; height: 50px; background-color:darkgray; ">1 float:right;</div>
+        <div id= "DIV2" style= "clear:right; float:right; width:250px; height: 50px; background-color:silver; ">2 clear:right; float:right;</div>
+        <div id= "DIV3" style= "float:right;  width:120px; height: 50px; background-color:gray; ">3 float:right;</div>
+</div>
+<br />
+不该报的(第三个元素清除了同方向上的浮动)：
+<div id= "Container" style= "width:400px; height:200px; border:1px solid red;">
+        <div id= "DIV1" style= "float:right; width:150px; height: 50px; background-color:darkgray; ">1 float:right;</div>
+        <div id= "DIV2" style= "clear:right; float:right; width:250px; height: 50px; background-color:silver; ">2 clear:right; float:right;</div>
+        <div id= "DIV3" style= "float:right; clear:right;width:100px; height: 50px; background-color:gray; ">3 float:right;</div>
+</div>
+</body>
+</html>
