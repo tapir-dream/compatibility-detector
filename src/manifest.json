@@ -108,6 +108,8 @@
 	  "detectors/getelementsbyname_case_sensitive.js",
 	  "detectors/block_formatting_context_haslayout.js",
 	  "detectors/background_attachment_scroll.js",
+	  "detectors/iframe_background_color_transparent.js",
+	  
 
       "annotation.js"
     ],
