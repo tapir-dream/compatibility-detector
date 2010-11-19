@@ -31,14 +31,14 @@ function checkNode(node, context) {
   var scrollValue = ['scroll', 'auto'];
   if (computedStyle.backgroundImage != 'none' && 
       computedStyle.backgroundAttachment == 'scroll' && (
-	    (scrollValue.indexOf(computedStyle.overflowX) >= 0 && hasScrollAt(node, 'Width')) ||
-	    (scrollValue.indexOf(computedStyle.overflowY) >= 0 && hasScrollAt(node, 'Height'))
-	  )){
-    this.addProblem('RC3003', [node])	 	
+        (scrollValue.indexOf(computedStyle.overflowX) >= 0 && hasScrollAt(node, 'Width')) ||
+        (scrollValue.indexOf(computedStyle.overflowY) >= 0 && hasScrollAt(node, 'Height'))
+      )){
+    this.addProblem('RC3003', [node])         
   }
   
   function hasScrollAt(element, woh){
-  	return element['client' + woh] < element['scroll' + woh];
+    return element['client' + woh] < element['scroll' + woh];
   }
 }
 ); // declareDetector
