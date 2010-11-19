@@ -549,6 +549,8 @@
   "HF3013_suggestion": { "message": "使用其他方式使想要 disabled 的 OPTION 和 OPTGROUP 无效，比如使用脚本动态删除 OPTION 或 OPTGROUP。" },
   "SD9030": {"message": "为 SELECT 对象增加或删除选项的方法在各浏览器中的支持情况不同"},
   "SD9030_suggestion": { "message": "1. 在添加 OPTION 元素时，如果需要向指定索引前插入 OPTION，可以使用 options.add(option, index)；" },
+  "RC3003": {"message": "IE6 IE7 IE8(Q) 下 'background-attachment : scroll' 时背景图片会随着元素内容滚动" },
+  "RC3003_suggestion": {"message": "若需要在所有浏览器下元素图片不随元素内容滚动，则不给元素设置任何背景，并且在元素的父元素上设置背景图，例如："},
   
   //liuzhiqiang  add
   "RE1016": { "message": "IE6 IE7 IE8(Q) 中空 TABLE 的宽度和高度均为 0" },
