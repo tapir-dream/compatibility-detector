@@ -11,7 +11,7 @@
 </div>
 <script>
 	var A = document.getElementById('A');
-	A.appendChild(document.getElementById('B').cloneNode(true));
+	chrome_comp.expectProblems(document.getElementById('B').cloneNode(true), 'SD9029');
 </script>
 </body>
 </html>
