@@ -1,0 +1,25 @@
+<!doctype html>
+<html chrome_comp_test="forbidden_content_selection">	<head>
+		<style type="text/css">
+			div{
+				background:#CCC;
+			}
+		</style>
+	</head>	<body>
+		<div unselectable="on" style="-webkit-user-select:none; ">unselectable=on + -webkit-user-select:none;</div>
+		<br />
+		<div unselectable="on" onselectstart="return false;">unselectable=on + onselectstart attribute</div>
+		<br />
+		<div id="event1" unselectable="on">unselectable=on + onselectstart event</div>
+		<br />
+		<br />
+		<div expectedProblems="BX2050" onselectstart="return false;">only onselectstart="return false;"</div>
+		<br />
+		<div expectedProblems="BX2050" unselectable="on">only unselectable=on </div>
+		<br />
+		<div expectedProblems="BX2050" style="-webkit-user-select:none;">only -webkit-user-select:none; </div>
+		<script type="text/javascript">
+			var $ = function(id){return document.getElementById(id);};
+			$("event1").onselectstart = function(){return false;};
+		</script>
+	</body></html>
