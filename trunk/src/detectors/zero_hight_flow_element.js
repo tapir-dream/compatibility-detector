@@ -30,7 +30,7 @@ function checkNode(node, additionalData) {
   var nodeDisplayStyle = chrome_comp.getComputedStyle(node).display;
   var nodeClearStyle = chrome_comp.getComputedStyle(node).clear;
   var nodeFloatStyle = chrome_comp.getComputedStyle(node).float;
-  if(node.nextElementSibling){
+  if (node.nextElementSibling) {
   var nextNode = node.nextElementSibling;
   var nextNodeDisplayStyle = chrome_comp.getComputedStyle(nextNode).display;
   var nextNodeClearStyle = chrome_comp.getComputedStyle(nextNode).clear;
@@ -39,25 +39,25 @@ function checkNode(node, additionalData) {
   }
   else
   	return;
-  if(node.offsetHeight == '0' && node.offsetWidth!='0' && nodeFloatStyle!='none' && nodeDisplayStyle!='none')  
-	  if(nextNode.offsetHeight!='0' && nextNode.offsetWidth!='0' && nextNodeFloatStyle!='none' && nextNodeDisplayStyle!='none')
-		  if(nodeFloatStyle == nextNodeFloatStyle){ 
-				if(nextNodeClearStyle!=nodeFloatStyle && nextNodeClearStyle!='both' && nextNodeClearStyle!='all'){  
-					var div = document.createElement('div');
-					div.style.height = '0px';
-					div.style.padding = '0px';
-					div.style.margin = '0px';
-					div.style.border = '0px';
-					div.style.overflow = 'hidden';
-					node.style.height='1px';         
-					node.parentNode.insertBefore(div, nextNode);
-					remainSpace = chrome_comp.getComputedStyle(div).width;  //the leaving space of containner
-					if(parseInt(nextNodeWidthStyle) <= parseInt(remainSpace))
-						this.addProblem('RM1004', [node]);
-				}
-				node.style.height='0px';
-				node.parentNode.removeChild(div);
-		  }
+  if (node.offsetHeight == '0' && node.offsetWidth!='0' && nodeFloatStyle!='none' && nodeDisplayStyle!='none')  
+    if (nextNode.offsetHeight!='0' && nextNode.offsetWidth!='0' && nextNodeFloatStyle!='none' && nextNodeDisplayStyle!='none')
+      if (nodeFloatStyle == nextNodeFloatStyle) { 
+        if (nextNodeClearStyle!=nodeFloatStyle && nextNodeClearStyle!='both' && nextNodeClearStyle!='all') {  
+          var div = document.createElement('div');
+		  div.style.height = '0px';
+          div.style.padding = '0px';
+          div.style.margin = '0px';
+          div.style.border = '0px';
+          div.style.overflow = 'hidden';
+          node.style.height='1px';         
+          node.parentNode.insertBefore(div, nextNode);
+          remainSpace = chrome_comp.getComputedStyle(div).width;  //the leaving space of containner
+          if(parseInt(nextNodeWidthStyle) <= parseInt(remainSpace))
+            this.addProblem('RM1004', [node]);
+        }
+       node.style.height='0px';
+       node.parentNode.removeChild(div);
+       }
 			  
 }
 ); // declareDetector
