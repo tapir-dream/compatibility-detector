@@ -292,6 +292,7 @@ var issueIds = [
   'HF3012',
   'SD9030',
   'RC3003',
+  'BX2050',
    // lzq add
   'RE1016',
   //luyuan
