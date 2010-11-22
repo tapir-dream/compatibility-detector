@@ -113,6 +113,7 @@
 
       //luyuan
       "detectors/associating_map_only_by_id_attribute.js",
+      "detectors/object_onerror.js",
 
       "annotation.js"
     ],
