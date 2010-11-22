@@ -29,17 +29,17 @@ function checkNode(node, additionalData) {
   if (Node.ELEMENT_NODE != node.nodeType ||
       Node.ELEMENT_NODE != node.parentNode.nodeType ||
       node.tagName != 'TABLE')
-		return;
-  if (node.tagName =='TABLE'&&(node.offsetWidth!='0' || node.offsetHeight!='0')){       
-	 if (node.children.length=='0')               
-	 	this.addProblem('RE1016', [node]);
+    return;
+  if (node.tagName =='TABLE'&&(node.offsetWidth!='0' || node.offsetHeight!='0')) {       
+    if (node.children.length=='0')               
+      this.addProblem('RE1016', [node]);
   	else {
-		  var tdList = node.getElementsByTagName('td');   
-		  var thList = node.getElementsByTagName('th');
-		  var captionList=node.getElementsByTagName('caption');
-		  if (tdList.length <= 0 && thList.length <= 0 && captionList.length <= 0) 
-		  		this.addProblem('RE1016', [node]);
-	  }	
+      var tdList = node.getElementsByTagName('td');   
+      var thList = node.getElementsByTagName('th');
+      var captionList=node.getElementsByTagName('caption');
+      if (tdList.length <= 0 && thList.length <= 0 && captionList.length <= 0) 
+        this.addProblem('RE1016', [node]);
+     }	
   }
    
 }

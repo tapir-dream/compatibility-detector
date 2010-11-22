@@ -26,22 +26,22 @@ null, // constructor
 
 function checkNode(node, additionalData) {
   if (Node.ELEMENT_NODE != node.nodeType)
-      return;	
+    return;	
   var nodeDisplayStyle = chrome_comp.getComputedStyle(node).display;
   var nodeFloatStyle = chrome_comp.getComputedStyle(node).float;
-  if (nodeDisplayStyle!='none' && nodeFloatStyle!='none'){
-		  var nodeWidthStyle = chrome_comp.getComputedStyle(node).width;
-		  var nodeDirectionStyle = chrome_comp.getComputedStyle(node).direction;
+  if (nodeDisplayStyle!='none' && nodeFloatStyle!='none') {
+    var nodeWidthStyle = chrome_comp.getComputedStyle(node).width;
+    var nodeDirectionStyle = chrome_comp.getComputedStyle(node).direction;
   }
   else 
-	  return;
-  if (node.offsetHeight && node.offsetWidth){
-		containerWidth = chrome_comp.getComputedStyle(chrome_comp.getContainingBlock(node)).width;    
-		if(parseInt(nodeWidthStyle) > parseInt(containerWidth)){ 		   
-			if ((nodeFloatStyle == 'right' && nodeDirectionStyle== 'ltr') || (nodeFloatStyle == 'left' && nodeDirectionStyle== 'rtl'))
-				this.addProblem('RM8014', [node]);
-		}
-	}			  
+    return;
+  if (node.offsetHeight && node.offsetWidth) {
+    containerWidth = chrome_comp.getComputedStyle(chrome_comp.getContainingBlock(node)).width;    
+    if(parseInt(nodeWidthStyle) > parseInt(containerWidth)) { 		   
+      if ((nodeFloatStyle == 'right' && nodeDirectionStyle== 'ltr') || (nodeFloatStyle == 'left' && nodeDirectionStyle== 'rtl'))
+        this.addProblem('RM8014', [node]);
+	}
+  }			  
 }
 ); // declareDetector
 
