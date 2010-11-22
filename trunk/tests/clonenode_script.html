@@ -1,0 +1,17 @@
+<html chrome_comp_test='clonenode_script'>
+<head>
+</head>
+<body>
+<div id="C" style="width:200px;height:40px;background: pink;"></div>
+<div id="A" style="width:200px;height:100px;background: gold;"></div>
+<div id="B" style="width:120px;height:40px;background: silver;">
+<script expectedProblems="SD9029">
+	document.getElementById("C").innerHTML += "content ";
+</script>
+</div>
+<script>
+	var A = document.getElementById('A');
+	A.appendChild(document.getElementById('B').cloneNode(true));
+</script>
+</body>
+</html>

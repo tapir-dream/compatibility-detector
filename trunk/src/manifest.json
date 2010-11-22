@@ -115,6 +115,7 @@
       //luyuan
       "detectors/associating_map_only_by_id_attribute.js",
       "detectors/object_onerror.js",
+      "detectors/clonenode_script.js",
 
       "annotation.js"
     ],
