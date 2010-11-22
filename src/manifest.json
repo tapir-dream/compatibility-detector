@@ -111,6 +111,9 @@
 	  "detectors/iframe_background_color_transparent.js",
 	  
 
+      //luyuan
+      "detectors/associating_map_only_by_id_attribute.js",
+
       "annotation.js"
     ],
     "run_at": "document_start"
