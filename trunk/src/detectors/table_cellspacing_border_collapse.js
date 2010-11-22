@@ -37,8 +37,11 @@ function checkNode(node, context) {
     var borderCollapse = computedStyle.borderCollapse;
     switch (borderCollapse) {
       case 'collapse':
-        if (node.hasAttribute('cellspacing'))
-          this.addProblem('RX1008', [node]);
+        if (node.hasAttribute('cellspacing')
+	    && parseInt(node.getAttribute('cellspacing'),10) > 0
+	    && node.childElementCount > 0 ){
+            this.addProblem('RX1008', [node]);
+	  }
         break;
       case 'separate':
         var hSpacing = parseInt(computedStyle.WebkitBorderHorizontalSpacing);
