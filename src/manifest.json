@@ -110,6 +110,22 @@
 	  "detectors/background_attachment_scroll.js",
 	  "detectors/iframe_background_color_transparent.js",
 	  
+	   //qbk add
+      "img_empty_src_and_img_lowsrc_detector.js",//
+      "frame_margin_detector.js",
+      "radio_name_detector.js",
+      "base_tag_position_detector.js",
+      "float_center_css_detector.js",//
+      "zoom_style_detector.js",//
+      "execScript_detector.js",//
+      "window_eval_detector.js",
+      "location_reload_detector.js",//
+      "array_direct_volume_detector.js",
+      "window_navigate_detector.js",
+      "document_execcommand_detector.js",//
+      "window_constructor_detector.js",
+      "setTimeout_setInterval_detector.js",//
+	  
 
       //luyuan
       "detectors/associating_map_only_by_id_attribute.js",
