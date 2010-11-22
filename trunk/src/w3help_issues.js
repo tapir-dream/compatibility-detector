@@ -294,6 +294,8 @@ var issueIds = [
   'RC3003',
    // lzq add
   'RE1016'
+  //luyuan
+  'HO9008',
 ];
 
 var issues = { };
