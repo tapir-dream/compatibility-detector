@@ -44,10 +44,10 @@ function checkNode(node, context) {
 	  }
         break;
       case 'separate':
-        var hSpacing = parseInt(computedStyle.WebkitBorderHorizontalSpacing);
-        var vSpacing = parseInt(computedStyle.WebkitBorderVerticalSpacing);
+        var hSpacing = parseInt(computedStyle.WebkitBorderHorizontalSpacing，10);
+        var vSpacing = parseInt(computedStyle.WebkitBorderVerticalSpacing，10);
         if (node.hasAttribute('cellspacing')) {
-          var spacing = parseInt(node.getAttribute('cellspacing'));
+          var spacing = parseInt(node.getAttribute('cellspacing')，10);
           if (!hSpacing || hSpacing != spacing ||
               !vSpacing || vSpacing != spacing)
             this.addProblem('RE1020', [node]);
