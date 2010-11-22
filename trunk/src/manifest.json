@@ -109,6 +109,7 @@
 	  //"detectors/block_formatting_context_haslayout.js",
 	  "detectors/background_attachment_scroll.js",
 	  "detectors/iframe_background_color_transparent.js",
+	  "detectors/forbidden_content_selection.js",
 
 
       //luyuan
