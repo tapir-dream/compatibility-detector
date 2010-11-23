@@ -18,19 +18,50 @@ addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'onreadystatechange',
+'onreadystatechangeDetector',
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
-null, // constructor
+function constructor(rootNode) {
+  var This = this;
+  this.hookHandler_ = function(oldValue, newValue, reason) {
+
+  //onreadystatechange and onload combined use in Script tag of filtered
+    if (this.tagName === 'SCRIPT' && this.onload){
+	var loadEventHandler = this.onload.toString();
+	if ( /onreadystatechange/.test(loadEventHandler) &&
+	     /onload/.test(loadEventHandler))
+	     return ;
+    }
+    if (!this.onreadystatechange) return;
+  //filtering end.
+
+    This.addProblem('BX9021', { nodes: [this], needsStack: true });
+    return newValue;
+  };
+},
 
 function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType)
     return;
 
-  if ((node.hasAttribute('onreadystatechange') || node.onreadystatechange) &&
-      (!node.onload || node.tagName == 'LINK'))
+  //onreadystatechange and onload attributes use in HTML tag of filtered
+  if (node.attributes['onreadystatechange'] === node.attributes['onload'])
+    return;
+  //filtering end.
+
+  if (node.hasAttribute('onreadystatechange'))
     this.addProblem('BX9021', [node]);
+},
+
+function setUp() {
+  chrome_comp.CompDetect.registerSimplePropertyHook(
+      Element.prototype, 'onreadystatechange', this.hookHandler_);
+},
+
+function cleanUp() {
+  chrome_comp.CompDetect.unregisterSimplePropertyHook(
+      Element.prototype, 'onreadystatechange', this.hookHandler_);
 }
 ); // declareDetector
 
