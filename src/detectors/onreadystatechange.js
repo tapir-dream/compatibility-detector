@@ -27,13 +27,13 @@ function constructor(rootNode) {
   this.hookHandler_ = function(oldValue, newValue, reason) {
 
   //onreadystatechange and onload combined use in Script tag of filtered
-    if (this.tagName === 'SCRIPT' && this.onload){
+    if (this.tagName === 'SCRIPT' && this.onload ){
 	var loadEventHandler = this.onload.toString();
 	if ( /onreadystatechange/.test(loadEventHandler) &&
 	     /onload/.test(loadEventHandler))
 	     return ;
     }
-    if (!this.onreadystatechange) return;
+    if ( !this.onreadystatechange ) return;
   //filtering end.
 
     This.addProblem('BX9021', { nodes: [this], needsStack: true });
@@ -47,6 +47,9 @@ function checkNode(node, context) {
 
   //onreadystatechange and onload attributes use in HTML tag of filtered
   if (node.attributes['onreadystatechange'] === node.attributes['onload'])
+    return;
+
+  if (node.hasAttribute('onreadystatechange') &&  node.hasAttribute('onload'))
     return;
   //filtering end.
 
