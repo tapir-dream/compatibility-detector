@@ -1,19 +1,3 @@
-/*
- * Copyright 2010 Google Inc.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 // One detector implementation for checking 'undetectable document.all' problems
 // @author : jnd@chromium.org
 // @bug: http://b/hotlist?id=10048
@@ -52,37 +36,81 @@ addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'document_all',
+'detectorForBomDocumentAll',
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
 function constructor(rootNode) {
   this.gatherAllProblemNodes_ = false;
-  this.documentAllRegexp_ = /[^\w$]+document[.]all\s?[^\(.\[\w$]/g;
+  //fix document.all and document['all']
+  this.documentAllFilterShortSyntaxRegexp_ =  /\b(?:[^||&&])\s*document(([.]all)|(\[["']all["']\]))\s?[\(\.\[\w$]/g;
+  this.documentAllRegexp_ =  /[^\w$]*document(([.]all)|(\[["']all["']\]))\s?[\(\.\[\w$]/g;
+  this.documentAllTernaryRegexp_ = /document(([.]all)|(\[["']all["']\]))\s*((\)\s*\?)|(\?))/g;
+  this.multiLineScriptCommentsRegexp_ = /\/\*([\S\s]*?)\*\//g;
+  this.oneLineScriptCommentsRegexp_ = /[^:\/]\/\/[^\n\r]*/gm;
 },
 
 function checkNode(node, context) {
   // Do not check page's root node(HTML tag).
-  if (node == this.rootNode_)
-    return;
-
   if (Node.ELEMENT_NODE != node.nodeType)
     return;
 
-  // only check script node
-  if (node.tagName != 'SCRIPT')
-    return;
-  var scriptData;
-  if (node.src && node.src != '') {
-    scriptData = (node.src in context) ? context[node.src] : '';
-  } else {
-    scriptData = node.text;
+  //check script node
+  var This = this,
+      scriptData = '',
+      testResults = {documentAllRegexp_:false,
+                     documentAllFilterShortSyntaxRegexp_:false,
+                     documentAllTernaryRegexp_:false};
+
+  if (node.tagName == 'SCRIPT') {
+    if (node.src && node.src != '') {
+      scriptData = (node.src in context) ? context[node.src] : '';
+    } else {
+      scriptData = node.text;
+    }
+
+   //delete script comment
+   scriptData = removeScriptComments(scriptData);
+   setTestResults(scriptData);
+    if (getTestDetectorResult()) {
+      this.addProblem('BX9002', [node]);
+    }
+
+  //check inline events of other node
+  }else{
+    for (var i = 0,l = node.attributes.length; i<l; i++){
+      if ( node.attributes[i].name.toLowerCase().indexOf('on') == 0 ){
+       scriptData = removeScriptComments(node.attributes[i].value)
+	setTestResults(scriptData);
+        if (getTestDetectorResult()) {
+           this.addProblem('BX9002', [node]);
+         }
+      }
+    }
   }
-  if (this.documentAllRegexp_.test(scriptData)) {
-    this.addProblem('BX9002', [node]);
-    // Clear the status of test method.
-    this.documentAllRegexp_.test('');
+
+  function removeScriptComments(scriptData){
+	return scriptData
+	       .replace(this.oneLineScriptCommentsRegexp_,'')
+	       .replace(this.multiLineScriptCommentsRegexp_,'');
   }
+
+  function getTestDetectorResult(){
+    return testResults.documentAllRegexp_ &&
+           testResults.documentAllFilterShortSyntaxRegexp_ &&
+           testResults.documentAllTernaryRegexp_;
+  }
+
+  function setTestResults(scriptData){
+     This.documentAllRegexp_.test('');
+     testResults.documentAllRegexp_= This.documentAllRegexp_.test(scriptData);
+     This.documentAllRegexp_.test('');
+     testResults.documentAllFilterShortSyntaxRegexp_ = !This.documentAllFilterShortSyntaxRegexp_.test(scriptData);
+     This.documentAllFilterShortSyntaxRegexp_.test('');
+     testResults.documentAllTernaryRegexp_ = !This.documentAllTernaryRegexp_.test(scriptData);
+     This.documentAllTernaryRegexp_.test('');
+  }
+
 }
 ); // declareDetector
 
