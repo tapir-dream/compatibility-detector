@@ -40,8 +40,10 @@ function checkNode(node, context) {
     if (isOpt)
       this.addProblem('HF3013', [node]);
     else if (tagName != 'BUTTON' && tagName != 'INPUT' &&
-               tagName != 'SELECT' && tagName != 'TEXTAREA')
-      this.addProblem('HF3005', [node]);
+               tagName != 'SELECT' && tagName != 'TEXTAREA' &&
+	       //filter empty element and img element
+	       tagName != 'IMG' && node.textContent.trim().length > 0)
+         this.addProblem('HF3005', [node]);
   }
 }
 ); // declareDetector

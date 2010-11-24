@@ -43,9 +43,13 @@ chrome_comp.CompDetect.ScanDomBaseDetector,
 function constructor(rootNode) {
   this.gatherAllProblemNodes_ = false;
   //fix document.all and document['all']
-  this.documentAllFilterShortSyntaxRegexp_ =  /\b(?:[^||&&])\s*document(([.]all)|(\[["']all["']\]))\s?[\(\.\[\w$]/g;
   this.documentAllRegexp_ =  /[^\w$]*document(([.]all)|(\[["']all["']\]))\s?[\(\.\[\w$]/g;
-  this.documentAllTernaryRegexp_ = /document(([.]all)|(\[["']all["']\]))\s*((\)\s*\?)|(\?))/g;
+  this.documentAllFiterAndSyntaxRegexp_ = /document(([.]all)|(\[["']all["']\]))\s*?&&/g;
+  this.documentAllFilterShortSyntaxRegexp_ =  /\b(?:[^||&&])\s*document(([.]all)|(\[["']all["']\]))\s*?[\(\.\[\w$]/g;
+  this.documentAllFilterIfSyntaxRegxp_ = /if\s*\(\s*document(([.]all)|(\[["']all["']\]))\s*?\)/g;
+  this.documentAllTernaryQuestionRegexp_ = /document(([.]all)|(\[["']all["']\]))\s*((\)\s*\?)|(\?))/g;
+  this.documentAllTernaryColonRegexp_ = /\?[\w\W\s]+?\:\s*document(([.]all)|(\[["']all["']\]))\s*?[\(\.\[]/g;
+  this.dcoumentAllEvalRegexp_ = /return\s+\eval\s*\(\s*[\'\"]\s*document(([.]all)|(\[["']all["']\]))\s*?[\(\.\[]*/g;
   this.multiLineScriptCommentsRegexp_ = /\/\*([\S\s]*?)\*\//g;
   this.oneLineScriptCommentsRegexp_ = /[^:\/]\/\/[^\n\r]*/gm;
 },
@@ -60,7 +64,12 @@ function checkNode(node, context) {
       scriptData = '',
       testResults = {documentAllRegexp_:false,
                      documentAllFilterShortSyntaxRegexp_:false,
-                     documentAllTernaryRegexp_:false};
+                     documentAllTernaryQuestionRegexp_:false,
+		     documentAllTernaryColonRegexp_:false,
+		     dcoumentAllEvalRegexp_:false,
+		     documentAllFiterAndSyntaxRegexp_:false,
+		     documentAllFilterIfSyntaxRegxp_:false
+		     };
 
   if (node.tagName == 'SCRIPT') {
     if (node.src && node.src != '') {
@@ -98,7 +107,11 @@ function checkNode(node, context) {
   function getTestDetectorResult(){
     return testResults.documentAllRegexp_ &&
            testResults.documentAllFilterShortSyntaxRegexp_ &&
-           testResults.documentAllTernaryRegexp_;
+           testResults.documentAllTernaryQuestionRegexp_ &&
+	   testResults.documentAllTernaryColonRegexp_ &&
+	   testResults.dcoumentAllEvalRegexp_ &&
+	   testResults.documentAllFiterAndSyntaxRegexp_ &&
+	   testResults.documentAllFilterIfSyntaxRegxp_ ;
   }
 
   function setTestResults(scriptData){
@@ -107,8 +120,16 @@ function checkNode(node, context) {
      This.documentAllRegexp_.test('');
      testResults.documentAllFilterShortSyntaxRegexp_ = !This.documentAllFilterShortSyntaxRegexp_.test(scriptData);
      This.documentAllFilterShortSyntaxRegexp_.test('');
-     testResults.documentAllTernaryRegexp_ = !This.documentAllTernaryRegexp_.test(scriptData);
-     This.documentAllTernaryRegexp_.test('');
+     testResults.documentAllTernaryQuestionRegexp_ = !This.documentAllTernaryQuestionRegexp_.test(scriptData);
+     This.documentAllTernaryQuestionRegexp_.test('');
+     testResults.documentAllTernaryColonRegexp_ = !This.documentAllTernaryColonRegexp_.test(scriptData);
+     This.documentAllTernaryColonRegexp_.test('');
+     testResults.dcoumentAllEvalRegexp_ = !This.dcoumentAllEvalRegexp_.test(scriptData);
+     This.dcoumentAllEvalRegexp_.test('');
+     testResults.documentAllFiterAndSyntaxRegexp_ = !This.documentAllFiterAndSyntaxRegexp_.test(scriptData);
+     This.documentAllFiterAndSyntaxRegexp_.test('');
+     testResults.documentAllFilterIfSyntaxRegxp_ = !This.documentAllFilterIfSyntaxRegxp_.test(scriptData);
+     This.documentAllFilterIfSyntaxRegxp_.test('');
   }
 
 }
