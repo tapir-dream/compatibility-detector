@@ -25,7 +25,8 @@ chrome_comp.CompDetect.ScanDomBaseDetector,
 null, // constructor
 
 function checkNode(node, context) {
-  if (context.isDisplayNone() || Node.ELEMENT_NODE != node.parentNode.nodeType)
+  if (context.isDisplayNone() || !node.parentNode || 
+      Node.ELEMENT_NODE != node.parentNode.nodeType)
     return;
   var parentStyle = chrome_comp.getComputedStyle(node.parentNode);
   if (// About pre white-space there are more problems that are out of range
