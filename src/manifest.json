@@ -101,21 +101,37 @@
       "detectors/float_element_overflow_container.js",
       "detectors/empty_float_left_element_in_auto_tablelayout.js",
 
-	  //wangjun
-	  "detectors/option_label_attribute.js",
-	  "detectors/select_options_add_remove_option.js",
-	  "detectors/nowrap_attribute.js",
-	  "detectors/getelementsbyname_case_sensitive.js",
-	  //"detectors/block_formatting_context_haslayout.js",
-	  "detectors/background_attachment_scroll.js",
-	  "detectors/iframe_background_color_transparent.js",
-	  "detectors/forbidden_content_selection.js",
+      //wangjun
+      "detectors/option_label_attribute.js",
+      "detectors/select_options_add_remove_option.js",
+      "detectors/nowrap_attribute.js",
+      "detectors/getelementsbyname_case_sensitive.js",
+      //"detectors/block_formatting_context_haslayout.js",
+      "detectors/background_attachment_scroll.js",
+      "detectors/iframe_background_color_transparent.js",
+      "detectors/forbidden_content_selection.js",
 
 
       //luyuan
       "detectors/associating_map_only_by_id_attribute.js",
       "detectors/object_onerror.js",
       "detectors/clonenode_script.js",
+
+      //qbk add
+      "detectors/img_empty_src_and_img_lowsrc.js"
+      "detectors/frame_margin.js",
+      "detectors/radio_name.js",
+      "detectors/base_tag_position.js",
+      "detectors/float_center_css.js",
+      "detectors/zoom_style.js",
+      "detectors/execScript.js",
+      "detectors/window_eval.js",
+      "detectors/location_reload.js",
+      "detectors/array_direct_volume.js",
+      "detectors/window_navigate.js",
+      "detectors/document_execcommand.js",
+      "detectors/window_constructor.js",
+      "detectors/setTimeout_setInterval.js",
 
       "annotation.js"
     ],
