@@ -16,7 +16,7 @@ null, // constructor
  *
  *【messages.json】
  * "BX8017": { "message": "只有 IE Chrome Safari 支持 'zoom' 特性并且他们的具体实现方式不同"},
- * "BT1038_suggestion": { "message": "如无特殊应用需求，应避免使用 lowsrc 属性。" },
+ * "BX8017_suggestion": { "message": "由于各浏览器对 'zoom' 的实现上存在差异，并且Firefox Opera 并不支持 'zoom'，所以这里不建议为 'zoom' 设定值大于 1 的值来对元素进行缩放应用。" },
  *
  */
 

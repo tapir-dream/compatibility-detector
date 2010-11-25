@@ -15,7 +15,7 @@ null, // constructor
  * 检测 marginwidth  marginheight 属性，如果为非数字或非设置情况则命中
  *
  *【messages.json】
- * "HO1002": { "message": "IMG 元素的 src 属性为空时其尺寸在各浏览器中不一致" },
+ * "HM1002": { "message": "各浏览器对 "marginwidth" 和 "marginheight" 属性的错误设定值的处理不同 },
  * "HM1002_suggestion": { "message": "在使用 \"marginwidth\" 和 \"marginheight\" 时应严格遵照规范中的描述，要对其设定大于等于零的数值。" },
  */
 
