@@ -22,23 +22,72 @@ chrome_comp.CompDetect.declareDetector(
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
-null, // constructor
+function construtor(){
+  this.getCompatMode_ = function(){
+    function isIEDTDBug() {
+      var html = document.documentElement, prev = html;
+      while (prev.previousSibling) { prev = prev.previousSibling; }
+      if (prev && prev.nodeType == 8) {
+        return true;
+      }
+    }
+
+    var doctypeInIE, doctypeInWebKit, diffMap,
+        pid = (document.doctype) ? document.doctype.publicId : 0,
+        sid = (document.doctype) ? document.doctype.systemId : 0,
+        cm = document.compatMode.toLowerCase();
+    doctypeInIE = doctypeInWebKit = (cm == 'backcompat') ? 'Q' : 'S';
+    if (isIEDTDBug()) {
+      doctypeInIE = 'Q';
+      if (tn == 'HTML')
+        this.addProblem('HG8001', [node]);
+    }
+    diffMap = {
+      "-//W3C//DTD HTML 4.0 Transitional//EN": {
+        "systemId": "http://www.w3.org/TR/html4/loose.dtd",
+        "IE": "S",
+        "WebKit": "Q"
+      },
+      "ISO/IEC 15445:2000//DTD HTML//EN": {
+        "systemId": "",
+        "IE": "Q",
+        "WebKit": "S"
+      },
+      "ISO/IEC 15445:1999//DTD HTML//EN": {
+        "systemId": "",
+        "IE": "Q",
+        "WebKit": "S"
+      }
+    }
+    if (diffMap[pid]) {
+      if (diffMap[pid]['systemId'] == sid) {
+        doctypeInIE = diffMap[pid]['IE'];
+        doctypeInWebKit = diffMap[pid]['WebKit'];
+      }
+    }
+    return {doctypeInIE:doctypeInWebKit,
+      doctypeInWebKit:doctypeInWebKit};
+  }();
+}, // constructor
 
 function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
     return;
 
-  var style = chrome_comp.getComputedStyle(node);
-  var display = style.display;
-  var textAlign = style.textAlign;
-  var direction = style.direction;
+  if (this.getCompatMode_.doctypeInIE === 'S')
+    return;
+
+  var style = chrome_comp.getComputedStyle(node),
+      display = style.display,
+      textAlign = style.textAlign,
+      direction = style.direction;
+
   if ((display == 'block' || display == 'inline-block' ||
        display == 'table-cell') &&
       (textAlign == 'center' ||
        (direction == 'ltr' && textAlign == 'right') ||
        (direction == 'rtl' && textAlign == 'left'))) {
-    var childMaxWidth = node.clientWidth -
-        parseInt(style.paddingLeft) - parseInt(style.paddingRight);
+    var parentElementMaxWidth = parseInt(node.style.width,10);
     var child = node.firstElementChild;
     do {
       if (child) {
@@ -47,12 +96,18 @@ function checkNode(node, context) {
             childStyle.float == 'none' &&
             (childStyle.position == 'static' ||
              childStyle.position == 'relative')) {
-          var childWidth = child.offsetWidth +
-              parseInt(childStyle.marginLeft) +
-              parseInt(childStyle.marginRight);
-          if (childWidth + 1 < childMaxWidth) {
+          var childWidth = parseInt(child.style.width,10) +
+              parseInt(childStyle.paddingLeft,10) +
+              parseInt(childStyle.paddingRight,10);
+              console.log(childStyle.marginLeft);
+              console.log(childStyle.marginRight);
+              console.log(childWidth);
+              console.log(parentElementMaxWidth);
+          if ( Math.abs( parseInt(childStyle.marginLeft,10) -
+                         parseInt(childStyle.marginRight,10)) > 1
+                && childWidth + 1 < parentElementMaxWidth ) {
             this.addProblem('RT8003',
-                { nodes: [node], details: childMaxWidth + 'vs' + childWidth });
+                { nodes: [node], details: parentElementMaxWidth + 'vs' + childWidth });
             return;
           }
         }
