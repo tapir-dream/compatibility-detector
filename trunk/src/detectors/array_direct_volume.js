@@ -55,7 +55,7 @@ function checkNode(node, context) {
        scriptData = node.attributes[i].value
         .replace(this.oneLineScriptCommentsRegexp_,'')
         .replace(this.multiLineScriptCommentsRegexp_,'')
-	.replace(this.stringDirectVolumeRegxp_,'');
+        .replace(this.stringDirectVolumeRegxp_,'');
         if (this.arrayDirectVolumeRegexp_.test(scriptData))
            this.addProblem('SJ2007', [node]);
       }

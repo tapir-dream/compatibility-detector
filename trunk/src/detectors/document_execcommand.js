@@ -26,10 +26,10 @@ function constructor(rootNode) {
    this.execCommandHookHandler_ = function(result, originalArguments, callStack) {
      var commandList = {"backColor":"","bold":"","createLink":"","delete":"","fontSize":"",
                         "foreColor":"","formatBlock":"","indent":"","insertHorizontalRule":"",
-			"insertImage":"","insertOrderedList":"","insertUnorderedList":"","insertParagraph":"",
-			"italic":"","justifyCenter":"","justifyLeft":"","justifyRight":"","justifyFull":"",
-			"outdent":"","removeFormat":"","selectAll":"","strikeThrough":"","subscript":"",
-			"superscript":"","underline":"","unlink":""}
+                        "insertImage":"","insertOrderedList":"","insertUnorderedList":"","insertParagraph":"",
+                        "italic":"","justifyCenter":"","justifyLeft":"","justifyRight":"","justifyFull":"",
+                        "outdent":"","removeFormat":"","selectAll":"","strikeThrough":"","subscript":"",
+                        "superscript":"","underline":"","unlink":""}
      if (originalArguments[0] in commandList) return;
     This.addProblem('BX9054', { nodes: [this], needsStack: true });
   };

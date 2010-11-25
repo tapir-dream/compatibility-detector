@@ -4,7 +4,7 @@ addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'inputTypeIsRadio',
+'inputTypeIsRadioDetector',
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
