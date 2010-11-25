@@ -55,6 +55,10 @@ function constructor(rootNode) {
 function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType)
     return;
+//Increase the filter conditions , When the elements of the display: none ,no problem.
+  var display = window.getComputedStyle(node,null).display;
+  if(display == "none")
+    return;
 //Increase the filter conditions , when onmouseenter and onmouseover exist, that the author considers the problem
   if(node.hasAttribute('onmouseenter') && node.hasAttribute('onmouseover'))
     return;
