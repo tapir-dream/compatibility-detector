@@ -11,7 +11,8 @@ chrome_comp.CompDetect.NonScanDomBaseDetector,
 function constructor(rootNode) {
   var This = this;
   this.click_ = function(result, originalArguments, callStack) {
-    This.addProblem('SD9025', [this]);
+    if (this.tagName != 'BUTTON' && this.tagName != 'INPUT')
+      This.addProblem('SD9025', [this]);
   };
 },
 
