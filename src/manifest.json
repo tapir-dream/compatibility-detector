@@ -42,7 +42,7 @@
       "detectors/useragent_check.js",
       "detectors/document_all.js",
       "detectors/scroll_top_left.js",
-      //"detectors/getelementbyid.js", merge to getelementbyid_and_getelementsbyname.js
+      //"detectors/getelementbyid.js", merge into getelementbyid_and_getelementsbyname.js
       "detectors/plugin.js",
       "detectors/minimal_font_size.js",
       "detectors/absolute_font_size.js",
@@ -101,16 +101,16 @@
       "detectors/float_element_overflow_container.js",
       "detectors/empty_float_left_element_in_auto_tablelayout.js",
 
-	  //wangjun
-	  "detectors/option_label_attribute.js",
-	  "detectors/select_options_add_remove_option.js",
-	  "detectors/nowrap_attribute.js",
-	  //"detectors/getelementsbyname_case_sensitive.js", merge to getelementbyid_and_getelementsbyname.js
-	  //"detectors/block_formatting_context_haslayout.js",
-	  "detectors/background_attachment_scroll.js",
-	  "detectors/iframe_background_color_transparent.js",
-	  "detectors/forbidden_content_selection.js",
-	  "detectors/getelementbyid_and_getelementsbyname.js", //SD9001 SD9002 SD9012
+	    //wangjun
+	    "detectors/option_label_attribute.js",
+	    "detectors/select_options_add_remove_option.js",
+	    "detectors/nowrap_attribute.js",
+	    //"detectors/getelementsbyname_case_sensitive.js", merge into getelementbyid_and_getelementsbyname.js
+	    //"detectors/block_formatting_context_haslayout.js",
+	    "detectors/background_attachment_scroll.js",
+	    "detectors/iframe_background_color_transparent.js",
+	    "detectors/forbidden_content_selection.js",
+	    "detectors/getelementbyid_and_getelementsbyname.js", //SD9001 SD9002 SD9012
 
 
       //luyuan
@@ -118,7 +118,7 @@
       "detectors/object_onerror.js",
       "detectors/clonenode_script.js",
 
-	  //qbk add
+	    //qbk add
       "detectors/img_empty_src_and_img_lowsrc.js"
       "detectors/frame_margin.js",
       "detectors/radio_name.js",
