@@ -119,7 +119,7 @@
       "detectors/clonenode_script.js",
 
 	    //qbk add
-      "detectors/img_empty_src_and_img_lowsrc.js"
+      "detectors/img_empty_src_and_img_lowsrc.js",
       "detectors/frame_margin.js",
       "detectors/radio_name.js",
       "detectors/base_tag_position.js",
