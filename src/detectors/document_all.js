@@ -60,16 +60,17 @@ function checkNode(node, context) {
     return;
 
   //check script node
-  var This = this,
-      scriptData = '',
-      testResults = {documentAllRegexp_:false,
-                     documentAllFilterShortSyntaxRegexp_:false,
-                     documentAllTernaryQuestionRegexp_:false,
-		     documentAllTernaryColonRegexp_:false,
-		     dcoumentAllEvalRegexp_:false,
-		     documentAllFiterAndSyntaxRegexp_:false,
-		     documentAllFilterIfSyntaxRegxp_:false
-		     };
+  var This = this;
+  var scriptData = '';
+  var testResults = {
+                      documentAllRegexp_:false,
+                      documentAllFilterShortSyntaxRegexp_:false,
+                      documentAllTernaryQuestionRegexp_:false,
+                      documentAllTernaryColonRegexp_:false,
+                      dcoumentAllEvalRegexp_:false,
+                      documentAllFiterAndSyntaxRegexp_:false,
+                      documentAllFilterIfSyntaxRegxp_:false
+                    };
 
   if (node.tagName == 'SCRIPT') {
     if (node.src && node.src != '') {
@@ -100,18 +101,18 @@ function checkNode(node, context) {
 
   function removeScriptComments(scriptData){
 	return scriptData
-	       .replace(this.oneLineScriptCommentsRegexp_,'')
-	       .replace(this.multiLineScriptCommentsRegexp_,'');
+	       .replace(This.multiLineScriptCommentsRegexp_,'')
+         .replace(This.oneLineScriptCommentsRegexp_,'');
   }
 
   function getTestDetectorResult(){
     return testResults.documentAllRegexp_ &&
            testResults.documentAllFilterShortSyntaxRegexp_ &&
            testResults.documentAllTernaryQuestionRegexp_ &&
-	   testResults.documentAllTernaryColonRegexp_ &&
-	   testResults.dcoumentAllEvalRegexp_ &&
-	   testResults.documentAllFiterAndSyntaxRegexp_ &&
-	   testResults.documentAllFilterIfSyntaxRegxp_ ;
+           testResults.documentAllTernaryColonRegexp_ &&
+           testResults.dcoumentAllEvalRegexp_ &&
+           testResults.documentAllFiterAndSyntaxRegexp_ &&
+           testResults.documentAllFilterIfSyntaxRegxp_ ;
   }
 
   function setTestResults(scriptData){
