@@ -39,18 +39,42 @@
       "w3help_issues.js",
       "non_w3help_issues.js",
 
+      //Verified
+
+
+
+      //Started
+      "detectors/getelementbyid_and_getelementsbyname.js",
+      "detectors/img_alt_title.js",
+      "detectors/text_align.js",
+      "detectors/onreadystatechange.js",
+      "detectors/mouse_enter_leave.js",
+      "detectors/center_element.js",
+      "detectors/disabled_attribute.js",
+      "detectors/table_cellspacing_border_collapse.js",
+
+      "detectors/decoration_font_color.js",
+      "detectors/text_decoration_propagation.js",
+      "detectors/font_style_element_affects_css.js",
+      "detectors/white_space_after_iframe_object.js",
+      "detectors/invalid_list_item.js",
+      "detectors/overflow.js",
+      "detectors/empty_cell.js",
+      "detectors/marquee_width.js",
+
+
+      //WontFix
+      "detectors/script_language_type.js",
+      "detectors/document_all.js",
+
+
       /*********************************
       "detectors/useragent_check.js",
-      "detectors/document_all.js",
       "detectors/scroll_top_left.js",
       "detectors/plugin.js",
       "detectors/minimal_font_size.js",
       "detectors/absolute_font_size.js",
       "detectors/colspan_width_adjustment.js",
-      "detectors/disabled_attribute.js",
-      "detectors/invalid_list_item.js",
-      "detectors/overflow.js",
-      "detectors/decoration_font_color.js",
       "detectors/get_year.js",
       "detectors/haslayout_full_shape_space.js",
       "detectors/full_shape_space_no_wrap.js",
@@ -59,34 +83,22 @@
       "detectors/table_border_color.js",
       "detectors/conditional_comments.js",
       "detectors/img_text_decoration.js",
-      "detectors/text_align.js",
       "detectors/tr_height.js",
-      "detectors/empty_cell.js",
       "detectors/stretched_cell_align.js",
       "detectors/style_attribute_value_in_braces.js",
       "detectors/img_padding.js",
-      "detectors/font_style_element_affects_css.js",
       "detectors/table_margin_affects_align_center.js",
       "detectors/text_overflow_ellipsis.js",
       "detectors/get_and_set_attribute.js",
-      "detectors/table_cellspacing_border_collapse.js",
       "detectors/td_nowrap_inheritence.js",
-      "detectors/text_decoration_propagation.js",
       "detectors/bold_element_font_weight.js",
       "detectors/word_wrap_spaces.js",
       "detectors/fieldset_width.js",
       "detectors/percent_height_in_auto_height.js",
       "detectors/iframe_scroll.js",
-      "detectors/onreadystatechange.js",
       "detectors/align_nowrap.js",
-      "detectors/marquee_width.js",
       "detectors/navigator_language.js",
-      "detectors/mouse_enter_leave.js",
-      "detectors/script_language_type.js",
-      "detectors/img_alt_title.js",
-      "detectors/center_element.js",
       "detectors/align_middle.js",
-      "detectors/white_space_after_iframe_object.js",
       "detectors/nbsp_before_object.js",
       "detectors/meta_content_separator.js",
 
@@ -109,11 +121,7 @@
       "detectors/background_attachment_scroll.js",
       "detectors/iframe_background_color_transparent.js",
       "detectors/forbidden_content_selection.js",
-      ****************************************************/
 
-      "detectors/getelementbyid_and_getelementsbyname.js",
-
-      /****************************************************
       //luyuan
       "detectors/associating_map_only_by_id_attribute.js",
       "detectors/object_onerror.js",
@@ -134,7 +142,6 @@
       "detectors/document_execcommand.js",
       "detectors/window_constructor.js",
       "detectors/setTimeout_setInterval.js",
-
       *************************************************/
 
       "annotation.js"
