@@ -25,7 +25,8 @@ function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
     return;
 
-  var nodeCssZoomValue = parseFloat(window.getComputedStyle(node, null).zoom);
+  var nodeCssZoomValue = parseFloat(window.getComputedStyle(node, null).zoom));
+  var nodeCssZoomValue = parseInt(window.getComputedStyle(node, null).zoom,10);
   if ( isNaN(nodeCssZoomValue) ) nodeCssZoomValue = 1;
   if ( nodeCssZoomValue != 1 )
     this.addProblem('BX8017', [node]);
