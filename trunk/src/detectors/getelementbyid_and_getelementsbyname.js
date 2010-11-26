@@ -23,7 +23,7 @@ chrome_comp.CompDetect.declareDetector(
 chrome_comp.CompDetect.NonScanDomBaseDetector,
 
 function constructor(rootNode) {
-  var that = this;
+  var that = this;  
   var ids;
   var commonNames;
   var namesOfEmbed;
@@ -33,18 +33,18 @@ function constructor(rootNode) {
     var arg0 = originalArguments[0];
     var lowerCaseArg0 = arg0.toLowerCase();
     var lowerCaseIds = getIds();
-
-    //SD9002: IE6 IE7 IE8(Q) 中的 getElementById 方法的参数不区分大小写
-    if (!result && lowerCaseIds.indexOf(lowerCaseArg0) >= 0){
+    
+    //handle SD9002
+    if (!result && lowerCaseIds.indexOf(lowerCaseArg0) >= 0) {
       addProblem('SD9002');
     }
-
-    //对于存在 SD9001 这个问题的标签，传入错误大小写的 name 也能通过 document.getElementById(name) 获得元素
+  
+    //handle SD9001, document.getElementById(case-sensitive name) still works in IE67Q
     var names = getNames();
-    if(!result && names.commonNames.concat(names.namesOfEmbed).indexOf(lowerCaseArg0) >= 0){
+    if (!result && names.commonNames.concat(names.namesOfEmbed).indexOf(lowerCaseArg0) >= 0) {
       addProblem('SD9001');
     }
-
+    
     function addProblem(id){
       that.addProblem(id, {
         nodes: [this],
@@ -53,12 +53,12 @@ function constructor(rootNode) {
       });
     }
   };
-
-  //SD9012：IE6 IE7 IE8 中 getElementsByName 方法的参数不区分大小写
+  
+  //handle SD9012
   this.getElementsByName_ = function(result, originalArguments, callStack) {
     var arg0 = originalArguments[0];
     var names = getNames();
-
+    
     if(result.length == 0 && names.commonNames.concat(names.namesOfFrameAndParam)
        .indexOf(arg0.toLowerCase()) >= 0){
       that.addProblem('SD9012', {
@@ -68,30 +68,30 @@ function constructor(rootNode) {
      });
     }
   };
-
+  
+	//get all elements with id attribute in the document
   function getIds(){
     if(!ids){
       ids = [];
       var elements = document.querySelectorAll('[id]');
-      var length = elements.length;
-      var i = length - 1;
-      for (;i >= 0;i--){
-        ids.push(elements[i].getAttribute('id').toLowerCase());
-      }
+			Array.prototype.forEach.call(elements, function(element){
+        ids.push(element.getAttribute('id').toLowerCase());		
+			});
     }
     return ids;
   }
-
+  
+  //get names of specified element in the document
   function getNames(){
     if (!commonNames) {
       commonNames = [];
       namesOfEmbed = [];
       namesOfFrameAndParam = [];
-
+      
       var elements = document.querySelectorAll('[name]');
-      var commonTags = ['A', 'APPLET', 'BUTTON', 'FORM', 'IFRAME', 'IMG', 'INPUT',
+      var commonTags = ['A', 'APPLET', 'BUTTON', 'FORM', 'IFRAME', 'IMG', 'INPUT', 
         'MAP', 'META', 'OBJECT', 'SELECT', 'TEXTAREA'];
-
+      
       Array.prototype.forEach.call(elements, function(element){
         var tagName = element.tagName;
         var name = element.getAttribute('name').toLowerCase();
@@ -114,16 +114,16 @@ function constructor(rootNode) {
 
 function setUp() {
   chrome_comp.CompDetect.registerExistingMethodHook(
-      Document.prototype, 'getElementById', this.getElementById_);
+    Document.prototype, 'getElementById', this.getElementById_);
   chrome_comp.CompDetect.registerExistingMethodHook(
-      Document.prototype, 'getElementsByName', this.getElementsByName_);
+    Document.prototype, 'getElementsByName', this.getElementsByName_);
 },
 
 function cleanUp() {
   chrome_comp.CompDetect.unregisterExistingMethodHook(
-      Document.prototype, 'getElementById', this.getElementById_);
+    Document.prototype, 'getElementById', this.getElementById_);
   chrome_comp.CompDetect.unregisterExistingMethodHook(
-      Document.prototype, 'getElementsByName', this.getElementsByName_);
+    Document.prototype, 'getElementsByName', this.getElementsByName_);
 }
 ); // declareDetector
 
