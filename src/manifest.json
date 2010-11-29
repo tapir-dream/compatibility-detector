@@ -39,36 +39,58 @@
       "w3help_issues.js",
       "non_w3help_issues.js",
 
-      //Verified
+
+      //============unit test===========
+
+      //====这里的东西是临时的，用完删除，不要从下边粘贴上来=====
 
 
 
-      //Started
-      "detectors/getelementbyid_and_getelementsbyname.js",
-      "detectors/img_alt_title.js",
-      "detectors/text_align.js",
-      "detectors/onreadystatechange.js",
+      //=======Review===========
+      "detectors/empty_cell.js", //
       "detectors/mouse_enter_leave.js",
+      "detectors/script_language_type.js", //BT9002
+      "detectors/getelementbyid_and_getelementsbyname.js", //SD9002 SD9012
+      "detectors/text_align.js",
+      "detectors/disabled_attribute.js", //HF3001 HF3005
+      "detectors/table_margin_affects_align_center.js",
+      //====这里的东西是临时的，用完删除，不要从下边粘贴上来=====
+
+
+      /*********************************
+      //Verified
+      "detectors/decoration_font_color.js",
+      "detectors/white_space_after_iframe_object.js",
+
+      //Started——Error
+      "detectors/getelementbyid_and_getelementsbyname.js",
+      "detectors/mouse_enter_leave.js"
+      "detectors/text_align.js",
       "detectors/center_element.js",
+      "detectors/onreadystatechange.js",
+      "detectors/table_margin_affects_align_center.js",
+
+      //Started——Warning
+      "detectors/empty_cell.js",
       "detectors/disabled_attribute.js",
       "detectors/table_cellspacing_border_collapse.js",
-
       "detectors/decoration_font_color.js",
       "detectors/text_decoration_propagation.js",
       "detectors/font_style_element_affects_css.js",
-      "detectors/white_space_after_iframe_object.js",
       "detectors/invalid_list_item.js",
       "detectors/overflow.js",
-      "detectors/empty_cell.js",
       "detectors/marquee_width.js",
 
 
       //WontFix
-      "detectors/script_language_type.js",
       "detectors/document_all.js",
+      "detectors/script_language_type.js", //BT9005 WontFix
+      "detectors/right_floats_stretch_parent_elements.js",
+      "detectors/img_alt_title.js",
 
 
-      /*********************************
+      //===============Uncategorized==================
+
       "detectors/useragent_check.js",
       "detectors/scroll_top_left.js",
       "detectors/plugin.js",
@@ -87,7 +109,6 @@
       "detectors/stretched_cell_align.js",
       "detectors/style_attribute_value_in_braces.js",
       "detectors/img_padding.js",
-      "detectors/table_margin_affects_align_center.js",
       "detectors/text_overflow_ellipsis.js",
       "detectors/get_and_set_attribute.js",
       "detectors/td_nowrap_inheritence.js",
@@ -103,7 +124,7 @@
       "detectors/meta_content_separator.js",
 
       //sundongguo
-      "detectors/right_floats_stretch_parent_elements.js",
+
       "detectors/z_index_auto.js",
 
       //lzq add
