@@ -28,6 +28,121 @@ function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
     return;
 
+  var tagList = ['IMG', 'OBJECT', 'IFRAME', 'TABLE', 'APPLET', 'EMBED'];
+  var display = chrome_comp.getComputedStyle(node).display;
+  if (display == 'inline' || display == 'table')
+    return;
+  var children = node.children;
+  var nodeListLeft = [];
+  var nodeListRight = [];
+  for (var i = 0, j = children.length; i < j; i++) {
+    if (tagList.indexOf(children[i].tagName) != -1) {
+      var align = children[i].align.toLowerCase();
+      if (align == 'left')
+        nodeListLeft.push({
+          node: children[i],
+          alignment: children[i].align.toLowerCase(),
+          rect: children[i].getBoundingClientRect()
+        });
+      if (align == 'right')
+        nodeListRight.push({
+          node: children[i],
+          alignment: children[i].align.toLowerCase(),
+          rect: children[i].getBoundingClientRect()
+        });
+    }
+  }
+  //console.log(nodeList);
+  if (nodeListLeft.length + nodeListRight.length < 2)
+    return;
+  var right = node.getBoundingClientRect().right;
+  var inlineWidth = node.style.width;
+  var oldWidth = chrome_comp.getComputedStyle(node).width;
+  var newWidth = 1000000;
+  node.style.width = newWidth + 'px !important';
+  if (nodeListLeft.length > 0) {
+    for (var m = 0, n = nodeListLeft.length; m < n; m++) {
+      nodeListLeft[m].newRect = nodeListLeft[m].node.getBoundingClientRect();
+      if (nodeListLeft[m].rect.top == nodeListLeft[m].newRect.top)
+        continue;
+      if (nodeListLeft[m].alignment == 'left') {
+        if (nodeListLeft[m].rect.left == nodeListLeft[m].newRect.left) {
+          var prev = nodeListLeft[m].node.previousSibling;
+          if (prev) {
+            if (prev.nodeType == 3) {
+              if (/^\s+$/g.test(prev.nodeValue)) {
+                prev = prev.previousSibling;
+              } else {
+                continue;
+              }
+            }
+            if (prev.nodeType == 1) {
+              if (chrome_comp.getComputedStyle(prev).display == 'inline')
+                continue;
+            }
+          }
+        } else {
+          this.addProblem('RX8015', [nodeListLeft[m].node]);
+        }
+      }
+    }
+  }
+  //node.style.width = null;
+  //node.style.width = (inlineWidth) ? inlineWidth : null;
+  console.log(nodeListRight);
+  var inlinePosition = node.style.position;
+  var inlineLeft = node.style.left;
+  var oldMarginLeft = chrome_comp.getComputedStyle(node).marginLeft;
+  var left = node.getBoundingClientRect().left - oldMarginLeft + oldWidth - newWidth;
+  node.style.position = 'fixed !important';
+  node.style.left = left + 'px';
+  if (nodeListRight.length > 0) {
+    for (var m = 0, n = nodeListRight.length; m < n; m++) {
+      nodeListRight[m].newRect = nodeListRight[m].node.getBoundingClientRect();
+      if (nodeListRight[m].rect.top == nodeListRight[m].newRect.top)
+        continue;
+      if (nodeListRight[m].alignment == 'right') {
+        var newRight = node.getBoundingClientRect().right;
+        if ((nodeListRight[m].rect.right) == (nodeListRight[m].newRect.right)) {
+          var prev = nodeListRight[m].node.previousSibling;
+          if (prev) {
+            if (prev.nodeType == 3) {
+              if (/^\s+$/g.test(prev.nodeValue)) {
+                prev = prev.previousSibling;
+              } else {
+                continue;
+              }
+            }
+            if (prev.nodeType == 1) {
+              if (chrome_comp.getComputedStyle(prev).display == 'inline')
+                continue;
+            }
+          }
+        } else {
+          this.addProblem('RX8015', [nodeListRight[m].node]);
+        }
+      }
+    }
+  }
+  node.style.width = null;
+  node.style.width = (inlineWidth) ? inlineWidth : null;
+  node.style.position = null;
+  node.style.position = (inlinePosition) ? inlinePosition : null;
+  node.style.left = null;
+  node.style.left = (inlineLeft) ? inlineLeft : null;
+  
+  
+
+
+
+
+
+
+
+
+
+return;
+
   var hasLayoutParentInIE = context.getCurrentHasLayoutInIE();
   if (!hasLayoutParentInIE)
     return;
