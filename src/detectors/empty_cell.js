@@ -17,18 +17,18 @@
 addScriptToInject(function() {
 
 function hasMargin(style) {
-  return parseInt(style.marginLeft) || parseInt(style.marginTop) ||
-         parseInt(style.marginRight) || parseInt(style.marginBottom);
+  return parseInt(style.marginLeft,10) || parseInt(style.marginTop,10) ||
+         parseInt(style.marginRight,10) || parseInt(style.marginBottom,10);
 }
 
 function hasPadding(style) {
-  return parseInt(style.paddingLeft) || parseInt(style.paddingTop) ||
-         parseInt(style.paddingRight) || parseInt(style.paddingBottom);
+  return parseInt(style.paddingLeft,10) || parseInt(style.paddingTop,10) ||
+         parseInt(style.paddingRight,10) || parseInt(style.paddingBottom,10);
 }
 
 function hasBorder(style) {
-  return parseInt(style.borderLeftWidth) || parseInt(style.borderTopWidth) ||
-         parseInt(style.borderRightWidth) || parseInt(style.borderBottomWidth);
+  return parseInt(style.borderLeftWidth,10) || parseInt(style.borderTopWidth,10) ||
+         parseInt(style.borderRightWidth,10) || parseInt(style.borderBottomWidth,10);
 }
 
 function isEmptyNode(node, cell) {
@@ -110,19 +110,24 @@ function checkNode(node, context) {
 
     var mayHaveRE1012 = style.borderCollapse != 'collapse' && hasBorder(style);
     var mayHaveRE1013 = false;
-    if (parseInt(style.paddingTop) || parseInt(style.paddingBottom)) {
-      var orgHeight = node.offsetHeight;
-      var orgPaddingTop = node.style.paddingTop;
-      var orgPaddingBottom = node.style.paddingBottom;
-      node.style.paddingTop = '0px';
-      node.style.paddingBottom = '0px';
-      var newHeight = node.offsetHeight;
-      node.style.paddingTop = orgPaddingTop;
-      node.style.paddingBottom = orgPaddingBottom;
-      if (orgHeight > newHeight)
-        mayHaveRE1013 = true;
-    }
+    var nodePaddingTop = parseInt(style.paddingTop,10)|0;
+    var nodePaddingBottom = parseInt(style.paddingBottom,10)|0;
 
+    //fix empty cell padding is 1px
+    nodePaddingTop = (nodePaddingTop == 1) ? 0 : nodePaddingTop;
+    nodePaddingBottom = (nodePaddingBottom == 1) ? 0 : nodePaddingBottom;
+
+    if (nodePaddingTop || nodePaddingBottom) {
+      var nodeHeight = parseInt(chrome_comp.getDefinedStylePropertyByName(node, true, 'height'),10)|0;
+      var nodeClientHeight = node.clientHeight|0;
+      var nodePaddingHeight = nodePaddingTop + nodePaddingBottom;
+
+
+      if (nodeHeight < nodePaddingHeight &&
+          !(nodePaddingHeight < nodeClientHeight))
+          mayHaveRE1013 = true;
+
+    }
     if ((mayHaveRE1012 || mayHaveRE1013) && isEmptyCell(node)) {
       if (mayHaveRE1012)
         this.addProblem('RE1012', [node]);
