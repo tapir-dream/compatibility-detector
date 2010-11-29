@@ -42,7 +42,11 @@ function constructor(rootNode) {
     //handle SD9001, document.getElementById(case-sensitive name) still works in IE67Q
     var names = getNames();
     if (!result && names.commonNames.concat(names.namesOfEmbed).indexOf(lowerCaseArg0) >= 0) {
-      addProblem('SD9001');
+      //caller is null when call document.getElementById() in window scope
+      var caller = arguments.callee.caller.caller; 
+      //filter jQuery
+      if (!(caller && caller.caller && /jQuery/.test(caller.caller.caller)))
+        addProblem('SD9001');
     }
     
     function addProblem(id){
@@ -69,6 +73,7 @@ function constructor(rootNode) {
     }
   };
   
+	//this may has problem when updating document tree dynamically after window loading
 	//get all elements with id attribute in the document
   function getIds(){
     if(!ids){
