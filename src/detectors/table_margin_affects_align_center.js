@@ -29,16 +29,31 @@ function checkNode(node, context) {
       node.tagName != 'TABLE')
     return;
 
-  if (chrome_comp.getAttributeLowerCase(node, 'align') == 'center') {
-    var computedStyle = chrome_comp.getComputedStyle(node);
-    if (computedStyle.display == 'table') {
-      var marginLeft = parseInt(computedStyle.marginLeft);
-      var marginRight = parseInt(computedStyle.marginRight);
-      if (Math.abs(marginLeft - marginRight) > 1 ||
-          marginLeft + marginRight + node.offsetWidth !=
-              parseInt(chrome_comp.getComputedStyle(node.parentNode).width))
-        this.addProblem('RX8004', [node]);
-    }
+  if (chrome_comp.getAttributeLowerCase(node, 'align') != 'center')
+    return;
+
+  var inlineMarginLeft = node.style.marginLeft;
+  var inlineMarginRight = node.style.marginRight;
+  var left = node.getBoundingClientRect().left;
+  node.style.marginLeft = 'auto !important';
+  node.style.marginRight = 'auto !important';
+  var newLeft = node.getBoundingClientRect().left;
+  node.style.marginLeft = null;
+  node.style.marginLeft = (inlineMarginLeft) ? inlineMarginLeft : null;
+  node.style.marginRight = null;
+  node.style.marginRight = (inlineMarginRight) ? inlineMarginRight : null;
+  if ((left != newLeft) && (newLeft != left + 1)) {
+    this.addProblem('RX8004', [node]);
+    return;
+  }
+  var align = node.align;
+  node.align = 'left';
+  var definedMarginLeft = chrome_comp.getComputedStyle(node).marginLeft;
+  node.align = 'right';
+  var definedMarginRight = chrome_comp.getComputedStyle(node).marginRight;
+  node.align = align;
+  if (definedMarginLeft != definedMarginRight) {
+    this.addProblem('RX8004', [node]);
   }
 }
 ); // declareDetector
