@@ -57,10 +57,12 @@
       //====这里的东西是临时的，用完删除，不要从下边粘贴上来=====
 
 
-      /*********************************
       //Verified
       "detectors/decoration_font_color.js",
       "detectors/white_space_after_iframe_object.js",
+
+
+      /*********************************
 
       //Started——Error
       "detectors/getelementbyid_and_getelementsbyname.js",
