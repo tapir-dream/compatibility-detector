@@ -32,6 +32,12 @@ function checkNode(node, context) {
   if (chrome_comp.getAttributeLowerCase(node, 'align') != 'center')
     return;
 
+  if (node.offsetWidth == 0 || node.offsetHeight == 0)
+    return;
+
+  if (node.innerText == '')
+    return;
+
   var inlineMarginLeft = node.style.marginLeft;
   var inlineMarginRight = node.style.marginRight;
   var left = node.getBoundingClientRect().left;
@@ -46,7 +52,7 @@ function checkNode(node, context) {
     this.addProblem('RX8004', [node]);
     return;
   }
-  var align = node.align;
+  /*var align = node.align;
   node.align = 'left';
   var definedMarginLeft = chrome_comp.getComputedStyle(node).marginLeft;
   node.align = 'right';
@@ -54,7 +60,7 @@ function checkNode(node, context) {
   node.align = align;
   if (definedMarginLeft != definedMarginRight) {
     this.addProblem('RX8004', [node]);
-  }
+  }*/
 }
 ); // declareDetector
 
