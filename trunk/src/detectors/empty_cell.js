@@ -118,16 +118,19 @@ function checkNode(node, context) {
     nodePaddingBottom = (nodePaddingBottom == 1) ? 0 : nodePaddingBottom;
 
     if (nodePaddingTop || nodePaddingBottom) {
-      var nodeHeight = parseInt(chrome_comp.getDefinedStylePropertyByName(node, true, 'height'),10)|0;
+      var nodeHeight = parseInt(
+          chrome_comp.getDefinedStylePropertyByName(node, true, 'height'),
+          10)|0;
+      //fix cell getCompatStyle height is null
+      nodeHeight = nodeHeight || (parseInt(node.getAttribute('height'),10)|0);
       var nodeClientHeight = node.clientHeight|0;
       var nodePaddingHeight = nodePaddingTop + nodePaddingBottom;
-
 
       if (nodeHeight < nodePaddingHeight &&
           !(nodePaddingHeight < nodeClientHeight))
           mayHaveRE1013 = true;
-
     }
+
     if ((mayHaveRE1012 || mayHaveRE1013) && isEmptyCell(node)) {
       if (mayHaveRE1012)
         this.addProblem('RE1012', [node]);
