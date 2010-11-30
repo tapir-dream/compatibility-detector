@@ -46,35 +46,36 @@
 
 
 
-      //=======Review===========
-      "detectors/empty_cell.js", //
-      "detectors/mouse_enter_leave.js",
-      "detectors/script_language_type.js", //BT9002
-      "detectors/getelementbyid_and_getelementsbyname.js", //SD9002 SD9012
-      "detectors/text_align.js",
-      "detectors/disabled_attribute.js", //HF3001 HF3005
-      "detectors/table_margin_affects_align_center.js",
+      //=========Review===========
+      "detectors/mouse_enter_leave.js" //BT9017
+      "detectors/script_language_type.js" //BT9006
+      "detectors/getelementbyid_and_getelementsbyname.js",// SD9002
+      "detectors/text_align.js",//RT8003
+      "detectors/center_element.js", //HA8001
+      "detectors/getelementbyid_and_getelementsbyname.js" //SD9001
+      "detectors/full_shape_space_no_wrap.js", //BX1009
+      "detectors/align_nowrap.js",//RX8015
       //====这里的东西是临时的，用完删除，不要从下边粘贴上来=====
 
 
       //Verified
       "detectors/decoration_font_color.js",
       "detectors/white_space_after_iframe_object.js",
-
+      "detectors/disabled_attribute.js", //HF3005 HF3013
+      "detectors/getelementbyid_and_getelementsbyname.js", // SD9012
+      "detectors/table_margin_affects_align_center.js", // RX8004
+      "detectors/empty_cell.js",// RE1013
 
       /*********************************
 
       //Started——Error
-      "detectors/getelementbyid_and_getelementsbyname.js",
       "detectors/mouse_enter_leave.js"
       "detectors/text_align.js",
       "detectors/center_element.js",
       "detectors/onreadystatechange.js",
-      "detectors/table_margin_affects_align_center.js",
+      "detectors/align_nowrap.js",
 
       //Started——Warning
-      "detectors/empty_cell.js",
-      "detectors/disabled_attribute.js",
       "detectors/table_cellspacing_border_collapse.js",
       "detectors/decoration_font_color.js",
       "detectors/text_decoration_propagation.js",
@@ -82,6 +83,7 @@
       "detectors/invalid_list_item.js",
       "detectors/overflow.js",
       "detectors/marquee_width.js",
+      "detectors/full_shape_space_no_wrap.js",
 
 
       //WontFix
@@ -101,7 +103,6 @@
       "detectors/colspan_width_adjustment.js",
       "detectors/get_year.js",
       "detectors/haslayout_full_shape_space.js",
-      "detectors/full_shape_space_no_wrap.js",
       "detectors/shrink_to_fit_percentage_child.js",
       "detectors/missing_tags.js",
       "detectors/table_border_color.js",
@@ -119,7 +120,6 @@
       "detectors/fieldset_width.js",
       "detectors/percent_height_in_auto_height.js",
       "detectors/iframe_scroll.js",
-      "detectors/align_nowrap.js",
       "detectors/navigator_language.js",
       "detectors/align_middle.js",
       "detectors/nbsp_before_object.js",
