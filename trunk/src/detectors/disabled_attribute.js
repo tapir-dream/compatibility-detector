@@ -42,7 +42,7 @@ function checkNode(node, context) {
     else if (tagName != 'BUTTON' && tagName != 'INPUT' &&
                tagName != 'SELECT' && tagName != 'TEXTAREA' &&
 	       //filter empty element and img element
-	       tagName != 'IMG' && node.textContent.trim().length > 0)
+	       tagName != 'IMG' && node.innerText.trim().length > 0)
          this.addProblem('HF3005', [node]);
   }
 }
