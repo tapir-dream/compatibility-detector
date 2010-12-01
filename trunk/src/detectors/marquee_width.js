@@ -29,20 +29,27 @@ function checkNode(node, context) {
     return;
 
   if (node.tagName == 'MARQUEE') {
-    var parentNode = node.parentNode;
-    var parentStyle = chrome_comp.getComputedStyle(parentNode);
-    if (parentStyle && parentStyle.display == 'table-cell') {
+    var parentElement = node.parentElement;
+    var parentStyle = chrome_comp.getComputedStyle(parentElement);
+    if (parentStyle &&
+        parentStyle.display == 'table-cell' &&
+        parentStyle.tableLayout == 'auto') {
       var definedWidth = chrome_comp.getDefinedStylePropertyByName(
           node, false, 'width');
-      if (!definedWidth || definedWidth == 'auto') {
-        var oldWidth = parentNode.offsetWidth;
-        // \u2060 is word joiner which has zero width but can prevent the
-        // table cell from becoming a blank cell whose width is always zero.
-        var textNode = document.createTextNode('\u2060');
-        parentNode.replaceChild(textNode, node);
-        if (parentNode.offsetWidth < oldWidth)
+      definedWidth =
+          definedWidth || parseInt(node.getAttribute('width'),10)|0;
+      var parentElementWidth = chrome_comp.getDefinedStylePropertyByName(
+          parentElement, false, 'width')
+      parentElementWidth =  parentElementWidth ||
+          parseInt(parentElement.getAttribute('width'),10)|0;
+
+      if ((definedWidth == 0 || definedWidth == 'auto') &&
+          (parentElementWidth == 0 || parentElementWidth == 'auto')) {
+        var oldWidth = parentElement.offsetWidth;
+        node.style.display ='none';
+        if (parentElement.offsetWidth < oldWidth)
           this.addProblem('BX1030', [node]);
-        parentNode.replaceChild(node, textNode);
+        node.style.display ='';
       }
     }
   }

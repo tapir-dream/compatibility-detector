@@ -47,48 +47,50 @@
 
 
       //=========Review===========
-      "detectors/mouse_enter_leave.js",                     //BT9017
-      "detectors/script_language_type.js",                  //BT9006
-      "detectors/getelementbyid_and_getelementsbyname.js",  //SD9002
-      "detectors/text_align.js",                            //RT8003
-      "detectors/center_element.js",                        //HA8001
-      "detectors/getelementbyid_and_getelementsbyname.js",  //SD9001
-      "detectors/full_shape_space_no_wrap.js",              //BX1009
+      "detectors/white_space_after_iframe_object.js",       //HT1001
       "detectors/align_nowrap.js",                          //RX8015
+      "detectors/td_nowrap_inheritence.js",                 //RX1003
+      "detectors/mouse_enter_leave.js",                     //BT9017
+      "detectors/marquee_width.js",                         //BX1030
+      //"detectors/empty_cell.js",                            //RE1012
       //====这里的东西是临时的，用完删除，不要从下边粘贴上来=====
 
 
       //Verified
       "detectors/decoration_font_color.js",                 //RX3011
-      "detectors/white_space_after_iframe_object.js",       //HT1001
       "detectors/disabled_attribute.js",                    //HF3005 HF3013
       "detectors/getelementbyid_and_getelementsbyname.js",  //SD9012
       "detectors/table_margin_affects_align_center.js",     //RX8004
       "detectors/empty_cell.js",                            //RE1013
+      "detectors/table_cellspacing_border_collapse.js",     //RX1008
 
       /*********************************
 
       //Started——Error
-      "detectors/mouse_enter_leave.js"
-      "detectors/text_align.js",
-      "detectors/center_element.js",
-      "detectors/onreadystatechange.js",
-      "detectors/align_nowrap.js",
+      "detectors/script_language_type.js",                  //BT9006
+      "detectors/getelementbyid_and_getelementsbyname.js",  //SD9002 SD9001
+      "detectors/mouse_enter_leave.js"                      //BT9017
+      "detectors/text_align.js",                            //RT8003
+      "detectors/center_element.js",                        //HA8001
+      "detectors/onreadystatechange.js",                    //BX9021
+      "detectors/align_nowrap.js",                          //RX8015
+      "detectors/td_nowrap_inheritence.js",                 //RX1003
 
       //Started——Warning
-      "detectors/table_cellspacing_border_collapse.js",
-      "detectors/decoration_font_color.js",
-      "detectors/text_decoration_propagation.js",
-      "detectors/font_style_element_affects_css.js",
-      "detectors/invalid_list_item.js",
-      "detectors/overflow.js",
-      "detectors/marquee_width.js",
-      "detectors/full_shape_space_no_wrap.js",
+      "detectors/empty_cell.js",                            //RE1012
+      "detectors/white_space_after_iframe_object.js",       //HT1001
+      "detectors/decoration_font_color.js",                 //RX3011
+      "detectors/text_decoration_propagation.js",           //RT3002
+      "detectors/font_style_element_affects_css.js",        //RX3007
+      "detectors/invalid_list_item.js",                     //HY1005
+      "detectors/overflow.js",                              //RV1001
+      "detectors/marquee_width.js",                         //BX1030
+      "detectors/full_shape_space_no_wrap.js",              //BX1009
 
 
       //WontFix
       "detectors/document_all.js",                          //BX9002
-      "detectors/script_language_type.js",                  //BT9005 WontFix
+      "detectors/script_language_type.js",                  //BT9005 BT9006
       "detectors/right_floats_stretch_parent_elements.js",  //RD8006
       "detectors/img_alt_title.js",                         //HO3003
 
@@ -114,7 +116,6 @@
       "detectors/img_padding.js",
       "detectors/text_overflow_ellipsis.js",
       "detectors/get_and_set_attribute.js",
-      "detectors/td_nowrap_inheritence.js",
       "detectors/bold_element_font_weight.js",
       "detectors/word_wrap_spaces.js",
       "detectors/fieldset_width.js",
