@@ -27,8 +27,10 @@ function hasPadding(style) {
 }
 
 function hasBorder(style) {
-  return parseInt(style.borderLeftWidth,10) || parseInt(style.borderTopWidth,10) ||
-         parseInt(style.borderRightWidth,10) || parseInt(style.borderBottomWidth,10);
+  return parseInt(style.borderLeftWidth,10) ||
+         parseInt(style.borderTopWidth,10) ||
+         parseInt(style.borderRightWidth,10) ||
+         parseInt(style.borderBottomWidth,10);
 }
 
 function isEmptyNode(node, cell) {
@@ -90,6 +92,25 @@ function isEmptyCell(cell) {
   return true;
 }
 
+function isEmptyChild(node){
+  var childElements =
+          Array.prototype.slice.call(node.getElementsByTagName('*'));
+  var childElemnetContent = '';
+  for (var i = 0,l = childElements.length; i < l; i++){
+    if (chrome_comp.hasLayoutInIE(childElements[i]) ||
+        childElements[i].tagName == 'IFRAME')
+      return false;
+    if (chrome_comp.getComputedStyle(childElements[i]).display != 'none')
+      childElemnetContent += childElements[i].innerText;
+  }
+
+  if (childElemnetContent == '' && node.innerText == '')
+    return true;
+
+  return false;
+}
+
+
 chrome_comp.CompDetect.declareDetector(
 
 'empty_cell',
@@ -102,8 +123,7 @@ function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
     return;
 
-  if ((node.tagName == 'TD' || node.tagname == 'TH') &&
-      node.clientWidth > 1 && node.clientHeight > 1) {
+  if (node.tagName == 'TD' || node.tagname == 'TH') {
     var style = chrome_comp.getComputedStyle(node);
     if (style.emptyCells == 'hide')
       return;
@@ -130,13 +150,11 @@ function checkNode(node, context) {
           !(nodePaddingHeight < nodeClientHeight))
           mayHaveRE1013 = true;
     }
-
-    if ((mayHaveRE1012 || mayHaveRE1013) && isEmptyCell(node)) {
-      if (mayHaveRE1012)
-        this.addProblem('RE1012', [node]);
-      if (mayHaveRE1013)
-        this.addProblem('RE1013', [node]);
-    }
+    //filter child nodes is haslayout and empty elements
+    if (mayHaveRE1012 && isEmptyChild(node))
+      this.addProblem('RE1012', [node]);
+    if (mayHaveRE1013 && isEmptyCell(node))
+      this.addProblem('RE1013', [node]);
   }
 }
 ); // declareDetector
