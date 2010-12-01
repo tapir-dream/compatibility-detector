@@ -78,7 +78,6 @@ function checkNode(node, context) {
   var list = getCellsSetWidth(node);
   var autoList = list.auto;
   var nonAutoList = list.nonAuto;
-  console.log(autoList.length +',,,');
   for (var i = 0, j = autoList.length; i < j; i++) {
     if (chrome_comp.getComputedStyle(autoList[i]).whiteSpace == 'nowrap')
       if (isNowrapInherit(autoList[i]))
