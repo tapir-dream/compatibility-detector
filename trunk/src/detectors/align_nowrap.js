@@ -82,7 +82,8 @@ function checkNode(node, context) {
       if (nodeListLeft[m].rect.top == nodeListLeft[m].newRect.top)
         continue;
       if (nodeListLeft[m].alignment == 'left') {
-        if (left - nodeListLeft[m].rect.left == newLeft - nodeListLeft[m].newRect.left) {
+        if (left - nodeListLeft[m].rect.left == 
+            newLeft - nodeListLeft[m].newRect.left) {
           var prev = nodeListLeft[m].node.previousSibling;
           if (prev) {
             if (prev.nodeType == 3) {
@@ -105,7 +106,8 @@ function checkNode(node, context) {
   }
   node.style.left = null;
   var oldMarginLeft = parseInt(chrome_comp.getComputedStyle(node).marginLeft);
-  var left = node.getBoundingClientRect().left - oldMarginLeft + oldWidth - newWidth;
+  var left = node.getBoundingClientRect().left - 
+      oldMarginLeft + oldWidth - newWidth;
   node.style.left = left + 'px !important';
   if (nodeListRight.length > 0) {
     for (var m = 0, n = nodeListRight.length; m < n; m++) {
@@ -129,7 +131,8 @@ function checkNode(node, context) {
                 continue;
             }
           }
-          if (!(mostTop < nodeListRight[m].newRect.top && nodeListRight[m].newRect < mostBottom))
+          if (!(mostTop < nodeListRight[m].newRect.top && 
+                nodeListRight[m].newRect < mostBottom))
             this.addProblem('RX8015', [nodeListRight[m].node]);
         } else {
           this.addProblem('RX8015', [nodeListRight[m].node]);
