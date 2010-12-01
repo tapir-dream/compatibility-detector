@@ -57,7 +57,9 @@ function checkNode(node, context) {
     return;
 //Increase the filter conditions , When the elements of the display: none ,no problem.
   var display = window.getComputedStyle(node,null).display;
-  if(display == "none")
+//Increase the filter conditions , When the elements of the visibility: hidden ,no problem.
+  var visibility = window.getComputedStyle(node,null).visibility;
+  if(display == "none" || visibility =="hidden")
     return;
 //Increase the filter conditions , when onmouseenter and onmouseover exist, that the author considers the problem
   if(node.hasAttribute('onmouseenter') && node.hasAttribute('onmouseover'))
