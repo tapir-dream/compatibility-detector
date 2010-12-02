@@ -29,10 +29,26 @@ function checkNode(node, context) {
     return;
 
   var style = chrome_comp.getComputedStyle(node);
-  if (style && style.textOverflow == 'ellipsis') {
+  var textOverflow = chrome_comp.getComputedStyle(node).textOverflow;
+  var overflow = chrome_comp.getComputedStyle(node).overflow;
+  var nodeWidth = chrome_comp.getComputedStyle(node).width;
+  if (style && textOverflow == 'ellipsis' && overflow == "hidden") {
     // Firefox doesn't support 'text-overflow:ellipsis', so there will
     // compatibility issue as long as it's used.
-    this.addProblem('RT3005', [node]);
+    //this.addProblem('RT3005', [node]);
+    var childrenDisplay = null;
+    var isSetWidth = false;
+    for(var i=0,c=node.childNodes.length;i<c;i++){
+      if(node.childNodes[i].nodeType!==3){
+        childrenDisplay=chrome_comp.getComputedStyle(node.childNodes[i])
+          .display;
+        isSetWidth = chrome_comp.getDefinedStylePropertyByName
+          (node.childNodes[i],false,'width')?true:false;
+      if(childrenDisplay == "block" && isSetWidth == false){
+        this.addProblem('RT3005', [node]);
+      }
+     }
+    }
   }
 }
 
