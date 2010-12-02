@@ -34,23 +34,16 @@ function checkNode(node, context) {
     if (parentStyle &&
         parentStyle.display == 'table-cell' &&
         parentStyle.tableLayout == 'auto') {
-      var definedWidth = chrome_comp.getDefinedStylePropertyByName(
-          node, false, 'width');
-      definedWidth =
-          definedWidth || parseInt(node.getAttribute('width'),10)|0;
-      var parentElementWidth = chrome_comp.getDefinedStylePropertyByName(
-          parentElement, false, 'width')
-      parentElementWidth =  parentElementWidth ||
-          parseInt(parentElement.getAttribute('width'),10)|0;
-
-      if ((definedWidth == 0 || definedWidth == 'auto') &&
-          (parentElementWidth == 0 || parentElementWidth == 'auto')) {
-        var oldWidth = parentElement.offsetWidth;
+        var oldParentClientRect = parentElement.getBoundingClientRect();
+        var oldBodyClientRect = document.body.getBoundingClientRect();
         node.style.display ='none';
-        if (parentElement.offsetWidth < oldWidth)
+        if (oldBodyClientRect.width !=
+                document.body.getBoundingClientRect().width ||
+            oldParentClientRect.left !=
+                parentElement.getBoundingClientRect().left
+        )
           this.addProblem('BX1030', [node]);
         node.style.display ='';
-      }
     }
   }
 }
