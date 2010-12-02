@@ -44,7 +44,7 @@
 
       //====这里的东西是临时的，用完删除，不要从下边粘贴上来=====
 
-      /*********************************
+
 
       //=========Review===========
       "detectors/td_nowrap_inheritence.js",                 //RX1003
@@ -64,6 +64,7 @@
       "detectors/empty_cell.js",                            //RE1013
       "detectors/table_cellspacing_border_collapse.js",     //RX1008
 
+      /*********************************
 
       //Started——Error
       "detectors/script_language_type.js",                  //BT9006
