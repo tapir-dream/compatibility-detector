@@ -95,19 +95,29 @@ function isEmptyCell(cell) {
 function isEmptyChild(node){
   var childElements =
           Array.prototype.slice.call(node.getElementsByTagName('*'));
-  var childElemnetContent = '';
-  for (var i = 0,l = childElements.length; i < l; i++){
+  for (var i = 0,l = childElements.length; i < l; i++)
     if (chrome_comp.hasLayoutInIE(childElements[i]) ||
         childElements[i].tagName == 'IFRAME')
       return false;
-    if (chrome_comp.getComputedStyle(childElements[i]).display != 'none')
-      childElemnetContent += childElements[i].innerText;
-  }
-
-  if (childElemnetContent == '' && node.innerText == '')
+  if ( getFixedNodeTextContent(node) == '')
     return true;
 
   return false;
+}
+
+//match script and style element content fix textContent return text
+//don't use 'node.cloneNode(true).innerText ' it will trigger RCA SD9029……
+function getFixedNodeTextContent(node){
+  var scriptElements =
+          Array.prototype.slice.call(node.getElementsByTagName('script'));
+  var styleElements =
+          Array.prototype.slice.call(node.getElementsByTagName('style'));
+  var nodeValue = node.textContent;
+  for (var i = 0,l = scriptElements.length; i < l; i++)
+    nodeValue = nodeValue.replace(scriptElements[i].textContent,'');
+  for (var i = 0,l = styleElements.length; i < l; i++)
+    nodeValue = nodeValue.replace(styleElements[i].textContent,'');
+  return nodeValue;
 }
 
 
