@@ -48,10 +48,10 @@
 
       //=========Review===========
       "detectors/get_and_set_attribute.js",                 //SD9006
-			"detectors/full_shape_space_no_wrap.js",              //BX1009
-			"detectors/element_click.js",													//SD9025
-			"detectors/td_nowrap_inheritence.js",                 //RX1003
-			"detectors/table_cellspacing_border_collapse.js",     //RE1020
+      "detectors/full_shape_space_no_wrap.js",              //BX1009
+      "detectors/element_click.js",                         //SD9025
+      "detectors/td_nowrap_inheritence.js",                 //RX1003
+      "detectors/table_cellspacing_border_collapse.js",     //RE1020
       //====here things are temporary, used to delete, don't paste from the bottom up=====
 
 
@@ -65,14 +65,14 @@
       "detectors/align_nowrap.js",                          //RX8015
       "detectors/marquee_width.js",                         //BX1030
 
-			/*********************************
-      
-			//Started——Error
+      /*********************************
+
+      //Started——Error
       "detectors/text_align.js",                            //RT8003
       "detectors/center_element.js",                        //HA8001
       "detectors/onreadystatechange.js",                    //BX9021
       "detectors/get_and_set_attribute.js",                 //SD9006
-			"detectors/element_click.js",													//SD9025
+      "detectors/element_click.js",                         //SD9025
 
       //Started——Warning
       "detectors/table_cellspacing_border_collapse.js",     //RE1020
@@ -92,8 +92,8 @@
       "detectors/right_floats_stretch_parent_elements.js",  //RD8006
       "detectors/img_alt_title.js",                         //HO3003
       "detectors/mouse_enter_leave.js"                      //BT9017
-      "detectors/scroll_top_left.js",                       //BX9008 
-			"detectors/overflow.js",                              //RX1002
+      "detectors/scroll_top_left.js",                       //BX9008
+      "detectors/overflow.js",                              //RX1002
 
       //===============Uncategorized==================
 
