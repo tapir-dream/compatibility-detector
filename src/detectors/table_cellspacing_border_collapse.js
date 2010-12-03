@@ -45,16 +45,30 @@ function checkNode(node, context) {
         break;
       case 'separate':
         var hSpacing =
-          parseInt(computedStyle.WebkitBorderHorizontalSpacing, 10);
+          parseInt(computedStyle.WebkitBorderHorizontalSpacing, 10)|0;
         var vSpacing =
-          parseInt(computedStyle.WebkitBorderVerticalSpacing, 10);
-        if (node.hasAttribute('cellspacing')) {
-          var spacing = parseInt(node.getAttribute('cellspacing',10));
-          if (!hSpacing || hSpacing != spacing ||
-              !vSpacing || vSpacing != spacing)
-            this.addProblem('RE1020', [node]);
-        } else if (hSpacing || vSpacing)
-          this.addProblem('RE1020', [node]);
+          parseInt(computedStyle.WebkitBorderVerticalSpacing, 10)|0;
+
+        if (node.tagName == 'TABLE'){
+          if (node.hasAttribute('cellspacing')) {
+            var spacing = parseInt(node.getAttribute('cellspacing',10))|0;
+            if ( (hSpacing && hSpacing != spacing) ||
+               (vSpacing && vSpacing != spacing)){
+              this.addProblem('RE1020', [node]);
+              return;
+            }
+           } else {
+           // 2px is talbe tag default table-cell space in chrome
+            if (hSpacing !==2 || vSpacing !=2){
+              this.addProblem('RE1020', [node]);
+              return;
+            }
+          }
+        }
+        // other html tag set display:table and display:inline-table
+        if (node.tagName != 'TABLE' && (hSpacing || vSpacing) )
+           this.addProblem('RE1020', [node]);
+        break;
     }
   }
 }

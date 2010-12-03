@@ -41,18 +41,18 @@
 
 
       //============unit test===========
-      //====这里的东西是临时的，用完删除，不要从下边粘贴上来=====
+
+      //====here things are temporary, used to delete, don't paste from the bottom up=====
 
 
-
-      /*********************************
 
       //=========Review===========
       "detectors/get_and_set_attribute.js",                 //SD9006
 			"detectors/full_shape_space_no_wrap.js",              //BX1009
 			"detectors/element_click.js",													//SD9025
-
-      //====这里的东西是临时的，用完删除，不要从下边粘贴上来=====
+			"detectors/td_nowrap_inheritence.js",                 //RX1003
+			"detectors/table_cellspacing_border_collapse.js",     //RE1020
+      //====here things are temporary, used to delete, don't paste from the bottom up=====
 
 
       //Verified
@@ -65,7 +65,9 @@
       "detectors/align_nowrap.js",                          //RX8015
       "detectors/marquee_width.js",                         //BX1030
 
-      //Started——Error
+			/*********************************
+      
+			//Started——Error
       "detectors/text_align.js",                            //RT8003
       "detectors/center_element.js",                        //HA8001
       "detectors/onreadystatechange.js",                    //BX9021
