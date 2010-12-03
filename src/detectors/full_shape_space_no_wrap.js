@@ -33,13 +33,15 @@ function getIdeographicSpaceTextNode(element) {
 function detectorStyle(action, element) {
   if (action == 'create') {
     var style = document.createElement('style');
-    style.textContent = 'detector.ideo { display:inline-block !important; }';
+    style.textContent = 'det.ideo { display:inline-block !important; }';
     document.getElementsByTagName('head')[0].appendChild(style);
     return style;
   } else if (action == 'remove') {
     document.getElementsByTagName('head')[0].removeChild(element);
   }
 }
+
+//function is
 
 chrome_comp.CompDetect.declareDetector(
 
@@ -59,7 +61,7 @@ function checkNode(node, context) {
   if ((node.tagName == 'HEAD') || (node.tagName == 'HTML'))
     return;
 
-  if (node.tagName == 'DETECTOR')
+  if (node.tagName == 'DET')
     return;
 
   var textNodes = getIdeographicSpaceTextNode(node);
@@ -69,9 +71,10 @@ function checkNode(node, context) {
   var originalNode = node;
   var nodeDisplay = chrome_comp.getComputedStyle(node).display == 'inline';
   var style = detectorStyle('create');
-  node.innerHTML = node.innerHTML.replace(/\u3000/g, 
-      '<detector class="ideo">' + IS + '</detector>');
-  var qsNode = node.querySelectorAll('detector.ideo');
+  var oriHTML = node.innerHTML;
+  var tmpHTML = oriHTML.replace(/ /g, '').replace(/\t/g, '').replace(/\n/g, '');
+  node.innerHTML = tmpHTML.replace(/(.)/g, '<det class="ideo">$1</det>');
+  var qsNode = node.querySelectorAll('det.ideo');
   if (qsNode.length < 1)
     return;
   var qsNodeRect;
@@ -81,7 +84,24 @@ function checkNode(node, context) {
   var changedTop;
   var reRemove = /<detector class=\"ideo\">\u3000<\/detector>/gi;
   for (var m = 0, n = qsNode.length; m < n; m++) {
-    if (m > 0) {
+    if (qsNode[m].innerHTML == IS) {
+      var isRect = qsNode[m].getBoundingClientRect().left;
+      var prev = qsNode[m].previousElementSibling;
+      if (!prev)
+        continue;
+      var prevRect = prev.getBoundingClientRect().left;
+      if (prevRect > isRect) {
+        this.addProblem('BX1009', [node]);
+        //reported = true;
+        break;
+      }
+    }
+    
+    
+    
+    
+    
+    /*if (m > 0) {
       if (qsNode[m - 1].innerHTML != IS)
         continue;
       qsPrevNodeRect = qsNode[m - 1].getBoundingClientRect();
@@ -92,9 +112,9 @@ function checkNode(node, context) {
       this.addProblem('BX1009', [node]);
       reported = true;
       break;
-    }
+    }*/
   }
-  if (!reported) {
+  /*if (!reported) {
     var n = (nodeDisplay) ? chrome_comp.getContainingBlock(node) : node;
     var cbInlineWidth = n.style.width;
     n.style.width = '1000000px !important';
@@ -103,8 +123,8 @@ function checkNode(node, context) {
     n.style.width = (cbInlineWidth) ? cbInlineWidth : null;
     if (changedTop < originalTop)
       this.addProblem('BX1009', [node]);
-  }
-  node.innerHTML = node.innerHTML.replace(reRemove, IS);
+  }*/
+  node.innerHTML = oriHTML;
   detectorStyle('remove', style);
   node = originalNode;
 }
