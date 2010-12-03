@@ -31,9 +31,13 @@ function checkNode(node, context) {
   if (node.tagName == 'MARQUEE') {
     var parentElement = node.parentElement;
     var parentStyle = chrome_comp.getComputedStyle(parentElement);
+    var definedWidth = chrome_comp.getDefinedStylePropertyByName(
+          node, false, 'width');
+    definedWidth = definedWidth ||
+          parseInt(node.getAttribute('width'),10)|0 ;
     if (parentStyle &&
         parentStyle.display == 'table-cell' &&
-        parentStyle.tableLayout == 'auto') {
+        parentStyle.tableLayout == 'auto' && !definedWidth ) {
         var oldParentClientRect = parentElement.getBoundingClientRect();
         var oldBodyClientRect = document.body.getBoundingClientRect();
         node.style.display ='none';
