@@ -26,7 +26,6 @@ null, // constructor
 
 function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType ||
-      Node.ELEMENT_NODE != node.parentNode.nodeType ||
       context.isDisplayNone() || node.tagName != 'FONT')
     return;
 
