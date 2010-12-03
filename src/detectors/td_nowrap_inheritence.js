@@ -79,13 +79,37 @@ function checkNode(node, context) {
   var autoList = list.auto;
   var nonAutoList = list.nonAuto;
   for (var i = 0, j = autoList.length; i < j; i++) {
-    if (chrome_comp.getComputedStyle(autoList[i]).whiteSpace == 'nowrap')
-      if (isNowrapInherit(autoList[i]))
-        this.addProblem('RX1003', [autoList[i]]);
+    if (chrome_comp.getComputedStyle(autoList[i]).whiteSpace == 'nowrap') {
+      if (isNowrapInherit(autoList[i])) {
+        autoList[i].setAttribute('name', 'chrome_comp_td_det');
+        var op = autoList[i].offsetParent;
+        var cl = op.cloneNode(true);
+        op.parentNode.appendChild(cl);
+        var clTD = cl.querySelector('*[name="chrome_comp_td_det"]');
+        clTD.style.whiteSpace = 'normal !important';
+        var oldW = autoList[i].offsetWidth;
+        var newW = clTD.offsetWidth;
+        op.parentNode.removeChild(cl);
+        //alert(oldW+','+newW);
+        if (Math.abs(oldW - newW) > 10)
+          this.addProblem('RX1003', [autoList[i]]);
+      }
+    }
   }
   for (var i = 0, j = nonAutoList.length; i < j; i++) {
     if (!isNowrapInherit(nonAutoList[i])) {
-      this.addProblem('RX1003', [nonAutoList[i]]);
+      nonAutoList[i].setAttribute('name', 'chrome_comp_td_det');
+      var op = nonAutoList[i].offsetParent;
+      var cl = op.cloneNode(true);
+      op.parentNode.appendChild(cl);
+      var clTD = cl.querySelector('*[name="chrome_comp_td_det"]');
+      clTD.style.whiteSpace = 'normal !important';
+      var oldW = nonAutoList[i].offsetWidth;
+      var newW = clTD.offsetWidth;
+      op.parentNode.removeChild(cl);
+      //alert(oldW+','+newW);
+      if (Math.abs(oldW - newW) > 10)
+        this.addProblem('RX1003', [nonAutoList[i]]);
     }
   }
 }
