@@ -68,6 +68,7 @@
       /*********************************
 
       //Started——Error
+      "detectors/script_language_type.js",                  //BT9005 BT9006
       "detectors/text_align.js",                            //RT8003
       "detectors/center_element.js",                        //HA8001
       "detectors/onreadystatechange.js",                    //BX9021
@@ -88,7 +89,6 @@
       //WontFix
       "detectors/getelementbyid_and_getelementsbyname.js",  //SD9001 SD9002
       "detectors/document_all.js",                          //BX9002
-      "detectors/script_language_type.js",                  //BT9005 BT9006
       "detectors/right_floats_stretch_parent_elements.js",  //RD8006
       "detectors/img_alt_title.js",                         //HO3003
       "detectors/mouse_enter_leave.js"                      //BT9017
