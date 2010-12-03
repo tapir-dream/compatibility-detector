@@ -65,7 +65,6 @@ function checkNode(node, context) {
   var inlineLeft = node.style.left;
   var oldWidth = parseInt(chrome_comp.getComputedStyle(node).width);
   var newWidth = 10000;
-  console.log(node);
   if (node.tagName != 'TD' && node.tagName != 'TH')
     node.style.position = 'fixed !important';
   node.style.left = '0px';
@@ -99,7 +98,8 @@ function checkNode(node, context) {
             }
           }
         } else {
-          this.addProblem('RX8015', [nodeListLeft[m].node]);
+          this.addProblem('RX8015', 
+              { nodes: [nodeListLeft[m].node], severityLevel: 1 });
         }
       }
     }
@@ -133,9 +133,11 @@ function checkNode(node, context) {
           }
           if (!(mostTop < nodeListRight[m].newRect.top && 
                 nodeListRight[m].newRect < mostBottom))
-            this.addProblem('RX8015', [nodeListRight[m].node]);
+            this.addProblem('RX8015', 
+                { nodes: [nodeListRight[m].node], severityLevel: 1 });
         } else {
-          this.addProblem('RX8015', [nodeListRight[m].node]);
+          this.addProblem('RX8015', 
+              { nodes: [nodeListRight[m].node], severityLevel: 1 });
         }
       }
     }
