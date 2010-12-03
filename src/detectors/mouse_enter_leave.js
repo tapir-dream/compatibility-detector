@@ -31,7 +31,8 @@ function constructor(rootNode) {
       enterFlag=true;
     }
   };
-//When onmouseenter and onmouseover same time bound , that the author considers the problem
+  //When onmouseenter and onmouseover same time bound ,
+  //that the author considers the problem
   this.hookEnterHandler_ = function(oldValue, newValue, reason) {
     if (reason == 'set' && enterCounter == true)
       This.addProblem('BT9017', { nodes: [this], needsStack: true });
@@ -42,7 +43,8 @@ function constructor(rootNode) {
       leaveFlag=true;
     }
   };
-//When onmouseout and onmouseleave same time bound , that the author considers the problem
+  //When onmouseout and onmouseleave same time bound ,
+  //that the author considers the problem
   this.hookLeaveHandler_ = function(oldValue, newValue, reason) {
     if (reason == 'set' && leaveFlag == true)
       This.addProblem('BT9017', { nodes: [this], needsStack: true });
@@ -55,16 +57,20 @@ function constructor(rootNode) {
 function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType)
     return;
-//Increase the filter conditions , When the elements of the display: none ,no problem.
+  //Increase the filter conditions , When the elements
+  //of the display: none ,no problem.
   var display = window.getComputedStyle(node,null).display;
-//Increase the filter conditions , When the elements of the visibility: hidden ,no problem.
+  //Increase the filter conditions , When the elements
+  //of the visibility: hidden ,no problem.
   var visibility = window.getComputedStyle(node,null).visibility;
   if(display == "none" || visibility =="hidden")
     return;
-//Increase the filter conditions , when onmouseenter and onmouseover exist, that the author considers the problem
+  //Increase the filter conditions , when onmouseenter and onmouseover exist,
+  //that the author considers the problem
   if(node.hasAttribute('onmouseenter') && node.hasAttribute('onmouseover'))
     return;
-//Increase the filter conditions , when onmouseleave and onmouseout exist, that the author considers the problem
+  //Increase the filter conditions , when onmouseleave and onmouseout exist,
+  //that the author considers the problem
   else if(node.hasAttribute('onmouseleave') && node.hasAttribute('onmouseout'))
     return;
   if(node.hasAttribute('onmouseenter') || node.hasAttribute('onmouseleave'))

@@ -17,7 +17,7 @@
 addScriptToInject(function() {
 
 // Languages supported by all main browsers.
-const ACCEPTED_SCRIPT_LANGUAGES = {
+var ACCEPTED_SCRIPT_LANGUAGES = {
   'javascript': true,
   'javascript1.0': true,
   'javascript1.1': true,
@@ -27,7 +27,7 @@ const ACCEPTED_SCRIPT_LANGUAGES = {
 };
 
 // Script MIME types supported by all main browsers.
-const ACCEPTED_SCRIPT_TYPES = {
+var ACCEPTED_SCRIPT_TYPES = {
   'text/javascript': true,
   'text/ecmascript': true,
   'text/jscript': true

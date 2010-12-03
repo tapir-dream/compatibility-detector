@@ -52,15 +52,6 @@ function checkNode(node, context) {
     this.addProblem('RX8004', [node]);
     return;
   }
-  /*var align = node.align;
-  node.align = 'left';
-  var definedMarginLeft = chrome_comp.getComputedStyle(node).marginLeft;
-  node.align = 'right';
-  var definedMarginRight = chrome_comp.getComputedStyle(node).marginRight;
-  node.align = align;
-  if (definedMarginLeft != definedMarginRight) {
-    this.addProblem('RX8004', [node]);
-  }*/
 }
 ); // declareDetector
 
