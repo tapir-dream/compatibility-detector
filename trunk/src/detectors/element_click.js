@@ -18,7 +18,7 @@ addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'elementClick',
+'element_click',
 
 chrome_comp.CompDetect.NonScanDomBaseDetector,
 
