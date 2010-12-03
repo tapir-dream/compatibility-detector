@@ -97,7 +97,9 @@ function isEmptyChild(node){
           Array.prototype.slice.call(node.getElementsByTagName('*'));
   for (var i = 0,l = childElements.length; i < l; i++)
     if (chrome_comp.hasLayoutInIE(childElements[i]) ||
-        childElements[i].tagName == 'IFRAME')
+        childElements[i].tagName == 'IFRAME' ||
+        childElements[i].tagName == 'OBJECT' ||
+        childElements[i].tagName == 'EMBED')
       return false;
   if ( getFixedNodeTextContent(node) == '')
     return true;
