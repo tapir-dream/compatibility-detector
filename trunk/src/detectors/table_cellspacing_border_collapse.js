@@ -38,14 +38,16 @@ function checkNode(node, context) {
     switch (borderCollapse) {
       case 'collapse':
         if (node.hasAttribute('cellspacing')
-	    && parseInt(node.getAttribute('cellspacing'),10) > 0
-	    && node.childElementCount > 0 ){
+            && parseInt(node.getAttribute('cellspacing'),10) > 0
+            && node.childElementCount > 0 ){
             this.addProblem('RX1008', [node]);
-	  }
+        }
         break;
       case 'separate':
-        var hSpacing = parseInt(computedStyle.WebkitBorderHorizontalSpacing, 10);
-        var vSpacing = parseInt(computedStyle.WebkitBorderVerticalSpacing, 10);
+        var hSpacing =
+          parseInt(computedStyle.WebkitBorderHorizontalSpacing, 10);
+        var vSpacing =
+          parseInt(computedStyle.WebkitBorderVerticalSpacing, 10);
         if (node.hasAttribute('cellspacing')) {
           var spacing = parseInt(node.getAttribute('cellspacing',10));
           if (!hSpacing || hSpacing != spacing ||

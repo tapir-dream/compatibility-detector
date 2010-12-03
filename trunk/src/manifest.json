@@ -41,9 +41,6 @@
 
 
       //============unit test===========
-			"detectors/marquee_width.js",                         //BX1030
-      "detectors/empty_cell.js",                            //RE1012
- 
       //====这里的东西是临时的，用完删除，不要从下边粘贴上来=====
 
 
@@ -51,10 +48,9 @@
       /*********************************
 
       //=========Review===========
-      //"detectors/td_nowrap_inheritence.js",                 //RX1003
-      //"detectors/text_overflow_ellipsis.js",                //RT3005
       "detectors/get_and_set_attribute.js",                 //SD9006
 			"detectors/full_shape_space_no_wrap.js",              //BX1009
+			"detectors/element_click.js",													//SD9025
 
       //====这里的东西是临时的，用完删除，不要从下边粘贴上来=====
 
@@ -64,30 +60,28 @@
       "detectors/disabled_attribute.js",                    //HF3005 HF3013
       "detectors/getelementbyid_and_getelementsbyname.js",  //SD9012
       "detectors/table_margin_affects_align_center.js",     //RX8004
-      "detectors/empty_cell.js",                            //RE1013
+      "detectors/empty_cell.js",                            //RE1013 RE1012
       "detectors/table_cellspacing_border_collapse.js",     //RX1008
       "detectors/align_nowrap.js",                          //RX8015
+      "detectors/marquee_width.js",                         //BX1030
 
       //Started——Error
-      "detectors/script_language_type.js",                  //BT9006
       "detectors/text_align.js",                            //RT8003
       "detectors/center_element.js",                        //HA8001
       "detectors/onreadystatechange.js",                    //BX9021
-      "detectors/td_nowrap_inheritence.js",                 //RX1003
       "detectors/get_and_set_attribute.js",                 //SD9006
-      "detectors/full_shape_space_no_wrap.js",              //BX1009
+			"detectors/element_click.js",													//SD9025
 
       //Started——Warning
       "detectors/table_cellspacing_border_collapse.js",     //RE1020
-      "detectors/empty_cell.js",                            //RE1012
       "detectors/white_space_after_iframe_object.js",       //HT1001
       "detectors/decoration_font_color.js",                 //RX3011
       "detectors/text_decoration_propagation.js",           //RT3002
       "detectors/font_style_element_affects_css.js",        //RX3007
       "detectors/invalid_list_item.js",                     //HY1005
-      "detectors/overflow.js",                              //RV1001
-      "detectors/marquee_width.js",                         //BX1030
-
+      "detectors/overflow.js",                              //RV1001 RX1002
+      "detectors/full_shape_space_no_wrap.js",              //BX1009
+      "detectors/td_nowrap_inheritence.js",                 //RX1003
 
       //WontFix
       "detectors/getelementbyid_and_getelementsbyname.js",  //SD9001 SD9002
@@ -97,6 +91,7 @@
       "detectors/img_alt_title.js",                         //HO3003
       "detectors/mouse_enter_leave.js"                      //BT9017
       "detectors/scroll_top_left.js",                       //BX9008 
+			"detectors/overflow.js",                              //RX1002
 
       //===============Uncategorized==================
 
@@ -142,7 +137,6 @@
       "detectors/option_label_attribute.js",
       "detectors/select_options_add_remove_option.js",
       "detectors/nowrap_attribute.js",
-      //"detectors/block_formatting_context_haslayout.js",
       "detectors/background_attachment_scroll.js",
       "detectors/iframe_background_color_transparent.js",
       "detectors/forbidden_content_selection.js",
