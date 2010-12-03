@@ -40,20 +40,29 @@ chrome_comp.CompDetect.NonScanDomBaseDetector,
 
 function constructor(rootNode) {
   var This = this;
+  var events = ['blur', 'change', 'click', 'dblclick', 'focus', 'mousedown',
+    'mouseup', 'mouseover', 'mousemove', 'mouseout', 'keydown', 'keypress',
+    'keyup', 'load', 'unload', 'select', 'submit', 'reset'];
+  
   this.getAttributeHandler_ = function(result, originalArguments, callStack) {
     var attributeName = originalArguments[0];
-    if (!attributeName)
+    //filter prototype
+    if (!attributeName && attributeName == '_countedByPrototype')
       return;
-
+    debugger;
     if (INVALID_ATTRIBUTE_NAMES.hasOwnProperty(attributeName) ||
-        // If element.getAttribute(attributeName) returns null, but
+        // 1, 6. If element.getAttribute(attributeName) returns null, but
         // attributeName is a non-empty property of element, we warn the user
         // because he/she may mean to use element[attributeName].
         (result == null && this[attributeName]) ||
-        // In IE 6, IE 7 and IE 8(Q), if element is an input object,
+        // 2. In IE 6, IE 7 and IE 8(Q), if element is an input object,
         // element.getAttribute('value') returns the current value, while
         // in Chrome it returns the initial value.
-        (this.tagName == 'INPUT' && attributeName == 'value'))
+        (this.tagName == 'INPUT' && attributeName == 'value') || 
+        // 4. In IE6, IE7 and IE8(Q), element.getAttribute('style') returns an
+        // object and 5. element.getAttribute('onEventName') returns a function.
+        // In Chrome etc it returns a string or null.
+        attributeName == 'style' || events.indexOf(attributeName.slice(2)) >= 0)
       This.addProblem('SD9006', {
         nodes: [this],
         details: 'getAttribute("' + attributeName + '")',
@@ -70,14 +79,23 @@ function constructor(rootNode) {
     if (INVALID_ATTRIBUTE_NAMES.hasOwnProperty(attributeName) ||
         // In Chrome, the second param should always be a string, while in IE6,
         // IE7 and IE 8(Q), element.setAttribute('style', styleObject) requires
-        // an object as the second param, and element.setAttribute('onclick',
+        // an object as the second param, and 5. element.setAttribute('onclick',
         // func) requires a function as the second param.
         // Cases of other primitive types which also work in Chrome are ignored.
-        attributeType == 'function' || attributeType == 'object' ||
-        // In IE 6, IE 7 and IE 8(Q), if element is an input object,
+        (events.indexOf(attributeName.slice(2)) >= 0 && 
+          (attributeType == 'function' || attributeType == 'string')) || 
+        //attributeType == 'object' ||
+        // 2. In IE 6, IE 7 and IE 8(Q), if element is an input object,
         // element.setAttribute('value', 'foo') sets the current value, while
         // in Chrome it sets the initial value.
-        (this.tagName == 'INPUT' && attributeName == 'value'))
+        (this.tagName == 'INPUT' && attributeName == 'value') ||
+        // 4. In IE6, IE7 and IE8(Q) element.setAttribute('style', styleText)
+        // is not valid
+        attributeName == 'style' ||
+        // 6. In IE6, IE7 and IE8(Q) element.setAttribute('innerHTML', htmlText) 
+        // equivalent to element.innerHTML. offsetHeight etc is the same.
+        this.hasOwnProperty(attributeName) && 
+          (attributeValue != this[attributeName]))
       This.addProblem('SD9006', {
         nodes: [this],
         details: 'setAttribute("' + attributeName + '",' + attributeValue + ')',
