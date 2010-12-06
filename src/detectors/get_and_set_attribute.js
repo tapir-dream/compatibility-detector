@@ -43,13 +43,13 @@ function constructor(rootNode) {
   var events = ['blur', 'change', 'click', 'dblclick', 'focus', 'mousedown',
     'mouseup', 'mouseover', 'mousemove', 'mouseout', 'keydown', 'keypress',
     'keyup', 'load', 'unload', 'select', 'submit', 'reset'];
-  
+
   this.getAttributeHandler_ = function(result, originalArguments, callStack) {
     var attributeName = originalArguments[0];
     //filter prototype
     if (!attributeName && attributeName == '_countedByPrototype')
       return;
-    debugger;
+
     if (INVALID_ATTRIBUTE_NAMES.hasOwnProperty(attributeName) ||
         // 1, 6. If element.getAttribute(attributeName) returns null, but
         // attributeName is a non-empty property of element, we warn the user
@@ -58,7 +58,7 @@ function constructor(rootNode) {
         // 2. In IE 6, IE 7 and IE 8(Q), if element is an input object,
         // element.getAttribute('value') returns the current value, while
         // in Chrome it returns the initial value.
-        (this.tagName == 'INPUT' && attributeName == 'value') || 
+        (this.tagName == 'INPUT' && attributeName == 'value') ||
         // 4. In IE6, IE7 and IE8(Q), element.getAttribute('style') returns an
         // object and 5. element.getAttribute('onEventName') returns a function.
         // In Chrome etc it returns a string or null.
@@ -82,8 +82,8 @@ function constructor(rootNode) {
         // an object as the second param, and 5. element.setAttribute('onclick',
         // func) requires a function as the second param.
         // Cases of other primitive types which also work in Chrome are ignored.
-        (events.indexOf(attributeName.slice(2)) >= 0 && 
-          (attributeType == 'function' || attributeType == 'string')) || 
+        (events.indexOf(attributeName.slice(2)) >= 0 &&
+          (attributeType == 'function' || attributeType == 'string')) ||
         //attributeType == 'object' ||
         // 2. In IE 6, IE 7 and IE 8(Q), if element is an input object,
         // element.setAttribute('value', 'foo') sets the current value, while
@@ -92,9 +92,9 @@ function constructor(rootNode) {
         // 4. In IE6, IE7 and IE8(Q) element.setAttribute('style', styleText)
         // is not valid
         attributeName == 'style' ||
-        // 6. In IE6, IE7 and IE8(Q) element.setAttribute('innerHTML', htmlText) 
+        // 6. In IE6, IE7 and IE8(Q) element.setAttribute('innerHTML', htmlText)
         // equivalent to element.innerHTML. offsetHeight etc is the same.
-        this.hasOwnProperty(attributeName) && 
+        this.hasOwnProperty(attributeName) &&
           (attributeValue != this[attributeName]))
       This.addProblem('SD9006', {
         nodes: [this],
