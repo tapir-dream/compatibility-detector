@@ -31,23 +31,31 @@ function checkNode(node, context) {
   var style = chrome_comp.getComputedStyle(node);
   var textOverflow = chrome_comp.getComputedStyle(node).textOverflow;
   var overflow = chrome_comp.getComputedStyle(node).overflow;
-  var nodeWidth = chrome_comp.getComputedStyle(node).width;
-  if (style && textOverflow == 'ellipsis' && overflow == "hidden") {
-    // Firefox doesn't support 'text-overflow:ellipsis', so there will
-    // compatibility issue as long as it's used.
-    //this.addProblem('RT3005', [node]);
-    var childrenDisplay = null;
-    var isSetWidth = false;
+  var wordWrap = chrome_comp.getComputedStyle(node).wordWrap;
+  //Increase the filter conditions , When the elements
+  //of the TD and set word-wrap:break-word ,no problem.
+  if (style && textOverflow == 'ellipsis' && overflow == "hidden" && 
+    node.tagName !="TD" && wordWrap != "break-word") {
+    var nodeWidth = chrome_comp.getComputedStyle(node).width;
+    var childrenWidth= null;
     for(var i=0,c=node.childNodes.length;i<c;i++){
-      if(node.childNodes[i].nodeType!==3){
-        childrenDisplay=chrome_comp.getComputedStyle(node.childNodes[i])
-          .display;
-        isSetWidth = chrome_comp.getDefinedStylePropertyByName
-          (node.childNodes[i],false,'width')?true:false;
-      if(childrenDisplay == "block" && isSetWidth == false){
-        this.addProblem('RT3005', [node]);
+      //If the child element is a block element, 
+      //there may be compatibility issues
+      if(node.childNodes[i].nodeType!==3 && chrome_comp.getComputedStyle
+        (node.childNodes[i]).display=="block"){
+        var tempNode= node.childNodes[i].cloneNode(true);
+        //To obtain the actual length of the block elements
+        tempNode.style.float= "right";
+        document.body.appendChild(tempNode);
+        childrenWidth = chrome_comp.getComputedStyle(tempNode).width;
+        //Remove the temporary elements
+        document.body.removeChild(tempNode);
+        //If the child element is greater than the actual length of the parent 
+        //element length, there are compatibility issues
+        if(parseInt(childrenWidth,10)>parseInt(nodeWidth,10)){
+          this.addProblem('RT3005', [node]);
+        }
       }
-     }
     }
   }
 }
