@@ -15,24 +15,45 @@
  */
 
 addScriptToInject(function() {
+/*
+                              IE6/7/8   Chrome 9.0.597.0 dev
 
-// Languages supported by all main browsers.
-var ACCEPTED_SCRIPT_LANGUAGES = {
-  'javascript': true,
-  'javascript1.0': true,
-  'javascript1.1': true,
-  'javascript1.2': true,
-  'javascript1.3': true,
-  'livescript': true
-};
+[type]
+text/javascript:              OK        OK
+text/ecmascript:              OK        OK
+text/livescript:              OK        OK
+text/javascript1.1:           OK        OK
+text/javascript1.2:           OK        OK
+text/javascript1.3:           OK        OK
+text/jscript:                 OK        OK
+text/vbscript:                OK
+text/vbs:                     OK
+application/javascript:                 OK
 
-// Script MIME types supported by all main browsers.
-var ACCEPTED_SCRIPT_TYPES = {
-  'text/javascript': true,
-  'text/ecmascript': true,
-  'text/jscript': true
-};
+[Language]
+javascript:                   OK        OK
+ecmascript:                   OK        OK
+livescript:                   OK        OK
+javascript1.0:                          OK
+javascript1.1:                OK        OK
+javascript1.2:                OK        OK
+javascript1.3:                OK        OK
+javascript1.4:                          OK
+javascript1.5:                          OK
+javascript1.6:                          OK
+javascript1.7:                          OK
+jscript:                      OK        OK
+vbscript:                     OK
+vbs:                          OK
 
+[Language Encode]
+jscript.encode:               OK
+vbscript.encode:              OK
+
+[Mix]
+text/javascript language=vbs: OK        OK
+(We didn't check this situation now.)
+*/
 chrome_comp.CompDetect.declareDetector(
 
 'script_language_type',
@@ -46,20 +67,15 @@ function checkNode(node, context) {
     return;
 
   var type = node.getAttribute('type');
-  var typeIsAccepted = !type ||
-      ACCEPTED_SCRIPT_TYPES.hasOwnProperty(type.toLowerCase());
+  if (type) type = type.toLowerCase();
   var language = node.getAttribute('language');
-  var languageIsAccepted = !language ||
-      ACCEPTED_SCRIPT_LANGUAGES.hasOwnProperty(language.toLowerCase());
-  if (!typeIsAccepted)
-    this.addProblem('BT9005', [node]);
-  if (!languageIsAccepted) {
-    // Use custom severity level 3 (warning) if type is specified, otherwise
-    // default severity level (error).
-    var severityLevel = type ? 3 : 0;
-    var languageIsEncode = language.match(/\.encode$/);
-    this.addProblem(languageIsEncode ? 'BT9006' : 'BT9005',
-        { nodes: [node], severityLevel: severityLevel });
+  if (language) language = language.toLowerCase();
+  if (type == 'text/vbscript' || type == 'text/vbs' ||
+      language == 'vbscript' || language == 'vbs') {
+    this.addProblem('BT9005', { nodes: [node], severityLevel: 3 });
+  }
+  if (language == 'jscript.encode' || language == 'vbscript.encode') {
+    this.addProblem('BT9006', { nodes: [node], severityLevel: 3 });
   }
 }
 ); // declareDetector
