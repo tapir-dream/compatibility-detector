@@ -51,7 +51,7 @@ function checkNode(node, context) {
     var width = chrome_comp.getComputedStyle(element).width;
     element.style.display = null;
     element.style.display = (inlineDisplay) ? inlineDisplay : null;
-    return width.substr(-1) == '%';
+    return width.slice(-1) == '%';
   }
 
   function getAllPercentageWidthDescendant(element) {
