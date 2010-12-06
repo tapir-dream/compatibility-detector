@@ -44,14 +44,17 @@
 
       //====here things are temporary, used to delete, don't paste from the bottom up=====
 
-
-
       //=========Review===========
-      "detectors/get_and_set_attribute.js",                 //SD9006
-      "detectors/full_shape_space_no_wrap.js",              //BX1009
-      "detectors/element_click.js",                         //SD9025
-      "detectors/td_nowrap_inheritence.js",                 //RX1003
+      "detectors/shrink_to_fit_percentage_child.js",        //RX8017
+      "detectors/percent_height_in_auto_height.js",         //RE8010 RD8026
+      "detectors/text_overflow_ellipsis.js",                //RT3005
       "detectors/table_cellspacing_border_collapse.js",     //RE1020
+      "detectors/haslayout_full_shape_space.js",            //BT1025
+      "detectors/text_align.js",                            //RT8003
+      "detectors/center_element.js",                        //HA8001
+      "detectors/invalid_list_item.js",                     //HY1005
+      "detectors/script_language_type.js",                  //BT9005 BT9006
+      "detectors/overflow.js",                              //RX1002
       //====here things are temporary, used to delete, don't paste from the bottom up=====
 
 
@@ -64,18 +67,22 @@
       "detectors/table_cellspacing_border_collapse.js",     //RX1008
       "detectors/align_nowrap.js",                          //RX8015
       "detectors/marquee_width.js",                         //BX1030
+      "detectors/onreadystatechange.js",                    //BX9021
 
       /*********************************
 
       //Started——Error
+      "detectors/percent_height_in_auto_height.js",         //RE8010 RD8026
+      "detectors/shrink_to_fit_percentage_child.js",        //RX8017
       "detectors/script_language_type.js",                  //BT9005 BT9006
       "detectors/text_align.js",                            //RT8003
       "detectors/center_element.js",                        //HA8001
-      "detectors/onreadystatechange.js",                    //BX9021
       "detectors/get_and_set_attribute.js",                 //SD9006
       "detectors/element_click.js",                         //SD9025
 
       //Started——Warning
+      "detectors/text_overflow_ellipsis.js",                //RT3005
+      "detectors/haslayout_full_shape_space.js",            //BT1025
       "detectors/table_cellspacing_border_collapse.js",     //RE1020
       "detectors/white_space_after_iframe_object.js",       //HT1001
       "detectors/decoration_font_color.js",                 //RX3011
@@ -93,8 +100,6 @@
       "detectors/img_alt_title.js",                         //HO3003
       "detectors/mouse_enter_leave.js"                      //BT9017
       "detectors/scroll_top_left.js",                       //BX9008
-      "detectors/overflow.js",                              //RX1002
-
       //===============Uncategorized==================
 
       "detectors/useragent_check.js",
@@ -103,8 +108,6 @@
       "detectors/absolute_font_size.js",
       "detectors/colspan_width_adjustment.js",
       "detectors/get_year.js",
-      "detectors/haslayout_full_shape_space.js",
-      "detectors/shrink_to_fit_percentage_child.js",
       "detectors/missing_tags.js",
       "detectors/table_border_color.js",
       "detectors/conditional_comments.js",
@@ -113,11 +116,9 @@
       "detectors/stretched_cell_align.js",
       "detectors/style_attribute_value_in_braces.js",
       "detectors/img_padding.js",
-      "detectors/text_overflow_ellipsis.js",
       "detectors/bold_element_font_weight.js",
       "detectors/word_wrap_spaces.js",
       "detectors/fieldset_width.js",
-      "detectors/percent_height_in_auto_height.js",
       "detectors/iframe_scroll.js",
       "detectors/navigator_language.js",
       "detectors/align_middle.js",
