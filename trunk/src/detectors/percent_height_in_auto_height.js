@@ -25,28 +25,51 @@ chrome_comp.CompDetect.ScanDomBaseDetector,
 null, // constructor
 
 function checkNode(node, context) {
+  function isAutoHeight(element) {
+    var inlineDisplay = element.style.display;
+    element.style.display = 'none !important';
+    var height = chrome_comp.getComputedStyle(element).height;
+    element.style.display = null;
+    element.style.display = (inlineDisplay) ? inlineDisplay : null;
+    return height == 'auto';
+  }
+
+  function isPercentageHeight(element) {
+    var inlineDisplay = element.style.display;
+    element.style.display = 'none !important';
+    var height = chrome_comp.getComputedStyle(element).height;
+    element.style.display = null;
+    element.style.display = (inlineDisplay) ? inlineDisplay : null;
+    return height.slice(-1) == '%';
+  }
+
+  function isTable(element) {
+    return chrome_comp.getComputedStyle(element).display == 'table';
+  }
+
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone() ||
       // Firefox Standard mode RE8010 issue is ignored.
       !chrome_comp.inQuirksMode())
     return;
 
-  if (chrome_comp.startsBlockBox(node)) {
-    var height = chrome_comp.getDefinedStylePropertyByName(node, false,
-        'height');
-    if (height && height[height.length - 1] == '%') {
-      var container = chrome_comp.getContainingBlock(node);
-      var containerDisplay = chrome_comp.getComputedStyle(container).display;
-      // Here omit the cases that node is in a table (or a table cell) to
-      // simplify the algorithm.
-      if (containerDisplay.substring(0, 5) != 'table') {
-        var containerHeight = chrome_comp.getDefinedStylePropertyByName(
-            container, true, 'height');
-        if (!containerHeight || containerHeight == 'auto') {
-          this.addProblem(node.tagName == 'TABLE' ? 'RE8010' : 'RD8026',
-              [node, container]);
-        }
-      }
-    }
+  if (!isPercentageHeight(node))
+    return;
+  var cb = chrome_comp.getContainingBlock(node);
+  if (!cb)
+    return;
+  if (!isAutoHeight(cb) && cb.tagName != 'BODY')
+    return;
+  if (cb.tagName == 'BODY' && isAutoHeight(cb))
+    return;
+
+  var oldHeight = parseInt(chrome_comp.getComputedStyle(node).height);
+  var inlineHeight = node.style.height;
+  node.style.height = 'auto !important';
+  var newHeight = parseInt(chrome_comp.getComputedStyle(node).height);
+  node.style.height = null;
+  node.style.height = (inlineHeight) ? inlineHeight : null;
+  if (oldHeight != newHeight) {
+    this.addProblem(isTable(node) ? 'RE8010' : 'RD8026', [node]);
   }
 }
 ); // declareDetector
