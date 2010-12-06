@@ -25,34 +25,72 @@ chrome_comp.CompDetect.ScanDomBaseDetector,
 null, // constructor
 
 function checkNode(node, context) {
+
+  function isAutoWidth(element) {
+    var inlineDisplay = element.style.display;
+    element.style.display = 'none !important';
+    var width = chrome_comp.getComputedStyle(element).width;
+    element.style.display = null;
+    element.style.display = (inlineDisplay) ? inlineDisplay : null;
+    return width == 'auto';
+  }
+
+  function isShrinkToFit(element) {
+    if (!isAutoWidth(element))
+      return false;
+    var style = chrome_comp.getComputedStyle(element);
+    if ((style.float == 'none') && (style.display != 'inline-block') &&
+        (style.position == 'static' || style.position == 'relative'))
+      return false;
+    return true;
+  }
+
+  function isPercentageWidth(element) {
+    var inlineDisplay = element.style.display;
+    element.style.display = 'none !important';
+    var width = chrome_comp.getComputedStyle(element).width;
+    element.style.display = null;
+    element.style.display = (inlineDisplay) ? inlineDisplay : null;
+    return width.substr(-1) == '%';
+  }
+
+  function getAllPercentageWidthDescendant(element) {
+    var ch = element.children;
+    var desceList = [];
+    for (var i = 0, j = ch.length; i < j; i++) {
+      if (isPercentageWidth(ch[i]))
+        desceList.push(ch[i]);
+    }
+    return desceList;
+  }
+
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
     return;
 
-  var isShrinkToFit = context.getValueInBlockStack('isShrinkToFit');
-  if (isShrinkToFit === undefined) {
-    var block = context.getParentBlock();
-    if (block) {
-      isShrinkToFit = chrome_comp.isShrinkToFit(block, true);
-      context.putValueInBlockStack('isShrinkToFit', isShrinkToFit);
+  if (!isShrinkToFit(node))
+    return;
+
+  var descendantList = getAllPercentageWidthDescendant(node);
+  if (descendantList.length < 1)
+    return;
+
+  for (var i = 0, j = descendantList.length; i < j; i++) {
+    var style = chrome_comp.getComputedStyle(descendantList[i]);
+    if (style.display == 'inline')
+      continue;
+    var position = style.position;
+    if (position == 'fixed' || position == 'absolute')
+      continue;
+    var oldWidth = chrome_comp.getComputedStyle(descendantList[i]).width;
+    var inlineWidth = descendantList[i].style.width;
+    descendantList[i].style.width = 'auto !important';
+    var newWidth = chrome_comp.getComputedStyle(descendantList[i]).width;
+    descendantList[i].style.width = null;
+    descendantList[i].style.width = (inlineWidth) ? inlineWidth : null;
+    if (oldWidth != newWidth) {
+      this.addProblem('RX8017', [descendantList[i]]);
     }
   }
-  if (!isShrinkToFit)
-    return;
-
-  // This algorithm only applies to non-replaced elements.
-  if (chrome_comp.isReplacedElement(node))
-    return;
-
-  var style = chrome_comp.getComputedStyle(node);
-  if (style.display == 'inline')
-    return;
-  var position = style.position;
-  if (position == 'fixed' || position == 'absolute')
-    return;
-
-  var width = chrome_comp.getDefinedStylePropertyByName(node, false, 'width');
-  if (width && width.match(/[0-9]+\%$/) && parseInt(width) > 0)
-    this.addProblem('RX8017', [node]);
 }
 ); // declareDetector
 
