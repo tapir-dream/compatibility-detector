@@ -1,28 +1,55 @@
 <!DOCTYPE html>
-<!-- RX1002 -->
-<table border="1" style="table-layout:fixed;width:80px;">
-  <tr>
-    <td id='td' style="overflow:visible"><div style="width:120px; height:30px; background:#CCC;">yy</div></td>
-  </tr>
-  <tr>
-    <td id='td' style="overflow:hidden"><div style="width:120px; height:30px; background:#CCC;">zz</div></td>
-  </tr>
-</table>
-<br>
+<html chrome_comp_test="overflow">
+<head>
+</head>
+<body>
 
-<!-- RD8002 -->
-<div style="width:100px;height:100px;background:darkgray;">
-  <div style="width:150px;height:50px; background:red"></div>
+<!-- RD1002 -->
+<h1>RD1002</h1>
+<h2>Warning</h2>
+<div style="width:100px; height:100px; background:silver; overflow:visible;" expectedProblems="RD1002">
+  <div style="width:150px; height:50px; background:red;"></div>
 </div>
-<br>
+<h2>None</h2>
+<div style="width:100px; height:100px; background:silver; overflow:visible;">
+  <div style="width:80px; height:80px; background:red;"></div>
+</div>
+<div style="width:100px; height:100px; background:silver; overflow:visible;">
+  <div style="float:right; width:80px; height:80px; margin-right:-50px; background:red;"></div>
+</div>
+<div style="width:100px; height:100px; background:silver; overflow:visible;">
+  <div style="position:relative; right:-30px; width:80px; height:80px; background:red;"></div>
+</div>
 
 <!-- RV1001 -->
-<div id="div1" style="width:200px; height:50px;background:gold; overflow-x:hidden; border:1px solid red;">
-  <div style="width:200px;height:50px;background:silver; margin:20px;"></div>
+<h1>RV1001</h1>
+<h2>Warning</h2>
+<div style="width:200px; height:50px; background:silver; overflow-x:hidden; border:1px solid black;" expectedProblems="RV1001">
+  <div style="width:200px; height:50px; background:red; margin:20px;"></div>
 </div>
-<br>
+<h2>None</h2>
+<div style="width:200px; height:50px; background:silver; overflow-x:scroll; overflow-y:scroll; border:1px solid black;">
+  <div style="width:200px; height:50px; background:red; margin:20px;"></div>
+</div>
 
 <!-- RV1002 -->
-<div id='id1' style="width:150px;height:100px;background:darkgray;overflow:hidden;">
+<!--div id='id1' style="width:150px;height:100px;background:silver;overflow:hidden;">
   <div id='id2' style="width:100px;height:150px;background:red;position:relative"></div>
-</div>
+</div-->
+
+<!-- RX1002 -->
+<!--table border="1" style="table-layout:fixed; width:80px;">
+  <tr>
+    <td expectedProblems="RX1002">
+      <div style="width:120px; height:30px; background:red;">120 x 30<br>visible</div>
+    </td>
+  </tr>
+  <tr>
+    <td style="overflow:hidden">
+      <div style="width:120px; height:30px; background:green;">120 x 30<br>hidden</div>
+    </td>
+  </tr>
+</table-->
+
+</body>
+</html>
