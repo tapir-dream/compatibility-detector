@@ -35,8 +35,8 @@ function checkNode(node, context) {
     return;
 
   // Whether it's the descendant of a hasLayout element
-  for (var parentNode = node.parentNode; parentNode;
-       parentNode = parentNode.parentNode) {
+  for (var parentNode = node.parentElement; parentNode;
+       parentNode = parentNode.parentElement) {
     if (parentNode == document.body)
       return;
     if (chrome_comp.hasLayoutInIE(parentNode))
@@ -69,7 +69,7 @@ function checkNode(node, context) {
     // Our content is at the end of out parent box. But we need to check
     // the parent style, as the parent's siblings may be just behind us
     // if the parent is also inline (or inline block)
-    parentNode = parentNode.parentNode;
+    parentNode = parentNode.parentElement;
     var style = chrome_comp.getComputedStyle(parentNode);
     if (!style)
       return;
@@ -92,14 +92,35 @@ function checkNode(node, context) {
       parentColor = parentStyle && parentStyle.backgroundColor;
       if (parentColor != 'rgba(0, 0, 0, 0)')
         break;
-      parent = parent.parentNode;
+      parent = parent.parentElement;
     }
     return (parentColor != 'rgba(0, 0, 0, 0)' && color != parentColor);
   }
 
   function hasTextDecoration(element) {
     var style = chrome_comp.getComputedStyle(element);
-    return style.WebkitTextDecorationsInEffect && style.WebkitTextDecorationsInEffect != 'none';
+    return style.WebkitTextDecorationsInEffect &&
+           style.WebkitTextDecorationsInEffect != 'none';
+  }
+
+  function hasTextDirection(element){
+    var style = chrome_comp.getComputedStyle(element);
+    var styleMap = {
+                  'marginLeft':parseInt(style.marginLeft,10)|0,
+                  'marginRight':parseInt(style.marginRight,10)|0,
+                  'paddingLeft':parseInt(style.paddingLeft,10)|0,
+                  'paddingRight':parseInt(style.paddingRight,10)|0,
+                  'borderLeft':parseInt(style.borderLeftWidth,10)|0,
+                  'borderRight':parseInt(style.borderRightWidth,10)|0,
+                  'direction':style.direction
+                };
+    if (styleMap.direction == 'ltr')
+      return styleMap.marginRight || styleMap.paddingRight || styleMap.borderRight;
+
+    if (styleMap.direction == 'rtl'){
+      return styleMap.marginLeft || styleMap.paddingLeft || styleMap.borderLeft;
+    }
+    return false;
   }
 
   function checkProblem(parent, child) {
@@ -108,6 +129,9 @@ function checkNode(node, context) {
 
     if (hasTextDecoration(parent))
       return true;
+    // Check parent element style direction is 'ltr' or 'rtl'
+    if (hasTextDirection(parent))
+      return false;
 
     function getSiblingBoxes(parent, child) {
       var boxes = [];
@@ -161,8 +185,8 @@ function checkNode(node, context) {
       var style = chrome_comp.getComputedStyle(parent);
       // parent's size changed, if it has border or has different background
       // color, report as a problem
-      if (parseInt(style.borderRightWidth) > 0 ||
-          parseInt(style.borderBottomWidth) > 0 ||
+      if (parseInt(style.borderRightWidth,10)|0 > 0 ||
+          parseInt(style.borderBottomWidth,10)|0 > 0 ||
           hasDiffBackgroundColor(parent)) {
         return true;
       }
