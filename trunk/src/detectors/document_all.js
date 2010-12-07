@@ -97,17 +97,17 @@ function checkNode(node, context) {
    scriptData = removeScriptComments(scriptData);
    setTestResults(scriptData);
     if (getTestDetectorResult()) {
-      this.addProblem('BX9002', [node]);
+      this.addProblem('BX9002', { nodes: [node], severityLevel: 3 });
     }
 
   //check inline events of other node
   }else{
     for (var i = 0,l = node.attributes.length; i<l; i++){
       if ( node.attributes[i].name.toLowerCase().indexOf('on') == 0 ){
-       scriptData = removeScriptComments(node.attributes[i].value)
-	setTestResults(scriptData);
+        scriptData = removeScriptComments(node.attributes[i].value);
+        setTestResults(scriptData);
         if (getTestDetectorResult()) {
-           this.addProblem('BX9002', [node]);
+           this.addProblem('BX9002', { nodes: [node], severityLevel: 3 });
          }
       }
     }
