@@ -47,6 +47,38 @@ function checkNode(node, context) {
     return chrome_comp.getComputedStyle(element).display == 'table';
   }
 
+  function isBlockFormattingContext(element) {
+    var style = chrome_comp.getComputedStyle(element);
+    var display = style.display;
+    var cssFloat = style.float;
+    var position = style.position;
+    var overflow = style.overflow;
+    var overflowX = style.overflowX;
+    var overflowY = style.overflowY;
+    return (display == 'inline-block') || (display == 'table') ||
+      (display == 'table-cell') || (display == 'table-caption') ||
+      (position == 'absolute') || (position == 'fixed') ||
+      (overflow != 'visible') || (overflowX != 'visible') ||
+      (overflowY != 'visible');
+  }
+
+  function getContainingBlock(element) {
+    var position = chrome_comp.getComputedStyle(element).position;
+    if (element == document.documentElement) { return null; }
+    if (position == 'fixed') { return null; }
+    if (position == 'absolute') { return element.offsetParent; }
+    var nod = element;
+    while (nod) {
+      if (nod == document.body) return document.documentElement;
+      if (nod.parentNode) nod = nod.parentNode;
+      if (chrome_comp.getComputedStyle(nod).display ==
+          'block' || isBlockFormattingContext(nod)) {
+        return nod;
+      }
+    }
+    return null;
+  }
+
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone() ||
       // Firefox Standard mode RE8010 issue is ignored.
       !chrome_comp.inQuirksMode())
@@ -54,9 +86,10 @@ function checkNode(node, context) {
 
   if (!isPercentageHeight(node))
     return;
-  var cb = chrome_comp.getContainingBlock(node);
+  var cb = getContainingBlock(node);
   if (!cb)
     return;
+  console.log(cb);
   if (!isAutoHeight(cb) && cb.tagName != 'BODY')
     return;
   if (cb.tagName == 'BODY' && isAutoHeight(cb))
