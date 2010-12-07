@@ -33,10 +33,9 @@ function checkNode(node, context) {
    if(node.childNodes.length>0){
     for(var i=0;i<node.childNodes.length;i++){
      if(node.childNodes[i].nodeType!=3){
-      if(node.childNodes[i].childNodes.length==1 && 
+      if(node.childNodes[i].childNodes.length==1 &&
         node.childNodes[i].childNodes[0].nodeType==3){
-        //debugger;
-        if(window.getComputedStyle(node.childNodes[i]).display == "block" && 
+        if(window.getComputedStyle(node.childNodes[i]).display == "block" &&
           window.getComputedStyle(node.childNodes[i]).float == "none"){
         console.log(node.childNodes[i].id);
         var tempNode= node.childNodes[i].cloneNode(true);
@@ -49,7 +48,6 @@ function checkNode(node, context) {
         console.log(childrenWidth);
         console.log(nodeWidth);
         if(parseInt(childrenWidth)>parseInt(nodeWidth)){
-          //debugger;
           This.flag=true;
           return;
         }}
@@ -76,7 +74,7 @@ function checkNode(node, context) {
   var wordWrap = style.wordWrap;
   //Increase the filter conditions , When the elements
   //of the TD and set word-wrap:break-word ,no problem.
-  if (style && textOverflow == 'ellipsis' && overflow == "hidden" && 
+  if (style && textOverflow == 'ellipsis' && overflow == "hidden" &&
     node.tagName !="TD" && wordWrap != "break-word" && !isAutoWidth(node)) {
     var nodeWidth = chrome_comp.getComputedStyle(node).width;
     This.flag = false;

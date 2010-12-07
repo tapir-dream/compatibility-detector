@@ -73,7 +73,6 @@ function checkNode(node, context) {
     var preferredWidth = element.offsetWidth;
     element.style.position = null;
     element.style.position = (inlinePosition) ? inlinePosition : null;
-    //console.log(width+','+preferredWidth);
     return preferredWidth > width;
   }
 
@@ -102,18 +101,13 @@ function checkNode(node, context) {
     var position = style.position;
     if (position == 'fixed' || position == 'absolute')
       continue;
-    //var oldWidth = chrome_comp.getComputedStyle(descendantList[i]).width;
     var oldWidth = descendantList[i].offsetWidth;
     var inlineWidth = descendantList[i].style.width;
     descendantList[i].style.width = 'auto !important';
-    //var newWidth = chrome_comp.getComputedStyle(descendantList[i]).width;
     var newWidth = descendantList[i].offsetWidth;
     descendantList[i].style.width = null;
     descendantList[i].style.width = (inlineWidth) ? inlineWidth : null;
-    //console.log(newWidth+','+oldWidth);
     if (oldWidth != newWidth && oldWidth && newWidth) {
-      //if (descendantList[i].offsetWidth && descendantList[i].offsetHeight)
-      //if (!isUsingAvailableWidth(node))
         this.addProblem('RX8017', [descendantList[i]]);
     }
   }
