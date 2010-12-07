@@ -41,22 +41,24 @@
 
 
       //============unit test===========
-      "detectors/table_cellspacing_border_collapse.js",     //RE1020
+
       //====here things are temporary, used to delete, don't paste from the bottom up=====
 
-      /*********************************
+
 
       //=========Review===========
+      "detectors/td_nowrap_inheritence.js",                 //RX1003
       "detectors/shrink_to_fit_percentage_child.js",        //RX8017
+      "detectors/full_shape_space_no_wrap.js",              //BX1009
+      "detectors/text_align.js",                            //RT8003 ... Less than 20 url
+      "detectors/center_element.js",                        //HA8001 ... Less than 20 url
+      "detectors/overflow.js",                              //RD1002 ... Less than 20 url
+      "detectors/full_shape_space_no_wrap.js",              //BX1009
       "detectors/percent_height_in_auto_height.js",         //RE8010 RD8026
+      "detectors/element_click.js",                         //SD9025
+      "detectors/stretched_cell_align.js",                  //RE8014
+      "detectors/get_and_set_attribute.js",                 //SD9006
       "detectors/text_overflow_ellipsis.js",                //RT3005
-      "detectors/table_cellspacing_border_collapse.js",     //RE1020
-      "detectors/haslayout_full_shape_space.js",            //BT1025
-      "detectors/text_align.js",                            //RT8003
-      "detectors/center_element.js",                        //HA8001
-      "detectors/invalid_list_item.js",                     //HY1005
-      "detectors/script_language_type.js",                  //BT9005 BT9006
-      "detectors/overflow.js",                              //RX1002
       //====here things are temporary, used to delete, don't paste from the bottom up=====
 
       //Verified
@@ -66,23 +68,30 @@
       "detectors/table_margin_affects_align_center.js",     //RX8004
       "detectors/empty_cell.js",                            //RE1013 RE1012
       "detectors/table_cellspacing_border_collapse.js",     //RX1008
-      "detectors/align_nowrap.js",                          //RX8015
       "detectors/marquee_width.js",                         //BX1030
       "detectors/onreadystatechange.js",                    //BX9021
+      "detectors/haslayout_full_shape_space.js",            //BT1025
+      "detectors/table_cellspacing_border_collapse.js",     //RE1020
 
+      //Verified --> Error downgraded to Warning
+      "detectors/getelementbyid_and_getelementsbyname.js",  //SD9001 SD9002
+      "detectors/document_all.js",                          //BX9002
+      "detectors/script_language_type.js",                  //BT9005 BT9006
+      "detectors/align_nowrap.js",                          //RX8015
 
-      //Started——Error
+      /*********************************
+
+      //Started --> Error
       "detectors/percent_height_in_auto_height.js",         //RE8010 RD8026
       "detectors/shrink_to_fit_percentage_child.js",        //RX8017
-      "detectors/script_language_type.js",                  //BT9005 BT9006
       "detectors/text_align.js",                            //RT8003
       "detectors/center_element.js",                        //HA8001
       "detectors/get_and_set_attribute.js",                 //SD9006
       "detectors/element_click.js",                         //SD9025
 
-      //Started——Warning
+      //Started --> Warning
+      "detectors/stretched_cell_align.js",                  //RE8014
       "detectors/text_overflow_ellipsis.js",                //RT3005
-      "detectors/haslayout_full_shape_space.js",            //BT1025
       "detectors/table_cellspacing_border_collapse.js",     //RE1020
       "detectors/white_space_after_iframe_object.js",       //HT1001
       "detectors/decoration_font_color.js",                 //RX3011
@@ -94,12 +103,11 @@
       "detectors/td_nowrap_inheritence.js",                 //RX1003
 
       //WontFix
-      "detectors/getelementbyid_and_getelementsbyname.js",  //SD9001 SD9002
-      "detectors/document_all.js",                          //BX9002
       "detectors/right_floats_stretch_parent_elements.js",  //RD8006
-      "detectors/img_alt_title.js",                         //HO3003
       "detectors/mouse_enter_leave.js"                      //BT9017
       "detectors/scroll_top_left.js",                       //BX9008
+      "detectors/img_alt_title.js",                         //HO3003...
+
       //===============Uncategorized==================
 
       "detectors/useragent_check.js",
@@ -113,7 +121,6 @@
       "detectors/conditional_comments.js",
       "detectors/img_text_decoration.js",
       "detectors/tr_height.js",
-      "detectors/stretched_cell_align.js",
       "detectors/style_attribute_value_in_braces.js",
       "detectors/img_padding.js",
       "detectors/bold_element_font_weight.js",
