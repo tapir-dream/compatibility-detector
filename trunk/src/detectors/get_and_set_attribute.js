@@ -44,10 +44,20 @@ function constructor(rootNode) {
     'mouseup', 'mouseover', 'mousemove', 'mouseout', 'keydown', 'keypress',
     'keyup', 'load', 'unload', 'select', 'submit', 'reset'];
 
+  //When setting one of attributes below(attr1, attr2) on an element, such as 
+  //element.setAttribute('disabled', 'disabled'), element.disabled will get 
+  //Boolean true instead of String 'disabled'. And set attribute 'readonly', 
+  //'nowrap' etc. will make element.readOnly to be Boolean true, but 
+  //element.readonly is undefined.
+  var attrs = ['async', 'defer', 'disabled', 'checked', 'multiple', 'selected',
+    'compact', 'declare', 'readonly', 'nowrap', 'nohref', 'noshade'];
+
   this.getAttributeHandler_ = function(result, originalArguments, callStack) {
     var attributeName = originalArguments[0];
-    //filter prototype
-    if (!attributeName && attributeName == '_countedByPrototype')
+    var lowerCaseAttrName = attributeName.toLowerCase();
+    //filter jQuery and prototype
+    if (!attributeName || isCalledFromJquery(arguments) || 
+        isCalledFromPrototype(attributeName))
       return;
 
     if (INVALID_ATTRIBUTE_NAMES.hasOwnProperty(attributeName) ||
@@ -58,23 +68,29 @@ function constructor(rootNode) {
         // 2. In IE 6, IE 7 and IE 8(Q), if element is an input object,
         // element.getAttribute('value') returns the current value, while
         // in Chrome it returns the initial value.
-        (this.tagName == 'INPUT' && attributeName == 'value') ||
+        (this.tagName == 'INPUT' && lowerCaseAttrName == 'value') ||
         // 4. In IE6, IE7 and IE8(Q), element.getAttribute('style') returns an
         // object and 5. element.getAttribute('onEventName') returns a function.
         // In Chrome etc it returns a string or null.
-        attributeName == 'style' || events.indexOf(attributeName.slice(2)) >= 0)
+        lowerCaseAttrName == 'style' || 
+        events.indexOf(lowerCaseAttrName.slice(2)) >= 0 ||
+        // In IE6, IE7 and IE8(Q) element.getAttribute('disabled') returns true
+        // or false; It returns a String or null in Chrome etc.
+        attrs.indexOf(lowerCaseAttrName) >= 0)
       This.addProblem('SD9006', {
         nodes: [this],
-        details: 'getAttribute("' + attributeName + '")',
+        details: this.tagName + '.getAttribute("' + attributeName + '")',
         needsStack: true
       });
   };
   this.setAttributeHandler_ = function(result, originalArguments, callStack) {
     var attributeName = originalArguments[0];
     var attributeValue = originalArguments[1];
-    if (!attributeName || !attributeValue)
+    var lowerCaseAttrName = attributeName.toLowerCase();
+    if (!attributeName || !attributeValue || isCalledFromJquery(arguments))
       return;
 
+    var exceptiveAttrs = ['src', 'href'];
     var attributeType = typeof attributeValue;
     if (INVALID_ATTRIBUTE_NAMES.hasOwnProperty(attributeName) ||
         // In Chrome, the second param should always be a string, while in IE6,
@@ -82,26 +98,46 @@ function constructor(rootNode) {
         // an object as the second param, and 5. element.setAttribute('onclick',
         // func) requires a function as the second param.
         // Cases of other primitive types which also work in Chrome are ignored.
-        (events.indexOf(attributeName.slice(2)) >= 0 &&
+        (events.indexOf(lowerCaseAttrName.slice(2)) >= 0 &&
           (attributeType == 'function' || attributeType == 'string')) ||
         //attributeType == 'object' ||
         // 2. In IE 6, IE 7 and IE 8(Q), if element is an input object,
         // element.setAttribute('value', 'foo') sets the current value, while
         // in Chrome it sets the initial value.
-        (this.tagName == 'INPUT' && attributeName == 'value') ||
+        (this.tagName == 'INPUT' && lowerCaseAttrName == 'value') ||
         // 4. In IE6, IE7 and IE8(Q) element.setAttribute('style', styleText)
         // is not valid
-        attributeName == 'style' ||
+        lowerCaseAttrName == 'style' ||
         // 6. In IE6, IE7 and IE8(Q) element.setAttribute('innerHTML', htmlText)
         // equivalent to element.innerHTML. offsetHeight etc is the same.
-        this.hasOwnProperty(attributeName) &&
-          (attributeValue != this[attributeName]))
+        (this.hasOwnProperty(attributeName) &&
+          attributeValue != this[attributeName] && 
+          exceptiveAttrs.concat(attrs).indexOf(lowerCaseAttrName) < 0))
+        // In IE6, IE7 IE8(Q), element.setAttribute('readonly', 'readonly') will
+        // make element.readonly be String 'readonly', but it's undefined in 
+        // Chrome etc.
+        //attr2.indexOf(lowerCaseAttrName) >= 0)
       This.addProblem('SD9006', {
         nodes: [this],
-        details: 'setAttribute("' + attributeName + '",' + attributeValue + ')',
+        details: this.tagName + '.setAttribute("' + attributeName + 
+          '",' + attributeValue + ')',
         needsStack: true
       });
   };
+
+  function isCalledFromJquery(args){
+    var caller = args.callee.caller.caller;
+    while (caller) {
+      if (/jQuery/.test(caller))
+        return true;
+      caller = caller.caller;
+    }
+    return false;
+  }
+  
+  function isCalledFromPrototype(attributeName){
+    return attributeName == '_countedByPrototype';
+  }
 },
 
 function setUp() {
