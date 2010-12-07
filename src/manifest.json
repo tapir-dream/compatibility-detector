@@ -41,8 +41,10 @@
 
 
       //============unit test===========
-
+      "detectors/table_cellspacing_border_collapse.js",     //RE1020
       //====here things are temporary, used to delete, don't paste from the bottom up=====
+
+      /*********************************
 
       //=========Review===========
       "detectors/shrink_to_fit_percentage_child.js",        //RX8017
@@ -57,7 +59,6 @@
       "detectors/overflow.js",                              //RX1002
       //====here things are temporary, used to delete, don't paste from the bottom up=====
 
-
       //Verified
       "detectors/decoration_font_color.js",                 //RX3011
       "detectors/disabled_attribute.js",                    //HF3005 HF3013
@@ -69,7 +70,6 @@
       "detectors/marquee_width.js",                         //BX1030
       "detectors/onreadystatechange.js",                    //BX9021
 
-      /*********************************
 
       //Started——Error
       "detectors/percent_height_in_auto_height.js",         //RE8010 RD8026
@@ -89,7 +89,7 @@
       "detectors/text_decoration_propagation.js",           //RT3002
       "detectors/font_style_element_affects_css.js",        //RX3007
       "detectors/invalid_list_item.js",                     //HY1005
-      "detectors/overflow.js",                              //RV1001 RX1002
+      "detectors/overflow.js",                              //RV1001 RX1002 RD1002
       "detectors/full_shape_space_no_wrap.js",              //BX1009
       "detectors/td_nowrap_inheritence.js",                 //RX1003
 
