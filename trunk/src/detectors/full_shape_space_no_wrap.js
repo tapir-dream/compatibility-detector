@@ -33,7 +33,7 @@ function getIdeographicSpaceTextNode(element) {
 function detectorStyle(action, element) {
   if (action == 'create') {
     var style = document.createElement('style');
-    style.textContent = 'det.ideo { display:inline-block !important; ' + 
+    style.textContent = 'det.ideo { display:inline-block !important; ' +
         'text-indent:0 !important; }';
     document.getElementsByTagName('head')[0].appendChild(style);
     return style;
@@ -106,6 +106,7 @@ function checkNode(node, context) {
         }
       }
     }
+  }
   node.innerHTML = oriHTML;
   detectorStyle('remove', style);
   node = originalNode;
