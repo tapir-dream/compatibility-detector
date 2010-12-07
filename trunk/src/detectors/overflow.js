@@ -45,6 +45,31 @@ function checkNode(node, context) {
     }
   }
 
+  // Some developers using '{content:"."; display:block; visibility:hidden;
+  // height:0; clear:both;}' to expand containing blocks.
+  // However, if they donot add a rule like 'overflow:hidden', the pseudo
+  // element ':after' will holding space in WebKit.
+  // This affects the calculation of 'scrollHeight'.
+  // Fortunately, it does not expand its containing block visually.
+  function pseudoElementDoesNotAffect(node) {
+    var pseudoStyle = window.getComputedStyle(node, ':after');
+    if (pseudoStyle.display && pseudoStyle.clear) {
+      var h0 = node.offsetHeight;
+      var settedHeight = node.style.height;
+      var settedOverflowX = node.style.overflowX;
+      var settedOverflowY = node.style.overflowY;
+      node.style.height = 'auto';
+      node.style.overflowX = 'hidden';
+      node.style.overflowY = 'hidden';
+      var h1 = node.offsetHeight;
+      node.style.height = settedHeight;
+      node.style.overflowX = settedOverflowX;
+      node.style.overflowY = settedOverflowY;
+      return h1 > h0;
+    }
+    return true;
+  }
+
   function rectCallback(node) {
     var left = chrome_comp.PageUtil.pageLeft(node);
     var top = chrome_comp.PageUtil.pageTop(node);
@@ -63,6 +88,8 @@ function checkNode(node, context) {
 
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
   return;
+
+// RX1002 WontFix now.
 
 //  if (node.tagName == 'TABLE') {
 //    var computedStyle = chrome_comp.getComputedStyle(node);
@@ -87,8 +114,8 @@ function checkNode(node, context) {
 
   //RD1002
   if (checkOverflow(node, true, true)) {
-    //To get the computed value of 'width' or 'height', set the 'display'
-    //property to 'none' first to ensure the value is correct.
+    // To get the computed value of 'width' or 'height', set the 'display'
+    // property to 'none' first to ensure the value is correct.
     var settedDisplay = node.style.display;
     node.style.display = 'none !important';
     var cWidthIsNotAuto = computedStyle.width != 'auto';
@@ -99,8 +126,8 @@ function checkNode(node, context) {
     if (cOverflowIsVisible && (cWidthIsNotAuto || cHeightIsNotAuto)) {
       var elPool = [];
       var descentElements = node.getElementsByTagName('*');
-      //Negative margin or relative positioned element won't expand the
-      //containing element's size. So we clean the settings first.
+      // Negative margin or relative positioned element won't expand the
+      // containing element's size. So we clean the settings first.
       for(var i = 0; i < descentElements.length; i++) {
         var el = descentElements[i];
         var settedStyle = {};
@@ -125,17 +152,22 @@ function checkNode(node, context) {
           settedStyle.position = el.style.position;
           el.style.position = 'static !important';
         }
-        //Save styles if we cleaned them.
+        // Save styles if we cleaned them.
         if ('marginTop' in settedStyle || 'marginRight' in settedStyle ||
             'marginBottom' in settedStyle || 'marginLeft' in settedStyle ||
             'position' in settedStyle)
           elPool.push({'el': el, 'settedStyle': settedStyle});
       }
       if (checkOverflow(node, cWidthIsNotAuto, cHeightIsNotAuto)) {
-        this.addProblem('RD1002',
-            { nodes: [node], rectCallback: rectCallback });
+        // Pseudo elements maybe expand the containing block, see overflow.html
+        // - 'None - pseudo' part.
+        if (!cHeightIsNotAuto ||
+            cHeightIsNotAuto && pseudoElementDoesNotAffect(node)) {
+          this.addProblem('RD1002',
+              { nodes: [node], rectCallback: rectCallback });
+        }
       }
-      //Restore cleaned styles.
+      // Restore cleaned styles.
       if (elPool.length) {
         for (var i = 0; i < elPool.length; i++) {
           var elementAndStyle = elPool[i];
@@ -148,29 +180,32 @@ function checkNode(node, context) {
     }
   }
 
-  //RV1001
-  var overflowX = computedStyle.overflowX;
-  var overflowY = computedStyle.overflowY;
-  if (overflowX != overflowY) {
-    var xVisible = false;
-    var yVisible = false;
-    if (overflowX == 'auto') {
-      var settedOverflowY = node.style.overflowY;
-      node.style.overflowY = 'visible !important';
-      xVisible = computedStyle.overflowX == 'visible';
-      node.style.overflowY = '';
-      node.style.overflowY = settedOverflowY;
-    }
-    if (overflowY == 'auto') {
-      var settedOverflowX = node.style.overflowX;
-      node.style.overflowX = 'visible !important';
-      yVisible = computedStyle.overflowY == 'visible';
-      node.style.overflowX = '';
-      node.style.overflowX = settedOverflowX;
-    }
-    if ((xVisible && !yVisible && node.scrollWidth > node.offsetWidth) ||
-        (!xVisible && yVisible && node.scrollHeight > node.offsetHeight)) {
-      this.addProblem('RV1001', [node]);
+  // RV1001
+  // The element must be visible.
+  if (node.offsetWidth && node.offsetHeight) {
+    var overflowX = computedStyle.overflowX;
+    var overflowY = computedStyle.overflowY;
+    if (overflowX == 'auto' || overflowY == 'auto') {
+      var xVisible = false;
+      var yVisible = false;
+      if (overflowX == 'auto') {
+        var settedOverflowY = node.style.overflowY;
+        node.style.overflowY = 'visible !important';
+        xVisible = computedStyle.overflowX == 'visible';
+        node.style.overflowY = '';
+        node.style.overflowY = settedOverflowY;
+      }
+      if (overflowY == 'auto') {
+        var settedOverflowX = node.style.overflowX;
+        node.style.overflowX = 'visible !important';
+        yVisible = computedStyle.overflowY == 'visible';
+        node.style.overflowX = '';
+        node.style.overflowX = settedOverflowX;
+      }
+      if ((xVisible && !yVisible && node.scrollWidth > node.offsetWidth) ||
+          (!xVisible && yVisible && node.scrollHeight > node.offsetHeight)) {
+        this.addProblem('RV1001', [node]);
+      }
     }
   }
 
