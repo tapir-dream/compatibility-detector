@@ -16,39 +16,8 @@
 
 addScriptToInject(function() {
 
-function getCellsSetWidth(element) {
-  var inlineTableLayout = element.style.tableLayout;
-  var inlineWidth = element.style.width;
-  element.style.tableLayout = 'fixed !important';
-  element.style.width = '0px !important';
-  var rows = element.rows;
-  var autoCellList = [], nonAutoCellList = [];
-  var rowsDisplay = [];
-  for (var i = 0, j = rows.length; i < j; i++) {
-    var cells = rows[i].cells;
-    for (var m = 0, n = cells.length; m < n; m++) {
-      if (cells[m].offsetWidth == 0) {
-        autoCellList.push(cells[m]);
-      } else {
-        nonAutoCellList.push(cells[m]);
-      }
-    }
-    rowsDisplay[i] = rows[i].style.display;
-    rows[i].style.display = 'none !important';
-  }
-  for (var i = 0, j = rows.length; i < j; i++) {
-    rows[i].style.display = null;
-    rows[i].style.display = (rowsDisplay[i]) ? rowsDisplay[i] : null;
-  }
-  element.style.tableLayout = null;
-  element.style.tableLayout = (inlineTableLayout) ? inlineTableLayout: null;
-  element.style.width = null;
-  element.style.width = (inlineWidth) ? inlineWidth : null;
-  return { auto: autoCellList, nonAuto: nonAutoCellList };
-}
-
-function isNowrapInherit(element) {
-  if (element.tagName != 'TD' && element.tagName != 'TR')
+function isNowrapInherited(element) {
+  if (chrome_comp.getComputedStyle(element).whiteSpace != 'nowrap')
     return;
   var table = element.offsetParent;
   var tableInlineWhiteSpace = table.style.whiteSpace;
@@ -60,6 +29,33 @@ function isNowrapInherit(element) {
   return computedWhiteSpace == 'pre-line';
 }
 
+function isChildrenAffectedByCellsWhiteSpace(element) {
+  if (chrome_comp.getComputedStyle(element).whiteSpace != 'nowrap')
+    return;
+  var inlineWhiteSpace = element.style.whiteSpace;
+  var op = element.offsetParent;
+  var inlineTableWhiteSpace = op.style.whiteSpace;
+  var oldWidth = element.offsetWidth;
+  element.style.whiteSpace = 'normal !important';
+  op.style.whiteSpace = 'normal !important';
+  var newWidth = element.offsetWidth;
+  element.style.whiteSpace = null;
+  element.style.whiteSpace = (inlineWhiteSpace) ? inlineWhiteSpace : null;
+  op.style.whiteSpace = null;
+  op.style.whiteSpace = (inlineTableWhiteSpace) ? inlineTableWhiteSpace : null;
+  return oldWidth != newWidth;
+}
+
+function isAutoWidth(element) {
+  if (chrome_comp.getComputedStyle(element).display == 'none')
+    return chrome_comp.getComputedStyle(element).width == 'auto';
+  var inlineDisplay = element.style.display;
+  element.style.display = 'none !important';
+  var width = chrome_comp.getComputedStyle(element).width;
+  element.style.display = null;
+  element.style.display = (inlineDisplay) ? inlineDisplay : null;
+  return width == 'auto';
+}
 
 chrome_comp.CompDetect.declareDetector(
 
@@ -73,43 +69,20 @@ function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
     return;
 
-  if (node.tagName != 'TABLE')
+  if ((node.tagName != 'TH') && (node.tagName != 'TD'))
     return;
-  var list = getCellsSetWidth(node);
-  var autoList = list.auto;
-  var nonAutoList = list.nonAuto;
-  for (var i = 0, j = autoList.length; i < j; i++) {
-    if (chrome_comp.getComputedStyle(autoList[i]).whiteSpace == 'nowrap') {
-      if (isNowrapInherit(autoList[i])) {
-        autoList[i].setAttribute('name', 'chrome_comp_td_det');
-        var op = autoList[i].offsetParent;
-        var cl = op.cloneNode(true);
-        op.parentNode.appendChild(cl);
-        var clTD = cl.querySelector('*[name="chrome_comp_td_det"]');
-        clTD.style.whiteSpace = 'normal !important';
-        var oldW = autoList[i].offsetWidth;
-        var newW = clTD.offsetWidth;
-        op.parentNode.removeChild(cl);
-        //alert(oldW+','+newW);
-        if (Math.abs(oldW - newW) > 10)
-          this.addProblem('RX1003', [autoList[i]]);
+
+  if (isAutoWidth(node)) {
+    if (isNowrapInherited(node)) {
+      if (isChildrenAffectedByCellsWhiteSpace(node)){
+        this.addProblem('RX1003', [node]);
       }
     }
-  }
-  for (var i = 0, j = nonAutoList.length; i < j; i++) {
-    if (!isNowrapInherit(nonAutoList[i])) {
-      nonAutoList[i].setAttribute('name', 'chrome_comp_td_det');
-      var op = nonAutoList[i].offsetParent;
-      var cl = op.cloneNode(true);
-      op.parentNode.appendChild(cl);
-      var clTD = cl.querySelector('*[name="chrome_comp_td_det"]');
-      clTD.style.whiteSpace = 'normal !important';
-      var oldW = nonAutoList[i].offsetWidth;
-      var newW = clTD.offsetWidth;
-      op.parentNode.removeChild(cl);
-      //alert(oldW+','+newW);
-      if (Math.abs(oldW - newW) > 10)
-        this.addProblem('RX1003', [nonAutoList[i]]);
+  } else {
+    if (chrome_comp.getComputedStyle(node).whiteSpace == 'nowrap') {
+      if (isChildrenAffectedByCellsWhiteSpace(node)){
+        this.addProblem('RX1003', [node]);
+      }
     }
   }
 }
