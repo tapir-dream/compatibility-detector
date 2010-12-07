@@ -59,7 +59,7 @@ function checkNode(node, context) {
             }
            } else {
            // 2px is talbe tag default table-cell space in chrome
-            if (hSpacing != 0 || vSpacing != 0 ){
+            if (hSpacing > 2 || vSpacing > 2 ){
               this.addProblem('RE1020', [node]);
               return;
             }
