@@ -33,7 +33,8 @@ function getIdeographicSpaceTextNode(element) {
 function detectorStyle(action, element) {
   if (action == 'create') {
     var style = document.createElement('style');
-    style.textContent = 'det.ideo { display:inline-block !important; }';
+    style.textContent = 'det.ideo { display:inline-block !important; ' + 
+        'text-indent:0 !important; }';
     document.getElementsByTagName('head')[0].appendChild(style);
     return style;
   } else if (action == 'remove') {
@@ -41,7 +42,17 @@ function detectorStyle(action, element) {
   }
 }
 
-//function is
+function getPreviousElement(element) {
+  var p = element.previousSibling;
+  if (!p)
+    return;
+  var ch = p.children;
+  if (ch.length > 0) {
+    return ch[ch.length - 1]
+  } else   {
+    return p;
+  }
+}
 
 chrome_comp.CompDetect.declareDetector(
 
@@ -67,22 +78,33 @@ function checkNode(node, context) {
   var textNodes = getIdeographicSpaceTextNode(node);
   if (textNodes.length < 1)
     return;
+  //console.log(node);
+  //console.log(textNodes.length);
   var IS = '　';
   var originalNode = node;
-  var nodeDisplay = chrome_comp.getComputedStyle(node).display == 'inline';
+  //var nodeDisplay = chrome_comp.getComputedStyle(node).display == 'inline';
   var style = detectorStyle('create');
   var oriHTML = node.innerHTML;
-  var tmpHTML = oriHTML.replace(/ /g, '').replace(/\t/g, '').replace(/\n/g, '');
-  node.innerHTML = tmpHTML.replace(/(.)/g, '<det class="ideo">$1</det>');
+  for (var i = 0, j = textNodes.length; i < j; i++) {
+    var text = textNodes[i].nodeValue;
+    var detText = text.replace(/(.)/g, '<det class="ideo">$1</det>');
+    node.innerHTML = node.innerHTML.replace(text, detText);
+  }
+  
+  
+  //var oriHTML = node.innerHTML;
+  //var tmpHTML = oriHTML.replace(/\n/g, '');
+  //node.innerHTML = tmpHTML.replace(/(.)/g, '<det class="ideo">$1</det>');
   var qsNode = node.querySelectorAll('det.ideo');
   if (qsNode.length < 1)
     return;
+  //console.log(qsNode.length);
   var qsNodeRect;
   var qsPrevNodeRect;
   var reported = false;
   var originalTop;
   var changedTop;
-  var reRemove = /<detector class=\"ideo\">\u3000<\/detector>/gi;
+  //var reRemove = /<detector class=\"ideo\">\u3000<\/detector>/gi;
   for (var m = 0, n = qsNode.length; m < n; m++) {
     if (qsNode[m].innerHTML == IS) {
       var isRect = qsNode[m].getBoundingClientRect().left;
@@ -90,10 +112,14 @@ function checkNode(node, context) {
       if (!prev)
         continue;
       var prevRect = prev.getBoundingClientRect().left;
-      if (prevRect > isRect) {
-        this.addProblem('BX1009', [node]);
-        //reported = true;
-        break;
+      if ((prevRect > isRect)) {
+        var pe = getPreviousElement(qsNode[m]);
+        //console.log(pe);
+        if (pe && pe.tagName != 'BR') {
+          this.addProblem('BX1009', [qsNode[m]]);
+          //reported = true;
+          break;
+        }
       }
     }
     
