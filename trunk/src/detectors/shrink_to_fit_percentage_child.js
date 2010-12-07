@@ -58,16 +58,37 @@ function checkNode(node, context) {
     var ch = element.children;
     var desceList = [];
     for (var i = 0, j = ch.length; i < j; i++) {
+      if (!chrome_comp.isElementTrulyDisplayable(ch[i]))
+        continue;
       if (isPercentageWidth(ch[i]))
         desceList.push(ch[i]);
     }
     return desceList;
   }
 
+  function isUsingAvailableWidth(element) {
+    var width = element.offsetWidth;
+    var inlinePosition = element.style.position;
+    element.style.position = 'fixed !important';
+    var preferredWidth = element.offsetWidth;
+    element.style.position = null;
+    element.style.position = (inlinePosition) ? inlinePosition : null;
+    //console.log(width+','+preferredWidth);
+    return preferredWidth > width;
+  }
+
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
     return;
 
   if (!isShrinkToFit(node))
+    return;
+
+  if (node.tagName == 'MARQUEE')
+    return;
+  if (chrome_comp.isReplacedElement(node))
+    return;
+
+  if (isUsingAvailableWidth(node))
     return;
 
   var descendantList = getAllPercentageWidthDescendant(node);
@@ -81,14 +102,19 @@ function checkNode(node, context) {
     var position = style.position;
     if (position == 'fixed' || position == 'absolute')
       continue;
-    var oldWidth = chrome_comp.getComputedStyle(descendantList[i]).width;
+    //var oldWidth = chrome_comp.getComputedStyle(descendantList[i]).width;
+    var oldWidth = descendantList[i].offsetWidth;
     var inlineWidth = descendantList[i].style.width;
     descendantList[i].style.width = 'auto !important';
-    var newWidth = chrome_comp.getComputedStyle(descendantList[i]).width;
+    //var newWidth = chrome_comp.getComputedStyle(descendantList[i]).width;
+    var newWidth = descendantList[i].offsetWidth;
     descendantList[i].style.width = null;
     descendantList[i].style.width = (inlineWidth) ? inlineWidth : null;
-    if (oldWidth != newWidth) {
-      this.addProblem('RX8017', [descendantList[i]]);
+    //console.log(newWidth+','+oldWidth);
+    if (oldWidth != newWidth && oldWidth && newWidth) {
+      //if (descendantList[i].offsetWidth && descendantList[i].offsetHeight)
+      //if (!isUsingAvailableWidth(node))
+        this.addProblem('RX8017', [descendantList[i]]);
     }
   }
 }
