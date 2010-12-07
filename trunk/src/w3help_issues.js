@@ -298,6 +298,8 @@ var issueIds = [
   //luyuan
   'HO9008',
   'SD9029',
+  'SD9025',
+  'RD8026'
 ];
 
 var issues = { };

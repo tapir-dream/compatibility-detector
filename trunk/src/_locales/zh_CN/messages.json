@@ -566,6 +566,10 @@
   "HO9008": { "message": "IE Opera 中可以通过 MAP 元素的 id 属性与 IMG 元素相关联" },
   "HO9008_suggestion": { "message": "若需要 IMG 元素与 MAP 元素相关联，注意通过 IMG 元素的 usemap 属性关联的 MAP 元素的 name 属性的值。" },
   "SD9029": { "message": "各浏览器下在向文档树中插入通过 cloneNode(true) 创建的节点时，其内的 SCRIPT 元素中的脚本执行有差异" },
-  "SD9029_suggestion": { "message": "避免深度复制 cloneNode(true) 包含 SCRIPT 元素的节点。" }
+  "SD9029_suggestion": { "message": "避免深度复制 cloneNode(true) 包含 SCRIPT 元素的节点。" },
+  "SD9025": { "message": "IE6 IE7 IE8 Opera 支持除 INPUT 和 BUTTON 元素以外的其他元素的 click 方法" },
+  "SD9025_suggestion": { "message": "建议尽量避免对除 INPUT 和 BUTTON 元素以外的其他元素通过 click 方法模拟鼠标点击事件。" },
+  "RD8026": { "message": "各浏览器对于未明确设定高度的包含块内包含百分比单位高度的块级元素或行内块元素的高度计算存在差异" },
+  "RD8026_suggestion": { "message": "要对设置有百分比高度的块级元素的包含块设置明确的 height 属性值。" }
 
 }
