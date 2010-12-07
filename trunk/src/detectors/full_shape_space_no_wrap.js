@@ -47,11 +47,7 @@ function getPreviousElement(element) {
   if (!p)
     return;
   var ch = p.children;
-  if (ch.length > 0) {
-    return ch[ch.length - 1]
-  } else   {
-    return p;
-  }
+  return (ch.length > 0) ? ch[ch.length - 1] : p;
 }
 
 chrome_comp.CompDetect.declareDetector(
@@ -78,11 +74,8 @@ function checkNode(node, context) {
   var textNodes = getIdeographicSpaceTextNode(node);
   if (textNodes.length < 1)
     return;
-  //console.log(node);
-  //console.log(textNodes.length);
   var IS = '　';
   var originalNode = node;
-  //var nodeDisplay = chrome_comp.getComputedStyle(node).display == 'inline';
   var style = detectorStyle('create');
   var oriHTML = node.innerHTML;
   for (var i = 0, j = textNodes.length; i < j; i++) {
@@ -90,21 +83,14 @@ function checkNode(node, context) {
     var detText = text.replace(/(.)/g, '<det class="ideo">$1</det>');
     node.innerHTML = node.innerHTML.replace(text, detText);
   }
-  
-  
-  //var oriHTML = node.innerHTML;
-  //var tmpHTML = oriHTML.replace(/\n/g, '');
-  //node.innerHTML = tmpHTML.replace(/(.)/g, '<det class="ideo">$1</det>');
   var qsNode = node.querySelectorAll('det.ideo');
   if (qsNode.length < 1)
     return;
-  //console.log(qsNode.length);
   var qsNodeRect;
   var qsPrevNodeRect;
   var reported = false;
   var originalTop;
   var changedTop;
-  //var reRemove = /<detector class=\"ideo\">\u3000<\/detector>/gi;
   for (var m = 0, n = qsNode.length; m < n; m++) {
     if (qsNode[m].innerHTML == IS) {
       var isRect = qsNode[m].getBoundingClientRect().left;
@@ -114,42 +100,12 @@ function checkNode(node, context) {
       var prevRect = prev.getBoundingClientRect().left;
       if ((prevRect > isRect)) {
         var pe = getPreviousElement(qsNode[m]);
-        //console.log(pe);
         if (pe && pe.tagName != 'BR') {
           this.addProblem('BX1009', [qsNode[m]]);
-          //reported = true;
           break;
         }
       }
     }
-    
-    
-    
-    
-    
-    /*if (m > 0) {
-      if (qsNode[m - 1].innerHTML != IS)
-        continue;
-      qsPrevNodeRect = qsNode[m - 1].getBoundingClientRect();
-    } else
-      originalTop = qsNode[0].getBoundingClientRect().top;
-    qsNodeRect = qsNode[m].getBoundingClientRect();
-    if (qsPrevNodeRect && (qsNodeRect.top > qsPrevNodeRect.top)) {
-      this.addProblem('BX1009', [node]);
-      reported = true;
-      break;
-    }*/
-  }
-  /*if (!reported) {
-    var n = (nodeDisplay) ? chrome_comp.getContainingBlock(node) : node;
-    var cbInlineWidth = n.style.width;
-    n.style.width = '1000000px !important';
-    changedTop = qsNode[0].getBoundingClientRect().top;
-    n.style.width = null;
-    n.style.width = (cbInlineWidth) ? cbInlineWidth : null;
-    if (changedTop < originalTop)
-      this.addProblem('BX1009', [node]);
-  }*/
   node.innerHTML = oriHTML;
   detectorStyle('remove', style);
   node = originalNode;
