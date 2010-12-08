@@ -25,6 +25,8 @@ chrome_comp.CompDetect.ScanDomBaseDetector,
 null, // constructor
 
 function checkNode(node, context) {
+
+  // Check if the node is a table element.
   function isTableElement(node) {
     var TABLELIKE_VALUES = ['table', 'inline-table', 'table-row-group',
         'table-header-group', 'table-footer-group', 'table-row',
@@ -33,16 +35,29 @@ function checkNode(node, context) {
     return TABLELIKE_VALUES.indexOf(display) != -1;
   }
 
-  function checkOverflow(node, checkWidth, checkHeight) {
-    var computedStyle = chrome_comp.getComputedStyle(node);
-    if (computedStyle.overflow == 'visible') {
-      var overflow = false;
-      if (checkWidth)
-        overflow = node.scrollWidth > node.offsetWidth;
-      if (!overflow && checkHeight)
-        overflow = node.scrollHeight > node.offsetHeight;
-      return overflow;
+  // In Chrome, if one of the two values is 'visible' and the other is not,
+  // the computed value of the 'visible' one will be converted into 'auto'.
+  function overflowIsVisible(node) {
+    var style = chrome_comp.getComputedStyle(node);
+    if (style.overflow == 'visible')
+        return {'xIsVisible': true, 'yIsVisible': true};
+    var xIsVisible = false;
+    var yIsVisible = false;
+    if (style.overflowX == 'auto') {
+      var settedOverflowY = node.style.overflowY;
+      node.style.overflowY = 'visible !important';
+      xIsVisible = style.overflowX == 'visible';
+      node.style.overflowY = '';
+      node.style.overflowY = settedOverflowY;
     }
+    if (style.overflowY == 'auto') {
+      var settedOverflowX = node.style.overflowX;
+      node.style.overflowX = 'visible !important';
+      yIsVisible = style.overflowY == 'visible';
+      node.style.overflowX = '';
+      node.style.overflowX = settedOverflowX;
+    }
+    return {'xIsVisible': xIsVisible, 'yIsVisible': yIsVisible};
   }
 
   // Some developers using '{content:"."; display:block; visibility:hidden;
@@ -58,10 +73,13 @@ function checkNode(node, context) {
       var settedHeight = node.style.height;
       var settedOverflowX = node.style.overflowX;
       var settedOverflowY = node.style.overflowY;
-      node.style.height = 'auto';
-      node.style.overflowX = 'hidden';
-      node.style.overflowY = 'hidden';
+      node.style.height = 'auto !important';
+      node.style.overflowX = 'hidden !important';
+      node.style.overflowY = 'hidden !important';
       var h1 = node.offsetHeight;
+      node.style.height = '';
+      node.style.overflowX = '';
+      node.style.overflowY = '';
       node.style.height = settedHeight;
       node.style.overflowX = settedOverflowX;
       node.style.overflowY = settedOverflowY;
@@ -87,7 +105,18 @@ function checkNode(node, context) {
   }
 
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
-  return;
+      return;
+
+//  // Check whether the contents overflowed from an element.
+//  function checkOverflow(node, checkWidth, checkHeight) {
+//    var overflow = overflowIsVisible(node);
+//    var isOverflow = false;
+//    if (checkWidth && overflow.xIsVisible)
+//        overflow = node.scrollWidth > node.offsetWidth;
+//    if (checkHeight && overflow.yIsVisible)
+//        overflow = node.scrollHeight > node.offsetHeight;
+//    return isOverflow;
+//  }
 
 // RX1002 WontFix now.
 
@@ -108,61 +137,73 @@ function checkNode(node, context) {
 
   if (chrome_comp.isReplacedElement(node) || isTableElement(node) ||
       node.tagName == "HTML" || node.tagName == "BODY")
-  return;
+      return;
 
   var computedStyle = chrome_comp.getComputedStyle(node);
 
   //RD1002
-  if (checkOverflow(node, true, true)) {
+  // In [IE6 IE7(Q) IE8(Q)], if an element's specified size is not big enouth to
+  // contain its child elements, and its 'overflow' is 'visible',
+  if (node.scrollWidth > node.offsetWidth ||
+      node.scrollHeight > node.offsetHeight) {
     // To get the computed value of 'width' or 'height', set the 'display'
     // property to 'none' first to ensure the value is correct.
     var settedDisplay = node.style.display;
     node.style.display = 'none !important';
-    var cWidthIsNotAuto = computedStyle.width != 'auto';
-    var cHeightIsNotAuto = computedStyle.height != 'auto';
-    var cOverflowIsVisible = computedStyle.overflow == 'visible';
+    var widthIsNotAuto = computedStyle.width != 'auto';
+    var heightIsNotAuto = computedStyle.height != 'auto';
     node.style.display = '';
     node.style.display = settedDisplay;
-    if (cOverflowIsVisible && (cWidthIsNotAuto || cHeightIsNotAuto)) {
+    // Get the specified value of 'overflow'.
+    var overflow = overflowIsVisible(node);
+    if ((overflow.xIsVisible && widthIsNotAuto) ||
+        (overflow.yIsVisible && heightIsNotAuto)) {
       var elPool = [];
       var descentElements = node.getElementsByTagName('*');
-      // Negative margin or relative positioned element won't expand the
-      // containing element's size. So we clean the settings first.
+      // An element has negative margin, a abosolute positioned element, or a
+      // relative positioned element won't expand the containing element's size.
+      // So we clean the settings or hide absolute elements first.
       for(var i = 0; i < descentElements.length; i++) {
         var el = descentElements[i];
         var settedStyle = {};
-        var computedStyle = chrome_comp.getComputedStyle(el);
-        if (parseInt(computedStyle.marginTop) < 0){
+        var style = chrome_comp.getComputedStyle(el);
+        if (parseInt(style.marginTop) < 0){
           settedStyle.marginTop = el.style.marginTop;
           el.style.marginTop = '0 !important';
         }
-        if (parseInt(computedStyle.marginRight) < 0){
+        if (parseInt(style.marginRight) < 0){
           settedStyle.marginRight = el.style.marginRight;
           el.style.marginRight = '0 !important';
         }
-        if (parseInt(computedStyle.marginBottom) < 0){
+        if (parseInt(style.marginBottom) < 0){
           settedStyle.marginBottom = el.style.marginBottom;
           el.style.marginBottom = '0 !important';
         }
-        if (parseInt(computedStyle.marginLeft) < 0){
+        if (parseInt(style.marginLeft) < 0){
           settedStyle.marginLeft = el.style.marginLeft;
           el.style.marginLeft = '0 !important';
         }
-        if (computedStyle.position == 'relative'){
+        if (style.position == 'relative'){
           settedStyle.position = el.style.position;
           el.style.position = 'static !important';
+        }
+        else if (style.position == 'absolute'){
+          settedStyle.display = el.style.display;
+          el.style.display = 'none !important';
         }
         // Save styles if we cleaned them.
         if ('marginTop' in settedStyle || 'marginRight' in settedStyle ||
             'marginBottom' in settedStyle || 'marginLeft' in settedStyle ||
-            'position' in settedStyle)
+            'position' in settedStyle || 'display' in settedStyle)
           elPool.push({'el': el, 'settedStyle': settedStyle});
       }
-      if (checkOverflow(node, cWidthIsNotAuto, cHeightIsNotAuto)) {
-        // Pseudo elements maybe expand the containing block, see overflow.html
-        // - 'None - pseudo' part.
-        if (!cHeightIsNotAuto ||
-            cHeightIsNotAuto && pseudoElementDoesNotAffect(node)) {
+      if ((overflow.xIsVisible && widthIsNotAuto &&
+          node.scrollWidth > node.offsetWidth) ||
+          (overflow.yIsVisible && heightIsNotAuto &&
+          node.scrollHeight > node.offsetHeight)) {
+        // Pseudo elements maybe expand the containing block.
+        if (!heightIsNotAuto ||
+            heightIsNotAuto && pseudoElementDoesNotAffect(node)) {
           this.addProblem('RD1002',
               { nodes: [node], rectCallback: rectCallback });
         }
@@ -181,60 +222,53 @@ function checkNode(node, context) {
   }
 
   // RV1001
+  // For an element which specified values of 'overflow-x' and 'overflow-y', if
+  // one is 'visible' and the other is 'hidden', the element will looks
+  // different between [IE6 IE7(Q) IE8(Q)] and [IE7(S) IE8(S) Chrome].
+
   // The element must be visible.
   if (node.offsetWidth && node.offsetHeight) {
     var overflowX = computedStyle.overflowX;
     var overflowY = computedStyle.overflowY;
-    if (overflowX == 'auto' || overflowY == 'auto') {
-      var xVisible = false;
-      var yVisible = false;
-      if (overflowX == 'auto') {
-        var settedOverflowY = node.style.overflowY;
-        node.style.overflowY = 'visible !important';
-        xVisible = computedStyle.overflowX == 'visible';
-        node.style.overflowY = '';
-        node.style.overflowY = settedOverflowY;
-      }
-      if (overflowY == 'auto') {
-        var settedOverflowX = node.style.overflowX;
-        node.style.overflowX = 'visible !important';
-        yVisible = computedStyle.overflowY == 'visible';
-        node.style.overflowX = '';
-        node.style.overflowX = settedOverflowX;
-      }
-      if ((xVisible && !yVisible && node.scrollWidth > node.offsetWidth) ||
-          (!xVisible && yVisible && node.scrollHeight > node.offsetHeight)) {
+    if ((overflowX == 'hidden' && overflowY == 'auto') ||
+        (overflowX == 'auto' && overflowY == 'hidden')) {
+      // Is the 'auto' value is converted from 'visible'?
+      var overflow = overflowIsVisible(node);
+      if ((overflow.xIsVisible && node.scrollWidth > node.offsetWidth) ||
+          (overflow.yIsVisible && node.scrollHeight > node.offsetHeight)) {
         this.addProblem('RV1001', [node]);
       }
     }
   }
 
   //RV1002
-
-
-
-  if (!chrome_comp.inQuirksMode()) {
-    var style = chrome_comp.getComputedStyle(node);
-    if (style && style.position == 'relative') {
-      var parentNode = node.parentNode;
-      var parentStyle = chrome_comp.getComputedStyle(parentNode);
-      if (parentStyle.overflow != 'hidden' ||
-          parentStyle.position == 'relative' ||
-          parentStyle.position == 'absolute')
-        return;
-      // If there is overflow, chrome cuts out the overflow part, but
-      // scroll size is still larger than offset size. While in IE6/7
-      // standard mode, the overflow part is not cut out
-      if (parentNode.offsetWidth < parentNode.scrollWidth ||
-          parentNode.offsetHeight < parentNode.scrollHeight) {
-        // Make sure the parent's overflow is caused by this node
-        var oldDisplay = node.style.display;
-        node.style.display = 'none';
-        if (parentNode.offsetWidth == parentNode.scrollWidth &&
-            parentNode.offsetHeight == parentNode.scrollHeight) {
-          this.addProblem('RV1002', [node, parentNode]);
+  // For a absolute positioned element, if it overflows its container which
+  // 'overflow' is not 'visible', [IE6(Q) IE7(Q) IE8(Q)] cut out the overflow
+  // part, but [IE6(S) IE7(S) IE8(S) Chrome] dosn't.
+  // For a relative positioned element, if it overflows its container which
+  // 'overflow' is not 'visible', [IE6(Q) IE7(Q) IE8 Chrome] cuts out the
+  // overflow part, but [IE6(S) IE7(S)] dosn't.
+  if ((chrome_comp.inQuirksMode() && computedStyle.position == 'absolute') ||
+      (!chrome_comp.inQuirksMode() && computedStyle.position == 'relative')) {
+    var parentElement = node;
+    while ((parentElement = parentElement.parentElement) &&
+        !isTableElement(parentElement) &&
+        parentElement.tagName != "BUTTON" &&
+        parentElement.tagName != "BODY" ) {
+      var style = chrome_comp.getComputedStyle(parentElement);
+      if (style.position != 'static') break;
+      // In Chrome, the value of 'overflow' is computed from the values of
+      // 'overflow-x' and 'overflow-y', and the value of 'overflow' will not
+      // be 'visible' if one of 'overflow-x' and 'overflow-y' is not 'visible'.
+      // So we check 'overflow' here, that's enough.
+      if (style.overflow != 'visible') {
+        var pRect = parentElement.getBoundingClientRect();
+        var cRect = node.getBoundingClientRect();
+        if (cRect.left < pRect.left || cRect.right > pRect.right ||
+            cRect.top < pRect.top || cRect.bottom > pRect.bottom) {
+          this.addProblem('RV1002', [parentElement, node]);
+          break;
         }
-        node.style.display = oldDisplay;
       }
     }
   }
