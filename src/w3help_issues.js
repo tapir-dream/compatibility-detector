@@ -288,18 +288,17 @@ var issueIds = [
   'BX2040',
   'BX9041',
   'BX8042',
-  //wangjun
   'HF3012',
   'SD9030',
   'RC3003',
   'BX2050',
-   // lzq add
   'RE1016',
-  //luyuan
   'HO9008',
   'SD9029',
   'SD9025',
-  'RD8026'
+  'RD8026',
+  'BX8017',
+  'RM8015'
 ];
 
 var issues = { };

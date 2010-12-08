@@ -99,10 +99,6 @@ function checkNode(node, context) {
           var childWidth = parseInt(child.style.width,10) +
               parseInt(childStyle.paddingLeft,10) +
               parseInt(childStyle.paddingRight,10);
-              console.log(childStyle.marginLeft);
-              console.log(childStyle.marginRight);
-              console.log(childWidth);
-              console.log(parentElementMaxWidth);
           if ( Math.abs( parseInt(childStyle.marginLeft,10) -
                          parseInt(childStyle.marginRight,10)) > 1
                 && childWidth + 1 < parentElementMaxWidth ) {

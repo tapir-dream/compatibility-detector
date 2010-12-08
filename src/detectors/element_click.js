@@ -34,7 +34,6 @@ function constructor(rootNode) {
         if (cl == cl.caller)
           return;
         cl = cl.caller;
-        console.log(cl);
       }
       This.addProblem('SD9025', [t]);
     }
