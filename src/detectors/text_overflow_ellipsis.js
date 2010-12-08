@@ -37,16 +37,13 @@ function checkNode(node, context) {
         node.childNodes[i].childNodes[0].nodeType==3){
         if(window.getComputedStyle(node.childNodes[i]).display == "block" &&
           window.getComputedStyle(node.childNodes[i]).float == "none"){
-        console.log(node.childNodes[i].id);
         var tempNode= node.childNodes[i].cloneNode(true);
         //To obtain the actual length of the block elements
-        tempNode.style.float= "right";
+        tempNode.style.float= "left";
         document.body.appendChild(tempNode);
         childrenWidth = window.getComputedStyle(tempNode).width;
         //Remove the temporary elements
         document.body.removeChild(tempNode);
-        console.log(childrenWidth);
-        console.log(nodeWidth);
         if(parseInt(childrenWidth)>parseInt(nodeWidth)){
           This.flag=true;
           return;
