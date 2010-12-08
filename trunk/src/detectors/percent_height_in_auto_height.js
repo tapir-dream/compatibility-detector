@@ -79,6 +79,7 @@ function checkNode(node, context) {
     return null;
   }
 
+
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone() ||
       // Firefox Standard mode RE8010 issue is ignored.
       !chrome_comp.inQuirksMode())
@@ -104,6 +105,8 @@ function checkNode(node, context) {
   if (oldHeight != newHeight) {
     this.addProblem(isTable(node) ? 'RE8010' : 'RD8026', [node]);
   }
+  
+  
 }
 ); // declareDetector
 
