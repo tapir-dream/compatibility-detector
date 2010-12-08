@@ -90,11 +90,13 @@ function checkNode(node, context) {
   var cb = getContainingBlock(node);
   if (!cb)
     return;
-  console.log(cb);
-  if (!isAutoHeight(cb) && cb.tagName != 'BODY')
-    return;
-  if (cb.tagName == 'BODY' && isAutoHeight(cb))
-    return;
+  while (cb) {
+    if (!isAutoHeight(cb) && cb.tagName != 'BODY')
+      return;
+    if (cb.tagName == 'BODY' && isAutoHeight(cb))
+      return;
+    cb = getContainingBlock(cb);
+  }
 
   var oldHeight = parseInt(chrome_comp.getComputedStyle(node).height);
   var inlineHeight = node.style.height;
