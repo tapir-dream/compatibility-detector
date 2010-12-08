@@ -25,8 +25,18 @@ chrome_comp.CompDetect.NonScanDomBaseDetector,
 function constructor(rootNode) {
   var This = this;
   this.click_ = function(result, originalArguments, callStack) {
-    if (this.tagName != 'BUTTON' && this.tagName != 'INPUT') {
-      This.addProblem('SD9025', [this]);
+    var t = this;
+    if (t.tagName && (t.tagName != 'BUTTON') && (t.tagName != 'INPUT')) {
+      var cl = arguments.callee.caller;
+      while (cl) {
+        if (cl.toString().indexOf('jQuery') != -1)
+          return;
+        if (cl == cl.caller)
+          return;
+        cl = cl.caller;
+        console.log(cl);
+      }
+      This.addProblem('SD9025', [t]);
     }
   };
 },
