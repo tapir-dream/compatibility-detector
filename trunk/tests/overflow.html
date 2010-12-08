@@ -2,7 +2,7 @@
 <html chrome_comp_test="overflow">
 <head>
 <style>
-#pseudo:after {
+#RD1002_pseudo:after {
 	content: ".";
 	display: block;
 	visibility: hidden;
@@ -13,51 +13,6 @@
 </style>
 </head>
 <body>
-
-<!-- RD1002 -->
-<h1>RD1002</h1>
-<h2>Warning</h2>
-<div style="width:100px; height:100px; background:silver; overflow:visible;" expectedProblems="RD1002">
-	<div style="width:150px; height:50px; background:red;"></div>
-</div>
-<h2>None - pseudo</h2>
-<div id="pseudo" style="width:100px; height:100px; background:silver; overflow:visible;">
-	<div style="width:80px; height:100px; background:red;"></div>
-</div>
-<h2>None</h2>
-<div style="width:100px; height:100px; background:silver; overflow:visible;">
-	<div style="width:80px; height:80px; background:red;"></div>
-</div>
-<div style="width:100px; height:100px; background:silver; overflow:visible;">
-	<div style="float:right; width:80px; height:80px; margin-right:-50px; background:red;"></div>
-</div>
-<div style="width:100px; height:100px; background:silver; overflow:visible;">
-	<div style="position:relative; right:-30px; width:80px; height:80px; background:red;"></div>
-</div>
-
-<!-- RV1001 -->
-<h1>RV1001</h1>
-<h2>Warning</h2>
-<div style="width:200px; height:50px; background:silver; overflow-x:hidden; border:1px solid black;" expectedProblems="RV1001">
-	<div style="width:200px; height:50px; background:red; margin:20px;"></div>
-</div>
-<h2>None</h2>
-<div style="width:200px; height:50px; background:silver; overflow-x:scroll; overflow-y:scroll; border:1px solid black;">
-	<div style="width:200px; height:50px; background:red; margin:20px;"></div>
-</div>
-<h3>Element is invisible</h3>
-<div style="width:100px; height:0px; overflow-x:hidden;">
-	<div style="height:150px;">overflow-x:hidden; overflow-y:visible;</div>
-</div>
-<div style="width:0px; height:100px; overflow-y:hidden;">
-	<div style="width:150px;">overflow-y:hidden; overflow-x:visible;</div>
-</div>
-
-<!-- RV1002 -->
-<h1>RV1002</h1>
-<!--div id='id1' style="width:150px;height:100px;background:silver;overflow:hidden;">
-	<div id='id2' style="width:100px;height:150px;background:red;position:relative"></div>
-</div-->
 
 <!-- RX1002 -->
 <!--table border="1" style="table-layout:fixed; width:80px;">
@@ -72,6 +27,115 @@
 		</td>
 	</tr>
 </table-->
+
+<!-- RD1002 -->
+<h1>RD1002</h1>
+<h2>Warning</h2>
+<p>overflow:visible;</p>
+<div style="width:100px; height:100px; background:silver; overflow:visible;" expectedProblems="RD1002">
+	<div>
+		<div style="width:150px; height:50px; background:red;"></div>
+	</div>
+</div>
+<p>overflow-x:scroll; overflow-y:visible;</p>
+<div style="width:100px; height:100px; background:silver; overflow-x:scroll;" expectedProblems="RD1002">
+	<div style="width:50px; height:150px; background:red;"></div>
+</div>
+<p>overflow-x:visible; overflow-y:scroll;</p>
+<div style="width:100px; height:100px; background:silver; overflow-y:scroll;" expectedProblems="RD1002">
+	<div style="width:150px; height:50px; background:red;"></div>
+</div>
+<p>floating elements</p>
+<div style="width:100px; height:100px; background:silver;" expectedProblems="RD1002">
+	<div style="float:left; width:150px; height:50px; background:red;"></div>
+</div>
+<p>absolute - static</p>
+<div style="position:absolute; width:100px; height:100px; background:silver; overflow:visible;" expectedProblems="RD1002">
+	<div style="margin-top:35px; left:35px; width:80px; height:80px; background:red;"></div>
+</div>
+<h2 style="margin-top:200px;">None</h2>
+<p>static - static (no overflow)</p>
+<div style="width:100px; height:100px; background:silver; overflow:visible;">
+	<div style="width:80px; height:80px; background:green;"></div>
+</div>
+<p>static - pseudo element</p>
+<div id="RD1002_pseudo" style="width:100px; height:100px; background:silver; overflow:visible;">
+	<div style="width:80px; height:100px; background:green;"></div>
+</div>
+<p>static - negative margin</p>
+<div style="width:100px; height:100px; background:silver; overflow:visible;">
+	<div style="float:right; width:80px; height:80px; margin-right:-50px; background:green;"></div>
+</div>
+<p>static - relative and has offset</p>
+<div style="width:100px; height:100px; background:silver; overflow:visible;">
+	<div>
+		<div>
+			<div style="position:relative; right:-30px; width:80px; height:80px; background:green;"></div>
+		</div>
+	</div>
+</div>
+<p>static - absolute</p>
+<div style="width:100px; height:100px; background:silver; overflow:visible;">
+	<div style="position:absolute; margin-top:50px; left:50px; width:80px; height:80px; background:green;"></div>
+</div>
+<p>relative - absolute</p>
+<div style="position:relative; width:100px; height:100px; background:silver; overflow:visible;">
+	<div style="position:absolute; margin-top:35px; left:35px; width:80px; height:80px; background:green;"></div>
+</div>
+<p>absolute - absolute</p>
+<div style="position:absolute; width:100px; height:100px; background:silver; overflow:visible;">
+	<div style="position:absolute; margin-top:35px; left:35px; width:80px; height:80px; background:green;"></div>
+</div>
+
+<!-- RV1001 -->
+<h1 style="margin-top:200px;">RV1001</h1>
+<h2>Warning</h2>
+<p>hidden + visible (+ RD1002)</p>
+<div style="width:200px; height:50px; background:silver; overflow-x:hidden; border:1px solid black;" expectedProblems="RD1002 RV1001">
+	<div style="width:200px; height:50px; background:red; margin:20px;"></div>
+</div>
+<h2>None</h2>
+<p>scroll + scroll</p>
+<div style="width:200px; height:50px; background:silver; overflow-x:scroll; overflow-y:scroll; border:1px solid black;">
+	<div style="width:200px; height:50px; margin:20px; background:green;"></div>
+</div>
+<p>hidden + auto</p>
+<div style="width:200px; height:50px; background:silver; overflow-x:hidden; overflow-y:auto; border:1px solid black;">
+	<div style="width:200px; height:50px; margin:20px; background:green;"></div>
+</div>
+<p>Element is invisible (+ RD1002 x 2)</p>
+<div style="width:100px; height:0px; overflow-x:hidden;" expectedProblems="RD1002">
+	<div style="height:150px;">overflow-x:hidden; overflow-y:visible;</div>
+</div>
+<div style="width:0px; height:100px; overflow-y:hidden;" expectedProblems="RD1002">
+	<div style="width:150px;">overflow-y:hidden; overflow-x:visible;</div>
+</div>
+
+<!-- RV1002 -->
+<h1>RV1002</h1>
+<h2>Warning</h2>
+<h3>Standards mode only</h3>
+<p>overflow:hidden; - relative</p>
+<div style="width:150px; height:100px; background:silver; overflow:hidden;" expectedProblems="RV1002">
+	<div style="position:relative; width:200px; height:50px; background:red;"></div>
+</div>
+<p>overflow-x:visible; overflow-y:auto; - relative (+ RD1002)</p>
+<div style="width:150px; height:100px; background:silver; overflow-x:visible; overflow-y:auto;" expectedProblems="RD1002 RV1002">
+	<div style="position:relative; width:200px; height:50px; background:red;"></div>
+</div>
+<p>overflow:hidden; - wrapper - relative</p>
+<div style="width:150px; height:150px; background:silver; overflow:hidden;" expectedProblems="RV1002">
+	<div style="width:100px; height:100px; background:gold;">
+		<div style="position:relative; left:110px; top:-10px; width:50px; height:50px; background:red;"></div>
+	</div>
+</div>
+<h3>Quriks mode only</h3>
+<p>overflow:hidden; - wrapper - absolute</p>
+<div style="width:150px; height:150px; background:silver; overflow:hidden;"><!-- expectedProblems="RV1002"-->
+	<div style="width:100px; height:100px; background:gold;">
+		<div style="position:absolute; margin-top:120px; left:10px; width:50px; height:50px; background:red;"></div>
+	</div>
+</div>
 
 </body>
 </html>
