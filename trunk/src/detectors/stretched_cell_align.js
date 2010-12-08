@@ -87,7 +87,8 @@ function checkNode(node, context) {
     //console.log(width+','+list[i].width)
     if (isPercentageWidth(list[i].node))
       continue;
-    if ((width > list[i].width) && (textAlign != 'left')) {
+    if ((width > list[i].width) && ((textAlign.indexOf('right') != -1) || 
+    (textAlign.indexOf('center') != -1))) {
       if (!isStretched(list[i].node))
       this.addProblem('RE8014', [list[i].node]);
     }
