@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html chrome_comp_test="zoom_style">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style>
+  div{zoom:1;width:100px;height:100px;background:yellow;}
+  span{zoom:2;background:gold;}
+</style>
+</head>
+<body>
+<h1>no reported</h1>
+<div style="zoom:1;"></div>
+<h1>reported</h1>
+<div style="zoom:2;" expectedProblems="BX8017"></div>
+<span expectedProblems="BX8017">span tag</span>
+</body>
+</html>
