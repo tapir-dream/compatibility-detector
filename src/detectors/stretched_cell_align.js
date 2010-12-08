@@ -56,6 +56,15 @@ function isStretched(element) {
   return oldWidth == newWidth;
 }
 
+function isPercentageWidth(element) {
+  var inlineDisplay = element.style.display;
+  element.style.display = 'none !important';
+  var width = chrome_comp.getComputedStyle(element).width;
+  element.style.display = null;
+  element.style.display = (inlineDisplay) ? inlineDisplay : null;
+  return width.slice(-1) == '%';
+}
+
 chrome_comp.CompDetect.declareDetector(
 
 'stretched_cell_align',
@@ -76,6 +85,8 @@ function checkNode(node, context) {
     var width = parseInt(chrome_comp.getComputedStyle(list[i].node).width);
     var textAlign = chrome_comp.getComputedStyle(list[i].node).textAlign;
     //console.log(width+','+list[i].width)
+    if (isPercentageWidth(list[i].node))
+      continue;
     if ((width > list[i].width) && (textAlign != 'left')) {
       if (!isStretched(list[i].node))
       this.addProblem('RE8014', [list[i].node]);
