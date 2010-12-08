@@ -51,7 +51,7 @@ function checkNode(node, context) {
     var width = chrome_comp.getComputedStyle(element).width;
     element.style.display = null;
     element.style.display = (inlineDisplay) ? inlineDisplay : null;
-    return width.slice(-1) == '%';
+    return width.slice(-1) == '%' && width != '100%';
   }
 
   function getAllPercentageWidthDescendant(element) {
@@ -96,7 +96,10 @@ function checkNode(node, context) {
 
   for (var i = 0, j = descendantList.length; i < j; i++) {
     var style = chrome_comp.getComputedStyle(descendantList[i]);
-    if (style.display == 'inline')
+    var display = style.display;
+    var cFloat = style.float;
+    if ((display == 'inline' || display == 'block' || display == 'list-item' ||
+        display.indexOf('table') >= 0) && (cFloat == 'none'))
       continue;
     var position = style.position;
     if (position == 'fixed' || position == 'absolute')
