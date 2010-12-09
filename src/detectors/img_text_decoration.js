@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
