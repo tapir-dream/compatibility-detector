@@ -144,8 +144,8 @@ function checkNode(node, context) {
   //RD1002
   // In [IE6 IE7(Q) IE8(Q)], if an element's specified size is not big enouth to
   // contain its child elements, and its 'overflow' is 'visible',
-  if (node.scrollWidth > node.offsetWidth ||
-      node.scrollHeight > node.offsetHeight) {
+  if (node.scrollWidth > node.clientWidth ||
+      node.scrollHeight > node.clientHeight) {
     // To get the computed value of 'width' or 'height', set the 'display'
     // property to 'none' first to ensure the value is correct.
     var settedDisplay = node.style.display;
@@ -198,9 +198,9 @@ function checkNode(node, context) {
           elPool.push({'el': el, 'settedStyle': settedStyle});
       }
       if ((overflow.xIsVisible && widthIsNotAuto &&
-          node.scrollWidth > node.offsetWidth) ||
+          node.scrollWidth > node.clientWidth) ||
           (overflow.yIsVisible && heightIsNotAuto &&
-          node.scrollHeight > node.offsetHeight)) {
+          node.scrollHeight > node.clientHeight)) {
         // Pseudo elements maybe expand the containing block.
         if (!heightIsNotAuto ||
             heightIsNotAuto && pseudoElementDoesNotAffect(node)) {
@@ -222,20 +222,21 @@ function checkNode(node, context) {
   }
 
   // RV1001
-  // For an element which specified values of 'overflow-x' and 'overflow-y', if
-  // one is 'visible' and the other is 'hidden', the element will looks
-  // different between [IE6 IE7(Q) IE8(Q)] and [IE7(S) IE8(S) Chrome].
+  // For an element specified values of 'overflow-x' and 'overflow-y', if one of
+  // them is 'visible' and the other is 'hidden', and its content overflow from
+  // its content box, the element will generate a scroll bar in [Chrome], but
+  // not in [IE6 IE7 IE8].
 
-  // The element must be visible.
-  if (node.offsetWidth && node.offsetHeight) {
+  // The element's content box must be visible.
+  if (node.clientWidth && node.clientHeight) {
     var overflowX = computedStyle.overflowX;
     var overflowY = computedStyle.overflowY;
     if ((overflowX == 'hidden' && overflowY == 'auto') ||
         (overflowX == 'auto' && overflowY == 'hidden')) {
       // Is the 'auto' value is converted from 'visible'?
       var overflow = overflowIsVisible(node);
-      if ((overflow.xIsVisible && node.scrollWidth > node.offsetWidth) ||
-          (overflow.yIsVisible && node.scrollHeight > node.offsetHeight)) {
+      if ((overflow.xIsVisible && node.scrollWidth > node.clientWidth) ||
+          (overflow.yIsVisible && node.scrollHeight > node.clientHeight)) {
         this.addProblem('RV1001', [node]);
       }
     }
@@ -248,8 +249,11 @@ function checkNode(node, context) {
   // For a relative positioned element, if it overflows its container which
   // 'overflow' is not 'visible', [IE6(Q) IE7(Q) IE8 Chrome] cuts out the
   // overflow part, but [IE6(S) IE7(S)] dosn't.
-  if ((chrome_comp.inQuirksMode() && computedStyle.position == 'absolute') ||
-      (!chrome_comp.inQuirksMode() && computedStyle.position == 'relative')) {
+
+  // The element's border box must be visible.
+  if ((node.offsetWidth && node.offsetHeight) &&
+      ((chrome_comp.inQuirksMode() && computedStyle.position == 'absolute') ||
+      (!chrome_comp.inQuirksMode() && computedStyle.position == 'relative'))) {
     var parentElement = node;
     while ((parentElement = parentElement.parentElement) &&
         !isTableElement(parentElement) &&
