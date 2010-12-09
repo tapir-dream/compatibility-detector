@@ -76,7 +76,11 @@ function constructor(rootNode) {
         events.indexOf(lowerCaseAttrName.slice(2)) >= 0 ||
         // In IE6, IE7 and IE8(Q) element.getAttribute('disabled') returns true
         // or false; It returns a String or null in Chrome etc.
-        attrs.indexOf(lowerCaseAttrName) >= 0)
+        attrs.indexOf(lowerCaseAttrName) >= 0 || 
+        // <img src="xx.img" width="200px" />, In IE678 
+        // IMG.getAttribute('width') returns 200; In chrome it returns "200px".
+        ((lowerCaseAttrName == 'width' || lowerCaseAttrName == 'height') && 
+          this[lowerCaseAttrName] != result))
       This.addProblem('SD9006', {
         nodes: [this],
         details: this.tagName + '.getAttribute("' + attributeName + '")',
@@ -90,7 +94,12 @@ function constructor(rootNode) {
     if (!attributeName || !attributeValue || isCalledFromJquery(arguments))
       return;
 
-    var exceptiveAttrs = ['src', 'href'];
+    //When setting attributes below and the resource value is specified by 
+    //relative path. In IE8(S) and Chrome element.src returns the absolute path
+    //src: SCRIPT, INPUT[type=image], FRAME, IFRAME, IMG
+    //href: A, AREA, LINK, BASE
+    //data: OBJECT
+    var exceptiveAttrs = ['src', 'href', 'data'];
     var attributeType = typeof attributeValue;
     if (INVALID_ATTRIBUTE_NAMES.hasOwnProperty(attributeName) ||
         // In Chrome, the second param should always be a string, while in IE6,
@@ -113,10 +122,6 @@ function constructor(rootNode) {
         (this.hasOwnProperty(attributeName) &&
           attributeValue != this[attributeName] && 
           exceptiveAttrs.concat(attrs).indexOf(lowerCaseAttrName) < 0))
-        // In IE6, IE7 IE8(Q), element.setAttribute('readonly', 'readonly') will
-        // make element.readonly be String 'readonly', but it's undefined in 
-        // Chrome etc.
-        //attr2.indexOf(lowerCaseAttrName) >= 0)
       This.addProblem('SD9006', {
         nodes: [this],
         details: this.tagName + '.setAttribute("' + attributeName + 
@@ -125,12 +130,17 @@ function constructor(rootNode) {
       });
   };
 
+  //Determine if getAttribute or setAttribute is called from jQuery
   function isCalledFromJquery(args){
     var caller = args.callee.caller.caller;
+    var callers = [];
     while (caller) {
       if (/jQuery/.test(caller))
         return true;
+      if (callers.indexOf(caller) >= 0)
+        return window.jQuery != undefined || false;
       caller = caller.caller;
+      callers.push(caller);
     }
     return false;
   }
