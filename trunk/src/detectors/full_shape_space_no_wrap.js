@@ -44,10 +44,30 @@ function detectorStyle(action, element) {
 
 function getPreviousElement(element) {
   var p = element.previousSibling;
-  if (!p)
-    return;
-  var ch = p.children;
-  return (ch.length > 0) ? ch[ch.length - 1] : p;
+  while (!p) {
+    p = p.parentNode.previousSibling;
+  }
+  return p;
+}
+
+function getPreviousInlineSibling(element) {
+  var prev = element.previousElementSibling;
+  if (!prev) {
+    if (element.parentNode) {
+      prev = element.parentNode.previousElementSibling;
+    }
+  }
+  while (prev) {
+    if (chrome_comp.getComputedStyle(prev).display.indexOf('inline') != -1) {
+      return prev;
+    }
+    prev = prev.previousElementSibling;
+    if (!prev) {
+      if (prev.parentNode) {
+        prev = prev.parentNode.previousElementSibling;
+      }
+    }
+  }
 }
 
 chrome_comp.CompDetect.declareDetector(
@@ -80,7 +100,7 @@ function checkNode(node, context) {
   var oriHTML = node.innerHTML;
   for (var i = 0, j = textNodes.length; i < j; i++) {
     var text = textNodes[i].nodeValue;
-    var detText = text.replace(/(.)/g, '<det class="ideo">$1</det>');
+    var detText = text.replace(/(\u3000)/g, '<det class="ideo">$1</det>');
     node.innerHTML = node.innerHTML.replace(text, detText);
   }
   var qsNode = node.querySelectorAll('det.ideo');
@@ -94,14 +114,13 @@ function checkNode(node, context) {
   for (var m = 0, n = qsNode.length; m < n; m++) {
     if (qsNode[m].innerHTML == IS) {
       var isRect = qsNode[m].getBoundingClientRect().left;
-      var prev = qsNode[m].previousElementSibling;
+      var prev = getPreviousInlineSibling(qsNode[m]);
       if (!prev)
         continue;
       var prevRect = prev.getBoundingClientRect().left;
-      if ((prevRect > isRect)) {
-        var pe = getPreviousElement(qsNode[m]);
-        if (pe && pe.tagName != 'BR') {
-          this.addProblem('BX1009', [qsNode[m]]);
+      if ((prevRect >= isRect)) {
+        if (prev && prev.tagName != 'BR') {
+          this.addProblem('BX1009', [node]);
           break;
         }
       }
