@@ -114,7 +114,7 @@ function checkNode(node, context) {
     descendantList[i].style.width = null;
     descendantList[i].style.width = (inlineWidth) ? inlineWidth : null;
     if (oldWidth != newWidth && oldWidth && newWidth) {
-        this.addProblem('RX8017', [descendantList[i]]);
+      this.addProblem('RX8017', [descendantList[i]]);
     }
   }
 }

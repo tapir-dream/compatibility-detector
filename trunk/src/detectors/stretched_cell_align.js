@@ -86,8 +86,8 @@ function checkNode(node, context) {
     var textAlign = chrome_comp.getComputedStyle(list[i].node).textAlign;
     if (isPercentageWidth(list[i].node))
       continue;
-    if ((width > list[i].width + 1) && ((textAlign.indexOf('right') != -1) || 
-    (textAlign.indexOf('center') != -1))) {
+    if ((width > list[i].width + 1) && ((textAlign.indexOf('right') != -1) ||
+        (textAlign.indexOf('center') != -1))) {
       if (!isStretched(list[i].node))
       this.addProblem('RE8014', [list[i].node]);
     }
