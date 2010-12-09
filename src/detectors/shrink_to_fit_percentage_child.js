@@ -76,6 +76,10 @@ function checkNode(node, context) {
     return preferredWidth > width;
   }
 
+  function isVisible(element) {
+    return element.offsetWidth && element.offsetHeight;
+  }
+
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
     return;
 
@@ -98,11 +102,10 @@ function checkNode(node, context) {
     var style = chrome_comp.getComputedStyle(descendantList[i]);
     var display = style.display;
     var cFloat = style.float;
-    if ((display == 'inline' || display == 'block' || display == 'list-item' ||
-        display.indexOf('table') >= 0) && (cFloat == 'none'))
-      continue;
     var position = style.position;
     if (position == 'fixed' || position == 'absolute')
+      continue;
+    if (!isVisible(descendantList[i]))
       continue;
     var oldWidth = descendantList[i].offsetWidth;
     var inlineWidth = descendantList[i].style.width;
