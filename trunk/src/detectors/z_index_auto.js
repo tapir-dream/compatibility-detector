@@ -20,34 +20,90 @@ chrome_comp.CompDetect.declareDetector(
 
 'z_index_auto',
 
-chrome_comp.CompDetect.ScanDomBaseDetector,
+chrome_comp.CompDetect.NonScanDomBaseDetector,
 
-null, // constructor
+function constructor(rootNode) {
+  this.addProblem_ = function(nodeList) {
+    this.addProblem('RM8015',nodeList);
+  };
+},
 
-function checkNode(node, context) {
-  if (node.nodeType != Node.ELEMENT_NODE || context.isDisplayNone())
-    return;
+function postAnalyze() {
+  var nodeList =
+      Array.prototype.slice.call(document.getElementsByTagName('*'));
+  var nodeClientRect = [];
+  var overlapNodeList = [];
 
-  var nodeComputedStyle = chrome_comp.getComputedStyle(node);
+  // Filter elements are not visible and non-position
+  nodeList.forEach(function (node,index){
+     var nodeComputedStyle = chrome_comp.getComputedStyle(node);
+     if (nodeComputedStyle.display == 'none' ||
+         nodeComputedStyle.visibility == 'hidden' ||
+         nodeComputedStyle.position == 'static' ||
+         nodeComputedStyle.zIndex != 'auto')
+       return;
+     nodeClientRect.push(
+       {'node' : node,'clientRect' : node.getBoundingClientRect()}
+     )
+  });
 
-  if (nodeComputedStyle.position == 'static' ||
-      nodeComputedStyle.zIndex != 'auto')
-    return;
-
-  var childrenElements = Array.prototype.slice.call(node.children);
-
-  for (var i = 0, l = childrenElements.length; i < l; i++) {
-    var childernElementStyle =
-          chrome_comp.getComputedStyle(childrenElements[i]);
-
-    if (childernElementStyle.position != 'static' &&
-        childernElementStyle.display != 'none') {
-      this.addProblem('RM8015', [node]);
-      return;
+  // Check the overlapping elements
+  for (var i = 0, l = nodeClientRect.length; i < l; i++){
+    for (var j = i + 1; j < l; j++){
+      var nodeA = nodeClientRect[i];
+      var nodeB = nodeClientRect[j];
+      if (nodeA.clientRect.top < nodeB.clientRect.top &&
+          nodeA.clientRect.bottom > nodeB.clientRect.top){
+        if (nodeA.clientRect.right > nodeB.clientRect.left &&
+            nodeA.clientRect.left < nodeB.clientRect.right){
+          overlapNodeList.push({'nodeA' : nodeA.node, 'nodeB' : nodeB.node });
+          continue;
+        }
+        if (nodeA.clientRect.left < nodeB.clientRect.right &&
+            nodeA.clientRect.right > nodeB.clientRect.left ){
+          overlapNodeList.push({'nodeA' : nodeA.node, 'nodeB' : nodeB.node });
+          continue;
+        }
+      }
+      if (nodeB.clientRect.top < nodeA.clientRect.top &&
+          nodeB.clientRect.bottom > nodeA.clientRect.top){
+        if (nodeB.clientRect.right > nodeA.clientRect.left &&
+            nodeB.clientRect.left < nodeA.clientRect.right){
+          overlapNodeList.push({'nodeA' : nodeA.node, 'nodeB' : nodeB.node });
+          continue;
+        }
+        if (nodeB.clientRect.right > nodeA.clientRect.left &&
+            nodeB.clientRect.left < nodeA.clientRect.right){
+          overlapNodeList.push({'nodeA' : nodeA.node, 'nodeB' : nodeB.node });
+          continue;
+        }
+      }
     }
   }
 
+  var This = this;
+  // Filter elements overlap with no father and son set the background elements
+  overlapNodeList.forEach(function (overlapNodes,index){
+    var compareDocumentPosition
+        = overlapNodes.nodeA.compareDocumentPosition(overlapNodes.nodeB);
+
+    if ( compareDocumentPosition === 20 || compareDocumentPosition === 10 )
+      return ;
+    var nodeAStyle = chrome_comp.getComputedStyle(overlapNodes.nodeA);
+    var nodeBStyle = chrome_comp.getComputedStyle(overlapNodes.nodeB);
+
+    if ( nodeAStyle.backgroundImage == 'none' &&
+         nodeBStyle.backgroundImage == 'none' &&
+         (nodeAStyle.backgroundColor == 'rgba(0, 0, 0, 0)' &&
+          nodeBStyle.backgroundColor == 'rgba(0, 0, 0, 0)') ||
+         (nodeAStyle.backgroundColor == 'rgb(0, 0, 0)' &&
+          nodeBStyle.backgroundColor == 'rgb(0, 0, 0)') )
+      return;
+    This.addProblem_([overlapNodes.nodeA,overlapNodes.nodeB]);
+    This.addProblem_([overlapNodes.nodeB,overlapNodes.nodeA]);
+  });
 }
+
 ); // declareDetector
 
 });
