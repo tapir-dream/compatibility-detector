@@ -32,9 +32,9 @@ function checkNode(node, context) {
     var elementFloat = element.style.float;
     var elementPosition = element.style.position;
     var elementDisplay = element.style.display;
-    element.style.float = "none !important";
-    element.style.position = "static !important";
-    element.style.display="";
+    element.style.float = 'none !important';
+    element.style.position = 'static !important';
+    element.style.display='';
     var defaultDisplay = chrome_comp.getComputedStyle(element).display;
     element.style.float = null;
     element.style.position = null;
@@ -52,7 +52,7 @@ function checkNode(node, context) {
   var nextreg = /[\u0020\u0009]$/g;
 
   //if a block element and its display set none
-  if(nodeDisplay == "none" && getDefaultDisplay(node) == "block"){
+  if(nodeDisplay == 'none' && getDefaultDisplay(node) == 'block'){
     //if the element's nextSibling is text node and
     // previousSibling is not text node
     if(nextSibling.nodeType == 3 && previousSibling.nodeType !=3){
@@ -65,8 +65,8 @@ function checkNode(node, context) {
      }
   }
   //if a inline element or a input element with type set hidden
-  if((node.tagName == "INPUT" && node.type == "hidden") ||
-    (getDefaultDisplay(node) == "inline" && nodeDisplay == "none")){
+  if((node.tagName == 'INPUT' && node.type == 'hidden') ||
+    (getDefaultDisplay(node) == 'inline' && nodeDisplay == 'none')){
     //if the element's nextSibling is text node and
     // previousSibling is text node
     if(nextSibling.nodeType == 3 && previousSibling.nodeType == 3){
