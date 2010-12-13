@@ -43,11 +43,11 @@ function checkNode(node, additionalData) {
     'CAPTION': ['table-caption', 'none'],
     'COL': ['table-column', 'none'],
     'COLGROUP': ['table-column-group', 'none']
-  }
+  };
   var computedDisplay = window.chrome_comp.getComputedStyle(node).display;
-  if (map[node.tagName].indexOf(computedDisplay) == -1) {
+
+  if (map[node.tagName].indexOf(computedDisplay) == -1)
     this.addProblem('RE8015', [node]);
-  }
 }
 ); // declareDetector
 

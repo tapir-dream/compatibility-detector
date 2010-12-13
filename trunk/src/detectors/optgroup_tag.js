@@ -27,9 +27,8 @@ null, // constructor
 function checkNode(node, additionalData) {
   if (Node.ELEMENT_NODE != node.nodeType || node.tagName != 'OPTGROUP')
     return;
-  if(node.parentNode.tagName == 'SELECT'){
+  if(node.parentNode.tagName == 'SELECT')
     this.addProblem('HF2016', [node]);
-  }
 }
 ); // declareDetector
 

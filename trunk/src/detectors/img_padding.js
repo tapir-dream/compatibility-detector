@@ -31,10 +31,10 @@ function checkNode(node, context) {
     return;
 
   var computedStyle = chrome_comp.getComputedStyle(node);
-  if (parseInt(computedStyle.paddingLeft) ||
-      parseInt(computedStyle.paddingTop) ||
-      parseInt(computedStyle.paddingRight) ||
-      parseInt(computedStyle.paddingBottom))
+  if (parseInt(computedStyle.paddingLeft,10) ||
+      parseInt(computedStyle.paddingTop,10) ||
+      parseInt(computedStyle.paddingRight,10) ||
+      parseInt(computedStyle.paddingBottom,10))
     this.addProblem('RX1010', [node]);
 }
 ); // declareDetector

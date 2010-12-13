@@ -26,14 +26,14 @@ null, // constructor
 
 /*
  * Detect 2 problems: HO1002 and BT1038
- * 
+ *
  * Step:
- * 
- * HO1002: check all IMG and INPUT[type="image"] elements, if it has no "src" 
+ *
+ * HO1002: check all IMG and INPUT[type="image"] elements, if it has no "src"
  *  attribute or the value of "src" is empty, then report problem.
- * 
- * BT1038: check all IMG and INPUT[type="image"] elements, if it has no "src" 
- *  attribute or the value of "src" is empty, and it has "lowsrc" attribute, 
+ *
+ * BT1038: check all IMG and INPUT[type="image"] elements, if it has no "src"
+ *  attribute or the value of "src" is empty, and it has "lowsrc" attribute,
  *  then report problem.
  */
 
@@ -51,8 +51,8 @@ function checkNode(node, context) {
   if (!node.hasAttribute('src') || node.getAttribute('src') === '')
     this.addProblem('HO1002', [node]);
 
-  if ((!node.hasAttribute('src') || node.getAttribute('src') === '') && 
-      node.hasAttribute('lowsrc'))
+  if ((!node.hasAttribute('src') || node.getAttribute('src') === '') &&
+       node.hasAttribute('lowsrc'))
     this.addProblem('BT1038', [node]);
 }
 ); // declareDetector

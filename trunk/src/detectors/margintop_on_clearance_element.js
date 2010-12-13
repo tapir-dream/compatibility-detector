@@ -27,19 +27,19 @@ null, // constructor
 function checkNode(node, additionalData) {
   function getContainingBlock(nodeEl) {
     var position = window.chrome_comp.getComputedStyle(nodeEl).position;
-    if (nodeEl == document.documentElement || position == 'fixed') 
-      return null; 
-    if (position == 'absolute') 
-      return nodeEl.offsetParent; 
+    if (nodeEl == document.documentElement || position == 'fixed')
+      return null;
+    if (position == 'absolute')
+      return nodeEl.offsetParent;
     var nod = nodeEl;
     while (nod) {
-      if (nod == document.body) 
+      if (nod == document.body)
         return document.documentElement;
-      if (nod.parentNode) 
+      if (nod.parentNode)
         nod = nod.parentNode;
-      if (window.chrome_comp.getComputedStyle(nod).display == 'block' || 
-          window.chrome_comp.getComputedStyle(nod).display == 'list-item' || 
-          isBlockFormattingContext(nod)) 
+      if (window.chrome_comp.getComputedStyle(nod).display == 'block' ||
+          window.chrome_comp.getComputedStyle(nod).display == 'list-item' ||
+          isBlockFormattingContext(nod))
         return nod;
     }
     return null;
@@ -54,16 +54,16 @@ function checkNode(node, additionalData) {
     var overflowX = computedStyle.overflowX;
     var overflowY = computedStyle.overflowY;
     return (display == 'inline-block') || (display == 'table') ||
-      (display == 'table-cell') || (display == 'table-caption') ||
-      (position == 'absolute') || (position == 'fixed') ||
-      (overflow != 'visible') || (overflowX != 'visible') ||
-      (overflowY != 'visible');
+           (display == 'table-cell') || (display == 'table-caption') ||
+           (position == 'absolute') || (position == 'fixed') ||
+           (overflow != 'visible') || (overflowX != 'visible') ||
+           (overflowY != 'visible');
   }
 
   function getBoundaryClearanceSpacing(nodeEl, start, protection) {
     var oldTop;
     var newTop
-    var computedMarginTop = 
+    var computedMarginTop =
       parseInt(chrome_comp.getComputedStyle(nodeEl).marginTop) | 0;
     var i = start;
     var definedMarginTop = nodeEl.style.marginTop;
