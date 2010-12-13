@@ -88,22 +88,22 @@ function checkNode(node, context) {
   if ((node.tagName == 'HEAD') || (node.tagName == 'HTML'))
     return;
 
-  if (node.tagName == 'DET')
-    return;
-
   var textNodes = getIdeographicSpaceTextNode(node);
   if (textNodes.length < 1)
     return;
   var IS = '　';
-  var originalNode = node;
+  var originalNode = node.cloneNode(true);
+  var inlineDisplay = node.style.display;
+  node.style.display = 'none !important';
+  node.parentNode.insertBefore(originalNode, node);
   var style = detectorStyle('create');
   var oriHTML = node.innerHTML;
   for (var i = 0, j = textNodes.length; i < j; i++) {
     var text = textNodes[i].nodeValue;
     var detText = text.replace(/(\u3000)/g, '<det class="ideo">$1</det>');
-    node.innerHTML = node.innerHTML.replace(text, detText);
+    originalNode.innerHTML = originalNode.innerHTML.replace(text, detText);
   }
-  var qsNode = node.querySelectorAll('det.ideo');
+  var qsNode = originalNode.querySelectorAll('det.ideo');
   if (qsNode.length < 1)
     return;
   var qsNodeRect;
@@ -126,9 +126,10 @@ function checkNode(node, context) {
       }
     }
   }
-  node.innerHTML = oriHTML;
+  originalNode.parentNode.removeChild(originalNode);
+  node.style.display = null;
+  node.style.display = (inlineDisplay) ? inlineDisplay : null;
   detectorStyle('remove', style);
-  node = originalNode;
 }
 ); // declareDetector
 
