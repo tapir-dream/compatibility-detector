@@ -173,7 +173,7 @@ window.chrome_comp = (function() {
   getSourceAndLine : function(stack) {
     stack = stack || chrome_comp.dumpStack();
     var r = /at .*:[0-9]+(?=:[0-9]+)/.exec(stack);
-    return r ? r[0].replace(/^at /, "") : null;
+    return r ? r[0].replace(/^at /, '') : null;
   },
 
   /**
@@ -1393,7 +1393,7 @@ chrome_comp.CompDetect = (function() {
       if (!ownerObject || !ownerProperty || !property || !handler)
         return false;
       var object = ownerObject[ownerProperty];
-      if (!object || typeof object != "object")
+      if (!object || typeof object != 'object')
         return false;
       if (!ownerObject.hasOwnProperty('chrome_comp_wrapDelegates'))
         ownerObject.chrome_comp_wrapDelegates = { };
@@ -1481,7 +1481,6 @@ chrome_comp.CompDetect = (function() {
       // ScanDomBaseDetector now inherits from NonScanDomDetector, so all
       // detectors should be instances of NonScanDomDetector.
       if (instance instanceof chrome_comp.CompDetect.NonScanDomBaseDetector) {
-        // chrome_comp.trace("Registering detector: '" + name + "'");
         detectors_.push(instance);
         instance.setUp();
         return instance;
@@ -1528,7 +1527,7 @@ chrome_comp.CompDetect = (function() {
           chrome_comp_reason: typeId,
           chrome_comp_severity:
               (occurrence.severityLevel || issue.severityLevel) >= 7 ?
-                  "error" : "warning"
+                  'error' : 'warning'
       });
     },
 
