@@ -108,7 +108,7 @@ function isEmptyChild(node){
 }
 
 //match script and style element content fix textContent return text
-//don't use 'node.cloneNode(true).innerText ' it will trigger RCA SD9029……
+//don't use 'node.cloneNode(true).innerText ' it will trigger RCA SD9029
 function getFixedNodeTextContent(node){
   var scriptElements =
           Array.prototype.slice.call(node.getElementsByTagName('script'));
