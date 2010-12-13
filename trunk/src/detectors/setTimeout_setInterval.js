@@ -1,30 +1,36 @@
-// @author : qianbaokun@gmail.com
+/*
+ * Copyright 2010 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'setTimeoutSetIntervalDetector',
+'setTimeout_setInterval',
 
 chrome_comp.CompDetect.NonScanDomBaseDetector,
 
-/*
- *【思路】
- * 包装 window.setTimeout 和 window.setInterval 对象，如果调用, 分析第二参数是否为负数、Infinity 和 大于2的32次方，如果是则命中。
- *
- *【messages.json】
- * "BX9011": { "message": "各浏览器对 setTimeout 方法传入时间参数的某些极端值的处理存在差异"},
- * "BX9011_suggestion": { "message": "明确使用 setTimeout 方法的意义，若不希望代码被执行则应通过其他方法达到类似的效果，而不能依赖于为 setTimeout 方法设定极端的时间参数；负数的时间参数是无意义的，应避免使用，若希望代码在当前执行流完成后立即执行，则应设定 0 作为参数。" },
- *
- */
+
 
 function constructor(rootNode) {
   var This = this;
   this.checkParam = function (param){
     return /\d+/.test(param)
-	   && param != Infinity
-	   && param >= 0
-	   && param < 2147483648 ;
+      && param != Infinity
+      && param >= 0
+      && param < 2147483648 ;
   }
 
   this.getTimeoutHandle_ = function(result, originalArguments, callStack) {
