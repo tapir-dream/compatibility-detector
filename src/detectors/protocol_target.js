@@ -55,7 +55,7 @@ function checkNode(node, additionalData) {
           mailto: true,
           'view-source': true,
           custom: true
-        },
+        }
       },
       protocol = href.split(':')[0],
       list = ['javascript', 'mailto', 'view-source'];
