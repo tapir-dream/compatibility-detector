@@ -13,35 +13,44 @@
 </div>
 <br>
 <h1>Absolute</h1>
-    <div style="text-decoration:underline;"> 
-      <div style="position:absolute;" expectedProblems="RT3002">block > position:absolute</div> 
-    </div> 
+    <div style="text-decoration:underline;">
+      <div style="position:absolute;" expectedProblems="RT3002">block > position:absolute</div>
+    </div>
     <br><br>
-    <span style="text-decoration:underline;"> 
-      <div style="position:absolute;" expectedProblems="RT3002">inline > position:absolute</div> 
-    </span> 
+    <span style="text-decoration:underline;">
+      <div style="position:absolute;" expectedProblems="RT3002">inline > position:absolute</div>
+    </span>
 <br>
 <h1>Inline-block with inline sibling</h1>
-    <a href="#"> 
-      <span></span> 
-      <span style="display:inline-block;" expectedProblems="RT3002">A > inline-block</span> 
-    </a> 
-    <br /> 
-    <span  style="text-decoration:underline"> 
-      <span></span> 
-      <span style="display:inline-block;" expectedProblems="RT3002">inline > inline-block</span> 
-    </span> 
-    <div style="text-decoration:underline"> 
+    <a href="#">
+      <span></span>
+      <span style="display:inline-block;" expectedProblems="RT3002">A > inline-block</span>
+    </a>
+    <br />
+    <span  style="text-decoration:underline">
+      <span></span>
+      <span style="display:inline-block;" expectedProblems="RT3002">inline > inline-block</span>
+    </span>
+    <div style="text-decoration:underline">
       <img src='img.png'>
-      <span style="display:inline-block;" expectedProblems="RT3002">block > inline-block</span> 
-    </div> 
-    <div style="text-decoration:underline"> 
       <span style="display:inline-block;" expectedProblems="RT3002">block > inline-block</span>
-      <b></b> 
-    </div> 
-    <div style="text-decoration:underline"> 
+    </div>
+    <div style="text-decoration:underline">
+      <span style="display:inline-block;" expectedProblems="RT3002">block > inline-block</span>
+      <b></b>
+    </div>
+    <div style="text-decoration:underline">
       <span style="display:inline-block;" expectedProblems="RT3002">block > inline-block</span>AA
-    </div> 
-
+    </div>
+<h1>Parent Element set 'text-decoration: underline' childnodes is float</h1>
+    <span style="text-decoration:underline;"><span style="text-decoration:underline;float:left">Google</span></span>
+    <span style="text-decoration:underline;"><span style="text-decoration:underline;float:right">Google</span></span>
+    <br /><br /><br />
+    <h2> text-indent is negative value </h2>
+    <span style="text-decoration:underline;"><span style="text-decoration:none;position:absolute;text-indent:-200px;">Google</span></span>
+    <br />
+    <h2> left/top is negative value </h2>
+    <span style="text-decoration:underline;"><span style="text-decoration:none;position:absolute;left:-200px">Google</span></span>
+    <span style="text-decoration:underline;"><span style="text-decoration:none;position:absolute;top:-500px">Google</span></span>
 </body>
 </html>
