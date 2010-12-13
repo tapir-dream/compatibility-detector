@@ -17,20 +17,20 @@
 addScriptToInject(function() {
 
 function hasMargin(style) {
-  return parseInt(style.marginLeft,10) || parseInt(style.marginTop,10) ||
-         parseInt(style.marginRight,10) || parseInt(style.marginBottom,10);
+  return parseInt(style.marginLeft, 10) || parseInt(style.marginTop, 10) ||
+         parseInt(style.marginRight, 10) || parseInt(style.marginBottom, 10);
 }
 
 function hasPadding(style) {
-  return parseInt(style.paddingLeft,10) || parseInt(style.paddingTop,10) ||
-         parseInt(style.paddingRight,10) || parseInt(style.paddingBottom,10);
+  return parseInt(style.paddingLeft, 10) || parseInt(style.paddingTop, 10) ||
+         parseInt(style.paddingRight, 10) || parseInt(style.paddingBottom, 10);
 }
 
 function hasBorder(style) {
-  return parseInt(style.borderLeftWidth,10) ||
-         parseInt(style.borderTopWidth,10) ||
-         parseInt(style.borderRightWidth,10) ||
-         parseInt(style.borderBottomWidth,10);
+  return parseInt(style.borderLeftWidth, 10) ||
+         parseInt(style.borderTopWidth, 10) ||
+         parseInt(style.borderRightWidth, 10) ||
+         parseInt(style.borderBottomWidth, 10);
 }
 
 function isEmptyNode(node, cell) {
@@ -95,13 +95,13 @@ function isEmptyCell(cell) {
 function isEmptyChild(node){
   var childElements =
           Array.prototype.slice.call(node.getElementsByTagName('*'));
-  for (var i = 0,l = childElements.length; i < l; i++)
+  for (var i = 0, l = childElements.length; i < l; i++)
     if (chrome_comp.hasLayoutInIE(childElements[i]) ||
         childElements[i].tagName == 'IFRAME' ||
         childElements[i].tagName == 'OBJECT' ||
         childElements[i].tagName == 'EMBED')
       return false;
-  if ( getFixedNodeTextContent(node) == '')
+  if (getFixedNodeTextContent(node) == '')
     return true;
 
   return false;
@@ -115,10 +115,10 @@ function getFixedNodeTextContent(node){
   var styleElements =
           Array.prototype.slice.call(node.getElementsByTagName('style'));
   var nodeValue = node.textContent;
-  for (var i = 0,l = scriptElements.length; i < l; i++)
-    nodeValue = nodeValue.replace(scriptElements[i].textContent,'');
-  for (var i = 0,l = styleElements.length; i < l; i++)
-    nodeValue = nodeValue.replace(styleElements[i].textContent,'');
+  for (var i = 0, l = scriptElements.length; i < l; i++)
+    nodeValue = nodeValue.replace(scriptElements[i].textContent, '');
+  for (var i = 0, l = styleElements.length; i < l; i++)
+    nodeValue = nodeValue.replace(styleElements[i].textContent, '');
   return nodeValue;
 }
 
@@ -142,8 +142,8 @@ function checkNode(node, context) {
 
     var mayHaveRE1012 = style.borderCollapse != 'collapse' && hasBorder(style);
     var mayHaveRE1013 = false;
-    var nodePaddingTop = parseInt(style.paddingTop,10)|0;
-    var nodePaddingBottom = parseInt(style.paddingBottom,10)|0;
+    var nodePaddingTop = parseInt(style.paddingTop, 10) | 0;
+    var nodePaddingBottom = parseInt(style.paddingBottom, 10) | 0;
 
     //fix empty cell padding is 1px
     nodePaddingTop = (nodePaddingTop == 1) ? 0 : nodePaddingTop;
@@ -152,10 +152,11 @@ function checkNode(node, context) {
     if (nodePaddingTop || nodePaddingBottom) {
       var nodeHeight = parseInt(
           chrome_comp.getDefinedStylePropertyByName(node, true, 'height'),
-          10)|0;
+          10) | 0;
       //fix cell getCompatStyle height is null
-      nodeHeight = nodeHeight || (parseInt(node.getAttribute('height'),10)|0);
-      var nodeClientHeight = node.clientHeight|0;
+      nodeHeight = nodeHeight || 
+        (parseInt(node.getAttribute('height'), 10) | 0);
+      var nodeClientHeight = node.clientHeight | 0;
       var nodePaddingHeight = nodePaddingTop + nodePaddingBottom;
 
       if (nodeHeight < nodePaddingHeight &&

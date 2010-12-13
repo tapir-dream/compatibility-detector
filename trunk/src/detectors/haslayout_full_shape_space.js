@@ -51,8 +51,7 @@ function checkNode(node, context) {
     for (var sibling = parentNode.nextSibling; sibling;
          sibling = sibling.nextSibling) {
       var siblingStyle = chrome_comp.getComputedStyle(sibling);
-      if (!siblingStyle ||
-          siblingStyle.float != 'none' ||
+      if (!siblingStyle || siblingStyle.float != 'none' ||
           (siblingStyle.position != 'static' &&
            siblingStyle.position != 'relative')) {
         continue;
@@ -106,16 +105,17 @@ function checkNode(node, context) {
   function hasTextDirection(element){
     var style = chrome_comp.getComputedStyle(element);
     var styleMap = {
-                  'marginLeft':parseInt(style.marginLeft,10)|0,
-                  'marginRight':parseInt(style.marginRight,10)|0,
-                  'paddingLeft':parseInt(style.paddingLeft,10)|0,
-                  'paddingRight':parseInt(style.paddingRight,10)|0,
-                  'borderLeft':parseInt(style.borderLeftWidth,10)|0,
-                  'borderRight':parseInt(style.borderRightWidth,10)|0,
-                  'direction':style.direction
-                };
+      'marginLeft': parseInt(style.marginLeft, 10) | 0,
+      'marginRight': parseInt(style.marginRight, 10) | 0,
+      'paddingLeft': parseInt(style.paddingLeft, 10) | 0,
+      'paddingRight': parseInt(style.paddingRight, 10) | 0,
+      'borderLeft': parseInt(style.borderLeftWidth, 10) | 0,
+      'borderRight': parseInt(style.borderRightWidth, 10) | 0,
+      'direction': style.direction
+    };
     if (styleMap.direction == 'ltr')
-      return styleMap.marginRight || styleMap.paddingRight || styleMap.borderRight;
+      return styleMap.marginRight || styleMap.paddingRight || 
+        styleMap.borderRight;
 
     if (styleMap.direction == 'rtl'){
       return styleMap.marginLeft || styleMap.paddingLeft || styleMap.borderLeft;
@@ -185,8 +185,8 @@ function checkNode(node, context) {
       var style = chrome_comp.getComputedStyle(parent);
       // parent's size changed, if it has border or has different background
       // color, report as a problem
-      if (parseInt(style.borderRightWidth,10)|0 > 0 ||
-          parseInt(style.borderBottomWidth,10)|0 > 0 ||
+      if (parseInt(style.borderRightWidth, 10) | 0 > 0 ||
+          parseInt(style.borderBottomWidth, 10) | 0 > 0 ||
           hasDiffBackgroundColor(parent)) {
         return true;
       }

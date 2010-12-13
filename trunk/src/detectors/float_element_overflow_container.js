@@ -38,8 +38,7 @@ function checkNode(node, additionalData) {
 
   if (node.offsetHeight && node.offsetWidth) {
     containerWidth =
-        chrome_comp.getComputedStyle(chrome_comp.getContainingBlock(node))
-            .width;
+      chrome_comp.getComputedStyle(chrome_comp.getContainingBlock(node)).width;
     if (parseInt(nodeWidthStyle, 10) > parseInt(containerWidth, 10)) {
       if ((nodeFloatStyle == 'right' && nodeDirectionStyle == 'ltr') || 
           (nodeFloatStyle == 'left' && nodeDirectionStyle == 'rtl'))
