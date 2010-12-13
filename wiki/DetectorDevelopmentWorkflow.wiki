@@ -1,0 +1,4 @@
+#labels Phase-Implementation,Phase-QA
+= Detector development workflow =
+Click here for details:
+https://docs1.google.com/document/d/1OfHsPU6iPODY4grF9eSFRCBewdg6IP_7P4C-UYTi7t0/edit?pli=1#bookmark=id.g6fh7m-qfaf48
