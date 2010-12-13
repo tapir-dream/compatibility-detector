@@ -26,7 +26,8 @@ null, // constructor
 
 function checkNode(node, additionalData) {
   function isVerticalStaticPosition(nodeEl) {
-    /*var inlineTop = nodeEl.style.top,
+    /*
+    var inlineTop = nodeEl.style.top,
         inlineBottom = nodeEl.style.bottom,
         oldCompTop = parseInt(chrome_comp.getComputedStyle(nodeEl).top),
         oldCompBottom = parseInt(chrome_comp.getComputedStyle(nodeEl).bottom);
@@ -37,17 +38,18 @@ function checkNode(node, additionalData) {
         ret = (oldCompTop == compTop) && (oldCompBottom == compBottom);
     alert(oldCompTop + '\n' + compTop);
     nodeEl.style.top = (inlineTop) ? inlineTop : null;
-    nodeEl.style.bottom = (inlineBottom) ? inlineBottom : null;*/
-    var top = chrome_comp.getComputedStyle(nodeEl).top,
-        bottom = chrome_comp.getComputedStyle(nodeEl).bottom;
+    nodeEl.style.bottom = (inlineBottom) ? inlineBottom : null;
+    */
+    var top = chrome_comp.getComputedStyle(nodeEl).top;
+    var bottom = chrome_comp.getComputedStyle(nodeEl).bottom;
     return (top == 'auto') && (bottom == 'auto');
   }
-  
+
   function isAbsolutelyPositioned(nodeEl) {
     var pos = chrome_comp.getComputedStyle(nodeEl).position;
     return (pos == 'absolute') || (pos == 'fixed');
   }
-  
+
   function isHidden(nodeEl) {
     return (chrome_comp.getComputedStyle(nodeEl).display == 'none') ||
         (chrome_comp.getComputedStyle(nodeEl).visibility == 'hidden');
@@ -71,13 +73,13 @@ function checkNode(node, additionalData) {
 
   if (Node.ELEMENT_NODE != node.nodeType)
     return;
-  
+
   if (!isAbsolutelyPositioned(node))
     return;
-  
+
   if (isHidden(node))
     return;
-  
+
   if (!isVerticalStaticPosition(node))
     return;
 

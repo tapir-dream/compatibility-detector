@@ -26,10 +26,10 @@ chrome_comp.CompDetect.NonScanDomBaseDetector,
 
 function constructor(rootNode) {
   var that = this;
-  
+
   /*
    * hook select.add()
-   * select.add(option, null), select.add(option, option), 
+   * select.add(option, null), select.add(option, option),
    * select.add(option, index) and select.add(option) all
    * have compatibility problem.
    */
@@ -47,13 +47,13 @@ function constructor(rootNode) {
       });
     }
   }
-  
+
   /*
    * hook options.add
    * options.add(option, null) and options.add(option, option)
    * have compatibility problem.
    */
-  
+
   this.optionsAdd_ = function(result, originalArguments, callStack) {
     if (originalArguments.length > 1 && _isOption(originalArguments[0])) {
       var arg1 = originalArguments[1];
@@ -66,7 +66,7 @@ function constructor(rootNode) {
         });
     }
   }
-  
+
   /*
    * hook options.remove()
    * options.remove(index) and options.remove(option)
@@ -84,11 +84,11 @@ function constructor(rootNode) {
         });
     }
   }
-  
+
   function _isOption(option) {
     return option instanceof HTMLOptionElement;
   }
-  
+
   function _isTextNode(node) {
     return node.nodeType === Node.TEXT_NODE;
   }
@@ -97,7 +97,7 @@ function constructor(rootNode) {
 function setUp() {
   var select = document.createElement("select");
   HTMLOptionsCollection = select.options.constructor;
-  
+
   chrome_comp.CompDetect.registerExistingMethodHook(
       window.HTMLSelectElement.prototype, 'add', this.selectAdd_);
   chrome_comp.CompDetect.registerExistingMethodHook(

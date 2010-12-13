@@ -76,7 +76,7 @@ function checkNode(node, context) {
     var nodeWidth = chrome_comp.getComputedStyle(node).width;
     This.flag = false;
     //when the length of sub-element is more than parent element ,point out
-    //this problem    
+    //this problem
     loopForNode(node, nodeWidth);
     if (This.flag == true)
       this.addProblem('RT3005', [node]);

@@ -48,10 +48,8 @@ function checkNode(node, context) {
   node.style.marginLeft = (inlineMarginLeft) ? inlineMarginLeft : null;
   node.style.marginRight = null;
   node.style.marginRight = (inlineMarginRight) ? inlineMarginRight : null;
-  if ((left != newLeft) && (newLeft != left + 1)) {
+  if ((left != newLeft) && (newLeft != left + 1))
     this.addProblem('RX8004', [node]);
-    return;
-  }
 }
 ); // declareDetector
 

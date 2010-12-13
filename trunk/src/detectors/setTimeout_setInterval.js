@@ -22,13 +22,11 @@ chrome_comp.CompDetect.declareDetector(
 
 chrome_comp.CompDetect.NonScanDomBaseDetector,
 
-
-
 function constructor(rootNode) {
   var This = this;
   this.checkParam = function (param){
-    return /\d+/.test(param) && param != Infinity && param >= 0 && 
-        param < 2147483648 ;
+    return /\d+/.test(param) && param != Infinity &&
+           param >= 0 && param < 2147483648 ;
   }
 
   this.getTimeoutHandle_ = function(result, originalArguments, callStack) {

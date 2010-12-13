@@ -24,8 +24,6 @@ chrome_comp.CompDetect.ScanDomBaseDetector,
 
 null, // constructor
 
-
-
 function checkNode(node, additionalData) {
   if (Node.ELEMENT_NODE != node.nodeType || node.tagName != 'OPTION')
     return;

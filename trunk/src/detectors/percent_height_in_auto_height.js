@@ -64,9 +64,12 @@ function checkNode(node, context) {
 
   function getContainingBlock(element) {
     var position = chrome_comp.getComputedStyle(element).position;
-    if (element == document.documentElement) { return null; }
-    if (position == 'fixed') { return null; }
-    if (position == 'absolute') { return element.offsetParent; }
+    if (element == document.documentElement)
+      return null;
+    if (position == 'fixed')
+      return null;
+    if (position == 'absolute')
+      return element.offsetParent;
     var nod = element;
     while (nod) {
       if (nod == document.body) return document.documentElement;
@@ -104,11 +107,8 @@ function checkNode(node, context) {
   var newHeight = parseInt(chrome_comp.getComputedStyle(node).height);
   node.style.height = null;
   node.style.height = (inlineHeight) ? inlineHeight : null;
-  if (oldHeight != newHeight) {
+  if (oldHeight != newHeight)
     this.addProblem(isTable(node) ? 'RE8010' : 'RD8026', [node]);
-  }
-  
-  
 }
 ); // declareDetector
 
