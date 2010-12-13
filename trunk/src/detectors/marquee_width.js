@@ -34,20 +34,18 @@ function checkNode(node, context) {
     var definedWidth = chrome_comp.getDefinedStylePropertyByName(
           node, false, 'width');
     definedWidth = definedWidth ||
-          parseInt(node.getAttribute('width'),10)|0 ;
-    if (parentStyle &&
-        parentStyle.display == 'table-cell' &&
-        parentStyle.tableLayout == 'auto' && !definedWidth ) {
+      parseInt(node.getAttribute('width'), 10) | 0 ;
+    if (parentStyle && parentStyle.display == 'table-cell' &&
+        parentStyle.tableLayout == 'auto' && !definedWidth) {
         var oldParentClientRect = parentElement.getBoundingClientRect();
         var oldBodyClientRect = document.body.getBoundingClientRect();
         node.style.display ='none';
         if (oldBodyClientRect.width !=
-                document.body.getBoundingClientRect().width ||
+              document.body.getBoundingClientRect().width ||
             oldParentClientRect.left !=
-                parentElement.getBoundingClientRect().left
-        )
+              parentElement.getBoundingClientRect().left)
           this.addProblem('BX1030', [node]);
-        node.style.display ='';
+        node.style.display = '';
     }
   }
 }
