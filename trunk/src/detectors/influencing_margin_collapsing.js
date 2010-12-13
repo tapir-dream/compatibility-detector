@@ -1,20 +1,28 @@
-// @author : luyuan.china@gmail.com
+/*
+ * Copyright 2010 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'influencingMarginCollapsing',
+'influencing_margin_collapsing',
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
 null, // constructor
-
-/*【思路】
- *【缺陷】
- * 
- */
-
 
 function checkNode(node, context) {
   function hasFloatOrPositionedBeforeFirstInFlowChild(element) {
@@ -34,7 +42,8 @@ function checkNode(node, context) {
   }
 
   function hasFloatOrPositionedAfterLastInFlowChild(element) {
-    var last = getLastInFlowElement(element), reWS = /^\s*$/g;
+    var last = getLastInFlowElement(element);
+    var reWS = /^\s*$/g;
     if (!last)
       return false;
     var ch = element.children;
@@ -54,15 +63,17 @@ function checkNode(node, context) {
   function isInFlow(element) {
     if (!element)
       return null;
-    var pos = chrome_comp.getComputedStyle(element).position,
-        fl = chrome_comp.getComputedStyle(element).float,
-        dis = chrome_comp.getComputedStyle(element).display;
+    var pos = chrome_comp.getComputedStyle(element).position;
+    var fl = chrome_comp.getComputedStyle(element).float;
+    var dis = chrome_comp.getComputedStyle(element).display;
     return (pos != 'absolute') && (pos != 'fixed') && (fl == 'none') &&
-        (dis != 'none');
+      (dis != 'none');
   }
 
   function getFirstInFlowElement(element) {
-    var ch = element.childNodes, reWS = /^\s*$/g, reNBSP = /\u00a0/g;
+    var ch = element.childNodes;
+    var reWS = /^\s*$/g;
+    var reNBSP = /\u00a0/g;
     if (!element.firstElementChild)
       return null;
     for (var i = 0, j = ch.length; i < j; i++) {
@@ -83,7 +94,9 @@ function checkNode(node, context) {
   }
 
   function getLastInFlowElement(element) {
-    var ch = element.childNodes, reWS = /^\s*$/g, reNBSP = /\u00a0/g;
+    var ch = element.childNodes;
+    var reWS = /^\s*$/g;
+    var reNBSP = /\u00a0/g;
     if (!element.lastElementChild)
       return null;
     for (var i = ch.length - 1, j = 0; i >= j; i--) {
@@ -121,12 +134,13 @@ function checkNode(node, context) {
   }
 
   function isBlockFormattingContext(element) {
-    var display = window.chrome_comp.getComputedStyle(element).display,
-        cssFloat = window.chrome_comp.getComputedStyle(element).float,
-        position = window.chrome_comp.getComputedStyle(element).position,
-        overflow = window.chrome_comp.getComputedStyle(element).overflow,
-        overflowX = window.chrome_comp.getComputedStyle(element).overflowX,
-        overflowY = window.chrome_comp.getComputedStyle(element).overflowY;
+    var computedStyle = window.chrome_comp.getComputedStyle(element);
+    var display = computedStyle.display;
+    var cssFloat = computedStyle.float;
+    var position = computedStyle.position;
+    var overflow = computedStyle.overflow;
+    var overflowX = computedStyle.overflowX;
+    var overflowY = computedStyle.overflowY;
     return (display == 'inline-block') || (display == 'table') ||
       (display == 'table-cell') || (display == 'table-caption') ||
       (position == 'absolute') || (position == 'fixed') ||
@@ -135,14 +149,14 @@ function checkNode(node, context) {
   }
 
   function hasTopBorderAndPadding(element) {
-    var bt = parseInt(chrome_comp.getComputedStyle(element).borderTopWidth),
-        pt = parseInt(chrome_comp.getComputedStyle(element).paddingTop);
+    var bt = parseInt(chrome_comp.getComputedStyle(element).borderTopWidth);
+    var pt = parseInt(chrome_comp.getComputedStyle(element).paddingTop);
     return (bt != 0) || (pt != 0);
   }
 
   function hasBottomBorderAndPadding(element) {
-    var bb = parseInt(chrome_comp.getComputedStyle(element).borderBottomWidth),
-        pb = parseInt(chrome_comp.getComputedStyle(element).paddingBottom);
+    var bb = parseInt(chrome_comp.getComputedStyle(element).borderBottomWidth);
+    var pb = parseInt(chrome_comp.getComputedStyle(element).paddingBottom);
     return (bb != 0) || (pb != 0);
   }
 
@@ -212,22 +226,17 @@ function checkNode(node, context) {
   if (hasTopBorderAndPadding(node) || hasBottomBorderAndPadding(node))
     return;
 
-  var f = hasFloatOrPositionedBeforeFirstInFlowChild(node),
-      l = hasFloatOrPositionedAfterLastInFlowChild(node);
+  var f = hasFloatOrPositionedBeforeFirstInFlowChild(node);
+  var l = hasFloatOrPositionedAfterLastInFlowChild(node);
   if (f && hasMarginTop(node))
     this.addProblem('RB8004', [f]);
   if (l && hasMarginBottom(node))
     this.addProblem('RB8004', [l]);
 
-  //alert((getPreviousCollapsing(node)) ? getPreviousCollapsing(node).outerHTML : null);
   var prev = getPreviousCollapsing(node);
   if (prev && getFloatingBetweenMarginCollapsing(prev)) {
     this.addProblem('RB8004', [prev]);
   }
-
-
-
-
 }
 ); // declareDetector
 
