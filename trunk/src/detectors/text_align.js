@@ -43,20 +43,20 @@ function construtor(){
         this.addProblem('HG8001', [node]);
     }
     diffMap = {
-      "-//W3C//DTD HTML 4.0 Transitional//EN": {
-        "systemId": "http://www.w3.org/TR/html4/loose.dtd",
-        "IE": "S",
-        "WebKit": "Q"
+      '-//W3C//DTD HTML 4.0 Transitional//EN': {
+        'systemId': 'http://www.w3.org/TR/html4/loose.dtd',
+        'IE': 'S',
+        'WebKit': 'Q'
       },
-      "ISO/IEC 15445:2000//DTD HTML//EN": {
-        "systemId": "",
-        "IE": "Q",
-        "WebKit": "S"
+      'ISO/IEC 15445:2000//DTD HTML//EN': {
+        'systemId': '',
+        'IE': 'Q',
+        'WebKit': 'S'
       },
-      "ISO/IEC 15445:1999//DTD HTML//EN": {
-        "systemId": "",
-        "IE": "Q",
-        "WebKit": "S"
+      'ISO/IEC 15445:1999//DTD HTML//EN': {
+        'systemId': '',
+        'IE': 'Q',
+        'WebKit': 'S'
       }
     }
     if (diffMap[pid]) {
