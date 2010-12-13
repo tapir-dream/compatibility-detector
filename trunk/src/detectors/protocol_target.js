@@ -4,20 +4,11 @@ addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'protocolTarget',
+'protocol_target',
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
 null, // constructor
-
-/*【思路】
- * 检测所有 A 及 AREA 的元素，得到其 href 属性中的协议部分
- * 得到当前页面的 BASE target，此时考虑当拥有多个 BASE 元素时，Chrome 认为第一个有效而 IE 认为最后一个有效
- * 根据超链接的协议类型以及当前页面的 BASE target，若 IE 和 Chrome 中相同，则发出警告
- *
- *【缺陷】
- * 仅考虑了 IE 和 Chrome 之间的差异
- */
 
 
 function checkNode(node, additionalData) {
@@ -57,7 +48,8 @@ function checkNode(node, additionalData) {
   if (list.indexOf(protocol) == -1 && reCus.test(protocol)) {
     protocol = 'custom';
   }
-  if ((map.IE[protocol] && isBaseTargetBlank().IE) != (map.Chrome[protocol] && isBaseTargetBlank().Chrome))
+  if ((map.IE[protocol] && isBaseTargetBlank().IE) != (map.Chrome[protocol] &&
+    isBaseTargetBlank().Chrome))
     this.addProblem('BX2032', [node]);
 }
 ); // declareDetector
