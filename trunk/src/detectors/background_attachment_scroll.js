@@ -27,16 +27,20 @@ null, // constructor
 function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
     return;
+
   var computedStyle = chrome_comp.getComputedStyle(node);
   var scrollValue = ['scroll', 'auto'];
-  if (computedStyle.backgroundImage != 'none' && 
+
+  if (computedStyle.backgroundImage != 'none' &&
       computedStyle.backgroundAttachment == 'scroll' && (
-        (scrollValue.indexOf(computedStyle.overflowX) >= 0 && hasScrollAt(node, 'Width')) ||
-        (scrollValue.indexOf(computedStyle.overflowY) >= 0 && hasScrollAt(node, 'Height'))
+        (scrollValue.indexOf(computedStyle.overflowX) >= 0 &&
+          hasScrollAt(node, 'Width')) ||
+        (scrollValue.indexOf(computedStyle.overflowY) >= 0 &&
+          hasScrollAt(node, 'Height'))
       )){
-    this.addProblem('RC3003', [node])         
+    this.addProblem('RC3003', [node]);
   }
-  
+
   function hasScrollAt(element, woh){
     return element['client' + woh] < element['scroll' + woh];
   }

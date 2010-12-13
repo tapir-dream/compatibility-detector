@@ -1,3 +1,19 @@
+/*
+ * Copyright 2010 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 // One detector implementation for checking 'undetectable document.all' problems
 // @author : jnd@chromium.org
 // @bug: http://b/hotlist?id=10048
@@ -32,17 +48,18 @@
 // use document.getElementById and
 // getElementsByTagName.
 // For now, I use the first way.
+
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'detectorForBomDocumentAll',
+'document_all',
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
 function constructor(rootNode) {
   this.gatherAllProblemNodes_ = false;
-  //fix document.all and document['all']
+  //fix document.all and document['all'] and if ( ... ) and  return ....
   this.documentAllRegexp_ =
     /[^\w$]*document(([.]all)|(\[["']all["']\]))\s?[\(\.\[\w$]/g;
 
@@ -77,14 +94,14 @@ function checkNode(node, context) {
   var This = this;
   var scriptData = '';
   var testResults = {
-                      documentAllRegexp_:false,
-                      documentAllFilterShortSyntaxRegexp_:false,
-                      documentAllTernaryQuestionRegexp_:false,
-                      documentAllTernaryColonRegexp_:false,
-                      dcoumentAllEvalRegexp_:false,
-                      documentAllFiterAndSyntaxRegexp_:false,
-                      documentAllFilterIfSyntaxRegxp_:false
-                    };
+      documentAllRegexp_:false,
+      documentAllFilterShortSyntaxRegexp_:false,
+      documentAllTernaryQuestionRegexp_:false,
+      documentAllTernaryColonRegexp_:false,
+      dcoumentAllEvalRegexp_:false,
+      documentAllFiterAndSyntaxRegexp_:false,
+      documentAllFilterIfSyntaxRegxp_:false
+  };
 
   if (node.tagName == 'SCRIPT') {
     if (node.src && node.src != '') {
@@ -107,16 +124,16 @@ function checkNode(node, context) {
         scriptData = removeScriptComments(node.attributes[i].value);
         setTestResults(scriptData);
         if (getTestDetectorResult()) {
-           this.addProblem('BX9002', { nodes: [node], severityLevel: 3 });
-         }
+          this.addProblem('BX9002', { nodes: [node], severityLevel: 3 });
+        }
       }
     }
   }
 
   function removeScriptComments(scriptData){
-	return scriptData
-	       .replace(This.multiLineScriptCommentsRegexp_,'')
-         .replace(This.oneLineScriptCommentsRegexp_,'');
+    return scriptData
+           .replace(This.multiLineScriptCommentsRegexp_,'')
+           .replace(This.oneLineScriptCommentsRegexp_,'');
   }
 
   function getTestDetectorResult(){
@@ -130,34 +147,34 @@ function checkNode(node, context) {
   }
 
   function setTestResults(scriptData){
-     This.documentAllRegexp_.test('');
-     testResults.documentAllRegexp_= This.documentAllRegexp_.test(scriptData);
+    This.documentAllRegexp_.test('');
+    testResults.documentAllRegexp_= This.documentAllRegexp_.test(scriptData);
 
-     This.documentAllRegexp_.test('');
-     testResults.documentAllFilterShortSyntaxRegexp_ =
+    This.documentAllRegexp_.test('');
+    testResults.documentAllFilterShortSyntaxRegexp_ =
       !This.documentAllFilterShortSyntaxRegexp_.test(scriptData);
 
-     This.documentAllFilterShortSyntaxRegexp_.test('');
-     testResults.documentAllTernaryQuestionRegexp_ =
+    This.documentAllFilterShortSyntaxRegexp_.test('');
+    testResults.documentAllTernaryQuestionRegexp_ =
       !This.documentAllTernaryQuestionRegexp_.test(scriptData);
 
-     This.documentAllTernaryQuestionRegexp_.test('');
-     testResults.documentAllTernaryColonRegexp_ =
+    This.documentAllTernaryQuestionRegexp_.test('');
+    testResults.documentAllTernaryColonRegexp_ =
       !This.documentAllTernaryColonRegexp_.test(scriptData);
 
-     This.documentAllTernaryColonRegexp_.test('');
-     testResults.dcoumentAllEvalRegexp_ =
+    This.documentAllTernaryColonRegexp_.test('');
+    testResults.dcoumentAllEvalRegexp_ =
       !This.dcoumentAllEvalRegexp_.test(scriptData);
 
-     This.dcoumentAllEvalRegexp_.test('');
-     testResults.documentAllFiterAndSyntaxRegexp_ =
+    This.dcoumentAllEvalRegexp_.test('');
+    testResults.documentAllFiterAndSyntaxRegexp_ =
       !This.documentAllFiterAndSyntaxRegexp_.test(scriptData);
 
-     This.documentAllFiterAndSyntaxRegexp_.test('');
-     testResults.documentAllFilterIfSyntaxRegxp_ =
+    This.documentAllFiterAndSyntaxRegexp_.test('');
+    testResults.documentAllFilterIfSyntaxRegxp_ =
       !This.documentAllFilterIfSyntaxRegxp_.test(scriptData);
 
-     This.documentAllFilterIfSyntaxRegxp_.test('');
+    This.documentAllFilterIfSyntaxRegxp_.test('');
   }
 
 }

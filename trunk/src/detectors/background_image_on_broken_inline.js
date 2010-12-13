@@ -1,23 +1,28 @@
-// @author : luyuan.china@gmail.com
+/*
+ * Copyright 2010 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'backgroundImageOnBrokenInline',
+'background_image_on_broken_inline',
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
 null, // constructor
-
-/*【思路】
- * 检测所有在拥有背景图片的纯行内元素，在其前后插入两个宽度为 0 的行内块元素
- * 若插入的两个行内块元素的纵坐标不相同，则代表此行内元素折行显示了，则发出警告
- *
- *【缺陷】
- * 
- */
-
 
 function checkNode(node, additionalData) {
   function hasBackgroundImage(element) {
@@ -25,14 +30,14 @@ function checkNode(node, additionalData) {
   }
 
   function isBroken(element) {
-    element.insertAdjacentHTML('beforeBegin', 
+    element.insertAdjacentHTML('beforeBegin',
         '<span style="display:inline-block; height:20px;"></span>');
-    element.insertAdjacentHTML('afterEnd', 
+    element.insertAdjacentHTML('afterEnd',
         '<span style="display:inline-block; height:20px;"></span>');
-    var span1 = element.previousElementSibling,
-        span2 = element.nextElementSibling,
-        top1 = span1.getBoundingClientRect().top,
-        top2 = span2.getBoundingClientRect().top;
+    var span1 = element.previousElementSibling;
+    var span2 = element.nextElementSibling;
+    var top1 = span1.getBoundingClientRect().top;
+    var top2 = span2.getBoundingClientRect().top;
     element.parentNode.removeChild(span1);
     element.parentNode.removeChild(span2);
     return (top1 != top2);

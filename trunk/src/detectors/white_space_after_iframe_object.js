@@ -40,17 +40,18 @@ function checkNode(node, context) {
         this.addProblem('HT1001', [objectCandidate, textCandidate]);
         context.clearValuesInBlockStack();
       //text node must be sibling of IFRAME, EMBED or OBJECT object
-      } else if (text.match(chrome_comp.LEADING_WHITESPACES) && 
+      } else if (text.match(chrome_comp.LEADING_WHITESPACES) &&
           node.parentNode == objectCandidate.parentNode) {
         context.putValueInBlockStack('textCandidate', node);
       }
     }
   } else if (Node.ELEMENT_NODE == node.nodeType) {
-    if (chrome_comp.startsNewLine(node)) { //BR block table list-item
+    //BR block table list-item
+    if (chrome_comp.startsNewLine(node)) {
       context.clearValuesInBlockStack();
       return;
     }
-    var objectCandidate = context.getValueInBlockStack('objectCandidate');  
+    var objectCandidate = context.getValueInBlockStack('objectCandidate');
     var textCandidate = context.getValueInBlockStack('textCandidate');
     if (objectCandidate && textCandidate)
       this.addProblem('HT1001', [objectCandidate, textCandidate]);

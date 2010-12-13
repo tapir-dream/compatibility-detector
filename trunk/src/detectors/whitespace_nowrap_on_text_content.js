@@ -1,21 +1,28 @@
-// @author : luyuan.china@gmail.com
+/*
+ * Copyright 2010 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'whiteSpaceNowrapOnTextContent',
+'whitespace_nowrap_on_text_content',
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
 null, // constructor
-
-/*【思路】
- * 检测所有 white-space 特性值不为 nowrap 的非替换元素
- * 查找其内连续紧密相连且设定了 white-space:nowrap 的行内元素，若存在其中某元素出现在包含块范围之外则发出警告
- *
- */
-
 
 function checkNode(node, additionalData) {
   function isInlineContent(nodeEl) {

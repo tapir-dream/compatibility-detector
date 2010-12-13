@@ -39,7 +39,7 @@ function checkNode(node, context) {
       for (var j = 0; j < cells.length; ++j) {
         var width =
             chrome_comp.getDefinedStylePropertyByName(cells[j], false, 'width');
-        if (parseInt(width) > 0) {
+        if (parseInt(width,10) > 0) {
           var span = cells[j].colSpan;
           if (span > 1) {
             // Check whether there is already a cell with same span range
@@ -110,16 +110,14 @@ function checkNode(node, context) {
 
         // Check whether the width of an auto column being spanned has been
         // changed
-        if (autoColumnWidth != rows[0].cells[autoColumn].clientWidth) {
+        if (autoColumnWidth != rows[0].cells[autoColumn].clientWidth)
           this.addProblem('HE1001', nodes);
-        }
 
         for (var k = 0; k < spanCells.length; ++k) {
-          if (spanCells[k].width > 0) {
+          if (spanCells[k].width > 0)
             spanCells[k].width = oldWidths[k];
-          } else {
+          else
             spanCells[k].style.width = oldWidths[k];
-          }
         }
       }
     }
