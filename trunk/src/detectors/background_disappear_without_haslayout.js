@@ -101,8 +101,7 @@ function checkNode(node, additionalData) {
     this.addProblem('RM3007', [cb]);
   } else {
     if (chrome_comp.getComputedStyle(
-        chrome_comp.getContainingBlock(cb)).backgroundColor !=
-        cbBgColor) {
+        chrome_comp.getContainingBlock(cb)).backgroundColor != cbBgColor) {
       this.addProblem('RM3007', [cb]);
     }
   }
@@ -110,4 +109,3 @@ function checkNode(node, additionalData) {
 ); // declareDetector
 
 });
-

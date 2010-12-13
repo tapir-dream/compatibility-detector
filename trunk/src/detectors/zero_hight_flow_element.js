@@ -44,13 +44,13 @@ function checkNode(node, additionalData) {
   var nextNodeWidthStyle = nextNodeStyle.width;
 
   if (node.offsetHeight == 0 && node.offsetWidth != 0 &&
-      nodeFloatStyle != 'none' && nodeDisplayStyle != 'none'){
+      nodeFloatStyle != 'none' && nodeDisplayStyle != 'none') {
     if (nextNode.offsetHeight != 0 && nextNode.offsetWidth != 0 &&
-        nextNodeFloatStyle != 'none' && nextNodeDisplayStyle!='none'){
-      if (nodeFloatStyle == nextNodeFloatStyle){
+        nextNodeFloatStyle != 'none' && nextNodeDisplayStyle!='none') {
+      if (nodeFloatStyle == nextNodeFloatStyle) {
         if (nextNodeClearStyle != nodeFloatStyle &&
             nextNodeClearStyle != 'both' &&
-            nextNodeClearStyle != 'all'){
+            nextNodeClearStyle != 'all') {
           var div = document.createElement('div');
           div.style.height = '0px';
           div.style.padding = '0px';
@@ -64,7 +64,7 @@ function checkNode(node, additionalData) {
           if(parseInt(nextNodeWidthStyle) <= parseInt(remainSpace))
             this.addProblem('RM1004', [node]);
         }
-       node.style.height='0px';
+       node.style.height = '0px';
        node.parentNode.removeChild(div);
       }
     }

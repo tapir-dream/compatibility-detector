@@ -24,10 +24,10 @@ chrome_comp.CompDetect.ScanDomBaseDetector,
 
 function constructor(rootNode) {
   this.missingTags_ = {
-    'BGSOUND': 'BT2033',
-    'XML': 'BT9036',
-    'LAYER': 'BX8042',
-    'WBR': 'BX1039' // WBR is not supported by IE8(S) and Opera
+    'BGSOUND' : 'BT2033',
+    'XML' : 'BT9036',
+    'LAYER' : 'BX8042',
+    'WBR' : 'BX1039' // WBR is not supported by IE8(S) and Opera
   };
 },
 

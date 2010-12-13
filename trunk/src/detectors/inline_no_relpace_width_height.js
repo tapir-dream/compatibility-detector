@@ -29,12 +29,14 @@ function checkNode(node, additionalData) {
   if (document.compatMode == 'CSS1Compat')
     return;
 
-  if (Node.ELEMENT_NODE != node.nodeType || 
+  if (Node.ELEMENT_NODE != node.nodeType ||
       !chrome_comp.isInlineNoReplacedElement(node))
     return;
 
-  var width = chrome_comp.getDefinedStylePropertyByName(node, true, 'width');
-  var height = chrome_comp.getDefinedStylePropertyByName(node, true, 'height');
+  var width =
+      chrome_comp.getDefinedStylePropertyByName(node, true, 'width');
+  var height =
+      chrome_comp.getDefinedStylePropertyByName(node, true, 'height');
 
   if((width && width != 'auto') || (height && height != 'auto')){
     var display=chrome_comp.getComputedStyle(node).display;

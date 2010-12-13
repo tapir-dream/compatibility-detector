@@ -41,7 +41,7 @@ function checkNode(node, context) {
       if (isNonBlankText) {
         var imgCandidates = context.getValueInBlockStack('imgCandidates');
         if (imgCandidates) {
-          for (var i = 0; i < imgCandidates.length; i++)
+          for (var i = 0, l = imgCandidates.length; i < l; i++)
             this.addProblem('RT3001', [imgCandidates[i]]);
           context.deleteValueInBlockStack('imgCandidate');
         }

@@ -57,7 +57,7 @@ function checkNode(node, context) {
     if (getTestDetectorResult())
       this.addProblem('BX9056', [node]);
   } else {
-    for (var i = 0,l = node.attributes.length; i<l; i++){
+    for (var i = 0,l = node.attributes.length; i < l; i++){
       if ( node.attributes[i].name.toLowerCase().indexOf('on') == 0 ){
         //delete script comment
         scriptData = removeScriptComments(node.attributes[i].value);

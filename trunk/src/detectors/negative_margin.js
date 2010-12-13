@@ -26,10 +26,11 @@ null, // constructor
 
 function checkNode(node, additionalData) {
   function isNegativeMargin(nodeEl) {
-    var t = parseInt(window.chrome_comp.getComputedStyle(nodeEl).marginTop);
-    var r = parseInt(window.chrome_comp.getComputedStyle(nodeEl).marginRight);
-    var b = parseInt(window.chrome_comp.getComputedStyle(nodeEl).marginbottom);
-    var l = parseInt(window.chrome_comp.getComputedStyle(nodeEl).marginLeft);
+    var elementStyle = window.chrome_comp.getComputedStyle(nodeEl);
+    var t = parseInt(elementStyle.marginTop, 10);
+    var r = parseInt(elementStyle.marginRight, 10);
+    var b = parseInt(elementStyle.marginbottom, 10);
+    var l = parseInt(elementStyle.marginLeft, 10);
     return (t < 0) || (r < 0) || (b < 0) || (l < 0);
   }
 
@@ -58,4 +59,3 @@ function checkNode(node, additionalData) {
 ); // declareDetector
 
 });
-
