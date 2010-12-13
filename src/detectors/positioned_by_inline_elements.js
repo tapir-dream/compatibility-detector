@@ -2,7 +2,7 @@ addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'positionedByInlineElements',
+'positioned_by_inline_elements',
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
