@@ -103,7 +103,8 @@ function checkNode(node, context) {
                          parseInt(childStyle.marginRight,10)) > 1
                 && childWidth + 1 < parentElementMaxWidth ) {
             this.addProblem('RT8003',
-                { nodes: [node], details: parentElementMaxWidth + 'vs' + childWidth });
+                { nodes: [node],
+                  details: parentElementMaxWidth + 'vs' + childWidth });
             return;
           }
         }
