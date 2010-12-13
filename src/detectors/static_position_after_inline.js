@@ -1,26 +1,28 @@
-// @author : luyuan.china@gmail.com
+/*
+ * Copyright 2010 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'staticPositionAfterInline',
+'static_position_after_inline',
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
 null, // constructor
-
-/*【思路】
- * 检测所有 type 属性值为 text、password、button、reset、submit 的 INPUT 元素
- * 文本框通过将其 line-height 特性设定为 normal 再恢复判断其是否设定了不为 normal 值的 line-height
- * 按钮通过将其 -webkit-appearance 私有特性设定为 textfield 再回复来判断其是否设定了不为 normal 值的 line-height
- * 若上述表单控件设定了不为 normal 的 line-height 则发出警告
- *
- *【缺陷】
- * 仅考虑了 IE 和 Chrome 之间的差异
- * 没有考虑用户私自设定了 -webkit-appearance 私有特性的情况
- */
-
 
 function checkNode(node, additionalData) {
   function isVerticalStaticPosition(nodeEl) {
