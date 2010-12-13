@@ -42,28 +42,28 @@ function checkNode(node, additionalData) {
   if (node.tagName != 'A' && node.tagName != 'AREA')
     return;
   
-  var href = node.href.trim(), reCus = /^\w*$/gi,
-      map = {
-        IE: {
-          javascript: true,
-          mailto: false,
-          'view-source': true,
-          custom: true
-        },
-        Chrome: {
-          javascript: false,
-          mailto: true,
-          'view-source': true,
-          custom: true
-        }
-      },
-      protocol = href.split(':')[0],
-      list = ['javascript', 'mailto', 'view-source'];
+  var href = node.href.trim(), reCus = /^\w*$/gi;
+  var map = {
+    IE: {
+      javascript: true,
+      mailto: false,
+      'view-source': true,
+      custom: true
+    },
+    Chrome: {
+      javascript: false,
+      mailto: true,
+      'view-source': true,
+      custom: true
+    }
+  };
+  var protocol = href.split(':')[0];
+  var list = ['javascript', 'mailto', 'view-source'];
   if (list.indexOf(protocol) == -1 && reCus.test(protocol)) {
     protocol = 'custom';
   }
   if ((map.IE[protocol] && isBaseTargetBlank().IE) != (map.Chrome[protocol] &&
-    isBaseTargetBlank().Chrome))
+      isBaseTargetBlank().Chrome))
     this.addProblem('BX2032', [node]);
 }
 ); // declareDetector

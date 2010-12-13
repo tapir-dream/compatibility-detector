@@ -64,7 +64,7 @@ function checkNode(node, context) {
   var inlineWidth = node.style.width;
   var inlinePosition = node.style.position;
   var inlineLeft = node.style.left;
-  var oldWidth = parseInt(chrome_comp.getComputedStyle(node).width,10);
+  var oldWidth = parseInt(chrome_comp.getComputedStyle(node).width, 10);
   var newWidth = 10000;
 
   if (node.tagName != 'TD' && node.tagName != 'TH')

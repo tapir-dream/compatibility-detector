@@ -26,10 +26,10 @@ null, // constructor
 
 function checkNode(node, additionalData) {
   function isStaticPosition(element) {
-    var top = chrome_comp.getComputedStyle(element).top,
-        right = chrome_comp.getComputedStyle(element).right,
-        bottom = chrome_comp.getComputedStyle(element).bottom,
-        left = chrome_comp.getComputedStyle(element).left;
+    var top = chrome_comp.getComputedStyle(element).top;
+    var right = chrome_comp.getComputedStyle(element).right;
+    var bottom = chrome_comp.getComputedStyle(element).bottom;
+    var left = chrome_comp.getComputedStyle(element).left;
     return (top == 'auto') && (right == 'auto') && (bottom == 'auto') &&
         (left == 'auto');
   }
@@ -64,8 +64,8 @@ function checkNode(node, additionalData) {
   }
 
   function getType(element) {
-    var dis = getStaticDisplayValue(element),
-        cssFloat = chrome_comp.getComputedStyle(element).float;
+    var dis = getStaticDisplayValue(element);
+    var cssFloat = chrome_comp.getComputedStyle(element).float;
     if (element.nodeType == 1) {
       if (cssFloat != 'none')
         return 'float';
@@ -100,8 +100,8 @@ function checkNode(node, additionalData) {
   if (!isStaticPosition(node))
     return;
 
-  var prevType = getPreviousSiblingType(node),
-      type = getType(node);
+  var prevType = getPreviousSiblingType(node);
+  var type = getType(node);
   if (!type || !prevType)
     return;
 

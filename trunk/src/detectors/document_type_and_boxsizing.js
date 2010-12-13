@@ -42,14 +42,14 @@ function checkNode(node, additionalData) {
   var w = chrome_comp.getDefinedStylePropertyByName(node, true, 'width');
   var h = chrome_comp.getDefinedStylePropertyByName(node, true, 'height');
   var elementStyle = chrome_comp.getComputedStyle(node);
-  var bt = parseInt(elementStyle.borderTopWidth,10);
-  var br = parseInt(elementStyle.borderRightWidth,10);
-  var bb = parseInt(elementStyle.borderBottomWidth,10);
-  var bl = parseInt(elementStyle.borderLeftWidth,10);
-  var pt = parseInt(elementStyle.paddingTopWidth,10);
-  var pr = parseInt(elementStyle.paddingRightWidth,10);
-  var pb = parseInt(elementStyle.paddingBottomWidth,10);
-  var pl = parseInt(elementStyle.paddingLeftWidth,10);
+  var bt = parseInt(elementStyle.borderTopWidth, 10);
+  var br = parseInt(elementStyle.borderRightWidth, 10);
+  var bb = parseInt(elementStyle.borderBottomWidth, 10);
+  var bl = parseInt(elementStyle.borderLeftWidth, 10);
+  var pt = parseInt(elementStyle.paddingTopWidth, 10);
+  var pr = parseInt(elementStyle.paddingRightWidth, 10);
+  var pb = parseInt(elementStyle.paddingBottomWidth, 10);
+  var pl = parseInt(elementStyle.paddingLeftWidth, 10);
 
   if ((!w || w == 'auto') && (!h || h == 'auto'))
     return;
@@ -71,7 +71,8 @@ function checkNode(node, additionalData) {
   var sid = (document.doctype) ? document.doctype.systemId : 0;
   var cm = document.compatMode.toLowerCase();
   var boxSizing = window.chrome_comp.getComputedStyle(node).webkitBoxSizing;
-  doctypeInIE = doctypeInWebKit = (cm == 'backcompat') ? 'Q' : 'S';
+  doctypeInWebKit = (cm == 'backcompat') ? 'Q' : 'S';
+  doctypeInIE = doctypeInWebKit;
   if (isIEDTDBug(node)) {
     doctypeInIE = 'Q';
     if (tn == 'HTML')

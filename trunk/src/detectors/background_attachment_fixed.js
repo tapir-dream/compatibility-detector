@@ -28,11 +28,12 @@ function checkNode(node, additionalData) {
 
   // Check whether it is HTML or BODY element
   if (Node.ELEMENT_NODE != node.nodeType ||
-      node.tagName == 'HMTL' || node.tagName =='BODY')
+      node.tagName == 'HTML' || node.tagName == 'BODY')
     return;
   // Get non-HTML BODY of the background-attachment property
   var background_attachment =
-      chrome_comp.getDefinedStylePropertyByName(node, true, 'background-attachment');
+      chrome_comp.getDefinedStylePropertyByName(node, true, 
+          'background-attachment');
 
   if (background_attachment == 'fixed')
     this.addProblem('RC3002', [node]);

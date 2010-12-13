@@ -28,18 +28,18 @@ null, // constructor
 function checkNode(node, additionalData) {
   if (Node.ELEMENT_NODE != node.nodeType)
     return;
-  var tableStyle = ['table-cell', 'table-row', 'table-caption'],
-    dis = window.chrome_comp.getComputedStyle(node).display,
-    pos = window.chrome_comp.getDefinedStylePropertyByName(node, true, 
-      'position'),
-    l = parseInt(window.chrome_comp.getDefinedStylePropertyByName(node, true, 
-      'left')),
-    t = parseInt(window.chrome_comp.getDefinedStylePropertyByName(node, true, 
-      'top'));
+  var tableStyle = ['table-cell', 'table-row', 'table-caption'];
+  var dis = chrome_comp.getComputedStyle(node).display;
+  var pos = chrome_comp.getDefinedStylePropertyByName(node, true, 
+      'position');
+  var l = parseInt(chrome_comp.getDefinedStylePropertyByName(node, true, 
+      'left'), 10);
+  var t = parseInt(chrome_comp.getDefinedStylePropertyByName(node, true, 
+      'top'), 10);
   if ((tableStyle.indexOf(dis) != -1) && (pos === 'relative') && 
-      (l != 0 || t != 0) ) {
+      (l != 0 || t != 0)) {
     this.addProblem('RM8024', [node]);
-  } 	 
+  }
 }
 ); // declareDetector
 

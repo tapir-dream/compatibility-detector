@@ -27,19 +27,19 @@ chrome_comp.CompDetect.NonScanDomBaseDetector,
 function constructor(rootNode) {
   var This = this;
   this.checkParam = function (param){
-    return /\d+/.test(param)
-      && param != Infinity
-      && param >= 0
-      && param < 2147483648 ;
+    return /\d+/.test(param) && param != Infinity && param >= 0 && 
+        param < 2147483648 ;
   }
 
   this.getTimeoutHandle_ = function(result, originalArguments, callStack) {
-    if (This.checkParam(originalArguments[1])) return ;
+    if (This.checkParam(originalArguments[1]))
+      return ;
     This.addProblem('BX9011', { nodes: [this], needsStack: true });
   };
 
   this.getIntervalHandle_ = function(result, originalArguments, callStack) {
-    if (This.checkParam(originalArguments[1])) return ;
+    if (This.checkParam(originalArguments[1]))
+      return ;
     This.addProblem('BX9011', { nodes: [this], needsStack: true });
   };
 },

@@ -60,7 +60,8 @@ function constructor(rootNode) {
 },
 
 function checkNode(node, context) {
-  if (Node.ELEMENT_NODE != node.nodeType || node.tagName != 'IFRAME' || context.isDisplayNone())
+  if (Node.ELEMENT_NODE != node.nodeType || node.tagName != 'IFRAME' || 
+      context.isDisplayNone())
     return;
 
   chrome_comp.CompDetect.registerExistingMethodHook(

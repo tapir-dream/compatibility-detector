@@ -83,8 +83,6 @@ function checkNode(node, additionalData) {
 
   if (hasInlinePreviousSibling(node))
     this.addProblem('RD8019', [node]);
-  
-  
 }
 ); // declareDetector
 

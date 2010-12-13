@@ -66,8 +66,8 @@ function checkNode(node, additionalData) {
 
   function getNearestLesserWidthAncestor(nodeEl) {
     var parent = nodeEl.parentNode;
-    var width = parseInt(chrome_comp.getComputedStyle(nodeEl).width,10);
-    var pWidth = parseInt(chrome_comp.getComputedStyle(parent).width,10);
+    var width = parseInt(chrome_comp.getComputedStyle(nodeEl).width, 10);
+    var pWidth = parseInt(chrome_comp.getComputedStyle(parent).width, 10);
     return pWidth < width;
   }
 
@@ -84,7 +84,7 @@ function checkNode(node, additionalData) {
   if (Node.ELEMENT_NODE != node.nodeType)
     return;
 
-  var clearDir = window.chrome_comp.getComputedStyle(node).clear;
+  var clearDir = chrome_comp.getComputedStyle(node).clear;
   if (clearDir == 'none')
     return;
   if (!hasClearanceSpacing(node))
@@ -92,16 +92,16 @@ function checkNode(node, additionalData) {
   if (!getNearestLesserWidthAncestor(node) && !hasOnlyFloat(node.parentNode))
     return;
 
-  var cb = window.chrome_comp.getContainingBlock(node), cbBgColor, cbCbBgColor;
-  cbBgColor = window.chrome_comp.getComputedStyle(cb).backgroundColor;
-  cbBgImage = window.chrome_comp.getComputedStyle(cb).backgroundImage;
-  if (cbBgColor == window.chrome_comp.COLOR_TRANSPARENT)
+  var cb = chrome_comp.getContainingBlock(node), cbBgColor, cbCbBgColor;
+  cbBgColor = chrome_comp.getComputedStyle(cb).backgroundColor;
+  cbBgImage = chrome_comp.getComputedStyle(cb).backgroundImage;
+  if (cbBgColor == chrome_comp.COLOR_TRANSPARENT)
     return;
   if (cbBgImage) {
     this.addProblem('RM3007', [cb]);
   } else {
-    if (window.chrome_comp.getComputedStyle(
-        window.chrome_comp.getContainingBlock(cb)).backgroundColor !=
+    if (chrome_comp.getComputedStyle(
+        chrome_comp.getContainingBlock(cb)).backgroundColor !=
         cbBgColor) {
       this.addProblem('RM3007', [cb]);
     }

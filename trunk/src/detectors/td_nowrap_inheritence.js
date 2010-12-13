@@ -74,15 +74,13 @@ function checkNode(node, context) {
 
   if (isAutoWidth(node)) {
     if (isNowrapInherited(node)) {
-      if (isChildrenAffectedByCellsWhiteSpace(node)){
+      if (isChildrenAffectedByCellsWhiteSpace(node))
         this.addProblem('RX1003', [node]);
-      }
     }
   } else {
     if (chrome_comp.getComputedStyle(node).whiteSpace == 'nowrap') {
-      if (isChildrenAffectedByCellsWhiteSpace(node)){
+      if (isChildrenAffectedByCellsWhiteSpace(node))
         this.addProblem('RX1003', [node]);
-      }
     }
   }
 }

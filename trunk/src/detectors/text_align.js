@@ -23,7 +23,7 @@ chrome_comp.CompDetect.declareDetector(
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
 function construtor(){
-  this.getCompatMode_ = function(){
+  this.getCompatMode_ = function() {
     function isIEDTDBug() {
       var html = document.documentElement, prev = html;
       while (prev.previousSibling) { prev = prev.previousSibling; }
@@ -87,7 +87,7 @@ function checkNode(node, context) {
       (textAlign == 'center' ||
        (direction == 'ltr' && textAlign == 'right') ||
        (direction == 'rtl' && textAlign == 'left'))) {
-    var parentElementMaxWidth = parseInt(node.style.width,10);
+    var parentElementMaxWidth = parseInt(node.style.width, 10);
     var child = node.firstElementChild;
     do {
       if (child) {
@@ -96,12 +96,12 @@ function checkNode(node, context) {
             childStyle.float == 'none' &&
             (childStyle.position == 'static' ||
              childStyle.position == 'relative')) {
-          var childWidth = parseInt(child.style.width,10) +
-              parseInt(childStyle.paddingLeft,10) +
-              parseInt(childStyle.paddingRight,10);
-          if ( Math.abs( parseInt(childStyle.marginLeft,10) -
-                         parseInt(childStyle.marginRight,10)) > 1
-                && childWidth + 1 < parentElementMaxWidth ) {
+          var childWidth = parseInt(child.style.width, 10) +
+              parseInt(childStyle.paddingLeft, 10) +
+              parseInt(childStyle.paddingRight, 10);
+          if (Math.abs(parseInt(childStyle.marginLeft, 10) -
+              parseInt(childStyle.marginRight, 10)) > 1 && 
+              childWidth + 1 < parentElementMaxWidth) {
             this.addProblem('RT8003',
                 { nodes: [node],
                   details: parentElementMaxWidth + 'vs' + childWidth });
