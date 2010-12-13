@@ -1,28 +1,49 @@
-// @author : luyuan.china@gmail.com
+/*
+ * Copyright 2010 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'imgIframeObjectEmbedBaseline',
+'img_iframe_object_embed_baseline',
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
-/*【思路】
- * 得到当前页面在 IE6 IE7 IE8 及 Chrome 中的文档模式，包括 Almost Standards Mode
- * 判断当前替换元素所在的包含块是否还存在其他内容，若是则退出
- * 判断是否存在空白节点，根据具体情况发出警告
- *
- *【缺陷】
- * 仅考虑了 IE 和 Chrome 之间的差异
+/*
+ * Step:
+ * 
+ * 1. Get doctype of the page in IE6, IE7, IE8 and Chrome, including 
+ *    Almost Standards Mode.
+ * 2. If the containing block of current replace element is with 
+ *    other content inside, then return.
+ * 3. If Empty node is existent, report problem as the case might be.
+ * 
+ * Defect:
+ * Only consider IE6, IE7, IE8 and Chrome currently.
  */
 
 
 function constructor(rootNode) {
   function getMode() {
     function isIEDTDBug() {
-      var html = document.documentElement, prev = html;
-      while (prev.previousSibling) { prev = prev.previousSibling; }
+      var html = document.documentElement;
+      var prev = html;
+      while (prev.previousSibling) {
+        prev = prev.previousSibling;
+      }
       if (prev && prev.nodeType == 8) {
         return true;
       }
@@ -33,7 +54,7 @@ function constructor(rootNode) {
       var div = document.createElement('div');
       div.appendChild(iframe);
       document.documentElement.appendChild(div);
-      n = div.offsetHeight == iframe.offsetHeight;
+      var n = div.offsetHeight == iframe.offsetHeight;
       document.documentElement.removeChild(div);
       return !n;
     }
@@ -54,20 +75,20 @@ function constructor(rootNode) {
       doctypeInIE8 = 'Q';
     }
     diffMap = {
-      "-//W3C//DTD HTML 4.0 Transitional//EN": { 
-        "systemId": "http://www.w3.org/TR/html4/loose.dtd",
-        "IE": "S",
-        "WebKit": "Q"
+      '-//W3C//DTD HTML 4.0 Transitional//EN': { 
+        'systemId': 'http://www.w3.org/TR/html4/loose.dtd',
+        'IE': 'S',
+        'WebKit': 'Q'
       },
-      "ISO/IEC 15445:2000//DTD HTML//EN": {
-        "systemId": "",
-        "IE": "Q",
-        "WebKit": "S"
+      'ISO/IEC 15445:2000//DTD HTML//EN': {
+        'systemId': '',
+        'IE': 'Q',
+        'WebKit': 'S'
       },
-      "ISO/IEC 15445:1999//DTD HTML//EN": {
-        "systemId": "",
-        "IE": "Q",
-        "WebKit": "S"
+      'ISO/IEC 15445:1999//DTD HTML//EN': {
+        'systemId': '',
+        'IE': 'Q',
+        'WebKit': 'S'
       }
     }
     if (diffMap[pid]) {
@@ -105,7 +126,6 @@ function constructor(rootNode) {
     };
   }
   this.documentMode = getMode();
-//alert('WebKit:' + this.documentMode.WebKit + '\nIE6:' + this.documentMode.IE6 + '\nIE7:' + this.documentMode.IE7 + '\nIE8:' + this.documentMode.IE8);return;
 },
 
 function checkNode(node, context) {
@@ -151,16 +171,16 @@ function checkNode(node, context) {
 
   var mode = this.documentMode;
   var hasEmptyNoWarnning = {
-    IE6 : 'SAQ',
-    IE7 : 'SAQ',
-    IE8 : 'SQ',
-    WebKit : 'S'
+    IE6: 'SAQ',
+    IE7: 'SAQ',
+    IE8: 'SQ',
+    WebKit: 'S'
   };
   var hasNoEmptyNoWarnning = {
-    IE6 : 'SAQ',
-    IE7 : 'SAQ',
-    IE8 : 'AQ',
-    WebKit : 'AQ'
+    IE6: 'SAQ',
+    IE7: 'SAQ',
+    IE8: 'AQ',
+    WebKit: 'AQ'
   }
 
   if (hasEmptyNode(node)) {
