@@ -16,7 +16,7 @@
 
 addScriptToInject(function() {
 
-const VALID_ALIGN_MIDDLE_TAGS = {
+var VALID_ALIGN_MIDDLE_TAGS = {
   IMG: true,
   OBJECT: true,
   APPLET: true,

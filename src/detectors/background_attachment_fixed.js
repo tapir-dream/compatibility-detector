@@ -1,3 +1,19 @@
+/*
+ * Copyright 2010 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
@@ -9,16 +25,17 @@ chrome_comp.CompDetect.ScanDomBaseDetector,
 null, // constructor
 
 function checkNode(node, additionalData) {
-  //检查元素是否是 HTML 或 BODY
 
-  if (Node.ELEMENT_NODE != node.nodeType || node.tagName == "HMTL" || node.tagName =="BODY")
+  // Check whether it is HTML or BODY element
+  if (Node.ELEMENT_NODE != node.nodeType ||
+      node.tagName == 'HMTL' || node.tagName =='BODY')
     return;
-  //取非 HTML BODY 的 background-attachment 属性
-  var background_attachment = chrome_comp.getDefinedStylePropertyByName(node, true, 'background-attachment');
+  // Get non-HTML BODY of the background-attachment property
+  var background_attachment =
+      chrome_comp.getDefinedStylePropertyByName(node, true, 'background-attachment');
 
-  if(background_attachment=="fixed"){
-      this.addProblem('RC3002', [node]);
-  }
+  if (background_attachment == 'fixed')
+    this.addProblem('RC3002', [node]);
 }
 ); // declareDetector
 

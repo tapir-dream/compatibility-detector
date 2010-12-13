@@ -1,26 +1,28 @@
-// @author : qianbaokun@gmail.com
+/*
+ * Copyright 2010 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'baseTagPositionDetector',
+'base_tag_position',
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
 null, // constructor
-
-/*
- *【思路】
- * 检测 BASE 标记，如果标记属于 BDOY 标记子元素，再得到所有 A 标记，
- * 遍历 A 标记，判断是否处于该 BASE 标记之后，如有则命中。
- *
- *
- *【messages.json】
- * "HJ2001": { "message": "各浏览器对 BASE 元素前后的超链接的默认 target 处理存在差异" },
- * "HJ2001_suggestion": { "message": "不要在 HEAD 元素之外定义 BASE 元素，保证各浏览器兼容。" },
- *
- */
 
 function checkNode(node, context) {
 
@@ -30,19 +32,18 @@ function checkNode(node, context) {
   if (node.tagName != 'BASE')
     return;
 
-  if ( document.getElementsByTagName('body')[0].compareDocumentPosition(node) != 20 )
+  var bodyElement =  document.getElementsByTagName('body')[0];
+  if (bodyElement.compareDocumentPosition(node) != 20)
     return;
 
   var Links = Array.prototype.slice.call(document.getElementsByTagName('A'));
 
-  for (var i = 0,len = Links.length; i<len; i++){
-      if ( node.compareDocumentPosition(Links[i]) === 2 ){
-         this.addProblem('HJ2001', [node]);
-	 return ;
-      }
+  for (var i = 0,len = Links.length; i < len; i++){
+    if ( node.compareDocumentPosition(Links[i]) === 2 ){
+      this.addProblem('HJ2001', [node]);
+      return ;
+    }
   }
-
-
 }
 ); // declareDetector
 

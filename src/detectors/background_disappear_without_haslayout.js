@@ -1,25 +1,28 @@
-// @author : luyuan.china@gmail.com
+/*
+ * Copyright 2010 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'backgroundDisappearWithoutHasLayout',
+'background_disappear_without_hasLayout',
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
 null, // constructor
-
-/*【思路】
- * 过滤掉 clear:none 的元素，过滤掉没有通过 clear 特性清除浮动的包含块，过滤掉包含块宽度较宽且包含块内包含非 clearance 的普通流节点的元素
- * 若包含块设定了背景图片则发出警告
- * 若包含块的背景色与其容器背景色不同则发出警告
- *
- * 【缺陷】
- * 此问题情况比较复杂，若包含块之后存在普通流中的元素且非触发hasLayout则可能不会出现背景色异常
- * 没有考虑作者使用 css hack 时的情况
- */
-
 
 function checkNode(node, additionalData) {
   function getNextHasLayoutElement(nodeEl) {
@@ -45,12 +48,12 @@ function checkNode(node, additionalData) {
         last = nodeEl.lastElementChild;
     for (var i = 0, j = ch.length; i < j; i++) {
       if (ch[i].nodeType == 1) {
-        if (chrome_comp.getComputedStyle(ch[i]).clear != 'none' && 
+        if (chrome_comp.getComputedStyle(ch[i]).clear != 'none' &&
             ch[i] == last)
           return true;
         if (chrome_comp.getComputedStyle(ch[i]).display != 'block')
           return false;
-        if (chrome_comp.getComputedStyle(ch[i]).float == 'none')
+        if (chrome_comp.getComputedStyle(ch[i])['float'] == 'none')
           return false;
       }
       if (ch[i].nodeType == 3) {
@@ -62,9 +65,9 @@ function checkNode(node, additionalData) {
   }
 
   function getNearestLesserWidthAncestor(nodeEl) {
-    var parent = nodeEl.parentNode,
-        width = parseInt(chrome_comp.getComputedStyle(nodeEl).width),
-        pWidth = parseInt(chrome_comp.getComputedStyle(parent).width);
+    var parent = nodeEl.parentNode;
+    var width = parseInt(chrome_comp.getComputedStyle(nodeEl).width,10);
+    var pWidth = parseInt(chrome_comp.getComputedStyle(parent).width,10);
     return pWidth < width;
   }
 
@@ -98,7 +101,7 @@ function checkNode(node, additionalData) {
     this.addProblem('RM3007', [cb]);
   } else {
     if (window.chrome_comp.getComputedStyle(
-        window.chrome_comp.getContainingBlock(cb)).backgroundColor != 
+        window.chrome_comp.getContainingBlock(cb)).backgroundColor !=
         cbBgColor) {
       this.addProblem('RM3007', [cb]);
     }

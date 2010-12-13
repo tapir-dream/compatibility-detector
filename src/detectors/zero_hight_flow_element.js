@@ -26,39 +26,49 @@ null, // constructor
 
 function checkNode(node, additionalData) {
   if (Node.ELEMENT_NODE != node.nodeType)
-    return;	
-  var nodeDisplayStyle = chrome_comp.getComputedStyle(node).display;
-  var nodeClearStyle = chrome_comp.getComputedStyle(node).clear;
-  var nodeFloatStyle = chrome_comp.getComputedStyle(node).float;
-  if (node.nextElementSibling) {
+    return;
+
+  if (!node.nextElementSibling)
+    return;
+
+  var elementStyle = chrome_comp.getComputedStyle(node);
+  var nodeDisplayStyle = elementStyle.display;
+  var nodeClearStyle = elementStyle.clear;
+  var nodeFloatStyle = elementStyle['float'];
   var nextNode = node.nextElementSibling;
-  var nextNodeDisplayStyle = chrome_comp.getComputedStyle(nextNode).display;
-  var nextNodeClearStyle = chrome_comp.getComputedStyle(nextNode).clear;
-  var nextNodeFloatStyle = chrome_comp.getComputedStyle(nextNode).float;
-  var nextNodeWidthStyle = chrome_comp.getComputedStyle(nextNode).width;
-  }
-  else
-  	return;
-  if (node.offsetHeight == '0' && node.offsetWidth!='0' && nodeFloatStyle!='none' && nodeDisplayStyle!='none')  
-    if (nextNode.offsetHeight!='0' && nextNode.offsetWidth!='0' && nextNodeFloatStyle!='none' && nextNodeDisplayStyle!='none')
-      if (nodeFloatStyle == nextNodeFloatStyle) { 
-        if (nextNodeClearStyle!=nodeFloatStyle && nextNodeClearStyle!='both' && nextNodeClearStyle!='all') {  
+
+  var nextNodeStyle = chrome_comp.getComputedStyle(nextNode);
+  var nextNodeDisplayStyle = nextNodeStyle.display;
+  var nextNodeClearStyle = nextNodeStyle.clear;
+  var nextNodeFloatStyle = nextNodeStyle['float'];
+  var nextNodeWidthStyle = nextNodeStyle.width;
+
+  if (node.offsetHeight == 0 && node.offsetWidth != 0 &&
+      nodeFloatStyle != 'none' && nodeDisplayStyle != 'none'){
+    if (nextNode.offsetHeight != 0 && nextNode.offsetWidth != 0 &&
+        nextNodeFloatStyle != 'none' && nextNodeDisplayStyle!='none'){
+      if (nodeFloatStyle == nextNodeFloatStyle){
+        if (nextNodeClearStyle != nodeFloatStyle &&
+            nextNodeClearStyle != 'both' &&
+            nextNodeClearStyle != 'all'){
           var div = document.createElement('div');
-		  div.style.height = '0px';
+          div.style.height = '0px';
           div.style.padding = '0px';
           div.style.margin = '0px';
           div.style.border = '0px';
           div.style.overflow = 'hidden';
-          node.style.height='1px';         
+          node.style.height = '1px';
           node.parentNode.insertBefore(div, nextNode);
-          remainSpace = chrome_comp.getComputedStyle(div).width;  //the leaving space of containner
+          // the leaving space of containner
+          remainSpace = chrome_comp.getComputedStyle(div).width;
           if(parseInt(nextNodeWidthStyle) <= parseInt(remainSpace))
             this.addProblem('RM1004', [node]);
         }
        node.style.height='0px';
        node.parentNode.removeChild(div);
-       }
-			  
+      }
+    }
+  }
 }
 ); // declareDetector
 

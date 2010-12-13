@@ -28,10 +28,12 @@ function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType || !chrome_comp.inQuirksMode())
     return;
 
-  var fontSize = chrome_comp.getDefinedStylePropertyByName(node, true,
-      'font-size');
-  if (fontSize == 'xx-small' || fontSize == 'x-small' || fontSize == 'medium' ||
-      fontSize == 'large' || fontSize == 'x-large' || fontSize == 'xx-large') {
+  var fontSize =
+      chrome_comp.getDefinedStylePropertyByName(node, true,'font-size');
+
+  if (fontSize == 'xx-small' || fontSize == 'x-small' ||
+      fontSize == 'medium' || fontSize == 'large' ||
+      fontSize == 'x-large' || fontSize == 'xx-large') {
     this.addProblem('##0006',
         { nodes: [node], details : 'font-size: ' + fontSize });
   }

@@ -32,7 +32,8 @@ function checkNode(node, context) {
   var fontWeight = chrome_comp.getDefinedStylePropertyByName(node, true,
       'font-weight');
   var parentFontWeight = parseInt(
-      chrome_comp.getComputedStyle(node.parentNode).fontWeight);
+      chrome_comp.getComputedStyle(node.parentNode).fontWeight,10);
+
   if ((fontWeight == 'bolder' && parentFontWeight <= 300) ||
       (fontWeight == 'lighter' && parentFontWeight >= 800)) {
     this.addProblem('RA3002', [node]);
@@ -42,7 +43,7 @@ function checkNode(node, context) {
   if (!fontWeight) {
     var tagName = node.tagName;
     if (tagName == 'STRONG' || tagName == 'B' || tagName == 'TH' ||
-        // H1 ~ H6
+        // check H1 ~ H6
         (tagName.length == 2 && tagName[0] == 'H' &&
          tagName[1] >= '1' && tagName[1] <= '6')) {
       if (!isNaN(parentFontWeight) && parentFontWeight <= 300)

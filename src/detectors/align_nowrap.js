@@ -29,16 +29,15 @@ function checkNode(node, context) {
     return;
 
   var tagList = ['IMG', 'OBJECT', 'IFRAME', 'TABLE', 'APPLET', 'EMBED'];
+
   var display = chrome_comp.getComputedStyle(node).display;
-  if (display == 'inline')
+  if (display == 'inline' || display == 'none')
     return;
-  if (display == 'none')
-    return;
+
   var children = node.children;
   var nodeListLeft = [];
   var nodeListRight = [];
-  
-  
+
   for (var i = 0, j = children.length; i < j; i++) {
     if (tagList.indexOf(children[i].tagName) != -1) {
       var align = children[i].align.toLowerCase();
@@ -56,23 +55,29 @@ function checkNode(node, context) {
         });
     }
   }
+
   if (nodeListLeft.length + nodeListRight.length < 2)
     return;
+
   var right = node.getBoundingClientRect().right;
   var left = node.getBoundingClientRect().left;
   var inlineWidth = node.style.width;
   var inlinePosition = node.style.position;
   var inlineLeft = node.style.left;
-  var oldWidth = parseInt(chrome_comp.getComputedStyle(node).width);
+  var oldWidth = parseInt(chrome_comp.getComputedStyle(node).width,10);
   var newWidth = 10000;
+
   if (node.tagName != 'TD' && node.tagName != 'TH')
     node.style.position = 'fixed !important';
+
   node.style.left = '0px';
   node.style.width = newWidth + 'px !important';
+
   var newLeft = node.getBoundingClientRect().left;
   var problemList = [];
   var mostTop = 0;
   var mostBottom = 0;
+
   if (nodeListLeft.length > 0) {
     for (var m = 0, n = nodeListLeft.length; m < n; m++) {
       nodeListLeft[m].newRect = nodeListLeft[m].node.getBoundingClientRect();
@@ -81,7 +86,7 @@ function checkNode(node, context) {
       if (nodeListLeft[m].rect.top == nodeListLeft[m].newRect.top)
         continue;
       if (nodeListLeft[m].alignment == 'left') {
-        if (left - nodeListLeft[m].rect.left == 
+        if (left - nodeListLeft[m].rect.left ==
             newLeft - nodeListLeft[m].newRect.left) {
           var prev = nodeListLeft[m].node.previousSibling;
           if (prev) {
@@ -98,16 +103,18 @@ function checkNode(node, context) {
             }
           }
         } else {
-          this.addProblem('RX8015', 
+          this.addProblem('RX8015',
               { nodes: [nodeListLeft[m].node], severityLevel: 1 });
         }
       }
     }
   }
   node.style.left = null;
+
   var oldMarginLeft = parseInt(chrome_comp.getComputedStyle(node).marginLeft);
-  var left = node.getBoundingClientRect().left - 
+  var left = node.getBoundingClientRect().left -
       oldMarginLeft + oldWidth - newWidth;
+
   node.style.left = left + 'px !important';
   if (nodeListRight.length > 0) {
     for (var m = 0, n = nodeListRight.length; m < n; m++) {
@@ -131,12 +138,12 @@ function checkNode(node, context) {
                 continue;
             }
           }
-          if (!(mostTop < nodeListRight[m].newRect.top && 
+          if (!(mostTop < nodeListRight[m].newRect.top &&
                 nodeListRight[m].newRect < mostBottom))
-            this.addProblem('RX8015', 
+            this.addProblem('RX8015',
                 { nodes: [nodeListRight[m].node], severityLevel: 1 });
         } else {
-          this.addProblem('RX8015', 
+          this.addProblem('RX8015',
               { nodes: [nodeListRight[m].node], severityLevel: 1 });
         }
       }

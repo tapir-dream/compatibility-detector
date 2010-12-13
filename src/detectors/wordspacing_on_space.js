@@ -1,23 +1,28 @@
-// @author : luyuan.china@gmail.com
+/*
+ * Copyright 2010 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'wordSpacingOnSpace',
+'wordspacing_on_space',
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
 null, // constructor
-
-/*【思路】
- * 检测所有 word-spacing 特性值不为 0 或 normal 的，且其内部包含纯文本节点的非替换元素
- * 若文本节点中包含 &nbsp; 或者连表意空格则发出警告
- *
- *【缺陷】
- * 
- */
-
 
 function checkNode(node, additionalData) {
   function hasTextNode(element) {
@@ -38,7 +43,7 @@ function checkNode(node, additionalData) {
   function hasNonBreakingSpace(string) {
     return /\u00a0/g.test(string);
   }
-  
+
   function hasIdeographicSpace(string) {
     var res = string.match(/\u3000/g);
     return res && res.length > 0;
@@ -58,7 +63,7 @@ function checkNode(node, additionalData) {
     return;
 
   for (var i = 0, j = textNode.list.length; i < j; i++) {
-    if (hasNonBreakingSpace(textNode.list[i].nodeValue) || 
+    if (hasNonBreakingSpace(textNode.list[i].nodeValue) ||
         hasIdeographicSpace(textNode.list[i].nodeValue))
       this.addProblem('RT2013', [node]);
   }

@@ -25,6 +25,7 @@
 //     for 'Apple' or 'Google' (websites shouldn't be looking at
 //     navigator.vendor to determine which browser is used)
 //
+
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(

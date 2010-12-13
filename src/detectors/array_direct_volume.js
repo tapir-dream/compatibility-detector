@@ -1,22 +1,26 @@
-// @author : qianbaokun@gmail.com
+/*
+ * Copyright 2010 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the 'License');
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an 'AS IS' BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'arrayDirectVolumeDetector',
+'array_direct_volume',
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
-
-/*
- *【思路】
- * 检测所有标记的内联事件与script标记，去除注释后与字符内容后，如果存在 ',]' 字符则命中。
- *
- *【messages.json】
- * "SJ2007": { "message": "IE6 IE7 IE8 不会忽略数组直接量的末尾空元素"},
- * "SJ2007_suggestion": { "message": "数组直接量的最后不要出现 \",\"字符，以保证兼容各浏览器。" },
- *
- */
 
 function constructor(rootNode) {
   this.gatherAllProblemNodes_ = false;
@@ -45,17 +49,18 @@ function checkNode(node, context) {
       .replace(this.oneLineScriptCommentsRegexp_,'')
       .replace(this.multiLineScriptCommentsRegexp_,'')
       .replace(this.stringDirectVolumeRegxp_,'');
+
     if (this.arrayDirectVolumeRegexp_.test(scriptData))
       this.addProblem('SJ2007', [node]);
 
   //check inline events of other node
-  }else{
+  } else {
     for (var i = 0,l = node.attributes.length; i<l; i++){
       if ( node.attributes[i].name.toLowerCase().indexOf('on') == 0 ){
-       scriptData = node.attributes[i].value
-        .replace(this.oneLineScriptCommentsRegexp_,'')
-        .replace(this.multiLineScriptCommentsRegexp_,'')
-        .replace(this.stringDirectVolumeRegxp_,'');
+        scriptData = node.attributes[i].value
+            .replace(this.oneLineScriptCommentsRegexp_,'')
+            .replace(this.multiLineScriptCommentsRegexp_,'')
+            .replace(this.stringDirectVolumeRegxp_,'');
         if (this.arrayDirectVolumeRegexp_.test(scriptData))
            this.addProblem('SJ2007', [node]);
       }

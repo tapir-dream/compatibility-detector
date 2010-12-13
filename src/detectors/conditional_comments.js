@@ -37,7 +37,7 @@ function checkNode(node, context) {
   //   processes the contents between them. We'll warn users because users may
   //   not expect this behavior.
   if (node.nodeValue.match(/^ *\[ *if [^\]]*\] *$/i))
-    this.addProblem("BT8004", [node]);
+    this.addProblem('BT8004', [node]);
 }
 ); // declareDetector
 
