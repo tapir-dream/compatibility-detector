@@ -51,7 +51,7 @@ function constructor(rootNode) {
         addProblem('SD9001');
     }
 
-    function addProblem(id){
+    function addProblem(id) {
       that.addProblem(id, {
         nodes: [this],
         details: 'document.getElementById(' + arg0 + ')',
@@ -67,22 +67,22 @@ function constructor(rootNode) {
     var names = getNames();
 
     if (result.length == 0 && names.commonNames
-        .concat(names.namesOfFrameAndParam).indexOf(arg0.toLowerCase()) >= 0){
+        .concat(names.namesOfFrameAndParam).indexOf(arg0.toLowerCase()) >= 0) {
       that.addProblem('SD9012', {
         nodes: [this],
         details: 'document.getElementsByName(' + arg0 + ')',
         needsStack: true
-     });
+      });
     }
   };
 
   //may has problem when updating document tree dynamically after window loading
   //get all elements with id attribute in the document
-  function getIds(){
+  function getIds() {
     if (!ids) {
       ids = [];
       var elements = document.querySelectorAll('[id]');
-      Array.prototype.forEach.call(elements, function(element){
+      Array.prototype.forEach.call(elements, function(element) {
         ids.push(element.getAttribute('id').toLowerCase());
       });
     }
@@ -100,16 +100,15 @@ function constructor(rootNode) {
       var commonTags = ['A', 'APPLET', 'BUTTON', 'FORM', 'IFRAME', 'IMG',
         'INPUT', 'MAP', 'META', 'OBJECT', 'SELECT', 'TEXTAREA'];
 
-      Array.prototype.forEach.call(elements, function(element){
+      Array.prototype.forEach.call(elements, function(element) {
         var tagName = element.tagName;
         var name = element.getAttribute('name').toLowerCase();
-        if (commonTags.indexOf(tagName) >= 0) {
+        if (commonTags.indexOf(tagName) >= 0)
           commonNames.push(name);
-        } else if (tagName == 'EMBED') {
+        else if (tagName == 'EMBED')
           namesOfEmbed.push(name)
-        } else if (tagName == 'FRAME' || tagName == 'PARAM') {
+        else if (tagName == 'FRAME' || tagName == 'PARAM')
           namesOfFrameAndParam.push(name);
-        }
       });
     }
     return {
@@ -122,16 +121,16 @@ function constructor(rootNode) {
 
 function setUp() {
   chrome_comp.CompDetect.registerExistingMethodHook(
-    Document.prototype, 'getElementById', this.getElementById_);
+      Document.prototype, 'getElementById', this.getElementById_);
   chrome_comp.CompDetect.registerExistingMethodHook(
-    Document.prototype, 'getElementsByName', this.getElementsByName_);
+      Document.prototype, 'getElementsByName', this.getElementsByName_);
 },
 
 function cleanUp() {
   chrome_comp.CompDetect.unregisterExistingMethodHook(
-    Document.prototype, 'getElementById', this.getElementById_);
+      Document.prototype, 'getElementById', this.getElementById_);
   chrome_comp.CompDetect.unregisterExistingMethodHook(
-    Document.prototype, 'getElementsByName', this.getElementsByName_);
+      Document.prototype, 'getElementsByName', this.getElementsByName_);
 }
 ); // declareDetector
 

@@ -69,8 +69,7 @@ function checkNode(node, context) {
     var width = chrome_comp.getDefinedStylePropertyByName(node, true, 'width');
     if (width && width != 'auto') {
       // IE(Q) mistakenly treats it as inline.
-      if (affectsInlineSibling(node, true) ||
-          affectsInlineSibling(node, false))
+      if (affectsInlineSibling(node, true) || affectsInlineSibling(node, false))
         this.addProblem('HF1004', [node]);
     }
   }

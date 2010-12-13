@@ -60,8 +60,7 @@ function checkNode(node, context) {
             function (oldValue, newValue, reason) {
               This.addProblem('BX9010', [node]);
               return newValue;
-            },
-        true, true);
+            }, true, true);
     winIdList[id] = node;
   }
   var winNameCList = ['A', 'FRAMESET', 'IMG', 'MAP', 'META', 'EMBED', 'FORM',
@@ -72,12 +71,11 @@ function checkNode(node, context) {
             function (oldValue, newValue, reason) {
               This.addProblem('BX9010', [node]);
               return newValue;
-            },
-        true, true);
+            }, true, true);
     winNameList[name] = node;
   }
-return;
-  if (hasNameAttribute(node)) {
+
+  /*if (hasNameAttribute(node)) {
     var docIdCList1 = ['FORM', 'IFRAME', 'EMBED'];
     if (id && !docIdList[id] && (docIdCList1.indexOf(node.tagName) >= 0)) {
       chrome_comp.CompDetect.registerSimplePropertyHook(ifr.contentDocument, id,
@@ -107,7 +105,7 @@ return;
           return newValue;
         }, true, true);
     docNameList[name] = node;
-  }
+  }*/
 }
 ); // declareDetector
 

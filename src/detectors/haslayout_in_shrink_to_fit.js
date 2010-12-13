@@ -4,49 +4,29 @@ addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'hasLayoutInShrinkToFit',
+'hasLayout_in_shrink_to_fit',
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
 null, // constructor
 
-/*【思路】
- * 检测所有遵循 shrink-to-fit 算法的非替换元素
- * 若其内不存在设定了宽度的子元素则发出警告
- *
- *【缺陷】
- * 很容易触发 WebKit 的过度 shrink-to-fit 的 Bug
- */
-
-
 function checkNode(node, additionalData) {
   function isWidthAuto(element) {
-    var div = document.createElement('div');
-    div.style.cssText = 'width:10000000px;height:20px;';
-    var dis = element.style.display, tl = element.style.tableLayout,
-        oldW = parseInt(chrome_comp.getComputedStyle(element).width),
-        blw = parseInt(chrome_comp.getComputedStyle(element).borderLeftWidth),
-        brw = parseInt(chrome_comp.getComputedStyle(element).borderRightWidth),
-        pl = parseInt(chrome_comp.getComputedStyle(element).paddingLeft),
-        pr = parseInt(chrome_comp.getComputedStyle(element).paddingRight);
-    element.style.display = 'table !important';
-    element.style.tableLayout = 'fixed !important';
-    element.appendChild(div);
-    var newW = parseInt(chrome_comp.getComputedStyle(element).width);
-    element.removeChild(div);
+    var inlineDisplay = element.style.display;
+    element.style.display = 'none !important';
+    var width = chrome_comp.getComputedStyle(element).width;
     element.style.display = null;
-    element.style.tableLayout = null;
-    element.style.display = (dis) ? dis : null;
-    element.style.tableLayout = (tl) ? tl : null;
+    element.style.display = (inlineDisplay) ? inlineDisplay : null;
+    return width == 'auto';
     return oldW != (newW + blw + brw + pl + pr);
   }
 
   function isShrinkToFit(element) {
     if (!isWidthAuto(element))
       return false;
-    var cssFloat = chrome_comp.getComputedStyle(element).float,
-        pos = chrome_comp.getComputedStyle(element).position,
-        dis = chrome_comp.getComputedStyle(element).display;
+    var cssFloat = chrome_comp.getComputedStyle(element).float;
+    var pos = chrome_comp.getComputedStyle(element).position;
+    var dis = chrome_comp.getComputedStyle(element).display;
     return (pos == 'absolute' || pos == 'fixed') || (cssFloat != 'none') ||
         (dis == 'inline-block');
   }
@@ -63,9 +43,8 @@ function checkNode(node, additionalData) {
       if (!isWidthAuto(ch[i]))
         return false;
       if (chrome_comp.hasLayoutInIE(element)) {
-        if (!allWidthAutoLayoutChildren(ch[i])) {
+        if (!allWidthAutoLayoutChildren(ch[i]))
           return false;
-        }
       }
     }
     return true;

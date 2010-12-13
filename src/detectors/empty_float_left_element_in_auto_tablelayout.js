@@ -25,42 +25,42 @@ chrome_comp.CompDetect.ScanDomBaseDetector,
 null, // constructor
 
 function checkNode(node, context) {
+  function getTrWidth(td) {
+    if (td.parentNode) {
+      if (td.parentNode.tagName == 'TR') {
+        return chrome_comp.getComputedStyle(td.parentNode).width;
+      } else {
+        if (td.parentNode.tagName == 'BODY')
+          return false;
+        else
+          getTrWidth(td.parentNode);
+      }
+    } else
+      return false;
+  }
+
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
     return;
-  function getTrWidth(td) {   
-    if (td.parentNode ) {
-	  if(td.parentNode.tagName == 'TR')
-	    return chrome_comp.getComputedStyle(td.parentNode).width
-      else {
-		if(td.parentNode.tagName == 'BODY')
-          return false;
-		else	
-          getTrWidth(td.parentNode);
-		}
-	 }
-    else
-      return  false;
- }
-  
+
   var nodeFloatStyle = chrome_comp.getComputedStyle(node).float;
   var nodeWidthStyle = chrome_comp.getComputedStyle(node).width;
   var offsetParent = node.offsetParent;
-  if (nodeFloatStyle == 'left' && nodeWidthStyle!=0 && node.childNodes.length == 0) {
+  if (nodeFloatStyle == 'left' && nodeWidthStyle != 0 && 
+      node.childNodes.length == 0) {
     if (offsetParent && offsetParent.tagName == 'TD') {
-	  var trOriginalWidth = getTrWidth(offsetParent);
-	  if (trOriginalWidth) {
-	    originalDisplay = node.style.display;
-	    node.style.display = 'none !important';
-	    trChangedWidth = getTrWidth(offsetParent); 
-	    if (trOriginalWidth!=trChangedWidth)
-	      this.addProblem('RE8004', [node]);
-	  node.style.display = originalDisplay ? originalDisplay : null;
+      var trOriginalWidth = getTrWidth(offsetParent);
+      if (trOriginalWidth) {
+        originalDisplay = node.style.display;
+        node.style.display = 'none !important';
+        trChangedWidth = getTrWidth(offsetParent); 
+        if (trOriginalWidth != trChangedWidth)
+          this.addProblem('RE8004', [node]);
+        node.style.display = null;
+        node.style.display = originalDisplay ? originalDisplay : null;
       }
- 	}
-			  
+    }
   }
 }
-						   
 ); // declareDetector
 
 });

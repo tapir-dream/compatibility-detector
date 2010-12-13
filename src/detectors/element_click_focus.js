@@ -4,50 +4,50 @@ addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'elementClickFocus',
+'element_click_focus',
 
 chrome_comp.CompDetect.NonScanDomBaseDetector,
 
 function constructor(rootNode) {
   var This = this;
   window.addEventListener('load', function () {
-    setTimeout(function () {
-      var allElements = document.getElementsByTagName('*');
-      var list = ['A', 'AREA', 'INPUT', 'EMBED', 'IFRAME', 'TABLE', 
-        'CAPTION', 'TD', 'FIELDSET'];
-      var typeList = ['text', 'password', 'file', 'hidden'];
-      for (var i = 0, j = allElements.length; i < j; i++) {
-        if (list.indexOf(allElements[i].tagName) == -1)
-          continue;
-        if (allElements[i].tagName == 'INPUT' && 
-            typeList.indexOf(allElements[i].type.toLowerCase()) != -1)
-          continue;
-        var hasClick = allElements[i].onclick ||
-            allElements[i].getAttribute('hasclick') == 'yes';
-        var hasFocus = allElements[i].onfocus ||
-            allElements[i].getAttribute('hasfocus') == 'yes';
-        if (hasClick && hasFocus) {
-          This.addProblem('SD9027', [allElements[i]]);
+      setTimeout(function () {
+        var allElements = document.getElementsByTagName('*');
+        var list = ['A', 'AREA', 'INPUT', 'EMBED', 'IFRAME', 'TABLE', 
+            'CAPTION', 'TD', 'FIELDSET'];
+        var typeList = ['text', 'password', 'file', 'hidden'];
+        for (var i = 0, j = allElements.length; i < j; i++) {
+          if (list.indexOf(allElements[i].tagName) == -1)
+            continue;
+          if (allElements[i].tagName == 'INPUT' && 
+              typeList.indexOf(allElements[i].type.toLowerCase()) != -1)
+            continue;
+          var hasClick = allElements[i].onclick ||
+              allElements[i].getAttribute('hasclick') == 'yes';
+          var hasFocus = allElements[i].onfocus ||
+              allElements[i].getAttribute('hasfocus') == 'yes';
+          if (hasClick && hasFocus) {
+            This.addProblem('SD9027', [allElements[i]]);
+          }
         }
-      }
-    }, 1000);
+      }, 1000);
   }, false);
   this.addEventListener_ = function(result, originalArguments, callStack) {
-    var list = ['A', 'AREA', 'INPUT', 'EMBED', 'IFRAME', 'TABLE', 
-        'CAPTION', 'TD', 'FIELDSET'];
-    if (list.indexOf(this.tagName) == -1)
-      return;
-    var typeList = ['text', 'password', 'file', 'hidden'];
-    if (this.tagName == 'INPUT' && 
-        typeList.indexOf(this.type.toLowerCase()) != -1)
-      return
-    var eventType = 
-        (originalArguments[0]) ? originalArguments[0].toLowerCase() : '';
-    if (eventType == 'click')
-      this.setAttribute('hasclick', 'yes');
-    if (eventType == 'focus')
-      this.setAttribute('hasfocus', 'yes');
-    
+      var list = ['A', 'AREA', 'INPUT', 'EMBED', 'IFRAME', 'TABLE', 
+          'CAPTION', 'TD', 'FIELDSET'];
+      if (list.indexOf(this.tagName) == -1)
+        return;
+      var typeList = ['text', 'password', 'file', 'hidden'];
+      if (this.tagName == 'INPUT' && 
+          typeList.indexOf(this.type.toLowerCase()) != -1)
+        return
+      var eventType = (originalArguments[0]) ? 
+          originalArguments[0].toLowerCase() : 
+          '';
+      if (eventType == 'click')
+        this.setAttribute('hasclick', 'yes');
+      if (eventType == 'focus')
+        this.setAttribute('hasfocus', 'yes');
   };
 },
 
