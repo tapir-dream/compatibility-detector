@@ -85,7 +85,7 @@ function checkNode(node, additionalData) {
     var parentElement = node;
     while ((parentElement = parentElement.parentElement) &&
       widthIsAuto(parentElement) && !isTableElement(parentElement) &&
-      parentElement.tagName != "BUTTON" && parentElement.tagName != "BODY") {
+      parentElement.tagName != 'BUTTON' && parentElement.tagName != 'BODY') {
       ancestorElements.push(parentElement);
     }
     for (var i = ancestorElements.length; i; i--) {
