@@ -1,28 +1,40 @@
-// @author : qianbaokun@gmail.com
+/*
+ * Copyright 2010 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'imgEmptySrcAndLowsrcDetector',
+'img_empty_src_and_lowsrc',
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
 null, // constructor
 
-/*【说明】
- * 本例检测了两个RCA问题：空 src 的 img 标记和 img 的 lowsrc 属性
- *
- *【思路】
- * 检测所有 img input[type=image] 标记，如果被其不存在 src 属性或 src 属性值为空，则命中。
- * 检测所有 img input[type=image] 标记，如果被其不存在 src 属性或 src 属性值为空，并且存在 lowsrc 属性则命中。
- *
- *【messages.json】
- * "BT1038": { "message": "只有 IE 支持 IMG INPUT[type=image] 标记内的 lowsrc 属性"},
- * "BT1038_suggestion": { "message": "如无特殊应用需求，应避免使用 lowsrc 属性。" },
- *
- * "HO1002": { "message": "IMG 元素的 src 属性为空时其尺寸在各浏览器中不一致" },
- * "HO1002_suggestion": { "message": "为了防止这种无 \"src\" 的 IMG 元素对页面产生布局影响，需要设置这种 IMG 的 ‘display’ 特性为 'none'。" },
+/*
+ * Detect 2 problems: HO1002 and BT1038
+ * 
+ * Step:
+ * 
+ * HO1002: check all IMG and INPUT[type="image"] elements, if it has no "src" 
+ *  attribute or the value of "src" is empty, then report problem.
+ * 
+ * BT1038: check all IMG and INPUT[type="image"] elements, if it has no "src" 
+ *  attribute or the value of "src" is empty, and it has "lowsrc" attribute, 
+ *  then report problem.
  */
 
 
@@ -30,17 +42,17 @@ function checkNode(node, context) {
 
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
     return;
-  if ( node.tagName != 'IMG' && node.tagName != 'INPUT' )
+  if (node.tagName != 'IMG' && node.tagName != 'INPUT')
     return;
 
-  if ( node.tagName === 'INPUT' &&
-       node.getAttribute('type') != 'image' )
+  if (node.tagName === 'INPUT' && node.getAttribute('type') != 'image')
     return;
 
-  if ( !node.hasAttribute('src') || node.getAttribute('src') === '' )
+  if (!node.hasAttribute('src') || node.getAttribute('src') === '')
     this.addProblem('HO1002', [node]);
 
-  if ( ( !node.hasAttribute('src') || node.getAttribute('src') === '' ) && node.hasAttribute('lowsrc') )
+  if ((!node.hasAttribute('src') || node.getAttribute('src') === '') && 
+      node.hasAttribute('lowsrc'))
     this.addProblem('BT1038', [node]);
 }
 ); // declareDetector
