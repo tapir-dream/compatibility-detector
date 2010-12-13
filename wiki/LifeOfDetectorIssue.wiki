@@ -4,7 +4,7 @@
 
 2. The verifier verifies if the detector can detect compatibility issues accurately, and record the details of the verification.
 
-3. If the verifier finds no false-positive or false-negative, change the status of the issue to `Done` and exit this process.
+3. If the verifier finds no false-positive or false-negative, change the status of the issue to `Verified` and exit this process.
 
 4. The verifier adds `False-Positive` and/or `False-Negative` labels to the issue if the detector is proved to have false-positives and/or false-negatives respectively.
 
