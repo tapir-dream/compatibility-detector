@@ -30,7 +30,7 @@ function checkNode(node, context) {
   function isTableElement(node) {
     var TABLELIKE_VALUES = ['table', 'inline-table', 'table-row-group',
         'table-header-group', 'table-footer-group', 'table-row',
-        'table-column-group','table-column','table-cell','table-caption'];
+        'table-column-group', 'table-column', 'table-cell', 'table-caption'];
     var display = chrome_comp.getComputedStyle(node).display;
     return TABLELIKE_VALUES.indexOf(display) != -1;
   }
@@ -40,7 +40,7 @@ function checkNode(node, context) {
   function overflowIsVisible(node) {
     var style = chrome_comp.getComputedStyle(node);
     if (style.overflow == 'visible')
-        return {'xIsVisible': true, 'yIsVisible': true};
+      return {'xIsVisible': true, 'yIsVisible': true};
     var xIsVisible = false;
     var yIsVisible = false;
     if (style.overflowX == 'auto') {
@@ -91,17 +91,20 @@ function checkNode(node, context) {
   function rectCallback(node) {
     var left = chrome_comp.PageUtil.pageLeft(node);
     var top = chrome_comp.PageUtil.pageTop(node);
-    return [{
-      left: left,
-      top: top,
-      width: node.offsetWidth,
-      height: node.offsetHeight
-    }, {
-      left: left,
-      top: top,
-      width: node.scrollWidth,
-      height: node.scrollHeight
-    }];
+    return [
+      {
+        left: left,
+        top: top,
+        width: node.offsetWidth,
+        height: node.offsetHeight
+      },
+      {
+        left: left,
+        top: top,
+        width: node.scrollWidth,
+        height: node.scrollHeight
+      }
+    ];
   }
 
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
@@ -137,7 +140,7 @@ function checkNode(node, context) {
 
   if (chrome_comp.isReplacedElement(node) || isTableElement(node) ||
       node.tagName == "HTML" || node.tagName == "BODY")
-      return;
+    return;
 
   var computedStyle = chrome_comp.getComputedStyle(node);
 
@@ -167,27 +170,26 @@ function checkNode(node, context) {
         var el = descentElements[i];
         var settedStyle = {};
         var style = chrome_comp.getComputedStyle(el);
-        if (parseInt(style.marginTop) < 0){
+        if (parseInt(style.marginTop) < 0) {
           settedStyle.marginTop = el.style.marginTop;
           el.style.marginTop = '0 !important';
         }
-        if (parseInt(style.marginRight) < 0){
+        if (parseInt(style.marginRight) < 0) {
           settedStyle.marginRight = el.style.marginRight;
           el.style.marginRight = '0 !important';
         }
-        if (parseInt(style.marginBottom) < 0){
+        if (parseInt(style.marginBottom) < 0) {
           settedStyle.marginBottom = el.style.marginBottom;
           el.style.marginBottom = '0 !important';
         }
-        if (parseInt(style.marginLeft) < 0){
+        if (parseInt(style.marginLeft) < 0) {
           settedStyle.marginLeft = el.style.marginLeft;
           el.style.marginLeft = '0 !important';
         }
-        if (style.position == 'relative'){
+        if (style.position == 'relative') {
           settedStyle.position = el.style.position;
           el.style.position = 'static !important';
-        }
-        else if (style.position == 'absolute'){
+        } else if (style.position == 'absolute') {
           settedStyle.display = el.style.display;
           el.style.display = 'none !important';
         }
@@ -260,7 +262,8 @@ function checkNode(node, context) {
         parentElement.tagName != "BUTTON" &&
         parentElement.tagName != "BODY" ) {
       var style = chrome_comp.getComputedStyle(parentElement);
-      if (style.position != 'static') break;
+      if (style.position != 'static')
+        break;
       // In Chrome, the value of 'overflow' is computed from the values of
       // 'overflow-x' and 'overflow-y', and the value of 'overflow' will not
       // be 'visible' if one of 'overflow-x' and 'overflow-y' is not 'visible'.
