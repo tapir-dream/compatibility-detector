@@ -70,12 +70,13 @@ function checkNode(node, context) {
   var textOverflow = style.textOverflow;
   var overflow = style.overflow;
   var wordWrap = style.wordWrap;
-  //Increase the filter conditions , When the elements
-  //of the TD and set word-wrap:break-word ,no problem.
+
   if (style && textOverflow == 'ellipsis' && overflow == "hidden" &&
     node.tagName !="TD" && wordWrap != "break-word" && !isAutoWidth(node)) {
     var nodeWidth = chrome_comp.getComputedStyle(node).width;
     This.flag = false;
+    //when the length of sub-element is more than parent element ,point out
+    //this problem    
     loopForNode(node,nodeWidth);
     if(This.flag == true)
       this.addProblem('RT3005', [node]);
