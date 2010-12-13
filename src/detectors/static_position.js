@@ -26,12 +26,13 @@ null, // constructor
 
 function checkNode(node, additionalData) {
   function isStaticPosition(element) {
-    var top = chrome_comp.getComputedStyle(element).top;
-    var right = chrome_comp.getComputedStyle(element).right;
-    var bottom = chrome_comp.getComputedStyle(element).bottom;
-    var left = chrome_comp.getComputedStyle(element).left;
-    return (top == 'auto') && (right == 'auto') && (bottom == 'auto') &&
-        (left == 'auto');
+    var elementStyle = chrome_comp.getComputedStyle(element);
+    var top = elementStyle.top;
+    var right = elementStyle.right;
+    var bottom = elementStyle.bottom;
+    var left = elementStyle.left;
+    return (top == 'auto') && (right == 'auto') &&
+           (bottom == 'auto') && (left == 'auto');
   }
 
   function isPositioned(element) {

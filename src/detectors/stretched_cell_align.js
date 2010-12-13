@@ -104,7 +104,8 @@ function checkNode(node, context) {
     return;
   if ((textAlign.indexOf('left') != -1) && !hasBackground(node))
     return;
-  if ((!isStretched(node) || (hasBackground(node))) && (hasInflowContent(node)))
+  if ((!isStretched(node) || (hasBackground(node))) &&
+      (hasInflowContent(node)))
     this.addProblem('RE8014', [node]);
 }
 ); // declareDetector

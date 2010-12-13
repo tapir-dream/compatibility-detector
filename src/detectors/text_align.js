@@ -77,10 +77,10 @@ function checkNode(node, context) {
   if (this.getCompatMode_.doctypeInIE === 'S')
     return;
 
-  var style = chrome_comp.getComputedStyle(node),
-      display = style.display,
-      textAlign = style.textAlign,
-      direction = style.direction;
+  var style = chrome_comp.getComputedStyle(node);
+  var display = style.display;
+  var textAlign = style.textAlign;
+  var direction = style.direction;
 
   if ((display == 'block' || display == 'inline-block' ||
        display == 'table-cell') &&
@@ -100,7 +100,7 @@ function checkNode(node, context) {
               parseInt(childStyle.paddingLeft, 10) +
               parseInt(childStyle.paddingRight, 10);
           if (Math.abs(parseInt(childStyle.marginLeft, 10) -
-              parseInt(childStyle.marginRight, 10)) > 1 && 
+              parseInt(childStyle.marginRight, 10)) > 1 &&
               childWidth + 1 < parentElementMaxWidth) {
             this.addProblem('RT8003',
                 { nodes: [node],

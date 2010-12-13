@@ -24,7 +24,7 @@ function isNowrapInherited(element) {
   table.style.whiteSpace = 'pre-line !important';
   var computedWhiteSpace = chrome_comp.getComputedStyle(element).whiteSpace;
   table.style.whiteSpace = null;
-  table.style.whiteSpace = 
+  table.style.whiteSpace =
       (tableInlineWhiteSpace) ? tableInlineWhiteSpace : null;
   return computedWhiteSpace == 'pre-line';
 }

@@ -101,7 +101,7 @@ function checkNode(node, context) {
   for (var i = 0, j = descendantList.length; i < j; i++) {
     var style = chrome_comp.getComputedStyle(descendantList[i]);
     var display = style.display;
-    var cFloat = style.float;
+    var cFloat = style['float'];
     var position = style.position;
     if (position == 'fixed' || position == 'absolute')
       continue;

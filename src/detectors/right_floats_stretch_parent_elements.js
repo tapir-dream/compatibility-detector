@@ -54,11 +54,13 @@ function checkNode(node, additionalData) {
       return true;
       //todo: check 'width' property need another function that is accurate.
       //todo: the 'width' maybe affected by its STF ancestor elements.
-//      console.log(oWidth,cWidth);
-//      var oBorderLeftWidth = computedStyle.borderLeftWidth;
-//      var oInlineBorderLeftWidth = node.style.borderLeftWidth;
-//      node.style.borderLeftWidth = '5px !important';
-//      cWidth = computedStyle.width;
+      /*
+      console.log(oWidth,cWidth);
+      var oBorderLeftWidth = computedStyle.borderLeftWidth;
+      var oInlineBorderLeftWidth = node.style.borderLeftWidth;
+      node.style.borderLeftWidth = '5px !important';
+      cWidth = computedStyle.width;
+      */
     }
     return false;
   }
@@ -68,7 +70,7 @@ function checkNode(node, additionalData) {
   */
   function widthIsShrinkToFit(node) {
     var computedStyle = chrome_comp.getComputedStyle(node);
-    return widthIsAuto(node) && computedStyle.display != 'none' && 
+    return widthIsAuto(node) && computedStyle.display != 'none' &&
       (((computedStyle.position == 'absolute' ||
       computedStyle.position == 'fixed') &&
       (computedStyle.left == 'auto' || computedStyle.right == 'auto')) ||
@@ -78,8 +80,8 @@ function checkNode(node, additionalData) {
 
   if (node.nodeType != Node.ELEMENT_NODE) return;
   var computedStyle = chrome_comp.getComputedStyle(node);
-  if (computedStyle.float == 'right' && 
-      computedStyle.position != 'absolute' && 
+  if (computedStyle.float == 'right' &&
+      computedStyle.position != 'absolute' &&
       computedStyle.position != 'fixed' && computedStyle.display != 'none') {
     var ancestorElements = [];
     var parentElement = node;

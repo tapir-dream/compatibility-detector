@@ -42,7 +42,7 @@ function checkNode(node, context) {
         false, 'width');
     if (elementWidth != undefined)
       return;
-    if (!chrome_comp.isShrinkToFit(getParentElement(node)))
+    if (!chrome_comp.isShrinkToFit(node.parentElement))
       return;
 
      //Hit the target!
@@ -57,20 +57,12 @@ function checkNode(node, context) {
     return ;
   if (elementWidth.toString().slice(-1) != "%")
     return;
-  if (!chrome_comp.isShrinkToFit(getParentElement(node)))
+  if (!chrome_comp.isShrinkToFit(node.parentElement))
     return;
 
   //Hit the target!
   this.addProblem('RD1021', [node]);
   return;
-
-  function getParentElement(node) {
-    var parentNode = node.parentNode;
-    while (parentNode.nodeType != 1) {
-      parentNode = node.parentNode;
-    }
-    return parentNode;
-  }
 }
 ); // declareDetector
 

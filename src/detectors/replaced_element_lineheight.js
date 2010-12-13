@@ -55,29 +55,27 @@ function checkNode(node, additionalData) {
 
   if (Node.ELEMENT_NODE != node.nodeType)
     return;
-  
+
   if (!chrome_comp.isReplacedElement(node))
     return;
-  
+
   if (node.tagName != 'INPUT')
     return;
-  
+
   var type = node.type.toLowerCase();
   var compLineHeight = parseInt(chrome_comp.getComputedStyle(node).lineHeight);
   var compHeight = parseInt(chrome_comp.getComputedStyle(node).height);
   if (type == 'text' || type == 'password') {
     if (compLineHeight == compHeight) {
-      if (testLineHeightChanged(node, 
-          (compLineHeight) ? compLineHeight : 'normal')) {
+      if (testLineHeightChanged(node,
+          (compLineHeight) ? compLineHeight : 'normal'))
         this.addProblem('RD1012', [node]);
-      }
     }
   } else if (type == 'button' || type == 'submit' || type == 'reset') {
-      if (testDefinedLineHeight(node, 
+      if (testDefinedLineHeight(node,
           (compLineHeight) ? compLineHeight : 'normal'))
         this.addProblem('RD1012', [node]);
   }
-  
 }
 ); // declareDetector
 
