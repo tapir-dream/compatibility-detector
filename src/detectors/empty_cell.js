@@ -92,24 +92,24 @@ function isEmptyCell(cell) {
   return true;
 }
 
-function isEmptyChild(node){
+function isEmptyChild(node) {
   var childElements =
           Array.prototype.slice.call(node.getElementsByTagName('*'));
-  for (var i = 0, l = childElements.length; i < l; i++)
+  for (var i = 0, l = childElements.length; i < l; i++) {
     if (chrome_comp.hasLayoutInIE(childElements[i]) ||
         childElements[i].tagName == 'IFRAME' ||
         childElements[i].tagName == 'OBJECT' ||
         childElements[i].tagName == 'EMBED')
       return false;
+  }
   if (getFixedNodeTextContent(node) == '')
     return true;
-
   return false;
 }
 
 //match script and style element content fix textContent return text
 //don't use 'node.cloneNode(true).innerText ' it will trigger RCA SD9029
-function getFixedNodeTextContent(node){
+function getFixedNodeTextContent(node) {
   var scriptElements =
           Array.prototype.slice.call(node.getElementsByTagName('script'));
   var styleElements =
@@ -154,7 +154,7 @@ function checkNode(node, context) {
           chrome_comp.getDefinedStylePropertyByName(node, true, 'height'),
           10) | 0;
       //fix cell getCompatStyle height is null
-      nodeHeight = nodeHeight || 
+      nodeHeight = nodeHeight ||
         (parseInt(node.getAttribute('height'), 10) | 0);
       var nodeClientHeight = node.clientHeight | 0;
       var nodePaddingHeight = nodePaddingTop + nodePaddingBottom;

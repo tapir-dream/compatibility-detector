@@ -26,7 +26,7 @@ null,
 
 function checkNode(node, context) {
   function isFloatLeft(element) {
-    return chrome_comp.getComputedStyle(element).float == 'left';
+    return chrome_comp.getComputedStyle(element)['float'] == 'left';
   }
 
   function hasMarginBottom(element) {

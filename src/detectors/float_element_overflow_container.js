@@ -29,7 +29,7 @@ function checkNode(node, additionalData) {
     return;
 
   var nodeDisplayStyle = chrome_comp.getComputedStyle(node).display;
-  var nodeFloatStyle = chrome_comp.getComputedStyle(node).float;
+  var nodeFloatStyle = chrome_comp.getComputedStyle(node)['float'];
   if (nodeDisplayStyle != 'none' && nodeFloatStyle != 'none') {
     var nodeWidthStyle = chrome_comp.getComputedStyle(node).width;
     var nodeDirectionStyle = chrome_comp.getComputedStyle(node).direction;
@@ -40,7 +40,7 @@ function checkNode(node, additionalData) {
     containerWidth =
       chrome_comp.getComputedStyle(chrome_comp.getContainingBlock(node)).width;
     if (parseInt(nodeWidthStyle, 10) > parseInt(containerWidth, 10)) {
-      if ((nodeFloatStyle == 'right' && nodeDirectionStyle == 'ltr') || 
+      if ((nodeFloatStyle == 'right' && nodeDirectionStyle == 'ltr') ||
           (nodeFloatStyle == 'left' && nodeDirectionStyle == 'rtl'))
         this.addProblem('RM8014', [node]);
     }

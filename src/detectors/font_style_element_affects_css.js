@@ -41,7 +41,7 @@ function checkNode(node, context) {
 
   var isUnderlineElement = (tagName == 'A' || tagName == 'U');
   var isStrikeElement = (!isUnderlineElement &&
-      (tagName == 'S' || tagName == 'STRIKE'));
+                        (tagName == 'S' || tagName == 'STRIKE'));
 
   var decorationsInEffect =
       chrome_comp.getComputedStyle(node).WebkitTextDecorationsInEffect;

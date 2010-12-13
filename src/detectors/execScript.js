@@ -18,7 +18,7 @@ addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'execscript',
+'execScript',
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
@@ -28,7 +28,7 @@ function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType)
     return;
 
-  this.execScriptSyntaxRegexp_ = 
+  this.execScriptSyntaxRegexp_ =
     /([^\w$]*execScript\s?[\(\w$])|([^\w$]*window([.]execScript|\[["']execScript["']\])\s?[\(\w$])/g
   this.multiLineScriptCommentsRegexp_ = /\/\*([\S\s]*?)\*\//g;
   this.oneLineScriptCommentsRegexp_ = /[^:\/]\/\/[^\n\r]*/gm;

@@ -37,8 +37,9 @@ function detectorStyle(action, element) {
         'text-indent:0 !important; }';
     document.getElementsByTagName('head')[0].appendChild(style);
     return style;
-  } else if (action == 'remove')
+  } else if (action == 'remove') {
     document.getElementsByTagName('head')[0].removeChild(element);
+  }
 }
 
 function getPreviousElement(element) {
