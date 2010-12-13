@@ -24,13 +24,13 @@ chrome_comp.CompDetect.ScanDomBaseDetector,
 
 /*
  * Step:
- * 
- * 1. Get doctype of the page in IE6, IE7, IE8 and Chrome, including 
+ *
+ * 1. Get doctype of the page in IE6, IE7, IE8 and Chrome, including
  *    Almost Standards Mode.
- * 2. If the containing block of current replace element is with 
+ * 2. If the containing block of current replace element is with
  *    other content inside, then return.
  * 3. If Empty node is existent, report problem as the case might be.
- * 
+ *
  * Defect:
  * Only consider IE6, IE7, IE8 and Chrome currently.
  */
@@ -44,9 +44,8 @@ function constructor(rootNode) {
       while (prev.previousSibling) {
         prev = prev.previousSibling;
       }
-      if (prev && prev.nodeType == 8) {
+      if (prev && prev.nodeType == 8)
         return true;
-      }
     }
 
     function hasBase() {
@@ -75,7 +74,7 @@ function constructor(rootNode) {
       doctypeInIE8 = 'Q';
     }
     diffMap = {
-      '-//W3C//DTD HTML 4.0 Transitional//EN': { 
+      '-//W3C//DTD HTML 4.0 Transitional//EN': {
         'systemId': 'http://www.w3.org/TR/html4/loose.dtd',
         'IE': 'S',
         'WebKit': 'Q'
@@ -100,29 +99,25 @@ function constructor(rootNode) {
       }
     }
     if (hasBase()) {
-      if (doctypeInWebKit != 'Q') {
+      if (doctypeInWebKit != 'Q')
         doctypeInWebKit = 'S';
-      }
-      if (doctypeInIE8 != 'Q') {
+      if (doctypeInIE8 != 'Q')
         doctypeInIE8 = 'S';
-      }
     } else {
-      if (doctypeInWebKit != 'Q') {
+      if (doctypeInWebKit != 'Q')
         doctypeInWebKit = 'A';
-      }
-      if (doctypeInIE8 != 'Q') {
+      if (doctypeInIE8 != 'Q')
         doctypeInIE8 = 'A';
-      }
     }
     if (doctypeInIE6 != 'Q')
       doctypeInIE6 = 'A';
     if (doctypeInIE7 != 'Q')
       doctypeInIE7 = 'A';
-    return { 
-      IE6 : doctypeInIE6, 
-      IE7 : doctypeInIE7, 
-      IE8 : doctypeInIE8, 
-      WebKit : doctypeInWebKit 
+    return {
+      IE6 : doctypeInIE6,
+      IE7 : doctypeInIE7,
+      IE8 : doctypeInIE8,
+      WebKit : doctypeInWebKit
     };
   }
   this.documentMode = getMode();
@@ -184,15 +179,15 @@ function checkNode(node, context) {
   }
 
   if (hasEmptyNode(node)) {
-    if ((hasEmptyNoWarnning.IE6.indexOf(mode.IE6) == -1) || 
-        (hasEmptyNoWarnning.IE7.indexOf(mode.IE7) == -1) || 
-        (hasEmptyNoWarnning.IE8.indexOf(mode.IE8) == -1) || 
+    if ((hasEmptyNoWarnning.IE6.indexOf(mode.IE6) == -1) ||
+        (hasEmptyNoWarnning.IE7.indexOf(mode.IE7) == -1) ||
+        (hasEmptyNoWarnning.IE8.indexOf(mode.IE8) == -1) ||
         (hasEmptyNoWarnning.WebKit.indexOf(mode.WebKit) == -1))
       this.addProblem('RD3020', [node]);
   } else {
-    if ((hasNoEmptyNoWarnning.IE6.indexOf(mode.IE6) == -1) || 
-        (hasNoEmptyNoWarnning.IE7.indexOf(mode.IE7) == -1) || 
-        (hasNoEmptyNoWarnning.IE8.indexOf(mode.IE8) == -1) || 
+    if ((hasNoEmptyNoWarnning.IE6.indexOf(mode.IE6) == -1) ||
+        (hasNoEmptyNoWarnning.IE7.indexOf(mode.IE7) == -1) ||
+        (hasNoEmptyNoWarnning.IE8.indexOf(mode.IE8) == -1) ||
         (hasNoEmptyNoWarnning.WebKit.indexOf(mode.WebKit) == -1))
       this.addProblem('RD3020', [node]);
   }

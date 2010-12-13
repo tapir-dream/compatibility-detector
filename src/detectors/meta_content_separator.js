@@ -31,9 +31,8 @@ function postAnalyze() {
     if (node.tagName == "META" &&
         chrome_comp.getAttributeLowerCase(node, 'http-equiv') == 'refresh') {
       var content = node.getAttribute('content');
-      if (content && !content.match(/^\s*[0-9]+\s*;/)) {
+      if (content && !content.match(/^\s*[0-9]+\s*;/))
         this.addProblem('HG2003', node);
-      }
     }
   }
 }
