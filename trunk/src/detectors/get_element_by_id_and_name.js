@@ -38,7 +38,7 @@ function constructor(rootNode) {
   ifr.src = location;
   ifr.onload = function () {
     document.body.removeChild(ifr);
-  }
+  };
 },
 
 function checkNode(node, context) {

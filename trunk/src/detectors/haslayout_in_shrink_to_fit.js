@@ -40,8 +40,8 @@ function checkNode(node, additionalData) {
     var cssFloat = chrome_comp.getComputedStyle(element).float;
     var pos = chrome_comp.getComputedStyle(element).position;
     var dis = chrome_comp.getComputedStyle(element).display;
-    return (pos == 'absolute' || pos == 'fixed') || (cssFloat != 'none') ||
-        (dis == 'inline-block');
+    return (pos == 'absolute' || pos == 'fixed') ||
+           (cssFloat != 'none') || (dis == 'inline-block');
   }
 
   function isInlineElement(element) {
@@ -71,7 +71,7 @@ function checkNode(node, additionalData) {
 
   if (chrome_comp.getComputedStyle(node).display == 'none')
     return;
-  
+
   if (chrome_comp.getComputedStyle(node).display.indexOf('inline') != -1)
     return;
 

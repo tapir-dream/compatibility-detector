@@ -27,13 +27,13 @@ function constructor(rootNode) {
   window.addEventListener('load', function () {
       setTimeout(function () {
         var allElements = document.getElementsByTagName('*');
-        var list = ['A', 'AREA', 'INPUT', 'EMBED', 'IFRAME', 'TABLE', 
+        var list = ['A', 'AREA', 'INPUT', 'EMBED', 'IFRAME', 'TABLE',
             'CAPTION', 'TD', 'FIELDSET'];
         var typeList = ['text', 'password', 'file', 'hidden'];
         for (var i = 0, j = allElements.length; i < j; i++) {
           if (list.indexOf(allElements[i].tagName) == -1)
             continue;
-          if (allElements[i].tagName == 'INPUT' && 
+          if (allElements[i].tagName == 'INPUT' &&
               typeList.indexOf(allElements[i].type.toLowerCase()) != -1)
             continue;
           var hasClick = allElements[i].onclick ||
@@ -47,16 +47,16 @@ function constructor(rootNode) {
       }, 1000);
   }, false);
   this.addEventListener_ = function(result, originalArguments, callStack) {
-      var list = ['A', 'AREA', 'INPUT', 'EMBED', 'IFRAME', 'TABLE', 
+      var list = ['A', 'AREA', 'INPUT', 'EMBED', 'IFRAME', 'TABLE',
           'CAPTION', 'TD', 'FIELDSET'];
       if (list.indexOf(this.tagName) == -1)
         return;
       var typeList = ['text', 'password', 'file', 'hidden'];
-      if (this.tagName == 'INPUT' && 
+      if (this.tagName == 'INPUT' &&
           typeList.indexOf(this.type.toLowerCase()) != -1)
         return
-      var eventType = (originalArguments[0]) ? 
-          originalArguments[0].toLowerCase() : 
+      var eventType = (originalArguments[0]) ?
+          originalArguments[0].toLowerCase() :
           '';
       if (eventType == 'click')
         this.setAttribute('hasclick', 'yes');
