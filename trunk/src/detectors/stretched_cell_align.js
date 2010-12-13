@@ -16,33 +16,13 @@
 
 addScriptToInject(function() {
 
-function getCellsSetWidth(element) {
-  var inlineTableLayout = element.style.tableLayout;
-  var inlineWidth = element.style.width;
-  element.style.tableLayout = 'fixed !important';
-  element.style.width = '0px !important';
-  var rows = element.rows;
-  var nonAutoCellList = [];
-  var rowsDisplay = [];
-  for (var i = 0, j = rows.length; i < j; i++) {
-    var cells = rows[i].cells;
-    for (var m = 0, n = cells.length; m < n; m++) {
-      if (cells[m].offsetWidth > 0) {
-        nonAutoCellList.push({ node: cells[m], width: cells[m].offsetWidth });
-      }
-    }
-    rowsDisplay[i] = rows[i].style.display;
-    rows[i].style.display = 'none !important';
-  }
-  for (var i = 0, j = rows.length; i < j; i++) {
-    rows[i].style.display = null;
-    rows[i].style.display = (rowsDisplay[i]) ? rowsDisplay[i] : null;
-  }
-  element.style.tableLayout = null;
-  element.style.tableLayout = (inlineTableLayout) ? inlineTableLayout: null;
-  element.style.width = null;
-  element.style.width = (inlineWidth) ? inlineWidth : null;
-  return nonAutoCellList;
+function getRealComputedWidth(element) {
+  var inlineDisplay = element.style.display;
+  element.style.display = 'none !important';
+  var width = chrome_comp.getComputedStyle(element).width;
+  element.style.display = null;
+  element.style.display = (inlineDisplay) ? inlineDisplay : null;
+  return width;
 }
 
 function isStretched(element) {
@@ -65,6 +45,15 @@ function isPercentageWidth(element) {
   return width.slice(-1) == '%';
 }
 
+function hasBackground(element) {
+  var style = chrome_comp.getComputedStyle(element);
+  if ((!style.backgroundColor || style.backgroundColor == 'transparent' ||
+      style.backgroundColor == chrome_comp.COLOR_TRANSPARENT) &&
+      (!style.backgroundImage || style.backgroundImage == 'none'))
+    return false;
+  return true;
+}
+
 chrome_comp.CompDetect.declareDetector(
 
 'stretched_cell_align',
@@ -77,21 +66,25 @@ function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
     return;
 
-  if (node.tagName != 'TABLE')
+ if (node.tagName != 'TD' && node.tagName != 'TH')
     return;
-  var list = getCellsSetWidth(node);
 
-  for (var i = 0, j = list.length; i < j; i++) {
-    var width = parseInt(chrome_comp.getComputedStyle(list[i].node).width);
-    var textAlign = chrome_comp.getComputedStyle(list[i].node).textAlign;
-    if (isPercentageWidth(list[i].node))
-      continue;
-    if ((width > list[i].width + 1) && ((textAlign.indexOf('right') != -1) ||
-        (textAlign.indexOf('center') != -1))) {
-      if (!isStretched(list[i].node))
-      this.addProblem('RE8014', [list[i].node]);
-    }
-  }
+  if (getRealComputedWidth(node) == 'auto')
+    return;
+
+  if (isPercentageWidth(node))
+    return;
+
+  var usedWidth = parseInt(chrome_comp.getComputedStyle(node).width, 10);
+  var computedWidth = parseInt(getRealComputedWidth(node), 10);
+  var textAlign = chrome_comp.getComputedStyle(node).textAlign;
+  if ((usedWidth < computedWidth))
+    return;
+  if ((textAlign.indexOf('left') != -1) && !hasBackground(node))
+    return;
+
+  if (!isStretched(node) || (hasBackground(node)))
+    this.addProblem('RE8014', [node]);
 }
 ); // declareDetector
 
