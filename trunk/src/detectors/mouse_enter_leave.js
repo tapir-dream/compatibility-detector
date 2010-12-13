@@ -23,32 +23,30 @@ chrome_comp.CompDetect.declareDetector(
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
 function constructor(rootNode) {
+  var This = this;
   var enterFlag = false;
   var leaveFlag = false;
-
-  //if mouseover exist , set the enterFlag
   this.hookOverHandler_ = function(oldValue, newValue, reason) {
-    if (reason == 'set'){
-      enterFlag = true;
+    if (reason == 'set') {
+      enterFlag=true;
     }
   };
-  //When mouseenter and mouseover same time bound ,
-  //that the author considers the problem ,otherwise  point out this problem
+  //When onmouseenter and onmouseover same time bound ,
+  //that the author considers the problem
   this.hookEnterHandler_ = function(oldValue, newValue, reason) {
-    if (reason == 'set' && enterFlag == false)
+    if (reason == 'set' && enterCounter == true)
       This.addProblem('BT9017', { nodes: [this], needsStack: true });
     return newValue;
   };
-  //if mouseout exist , set the leaveFlag
   this.hookOutHandler_ = function(oldValue, newValue, reason) {
-    if (reason == 'set'){
-      leaveFlag = true;
+    if (reason == 'set') {
+      leaveFlag=true;
     }
   };
-  //When mouseleave and mouseout same time bound ,
-  //that the author considers the problem ,otherwise  point out this problem
+  //When onmouseout and onmouseleave same time bound ,
+  //that the author considers the problem
   this.hookLeaveHandler_ = function(oldValue, newValue, reason) {
-    if (reason == 'set' && leaveFlag == false)
+    if (reason == 'set' && leaveFlag == true)
       This.addProblem('BT9017', { nodes: [this], needsStack: true });
     return newValue;
   };
@@ -61,51 +59,46 @@ function checkNode(node, context) {
     return;
   //Increase the filter conditions , When the elements
   //of the display: none ,no problem.
-  var display = window.getComputedStyle(node,null).display;
+  var display = window.getComputedStyle(node, null).display;
   //Increase the filter conditions , When the elements
   //of the visibility: hidden ,no problem.
-  var visibility = window.getComputedStyle(node,null).visibility;
-  if(display == "none" || visibility == "hidden")
+  var visibility = window.getComputedStyle(node, null).visibility;
+  if (display == 'none' || visibility == 'hidden')
     return;
-  //Increase the filter conditions , when mouseenter and mouseover exist,
+  //Increase the filter conditions, when onmouseenter and onmouseover exist,
   //that the author considers the problem
-  if(node.hasAttribute('onmouseenter') && node.hasAttribute('onmouseover'))
+  if (node.hasAttribute('onmouseenter') && node.hasAttribute('onmouseover'))
     return;
-  //Increase the filter conditions , when mouseleave and mouseout exist,
+  //Increase the filter conditions, when onmouseleave and onmouseout exist,
   //that the author considers the problem
-  if(node.hasAttribute('onmouseleave') && node.hasAttribute('onmouseout'))
+  else if (node.hasAttribute('onmouseleave') && node.hasAttribute('onmouseout'))
     return;
-  //if mouseenter or mouseleave exits , point out this problem
-  if(node.hasAttribute('onmouseenter') || node.hasAttribute('onmouseleave'))
+  if (node.hasAttribute('onmouseenter') || node.hasAttribute('onmouseleave'))
     this.addProblem('BT9017', [node]);
 },
 
 function setUp() {
-  //add mouseover hook of register
+  //add onmouseover hook of register
   chrome_comp.CompDetect.registerSimplePropertyHook(
       Element.prototype, 'onmouseover', this.hookOverHandler_);
-  //add mouseenter hook of register
   chrome_comp.CompDetect.registerSimplePropertyHook(
       Element.prototype, 'onmouseenter', this.hookEnterHandler_);
-  //add mouseout hook of register
+  //add onmouseout hook of register
   chrome_comp.CompDetect.registerSimplePropertyHook(
       Element.prototype, 'onmouseout', this.hookOutHandler_);
-  //add mouseleave hook of register
   chrome_comp.CompDetect.registerSimplePropertyHook(
       Element.prototype, 'onmouseleave', this.hookLeaveHandler_);
 },
 
 function cleanUp() {
-  //add mouseover hook of unregister
+  //add onmouseover hook of unregister
   chrome_comp.CompDetect.unregisterSimplePropertyHook(
       Element.prototype, 'onmouseover', this.hookOverHandler_);
-  //add mouseenter hook of unregister
   chrome_comp.CompDetect.unregisterSimplePropertyHook(
       Element.prototype, 'onmouseenter', this.hookEnterHandler_);
-  //add mouseout hook of unregister
+  //add onmouseout hook of unregister
   chrome_comp.CompDetect.unregisterSimplePropertyHook(
       Element.prototype, 'onmouseout', this.hookOutHandler_);
-  //add mouseleave hook of unregister
   chrome_comp.CompDetect.unregisterSimplePropertyHook(
       Element.prototype, 'onmouseleave', this.hookLeaveHandler_);
 }
