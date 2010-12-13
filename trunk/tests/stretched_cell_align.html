@@ -1,60 +1,94 @@
+<!DOCTYPE html>
+<html chrome_comp_test="stretched_cell_align">
+<head>
 <style>
-  table { background:#888; border:1px solid black; }
-  td { background:#AAA; text-align:right; border:1px solid black; }
-  div { background:#DDD; }
+	* { font:18px 'Trebuchet MS' }
+    table { width:200px; background:plum; border:3px solid black; }
+    td { background:coral; text-align:right; border:1px solid black; }
+    div { background:wheat; }
+    
+    .test td.a { width:50px; font-size:2em; background:gold; }
 </style>
-
-<table>
-<tr>
-  <td style="width:200px;">
-    <div>cell</div>
-  </td>
-</tr>
-<tr>
-  <td style="width:150px;">
-    <div>stretched cell</div>
-  </td>
-</tr>
+</head>
+<body>
+<table cellpadding="5" cellspacing="5" style="width:auto;">
+    <tr>
+        <td style="width:10;">
+            <div>10</div>
+        </td>
+    </tr>
 </table>
-
-<br>
-<span>No Problem Case</span>
-<br><br>
-
-<table>
-<tr>
-  <td style="width:10;">
-    <div>overflow</div>
-  </td>
-</tr>
+<br />
+<table cellpadding="5" cellspacing="5">
+    <tr>
+        <td style="width:100px;" expectedProblems="RE8014">
+            <div>100</div>
+        </td>
+    </tr>
 </table>
-
-<br>
-<table>
-<tr>
-  <td style="width:200px;">
-    <div>cell</div>
-  </td>
-</tr>
-<tr>
-  <td style="width:150px;">
-    <div style="float:left">float left cell</div>
-  </td>
-</tr>
+<br />
+<table cellpadding="5" cellspacing="5" style="width:auto;">
+    <tr>
+        <td style="width:10px;" expectedProblems="RE8014">
+            <div>10</div>
+        </td>
+        <td>
+            <div>auto</div>
+        </td>
+        <td style="width:10px;" expectedProblems="RE8014">
+            <div>10</div>
+        </td>
+    </tr>
 </table>
-
+<br />
+<table cellpadding="5" cellspacing="5">
+    <tr>
+        <td style="width:30px;" expectedProblems="RE8014">
+            <div>30</div>
+        </td>
+        <td style="width:90px;">
+            <div>90</div>
+        </td>
+        <td style="width:30px;" expectedProblems="RE8014">
+            <div>30</div>
+        </td>
+    </tr>
+    <tr>
+        <td style="width:60px;">
+            <div>60</div>
+        </td>
+        <td style="width:50px;" expectedProblems="RE8014">
+            <div>50</div>
+        </td>
+        <td style="width:60px;">
+            <div>60</div>
+        </td>
+    </tr>
+</table>
+<br />
+<table border="0" cellspacing="0" cellpadding="0" class="test" style="width:250px; border-collapse:collapse;">
+    <tr>
+        <td class="a" style="text-align:right;" expectedProblems="RE8014">
+            <div>cell</div>
+        </td>
+        <td style="width:100px; text-align:center;" expectedProblems="RE8014">
+            <div>cell</div>
+        </td>
+    </tr>
+</table>
+<br />
 <br>
-<style>
-.test td.a{width:50px; font-size:2em; background:gold;}
-</style>
-<table border="0" cellspacing="0" cellpadding="0" class="test" style="width:150px; border-collapse:collapse;"> 
-  <tr> 
-    <td class="a" style="text-align:right;"> 
-      cell
-    </td> 
-    <td style="width:100px; text-align:center;"> 
-      cell
-    </td> 
-  </tr> 
-</table> 
-
+<table border="0" cellspacing="0" cellpadding="0">
+    <tr>
+        <td style="width:200px;">
+            <div>cell</div>
+        </td>
+    </tr>
+    <tr>
+        <td style="width:150px;">
+            <div><div style="position:absolute">float left cell</div></div>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
