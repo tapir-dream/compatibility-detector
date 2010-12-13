@@ -1,27 +1,28 @@
-// @author : luyuan.china@gmail.com
+/*
+ * Copyright 2010 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'marginTopOnClearanceElement',
+'margin_top_on_clearance_element',
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
 null, // constructor
-
-/*【思路】
- * 检测所有 'clear' 特性不为 'none' 的元素，过滤其 'margin-top' 特性的计算值为 '0' 的情况
- * 得到 clearance 元素的包含块并获取距离其包含块顶部的距离，并由此值开始，循环为 clearance 元素设定 'margin-top' 特性的值，每次 +1，比较每次设定前后 clearance 元素是否在垂直方向上出现位移
- * 若出现位移，则返回第一次出现位移时的 'margin-top' 特性的临界值，并恢复 clearance 元素的 style 对象。若始终未出现位移则可以根据传入的 protection 参数的值决定何时结束循环
- * 如果 clearance 元素原先设定的 'margin-top' 特性的值小于得到临界值则发出警告。
- *
- * 【缺陷】
- * while (true) { } 的做法不好，可能导致循环过多
- * 判断 clearance 元素是否存在同级 previousElementSibling 不存在浮动元素的做法需要完善
- * clearance 元素计算后的 'margin-top' 特性值为 '0' 时是否不存在兼容性问题需要再分析
- * 没有考虑作者使用 css hack 时的情况
- */
 
 function checkNode(node, additionalData) {
   function getContainingBlock(nodeEl) {
@@ -36,21 +37,22 @@ function checkNode(node, additionalData) {
         return document.documentElement;
       if (nod.parentNode) 
         nod = nod.parentNode;
-      if (window.chrome_comp.getComputedStyle(nod).display ==
-          'block' || window.chrome_comp.getComputedStyle(nod).display == 
-          'list-item' || isBlockFormattingContext(nod)) 
+      if (window.chrome_comp.getComputedStyle(nod).display == 'block' || 
+          window.chrome_comp.getComputedStyle(nod).display == 'list-item' || 
+          isBlockFormattingContext(nod)) 
         return nod;
     }
     return null;
   }
 
   function isBlockFormattingContext(nodeEl) {
-    var display = window.chrome_comp.getComputedStyle(nodeEl).display,
-        cssFloat = window.chrome_comp.getComputedStyle(nodeEl).float,
-        position = window.chrome_comp.getComputedStyle(nodeEl).position,
-        overflow = window.chrome_comp.getComputedStyle(nodeEl).overflow,
-        overflowX = window.chrome_comp.getComputedStyle(nodeEl).overflowX,
-        overflowY = window.chrome_comp.getComputedStyle(nodeEl).overflowY;
+    var computedStyle = window.chrome_comp.getComputedStyle(nodeEl);
+    var display = computedStyle.display;
+    var cssFloat = computedStyle.float;
+    var position = computedStyle.position;
+    var overflow = computedStyle.overflow;
+    var overflowX = computedStyle.overflowX;
+    var overflowY = computedStyle.overflowY;
     return (display == 'inline-block') || (display == 'table') ||
       (display == 'table-cell') || (display == 'table-caption') ||
       (position == 'absolute') || (position == 'fixed') ||
@@ -59,9 +61,12 @@ function checkNode(node, additionalData) {
   }
 
   function getBoundaryClearanceSpacing(nodeEl, start, protection) {
-    var oldTop, newTop, computedMarginTop = 
-        parseInt(chrome_comp.getComputedStyle(nodeEl).marginTop) | 0, i = start,
-        definedMarginTop = nodeEl.style.marginTop;
+    var oldTop;
+    var newTop
+    var computedMarginTop = 
+      parseInt(chrome_comp.getComputedStyle(nodeEl).marginTop) | 0;
+    var i = start;
+    var definedMarginTop = nodeEl.style.marginTop;
     while (true) {
       i++;
       oldTop = nodeEl.getBoundingClientRect().top;
@@ -84,10 +89,11 @@ function checkNode(node, additionalData) {
   if (chrome_comp.getComputedStyle(node).clear == 'none')
     return;
 
-  var compMarginTop = parseInt(chrome_comp.getComputedStyle(node).marginTop),
-      nodeTop = node.getBoundingClientRect().top,
-      containingBlockTop = getContainingBlock(node).getBoundingClientRect().top,
-      startTop = compMarginTop - nodeTop - containingBlockTop, boundaryTop;
+  var compMarginTop = parseInt(chrome_comp.getComputedStyle(node).marginTop);
+  var nodeTop = node.getBoundingClientRect().top;
+  var containingBlockTop = getContainingBlock(node).getBoundingClientRect().top;
+  var startTop = compMarginTop - nodeTop - containingBlockTop;
+  var boundaryTop;
   if (compMarginTop == 0)
     return;
   boundaryTop = getBoundaryClearanceSpacing(node, startTop, 10000);
