@@ -40,15 +40,16 @@ function checkNode(node, additionalData) {
   }*/
 
   if (Node.ELEMENT_NODE != node.nodeType ||
-      window.chrome_comp.getComputedStyle(node).display != 'inline')
+      chrome_comp.getComputedStyle(node).display != 'inline')
     return;
-  if (window.chrome_comp.getComputedStyle(node).position != 'relative')
+  if (chrome_comp.getComputedStyle(node).position != 'relative')
     return;
   for (var i = 0, j = node.getElementsByTagName('*'), k = j.length; i < k; 
       i++) {
-    var pos = window.chrome_comp.getComputedStyle(j[i]).position,
-        isCB = (pos == 'absolute' && j[i].offsetParent == node);
-    if (!isCB) continue;
+    var pos = chrome_comp.getComputedStyle(j[i]).position;
+    var isCB = (pos == 'absolute' && j[i].offsetParent == node);
+    if (!isCB)
+      continue;
     this.addProblem('RM1020', [j[i]]);
   }
 }

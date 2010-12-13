@@ -31,8 +31,8 @@ function checkNode(node, additionalData) {
 
   function hasBorder(element) {
     var elementStyle = chrome_comp.getComputedStyle(element);
-    var btw = parseInt(elementStyle.borderTopWidth,10);
-    var blw = parseInt(elementStyle.borderLeftWidth,10);
+    var btw = parseInt(elementStyle.borderTopWidth, 10);
+    var blw = parseInt(elementStyle.borderLeftWidth, 10);
     return (btw != 0) || (blw != 0);
   }
 

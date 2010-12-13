@@ -37,11 +37,11 @@ function checkNode(node, context) {
           hasScrollAt(node, 'Width')) ||
         (scrollValue.indexOf(computedStyle.overflowY) >= 0 &&
           hasScrollAt(node, 'Height'))
-      )){
+      )) {
     this.addProblem('RC3003', [node]);
   }
 
-  function hasScrollAt(element, woh){
+  function hasScrollAt(element, woh) {
     return element['client' + woh] < element['scroll' + woh];
   }
 }

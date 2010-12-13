@@ -32,7 +32,7 @@ function checkNode(node, context) {
   var fontWeight = chrome_comp.getDefinedStylePropertyByName(node, true,
       'font-weight');
   var parentFontWeight = parseInt(
-      chrome_comp.getComputedStyle(node.parentNode).fontWeight,10);
+      chrome_comp.getComputedStyle(node.parentNode).fontWeight, 10);
 
   if ((fontWeight == 'bolder' && parentFontWeight <= 300) ||
       (fontWeight == 'lighter' && parentFontWeight >= 800)) {

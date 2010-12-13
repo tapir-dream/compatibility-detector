@@ -32,13 +32,13 @@ function checkNode(node, additionalData) {
 
   function isWidthAuto(nodeEl) {
     var width = window.chrome_comp.getDefinedStylePropertyByName(nodeEl, true,
-      'width');
+        'width');
     return !width || width == 'auto';
   }
 
   function isHeightAuto(nodeEl) {
     var height = window.chrome_comp.getDefinedStylePropertyByName(nodeEl, true,
-      'height');
+        'height');
     return !height || height == 'auto';
   }
 

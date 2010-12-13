@@ -36,8 +36,8 @@ If the available horizontal space is greater then its width, report an error.
 function checkNode(node, additionalData) {
   function isTableElement(node) {
     var TABLELIKE_VALUES = ['table', 'inline-table', 'table-row-group',
-    'table-header-group', 'table-footer-group', 'table-row',
-    'table-column-group','table-column','table-cell','table-caption'];
+        'table-header-group', 'table-footer-group', 'table-row',
+        'table-column-group','table-column','table-cell','table-caption'];
     var display = chrome_comp.getComputedStyle(node).display;
     return TABLELIKE_VALUES.indexOf(display) != -1;
   }
@@ -68,28 +68,28 @@ function checkNode(node, additionalData) {
   */
   function widthIsShrinkToFit(node) {
     var computedStyle = chrome_comp.getComputedStyle(node);
-    return widthIsAuto(node) && computedStyle.display != 'none' && (
-      ((computedStyle.position == 'absolute' ||
-        computedStyle.position == 'fixed') &&
+    return widthIsAuto(node) && computedStyle.display != 'none' && 
+      (((computedStyle.position == 'absolute' ||
+      computedStyle.position == 'fixed') &&
       (computedStyle.left == 'auto' || computedStyle.right == 'auto')) ||
       computedStyle.float != 'none' ||
-      computedStyle.display == 'inline-block'
-    );
+      computedStyle.display == 'inline-block');
   }
 
   if (node.nodeType != Node.ELEMENT_NODE) return;
   var computedStyle = chrome_comp.getComputedStyle(node);
-  if (computedStyle.float == 'right' && computedStyle.position != 'absolute'
-    && computedStyle.position != 'fixed' && computedStyle.display != 'none') {
+  if (computedStyle.float == 'right' && 
+      computedStyle.position != 'absolute' && 
+      computedStyle.position != 'fixed' && computedStyle.display != 'none') {
     var ancestorElements = [];
     var parentElement = node;
     while ((parentElement = parentElement.parentElement) &&
-      widthIsAuto(parentElement) && !isTableElement(parentElement) &&
-      parentElement.tagName != 'BUTTON' && parentElement.tagName != 'BODY') {
+        widthIsAuto(parentElement) && !isTableElement(parentElement) &&
+        parentElement.tagName != 'BUTTON' && parentElement.tagName != 'BODY') {
       ancestorElements.push(parentElement);
     }
     for (var i = ancestorElements.length; i; i--) {
-      var ancestorElement = ancestorElements[i-1];
+      var ancestorElement = ancestorElements[i - 1];
       if (widthIsShrinkToFit(ancestorElement)) {
         var rulerElement = document.createElement('div');
         rulerElement.style.cssText = 'display: block !important;' +
@@ -102,8 +102,8 @@ function checkNode(node, additionalData) {
         ancestorElement.parentNode.removeChild(rulerElement);
         var computedStyle = chrome_comp.getComputedStyle(node);
         if (availableWidth > ancestorElement.offsetWidth +
-          parseInt(computedStyle.marginLeft, 10) +
-          parseInt(computedStyle.marginRight, 10)) {
+           parseInt(computedStyle.marginLeft, 10) +
+            parseInt(computedStyle.marginRight, 10)) {
           this.addProblem('RD8006', [node]);
         }
         break;

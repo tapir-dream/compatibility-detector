@@ -163,16 +163,16 @@ function checkNode(node, additionalData) {
 
   function hasWiderCellBorder(nodeEl) {
     var tableBorderRightWidth =
-          parseInt(chrome_comp.getComputedStyle(nodeEl).borderRightWidth,10);
+          parseInt(chrome_comp.getComputedStyle(nodeEl).borderRightWidth, 10);
     var tableBorderLeftWidth =
-          parseInt(chrome_comp.getComputedStyle(nodeEl).borderLeftWidth,10);
+          parseInt(chrome_comp.getComputedStyle(nodeEl).borderLeftWidth, 10);
     var ch = nodeEl.children;
     var list = [];
     var borderWidth;
     var maxLeft;
     var maxRight;
     var rowGroupDisplay =
-          ['table-row-group', 'table-header-group', 'table-footer-group'];
+            ['table-row-group', 'table-header-group', 'table-footer-group'];
     for (var i = 0, j = ch.length; i < j; i++) {
       var dis = chrome_comp.getComputedStyle(ch[i]).display;
       if (rowGroupDisplay.indexOf(dis) != -1) {
@@ -215,13 +215,13 @@ function checkNode(node, additionalData) {
     var lastCell = findLastCellInFirstRow(node);
     var firstCell = node.rows[0].cells[0];
     var lastCellBorderRightWidth =
-          parseInt(chrome_comp.getComputedStyle(lastCell).borderRightWidth,10);
+          parseInt(chrome_comp.getComputedStyle(lastCell).borderRightWidth, 10);
     var firstCellBorderLeftWidth =
-          parseInt(chrome_comp.getComputedStyle(lastCell).borderLeftWidth,10);
+          parseInt(chrome_comp.getComputedStyle(lastCell).borderLeftWidth, 10);
     var tableBorderRightWidth =
-          parseInt(chrome_comp.getComputedStyle(node).borderRightWidth,10);
+          parseInt(chrome_comp.getComputedStyle(node).borderRightWidth, 10);
     var tableBorderLeftWidth =
-          parseInt(chrome_comp.getComputedStyle(node).borderLeftWidth,10);
+          parseInt(chrome_comp.getComputedStyle(node).borderLeftWidth, 10);
     if ((lastCellBorderRightWidth > tableBorderRightWidth) ||
         (firstCellBorderLeftWidth > tableBorderLeftWidth))
       this.addProblem('RE8002', [node]);

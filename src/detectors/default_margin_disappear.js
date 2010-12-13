@@ -26,7 +26,7 @@ null, // constructor
 
 function checkNode(node, additionalData) {
   function getContainingBlock(nodeEl) {
-    var position = window.chrome_comp.getComputedStyle(nodeEl).position;
+    var position = chrome_comp.getComputedStyle(nodeEl).position;
     if (nodeEl == document.documentElement)
       return;
     if (position == 'fixed')
@@ -38,7 +38,7 @@ function checkNode(node, additionalData) {
       if (nod == document.body)
         return document.documentElement;
       if (nod.parentNode) nod = nod.parentNode;
-      if (window.chrome_comp.getComputedStyle(nod).display ==
+      if (chrome_comp.getComputedStyle(nod).display ==
           'block' || isBlockFormattingContext(nod)) {
         return nod;
       }
@@ -47,7 +47,7 @@ function checkNode(node, additionalData) {
   }
 
   function isBlockFormattingContext(nodeEl) {
-    var elementStyle = window.chrome_comp.getComputedStyle(nodeEl);
+    var elementStyle = .chrome_comp.getComputedStyle(nodeEl);
     var display = elementStyle.display;
     var cssFloat = elementStyle['float'];
     var position = elementStyle.position;
@@ -66,13 +66,13 @@ function checkNode(node, additionalData) {
     var display = elementStyle.display;
     var cssFloat = elementStyle['float'];
     var width =
-        window.chrome_comp.getDefinedStylePropertyByName(nodeEl, true,'width');
+        chrome_comp.getDefinedStylePropertyByName(nodeEl, true,'width');
     var height =
-        window.chrome_comp.getDefinedStylePropertyByName(nodeEl, true,'height');
+        chrome_comp.getDefinedStylePropertyByName(nodeEl, true,'height');
     var position = elementStyle.position;
     var writingMode = elementStyle.writingMode;
     var zoom =
-        window.chrome_comp.getDefinedStylePropertyByName(nodeEl, true;'zoom');
+        chrome_comp.getDefinedStylePropertyByName(nodeEl, true;'zoom');
     var minWidth = elementStyle.minWidth;
     var minHeight = elementStyle.minHeight;
     var maxWidth = elementStyle.maxWidth;

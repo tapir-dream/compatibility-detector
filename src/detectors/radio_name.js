@@ -37,10 +37,10 @@ function checkNode(node, context) {
   var propertyValueRegExp_ = /^[A-Za-z0-9]$|^[A-Za-z0-9][A-Za-z0-9\-\_\:\b]+$/;
   var inputNameValue = node.getAttribute('name');
 
-  if ( inputTypeValue != 'radio')
+  if (inputTypeValue != 'radio')
     return;
 
-  if ( !propertyValueRegExp_.test(inputNameValue) )
+  if (!propertyValueRegExp_.test(inputNameValue))
     this.addProblem('HF9009', [node]);
 
 }

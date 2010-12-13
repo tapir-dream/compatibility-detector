@@ -30,8 +30,8 @@ function checkNode(node, context) {
     return;
 
   var style = chrome_comp.getComputedStyle(node);
-  var marginLeft = parseInt(style.marginLeft,10);
-  var marginRight = parseInt(style.marginRight,10);
+  var marginLeft = parseInt(style.marginLeft, 10);
+  var marginRight = parseInt(style.marginRight, 10);
   if (Math.abs(marginLeft - marginRight) > 1)
     this.addProblem('HA8001', [node]);
 }

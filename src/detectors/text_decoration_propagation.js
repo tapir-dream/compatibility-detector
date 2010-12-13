@@ -40,10 +40,10 @@ function checkNode(node, context) {
     if (position == 'absolute' || position == 'fixed') {
       if (chrome_comp.inQuirksMode())
         return;
-      if ((parseInt(computedStyle.top,10)|0) < threshold ||
-          (parseInt(computedStyle.left,10)|0) < threshold)
+      if ((parseInt(computedStyle.top, 10) | 0) < threshold ||
+          (parseInt(computedStyle.left, 10) | 0) < threshold)
         return;
-    } else if ((parseInt(computedStyle.textIndent,10)|0) < threshold ){
+    } else if ((parseInt(computedStyle.textIndent, 10) | 0) < threshold ){
       return;
     } else {
       var float = computedStyle.float;
@@ -54,7 +54,7 @@ function checkNode(node, context) {
     return;
   }
 
-  if ((parseInt(computedStyle.textIndent,10)|0) < threshold)
+  if ((parseInt(computedStyle.textIndent, 10) | 0) < threshold)
     return;
 
   if (!node.innerText)

@@ -32,16 +32,16 @@ function checkNode(node, context) {
   if (node.tagName != 'BASE')
     return;
 
-  var bodyElement =  document.getElementsByTagName('body')[0];
+  var bodyElement = document.getElementsByTagName('body')[0];
   if (bodyElement.compareDocumentPosition(node) != 20)
     return;
 
   var Links = Array.prototype.slice.call(document.getElementsByTagName('A'));
 
-  for (var i = 0,len = Links.length; i < len; i++){
-    if ( node.compareDocumentPosition(Links[i]) === 2 ){
+  for (var i = 0, len = Links.length; i < len; i++){
+    if (node.compareDocumentPosition(Links[i]) === 2){
       this.addProblem('HJ2001', [node]);
-      return ;
+      return;
     }
   }
 }

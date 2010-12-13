@@ -31,37 +31,42 @@ function checkNode(node, context) {
     return;
 
   //filter non-replace element
-  if ( !chrome_comp.isReplacedElement(node) && node.tagName != 'MARQUEE')
+  if (!chrome_comp.isReplacedElement(node) && node.tagName != 'MARQUEE')
     return;
 
   var parentElement,elementWidth;
 
   //detector marquee element
-  if ( node.tagName == 'MARQUEE' ){
-     elementWidth = chrome_comp.getDefinedStylePropertyByName(node,
-       false, 'width');
-     if ( elementWidth != undefined ) return;
-     if ( !chrome_comp.isShrinkToFit(getParentElement(node)) ) return;
+  if (node.tagName == 'MARQUEE') {
+    elementWidth = chrome_comp.getDefinedStylePropertyByName(node,
+        false, 'width');
+    if (elementWidth != undefined)
+      return;
+    if (!chrome_comp.isShrinkToFit(getParentElement(node)))
+      return;
 
      //Hit the target!
-     this.addProblem('RD1021', [node]);
-     return;
+    this.addProblem('RD1021', [node]);
+    return;
   }
 
   //detector replace element element
   elementWidth = chrome_comp.getDefinedStylePropertyByName(node,
-    false, 'width');
-  if ( elementWidth == undefined ) return ;
-  if ( elementWidth.toString().slice(-1) != "%" ) return;
-  if ( !chrome_comp.isShrinkToFit(getParentElement(node)) ) return;
+      false, 'width');
+  if (elementWidth == undefined)
+    return ;
+  if (elementWidth.toString().slice(-1) != "%")
+    return;
+  if (!chrome_comp.isShrinkToFit(getParentElement(node)))
+    return;
 
   //Hit the target!
   this.addProblem('RD1021', [node]);
   return;
 
-  function getParentElement(node){
+  function getParentElement(node) {
     var parentNode = node.parentNode;
-    while (parentNode.nodeType != 1){
+    while (parentNode.nodeType != 1) {
       parentNode = node.parentNode;
     }
     return parentNode;

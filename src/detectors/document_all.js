@@ -94,13 +94,13 @@ function checkNode(node, context) {
   var This = this;
   var scriptData = '';
   var testResults = {
-      documentAllRegexp_:false,
-      documentAllFilterShortSyntaxRegexp_:false,
-      documentAllTernaryQuestionRegexp_:false,
-      documentAllTernaryColonRegexp_:false,
-      dcoumentAllEvalRegexp_:false,
-      documentAllFiterAndSyntaxRegexp_:false,
-      documentAllFilterIfSyntaxRegxp_:false
+      documentAllRegexp_ : false,
+      documentAllFilterShortSyntaxRegexp_ : false,
+      documentAllTernaryQuestionRegexp_ : false,
+      documentAllTernaryColonRegexp_ : false,
+      dcoumentAllEvalRegexp_ : false,
+      documentAllFiterAndSyntaxRegexp_ : false,
+      documentAllFilterIfSyntaxRegxp_ : false
   };
 
   if (node.tagName == 'SCRIPT') {
@@ -119,7 +119,7 @@ function checkNode(node, context) {
 
   //check inline events of other node
   }else{
-    for (var i = 0,l = node.attributes.length; i<l; i++){
+    for (var i = 0,l = node.attributes.length; i < l; i++){
       if ( node.attributes[i].name.toLowerCase().indexOf('on') == 0 ){
         scriptData = removeScriptComments(node.attributes[i].value);
         setTestResults(scriptData);
@@ -132,8 +132,8 @@ function checkNode(node, context) {
 
   function removeScriptComments(scriptData){
     return scriptData
-           .replace(This.multiLineScriptCommentsRegexp_,'')
-           .replace(This.oneLineScriptCommentsRegexp_,'');
+           .replace(This.multiLineScriptCommentsRegexp_, '')
+           .replace(This.oneLineScriptCommentsRegexp_, '');
   }
 
   function getTestDetectorResult(){
@@ -152,27 +152,27 @@ function checkNode(node, context) {
 
     This.documentAllRegexp_.test('');
     testResults.documentAllFilterShortSyntaxRegexp_ =
-      !This.documentAllFilterShortSyntaxRegexp_.test(scriptData);
+        !This.documentAllFilterShortSyntaxRegexp_.test(scriptData);
 
     This.documentAllFilterShortSyntaxRegexp_.test('');
     testResults.documentAllTernaryQuestionRegexp_ =
-      !This.documentAllTernaryQuestionRegexp_.test(scriptData);
+        !This.documentAllTernaryQuestionRegexp_.test(scriptData);
 
     This.documentAllTernaryQuestionRegexp_.test('');
     testResults.documentAllTernaryColonRegexp_ =
-      !This.documentAllTernaryColonRegexp_.test(scriptData);
+        !This.documentAllTernaryColonRegexp_.test(scriptData);
 
     This.documentAllTernaryColonRegexp_.test('');
     testResults.dcoumentAllEvalRegexp_ =
-      !This.dcoumentAllEvalRegexp_.test(scriptData);
+        !This.dcoumentAllEvalRegexp_.test(scriptData);
 
     This.dcoumentAllEvalRegexp_.test('');
     testResults.documentAllFiterAndSyntaxRegexp_ =
-      !This.documentAllFiterAndSyntaxRegexp_.test(scriptData);
+        !This.documentAllFiterAndSyntaxRegexp_.test(scriptData);
 
     This.documentAllFiterAndSyntaxRegexp_.test('');
     testResults.documentAllFilterIfSyntaxRegxp_ =
-      !This.documentAllFilterIfSyntaxRegxp_.test(scriptData);
+        !This.documentAllFilterIfSyntaxRegxp_.test(scriptData);
 
     This.documentAllFilterIfSyntaxRegxp_.test('');
   }

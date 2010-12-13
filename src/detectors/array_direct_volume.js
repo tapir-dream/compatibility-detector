@@ -38,29 +38,28 @@ function checkNode(node, context) {
   var scriptData = '';
 
   if (node.tagName == 'SCRIPT') {
-    if (node.src && node.src != '') {
+    if (node.src && node.src != '')
       scriptData = (node.src in context) ? context[node.src] : '';
-    } else {
+    else
       scriptData = node.text;
-    }
 
    //delete script comment and string
    scriptData = scriptData
-      .replace(this.oneLineScriptCommentsRegexp_,'')
-      .replace(this.multiLineScriptCommentsRegexp_,'')
-      .replace(this.stringDirectVolumeRegxp_,'');
+      .replace(this.oneLineScriptCommentsRegexp_, '')
+      .replace(this.multiLineScriptCommentsRegexp_, '')
+      .replace(this.stringDirectVolumeRegxp_, '');
 
     if (this.arrayDirectVolumeRegexp_.test(scriptData))
       this.addProblem('SJ2007', [node]);
 
   //check inline events of other node
   } else {
-    for (var i = 0,l = node.attributes.length; i<l; i++){
-      if ( node.attributes[i].name.toLowerCase().indexOf('on') == 0 ){
+    for (var i = 0, l = node.attributes.length; i < l; i++){
+      if (node.attributes[i].name.toLowerCase().indexOf('on') == 0){
         scriptData = node.attributes[i].value
-            .replace(this.oneLineScriptCommentsRegexp_,'')
-            .replace(this.multiLineScriptCommentsRegexp_,'')
-            .replace(this.stringDirectVolumeRegxp_,'');
+            .replace(this.oneLineScriptCommentsRegexp_, '')
+            .replace(this.multiLineScriptCommentsRegexp_, '')
+            .replace(this.stringDirectVolumeRegxp_, '');
         if (this.arrayDirectVolumeRegexp_.test(scriptData))
            this.addProblem('SJ2007', [node]);
       }

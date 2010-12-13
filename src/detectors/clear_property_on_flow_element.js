@@ -38,7 +38,7 @@ function checkNode(node, additionalData) {
   if (node.nextElementSibling) {
     var secondNode = node.nextElementSibling;
     var secondNodeStyle =  chrome_comp.getComputedStyle(secondNode);
-    var secondNodeDisplayStyle =secondNodeStyle.display;
+    var secondNodeDisplayStyle = secondNodeStyle.display;
     var secondNodeClearStyle = secondNodeStyle.clear;
     var secondNodeFloatStyle = secondNodeStyle['float'];
     continuousNodeCount++;
@@ -57,9 +57,9 @@ function checkNode(node, additionalData) {
   }
 
   if (node.offsetHeight != 0 && node.offsetWidth != 0 &&
-      firstNodeFloatStyle!='none' && firstNodeDisplayStyle !='none') {
+      firstNodeFloatStyle != 'none' && firstNodeDisplayStyle != 'none') {
     if (secondNode.offsetHeight != 0 && secondNode.offsetWidth != 0 &&
-        secondNodeFloatStyle! ='none' && secondNodeDisplayStyle!='none') {
+        secondNodeFloatStyle != 'none' && secondNodeDisplayStyle != 'none') {
       // exist at least two continuous nodes
       if (continuousNodeCount >= 2) {
         if (firstNodeFloatStyle != secondNodeFloatStyle) {
@@ -77,7 +77,7 @@ function checkNode(node, additionalData) {
             if (!(thirdNodeFloatStyle == firstNodeFloatStyle &&
                   (thirdNodeClearStyle == firstNodeFloatStyle ||
                    thirdNodeClearStyle == 'both' ||
-                   thirdNodeClearStyle =='all'))) {
+                   thirdNodeClearStyle == 'all'))) {
               var div = document.createElement('div');
               div.style.height = '0px';
               div.style.padding = '0px';
