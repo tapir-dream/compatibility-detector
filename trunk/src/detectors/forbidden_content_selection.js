@@ -34,16 +34,16 @@ function checkNode(node, context) {
     this.addProblem('BX2050', [node]);
   
   function isForbiddenByEvent(element){
-  	return element.onselectstart && element.onselectstart() == false;
+    return element.onselectstart && element.onselectstart() == false;
   }
   
   function isForbiddenByCssProperty(element){
-  	return chrome_comp.getComputedStyle(node).webkitUserSelect == 'none';
+    return chrome_comp.getComputedStyle(node).webkitUserSelect == 'none';
   }
   
   function isForbiddenByAttribute(element){
-  	return element.hasAttribute('unselectable') && 
-	       element.getAttribute('unselectable') == 'on';
+    return element.hasAttribute('unselectable') && 
+        element.getAttribute('unselectable') == 'on';
   }
 }
 ); // declareDetector

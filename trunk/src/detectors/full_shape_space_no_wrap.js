@@ -37,35 +37,30 @@ function detectorStyle(action, element) {
         'text-indent:0 !important; }';
     document.getElementsByTagName('head')[0].appendChild(style);
     return style;
-  } else if (action == 'remove') {
+  } else if (action == 'remove')
     document.getElementsByTagName('head')[0].removeChild(element);
-  }
 }
 
 function getPreviousElement(element) {
   var p = element.previousSibling;
-  while (!p) {
+  while (!p)
     p = p.parentNode.previousSibling;
-  }
   return p;
 }
 
 function getPreviousInlineSibling(element) {
   var prev = element.previousElementSibling;
   if (!prev) {
-    if (element.parentNode) {
+    if (element.parentNode)
       prev = element.parentNode.previousElementSibling;
-    }
   }
   while (prev) {
-    if (chrome_comp.getComputedStyle(prev).display.indexOf('inline') != -1) {
+    if (chrome_comp.getComputedStyle(prev).display.indexOf('inline') != -1)
       return prev;
-    }
     prev = prev.previousElementSibling;
     if (!prev) {
-      if (prev.parentNode) {
+      if (prev.parentNode)
         prev = prev.parentNode.previousElementSibling;
-      }
     }
   }
 }

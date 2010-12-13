@@ -28,13 +28,6 @@ function constructor(rootNode) {
     var t = this;
     if (t.tagName && (t.tagName != 'BUTTON') && (t.tagName != 'INPUT')) {
       var cl = arguments.callee.caller;
-      while (cl) {
-        if (cl.toString().indexOf('jQuery') != -1)
-          return;
-        if (cl == cl.caller)
-          return;
-        cl = cl.caller;
-      }
       This.addProblem('SD9025', [t]);
     }
   };

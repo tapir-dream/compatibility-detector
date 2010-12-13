@@ -41,8 +41,8 @@ chrome_comp.CompDetect.NonScanDomBaseDetector,
 function constructor(rootNode) {
   var This = this;
   var events = ['blur', 'change', 'click', 'dblclick', 'focus', 'mousedown',
-    'mouseup', 'mouseover', 'mousemove', 'mouseout', 'keydown', 'keypress',
-    'keyup', 'load', 'unload', 'select', 'submit', 'reset'];
+      'mouseup', 'mouseover', 'mousemove', 'mouseout', 'keydown', 'keypress',
+      'keyup', 'load', 'unload', 'select', 'submit', 'reset'];
 
   //When setting one of attributes below(attr1, attr2) on an element, such as 
   //element.setAttribute('disabled', 'disabled'), element.disabled will get 
@@ -50,7 +50,7 @@ function constructor(rootNode) {
   //'nowrap' etc. will make element.readOnly to be Boolean true, but 
   //element.readonly is undefined.
   var attrs = ['async', 'defer', 'disabled', 'checked', 'multiple', 'selected',
-    'compact', 'declare', 'readonly', 'nowrap', 'nohref', 'noshade'];
+      'compact', 'declare', 'readonly', 'nowrap', 'nohref', 'noshade'];
 
   this.getAttributeHandler_ = function(result, originalArguments, callStack) {
     var attributeName = originalArguments[0];

@@ -4,7 +4,7 @@ addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'flashPercentLoaded',
+'flash_percentloaded',
 
 chrome_comp.CompDetect.NonScanDomBaseDetector,
 

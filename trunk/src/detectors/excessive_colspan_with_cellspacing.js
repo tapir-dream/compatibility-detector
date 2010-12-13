@@ -10,16 +10,10 @@ chrome_comp.CompDetect.ScanDomBaseDetector,
 
 null, // constructor
 
-/*【思路】
- * 检测所有水平单元格间隙不为 0 的 TABLE 元素
- * 一行行检测其内单元格，若存在 colspan 属性过度设定的情况则发出警告。
- *
- */
-
 function checkNode(node, context) {
   function hasCellspacing(element) {
     var borderSpacing = chrome_comp.getComputedStyle(element).borderSpacing;
-    return parseInt(borderSpacing.split(' ')[0]);
+    return parseInt(borderSpacing.split(' ')[0], 10);
   }
 
   if (Node.ELEMENT_NODE != node.nodeType)
@@ -39,13 +33,11 @@ function checkNode(node, context) {
         if (list[i] > max)
           this.addProblem('HE1005', [node.rows[i].cells[m]]);
         max = Math.max(max, list[i]);
-      } else {
+      } else
           max = list[i];
-      }
       if (node.rows[i].cells[m].rowSpan > 1) {
-        for (var a = 1, b = node.rows[i].cells[m].rowSpan; a <= b; a++) {
+        for (var a = 1, b = node.rows[i].cells[m].rowSpan; a <= b; a++)
           list[i + a - 1] = 1;
-        }
       }
     }
   }
