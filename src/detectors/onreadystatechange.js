@@ -18,23 +18,23 @@ addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'onreadystatechangeDetector',
+'onreadystatechange',
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
 function constructor(rootNode) {
   var This = this;
   this.hookHandler_ = function(oldValue, newValue, reason) {
-
-  //onreadystatechange and onload combined use in Script tag of filtered
-    if (this.tagName === 'SCRIPT' && this.onload ){
-	var loadEventHandler = this.onload.toString();
-	if ( /onreadystatechange/.test(loadEventHandler) &&
-	     /onload/.test(loadEventHandler))
-	     return ;
+    //onreadystatechange and onload combined use in Script tag of filtered
+    if (this.tagName === 'SCRIPT' && this.onload) {
+      var loadEventHandler = this.onload.toString();
+      if (/onreadystatechange/.test(loadEventHandler) &&
+          /onload/.test(loadEventHandler))
+        return ;
     }
-    if ( !this.onreadystatechange ) return;
-  //filtering end.
+    if (!this.onreadystatechange)
+      return;
+    //filtering end.
 
     This.addProblem('BX9021', { nodes: [this], needsStack: true });
     return newValue;
