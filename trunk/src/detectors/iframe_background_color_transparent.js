@@ -25,8 +25,8 @@ chrome_comp.CompDetect.ScanDomBaseDetector,
 null, // constructor
 
 function checkNode(node, context) {
-  if (Node.ELEMENT_NODE != node.nodeType || node.tagName != "IFRAME" || 
-      node.hasAttribute("allowtransparency") || context.isDisplayNone())
+  if (Node.ELEMENT_NODE != node.nodeType || node.tagName != 'IFRAME' || 
+      node.hasAttribute('allowtransparency') || context.isDisplayNone())
     return;
 
   this.addProblem('RC3001', [node]);
