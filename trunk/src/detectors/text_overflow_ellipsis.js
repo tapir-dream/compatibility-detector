@@ -35,11 +35,11 @@ function checkNode(node, context) {
      if(node.childNodes[i].nodeType!=3){
       if(node.childNodes[i].childNodes.length==1 &&
         node.childNodes[i].childNodes[0].nodeType==3){
-        if(window.getComputedStyle(node.childNodes[i]).display == "block" &&
-          window.getComputedStyle(node.childNodes[i]).float == "none"){
+        if(window.getComputedStyle(node.childNodes[i]).display == 'block' &&
+          window.getComputedStyle(node.childNodes[i]).float == 'none'){
           var tempNode= node.childNodes[i].cloneNode(true);
           //To obtain the actual length of the block elements
-          tempNode.style.float= "left";
+          tempNode.style.float= 'left';
           document.body.appendChild(tempNode);
           childrenWidth = window.getComputedStyle(tempNode).width;
           //Remove the temporary elements
@@ -71,8 +71,8 @@ function checkNode(node, context) {
   var overflow = style.overflow;
   var wordWrap = style.wordWrap;
 
-  if (style && textOverflow == 'ellipsis' && overflow == "hidden" &&
-    node.tagName !="TD" && wordWrap != "break-word" && !isAutoWidth(node)) {
+  if (style && textOverflow == 'ellipsis' && overflow == 'hidden' &&
+    node.tagName !='TD' && wordWrap != "break-word" && !isAutoWidth(node)) {
     var nodeWidth = chrome_comp.getComputedStyle(node).width;
     This.flag = false;
     //when the length of sub-element is more than parent element ,point out
