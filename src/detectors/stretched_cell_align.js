@@ -54,6 +54,28 @@ function hasBackground(element) {
   return true;
 }
 
+function hasInflowContent(element) {
+  var ch = element.childNodes;
+  if (ch.length == 0)
+    return false;
+  if (ch.length == 1 && ch[0].nodeType == 3 && /^\s+$/g.test(ch[0].nodeValue))
+    return false
+  for (var i = 0, j = ch.length; i < j; i++) {
+    if (ch[i].nodeType == 3) {
+      if (!/^\s+$/g.test(ch[i].nodeValue))
+        return true;
+    } else if (ch[i].nodeType == 1) {
+      var style = chrome_comp.getComputedStyle(ch[i]);
+      if (style.position != 'absolute' && style.position != 'fixed' &&
+          style.float == 'none')
+        return arguments.callee(ch[i])
+      else
+        return false;
+    }
+  }
+  return false;
+}
+
 chrome_comp.CompDetect.declareDetector(
 
 'stretched_cell_align',
@@ -78,12 +100,11 @@ function checkNode(node, context) {
   var usedWidth = parseInt(chrome_comp.getComputedStyle(node).width, 10);
   var computedWidth = parseInt(getRealComputedWidth(node), 10);
   var textAlign = chrome_comp.getComputedStyle(node).textAlign;
-  if ((usedWidth < computedWidth))
+  if ((usedWidth <= computedWidth))
     return;
   if ((textAlign.indexOf('left') != -1) && !hasBackground(node))
     return;
-
-  if (!isStretched(node) || (hasBackground(node)))
+  if ((!isStretched(node) || (hasBackground(node))) && (hasInflowContent(node)))
     this.addProblem('RE8014', [node]);
 }
 ); // declareDetector
