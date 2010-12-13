@@ -110,33 +110,36 @@ function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
       return;
 
-//  // Check whether the contents overflowed from an element.
-//  function checkOverflow(node, checkWidth, checkHeight) {
-//    var overflow = overflowIsVisible(node);
-//    var isOverflow = false;
-//    if (checkWidth && overflow.xIsVisible)
-//        overflow = node.scrollWidth > node.offsetWidth;
-//    if (checkHeight && overflow.yIsVisible)
-//        overflow = node.scrollHeight > node.offsetHeight;
-//    return isOverflow;
-//  }
+  // Check whether the contents overflowed from an element.
+  /*
+  function checkOverflow(node, checkWidth, checkHeight) {
+    var overflow = overflowIsVisible(node);
+    var isOverflow = false;
+    if (checkWidth && overflow.xIsVisible)
+        overflow = node.scrollWidth > node.offsetWidth;
+    if (checkHeight && overflow.yIsVisible)
+        overflow = node.scrollHeight > node.offsetHeight;
+    return isOverflow;
+  }
+  */
 
-// RX1002 WontFix now.
-
-//  if (node.tagName == 'TABLE') {
-//    var computedStyle = chrome_comp.getComputedStyle(node);
-//    if (computedStyle.tableLayout == 'fixed') {
-//      for (var i = 0; i < node.rows.length; ++i) {
-//        var row = node.rows[i];
-//        for (var j = 0; j < row.cells.length; ++j) {
-//          var cell = row.cells[j];
-//          if (checkOverflow(cell, true, true))
-//            this.addProblem('RX1002',
-//                { nodes: [cell], rectCallback: rectCallback });
-//        }
-//      }
-//    }
-//  } else {
+  // RX1002 WontFix now.
+  /*
+  if (node.tagName == 'TABLE') {
+    var computedStyle = chrome_comp.getComputedStyle(node);
+    if (computedStyle.tableLayout == 'fixed') {
+      for (var i = 0; i < node.rows.length; ++i) {
+        var row = node.rows[i];
+        for (var j = 0; j < row.cells.length; ++j) {
+          var cell = row.cells[j];
+          if (checkOverflow(cell, true, true))
+            this.addProblem('RX1002',
+                { nodes: [cell], rectCallback: rectCallback });
+        }
+      }
+    }
+  } else {
+  */
 
   if (chrome_comp.isReplacedElement(node) || isTableElement(node) ||
       node.tagName == "HTML" || node.tagName == "BODY")
@@ -244,7 +247,7 @@ function checkNode(node, context) {
     }
   }
 
-  //RV1002
+  // RV1002
   // For a absolute positioned element, if it overflows its container which
   // 'overflow' is not 'visible', [IE6(Q) IE7(Q) IE8(Q)] cut out the overflow
   // part, but [IE6(S) IE7(S) IE8(S) Chrome] dosn't.
@@ -279,7 +282,9 @@ function checkNode(node, context) {
       }
     }
   }
-//  }
+/*
+}
+*/
 }
 ); // declareDetector
 
