@@ -45,8 +45,8 @@ function checkNode(node, context) {
 
   var This = this;
   var testResults = {
-      windowConstructorFilterShortSyntaxRegexp_:false,
-      windowConstructorRegexp_:false
+      windowConstructorFilterShortSyntaxRegexp_ : false,
+      windowConstructorRegexp_ : false
   };
 
   //check script node
@@ -65,8 +65,8 @@ function checkNode(node, context) {
       this.addProblem('BX9045', [node]);
   //check inline events of other node
   } else {
-    for (var i = 0,l = node.attributes.length; i<l; i++){
-      if ( node.attributes[i].name.toLowerCase().indexOf('on') == 0 ){
+    for (var i = 0,l = node.attributes.length; i < l; i++){
+      if ( node.attributes[i].name.toLowerCase().indexOf('on') == 0 ) {
         //delete script comment
         scriptData = removeScriptComments(scriptData);
         setTestResults(scriptData);

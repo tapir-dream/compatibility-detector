@@ -57,7 +57,7 @@ function checkNode(node, context) {
       node.style.overflowX = '';
       node.style.overflowX = settedOverflowX;
     }
-    return {'xIsVisible': xIsVisible, 'yIsVisible': yIsVisible};
+    return {'xIsVisible' : xIsVisible, 'yIsVisible' : yIsVisible};
   }
 
   // Some developers using '{content:"."; display:block; visibility:hidden;
@@ -93,16 +93,16 @@ function checkNode(node, context) {
     var top = chrome_comp.PageUtil.pageTop(node);
     return [
       {
-        left: left,
-        top: top,
-        width: node.offsetWidth,
-        height: node.offsetHeight
+        left : left,
+        top : top,
+        width : node.offsetWidth,
+        height : node.offsetHeight
       },
       {
-        left: left,
-        top: top,
-        width: node.scrollWidth,
-        height: node.scrollHeight
+        left : left,
+        top : top,
+        width : node.scrollWidth,
+        height : node.scrollHeight
       }
     ];
   }
@@ -165,11 +165,13 @@ function checkNode(node, context) {
     if ((overflow.xIsVisible && widthIsNotAuto) ||
         (overflow.yIsVisible && heightIsNotAuto)) {
       var elPool = [];
-      var descentElements = node.getElementsByTagName('*');
-      // An element has negative margin, a abosolute positioned element, or a
-      // relative positioned element won't expand the containing element's size.
+      var descentElements =
+          Array.prototype.slice.call(node.getElementsByTagName('*'));
+      // An element has negative margin, a abosolute positioned element,
+      // or a relative positioned element won't expand the containing
+      // element's size.
       // So we clean the settings or hide absolute elements first.
-      for(var i = 0; i < descentElements.length; i++) {
+      for(var i = 0, l = descentElements.length; i < l; i++) {
         var el = descentElements[i];
         var settedStyle = {};
         var style = chrome_comp.getComputedStyle(el);
@@ -215,7 +217,7 @@ function checkNode(node, context) {
       }
       // Restore cleaned styles.
       if (elPool.length) {
-        for (var i = 0; i < elPool.length; i++) {
+        for (var i = 0, l = elPool.length; i < l; i++) {
           var elementAndStyle = elPool[i];
           for (var s in elementAndStyle.settedStyle) {
             elementAndStyle.el.style[s] = '';

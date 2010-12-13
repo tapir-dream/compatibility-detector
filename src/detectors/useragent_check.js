@@ -36,8 +36,8 @@ chrome_comp.CompDetect.NonScanDomBaseDetector,
 
 function constructor(rootNode) {
   this.patterns_ = {
-    companyName: /Apple|Google/ig,
-    browserBrand: /Safari|Chrome|Firefox/ig
+    companyName : /Apple|Google/ig,
+    browserBrand : /Safari|Chrome|Firefox/ig
   };
 
   function checkUserAgent(result, originalThisContext, originalArguments,

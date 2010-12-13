@@ -27,14 +27,14 @@ null, // constructor
 function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType)
     return;
-  //get the default value of display  
-  function getDefaultDisplay(element){
+  //get the default value of display
+  function getDefaultDisplay(element) {
     var elementFloat = element.style.float;
     var elementPosition = element.style.position;
     var elementDisplay = element.style.display;
     element.style.float = 'none !important';
     element.style.position = 'static !important';
-    element.style.display='';
+    element.style.display = '';
     var defaultDisplay = chrome_comp.getComputedStyle(element).display;
     element.style.float = null;
     element.style.position = null;
@@ -52,34 +52,29 @@ function checkNode(node, context) {
   var nextreg = /[\u0020\u0009]$/g;
 
   //if a block element and its display set none
-  if(nodeDisplay == 'none' && getDefaultDisplay(node) == 'block'){
+  if(nodeDisplay == 'none' && getDefaultDisplay(node) == 'block') {
     //if the element's nextSibling is text node and
     // previousSibling is not text node
-    if(nextSibling.nodeType == 3 && previousSibling.nodeType !=3){
+    if(nextSibling.nodeType == 3 && previousSibling.nodeType !=3) {
       //if the element's nextSibling is beginning with whitespace or tab ,
       //point out this problem
-
-       if(previousreg.test(nextSibling.nodeValue)){
+       if(previousreg.test(nextSibling.nodeValue))
         this.addProblem('RT1008', [node]);
-      }
      }
   }
   //if a inline element or a input element with type set hidden
   if((node.tagName == 'INPUT' && node.type == 'hidden') ||
-    (getDefaultDisplay(node) == 'inline' && nodeDisplay == 'none')){
+     (getDefaultDisplay(node) == 'inline' && nodeDisplay == 'none')) {
     //if the element's nextSibling is text node and
     // previousSibling is text node
-    if(nextSibling.nodeType == 3 && previousSibling.nodeType == 3){
+    if(nextSibling.nodeType == 3 && previousSibling.nodeType == 3) {
       //if the element's nextSibling and  previousSibling are beginning with
       // whitespace or tab , point out this problem
        if(previousreg.test(nextSibling.nodeValue)
-         && nextreg.test(previousSibling.nodeValue)){
+         && nextreg.test(previousSibling.nodeValue))
         this.addProblem('RT1008', [node]);
-      }
     }
   }
-
-
 }
 ); // declareDetector
 

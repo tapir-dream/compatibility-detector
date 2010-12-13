@@ -106,9 +106,9 @@ function checkNode(node, additionalData) {
         list.push(ch[i]);
     }
     var firstLeft = parseInt(chrome_comp.getComputedStyle(
-            list[0]).borderLeftWidth,10);
+            list[0]).borderLeftWidth, 10);
     var lastRight = parseInt(chrome_comp.getComputedStyle(
-            list[list.length - 1]).borderRightWidth,10);
+            list[list.length - 1]).borderRightWidth, 10);
 
     return { left : firstLeft, right : lastRight };
   }
@@ -122,16 +122,16 @@ function checkNode(node, additionalData) {
           list.push(ch[i]);
       }
       var firstLeft = parseInt(chrome_comp.getComputedStyle(
-              list[0]).borderLeftWidth,10),
+              list[0]).borderLeftWidth, 10),
           lastRight = parseInt(chrome_comp.getComputedStyle(
-              list[list.length - 1]).borderRightWidth,10);
+              list[list.length - 1]).borderRightWidth, 10);
       return (firstLeft != 0) || (lastRight != 0);
     }
 
     var tableBorderRightWidth =
-            parseInt(chrome_comp.getComputedStyle(nodeEl).borderRightWidth,10);
+            parseInt(chrome_comp.getComputedStyle(nodeEl).borderRightWidth, 10);
     var tableBorderLeftWidth =
-            parseInt(chrome_comp.getComputedStyle(nodeEl).borderLeftWidth,10);
+            parseInt(chrome_comp.getComputedStyle(nodeEl).borderLeftWidth, 10);
     var ch = nodeEl.children;
     var list = [];
     var borderWidth;
@@ -215,13 +215,13 @@ function checkNode(node, additionalData) {
     var lastCell = findLastCellInFirstRow(node);
     var firstCell = node.rows[0].cells[0];
     var lastCellBorderRightWidth =
-          parseInt(chrome_comp.getComputedStyle(lastCell).borderRightWidth, 10);
+        parseInt(chrome_comp.getComputedStyle(lastCell).borderRightWidth, 10);
     var firstCellBorderLeftWidth =
-          parseInt(chrome_comp.getComputedStyle(lastCell).borderLeftWidth, 10);
+        parseInt(chrome_comp.getComputedStyle(lastCell).borderLeftWidth, 10);
     var tableBorderRightWidth =
-          parseInt(chrome_comp.getComputedStyle(node).borderRightWidth, 10);
+        parseInt(chrome_comp.getComputedStyle(node).borderRightWidth, 10);
     var tableBorderLeftWidth =
-          parseInt(chrome_comp.getComputedStyle(node).borderLeftWidth, 10);
+        parseInt(chrome_comp.getComputedStyle(node).borderLeftWidth, 10);
     if ((lastCellBorderRightWidth > tableBorderRightWidth) ||
         (firstCellBorderLeftWidth > tableBorderLeftWidth))
       this.addProblem('RE8002', [node]);

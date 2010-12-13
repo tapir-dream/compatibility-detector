@@ -35,7 +35,7 @@ function constructor(rootNode) {
   //that the author considers the problem
   this.hookEnterHandler_ = function(oldValue, newValue, reason) {
     if (reason == 'set' && enterCounter == true)
-      This.addProblem('BT9017', { nodes: [this], needsStack: true });
+      This.addProblem('BT9017', { nodes : [this], needsStack : true });
     return newValue;
   };
   this.hookOutHandler_ = function(oldValue, newValue, reason) {
@@ -47,7 +47,7 @@ function constructor(rootNode) {
   //that the author considers the problem
   this.hookLeaveHandler_ = function(oldValue, newValue, reason) {
     if (reason == 'set' && leaveFlag == true)
-      This.addProblem('BT9017', { nodes: [this], needsStack: true });
+      This.addProblem('BT9017', { nodes : [this], needsStack : true });
     return newValue;
   };
   enterFlag = false;
@@ -67,11 +67,13 @@ function checkNode(node, context) {
     return;
   //Increase the filter conditions, when onmouseenter and onmouseover exist,
   //that the author considers the problem
-  if (node.hasAttribute('onmouseenter') && node.hasAttribute('onmouseover'))
+  if (node.hasAttribute('onmouseenter') &&
+      node.hasAttribute('onmouseover'))
     return;
   //Increase the filter conditions, when onmouseleave and onmouseout exist,
   //that the author considers the problem
-  else if (node.hasAttribute('onmouseleave') && node.hasAttribute('onmouseout'))
+  else if (node.hasAttribute('onmouseleave') &&
+           node.hasAttribute('onmouseout'))
     return;
   if (node.hasAttribute('onmouseenter') || node.hasAttribute('onmouseleave'))
     this.addProblem('BT9017', [node]);

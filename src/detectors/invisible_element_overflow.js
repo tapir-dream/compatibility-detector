@@ -38,25 +38,23 @@ function checkNode(node, additionalData) {
 
   if (Node.ELEMENT_NODE != node.nodeType)
     return;
-  
+
   if (!isInvisible(node))
     return;
-  
+
   var cb = window.chrome_comp.getContainingBlock(node);
   if (!cb)
     return;
-  
+
   if (!isOverflowAutoOrScroll(cb))
     return;
-  
+
   var nodeBound = node.getBoundingClientRect();
   var cbBound = cb.getBoundingClientRect();
   if (nodeBound.top < cbBound.top || nodeBound.right > cbBound.right ||
-      nodeBound.bottom > cbBound.bottom || nodeBound.left < cbBound.left) {
+      nodeBound.bottom > cbBound.bottom || nodeBound.left < cbBound.left)
     this.addProblem('BX8037', [node]);
-  }
 }
 ); // declareDetector
 
 });
-

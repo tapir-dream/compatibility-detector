@@ -54,14 +54,14 @@ function checkNode(node, context) {
 
   //check inline events of other node
   } else {
-    for (var i = 0, l = node.attributes.length; i < l; i++){
-      if (node.attributes[i].name.toLowerCase().indexOf('on') == 0){
+    for (var i = 0, l = node.attributes.length; i < l; i++) {
+      if (node.attributes[i].name.toLowerCase().indexOf('on') == 0) {
         scriptData = node.attributes[i].value
             .replace(this.oneLineScriptCommentsRegexp_, '')
             .replace(this.multiLineScriptCommentsRegexp_, '')
             .replace(this.stringDirectVolumeRegxp_, '');
         if (this.arrayDirectVolumeRegexp_.test(scriptData))
-           this.addProblem('SJ2007', [node]);
+          this.addProblem('SJ2007', [node]);
       }
     }
   }

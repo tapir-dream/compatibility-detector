@@ -166,16 +166,16 @@ function checkNode(node, context) {
 
   var mode = this.documentMode;
   var hasEmptyNoWarnning = {
-    IE6: 'SAQ',
-    IE7: 'SAQ',
-    IE8: 'SQ',
-    WebKit: 'S'
+    IE6 : 'SAQ',
+    IE7 : 'SAQ',
+    IE8 : 'SQ',
+    WebKit : 'S'
   };
   var hasNoEmptyNoWarnning = {
-    IE6: 'SAQ',
-    IE7: 'SAQ',
-    IE8: 'AQ',
-    WebKit: 'AQ'
+    IE6 : 'SAQ',
+    IE7 : 'SAQ',
+    IE8 : 'AQ',
+    WebKit : 'AQ'
   }
 
   if (hasEmptyNode(node)) {

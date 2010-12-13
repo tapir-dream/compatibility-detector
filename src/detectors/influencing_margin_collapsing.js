@@ -234,9 +234,8 @@ function checkNode(node, context) {
     this.addProblem('RB8004', [l]);
 
   var prev = getPreviousCollapsing(node);
-  if (prev && getFloatingBetweenMarginCollapsing(prev)) {
+  if (prev && getFloatingBetweenMarginCollapsing(prev))
     this.addProblem('RB8004', [prev]);
-  }
 }
 ); // declareDetector
 

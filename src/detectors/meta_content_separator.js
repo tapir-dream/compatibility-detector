@@ -25,8 +25,9 @@ chrome_comp.CompDetect.NonScanDomBaseDetector,
 null, // constructor
 
 function postAnalyze() {
-  var metas = document.getElementsByTagName('META');
-  for (var i = 0; i < metas.length; i++) {
+  var metas =
+      Array.prototype.slice.call(document.getElementsByTagName('META'));
+  for (var i = 0, l = metas.length; i < l; i++) {
     var node = metas[i];
     if (node.tagName == "META" &&
         chrome_comp.getAttributeLowerCase(node, 'http-equiv') == 'refresh') {

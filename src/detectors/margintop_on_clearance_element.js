@@ -91,7 +91,8 @@ function checkNode(node, additionalData) {
 
   var compMarginTop = parseInt(chrome_comp.getComputedStyle(node).marginTop);
   var nodeTop = node.getBoundingClientRect().top;
-  var containingBlockTop = getContainingBlock(node).getBoundingClientRect().top;
+  var containingBlockTop =
+      getContainingBlock(node).getBoundingClientRect().top;
   var startTop = compMarginTop - nodeTop - containingBlockTop;
   var boundaryTop;
   if (compMarginTop == 0)
@@ -105,4 +106,3 @@ function checkNode(node, additionalData) {
 ); // declareDetector
 
 });
-

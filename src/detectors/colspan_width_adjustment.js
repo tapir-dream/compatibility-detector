@@ -72,7 +72,7 @@ function checkNode(node, context) {
       }
     }
     // Check each span
-    for (var i = 0; i < spans.length; ++i) {
+    for (var i = 0, l = spans.length; i < l; ++i) {
       var span = spans[i];
       var hasWidthColumn = false;
       var hasAutoColumn = false;

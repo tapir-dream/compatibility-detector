@@ -25,7 +25,7 @@ chrome_comp.CompDetect.NonScanDomBaseDetector,
 function constructor(rootNode) {
   var This = this;
   this.navigateHookHandler_ = function(result, originalArguments, callStack) {
-    This.addProblem('BX9052', { nodes: [this], needsStack: true });
+    This.addProblem('BX9052', { nodes : [this], needsStack : true });
   };
 },
 

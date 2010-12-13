@@ -43,7 +43,7 @@ function checkNode(node, context) {
              tagName != 'SELECT' && tagName != 'TEXTAREA' &&
              //filter empty element and img element
              tagName != 'IMG' && node.innerText.trim().length > 0)
-             this.addProblem('HF3005', [node]);
+           this.addProblem('HF3005', [node]);
   }
 }
 ); // declareDetector

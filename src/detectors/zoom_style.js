@@ -30,12 +30,12 @@ function checkNode(node, context) {
     return;
 
   var nodeCssZoomValue =
-        parseInt(chrome_comp.getComputedStyle(node).zoom,10);
+        parseInt(chrome_comp.getComputedStyle(node).zoom, 10);
 
-  if ( isNaN(nodeCssZoomValue) )
+  if (isNaN(nodeCssZoomValue))
     return;
 
-  if ( nodeCssZoomValue > 1 )
+  if (nodeCssZoomValue > 1)
     this.addProblem('BX8017', [node]);
 }
 ); // declareDetector

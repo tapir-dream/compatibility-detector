@@ -71,4 +71,3 @@ function checkNode(node, additionalData) {
 ); // declareDetector
 
 });
-
