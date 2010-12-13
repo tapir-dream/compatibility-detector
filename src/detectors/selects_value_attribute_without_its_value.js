@@ -1,25 +1,30 @@
-﻿// @author : luyuan.china@gmail.com
+/*
+ * Copyright 2010 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'selectsValueAttributeWithoutItsValue',
+'selects_value_attribute_without_its_value',
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
 null, // constructor
 
-/*【思路】
- * 检测所有 OPTION 元素，若其拥有 value 属性且 value 属性值为空字符串，同时其位于表单中，则发出警告。
- *
- * 【缺陷】
- * 无法区分 <option value> 和 <option value=""> 的情况，因为第一种在 Chrome 中会被修复为第二种
- *
- *【messages.json】
- * "HF9018": { "message": "IE 中 OPTION 元素设置了空的 value 属性时会将 OPTION 元素的内容文本作为 value 属性值提交到服务端 " },
- * "HF9018_suggestion": { "message": "在使用 OPTION 元素时避免出现其仅包含属性名、没有属性值的 value 属性的情况，若需要设定空的 value 属性值可以写做 <OPTION value=\"\">。" },
- */
+
 
 function checkNode(node, additionalData) {
   if (Node.ELEMENT_NODE != node.nodeType || node.tagName != 'OPTION')
