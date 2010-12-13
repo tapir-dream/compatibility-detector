@@ -72,7 +72,7 @@ function checkNode(node, context) {
   var wordWrap = style.wordWrap;
 
   if (style && textOverflow == 'ellipsis' && overflow == 'hidden' &&
-    node.tagName !='TD' && wordWrap != "break-word" && !isAutoWidth(node)) {
+    node.tagName !='TD' && wordWrap != 'break-word' && !isAutoWidth(node)) {
     var nodeWidth = chrome_comp.getComputedStyle(node).width;
     This.flag = false;
     //when the length of sub-element is more than parent element ,point out
