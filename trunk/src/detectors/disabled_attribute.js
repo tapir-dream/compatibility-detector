@@ -31,19 +31,13 @@ function checkNode(node, context) {
   if (node.hasAttribute('disabled')) {
     var tagName = node.tagName;
     var isOpt = tagName == 'OPTGROUP' || tagName == 'OPTION';
-    var isFormElement = (tagName == 'BUTTON' ||
-                         tagName == 'INPUT' ||
-                         tagName == 'OPTGROUP' ||
-                         tagName == 'OPTION' ||
-                         tagName == 'SELECT' ||
-                         tagName == 'TEXTAREA');
     if (isOpt)
       this.addProblem('HF3013', [node]);
     else if (tagName != 'BUTTON' && tagName != 'INPUT' &&
              tagName != 'SELECT' && tagName != 'TEXTAREA' &&
              //filter empty element and img element
              tagName != 'IMG' && node.innerText.trim().length > 0)
-           this.addProblem('HF3005', [node]);
+      this.addProblem('HF3005', [node]);
   }
 }
 ); // declareDetector

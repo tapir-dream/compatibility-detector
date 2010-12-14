@@ -80,8 +80,6 @@ function isEmptyNode(node, cell) {
     default:
       return true;
   }
-  var style = chrome_comp.getComputedStyle(node);
-
 }
 
 function isEmptyCell(cell) {
@@ -94,7 +92,7 @@ function isEmptyCell(cell) {
 
 function isEmptyChild(node) {
   var childElements =
-          Array.prototype.slice.call(node.getElementsByTagName('*'));
+      Array.prototype.slice.call(node.getElementsByTagName('*'));
   for (var i = 0, l = childElements.length; i < l; i++) {
     if (chrome_comp.hasLayoutInIE(childElements[i]) ||
         childElements[i].tagName == 'IFRAME' ||
@@ -111,9 +109,9 @@ function isEmptyChild(node) {
 //don't use 'node.cloneNode(true).innerText ' it will trigger RCA SD9029
 function getFixedNodeTextContent(node) {
   var scriptElements =
-          Array.prototype.slice.call(node.getElementsByTagName('script'));
+      Array.prototype.slice.call(node.getElementsByTagName('script'));
   var styleElements =
-          Array.prototype.slice.call(node.getElementsByTagName('style'));
+      Array.prototype.slice.call(node.getElementsByTagName('style'));
   var nodeValue = node.textContent;
   for (var i = 0, l = scriptElements.length; i < l; i++)
     nodeValue = nodeValue.replace(scriptElements[i].textContent, '');
@@ -155,13 +153,13 @@ function checkNode(node, context) {
           10) | 0;
       //fix cell getCompatStyle height is null
       nodeHeight = nodeHeight ||
-        (parseInt(node.getAttribute('height'), 10) | 0);
+      (parseInt(node.getAttribute('height'), 10) | 0);
       var nodeClientHeight = node.clientHeight | 0;
       var nodePaddingHeight = nodePaddingTop + nodePaddingBottom;
 
       if (nodeHeight < nodePaddingHeight &&
           !(nodePaddingHeight < nodeClientHeight))
-          mayHaveRE1013 = true;
+        mayHaveRE1013 = true;
     }
     //filter child nodes is haslayout and empty elements
     if (mayHaveRE1012 && isEmptyChild(node))
