@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html chrome_comp_test="document_all">
+<head>
+</head>
+<body>
+<div id = "a" onclick = "alert(document.all.a.innerHTML);"></div>
+<script>
+chrome_comp.expectProblems(document.all.a, "BX9002");
+</script>
+<script>
+window.onload = function () {
+  var documentAll;
+  documentAll = document.all;
+  documentAll = document["all"];
+  documentAll = document['all'];
+  documentAll = document['all'].a;
+  documentAll = document["all"]['a'];
+  documentAll = true || document.all;
+  documentAll = false ||document['all'];
+  documentAll = true && document['all'];
+  documentAll = false && document["all"];
+  documentAll = document.all && true;
+  documentAll = document.all && false;
+  if (document.all.a) return;
+  if (document["all"]['a']) return;
+  return document.all.a;
+};
+</script>
+</body>
+</html>
