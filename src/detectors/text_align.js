@@ -22,20 +22,23 @@ chrome_comp.CompDetect.declareDetector(
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
-function construtor(){
+function construtor() {
   this.getCompatMode_ = function() {
     function isIEDTDBug() {
-      var html = document.documentElement, prev = html;
+      var html = document.documentElement
+      var prev = html;
       while (prev.previousSibling)
         prev = prev.previousSibling;
       if (prev && prev.nodeType == 8)
         return true;
     }
 
-    var doctypeInIE, doctypeInWebKit, diffMap,
-        pid = (document.doctype) ? document.doctype.publicId : 0,
-        sid = (document.doctype) ? document.doctype.systemId : 0,
-        cm = document.compatMode.toLowerCase();
+    var doctypeInIE;
+    var doctypeInWebKit
+    var diffMap;
+    var pid = (document.doctype) ? document.doctype.publicId : 0;
+    var sid = (document.doctype) ? document.doctype.systemId : 0;
+    var cm = document.compatMode.toLowerCase();
     doctypeInIE = doctypeInWebKit = (cm == 'backcompat') ? 'Q' : 'S';
     if (isIEDTDBug()) {
       doctypeInIE = 'Q';
@@ -65,8 +68,10 @@ function construtor(){
         doctypeInWebKit = diffMap[pid]['WebKit'];
       }
     }
-    return {doctypeInIE : doctypeInWebKit,
-            doctypeInWebKit : doctypeInWebKit};
+    return {
+      doctypeInIE: doctypeInWebKit,
+      doctypeInWebKit: doctypeInWebKit
+    };
   }();
 }, // constructor
 
@@ -102,9 +107,10 @@ function checkNode(node, context) {
           if (Math.abs(parseInt(childStyle.marginLeft, 10) -
               parseInt(childStyle.marginRight, 10)) > 1 &&
               childWidth + 1 < parentElementMaxWidth) {
-            this.addProblem('RT8003',
-                { nodes: [node],
-                  details: parentElementMaxWidth + 'vs' + childWidth });
+            this.addProblem('RT8003', {
+              nodes: [node],
+              details: parentElementMaxWidth + 'vs' + childWidth
+            });
             return;
           }
         }
