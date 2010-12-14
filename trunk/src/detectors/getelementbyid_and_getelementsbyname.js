@@ -29,7 +29,6 @@ function constructor(rootNode) {
   var namesOfEmbed;
   var namesOfFrameAndParam;
 
-  /* Won't Fix
   this.getElementById_ = function(result, originalArguments, callStack) {
     var arg0 = originalArguments[0];
     var lowerCaseArg0 = arg0.toLowerCase();
@@ -61,7 +60,6 @@ function constructor(rootNode) {
       });
     }
   };
-  */
 
   // Handle SD9012
   this.getElementsByName_ = function(result, originalArguments, callStack) {
@@ -78,7 +76,9 @@ function constructor(rootNode) {
     }
   };
 
-  /*
+  // May has problem when updating document tree dynamically after window 
+  // loading
+  // Get all elements with id attribute in the document
   function getIds() {
     if (!ids) {
       ids = [];
@@ -89,7 +89,6 @@ function constructor(rootNode) {
     }
     return ids;
   }
-  */
 
   // Get names of specified element in the document
   function getNames() {
@@ -119,22 +118,18 @@ function constructor(rootNode) {
       'namesOfFrameAndParam': namesOfFrameAndParam
     };
   }
-}, // constructor
+}, //constructor
 
 function setUp() {
-  /* Won't fix
   chrome_comp.CompDetect.registerExistingMethodHook(
       Document.prototype, 'getElementById', this.getElementById_);
-  */
   chrome_comp.CompDetect.registerExistingMethodHook(
       Document.prototype, 'getElementsByName', this.getElementsByName_);
 },
 
 function cleanUp() {
-  /* Won't fix
   chrome_comp.CompDetect.unregisterExistingMethodHook(
       Document.prototype, 'getElementById', this.getElementById_);
-  */
   chrome_comp.CompDetect.unregisterExistingMethodHook(
       Document.prototype, 'getElementsByName', this.getElementsByName_);
 }
