@@ -32,9 +32,8 @@ function checkNode(node, context) {
     var parentElement = node.parentElement;
     var parentStyle = chrome_comp.getComputedStyle(parentElement);
     var definedWidth = chrome_comp.getDefinedStylePropertyByName(
-          node, false, 'width');
-    definedWidth = definedWidth ||
-        parseInt(node.getAttribute('width'), 10) | 0 ;
+        node, false, 'width');
+    definedWidth = definedWidth || parseInt(node.getAttribute('width'), 10) | 0;
     if (parentStyle && parentStyle.display == 'table-cell' &&
         parentStyle.tableLayout == 'auto' && !definedWidth) {
       var oldParentClientRect = parentElement.getBoundingClientRect();
