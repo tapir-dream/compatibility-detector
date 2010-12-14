@@ -28,9 +28,11 @@ function checkNode(node, context) {
 
   // Check if the node is a table element.
   function isTableElement(node) {
-    var TABLELIKE_VALUES = ['table', 'inline-table', 'table-row-group',
-        'table-header-group', 'table-footer-group', 'table-row',
-        'table-column-group', 'table-column', 'table-cell', 'table-caption'];
+    var TABLELIKE_VALUES = [
+      'table', 'inline-table', 'table-row-group', 'table-header-group',
+      'table-footer-group', 'table-row', 'table-column-group', 'table-column',
+      'table-cell', 'table-caption'
+    ];
     var display = chrome_comp.getComputedStyle(node).display;
     return TABLELIKE_VALUES.indexOf(display) != -1;
   }
@@ -66,6 +68,7 @@ function checkNode(node, context) {
   // element ':after' will holding space in WebKit.
   // This affects the calculation of 'scrollHeight'.
   // Fortunately, it does not expand its containing block visually.
+  /* For RD1002
   function pseudoElementDoesNotAffect(node) {
     var pseudoStyle = window.getComputedStyle(node, ':after');
     if (pseudoStyle.display && pseudoStyle.clear) {
@@ -87,7 +90,9 @@ function checkNode(node, context) {
     }
     return true;
   }
+  */
 
+  /* For RD1002
   function rectCallback(node) {
     var left = chrome_comp.PageUtil.pageLeft(node);
     var top = chrome_comp.PageUtil.pageTop(node);
@@ -106,9 +111,10 @@ function checkNode(node, context) {
       }
     ];
   }
+  */
 
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
-      return;
+    return;
 
   // Check whether the contents overflowed from an element.
   /*
@@ -138,7 +144,7 @@ function checkNode(node, context) {
         }
       }
     }
-  } else {
+  }
   */
 
   if (chrome_comp.isReplacedElement(node) || isTableElement(node) ||
@@ -148,6 +154,7 @@ function checkNode(node, context) {
   var computedStyle = chrome_comp.getComputedStyle(node);
 
   // RD1002
+  /*
   // In [IE6 IE7(Q) IE8(Q)], if an element's specified size is not big enouth to
   // contain its child elements, and its 'overflow' is 'visible',
   if (node.scrollWidth > node.clientWidth ||
@@ -227,6 +234,7 @@ function checkNode(node, context) {
       }
     }
   }
+  */
 
   // RV1001
   // For an element specified values of 'overflow-x' and 'overflow-y', if one of
@@ -284,9 +292,6 @@ function checkNode(node, context) {
       }
     }
   }
-/*
-}
-*/
 }
 ); // declareDetector
 
