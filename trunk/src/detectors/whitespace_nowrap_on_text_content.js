@@ -29,8 +29,8 @@ function checkNode(node, additionalData) {
     if (nodeEl.nodeType == 3)
       return true;
     if (nodeEl.nodeType == 1) {
-      var dis = chrome_comp.getComputedStyle(nodeEl).display,
-          inlineList = ['inline', 'inline-block', 'inline-table'];
+      var dis = chrome_comp.getComputedStyle(nodeEl).display;
+      var inlineList = ['inline', 'inline-block', 'inline-table'];
       if (inlineList.indexOf(dis) != -1)
         return true;
     }
@@ -41,8 +41,8 @@ function checkNode(node, additionalData) {
     if (nodeEl.nodeType == 3)
       return false;
     if (nodeEl.nodeType == 1) {
-      var descendants = nodeEl.getElementsByTagName('*'),
-          inlineList = ['inline', 'inline-block', 'inline-table'];
+      var descendants = nodeEl.getElementsByTagName('*');
+      var inlineList = ['inline', 'inline-block', 'inline-table'];
       for (var i = 0, j = descendants.length; i < j; i++) {
         if (chrome_comp.getComputedStyle(descendants[i]).display != 'inline')
           return false;
