@@ -26,7 +26,8 @@ chrome_comp.CompDetect.ScanDomBaseDetector,
 null, // constructor
 
 function checkNode(node, additionalData) {
-  /*function isShrinkToFit(node) {
+  /*
+  function isShrinkToFit(node) {
     var width = window.chrome_comp.getDefinedStylePropertyByName(node, true, 
       'width');
     if (width && width != 'auto') return;
@@ -37,7 +38,8 @@ function checkNode(node, additionalData) {
         isFloat = (cssFloat == 'left') || (cssFloat == 'right'),
         isInlineBlock = inlineBlock == 'inline-block';
     return isAbsPosition || isFloat || isInlineBlock;
-  }*/
+  }
+  */
 
   if (Node.ELEMENT_NODE != node.nodeType ||
       chrome_comp.getComputedStyle(node).display != 'inline')

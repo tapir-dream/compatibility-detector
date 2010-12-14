@@ -83,10 +83,10 @@ function checkNode(node, context) {
   var direction = style.direction;
 
   if ((display == 'block' || display == 'inline-block' ||
-       display == 'table-cell') &&
+      display == 'table-cell') &&
       (textAlign == 'center' ||
-       (direction == 'ltr' && textAlign == 'right') ||
-       (direction == 'rtl' && textAlign == 'left'))) {
+      (direction == 'ltr' && textAlign == 'right') ||
+      (direction == 'rtl' && textAlign == 'left'))) {
     var parentElementMaxWidth = parseInt(node.style.width, 10);
     var child = node.firstElementChild;
     do {
@@ -95,7 +95,7 @@ function checkNode(node, context) {
         if (childStyle.display == 'block' &&
             childStyle.float == 'none' &&
             (childStyle.position == 'static' ||
-             childStyle.position == 'relative')) {
+            childStyle.position == 'relative')) {
           var childWidth = parseInt(child.style.width, 10) +
               parseInt(childStyle.paddingLeft, 10) +
               parseInt(childStyle.paddingRight, 10);
