@@ -26,10 +26,10 @@ function construtor(){
   this.getCompatMode_ = function() {
     function isIEDTDBug() {
       var html = document.documentElement, prev = html;
-      while (prev.previousSibling) { prev = prev.previousSibling; }
-      if (prev && prev.nodeType == 8) {
+      while (prev.previousSibling)
+        prev = prev.previousSibling;
+      if (prev && prev.nodeType == 8)
         return true;
-      }
     }
 
     var doctypeInIE, doctypeInWebKit, diffMap,
@@ -65,8 +65,8 @@ function construtor(){
         doctypeInWebKit = diffMap[pid]['WebKit'];
       }
     }
-    return {doctypeInIE:doctypeInWebKit,
-      doctypeInWebKit:doctypeInWebKit};
+    return {doctypeInIE : doctypeInWebKit,
+            doctypeInWebKit : doctypeInWebKit};
   }();
 }, // constructor
 
