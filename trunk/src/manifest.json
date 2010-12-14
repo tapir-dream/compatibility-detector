@@ -41,14 +41,17 @@
 
 
       //============unit test===========
+
       //====here things are temporary, used to delete, don't paste from the bottom up=====
 
 
       //=========Review===========
+      "detectors/text_decoration_propagation.js",           //RT3002
+      "detectors/word_wrap_spaces.js",                      //RT1008
+
       "detectors/get_element_by_id_and_name.js",            //BX9010
       "detectors/zoom_style.js",                            //BX8017 ... Test results url is 0
       "detectors/z_index_auto.js",                          //RM8015
-      "detectors/shrink_to_fit_percentage_child.js",        //RX8017
       "detectors/percent_height_in_auto_height.js",         //RE8010 RD8026
       "detectors/stretched_cell_align.js",                  //RE8014
       "detectors/td_nowrap_inheritence.js",                 //RX1003
@@ -72,35 +75,35 @@
       "detectors/invalid_list_item.js",                     //HY1005
       "detectors/text_align.js",                            //RT8003
       "detectors/center_element.js",                        //HA8001
+      "detectors/text_overflow_ellipsis.js",                //RT3005
+      "detectors/shrink_to_fit_percentage_child.js",        //RX8017
+      "detectors/overflow.js",                              //RV1001
 
       //Verified --> Error downgraded to Warning
       "detectors/getelementbyid_and_getelementsbyname.js",  //SD9001 SD9002
       "detectors/document_all.js",                          //BX9002
       "detectors/script_language_type.js",                  //BT9005 BT9006
       "detectors/align_nowrap.js",                          //RX8015
-
       /*********************************
 
       //Started --> Error
       "detectors/z_index_auto.js",                          //RM8015
       "detectors/get_element_by_id_and_name.js"             //BX9010
       "detectors/percent_height_in_auto_height.js",         //RE8010 RD8026
-      "detectors/shrink_to_fit_percentage_child.js",        //RX8017
       "detectors/get_and_set_attribute.js",                 //SD9006
       "detectors/element_click.js",                         //SD9025
+      "detectors/zoom_style.js",                            //BX8017
 
       //Started --> Warning
+      "detectors/word_wrap_spaces.js",                      //RT1008
       "detectors/align_middle.js",                          //HA1003
       "detectors/img_text_decoration.js",                   //RT3001
-      "detectors/zoom_style.js",                            //BX8017
       "detectors/stretched_cell_align.js",                  //RE8014
-      "detectors/text_overflow_ellipsis.js",                //RT3005
       "detectors/table_cellspacing_border_collapse.js",     //RE1020
       "detectors/white_space_after_iframe_object.js",       //HT1001
-      "detectors/decoration_font_color.js",                 //RX3011
       "detectors/text_decoration_propagation.js",           //RT3002
       "detectors/font_style_element_affects_css.js",        //RX3007
-      "detectors/overflow.js",                              //RV1001 RX1002 RD1002
+      "detectors/overflow.js",                              //RX1002 RD1002
       "detectors/full_shape_space_no_wrap.js",              //BX1009
       "detectors/td_nowrap_inheritence.js",                 //RX1003
 
@@ -108,8 +111,8 @@
       "detectors/right_floats_stretch_parent_elements.js",  //RD8006
       "detectors/mouse_enter_leave.js"                      //BT9017
       "detectors/scroll_top_left.js",                       //BX9008
-      "detectors/img_alt_title.js",                         //HO3003...
-
+      "detectors/img_alt_title.js",                         //HO3003
+      "detectors/zoom_style.js",                            //BX8017
       //===============Uncategorized==================
 
       "detectors/useragent_check.js",
@@ -125,7 +128,6 @@
       "detectors/style_attribute_value_in_braces.js",
       "detectors/img_padding.js",
       "detectors/bold_element_font_weight.js",
-      "detectors/word_wrap_spaces.js",
       "detectors/fieldset_width.js",
       "detectors/iframe_scroll.js",
       "detectors/navigator_language.js",
