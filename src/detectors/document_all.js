@@ -59,7 +59,7 @@ chrome_comp.CompDetect.ScanDomBaseDetector,
 
 function constructor(rootNode) {
   this.gatherAllProblemNodes_ = false;
-  //fix document.all and document['all'] and if ( ... ) and  return ....
+  // Fix document.all and document['all'] and if ( ... ) and  return ....
   this.documentAllRegexp_ =
       /[^\w$]*document(([.]all)|(\[["']all["']\]))\s?[\(\.\[\w$]/g;
 
@@ -94,13 +94,13 @@ function checkNode(node, context) {
   var This = this;
   var scriptData = '';
   var testResults = {
-    documentAllRegexp_ : false,
-    documentAllFilterShortSyntaxRegexp_ : false,
-    documentAllTernaryQuestionRegexp_ : false,
-    documentAllTernaryColonRegexp_ : false,
-    dcoumentAllEvalRegexp_ : false,
-    documentAllFiterAndSyntaxRegexp_ : false,
-    documentAllFilterIfSyntaxRegxp_ : false
+    documentAllRegexp_: false,
+    documentAllFilterShortSyntaxRegexp_: false,
+    documentAllTernaryQuestionRegexp_: false,
+    documentAllTernaryColonRegexp_: false,
+    dcoumentAllEvalRegexp_: false,
+    documentAllFiterAndSyntaxRegexp_: false,
+    documentAllFilterIfSyntaxRegxp_: false
   };
 
   if (node.tagName == 'SCRIPT') {
