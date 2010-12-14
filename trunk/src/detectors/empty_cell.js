@@ -93,7 +93,7 @@ function isEmptyCell(cell) {
 function isEmptyChild(node) {
   var childElements =
       Array.prototype.slice.call(node.getElementsByTagName('*'));
-  for (var i = 0, l = childElements.length; i < l; i++) {
+  for (var i = 0, len = childElements.length; i < len; i++) {
     if (chrome_comp.hasLayoutInIE(childElements[i]) ||
         childElements[i].tagName == 'IFRAME' ||
         childElements[i].tagName == 'OBJECT' ||
@@ -105,17 +105,17 @@ function isEmptyChild(node) {
   return false;
 }
 
-//match script and style element content fix textContent return text
-//don't use 'node.cloneNode(true).innerText ' it will trigger RCA SD9029
+// Match script and style element content fix textContent return text
+// Don't use 'node.cloneNode(true).innerText ' it will trigger RCA SD9029
 function getFixedNodeTextContent(node) {
   var scriptElements =
       Array.prototype.slice.call(node.getElementsByTagName('script'));
   var styleElements =
       Array.prototype.slice.call(node.getElementsByTagName('style'));
   var nodeValue = node.textContent;
-  for (var i = 0, l = scriptElements.length; i < l; i++)
+  for (var i = 0, len = scriptElements.length; i < len; i++)
     nodeValue = nodeValue.replace(scriptElements[i].textContent, '');
-  for (var i = 0, l = styleElements.length; i < l; i++)
+  for (var i = 0, len = styleElements.length; i < len; i++)
     nodeValue = nodeValue.replace(styleElements[i].textContent, '');
   return nodeValue;
 }
@@ -143,7 +143,7 @@ function checkNode(node, context) {
     var nodePaddingTop = parseInt(style.paddingTop, 10) | 0;
     var nodePaddingBottom = parseInt(style.paddingBottom, 10) | 0;
 
-    //fix empty cell padding is 1px
+    // Fix empty cell padding is 1px
     nodePaddingTop = (nodePaddingTop == 1) ? 0 : nodePaddingTop;
     nodePaddingBottom = (nodePaddingBottom == 1) ? 0 : nodePaddingBottom;
 
@@ -151,9 +151,9 @@ function checkNode(node, context) {
       var nodeHeight = parseInt(
           chrome_comp.getDefinedStylePropertyByName(node, true, 'height'),
           10) | 0;
-      //fix cell getCompatStyle height is null
+      // Fix cell getCompatStyle height is null
       nodeHeight = nodeHeight ||
-      (parseInt(node.getAttribute('height'), 10) | 0);
+          (parseInt(node.getAttribute('height'), 10) | 0);
       var nodeClientHeight = node.clientHeight | 0;
       var nodePaddingHeight = nodePaddingTop + nodePaddingBottom;
 
@@ -161,7 +161,7 @@ function checkNode(node, context) {
           !(nodePaddingHeight < nodeClientHeight))
         mayHaveRE1013 = true;
     }
-    //filter child nodes is haslayout and empty elements
+    // Filter child nodes is haslayout and empty elements
     if (mayHaveRE1012 && isEmptyChild(node))
       this.addProblem('RE1012', [node]);
     if (mayHaveRE1013 && isEmptyCell(node))
