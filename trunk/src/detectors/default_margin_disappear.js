@@ -37,9 +37,10 @@ function checkNode(node, additionalData) {
     while (nod) {
       if (nod == document.body)
         return document.documentElement;
-      if (nod.parentNode) nod = nod.parentNode;
-      if (chrome_comp.getComputedStyle(nod).display ==
-          'block' || isBlockFormattingContext(nod)) {
+      if (nod.parentNode)
+        nod = nod.parentNode;
+      if (chrome_comp.getComputedStyle(nod).display == 'block' ||
+          isBlockFormattingContext(nod)) {
         return nod;
       }
     }
@@ -80,8 +81,8 @@ function checkNode(node, additionalData) {
     var overflow = elementStyle.overflow;
     var overflowX = elementStyle.overflowX;
     var overflowY = elementStyle.overflowY;
-    var tagList = ['HTML', 'BODY', 'TABLE', 'TR', 'TH', 'TD',
-                   'BUTTON','FIELDSET', 'LEGEND', 'MARQUEE'];
+    var tagList = ['HTML', 'BODY', 'TABLE', 'TR', 'TH', 'TD', 'BUTTON',
+        'FIELDSET', 'LEGEND', 'MARQUEE'];
 
     if (display == 'none')
       return false;
@@ -120,10 +121,10 @@ function checkNode(node, additionalData) {
 
   function isNegativeMargin(nodeEl) {
     var elementStyle = window.chrome_comp.getComputedStyle(nodeEl);
-    var t = parseInt(elementStyle.marginTop,10);
-    var r = parseInt(elementStyle.marginRight,10);
-    var b = parseInt(elementStyle.marginbottom,10);
-    var l = parseInt(elementStyle.marginLeft,10);
+    var t = parseInt(elementStyle.marginTop, 10);
+    var r = parseInt(elementStyle.marginRight, 10);
+    var b = parseInt(elementStyle.marginbottom, 10);
+    var l = parseInt(elementStyle.marginLeft, 10);
     return (t < 0) || (r < 0) || (b < 0) || (l < 0);
   }
 
@@ -136,18 +137,17 @@ function checkNode(node, additionalData) {
 
   function isDefaultMargin(nodeEl) {
     var mt = window.chrome_comp.getDefinedStylePropertyByName(nodeEl, false,
-          'margin-top');
+        'margin-top');
     var mb = window.chrome_comp.getDefinedStylePropertyByName(nodeEl, false,
-          'margin-bottom');
+        'margin-bottom');
     return !mt || !mb;
   }
 
   function isFirstInFlow(nodeEl, containingBlock) {
     var p = containingBlock.firstElementChild;
     while (p) {
-      if (p == nodeEl) {
+      if (p == nodeEl)
         return true;
-      }
       if (isNotInFlow(p)) {
         p = p.nextElementSibling;
         continue;

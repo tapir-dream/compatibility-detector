@@ -25,12 +25,12 @@ chrome_comp.CompDetect.ScanDomBaseDetector,
 null, // constructor
 
 function checkNode(node, additionalData) {
-  //check all BUTTON element
+  // Check all BUTTON element
   if (Node.ELEMENT_NODE != node.nodeType || node.tagName != 'BUTTON')
     return;
   // Check the BUTTON element form attribute is present
-  // if there exists a description of the FORM in BUTTON
-  if(node.form != null){
+  // If there exists a description of the FORM in BUTTON
+  if (node.form != null) {
     this.addProblem('HF9015', [node]);
   }
 }

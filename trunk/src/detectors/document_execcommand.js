@@ -26,32 +26,32 @@ function constructor(rootNode) {
   var This = this;
   this.execCommandHookHandler_ = function(result, originalArguments, callStack) {
     var commandList = {
-        'backColor' : '',
-        'bold' : '',
-        'createLink' : '',
-        'delete' : '',
-        'fontSize' : '',
-        'foreColor' : '',
-        'formatBlock' : '',
-        'indent' : '',
-        'insertHorizontalRule' : '',
-        'insertImage' : '',
-        'insertOrderedList' : '',
-        'insertUnorderedList' : '',
-        'insertParagraph' : '',
-        'italic' : '',
-        'justifyCenter' : '',
-        'justifyLeft' : '',
-        'justifyRight' : '',
-        'justifyFull' : '',
-        'outdent' : '',
-        'removeFormat' : '',
-        'selectAll' : '',
-        'strikeThrough' : '',
-        'subscript' : '',
-        'superscript' : '',
-        'underline' : '',
-        'unlink' : ''
+      'backColor': '',
+      'bold': '',
+      'createLink': '',
+      'delete': '',
+      'fontSize': '',
+      'foreColor': '',
+      'formatBlock': '',
+      'indent': '',
+      'insertHorizontalRule': '',
+      'insertImage': '',
+      'insertOrderedList': '',
+      'insertUnorderedList': '',
+      'insertParagraph': '',
+      'italic': '',
+      'justifyCenter': '',
+      'justifyLeft': '',
+      'justifyRight': '',
+      'justifyFull': '',
+      'outdent': '',
+      'removeFormat': '',
+      'selectAll': '',
+      'strikeThrough': '',
+      'subscript': '',
+      'superscript': '',
+      'underline': '',
+      'unlink': ''
     };
     if (originalArguments[0] in commandList)
       return;
@@ -69,8 +69,14 @@ function checkNode(node, context) {
       'execCommand',
       this.execCommandHookHandler_);
 },
-function setUp() {},
-function cleanUp() {}
+
+function setUp() {
+
+},
+
+function cleanUp() {
+
+}
 ); // declareDetector
 
 });

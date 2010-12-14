@@ -139,7 +139,7 @@ function checkNode(node, context) {
             }
           }
           if (!(mostTop < nodeListRight[m].newRect.top &&
-                nodeListRight[m].newRect < mostBottom))
+              nodeListRight[m].newRect < mostBottom))
             this.addProblem('RX8015',
                 { nodes: [nodeListRight[m].node], severityLevel: 1 });
         } else {

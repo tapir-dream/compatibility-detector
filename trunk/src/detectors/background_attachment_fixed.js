@@ -25,7 +25,6 @@ chrome_comp.CompDetect.ScanDomBaseDetector,
 null, // constructor
 
 function checkNode(node, additionalData) {
-
   // Check whether it is HTML or BODY element
   if (Node.ELEMENT_NODE != node.nodeType ||
       node.tagName == 'HTML' || node.tagName == 'BODY')

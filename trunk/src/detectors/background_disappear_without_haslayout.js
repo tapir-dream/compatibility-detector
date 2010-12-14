@@ -29,7 +29,7 @@ function checkNode(node, additionalData) {
     var nod = nodeEl;
     while (nod) {
       nod = nod.nextElementSibling;
-      if (nod && window.chrome_comp.hasLayoutInIE(nod))
+      if (nod && chrome_comp.hasLayoutInIE(nod))
         return nod;
     }
   }
@@ -38,14 +38,15 @@ function checkNode(node, additionalData) {
     var nod = nodeEl;
     while (nod) {
       nod = nod.parentNode;
-      if (nod && window.chrome_comp.hasLayoutInIE(nod))
+      if (nod && chrome_comp.hasLayoutInIE(nod))
         return nod;
     }
   }
 
   function hasOnlyFloat(nodeEl) {
-    var ch = nodeEl.childNodes, reWS = /^\s*$/,
-        last = nodeEl.lastElementChild;
+    var ch = nodeEl.childNodes;
+    var reWS = /^\s*$/;
+    var last = nodeEl.lastElementChild;
     for (var i = 0, j = ch.length; i < j; i++) {
       if (ch[i].nodeType == 1) {
         if (chrome_comp.getComputedStyle(ch[i]).clear != 'none' &&
@@ -72,7 +73,9 @@ function checkNode(node, additionalData) {
   }
 
   function hasClearanceSpacing(nodeEl) {
-    var oldTop, newTop, inlineMarginTop = nodeEl.style.marginTop;
+    var oldTop;
+    var newTop;
+    var inlineMarginTop = nodeEl.style.marginTop;
     nodeEl.style.marginTop = '-1px';
     oldTop = nodeEl.getBoundingClientRect().top;
     nodeEl.style.marginTop = '0px';
