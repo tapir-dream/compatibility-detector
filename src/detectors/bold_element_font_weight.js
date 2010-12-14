@@ -43,9 +43,9 @@ function checkNode(node, context) {
   if (!fontWeight) {
     var tagName = node.tagName;
     if (tagName == 'STRONG' || tagName == 'B' || tagName == 'TH' ||
-        // check H1 ~ H6
+        // Check H1 ~ H6
         (tagName.length == 2 && tagName[0] == 'H' &&
-         tagName[1] >= '1' && tagName[1] <= '6')) {
+        tagName[1] >= '1' && tagName[1] <= '6')) {
       if (!isNaN(parentFontWeight) && parentFontWeight <= 300)
         this.addProblem('RA3002', [node]);
     }

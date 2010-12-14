@@ -26,18 +26,18 @@ null, // constructor
 
 function checkNode(node, additionalData) {
   function isPositioned(nodeEl) {
-    var position = window.chrome_comp.getComputedStyle(nodeEl).position;
+    var position = chrome_comp.getComputedStyle(nodeEl).position;
     return (position == 'absolute') || (position == 'fixed');
   }
 
   function isWidthAuto(nodeEl) {
-    var width = window.chrome_comp.getDefinedStylePropertyByName(nodeEl, true,
+    var width = chrome_comp.getDefinedStylePropertyByName(nodeEl, true,
         'width');
     return !width || width == 'auto';
   }
 
   function isHeightAuto(nodeEl) {
-    var height = window.chrome_comp.getDefinedStylePropertyByName(nodeEl, true,
+    var height = chrome_comp.getDefinedStylePropertyByName(nodeEl, true,
         'height');
     return !height || height == 'auto';
   }
@@ -45,12 +45,12 @@ function checkNode(node, additionalData) {
   if (Node.ELEMENT_NODE != node.nodeType || !isPositioned(node))
     return;
 
-  var left = window.chrome_comp.getComputedStyle(node).left;
-  var right = window.chrome_comp.getComputedStyle(node).right;
-  var width = window.chrome_comp.getComputedStyle(node).width;
+  var left = chrome_comp.getComputedStyle(node).left;
+  var right = chrome_comp.getComputedStyle(node).right;
+  var width = chrome_comp.getComputedStyle(node).width;
 
   if (left != 'auto' && right != 'auto' && isWidthAuto(node)) {
-    var stfWidth = window.chrome_comp.getComputedStyle(node).width;
+    var stfWidth = chrome_comp.getComputedStyle(node).width;
     node.style.left = 'auto';
     node.style.right = 'auto';
     node.style.left = left;
@@ -60,7 +60,7 @@ function checkNode(node, additionalData) {
       return;
     }
   }
-  var elementStyle = window.chrome_comp.getComputedStyle(node);
+  var elementStyle = chrome_comp.getComputedStyle(node);
   var top = elementStyle.top;
   var bottom = elementStyle.bottom;
   var height = elementStyle.height;
@@ -68,7 +68,7 @@ function checkNode(node, additionalData) {
   if (left != 'auto' && right != 'auto' && isHeightAuto(node)) {
     node.style.top = 'auto';
     node.style.bottom = 'auto';
-    var stfHeight = window.chrome_comp.getComputedStyle(node).height;
+    var stfHeight = chrome_comp.getComputedStyle(node).height;
     node.style.top = top;
     node.style.bottom = bottom;
     if (height != stfHeight) {

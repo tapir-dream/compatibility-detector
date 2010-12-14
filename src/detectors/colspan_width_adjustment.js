@@ -31,7 +31,7 @@ function checkNode(node, context) {
   if (node.tagName == 'TABLE') {
     var columnHasWidth = [];
     var columnSpans = [];
-    // span cells with specified width
+    // Span cells with specified width
     var spans = [];
     var rows = node.rows;
     for (var i = 0; i < rows.length; ++i) {
@@ -39,7 +39,7 @@ function checkNode(node, context) {
       for (var j = 0; j < cells.length; ++j) {
         var width =
             chrome_comp.getDefinedStylePropertyByName(cells[j], false, 'width');
-        if (parseInt(width,10) > 0) {
+        if (parseInt(width, 10) > 0) {
           var span = cells[j].colSpan;
           if (span > 1) {
             // Check whether there is already a cell with same span range
@@ -48,7 +48,7 @@ function checkNode(node, context) {
               if (spans[t][0] == j && spans[t][1] == span)
                 break;
             }
-            // duplicate span range
+            // Duplicate span range
             if (t != spans.length) {
               // Row i has the same span range with previous one
               spans[t].push(i);

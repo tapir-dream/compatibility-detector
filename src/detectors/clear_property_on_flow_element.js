@@ -29,7 +29,7 @@ function checkNode(node, additionalData) {
   if (Node.ELEMENT_NODE != node.nodeType)
     return;
 
-  // record the number of nodes
+  // Record the number of nodes
   var continuousNodeCount = 1;
   var elementStyle = chrome_comp.getComputedStyle(node);
   var firstNodeDisplayStyle = elementStyle.display;
@@ -60,24 +60,24 @@ function checkNode(node, additionalData) {
       firstNodeFloatStyle != 'none' && firstNodeDisplayStyle != 'none') {
     if (secondNode.offsetHeight != 0 && secondNode.offsetWidth != 0 &&
         secondNodeFloatStyle != 'none' && secondNodeDisplayStyle != 'none') {
-      // exist at least two continuous nodes
+      // Exist at least two continuous nodes
       if (continuousNodeCount >= 2) {
         if (firstNodeFloatStyle != secondNodeFloatStyle) {
           if (secondNodeClearStyle == firstNodeFloatStyle ||
               secondNodeClearStyle == 'both' ||
-               secondNodeClearStyle =='all')
+              secondNodeClearStyle =='all')
             this.addProblem('RM8008', [secondNode]);
         }
         if (firstNodeFloatStyle == secondNodeFloatStyle &&
            continuousNodeCount == 3 && thirdNodeFloatStyle!='none' ) {
-          //exist three continuous nodes
+          // Exist three continuous nodes
           if (secondNodeClearStyle == firstNodeFloatStyle ||
               secondNodeClearStyle == 'both' ||
               secondNodeClearStyle =='all') {
             if (!(thirdNodeFloatStyle == firstNodeFloatStyle &&
-                  (thirdNodeClearStyle == firstNodeFloatStyle ||
-                   thirdNodeClearStyle == 'both' ||
-                   thirdNodeClearStyle == 'all'))) {
+                (thirdNodeClearStyle == firstNodeFloatStyle ||
+                thirdNodeClearStyle == 'both' ||
+                thirdNodeClearStyle == 'all'))) {
               var div = document.createElement('div');
               div.style.height = '0px';
               div.style.padding = '0px';
@@ -85,11 +85,11 @@ function checkNode(node, additionalData) {
               div.style.border = '0px';
               div.style.overflow = 'hidden';
               node.parentNode.insertBefore(div, secondNode);
-              //the leaving space of containner
+              // The leaving space of containner
               remainSpace = chrome_comp.getComputedStyle(div).width;
               if (parseInt(thirdNodeWidthStyle) <= parseInt(remainSpace))
                 this.addProblem('RM8008', [secondNode]);
-                node.parentNode.removeChild(div);
+              node.parentNode.removeChild(div);
             }
           }
         }

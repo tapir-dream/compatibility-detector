@@ -43,16 +43,16 @@ function checkNode(node, context) {
     else
       scriptData = node.text;
 
-   //delete script comment and string
-   scriptData = scriptData
-      .replace(this.oneLineScriptCommentsRegexp_, '')
-      .replace(this.multiLineScriptCommentsRegexp_, '')
-      .replace(this.stringDirectVolumeRegxp_, '');
+    // Delete script comment and string
+    scriptData = scriptData
+        .replace(this.oneLineScriptCommentsRegexp_, '')
+        .replace(this.multiLineScriptCommentsRegexp_, '')
+        .replace(this.stringDirectVolumeRegxp_, '');
 
     if (this.arrayDirectVolumeRegexp_.test(scriptData))
       this.addProblem('SJ2007', [node]);
 
-  //check inline events of other node
+  // Check inline events of other node
   } else {
     for (var i = 0, l = node.attributes.length; i < l; i++) {
       if (node.attributes[i].name.toLowerCase().indexOf('on') == 0) {

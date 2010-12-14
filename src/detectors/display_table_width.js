@@ -27,7 +27,6 @@ null, // constructor
 function checkNode(node, additionalData) {
 
   function isTableElementWidthAuto(nodeEl) {
-
     var div = document.createElement('div');
     var td = document.createElement('td');
     var tr = document.createElement('tr');
@@ -42,8 +41,9 @@ function checkNode(node, additionalData) {
     var computedTableLayout = chrome_comp.getComputedStyle(nodeEl).tableLayout;
     var oldWidth = nodeEl.offsetWidth;
 
-    nodeEl.style.tableLayout =
-      (computedTableLayout == 'auto') ? 'fixed !important' : 'auto !important';
+    nodeEl.style.tableLayout = (computedTableLayout == 'auto') ?
+        'fixed !important' :
+        'auto !important';
 
     newWidth = nodeEl.offsetWidth;
     nodeEl.style.tableLayout = null;
@@ -73,8 +73,9 @@ function checkNode(node, additionalData) {
     var computedTableLayout = chrome_comp.getComputedStyle(nodeEl).tableLayout;
     var oldWidth = nodeEl.offsetWidth;
 
-    nodeEl.style.tableLayout =
-      (computedTableLayout == 'auto') ? 'fixed !important' : 'auto !important';
+    nodeEl.style.tableLayout = (computedTableLayout == 'auto') ?
+        'fixed !important' :
+        'auto !important';
 
     newWidth = nodeEl.offsetWidth;
     nodeEl.style.tableLayout = null;
@@ -87,14 +88,14 @@ function checkNode(node, additionalData) {
     return (oldWidth == newWidth) ? 'auto' : nodeEl.offsetWidth + 'px';
   }
 
-  function findLastCellInFirstRow(nodeEl) {
-    var row = nodeEl.rows[0];
+  function findLastCellInFirstRow(ele) {
+    var row = ele.rows[0];
     return row.cells[row.cells.length - 1];
   }
 
-  function isBorderHorizontalZero(nodeEl) {
-    var br = parseInt(chrome_comp.getComputedStyle(nodeEl).borderRightWidth);
-    var bl = parseInt(chrome_comp.getComputedStyle(nodeEl).borderLeftWidth);
+  function isBorderHorizontalZero(ele) {
+    var br = parseInt(chrome_comp.getComputedStyle(ele).borderRightWidth, 10);
+    var bl = parseInt(chrome_comp.getComputedStyle(ele).borderLeftWidth, 10);
     return (br == 0) && (bl == 0);
   }
 
@@ -106,9 +107,9 @@ function checkNode(node, additionalData) {
         list.push(ch[i]);
     }
     var firstLeft = parseInt(chrome_comp.getComputedStyle(
-            list[0]).borderLeftWidth, 10);
+        list[0]).borderLeftWidth, 10);
     var lastRight = parseInt(chrome_comp.getComputedStyle(
-            list[list.length - 1]).borderRightWidth, 10);
+        list[list.length - 1]).borderRightWidth, 10);
 
     return { left : firstLeft, right : lastRight };
   }
@@ -122,16 +123,16 @@ function checkNode(node, additionalData) {
           list.push(ch[i]);
       }
       var firstLeft = parseInt(chrome_comp.getComputedStyle(
-              list[0]).borderLeftWidth, 10),
-          lastRight = parseInt(chrome_comp.getComputedStyle(
-              list[list.length - 1]).borderRightWidth, 10);
+          list[0]).borderLeftWidth, 10);
+      var lastRight = parseInt(chrome_comp.getComputedStyle(
+          list[list.length - 1]).borderRightWidth, 10);
       return (firstLeft != 0) || (lastRight != 0);
     }
 
     var tableBorderRightWidth =
-            parseInt(chrome_comp.getComputedStyle(nodeEl).borderRightWidth, 10);
+        parseInt(chrome_comp.getComputedStyle(nodeEl).borderRightWidth, 10);
     var tableBorderLeftWidth =
-            parseInt(chrome_comp.getComputedStyle(nodeEl).borderLeftWidth, 10);
+        parseInt(chrome_comp.getComputedStyle(nodeEl).borderLeftWidth, 10);
     var ch = nodeEl.children;
     var list = [];
     var borderWidth;
@@ -163,16 +164,16 @@ function checkNode(node, additionalData) {
 
   function hasWiderCellBorder(nodeEl) {
     var tableBorderRightWidth =
-          parseInt(chrome_comp.getComputedStyle(nodeEl).borderRightWidth, 10);
+        parseInt(chrome_comp.getComputedStyle(nodeEl).borderRightWidth, 10);
     var tableBorderLeftWidth =
-          parseInt(chrome_comp.getComputedStyle(nodeEl).borderLeftWidth, 10);
+        parseInt(chrome_comp.getComputedStyle(nodeEl).borderLeftWidth, 10);
     var ch = nodeEl.children;
     var list = [];
     var borderWidth;
     var maxLeft;
     var maxRight;
     var rowGroupDisplay =
-            ['table-row-group', 'table-header-group', 'table-footer-group'];
+        ['table-row-group', 'table-header-group', 'table-footer-group'];
     for (var i = 0, j = ch.length; i < j; i++) {
       var dis = chrome_comp.getComputedStyle(ch[i]).display;
       if (rowGroupDisplay.indexOf(dis) != -1) {

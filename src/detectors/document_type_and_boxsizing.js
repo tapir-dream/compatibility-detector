@@ -26,7 +26,8 @@ null, // constructor
 
 function checkNode(node, additionalData) {
   function isIEDTDBug(nodeEl) {
-    var html = document.documentElement, prev = html;
+    var html = document.documentElement;
+    var prev = html;
     while (prev.previousSibling)
       prev = prev.previousSibling;
     if (prev && prev.nodeType == 8)
@@ -36,8 +37,9 @@ function checkNode(node, additionalData) {
   if (Node.ELEMENT_NODE != node.nodeType)
     return;
 
-  var tn = node.tagName, tp;
-  if (window.chrome_comp.getComputedStyle(node).display == 'none')
+  var tn = node.tagName;
+  var tp;
+  if (chrome_comp.getComputedStyle(node).display == 'none')
     return;
   var w = chrome_comp.getDefinedStylePropertyByName(node, true, 'width');
   var h = chrome_comp.getDefinedStylePropertyByName(node, true, 'height');
@@ -105,7 +107,7 @@ function checkNode(node, additionalData) {
       doctypeInWebKit = diffMap[pid]['WebKit'];
     }
   }
-  if (!window.chrome_comp.isReplacedElement(node)) {
+  if (!chrome_comp.isReplacedElement(node)) {
     if (doctypeInIE == 'Q' && boxSizing != 'border-box') {
       this.addProblem('RD8001', [node]);
       return;

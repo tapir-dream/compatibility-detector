@@ -29,7 +29,7 @@ function checkNode(node, additionalData) {
     return;
 
   var borderSpacing =
-      window.chrome_comp.getComputedStyle(node).borderSpacing.split(' ');
+      chrome_comp.getComputedStyle(node).borderSpacing.split(' ');
   var list = ['TBODY', 'TFOOT', 'THEAD'];
 
   for (var i = 0, rowGroupCount = 0, j = node.children.length; i < j; i++) {
