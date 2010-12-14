@@ -17,9 +17,9 @@
 addScriptToInject(function() {
 
 var VALID_LIST_NEXT_TAGS = {
-  LI : [ 'LI' ],
-  DT : [ 'DT', 'DD' ],
-  DD : [ 'DT', 'DD' ]
+  LI: [ 'LI' ],
+  DT: [ 'DT', 'DD' ],
+  DD: [ 'DT', 'DD' ]
 };
 
 chrome_comp.CompDetect.declareDetector(

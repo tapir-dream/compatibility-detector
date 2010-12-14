@@ -114,10 +114,10 @@ function constructor(rootNode) {
     if (doctypeInIE7 != 'Q')
       doctypeInIE7 = 'A';
     return {
-      IE6 : doctypeInIE6,
-      IE7 : doctypeInIE7,
-      IE8 : doctypeInIE8,
-      WebKit : doctypeInWebKit
+      IE6: doctypeInIE6,
+      IE7: doctypeInIE7,
+      IE8: doctypeInIE8,
+      WebKit: doctypeInWebKit
     };
   }
   this.documentMode = getMode();
@@ -166,16 +166,16 @@ function checkNode(node, context) {
 
   var mode = this.documentMode;
   var hasEmptyNoWarnning = {
-    IE6 : 'SAQ',
-    IE7 : 'SAQ',
-    IE8 : 'SQ',
-    WebKit : 'S'
+    IE6: 'SAQ',
+    IE7: 'SAQ',
+    IE8: 'SQ',
+    WebKit: 'S'
   };
   var hasNoEmptyNoWarnning = {
-    IE6 : 'SAQ',
-    IE7 : 'SAQ',
-    IE8 : 'AQ',
-    WebKit : 'AQ'
+    IE6: 'SAQ',
+    IE7: 'SAQ',
+    IE8: 'AQ',
+    WebKit: 'AQ'
   }
 
   if (hasEmptyNode(node)) {

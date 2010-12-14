@@ -57,7 +57,7 @@ function checkNode(node, context) {
       node.style.overflowX = '';
       node.style.overflowX = settedOverflowX;
     }
-    return {'xIsVisible' : xIsVisible, 'yIsVisible' : yIsVisible};
+    return {'xIsVisible': xIsVisible, 'yIsVisible': yIsVisible};
   }
 
   // Some developers using '{content:"."; display:block; visibility:hidden;
@@ -93,16 +93,16 @@ function checkNode(node, context) {
     var top = chrome_comp.PageUtil.pageTop(node);
     return [
       {
-        left : left,
-        top : top,
-        width : node.offsetWidth,
-        height : node.offsetHeight
+        left: left,
+        top: top,
+        width: node.offsetWidth,
+        height: node.offsetHeight
       },
       {
-        left : left,
-        top : top,
-        width : node.scrollWidth,
-        height : node.scrollHeight
+        left: left,
+        top: top,
+        width: node.scrollWidth,
+        height: node.scrollHeight
       }
     ];
   }
