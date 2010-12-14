@@ -119,8 +119,8 @@ function checkNode(node, context) {
 
   // Check inline events of other node
   } else {
-    for (var i = 0, len = node.attributes.length; i < len; i++){
-      if (node.attributes[i].name.toLowerCase().indexOf('on') == 0){
+    for (var i = 0, len = node.attributes.length; i < len; i++) {
+      if (node.attributes[i].name.toLowerCase().indexOf('on') == 0) {
         scriptData = removeScriptComments(node.attributes[i].value);
         setTestResults(scriptData);
         if (getTestDetectorResult()) {
@@ -130,13 +130,13 @@ function checkNode(node, context) {
     }
   }
 
-  function removeScriptComments(scriptData){
+  function removeScriptComments(scriptData) {
     return scriptData
            .replace(This.multiLineScriptCommentsRegexp_, '')
            .replace(This.oneLineScriptCommentsRegexp_, '');
   }
 
-  function getTestDetectorResult(){
+  function getTestDetectorResult() {
     return testResults.documentAllRegexp_ &&
            testResults.documentAllFilterShortSyntaxRegexp_ &&
            testResults.documentAllTernaryQuestionRegexp_ &&
@@ -146,7 +146,7 @@ function checkNode(node, context) {
            testResults.documentAllFilterIfSyntaxRegxp_ ;
   }
 
-  function setTestResults(scriptData){
+  function setTestResults(scriptData) {
     This.documentAllRegexp_.test('');
     testResults.documentAllRegexp_= This.documentAllRegexp_.test(scriptData);
 
