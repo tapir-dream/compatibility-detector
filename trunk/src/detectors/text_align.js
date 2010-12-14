@@ -42,8 +42,6 @@ function construtor() {
     doctypeInIE = doctypeInWebKit = (cm == 'backcompat') ? 'Q' : 'S';
     if (isIEDTDBug()) {
       doctypeInIE = 'Q';
-      if (tn == 'HTML')
-        this.addProblem('HG8001', [node]);
     }
     diffMap = {
       '-//W3C//DTD HTML 4.0 Transitional//EN': {
