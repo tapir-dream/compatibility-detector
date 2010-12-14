@@ -57,7 +57,7 @@ function checkNode(node, context) {
       node.style.overflowX = '';
       node.style.overflowX = settedOverflowX;
     }
-    return {'xIsVisible': xIsVisible, 'yIsVisible': yIsVisible};
+    return { 'xIsVisible': xIsVisible, 'yIsVisible': yIsVisible };
   }
 
   // Some developers using '{content:"."; display:block; visibility:hidden;
@@ -147,7 +147,7 @@ function checkNode(node, context) {
 
   var computedStyle = chrome_comp.getComputedStyle(node);
 
-  //RD1002
+  // RD1002
   // In [IE6 IE7(Q) IE8(Q)], if an element's specified size is not big enouth to
   // contain its child elements, and its 'overflow' is 'visible',
   if (node.scrollWidth > node.clientWidth ||
