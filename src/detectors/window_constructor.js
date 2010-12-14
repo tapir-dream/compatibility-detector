@@ -26,10 +26,10 @@ function constructor(rootNode) {
   this.gatherAllProblemNodes_ = false;
 
   this.windowConstructorFilterShortSyntaxRegexp_ =
-    /(\|\||\&\&)\s*(Window\s*(\.|\[)|window\s*(\.__proto__|\[\s*["']__proto__["']\s*\]\s*[\.\[])|window\s*(\.constructor|\[\s*["']constructor["']\s*\]\s*[\.\[]))/g;
+      /(\|\||\&\&)\s*(Window\s*(\.|\[)|window\s*(\.__proto__|\[\s*["']__proto__["']\s*\]\s*[\.\[])|window\s*(\.constructor|\[\s*["']constructor["']\s*\]\s*[\.\[]))/g;
 
   this.windowConstructorRegexp_ =
-    /Window\s*(\.|\[)|window\s*(\.__proto__|\[\s*["']__proto__["']\s*\]\s*[\.\[])|window\s*(\.constructor|\[\s*["']constructor["']\s*\]\s*[\.\[])/g;
+      /Window\s*(\.|\[)|window\s*(\.__proto__|\[\s*["']__proto__["']\s*\]\s*[\.\[])|window\s*(\.constructor|\[\s*["']constructor["']\s*\]\s*[\.\[])/g;
 
   this.multiLineScriptCommentsRegexp_ = /\/\*([\S\s]*?)\*\//g;
   this.oneLineScriptCommentsRegexp_ = /[^:\/]\/\/[^\n\r]*/gm;
@@ -45,8 +45,8 @@ function checkNode(node, context) {
 
   var This = this;
   var testResults = {
-      windowConstructorFilterShortSyntaxRegexp_ : false,
-      windowConstructorRegexp_ : false
+    windowConstructorFilterShortSyntaxRegexp_ : false,
+    windowConstructorRegexp_ : false
   };
 
   //check script node
@@ -58,9 +58,9 @@ function checkNode(node, context) {
       scriptData = node.text;
     }
 
-   //delete script comment
-   scriptData = removeScriptComments(scriptData);
-   setTestResults(scriptData);
+    //delete script comment
+    scriptData = removeScriptComments(scriptData);
+    setTestResults(scriptData);
     if (getTestDetectorResult())
       this.addProblem('BX9045', [node]);
   //check inline events of other node
@@ -94,7 +94,7 @@ function checkNode(node, context) {
 
     This.windowEvalFilterShortSyntaxRegexp_.test('');
     testResults.windowConstructorFilterShortSyntaxRegexp_ =
-      !This.windowConstructorFilterShortSyntaxRegexp_.test(scriptData);
+        !This.windowConstructorFilterShortSyntaxRegexp_.test(scriptData);
 
     This.windowConstructorFilterShortSyntaxRegexp_.test('');
   }

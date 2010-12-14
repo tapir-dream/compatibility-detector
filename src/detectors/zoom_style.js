@@ -30,7 +30,7 @@ function checkNode(node, context) {
     return;
 
   var nodeCssZoomValue =
-        parseInt(chrome_comp.getComputedStyle(node).zoom, 10);
+      parseInt(chrome_comp.getComputedStyle(node).zoom, 10);
 
   if (isNaN(nodeCssZoomValue))
     return;

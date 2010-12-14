@@ -24,10 +24,10 @@ chrome_comp.CompDetect.ScanDomBaseDetector,
 
 function constructor(rootNode) {
   this.windowEvalFilterShortSyntaxRegexp_ =
-    /\b(?:[^||&&])\s*window(([.]eval)|(\[["']eval["']\]))\s?\(/g;
+      /\b(?:[^||&&])\s*window(([.]eval)|(\[["']eval["']\]))\s?\(/g;
 
   this.windowEvalRegexp_ =
-    /[^\w$]*window(([.]eval)|(\[["']eval["']\]))\s?\(/g;
+      /[^\w$]*window(([.]eval)|(\[["']eval["']\]))\s?\(/g;
 
   this.multiLineScriptCommentsRegexp_ = /\/\*([\S\s]*?)\*\//g;
   this.oneLineScriptCommentsRegexp_ = /[^:\/]\/\/[^\n\r]*/gm;
@@ -40,8 +40,8 @@ function checkNode(node, context) {
 
   var This = this;
   var testResults = {
-      windowEvalFilterShortSyntaxRegexp_:false,
-      windowEvalRegexp_:false
+    windowEvalFilterShortSyntaxRegexp_:false,
+    windowEvalRegexp_:false
   };
 
   var scriptData = '';
@@ -84,7 +84,7 @@ function checkNode(node, context) {
     testResults.windowEvalRegexp_ = This.windowEvalRegexp_.test(scriptData);
     This.windowEvalFilterShortSyntaxRegexp_.test('');
     testResults.windowEvalFilterShortSyntaxRegexp_ =
-      !This.windowEvalFilterShortSyntaxRegexp_.test(scriptData);
+        !This.windowEvalFilterShortSyntaxRegexp_.test(scriptData);
     This.windowEvalFilterShortSyntaxRegexp_.test('');
   }
 

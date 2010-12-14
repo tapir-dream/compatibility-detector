@@ -59,7 +59,7 @@ function checkNode(node, additionalData) {
           div.style.overflow = 'hidden';
           node.style.height = '1px';
           node.parentNode.insertBefore(div, nextNode);
-          // the leaving space of containner
+          // The leaving space of containner
           remainSpace = chrome_comp.getComputedStyle(div).width;
           if(parseInt(nextNodeWidthStyle) <= parseInt(remainSpace))
             this.addProblem('RM1004', [node]);
