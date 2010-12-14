@@ -63,7 +63,7 @@ function constructor(rootNode) {
   this.documentAllRegexp_ =
       /[^\w$]*document(([.]all)|(\[["']all["']\]))\s?[\(\.\[\w$]/g;
 
-  this.documentAllFiterAndSyntaxRegexp_ =
+  this.documentAllFilterAndSyntaxRegexp_ =
       /document(([.]all)|(\[["']all["']\]))\s*?&&/g;
 
   this.documentAllFilterShortSyntaxRegexp_ =
@@ -99,7 +99,7 @@ function checkNode(node, context) {
     documentAllTernaryQuestionRegexp_: false,
     documentAllTernaryColonRegexp_: false,
     dcoumentAllEvalRegexp_: false,
-    documentAllFiterAndSyntaxRegexp_: false,
+    documentAllFilterAndSyntaxRegexp_: false,
     documentAllFilterIfSyntaxRegxp_: false
   };
 
@@ -142,7 +142,7 @@ function checkNode(node, context) {
            testResults.documentAllTernaryQuestionRegexp_ &&
            testResults.documentAllTernaryColonRegexp_ &&
            testResults.dcoumentAllEvalRegexp_ &&
-           testResults.documentAllFiterAndSyntaxRegexp_ &&
+           testResults.documentAllFilterAndSyntaxRegexp_ &&
            testResults.documentAllFilterIfSyntaxRegxp_;
   }
 
@@ -152,7 +152,7 @@ function checkNode(node, context) {
 
     This.documentAllRegexp_.test('');
     testResults.documentAllFilterShortSyntaxRegexp_ =
-        !This.documentAllFilterShortSyntaxRegexp_.test(scriptData);
+        This.documentAllFilterShortSyntaxRegexp_.test(scriptData);
 
     This.documentAllFilterShortSyntaxRegexp_.test('');
     testResults.documentAllTernaryQuestionRegexp_ =
@@ -167,10 +167,10 @@ function checkNode(node, context) {
         !This.dcoumentAllEvalRegexp_.test(scriptData);
 
     This.dcoumentAllEvalRegexp_.test('');
-    testResults.documentAllFiterAndSyntaxRegexp_ =
-        !This.documentAllFiterAndSyntaxRegexp_.test(scriptData);
+    testResults.documentAllFilterAndSyntaxRegexp_ =
+        !This.documentAllFilterAndSyntaxRegexp_.test(scriptData);
 
-    This.documentAllFiterAndSyntaxRegexp_.test('');
+    This.documentAllFilterAndSyntaxRegexp_.test('');
     testResults.documentAllFilterIfSyntaxRegxp_ =
         !This.documentAllFilterIfSyntaxRegxp_.test(scriptData);
 

@@ -42,7 +42,7 @@
       // Verified
       "detectors/decoration_font_color.js",                 //RX3011
       "detectors/disabled_attribute.js",                    //HF3005 HF3013
-      "detectors/getelementbyid_and_getelementsbyname.js",  //SD9012
+      "detectors/getelementbyid_and_getelementsbyname.js",  //SD9012 (SD9001 SD9002 Error downgraded to Warning )
       "detectors/table_margin_affects_align_center.js",     //RX8004
       "detectors/empty_cell.js",                            //RE1013 RE1012
       "detectors/marquee_width.js",                         //BX1030
@@ -57,7 +57,6 @@
       "detectors/overflow.js",                              //RV1001
 
       // Verified --> Error downgraded to Warning
-      "detectors/getelementbyid_and_getelementsbyname.js",  //SD9001 SD9002
       "detectors/document_all.js",                          //BX9002
       "detectors/script_language_type.js",                  //BT9005 BT9006
       "detectors/align_nowrap.js",                          //RX8015
