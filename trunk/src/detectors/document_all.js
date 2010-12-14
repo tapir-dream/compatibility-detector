@@ -90,7 +90,7 @@ function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType)
     return;
 
-  //check script node
+  // Check script node
   var This = this;
   var scriptData = '';
   var testResults = {
@@ -110,17 +110,17 @@ function checkNode(node, context) {
       scriptData = node.text;
     }
 
-    //delete script comment
+    // Delete script comment
     scriptData = removeScriptComments(scriptData);
     setTestResults(scriptData);
     if (getTestDetectorResult()) {
       this.addProblem('BX9002', { nodes: [node], severityLevel: 3 });
     }
 
-  //check inline events of other node
+  // Check inline events of other node
   } else {
-    for (var i = 0,l = node.attributes.length; i < l; i++){
-      if ( node.attributes[i].name.toLowerCase().indexOf('on') == 0 ){
+    for (var i = 0, len = node.attributes.length; i < len; i++){
+      if (node.attributes[i].name.toLowerCase().indexOf('on') == 0){
         scriptData = removeScriptComments(node.attributes[i].value);
         setTestResults(scriptData);
         if (getTestDetectorResult()) {
