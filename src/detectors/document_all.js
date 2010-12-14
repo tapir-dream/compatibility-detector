@@ -61,25 +61,25 @@ function constructor(rootNode) {
   this.gatherAllProblemNodes_ = false;
   //fix document.all and document['all'] and if ( ... ) and  return ....
   this.documentAllRegexp_ =
-    /[^\w$]*document(([.]all)|(\[["']all["']\]))\s?[\(\.\[\w$]/g;
+      /[^\w$]*document(([.]all)|(\[["']all["']\]))\s?[\(\.\[\w$]/g;
 
   this.documentAllFiterAndSyntaxRegexp_ =
-    /document(([.]all)|(\[["']all["']\]))\s*?&&/g;
+      /document(([.]all)|(\[["']all["']\]))\s*?&&/g;
 
   this.documentAllFilterShortSyntaxRegexp_ =
-    /\b(?:[^||&&])\s*document(([.]all)|(\[["']all["']\]))\s*?[\(\.\[\w$]/g;
+      /\b(?:[^||&&])\s*document(([.]all)|(\[["']all["']\]))\s*?[\(\.\[\w$]/g;
 
   this.documentAllFilterIfSyntaxRegxp_ =
-    /if\s*\(\s*document(([.]all)|(\[["']all["']\]))\s*?\)/g;
+      /if\s*\(\s*document(([.]all)|(\[["']all["']\]))\s*?\)/g;
 
   this.documentAllTernaryQuestionRegexp_ =
-    /document(([.]all)|(\[["']all["']\]))\s*((\)\s*\?)|(\?))/g;
+      /document(([.]all)|(\[["']all["']\]))\s*((\)\s*\?)|(\?))/g;
 
   this.documentAllTernaryColonRegexp_ =
-    /\?[\w\W\s]+?\:\s*document(([.]all)|(\[["']all["']\]))\s*?[\(\.\[]/g;
+      /\?[\w\W\s]+?\:\s*document(([.]all)|(\[["']all["']\]))\s*?[\(\.\[]/g;
 
   this.dcoumentAllEvalRegexp_ =
-    /return\s+\eval\s*\(\s*[\'\"]\s*document(([.]all)|(\[["']all["']\]))\s*?[\(\.\[]*/g;
+      /return\s+\eval\s*\(\s*[\'\"]\s*document(([.]all)|(\[["']all["']\]))\s*?[\(\.\[]*/g;
 
   this.multiLineScriptCommentsRegexp_ = /\/\*([\S\s]*?)\*\//g;
   this.oneLineScriptCommentsRegexp_ = /[^:\/]\/\/[^\n\r]*/gm;
@@ -94,13 +94,13 @@ function checkNode(node, context) {
   var This = this;
   var scriptData = '';
   var testResults = {
-      documentAllRegexp_ : false,
-      documentAllFilterShortSyntaxRegexp_ : false,
-      documentAllTernaryQuestionRegexp_ : false,
-      documentAllTernaryColonRegexp_ : false,
-      dcoumentAllEvalRegexp_ : false,
-      documentAllFiterAndSyntaxRegexp_ : false,
-      documentAllFilterIfSyntaxRegxp_ : false
+    documentAllRegexp_ : false,
+    documentAllFilterShortSyntaxRegexp_ : false,
+    documentAllTernaryQuestionRegexp_ : false,
+    documentAllTernaryColonRegexp_ : false,
+    dcoumentAllEvalRegexp_ : false,
+    documentAllFiterAndSyntaxRegexp_ : false,
+    documentAllFilterIfSyntaxRegxp_ : false
   };
 
   if (node.tagName == 'SCRIPT') {
@@ -110,15 +110,15 @@ function checkNode(node, context) {
       scriptData = node.text;
     }
 
-   //delete script comment
-   scriptData = removeScriptComments(scriptData);
-   setTestResults(scriptData);
+    //delete script comment
+    scriptData = removeScriptComments(scriptData);
+    setTestResults(scriptData);
     if (getTestDetectorResult()) {
       this.addProblem('BX9002', { nodes: [node], severityLevel: 3 });
     }
 
   //check inline events of other node
-  }else{
+  } else {
     for (var i = 0,l = node.attributes.length; i < l; i++){
       if ( node.attributes[i].name.toLowerCase().indexOf('on') == 0 ){
         scriptData = removeScriptComments(node.attributes[i].value);
