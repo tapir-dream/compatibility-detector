@@ -65,7 +65,7 @@ function checkNode(node, context) {
             }
           }
         }
-        // other html tag set display:table and display:inline-table
+        // Other html tag set display:table and display:inline-table
         if (node.tagName != 'TABLE' && (hSpacing || vSpacing))
           this.addProblem('RE1020', [node]);
         break;

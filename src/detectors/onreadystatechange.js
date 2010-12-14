@@ -25,7 +25,7 @@ chrome_comp.CompDetect.ScanDomBaseDetector,
 function constructor(rootNode) {
   var This = this;
   this.hookHandler_ = function(oldValue, newValue, reason) {
-    //onreadystatechange and onload combined use in Script tag of filtered
+    // Onreadystatechange and onload combined use in Script tag of filtered
     if (this.tagName === 'SCRIPT' && this.onload) {
       var loadEventHandler = this.onload.toString();
       if (/onreadystatechange/.test(loadEventHandler) &&
@@ -34,7 +34,7 @@ function constructor(rootNode) {
     }
     if (!this.onreadystatechange)
       return;
-    //filtering end.
+    // Filtering end.
 
     This.addProblem('BX9021', { nodes: [this], needsStack: true });
     return newValue;
@@ -45,13 +45,13 @@ function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType)
     return;
 
-  //onreadystatechange and onload attributes use in HTML tag of filtered
+  // Onreadystatechange and onload attributes use in HTML tag of filtered
   if (node.attributes['onreadystatechange'] === node.attributes['onload'])
     return;
 
   if (node.hasAttribute('onreadystatechange') &&  node.hasAttribute('onload'))
     return;
-  //filtering end.
+  // Filtering end.
 
   if (node.hasAttribute('onreadystatechange'))
     this.addProblem('BX9021', [node]);
