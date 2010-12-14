@@ -30,7 +30,7 @@ function constructor(rootNode) {
       var loadEventHandler = this.onload.toString();
       if (/onreadystatechange/.test(loadEventHandler) &&
           /onload/.test(loadEventHandler))
-        return ;
+        return;
     }
     if (!this.onreadystatechange)
       return;

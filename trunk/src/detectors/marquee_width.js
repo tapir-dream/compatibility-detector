@@ -38,7 +38,7 @@ function checkNode(node, context) {
         parentStyle.tableLayout == 'auto' && !definedWidth) {
       var oldParentClientRect = parentElement.getBoundingClientRect();
       var oldBodyClientRect = document.body.getBoundingClientRect();
-      node.style.display ='none';
+      node.style.display = 'none';
       if (oldBodyClientRect.width !=
           document.body.getBoundingClientRect().width ||
           oldParentClientRect.left !=
