@@ -31,8 +31,17 @@ function constructor(rootNode) {
     if ((!referer) && (hisCount > 1))
       This.addProblem('BX2012', [source]);
   };
-}
+},
 
+function setUp() {
+  chrome_comp.CompDetect.registerExistingMethodHook(
+      window, 'close', this.close_);
+},
+
+function cleanUp() {
+  chrome_comp.CompDetect.unregisterExistingMethodHook(
+      window, 'close', this.close_);
+}
 ); // declareDetector
 
 });
