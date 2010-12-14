@@ -17,9 +17,9 @@
 addScriptToInject(function() {
 
 var VALID_LIST_NEXT_TAGS = {
-  LI: [ 'LI' ],
-  DT: [ 'DT', 'DD' ],
-  DD: [ 'DT', 'DD' ]
+  LI: ['LI'],
+  DT: ['DT', 'DD'],
+  DD: ['DT', 'DD']
 };
 
 chrome_comp.CompDetect.declareDetector(
@@ -39,7 +39,7 @@ function checkNode(node, context) {
   // Find first valid or invalid visible sibling.
   if (validNextTags instanceof Array) {
     for (var sibling = node.nextSibling; sibling;
-         sibling = sibling.nextSibling) {
+        sibling = sibling.nextSibling) {
       switch (sibling.nodeType) {
         case Node.TEXT_NODE:
           var text = sibling.nodeValue;

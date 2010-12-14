@@ -53,15 +53,15 @@ function checkNode(node, context) {
       var siblingStyle = chrome_comp.getComputedStyle(sibling);
       if (!siblingStyle || siblingStyle.float != 'none' ||
           (siblingStyle.position != 'static' &&
-           siblingStyle.position != 'relative')) {
+          siblingStyle.position != 'relative')) {
         continue;
       }
       if (siblingStyle.display.substr(0, 6) != 'inline' ||
           sibling.tagName == 'BR') {
         break;
       } else if (sibling.offsetWidth > 0 ||
-                 (sibling.nodeType == Node.TEXT_NODE &&
-                  !sibling.nodeValue.replace(/^\s*$/g, ''))) {
+          (sibling.nodeType == Node.TEXT_NODE &&
+          !sibling.nodeValue.replace(/^\s*$/g, ''))) {
         return;
       }
     }
@@ -114,8 +114,8 @@ function checkNode(node, context) {
       'direction': style.direction
     };
     if (styleMap.direction == 'ltr')
-      return styleMap.marginRight || styleMap.paddingRight || 
-        styleMap.borderRight;
+      return styleMap.marginRight || styleMap.paddingRight ||
+          styleMap.borderRight;
 
     if (styleMap.direction == 'rtl'){
       return styleMap.marginLeft || styleMap.paddingLeft || styleMap.borderLeft;
@@ -136,11 +136,11 @@ function checkNode(node, context) {
     function getSiblingBoxes(parent, child) {
       var boxes = [];
       for (var sibling = parent.firstElementChild; sibling;
-           sibling = sibling.nextElementSibling) {
+          sibling = sibling.nextElementSibling) {
         if (sibling != child &&
             sibling.offsetWidth > 0 && sibling.offsetHeight > 0) {
           boxes.push([sibling.offsetLeft, sibling.offsetTop,
-                      sibling.offsetWidth, sibling.offsetHeight]);
+              sibling.offsetWidth, sibling.offsetHeight]);
         }
       }
       return boxes;
@@ -183,7 +183,7 @@ function checkNode(node, context) {
       return true;
     } else {
       var style = chrome_comp.getComputedStyle(parent);
-      // parent's size changed, if it has border or has different background
+      // Parent's size changed, if it has border or has different background
       // color, report as a problem
       if (parseInt(style.borderRightWidth, 10) | 0 > 0 ||
           parseInt(style.borderBottomWidth, 10) | 0 > 0 ||
@@ -191,7 +191,7 @@ function checkNode(node, context) {
         return true;
       }
     }
-    // parent's size changed, but it has neither border nor background
+    // Parent's size changed, but it has neither border nor background
     // color, no visual effect so far. Need more checking
     return checkProblem(parent.parentNode, parent);
   }

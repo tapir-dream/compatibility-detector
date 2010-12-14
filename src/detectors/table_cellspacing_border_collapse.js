@@ -38,16 +38,16 @@ function checkNode(node, context) {
     switch (borderCollapse) {
       case 'collapse':
         if (node.hasAttribute('cellspacing') && 
-            parseInt(node.getAttribute('cellspacing'),10) > 0 && 
+            parseInt(node.getAttribute('cellspacing'), 10) > 0 && 
             node.childElementCount > 0) {
           this.addProblem('RX1008', [node]);
         }
         break;
       case 'separate':
         var hSpacing =
-          parseInt(computedStyle.WebkitBorderHorizontalSpacing, 10) | 0;
+            parseInt(computedStyle.WebkitBorderHorizontalSpacing, 10) | 0;
         var vSpacing =
-          parseInt(computedStyle.WebkitBorderVerticalSpacing, 10) | 0;
+            parseInt(computedStyle.WebkitBorderVerticalSpacing, 10) | 0;
 
         if (node.tagName == 'TABLE') {
           if (node.hasAttribute('cellspacing')) {
@@ -57,8 +57,8 @@ function checkNode(node, context) {
               this.addProblem('RE1020', [node]);
               return;
             }
-           } else {
-           // 2px is talbe tag default table-cell space in chrome
+          } else {
+            // 2px is talbe tag default table-cell space in chrome
             if (hSpacing > 2 || vSpacing > 2) {
               this.addProblem('RE1020', [node]);
               return;
