@@ -44,7 +44,7 @@
 
       //====here things are temporary, used to delete, don't paste from the bottom up=====
 
-
+      /*****************************************
       //=========Review===========
       "detectors/text_decoration_propagation.js",           //RT3002
       "detectors/word_wrap_spaces.js",                      //RT1008
@@ -60,6 +60,8 @@
       "detectors/white_space_after_iframe_object.js",       //HT1001 ... Test results url is 0
       "detectors/align_middle.js",                          //HA1003 ... Test results url is 0
       //====here things are temporary, used to delete, don't paste from the bottom up=====
+
+      ****************************************/
 
       //Verified
       "detectors/decoration_font_color.js",                 //RX3011
@@ -84,6 +86,7 @@
       "detectors/document_all.js",                          //BX9002
       "detectors/script_language_type.js",                  //BT9005 BT9006
       "detectors/align_nowrap.js",                          //RX8015
+
       /*********************************
 
       //Started --> Error
@@ -113,6 +116,8 @@
       "detectors/scroll_top_left.js",                       //BX9008
       "detectors/img_alt_title.js",                         //HO3003
       "detectors/zoom_style.js",                            //BX8017
+
+
       //===============Uncategorized==================
 
       "detectors/useragent_check.js",
