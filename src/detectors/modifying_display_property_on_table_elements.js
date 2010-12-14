@@ -33,16 +33,16 @@ function checkNode(node, additionalData) {
     return;
 
   var map = {
-    'TABLE' : ['table', 'inline-table', 'none'],
-    'TR' : ['table-row', 'none'],
-    'TD' : ['table-cell', 'none'],
-    'TH' : ['table-cell', 'none'],
-    'THEAD' : ['table-header-group', 'none'],
-    'TBODY' : ['table-row-group', 'none'],
-    'TFOOT' : ['table-footer-group', 'none'],
-    'CAPTION' : ['table-caption', 'none'],
-    'COL' : ['table-column', 'none'],
-    'COLGROUP' : ['table-column-group', 'none']
+    'TABLE': ['table', 'inline-table', 'none'],
+    'TR': ['table-row', 'none'],
+    'TD': ['table-cell', 'none'],
+    'TH': ['table-cell', 'none'],
+    'THEAD': ['table-header-group', 'none'],
+    'TBODY': ['table-row-group', 'none'],
+    'TFOOT': ['table-footer-group', 'none'],
+    'CAPTION': ['table-caption', 'none'],
+    'COL': ['table-column', 'none'],
+    'COLGROUP': ['table-column-group', 'none']
   };
   var computedDisplay = window.chrome_comp.getComputedStyle(node).display;
 

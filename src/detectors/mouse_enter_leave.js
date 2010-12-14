@@ -35,7 +35,7 @@ function constructor(rootNode) {
   //that the author considers the problem
   this.hookEnterHandler_ = function(oldValue, newValue, reason) {
     if (reason == 'set' && enterCounter == true)
-      This.addProblem('BT9017', { nodes : [this], needsStack : true });
+      This.addProblem('BT9017', { nodes: [this], needsStack: true });
     return newValue;
   };
   this.hookOutHandler_ = function(oldValue, newValue, reason) {
@@ -47,7 +47,7 @@ function constructor(rootNode) {
   //that the author considers the problem
   this.hookLeaveHandler_ = function(oldValue, newValue, reason) {
     if (reason == 'set' && leaveFlag == true)
-      This.addProblem('BT9017', { nodes : [this], needsStack : true });
+      This.addProblem('BT9017', { nodes: [this], needsStack: true });
     return newValue;
   };
   enterFlag = false;
