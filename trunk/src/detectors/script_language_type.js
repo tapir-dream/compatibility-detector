@@ -67,16 +67,16 @@ function checkNode(node, context) {
     return;
 
   var type = node.getAttribute('type');
-  if (type) type = type.toLowerCase();
+  if (type)
+    type = type.toLowerCase();
   var language = node.getAttribute('language');
-  if (language) language = language.toLowerCase();
+  if (language)
+    language = language.toLowerCase();
   if (type == 'text/vbscript' || type == 'text/vbs' ||
-      language == 'vbscript' || language == 'vbs') {
+      language == 'vbscript' || language == 'vbs')
     this.addProblem('BT9005', { nodes: [node], severityLevel: 3 });
-  }
-  if (language == 'jscript.encode' || language == 'vbscript.encode') {
+  if (language == 'jscript.encode' || language == 'vbscript.encode')
     this.addProblem('BT9006', { nodes: [node], severityLevel: 3 });
-  }
 }
 ); // declareDetector
 

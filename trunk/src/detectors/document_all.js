@@ -143,12 +143,12 @@ function checkNode(node, context) {
            testResults.documentAllTernaryColonRegexp_ &&
            testResults.dcoumentAllEvalRegexp_ &&
            testResults.documentAllFiterAndSyntaxRegexp_ &&
-           testResults.documentAllFilterIfSyntaxRegxp_ ;
+           testResults.documentAllFilterIfSyntaxRegxp_;
   }
 
   function setTestResults(scriptData) {
     This.documentAllRegexp_.test('');
-    testResults.documentAllRegexp_= This.documentAllRegexp_.test(scriptData);
+    testResults.documentAllRegexp_ = This.documentAllRegexp_.test(scriptData);
 
     This.documentAllRegexp_.test('');
     testResults.documentAllFilterShortSyntaxRegexp_ =
