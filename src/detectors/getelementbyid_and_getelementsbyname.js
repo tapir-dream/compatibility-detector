@@ -34,19 +34,19 @@ function constructor(rootNode) {
     var lowerCaseArg0 = arg0.toLowerCase();
     var lowerCaseIds = getIds();
 
-    //handle SD9002
+    // Handle SD9002
     if (!result && lowerCaseIds.indexOf(lowerCaseArg0) >= 0) {
       addProblem('SD9002');
     }
 
-    //handle SD9001, document.getElementById(case-sensitive name)
-    //still works in IE67Q
+    // Handle SD9001, document.getElementById(case-sensitive name)
+    // Still works in IE67Q
     var names = getNames();
     if (!result && names.commonNames.concat(names.namesOfEmbed)
         .indexOf(lowerCaseArg0) >= 0) {
-      //caller is null when call document.getElementById() in window scope
+      // Caller is null when call document.getElementById() in window scope
       var caller = arguments.callee.caller.caller;
-      //filter jQuery
+      // Filter jQuery
       if (!(caller && caller.caller && /jQuery/.test(caller.caller.caller)))
         addProblem('SD9001');
     }
@@ -61,7 +61,7 @@ function constructor(rootNode) {
     }
   };
 
-  //handle SD9012
+  // Handle SD9012
   this.getElementsByName_ = function(result, originalArguments, callStack) {
     var arg0 = originalArguments[0];
     var names = getNames();
@@ -76,8 +76,9 @@ function constructor(rootNode) {
     }
   };
 
-  //may has problem when updating document tree dynamically after window loading
-  //get all elements with id attribute in the document
+  // May has problem when updating document tree dynamically after window 
+  // loading
+  // Get all elements with id attribute in the document
   function getIds() {
     if (!ids) {
       ids = [];
@@ -89,8 +90,8 @@ function constructor(rootNode) {
     return ids;
   }
 
-  //get names of specified element in the document
-  function getNames(){
+  // Get names of specified element in the document
+  function getNames() {
     if (!commonNames) {
       commonNames = [];
       namesOfEmbed = [];
@@ -98,7 +99,7 @@ function constructor(rootNode) {
 
       var elements = document.querySelectorAll('[name]');
       var commonTags = ['A', 'APPLET', 'BUTTON', 'FORM', 'IFRAME', 'IMG',
-        'INPUT', 'MAP', 'META', 'OBJECT', 'SELECT', 'TEXTAREA'];
+          'INPUT', 'MAP', 'META', 'OBJECT', 'SELECT', 'TEXTAREA'];
 
       Array.prototype.forEach.call(elements, function(element) {
         var tagName = element.tagName;
