@@ -59,7 +59,10 @@ function checkNode(node, context) {
       node.style.overflowX = '';
       node.style.overflowX = settedOverflowX;
     }
-    return { 'xIsVisible': xIsVisible, 'yIsVisible': yIsVisible };
+    return {
+      'xIsVisible': xIsVisible,
+      'yIsVisible': yIsVisible
+    };
   }
 
   // Some developers using '{content:"."; display:block; visibility:hidden;
