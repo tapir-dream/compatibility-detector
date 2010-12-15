@@ -50,7 +50,7 @@ function checkNode(node, context) {
       if (align == 'right')
         nodeListRight.push({
           node: children[i],
-          alignment: (children[i].align + '').align.toLowerCase(),
+          alignment: (children[i].align + '').toLowerCase(),
           rect: children[i].getBoundingClientRect()
         });
     }
