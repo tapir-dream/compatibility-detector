@@ -16,6 +16,56 @@
 
 addScriptToInject(function() {
 
+function getRealComputedWidth(element) {
+  var x = element.cloneNode(false);
+  x.style.display = 'none !important';
+  element.parentElement.appendChild(x);
+  var width = chrome_comp.getComputedStyle(x).width;
+  element.parentElement.removeChild(x);
+  x = null;
+  return width;
+}
+
+function isShrinkToFit(element) {
+  var style = chrome_comp.getComputedStyle(element);
+  if ((style.float == 'none') && (style.display != 'inline-block') &&
+      (style.position == 'static' || style.position == 'relative'))
+    return false;
+  if (getRealComputedWidth(element) == 'auto')
+    return true;
+}
+
+function isPercentageWidth(element) {
+  var width = getRealComputedWidth(element)
+  return width.slice(-1) == '%' && width != '100%';
+}
+
+function getAllPercentageWidthDescendant(element) {
+  var ch = element.children;
+  var desceList = [];
+  for (var i = 0, j = ch.length; i < j; i++) {
+    if (!chrome_comp.isElementTrulyDisplayable(ch[i]))
+      continue;
+    if (isPercentageWidth(ch[i]))
+      desceList.push(ch[i]);
+  }
+  return desceList;
+}
+
+function isUsingAvailableWidth(element) {
+  var width = element.offsetWidth;
+  var inlinePosition = element.style.position;
+  element.style.position = 'fixed !important';
+  var preferredWidth = element.offsetWidth;
+  element.style.position = null;
+  element.style.position = (inlinePosition) ? inlinePosition : null;
+  return preferredWidth > width;
+}
+
+function isVisible(element) {
+  return element.offsetWidth && element.offsetHeight;
+}
+
 chrome_comp.CompDetect.declareDetector(
 
 'shrink_to_fit_percentage_child',
@@ -26,78 +76,23 @@ null, // constructor
 
 function checkNode(node, context) {
 
-  function isAutoWidth(element) {
-    var inlineDisplay = element.style.display;
-    element.style.display = 'none !important';
-    var width = chrome_comp.getComputedStyle(element).width;
-    element.style.display = null;
-    element.style.display = (inlineDisplay) ? inlineDisplay : null;
-    return width == 'auto';
-  }
-
-  function isShrinkToFit(element) {
-    if (!isAutoWidth(element))
-      return false;
-    var style = chrome_comp.getComputedStyle(element);
-    if ((style.float == 'none') && (style.display != 'inline-block') &&
-        (style.position == 'static' || style.position == 'relative'))
-      return false;
-    return true;
-  }
-
-  function isPercentageWidth(element) {
-    var inlineDisplay = element.style.display;
-    element.style.display = 'none !important';
-    var width = chrome_comp.getComputedStyle(element).width;
-    element.style.display = null;
-    element.style.display = (inlineDisplay) ? inlineDisplay : null;
-    return width.slice(-1) == '%' && width != '100%';
-  }
-
-  function getAllPercentageWidthDescendant(element) {
-    var ch = element.children;
-    var desceList = [];
-    for (var i = 0, j = ch.length; i < j; i++) {
-      if (!chrome_comp.isElementTrulyDisplayable(ch[i]))
-        continue;
-      if (isPercentageWidth(ch[i]))
-        desceList.push(ch[i]);
-    }
-    return desceList;
-  }
-
-  function isUsingAvailableWidth(element) {
-    var width = element.offsetWidth;
-    var inlinePosition = element.style.position;
-    element.style.position = 'fixed !important';
-    var preferredWidth = element.offsetWidth;
-    element.style.position = null;
-    element.style.position = (inlinePosition) ? inlinePosition : null;
-    return preferredWidth > width;
-  }
-
-  function isVisible(element) {
-    return element.offsetWidth && element.offsetHeight;
-  }
-
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
     return;
 
+  if (node.tagName == 'MARQUEE' || node.tagName == 'HTML')
+    return;
+  
   if (!isShrinkToFit(node))
     return;
 
-  if (node.tagName == 'MARQUEE')
-    return;
   if (chrome_comp.isReplacedElement(node))
     return;
 
   if (isUsingAvailableWidth(node))
     return;
-
   var descendantList = getAllPercentageWidthDescendant(node);
   if (descendantList.length < 1)
     return;
-
   for (var i = 0, j = descendantList.length; i < j; i++) {
     var style = chrome_comp.getComputedStyle(descendantList[i]);
     var display = style.display;
