@@ -96,5 +96,3 @@ docElement.addEventListener('chrome_comp_getMessage', function() {
   docElement.setAttribute('chrome_comp_messageResult',
       chrome.i18n.getMessage(name, params ? JSON.parse(params) : undefined));
 });
-
-window.console.log('finish loading start.js');

@@ -1534,14 +1534,15 @@ chrome_comp.CompDetect = (function() {
     // Send the result of the compatibility detection for current page.
     sendDetectionResults: function() {
       chrome_comp.sendRequest('chrome_comp_endOfDetection');
-      chrome_comp.trace('end of analysis');
     },
 
     // Diagnose  compatibility issues on current page
     diagnoseCompatibilityIssues : function() {
       function loadHandlerForCompDetector() {
-        chrome_comp.trace('start---\r\ncurrent URL is: ' + window.location +
-            '\r\noriginal URL is: ' + chrome_comp.getTargetPageURL());
+        var startTime = new Date().getTime();
+        chrome_comp.trace('Start compatibility detection...' +
+            '\ncurrent URL is: ' + window.location +
+            '\noriginal URL is: ' + chrome_comp.getTargetPageURL());
         try {
           chrome_comp.CompDetect.runScanDomDetectorsForCurrentPage();
         } catch (e) {
@@ -1560,6 +1561,10 @@ chrome_comp.CompDetect = (function() {
         chrome_comp.trace(detectors_.length + ' detectors');
         for (var i = 0, c = detectors_.length; i < c; ++i)
           detectors_[i].postAnalyze();
+
+        var detectionTime = new Date().getTime() - startTime;
+        window.console.log('Finished compatibility detection in ' +
+            detectionTime + ' ms');
 
         chrome_comp.CompDetect.sendDetectionResults();
         if (chrome_comp.CompDetectorConfig.unitTestMode)
