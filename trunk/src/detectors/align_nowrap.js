@@ -40,17 +40,17 @@ function checkNode(node, context) {
 
   for (var i = 0, j = children.length; i < j; i++) {
     if (tagList.indexOf(children[i].tagName) != -1) {
-      var align = children[i].align.toLowerCase();
+      var align = (children[i].align + '').toLowerCase();
       if (align == 'left')
         nodeListLeft.push({
           node: children[i],
-          alignment: children[i].align.toLowerCase(),
+          alignment: (children[i].align + '').toLowerCase(),
           rect: children[i].getBoundingClientRect()
         });
       if (align == 'right')
         nodeListRight.push({
           node: children[i],
-          alignment: children[i].align.toLowerCase(),
+          alignment: (children[i].align + '').align.toLowerCase(),
           rect: children[i].getBoundingClientRect()
         });
     }
