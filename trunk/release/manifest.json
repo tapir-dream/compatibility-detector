@@ -1,0 +1,68 @@
+/*
+ * Copyright 2010 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+{
+  "name": "__MSG_extensionName__",
+  "version": "1.2",
+  "description": "__MSG_extensionDescription__",
+  "background_page": "background.html",
+  "default_locale": "zh_CN",
+  "icons": {
+    "128": "icon_128.png"
+  },
+  // "options_page": "options.html",
+  "permissions": [ "tabs", "http://*/*", "https://*/*" ],
+  "browser_action": {
+    "default_icon": "icon_normal.png",
+    "default_title": "__MSG_resultNotAvailable__"
+  },
+  "content_scripts": [
+  {
+    "matches": [ "http://*/*", "https://*/*", "file://*" ],
+    "js": [
+      "loader.js",
+      "framework.js",
+      "config.js",
+      "w3help_issues.js",
+      "non_w3help_issues.js",
+
+      // Verified
+      "detectors/decoration_font_color.js",                 //RX3011
+      "detectors/disabled_attribute.js",                    //HF3005 HF3013
+      "detectors/getelementbyid_and_getelementsbyname.js",  //SD9012 (SD9001 SD9002 Error downgraded to Warning )
+      "detectors/table_margin_affects_align_center.js",     //RX8004
+      "detectors/empty_cell.js",                            //RE1013 RE1012
+      "detectors/marquee_width.js",                         //BX1030
+      "detectors/onreadystatechange.js",                    //BX9021
+      "detectors/haslayout_full_shape_space.js",            //BT1025
+      "detectors/table_cellspacing_border_collapse.js",     //RE1020 RX1008
+      "detectors/invalid_list_item.js",                     //HY1005
+      "detectors/text_align.js",                            //RT8003
+      "detectors/center_element.js",                        //HA8001
+      "detectors/text_overflow_ellipsis.js",                //RT3005
+      "detectors/shrink_to_fit_percentage_child.js",        //RX8017
+      "detectors/overflow.js",                              //RV1001
+
+      // Verified --> Error downgraded to Warning
+      "detectors/document_all.js",                          //BX9002
+      "detectors/script_language_type.js",                  //BT9005 BT9006
+      "detectors/align_nowrap.js",                          //RX8015
+
+      "annotation.js"
+    ],
+    "run_at": "document_start"
+  }]
+}
