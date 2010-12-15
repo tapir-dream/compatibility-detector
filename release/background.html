@@ -1,0 +1,155 @@
+<!--
+ Copyright 2010 Google Inc.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<html>
+<script>
+var detectionResults = { };
+
+chrome.tabs.onRemoved.addListener(function(tabId) {
+  delete detectionResults[tabId];
+});
+
+function refreshTitle(tabId, finished) {
+  var title;
+  if (tabId in detectionResults) {
+    var result = detectionResults[tabId];
+    title = chrome.i18n.getMessage('numberOfIssues',
+                [result.totalWarnings, result.totalErrors]) + '\n' +
+            chrome.i18n.getMessage(result.annotationStatus ?
+                'hideAnnotations' : 'showAnnotations');
+  } else if (finished) {
+    title = chrome.i18n.getMessage('noIssueFound');
+  } else {
+    title = chrome.i18n.getMessage('resultNotAvailable');
+  }
+
+  chrome.browserAction.setTitle({
+    title: title,
+    tabId: tabId
+  });
+}
+
+chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+  if (changeInfo.status == 'loading') {
+    delete detectionResults[tabId];
+    chrome.browserAction.setIcon({
+      path: 'icon_normal.png',
+      tabId: tabId
+    });
+    chrome.browserAction.setBadgeText({
+      text: '',
+      tabId: tabId
+    });
+    refreshTitle(tabId);
+  }
+});
+
+chrome.browserAction.onClicked.addListener(function(tab) {
+  var tabId = tab.id;
+  if (tabId in detectionResults) {
+    if (detectionResults[tabId].annotationStatus) {
+      chrome.tabs.sendRequest(tabId, { type: 'AnnotationOff' });
+      detectionResults[tabId].annotationStatus = false;
+    } else {
+      chrome.tabs.sendRequest(tabId, { type: 'AnnotationOn' });
+      detectionResults[tabId].annotationStatus = true;
+    }
+    refreshTitle(tabId);
+  }
+  /*
+    var windowId = detectionResults[tabId].windowId;
+    if (windowId != undefined) {
+      delete detectionResults[tabId].windowId;
+      chrome.windows.remove(windowId);
+    }
+    chrome.windows.create({
+      url : 'display_issues.html#' + tabId
+    }, function(window) {
+      if (detectionResults[tabId]) {
+        detectionResults[tabId].windowId = window.id;
+      }
+    });
+  */
+});
+
+function addCompatibilityResult(tabId, severity) {
+  if (!detectionResults[tabId]) {
+    detectionResults[tabId] = { };
+    detectionResults[tabId].totalErrors = 0;
+    detectionResults[tabId].totalWarnings = 0;
+  }
+
+  if (severity == 'error')
+    detectionResults[tabId].totalErrors++;
+  else
+    detectionResults[tabId].totalWarnings++;
+ 
+  var totalErrors = detectionResults[tabId].totalErrors;
+  var totalWarnings = detectionResults[tabId].totalWarnings;
+  if (totalErrors) {
+    chrome.browserAction.setBadgeBackgroundColor({
+      color: [ 255, 0, 0, 255 ],
+      tabId: tabId
+    });
+    chrome.browserAction.setIcon({
+      path: 'icon_error.png',
+      tabId: tabId
+    });
+    chrome.browserAction.setBadgeText({
+      text: String(totalErrors),
+      tabId: tabId
+    });
+  } else {
+    chrome.browserAction.setBadgeBackgroundColor({
+      color: [ 255, 224, 0, 255 ],
+      tabId: tabId
+    });
+    chrome.browserAction.setIcon({
+      path: 'icon_warning.png',
+      tabId: tabId
+    });
+    chrome.browserAction.setBadgeText({
+      text: String(totalWarnings),
+      tabId: tabId
+    });
+  }
+  refreshTitle(tabId);
+}
+
+function setEndOfDetectionStatus(tabId) {
+  if (!detectionResults[tabId]) {
+    chrome.browserAction.setIcon({
+      path: 'icon_ok.png',
+      tabId: tabId
+    });
+    refreshTitle(tabId, true);
+  }
+}
+
+chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+  switch (request.type) {
+    case 'CompatibilityResult':
+      addCompatibilityResult(sender.tab.id, request.severity);
+      break;
+    case 'EndOfDetection':
+      setEndOfDetectionStatus(sender.tab.id);
+      break;
+  }
+});
+
+</script>
+<body>
+</body>
+</html>
