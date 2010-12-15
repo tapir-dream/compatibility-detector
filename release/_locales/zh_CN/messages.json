@@ -573,6 +573,9 @@
   "SD9025": { "message": "IE6 IE7 IE8 Opera 支持除 INPUT 和 BUTTON 元素以外的其他元素的 click 方法" },
   "SD9025_suggestion": { "message": "建议尽量避免对除 INPUT 和 BUTTON 元素以外的其他元素通过 click 方法模拟鼠标点击事件。" },
   "RD8026": { "message": "各浏览器对于未明确设定高度的包含块内包含百分比单位高度的块级元素或行内块元素的高度计算存在差异" },
-  "RD8026_suggestion": { "message": "要对设置有百分比高度的块级元素的包含块设置明确的 height 属性值。" }
+  "RD8026_suggestion": { "message": "要对设置有百分比高度的块级元素的包含块设置明确的 height 属性值。" },
+  "RE1020": { "message": "IE6 IE7 IE8(Q) 不支持 border-spacing 特性" },
+  "RE1020_suggestion": { "message": "'border-spacing' 不是所有浏览器都能很好的支持，若水平和垂直方向的空间相等，可以用 TABLE 的 cellspacing 属性代替 'border-spacing' 特性。"}
+
 
 }
