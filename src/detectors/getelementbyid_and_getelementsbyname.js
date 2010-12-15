@@ -31,6 +31,8 @@ function constructor(rootNode) {
 
   this.getElementById_ = function(result, originalArguments, callStack) {
     var arg0 = originalArguments[0];
+    if (arg0 == undefined)
+      return;
     var lowerCaseArg0 = arg0.toLowerCase();
     var lowerCaseIds = getIds();
 
@@ -76,7 +78,7 @@ function constructor(rootNode) {
     }
   };
 
-  // May has problem when updating document tree dynamically after window 
+  // May has problem when updating document tree dynamically after window
   // loading
   // Get all elements with id attribute in the document
   function getIds() {
