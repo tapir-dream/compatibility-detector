@@ -27,22 +27,7 @@ null, // constructor
 function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType)
     return;
-  // Get the default value of display
-  function getDefaultDisplay(element) {
-    var temp = element.cloneNode(false);
-    temp.style.display = 'none !important';
-    document.body.appendChild(temp);
-    var elementFloat = temp.style.float;
-    var elementPosition = temp.style.position;
-    var elementDisplay = temp.style.display;
-    temp.style.float = 'none !important';
-    temp.style.position = 'static !important';
-    temp.style.display = '';
-    var defaultDisplay = chrome_comp.getComputedStyle(temp).display;
-    document.body.removeChild(temp);
-    temp = null;
-    return defaultDisplay;
-  }
+
   var style = chrome_comp.getComputedStyle(node);
   var nodeDisplay = style.display;
   var nextSibling = node.nextSibling;
@@ -50,8 +35,12 @@ function checkNode(node, context) {
   var previousreg = /^[\u0020\u0009]/g;
   var nextreg = /[\u0020\u0009]$/g;
 
+  var blockLikeInIE = ['HTML', 'BODY', 'TABLE', 'LI', 'HR', 'OL',
+      'UL', 'MARQUEE', 'DIR', 'MENU', 'PRE', 'CENTER', 'P', 'DIV', 'NOFRAMES',
+      'DL', 'DD', 'DT', 'FORM', 'FRAMESET', 'ADDRESS', 'BLOCKQUOTE', 'H1',
+      'H2', 'H3', 'H4', 'H5', 'H6', 'FRAME'];
   // If a block element and its display set none
-  if (nodeDisplay == 'none' && getDefaultDisplay(node) == 'block') {
+  if (nodeDisplay == 'none' && blockLikeInIE.indexOf(node.tagName)!=-1) {
     // If the element's nextSibling is text node and
     // previousSibling is not text node
     if (nextSibling && nextSibling.nodeType == 3 && previousSibling &&
@@ -64,7 +53,7 @@ function checkNode(node, context) {
   }
   // If a inline element or a input element with type set hidden
   if ((node.tagName == 'INPUT' && node.type == 'hidden') ||
-      (getDefaultDisplay(node) == 'inline' && nodeDisplay == 'none')) {
+      (blockLikeInIE.indexOf(node.tagName) == -1 && nodeDisplay == 'none')) {
     // If the element's nextSibling is text node and
     // previousSibling is text node
     if (nextSibling && nextSibling.nodeType == 3 && previousSibling &&
