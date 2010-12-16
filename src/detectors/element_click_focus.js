@@ -74,9 +74,9 @@ function setUp() {
 
 function cleanUp() {
   chrome_comp.CompDetect.unregisterExistingMethodHook(
-      Node.prototype, 'cloneNode', this.addEventListener_);
+      Node.prototype, 'addEventListener', this.addEventListener_);
   chrome_comp.CompDetect.unregisterExistingMethodHook(
-      window.__proto__, 'cloneNode', this.addEventListener_);
+      window.__proto__, 'addEventListener', this.addEventListener_);
 }
 ); // declareDetector
 
