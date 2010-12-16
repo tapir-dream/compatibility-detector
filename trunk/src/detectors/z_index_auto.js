@@ -24,7 +24,7 @@ chrome_comp.CompDetect.NonScanDomBaseDetector,
 
 function constructor(rootNode) {
   this.addProblem_ = function(nodeList) {
-    this.addProblem('RM8015',nodeList);
+    this.addProblem('RM8015', {nodes: nodeList, severityLevel: 3 });
   };
 },
 
@@ -36,20 +36,21 @@ function postAnalyze() {
 
   // Filter elements are not visible and non-position
   nodeList.forEach(function (node,index) {
-     var nodeComputedStyle = chrome_comp.getComputedStyle(node);
-     if (nodeComputedStyle.display == 'none' ||
-         nodeComputedStyle.visibility == 'hidden' ||
-         nodeComputedStyle.position == 'static' ||
-         nodeComputedStyle.zIndex != 'auto')
-       return;
-     nodeClientRect.push(
-       {'node' : node,'clientRect' : node.getBoundingClientRect()}
-     )
+    var nodeComputedStyle = chrome_comp.getComputedStyle(node);
+    if (nodeComputedStyle.display == 'none' ||
+        nodeComputedStyle.visibility == 'hidden' ||
+        nodeComputedStyle.position == 'static' ||
+        nodeComputedStyle.zIndex != 'auto')
+      return;
+    nodeClientRect.push({
+      'node' : node,
+      'clientRect' : node.getBoundingClientRect()
+    });
   });
 
   // Check the overlapping elements
-  for (var i = 0, l = nodeClientRect.length; i < l; i++) {
-    for (var j = i + 1; j < l; j++) {
+  for (var i = 0, len = nodeClientRect.length; i < len; i++) {
+    for (var j = i + 1; j < len; j++) {
       var nodeA = nodeClientRect[i];
       var nodeB = nodeClientRect[j];
       if (nodeA.clientRect.top < nodeB.clientRect.top &&
@@ -81,6 +82,11 @@ function postAnalyze() {
     }
   }
 
+  function hasNodeBackground(nodeStyle) {
+    return nodeStyle.backgroundImage != 'none' ||
+           nodeStyle.backgroundColor != 'rgba(0, 0, 0, 0)';
+  }
+
   var This = this;
   // Filter elements overlap with no father and son set the background elements
   overlapNodeList.forEach(function (overlapNodes,index) {
@@ -92,15 +98,10 @@ function postAnalyze() {
     var nodeAStyle = chrome_comp.getComputedStyle(overlapNodes.nodeA);
     var nodeBStyle = chrome_comp.getComputedStyle(overlapNodes.nodeB);
 
-    if (nodeAStyle.backgroundImage == 'none' &&
-        nodeBStyle.backgroundImage == 'none' &&
-            (nodeAStyle.backgroundColor == 'rgba(0, 0, 0, 0)' &&
-             nodeBStyle.backgroundColor == 'rgba(0, 0, 0, 0)') ||
-            (nodeAStyle.backgroundColor == 'rgb(0, 0, 0)' &&
-             nodeBStyle.backgroundColor == 'rgb(0, 0, 0)'))
-      return;
-    This.addProblem_([overlapNodes.nodeA,overlapNodes.nodeB]);
-    This.addProblem_([overlapNodes.nodeB,overlapNodes.nodeA]);
+    if (hasNodeBackground(nodeAStyle) && hasNodeBackground(nodeBStyle)) {
+      This.addProblem_([overlapNodes.nodeA,overlapNodes.nodeB]);
+      This.addProblem_([overlapNodes.nodeB,overlapNodes.nodeA]);
+    }
   });
 }
 

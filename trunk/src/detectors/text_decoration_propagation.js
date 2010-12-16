@@ -25,31 +25,24 @@ chrome_comp.CompDetect.ScanDomBaseDetector,
 null, // constructor
 
 function checkNode(node, context) {
-  if (Node.ELEMENT_NODE != node.nodeType ||
-      Node.ELEMENT_NODE != node.parentNode.nodeType ||
-      context.isDisplayNone())
+  if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
+    return;
+  if (!node.parentNode)
     return;
 
   var computedStyle = chrome_comp.getComputedStyle(node);
   var display = computedStyle.display;
   var threshold = -100;
-  if (display == 'block') {
-    var position = computedStyle.position;
-    // All browsers propagates decoration into absolute positioned block in
-    // Quirks mode.
-    if (position == 'absolute' || position == 'fixed') {
-      if (chrome_comp.inQuirksMode())
-        return;
-      if ((parseInt(computedStyle.top, 10) | 0) < threshold ||
-          (parseInt(computedStyle.left, 10) | 0) < threshold)
-        return;
-    } else if ((parseInt(computedStyle.textIndent, 10) | 0) < threshold ){
+
+  var position = computedStyle.position;
+  // All browsers propagates decoration into absolute positioned block in
+  // Quirks mode.
+  if (position == 'absolute' || position == 'fixed') {
+    if (chrome_comp.inQuirksMode())
       return;
-    } else {
-      var float = computedStyle.float;
-      if (float == 'left' || float == 'right')
-        return;
-    }
+    if ((parseInt(computedStyle.top, 10) | 0) < threshold ||
+       (parseInt(computedStyle.left, 10) | 0) < threshold)
+      return;
   } else if (display != 'inline-table' && display != 'inline-block') {
     return;
   }
