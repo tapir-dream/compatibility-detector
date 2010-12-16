@@ -50,6 +50,8 @@ function checkNode(node, context) {
   var previousSibling = node.previousSibling;
   var previousreg = /^[\u0020\u0009]/g;
   var nextreg = /[\u0020\u0009]$/g;
+  if (!previousSibling)
+    return;
 
   //if a block element and its display set none
   if (nodeDisplay == 'none' && getDefaultDisplay(node) == 'block') {
