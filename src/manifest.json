@@ -39,6 +39,7 @@
       "w3help_issues.js",
       "non_w3help_issues.js",
 
+      "detectors/word_wrap_spaces.js",   
       // Verified
       "detectors/decoration_font_color.js",                 //RX3011
       "detectors/disabled_attribute.js",                    //HF3005 HF3013
