@@ -87,6 +87,19 @@ function postAnalyze() {
            nodeStyle.backgroundColor != 'rgba(0, 0, 0, 0)';
   }
 
+  function hasChildElementPosition(node){
+    var childElements =
+        Array.prototype.slice.call(node.getElementsByTagName('*'));
+    for (var i = 0, len = childElements.length; i < len; i++) {
+      var nodeComputedStyle = chrome_comp.getComputedStyle(childElements[i]);
+      if (!(nodeComputedStyle.display == 'none' ||
+          nodeComputedStyle.visibility == 'hidden') &&
+          nodeComputedStyle.position != 'static')
+        return true;
+    }
+    return false;
+  }
+
   var This = this;
   // Filter elements overlap with no father and son set the background elements
   overlapNodeList.forEach(function (overlapNodes,index) {
@@ -95,10 +108,17 @@ function postAnalyze() {
 
     if (compareDocumentPosition === 20 || compareDocumentPosition === 10)
       return ;
+
+    if (chrome_comp.isReplacedElement(overlapNodes.nodeA) ||
+        chrome_comp.isReplacedElement(overlapNodes.nodeB))
+      return;
+
     var nodeAStyle = chrome_comp.getComputedStyle(overlapNodes.nodeA);
     var nodeBStyle = chrome_comp.getComputedStyle(overlapNodes.nodeB);
 
-    if (hasNodeBackground(nodeAStyle) && hasNodeBackground(nodeBStyle)) {
+    if (hasNodeBackground(nodeAStyle) && hasNodeBackground(nodeBStyle) &&
+        hasChildElementPosition(overlapNodes.nodeA) &&
+        hasChildElementPosition(overlapNodes.nodeB)) {
       This.addProblem_([overlapNodes.nodeA,overlapNodes.nodeB]);
       This.addProblem_([overlapNodes.nodeB,overlapNodes.nodeA]);
     }
