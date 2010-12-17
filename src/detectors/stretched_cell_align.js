@@ -102,11 +102,11 @@ function checkNode(node, context) {
   var textAlign = chrome_comp.getComputedStyle(node).textAlign;
   if ((usedWidth <= computedWidth))
     return;
-  if ((textAlign.indexOf('left') != -1) && !hasBackground(node))
+  if (((textAlign.indexOf('left') != -1) || (textAlign.indexOf('auto') != -1)))
     return;
-  if ((!isStretched(node) || (hasBackground(node))) &&
-      (hasInflowContent(node)))
+  if ((!isStretched(node)) && (hasInflowContent(node)))
     this.addProblem('RE8014', [node]);
+  
 }
 ); // declareDetector
 
