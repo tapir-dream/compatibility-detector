@@ -54,7 +54,12 @@ function constructor(rootNode) {
 
   this.getAttributeHandler_ = function(result, originalArguments, callStack) {
     var attributeName = originalArguments[0];
+    if (attributeName == undefined)
+      return;
     var lowerCaseAttrName = attributeName.toLowerCase();
+    var hasOwnProperty = this.hasOwnProperty(attributeName);
+    if (result == null && !hasOwnProperty)
+      return;
     //filter jQuery and prototype
     if (!attributeName || isCalledFromJquery(arguments) || 
         isCalledFromPrototype(attributeName))
@@ -64,7 +69,7 @@ function constructor(rootNode) {
         // 1, 6. If element.getAttribute(attributeName) returns null, but
         // attributeName is a non-empty property of element, we warn the user
         // because he/she may mean to use element[attributeName].
-        (result == null && this[attributeName]) ||
+        (result == null && hasOwnProperty) ||
         // 2. In IE 6, IE 7 and IE 8(Q), if element is an input object,
         // element.getAttribute('value') returns the current value, while
         // in Chrome it returns the initial value.
@@ -73,12 +78,16 @@ function constructor(rootNode) {
         // object and 5. element.getAttribute('onEventName') returns a function.
         // In Chrome etc it returns a string or null.
         lowerCaseAttrName == 'style' || 
-        events.indexOf(lowerCaseAttrName.slice(2)) >= 0 ||
+        (lowerCaseAttrName.slice(2) == 'on' && 
+          events.indexOf(lowerCaseAttrName.slice(2)) >= 0) ||
         // In IE6, IE7 and IE8(Q) element.getAttribute('disabled') returns true
         // or false; It returns a String or null in Chrome etc.
         attrs.indexOf(lowerCaseAttrName) >= 0 || 
         // <img src="xx.img" width="200px" />, In IE678 
-        // IMG.getAttribute('width') returns 200; In chrome it returns "200px".
+        // IMG.getAttribute('width') returns NUMBER 200; In chrome it returns
+        // String "200px". If IMG has no attribute width, in IE678 
+        // IMG.getAttribute('width') returns original width of image, and in 
+        // chrome it returns null.
         ((lowerCaseAttrName == 'width' || lowerCaseAttrName == 'height') && 
           this[lowerCaseAttrName] != result))
       This.addProblem('SD9006', {
@@ -88,6 +97,8 @@ function constructor(rootNode) {
       });
   };
   this.setAttributeHandler_ = function(result, originalArguments, callStack) {
+    if (originalArguments.length < 2)
+      return false;
     var attributeName = originalArguments[0];
     var attributeValue = originalArguments[1];
     var lowerCaseAttrName = attributeName.toLowerCase();
@@ -107,7 +118,8 @@ function constructor(rootNode) {
         // an object as the second param, and 5. element.setAttribute('onclick',
         // func) requires a function as the second param.
         // Cases of other primitive types which also work in Chrome are ignored.
-        (events.indexOf(lowerCaseAttrName.slice(2)) >= 0 &&
+        (lowerCaseAttrName.slice(2) == 'on' && 
+          events.indexOf(lowerCaseAttrName.slice(2)) >= 0 &&
           (attributeType == 'function' || attributeType == 'string')) ||
         //attributeType == 'object' ||
         // 2. In IE 6, IE 7 and IE 8(Q), if element is an input object,
