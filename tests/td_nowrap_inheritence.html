@@ -1,32 +1,51 @@
 <!DOCTYPE html>
-<html>
+<html chrome_comp_test="td_nowrap_inheritence">
+<head></head>
 <body style="font:16px Arial;">
 <table id="table1" style="white-space:nowrap; width:100px; background:dodgerblue;">
-	<tbody><tr>
-		<td id="td1" style="background:lavender;">
-			<div id="div1">Text Text Text Text Text Text Text Text</div>
+	<tr>
+		<td id="td1" style="background:lavender;" expectedProblems="RX1003">
+			<div id="div1" style="background:red;">Text Text Text Text Text Text Text Text</div>
 		</td>
 	</tr>
-</tbody></table>
-<div id="info1"><br>TABLE:nowrap<br>TD:nowrap<br>DIV:nowrap</div>
-<br>
+</table>
+<div id="info1"></div>
+<br />
 <table id="table2" style="width:100px; background:dodgerblue;">
-	<tbody><tr>
+	<tr>
 		<td id="td2" style="white-space:nowrap; background:lavender;">
-			<div id="div2">Text Text Text Text Text Text Text Text</div>
+			<div id="div2" style="background:lightgreen;">Text Text Text Text Text Text Text Text</div>
 		</td>
 	</tr>
-</tbody></table>
-<div id="info2"><br>TABLE:normal<br>TD:nowrap<br>DIV:nowrap</div>
-<br>
+</table>
+<div id="info2"></div>
+<br />
 <table id="table3" style="width:100px; background:dodgerblue;">
-	<tbody><tr>
-		<td id="td3" style="white-space:nowrap; background:lavender; width:100px;">
-			<div id="div3">Text Text Text Text Text Text Text Text</div>
+	<tr>
+		<td id="td3" style="white-space:nowrap; background:lavender; width:100px;" expectedProblems="RX1003">
+			<div id="div3" style="background:red;">Text Text Text Text Text Text Text Text</div>
 		</td>
 	</tr>
-</tbody></table>
-<div id="info3"><br>TABLE:normal<br>TD:nowrap<br>DIV:nowrap</div>
+</table>
+<div id="info3"></div>
+<br />
+<table id="table4" style="width:100px; background:dodgerblue;">
+	<tr>
+		<td id="td4" style="white-space:nowrap; background:lavender; width:10%;">
+			<div id="div4" style="background:lightgreen;">Text Text Text Text Text Text Text Text</div>
+		</td>
+	</tr>
+</table>
+<div id="info4"></div>
+<br />
+<table id="table5" style="width:100px; background:dodgerblue;">
+	<tr>
+		<td id="td5" style="white-space:nowrap; background:lavender; width:0%;" expectedProblems="RX1003">
+			<div id="div5" style="background:red;">Text Text Text Text Text Text Text Text</div>
+		</td>
+	</tr>
+</table>
+<div id="info5"></div>
 <script>
 	window.onload = function() {
 		function $(id) { return document.getElementById(id); }
@@ -44,7 +63,14 @@
 		$("info3").innerHTML = "<br />TABLE:" + getComputedStyle($("table3"), null).whiteSpace
 			+ "<br />TD:" + getComputedStyle($("td3"), null).whiteSpace
 			+ "<br />DIV:" + getComputedStyle($("div3"), null).whiteSpace;
+		$("info4").innerHTML = "<br />TABLE:" + getComputedStyle($("table4"), null).whiteSpace
+			+ "<br />TD:" + getComputedStyle($("td4"), null).whiteSpace
+			+ "<br />DIV:" + getComputedStyle($("div4"), null).whiteSpace;
+		$("info5").innerHTML = "<br />TABLE:" + getComputedStyle($("table5"), null).whiteSpace
+			+ "<br />TD:" + getComputedStyle($("td5"), null).whiteSpace
+			+ "<br />DIV:" + getComputedStyle($("div5"), null).whiteSpace;
 	}
 </script>
 </body>
+
 </html>
