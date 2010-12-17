@@ -16,8 +16,13 @@
 
 addScriptToInject(function() {
 
+function isNowrap(element) {
+  return chrome_comp.getComputedStyle(element).whiteSpace.indexOf('nowrap') !=
+      -1;
+}
+
 function isNowrapInherited(element) {
-  if (chrome_comp.getComputedStyle(element).whiteSpace != 'nowrap')
+  if (!isNowrap(element))
     return;
   var table = element.offsetParent;
   var tableInlineWhiteSpace = table.style.whiteSpace;
@@ -30,7 +35,7 @@ function isNowrapInherited(element) {
 }
 
 function isChildrenAffectedByCellsWhiteSpace(element) {
-  if (chrome_comp.getComputedStyle(element).whiteSpace != 'nowrap')
+  if (!isNowrap(element))
     return;
   var inlineWhiteSpace = element.style.whiteSpace;
   var op = element.offsetParent;
@@ -43,18 +48,21 @@ function isChildrenAffectedByCellsWhiteSpace(element) {
   element.style.whiteSpace = (inlineWhiteSpace) ? inlineWhiteSpace : null;
   op.style.whiteSpace = null;
   op.style.whiteSpace = (inlineTableWhiteSpace) ? inlineTableWhiteSpace : null;
-  return oldWidth != newWidth;
+  return oldWidth > newWidth + 1;
 }
 
-function isAutoWidth(element) {
-  if (chrome_comp.getComputedStyle(element).display == 'none')
-    return chrome_comp.getComputedStyle(element).width == 'auto';
-  var inlineDisplay = element.style.display;
-  element.style.display = 'none !important';
-  var width = chrome_comp.getComputedStyle(element).width;
-  element.style.display = null;
-  element.style.display = (inlineDisplay) ? inlineDisplay : null;
-  return width == 'auto';
+function getRealComputedWidth(element) {
+  var x = element.cloneNode(false);
+  x.style.display = 'none !important';
+  element.parentElement.appendChild(x);
+  var width = chrome_comp.getComputedStyle(x).width;
+  element.parentElement.removeChild(x);
+  x = null;
+  return width;
+}
+
+function isPercentageWidth(width) {
+  return width.slice(-1) == '%' && width != '0%';
 }
 
 chrome_comp.CompDetect.declareDetector(
@@ -72,13 +80,14 @@ function checkNode(node, context) {
   if ((node.tagName != 'TH') && (node.tagName != 'TD'))
     return;
 
-  if (isAutoWidth(node)) {
+  var realWidth = getRealComputedWidth(node);
+  if (realWidth == 'auto') {
     if (isNowrapInherited(node)) {
       if (isChildrenAffectedByCellsWhiteSpace(node))
         this.addProblem('RX1003', [node]);
     }
   } else {
-    if (chrome_comp.getComputedStyle(node).whiteSpace == 'nowrap') {
+    if (isNowrap(node) && !isPercentageWidth(realWidth)) {
       if (isChildrenAffectedByCellsWhiteSpace(node))
         this.addProblem('RX1003', [node]);
     }
