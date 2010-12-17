@@ -39,8 +39,14 @@ function checkNode(node, context) {
       'UL', 'MARQUEE', 'DIR', 'MENU', 'PRE', 'CENTER', 'P', 'DIV', 'NOFRAMES',
       'DL', 'DD', 'DT', 'FORM', 'FRAMESET', 'ADDRESS', 'BLOCKQUOTE', 'H1',
       'H2', 'H3', 'H4', 'H5', 'H6', 'FRAME'];
+  var defaultDisplayNone = ['BASE', 'HEAD', 'META', 'NOFRAMES', 'NOSCRIPT',
+      'PARAM', 'SCRIPT', 'STYLE', 'TITLE'];
+
   // If a block element and its display set none
   if (nodeDisplay == 'none' && blockLikeInIE.indexOf(node.tagName)!=-1) {
+    if(node.parentElement.lastElementChild &&
+        node.parentElement.lastElementChild == node)
+      return;
     // If the element's nextSibling is text node and
     // previousSibling is not text node
     if (nextSibling && nextSibling.nodeType == 3 && previousSibling &&
@@ -53,7 +59,14 @@ function checkNode(node, context) {
   }
   // If a inline element or a input element with type set hidden
   if ((node.tagName == 'INPUT' && node.type == 'hidden') ||
-      (blockLikeInIE.indexOf(node.tagName) == -1 && nodeDisplay == 'none')) {
+      (blockLikeInIE.indexOf(node.tagName) == -1 &&
+      defaultDisplayNone.indexOf(node.tagName) == -1 && nodeDisplay == 'none'))
+    {
+    if(node.form != null)
+      return;
+    if(node.parentElement.lastElementChild &&
+        node.parentElement.lastElementChild == node)
+      return;
     // If the element's nextSibling is text node and
     // previousSibling is text node
     if (nextSibling && nextSibling.nodeType == 3 && previousSibling &&
