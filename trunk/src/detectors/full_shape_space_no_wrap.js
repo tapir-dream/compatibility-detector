@@ -52,11 +52,16 @@ function getPreviousElement(element) {
 function getPreviousInlineSibling(element) {
   var prev = element.previousElementSibling;
   if (!prev) {
-    if (element.parentNode)
+    if (element.parentNode) {
+      if (chrome_comp.getComputedStyle(element.parentNode).display != 'inline')
+        return null;
       prev = element.parentNode.previousElementSibling;
+    }
   }
+  if (prev && chrome_comp.getComputedStyle(prev).display  == 'inline')
+    return prev;
   while (prev) {
-    if (chrome_comp.getComputedStyle(prev).display.indexOf('inline') != -1)
+    if (chrome_comp.getComputedStyle(prev).display != 'inline')
       return prev;
     prev = prev.previousElementSibling;
     if (!prev) {
@@ -75,10 +80,7 @@ chrome_comp.CompDetect.ScanDomBaseDetector,
 null, // constructor
 
 function checkNode(node, context) {
-  if (context.isDisplayNone())
-    return;
-
-  if (Node.ELEMENT_NODE != node.nodeType)
+  if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
     return;
 
   if ((node.tagName == 'HEAD') || (node.tagName == 'HTML'))
@@ -87,13 +89,14 @@ function checkNode(node, context) {
   var textNodes = getIdeographicSpaceTextNode(node);
   if (textNodes.length < 1)
     return;
+
   var IS = '　';
   var originalNode = node.cloneNode(true);
   var inlineDisplay = node.style.display;
   node.style.display = 'none !important';
   node.parentNode.insertBefore(originalNode, node);
   var style = detectorStyle('create');
-  var oriHTML = node.innerHTML;
+
   for (var i = 0, j = textNodes.length; i < j; i++) {
     var text = textNodes[i].nodeValue;
     var detText = text.replace(/(\u3000)/g, '<det class="ideo">$1</det>');
@@ -102,11 +105,6 @@ function checkNode(node, context) {
   var qsNode = originalNode.querySelectorAll('det.ideo');
   if (qsNode.length < 1)
     return;
-  var qsNodeRect;
-  var qsPrevNodeRect;
-  var reported = false;
-  var originalTop;
-  var changedTop;
   for (var m = 0, n = qsNode.length; m < n; m++) {
     if (qsNode[m].innerHTML == IS) {
       var isRect = qsNode[m].getBoundingClientRect().left;
@@ -116,6 +114,7 @@ function checkNode(node, context) {
       var prevRect = prev.getBoundingClientRect().left;
       if ((prevRect >= isRect)) {
         if (prev && prev.tagName != 'BR') {
+          console.log(prev);
           this.addProblem('BX1009', [node]);
           break;
         }
