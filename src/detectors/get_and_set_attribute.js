@@ -93,7 +93,8 @@ function constructor(rootNode) {
       This.addProblem('SD9006', {
         nodes: [this],
         details: this.tagName + '.getAttribute("' + attributeName + '")',
-        needsStack: true
+        needsStack: true,
+        severityLevel: 3
       });
   };
   this.setAttributeHandler_ = function(result, originalArguments, callStack) {
@@ -138,7 +139,8 @@ function constructor(rootNode) {
         nodes: [this],
         details: this.tagName + '.setAttribute("' + attributeName + 
           '",' + attributeValue + ')',
-        needsStack: true
+        needsStack: true,
+        severityLevel: 3
       });
   };
 
