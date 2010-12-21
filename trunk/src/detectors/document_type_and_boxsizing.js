@@ -16,70 +16,122 @@
 
 addScriptToInject(function() {
 
+/**
+ * The comment or XML declaration before DTD will make the DTD be invalid in IE
+ * so that the HTML document will be in quirks mode in IE.
+ */
+function hasCommentBeforeDTD(element) {
+  var prev = element;
+  if (!prev)
+    return;
+  while (prev.previousSibling)
+    prev = prev.previousSibling;
+  if (prev && prev.nodeType == 8)
+    return prev;
+}
+
+function hasBorder(element) {
+  var style = chrome_comp.getComputedStyle(element);
+  var borderTop = parseInt(style.borderTopWidth, 10);
+  var borderRight = parseInt(style.borderRightWidth, 10);
+  var borderBottom = parseInt(style.borderBottomWidth, 10);
+  var borderLeft = parseInt(style.borderLeftWidth, 10);
+  return borderTop || borderRight || borderBottom || borderLeft;
+}
+
+function hasPadding(element) {
+  var style = chrome_comp.getComputedStyle(element);
+  var paddingTop = parseInt(style.paddingTop, 10);
+  var paddingRight = parseInt(style.paddingRight, 10);
+  var paddingBottom = parseInt(style.paddingBottom, 10);
+  var paddingLeft = parseInt(style.paddingLeft, 10);
+  return paddingTop || paddingRight || paddingBottom || paddingLeft
+}
+
+function isAutoWidth(element) {
+  var x = element.cloneNode(false);
+  x.style.display = 'none !important';
+  var parent = element.parentElement;
+  if (!parent)
+    return true;
+  if (parent.lastElementChild === element)
+    parent.appendChild(x);
+  else
+    parent.insertBefore(x, element);
+  var width = chrome_comp.getComputedStyle(x).width;
+  parent.removeChild(x);
+  x = null;
+  return width == 'auto';
+}
+
+function isAutoHeight(element) {
+  var x = element.cloneNode(false);
+  x.style.display = 'none !important';
+  var parent = element.parentElement;
+  if (!parent)
+    return true;
+  if (parent.lastElementChild === element)
+    parent.appendChild(x);
+  else
+    parent.insertBefore(x, element);
+  var height = chrome_comp.getComputedStyle(x).height;
+  parent.removeChild(x);
+  x = null;
+  return height == 'auto';
+}
+
 chrome_comp.CompDetect.declareDetector(
 
-'document_type_and_boxSizing',
+'document_type_and_boxsizing',
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
-null, // constructor
+function constructor(rootNode) {
+  // Must save this state because it is useful in checkNode function.
+  this.commentBeforeDTD = hasCommentBeforeDTD(rootNode);
+},
 
-function checkNode(node, additionalData) {
-  function isIEDTDBug(nodeEl) {
-    var html = document.documentElement;
-    var prev = html;
-    while (prev.previousSibling)
-      prev = prev.previousSibling;
-    if (prev && prev.nodeType == 8)
-      return true;
+function checkNode(node, context) {
+  if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
+    return;
+
+  var tag = node.tagName;
+  var inputType = '';
+  if (tag == 'HTML') {
+    if (this.commentBeforeDTD)
+      this.addProblem('HG8001', [node]);
+    return;
   }
 
-  if (Node.ELEMENT_NODE != node.nodeType)
+  if (isAutoWidth(node) && isAutoHeight(node))
+    return;
+  if (!hasPadding(node) && !hasBorder(node))
     return;
 
-  var tn = node.tagName;
-  var tp;
-  if (chrome_comp.getComputedStyle(node).display == 'none')
-    return;
-  var w = chrome_comp.getDefinedStylePropertyByName(node, true, 'width');
-  var h = chrome_comp.getDefinedStylePropertyByName(node, true, 'height');
-  var elementStyle = chrome_comp.getComputedStyle(node);
-  var bt = parseInt(elementStyle.borderTopWidth, 10);
-  var br = parseInt(elementStyle.borderRightWidth, 10);
-  var bb = parseInt(elementStyle.borderBottomWidth, 10);
-  var bl = parseInt(elementStyle.borderLeftWidth, 10);
-  var pt = parseInt(elementStyle.paddingTopWidth, 10);
-  var pr = parseInt(elementStyle.paddingRightWidth, 10);
-  var pb = parseInt(elementStyle.paddingBottomWidth, 10);
-  var pl = parseInt(elementStyle.paddingLeftWidth, 10);
+  if (tag == 'INPUT')
+    inputType = chrome_comp.getAttributeLowerCase(node, 'type');
 
-  if ((!w || w == 'auto') && (!h || h == 'auto'))
-    return;
-  if (!bt && !br && !bb && !bl && !pt && !pr && !pb && !pl)
+  // In following cases, there are no differences in all browsers.
+  if (tag == 'TABLE' || tag == 'IMG')
     return;
 
-  if (tn == 'INPUT')
-    tp = node.type.toLowerCase();
-
-  if (tn == 'TABLE' || tn == 'BUTTON' ||
-      (tn == 'INPUT' &&
-      (tp == 'button' || tp == 'submit' || tp == 'reset')))
-    return;
-
+  // Some authors may use -webkit-box-sizing property to make the value of width
+  // and height apply on border box in WebKit browsers. So we must ignore this
+  // situation.
+  var boxSizing = chrome_comp.getComputedStyle(node).webkitBoxSizing;
+  // There are several strange DTDs that have the document mode in IE and
+  // non-IE browser be different. And we must know the real document mode
+  // triggered by the present DTD in IE and WebKit browsers.
   var doctypeInIE;
   var doctypeInWebKit;
   var diffMap;
-  var pid = (document.doctype) ? document.doctype.publicId : 0;
-  var sid = (document.doctype) ? document.doctype.systemId : 0;
-  var cm = document.compatMode.toLowerCase();
-  var boxSizing = window.chrome_comp.getComputedStyle(node).webkitBoxSizing;
-  doctypeInWebKit = (cm == 'backcompat') ? 'Q' : 'S';
-  doctypeInIE = doctypeInWebKit;
-  if (isIEDTDBug(node)) {
+  var doctype = document.doctype;
+  var compatMode = document.compatMode.toLowerCase();
+  var publicId = (doctype) ? doctype.publicId : 0;
+  var systemId = (doctype) ? doctype.systemId : 0;
+  doctypeInIE = doctypeInWebKit = (compatMode == 'backcompat') ? 'Q' : 'S';
+  if (this.commentBeforeDTD)
     doctypeInIE = 'Q';
-    if (tn == 'HTML')
-      this.addProblem('HG8001', [node]);
-  }
   diffMap = {
     '-//W3C//DTD HTML 4.0 Transitional//EN': {
       'systemId': 'http://www.w3.org/TR/html4/loose.dtd',
@@ -97,16 +149,22 @@ function checkNode(node, additionalData) {
       'WebKit': 'S'
     }
   }
-  if ((tn == 'IMG') && (boxSizing != 'border-box'))
-    return;
-  if ((tn == 'HR') && (boxSizing == 'border-box'))
-    return;
-  if (diffMap[pid]) {
-    if (diffMap[pid]['systemId'] == sid) {
-      doctypeInIE = diffMap[pid]['IE'];
-      doctypeInWebKit = diffMap[pid]['WebKit'];
+  if (diffMap[publicId]) {
+    if (diffMap[publicId]['systemId'] == systemId) {
+      doctypeInIE = diffMap[publicId]['IE'];
+      doctypeInWebKit = diffMap[publicId]['WebKit'];
     }
   }
+
+  var isButton;
+  var isTextBox;
+  if ((tag == 'BUTTON') || (tag == 'INPUT' && (inputType == 'button' ||
+      inputType == 'submit' || inputType == 'reset')))
+    isButton = true;
+  if ((tag == 'TEXTAREA') || (tag == 'INPUT' && (inputType == 'text' ||
+      inputType == 'password')))
+    isTextBox = true;
+
   if (!chrome_comp.isReplacedElement(node)) {
     if (doctypeInIE == 'Q' && boxSizing != 'border-box') {
       this.addProblem('RD8001', [node]);
@@ -117,13 +175,15 @@ function checkNode(node, additionalData) {
       return;
     }
   } else {
-    if (((tn == 'INPUT' && (tp == 'text' || tp == 'password')) ||
-        (tn == 'TEXTAREA')) && (doctypeInIE != doctypeInWebKit)) {
+    if (isTextBox && (doctypeInIE != doctypeInWebKit)) {
       if (doctypeInIE == 'Q' && boxSizing != 'border-box')
         this.addProblem('RD8001', [node]);
       return;
-    }
-    if (tn == 'IFRAME' && doctypeInIE == 'Q') {
+    } else if (isButton && (doctypeInIE != doctypeInWebKit)) {
+      if (doctypeInIE == 'Q' && boxSizing != 'border-box')
+        this.addProblem('RD8001', [node]);
+      return;
+    } else if (tag == 'IFRAME' && doctypeInIE == 'Q' && hasPadding(node)) {
       this.addProblem('RD8001', [node]);
       return;
     }
