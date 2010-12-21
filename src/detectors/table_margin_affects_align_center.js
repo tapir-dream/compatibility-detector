@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+// One detector implementation for checking 'margin-left' and 'margin-right' 
+// properties affecting the table element which is center alignment problems
+// @author : luyuan.china@gmail.com
+// @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=4
+//
+
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
