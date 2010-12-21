@@ -1,0 +1,67 @@
+<!-- 123 -->
+<!DOCTYPE html>
+<html chrome_comp_test="document_type_and_boxsizing" expectedProblems="HG8001">
+<head>
+<style>
+	* { font:14px 'Trebuchet MS'; border-color:black; }
+	.ok { background:lightgreen; }
+	.fail { background:red; }
+</style>
+</head>
+<body>
+border:10px; padding:10px; width:auto; height:auto;
+<div style="border:10px solid; padding:10px; width:auto; height:auto;" class="ok">DIV</div>
+<br />
+
+border:0; padding:0; width:100px; height:100px;
+<p style="border:0; padding:0; margin:0; width:100px; height:100px;" class="ok">P</p>
+<br />
+
+border:10px; padding:10px; width:100px; height:100px;
+<h1 style="border:10px solid; padding:10px; margin:0; width:100px; height:100px;" class="fail" expectedProblems="RD8001">H1</h1>
+<br />
+
+border:10px; padding:10px; width:100px; height:100px; -webkit-box-sizing:border-box;
+<pre style="border:10px solid; padding:10px; margin:0; width:100px; height:100px; -webkit-box-sizing:border-box;" class="ok">PRE</pre>
+<br />
+
+padding:10px; width:100px; height:100px; -webkit-box-sizing:border-box;
+<blockquote style="padding:10px; margin:0; width:100px; height:100px; -webkit-box-sizing:border-box;" class="ok">BLOCKQUOTE</blockquote>
+<br />
+
+border:10px solid; width:100px; height:100px;
+<div><button style="border:10px solid; width:100px; height:100px;" class="ok">BUTTON</button></div>
+<br />
+
+border:10px solid; width:100px; height:100px; -webkit-box-sizing:content-box;
+<div><input type="reset" value="RESET" style="border:10px solid; width:100px; height:100px; -webkit-box-sizing:content-box;" class="fail" expectedProblems="RD8001" /></div>
+<br />
+
+border:10px solid; width:100px; height:100px; -webkit-box-sizing:content-box;
+<table style="border:10px solid; width:100px; height:100px; -webkit-box-sizing:content-box;" class="ok">
+	<tr>
+		<td>TABLE</td>
+	</tr>
+</table>
+<br />
+
+border:10px solid; width:100px; height:100px;
+<hr style="border:10px solid; width:100px; height:100px;" class="fail" align="left" expectedProblems="RD8001" />
+<br />
+
+border:10px solid; width:100px; height:100px;
+<div><img style="border:10px solid; width:100px; height:100px;" src="http://www.google.com/images/logo_sm.gif" class="ok" /></div>
+<br />
+
+border:10px solid black; width:100px; height:100px;
+<div><input type="text" value="TEXT" style="border:10px solid black; width:100px; height:100px;" class="fail" expectedProblems="RD8001" /></div>
+<br />
+
+border:10px solid black; width:100px; height:100px; -webkit-box-sizing:border-box;
+<div><input type="password" value="PASSWORD" style="border:10px solid black; width:100px; height:100px; -webkit-box-sizing:border-box;" class="ok" /></div>
+<br />
+
+border:10px solid; width:100px; height:100px;
+<div><iframe src="http://www.google.com" style="border:10px solid; width:100px; height:100px;" class="ok"></iframe></div>
+</body>
+</html>
