@@ -14,6 +14,35 @@
  * limitations under the License.
  */
 
+// One detector implementation for checking 'z-index is empty will generate
+// a new stack context' problems
+// @author : qianbaokun@gmail.com
+// @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=114
+//
+// In Internet Explorer 6 and  Internet Explorer 7 and
+// Internet Explorer 8 Quirks Mode, the element style is position of non-static
+// will produce a new stack context.
+//
+// It will lead to stacked display differences with other browsers.
+// The program checked all elements of positioning is non-static and visible,
+// filter not set value of 'z-index' property with HTML tags.
+//
+// Taking into account this may cause it to be find very many web pages,
+// the program will only checking the overlap of the elements, and they set
+// the background-image or background color, and the descendants of the node
+// set style postion non-static.
+//
+// This detector attempts to achieve the balance between
+// the precision complexity.
+// This approach: advantages is easy to understand and implement.
+// This difference:
+// If elements set background color similar or background image is transparent
+// or overlapping elements of the positioning of descendant elements do
+// not overlap. All will result in no difference in visual.
+//
+// In fact, position elements no set value of 'z-index' property,
+// there is a potential compatibility issues.
+
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
