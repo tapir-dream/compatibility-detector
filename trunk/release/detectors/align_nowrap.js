@@ -14,6 +14,30 @@
  * limitations under the License.
  */
 
+// One detector implementation for checking the HTML align attribute for several
+// elements transformed into floating element.
+// @author : luyuan.china@gmail.com
+// @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=5
+//
+// The align attribute for objects, images, tables, frames, etc., causes the 
+// object to float to the left or right margin. Floating objects generally 
+// begin a new line.
+// In other word, the align attribute for the said elements will be transformed
+// into CSS 'float' property in the corresponding direction.
+//
+// First, we ignore the inline and invisible elements. And get the children
+// elements of the present checked element, recording the left-aligned and
+// right-aligned said elements' information (the node object, its position and
+// its alignment). If there are less then two elements satisfied with 
+// conditions, we do not continue.
+//
+// Try to enlarge the width of the element, we get the new position of the
+// elements satisfied with conditions. By comparing the changes in the
+// position to determine that if there may have the compatibility issue.
+// At last, restore the style of the element.
+
+
+
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
@@ -40,17 +64,17 @@ function checkNode(node, context) {
 
   for (var i = 0, j = children.length; i < j; i++) {
     if (tagList.indexOf(children[i].tagName) != -1) {
-      var align = children[i].align.toLowerCase();
+      var align = (children[i].align + '').toLowerCase();
       if (align == 'left')
         nodeListLeft.push({
           node: children[i],
-          alignment: children[i].align.toLowerCase(),
+          alignment: (children[i].align + '').toLowerCase(),
           rect: children[i].getBoundingClientRect()
         });
       if (align == 'right')
         nodeListRight.push({
           node: children[i],
-          alignment: children[i].align.toLowerCase(),
+          alignment: (children[i].align + '').toLowerCase(),
           rect: children[i].getBoundingClientRect()
         });
     }
