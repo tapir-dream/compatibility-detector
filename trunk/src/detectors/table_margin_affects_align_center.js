@@ -33,7 +33,8 @@
 // highest, then also get the absolute left position (called new position).
 // Restore the 'margin-left' and 'margin-right' properties of the table, and if
 // the new position is different from the original position, we think that the
-// CSS margin property which affects the center-aligned table element by HTML // align attribute.
+// CSS margin property which affects the center-aligned table element by HTML 
+// align attribute.
 
 
 addScriptToInject(function() {
