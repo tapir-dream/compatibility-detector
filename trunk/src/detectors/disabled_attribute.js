@@ -16,18 +16,26 @@
 
 // One detector implementation for checking the HTML disable attribute for
 // all elements.
-// @author : luyuan.china@gmail.com
+// @author : luyuan.china@gmail.com qianbaokun@gmail.com
 // @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=20
 // @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=115
 //
-// The disabled attribute can set for a form control. The following elements 
-// support the disabled attribute: BUTTON, INPUT, OPTGROUP, OPTION, SELECT, and 
-// TEXTAREA. But IE6 and IE7 do not support the disable attribute for the 
+// The disabled attribute can set for a form control. The following elements
+// support the disabled attribute: BUTTON, INPUT, OPTGROUP, OPTION, SELECT, and
+// TEXTAREA. But IE6 and IE7 do not support the disable attribute for the
 // OPTGROUP and OPTION elements. And IE6, IE7 and IE8 support the disabled
 // attribute for some non-form elements such as anchors, and the attribute
 // can be inherited.
 // So the detector report the issues according to the said conditions.
-
+//
+// The detector checks all nodes, and do the following treatment:
+// 1. Filter all text nodes, and the node is not visible.
+// 2. Detect the presence of 'disabled' attribute of the tag.
+// 3. If the tagName is OPTION or OPTGROUP, that other browsers IE6 and IE7
+//    and the display is different.
+// 4. If the tagName is not BUTTON INPUT SELECT TEXTAREA and IMG,
+//    and the node in sub-tree have the text content, to that other browsers
+//    IE6 IE7 have the display different.
 
 addScriptToInject(function() {
 
