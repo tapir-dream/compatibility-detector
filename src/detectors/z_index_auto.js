@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-// One detector implementation for checking that the 'z-index' property which 
+// One detector implementation for checking that the 'z-index' property which
 // value is 'auto' will establishe a new stacking context.
-// @author : qianbaokun@gmail.com
+// @author: qianbaokun@gmail.com
 // @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=114
 //
-// The non-static positioned elements will establishe a new stacking context in 
+// The non-static positioned elements will establishe a new stacking context in
 // IE6, IE7 and IE8 quirks mode.
 //
 // The detector check all non-static positioned visible elements and ignore the
@@ -28,12 +28,12 @@
 //
 // The detector will check the overlapped and background-setted elements and
 // have the non-static positioned descendants.
-// 
+//
 // This detector attempts to achieve the balance between
 // the precision complexity.
 // This approach: advantages is easy to understand and implement.
 // This difference:
-// If overlapped elements are set the similar background color or transparent 
+// If overlapped elements are set the similar background color or transparent
 // background image, or their descendants do not overlap, it will result no
 // difference in visual.
 //
