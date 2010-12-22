@@ -40,14 +40,9 @@
       "non_w3help_issues.js",
 
       //============unit test===========
-
       //====here things are temporary, used to delete, don't paste from the bottom up=====
 
       //=========Review===========
-      "detectors/conditional_comments.js",                  //BT8004 (Error downgraded to Warning) ... url less
-      "detectors/percent_height_in_auto_height.js",         //RE8010 ... url less
-      "detectors/full_shape_space_no_wrap.js",              //BX1009
-
       //====here things are temporary, used to delete, don't paste from the bottom up=====
 
       // Verified
@@ -70,7 +65,6 @@
       "detectors/td_nowrap_inheritence.js",                 //RX1003
       "detectors/stretched_cell_align.js",                  //RE8014
 
-
       // Verified --> Error downgraded to Warning
       "detectors/document_all.js",                          //BX9002
       "detectors/script_language_type.js",                  //BT9005 BT9006
@@ -84,7 +78,6 @@
       "detectors/get_element_by_id_and_name.js"             //BX9010
       "detectors/percent_height_in_auto_height.js",         //RE8010 RD8026
       "detectors/element_click.js",                         //SD9025
-      "detectors/conditional_comments.js",                  //BT8004
 
       // Started --> Warning
       "detectors/align_middle.js",                          //HA1003
@@ -107,7 +100,7 @@
 
       // WontFix Test results url is Zero or url less 20
       "detectors/zoom_style.js",                            //BX8017 ... Test results url is 0
-
+      "detectors/conditional_comments.js",                  //BT8004 (Error downgraded to Warning) ... url less
 
       //===============Uncategorized==================
 
