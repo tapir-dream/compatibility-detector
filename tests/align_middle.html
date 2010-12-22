@@ -1,13 +1,17 @@
+<!doctype html>
 <html chrome_comp_test='align_middle'>
+<head></head><body>
 <div style='width: 300px; background: #AAA'>
-<img src='img.png' align='middle'>
-<hr align='middle'>
-<p align='middle' expectedProblems="HA1003">P</p>
-<table align='middle' width="200" border="1" expectedProblems="HA1003">
-  <tr><td>table</td></tr>
-</table>
-<table width="200" border="1">
-  <tr><td align='MIDDLE' expectedProblems="HA1003">table</td></tr>
-</table>
+	<img src='img.png' align='middle'>
+	<hr align='middle'>
+	<p align='middle' expectedProblems="HA1003">P</p>
+  <div align='middle' expectedProblems="HA1003">DIV</div>
+	 <h1 align='middle' expectedProblems="HA1003">H1</h1>
+	<table align='middle' width="200" border="1" >
+	  <tr><td>table</td></tr>
+	</table>
+	<table width="200" border="1">
+	  <tr><td align='MIDDLE' expectedProblems="HA1003">TD</td></tr>
+	</table>
 </div>
-</html>
+</body></html>
