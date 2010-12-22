@@ -14,6 +14,33 @@
  * limitations under the License.
  */
 
+// Detector for document.getElementById and document.getElementsByName
+// @author : xingyunshisui@gmail.com
+// @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=1
+//
+// Document.getElementById and document.getElementsByName is introduced in DOM 
+// level 1. Document.getElementById(elementId) returns the Element whose ID is 
+// given by elementId. If no such element exists, returns null.
+// Document.getElementsByName(elementName) returns the (possibly empty) 
+// collection of elements whose name value is given by elementName. This method 
+// is case sensitive.
+//
+// In IE6 IE7 IE8(Q), document.getElementById(elementId) is case insensitive, 
+// document.getElementById('X') will get element whose value of id attribute is 
+// 'x'. And for a part of elements, it's confused with ID and name attribute, 
+// document.getElementById(elementName) will return element whose value of name 
+// attribute is equal to elementName.
+//
+// In IE6 IE7 IE8, for a part of elements, 
+// document.getElementsByName(elementName) is case insensitive, 
+// document.getElementsByName('X') will get elements whose value of name 
+// attribute is 'x'.
+
+// First hook document.getElementById and document.getElementsByName, so that we
+// can catch the argument id or name. When calling these methods and gets no 
+// result, then traverse DOM tree. If case insensitive argument id or name is 
+// existing in document, report problem.
+
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
@@ -24,10 +51,6 @@ chrome_comp.CompDetect.NonScanDomBaseDetector,
 
 function constructor(rootNode) {
   var that = this;
-  var ids;
-  var commonNames;
-  var namesOfEmbed;
-  var namesOfFrameAndParam;
 
   this.getElementById_ = function(result, originalArguments, callStack) {
     var arg0 = originalArguments[0];
@@ -46,7 +69,7 @@ function constructor(rootNode) {
     var names = getNames();
     if (!result && names.commonNames.concat(names.namesOfEmbed)
         .indexOf(lowerCaseArg0) >= 0) {
-      // Caller is null when call document.getElementById() in window scope
+      // caller is null when call document.getElementById() in window scope
       var caller = arguments.callee.caller.caller;
       // Filter jQuery
       if (!(caller && caller.caller && /jQuery/.test(caller.caller.caller)))
@@ -78,42 +101,36 @@ function constructor(rootNode) {
     }
   };
 
-  // May has problem when updating document tree dynamically after window
-  // loading
   // Get all elements with id attribute in the document
   function getIds() {
-    if (!ids) {
-      ids = [];
-      var elements = document.querySelectorAll('[id]');
-      Array.prototype.forEach.call(elements, function(element) {
-        ids.push(element.getAttribute('id').toLowerCase());
-      });
-    }
+    var ids = [];
+    var elements = document.querySelectorAll('[id]');
+    Array.prototype.forEach.call(elements, function(element) {
+      ids.push(element.getAttribute('id').toLowerCase());
+    });
     return ids;
   }
 
   // Get names of specified element in the document
   function getNames() {
-    if (!commonNames) {
-      commonNames = [];
-      namesOfEmbed = [];
-      namesOfFrameAndParam = [];
+    var commonNames = [];
+    var namesOfEmbed = [];
+    var namesOfFrameAndParam = [];
 
-      var elements = document.querySelectorAll('[name]');
-      var commonTags = ['A', 'APPLET', 'BUTTON', 'FORM', 'IFRAME', 'IMG',
-          'INPUT', 'MAP', 'META', 'OBJECT', 'SELECT', 'TEXTAREA'];
+    var elements = document.querySelectorAll('[name]');
+    var commonTags = ['A', 'APPLET', 'BUTTON', 'FORM', 'IFRAME', 'IMG',
+        'INPUT', 'MAP', 'META', 'OBJECT', 'SELECT', 'TEXTAREA'];
 
-      Array.prototype.forEach.call(elements, function(element) {
-        var tagName = element.tagName;
-        var name = element.getAttribute('name').toLowerCase();
-        if (commonTags.indexOf(tagName) >= 0)
-          commonNames.push(name);
-        else if (tagName == 'EMBED')
-          namesOfEmbed.push(name)
-        else if (tagName == 'FRAME' || tagName == 'PARAM')
-          namesOfFrameAndParam.push(name);
-      });
-    }
+    Array.prototype.forEach.call(elements, function(element) {
+      var tagName = element.tagName;
+      var name = element.getAttribute('name').toLowerCase();
+      if (commonTags.indexOf(tagName) >= 0)
+        commonNames.push(name);
+      else if (tagName == 'EMBED')
+        namesOfEmbed.push(name)
+      else if (tagName == 'FRAME' || tagName == 'PARAM')
+        namesOfFrameAndParam.push(name);
+    });
     return {
       'commonNames': commonNames,
       'namesOfEmbed': namesOfEmbed,

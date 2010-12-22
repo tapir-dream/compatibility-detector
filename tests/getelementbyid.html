@@ -2,6 +2,9 @@
 <html chrome_comp_test="getelementbyid_and_getelementsbyname">	<head></head>	<body>
 		<input class="main_w" type="text" name="aa" />
 		<input type="text" name="aA" />
+		<script type="text/javascript">
+			chrome_comp.expectProblems(document.getElementById("AA"), "SD9001");
+		</script>
 		<div name="divName">DIV</div>
 		<button type="button" name="BT"></button>
 		<div id="info"></div>
@@ -9,7 +12,6 @@
       //test SD9001
       document.getElementById("info").innerHTML = document.getElementById("DIVNAME");
       
-      chrome_comp.expectProblems(document.getElementById("AA"), "SD9001");
       chrome_comp.expectProblems(document.getElementById("Aa"), "SD9001");
       chrome_comp.expectProblems(document.getElementById("bt"), "SD9001");
     </script>
