@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+// One detector implementation for checking that the HTML 'disibled' attribute
+// which visible difference in browsers.
+// @author: qianbaokun@gmail.com
+// @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=11
+//       https://code.google.com/p/compatibility-detector/issues/detail?id=12
+
 addScriptToInject(function() {
 
 function hasMargin(style) {

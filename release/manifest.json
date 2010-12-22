@@ -38,29 +38,28 @@
       "config.js",
       "w3help_issues.js",
       "non_w3help_issues.js",
-
-      // Verified
-      "detectors/decoration_font_color.js",                 //RX3011
-      "detectors/disabled_attribute.js",                    //HF3005 HF3013
-      "detectors/getelementbyid_and_getelementsbyname.js",  //SD9012 (SD9001 SD9002 Error downgraded to Warning )
-      "detectors/table_margin_affects_align_center.js",     //RX8004
-      "detectors/empty_cell.js",                            //RE1013 RE1012
-      "detectors/marquee_width.js",                         //BX1030
-      "detectors/onreadystatechange.js",                    //BX9021
-      "detectors/haslayout_full_shape_space.js",            //BT1025
-      "detectors/table_cellspacing_border_collapse.js",     //RE1020 RX1008
-      "detectors/invalid_list_item.js",                     //HY1005
-      "detectors/text_align.js",                            //RT8003
-      "detectors/center_element.js",                        //HA8001
-      "detectors/text_overflow_ellipsis.js",                //RT3005
-      "detectors/shrink_to_fit_percentage_child.js",        //RX8017
-      "detectors/overflow.js",                              //RV1001
-
-      // Verified --> Error downgraded to Warning
-      "detectors/document_all.js",                          //BX9002
-      "detectors/script_language_type.js",                  //BT9005 BT9006
-      "detectors/align_nowrap.js",                          //RX8015
-
+      "detectors/decoration_font_color.js",
+      "detectors/disabled_attribute.js",
+      "detectors/getelementbyid_and_getelementsbyname.js",
+      "detectors/table_margin_affects_align_center.js",
+      "detectors/empty_cell.js",
+      "detectors/marquee_width.js",
+      "detectors/onreadystatechange.js",
+      "detectors/haslayout_full_shape_space.js",
+      "detectors/table_cellspacing_border_collapse.js",
+      "detectors/invalid_list_item.js",
+      "detectors/text_align.js",
+      "detectors/center_element.js",
+      "detectors/text_overflow_ellipsis.js",
+      "detectors/shrink_to_fit_percentage_child.js",
+      "detectors/overflow.js",
+      "detectors/text_decoration_propagation.js",
+      "detectors/td_nowrap_inheritence.js",
+      "detectors/stretched_cell_align.js",
+      "detectors/document_all.js",
+      "detectors/script_language_type.js",
+      "detectors/align_nowrap.js",
+      "detectors/z_index_auto.js",
       "annotation.js"
     ],
     "run_at": "document_start"

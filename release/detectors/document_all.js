@@ -16,7 +16,7 @@
 
 // One detector implementation for checking 'undetectable document.all' problems
 // @author : jnd@chromium.org
-// @bug: http://b/hotlist?id=10048
+// @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=15
 //
 // All web pages caught by this detector do not mean that those pages have real
 // problems, but at least, they have potential compatibility problems since
@@ -48,6 +48,10 @@
 // use document.getElementById and
 // getElementsByTagName.
 // For now, I use the first way.
+// In order to reveal the problem as accurately as possible, filter out all
+// the script notes, all conditional statements, short circuit,
+// the three head operations, return document.all in the case ignored.
+// and Check HTML tag events attribute.
 
 addScriptToInject(function() {
 

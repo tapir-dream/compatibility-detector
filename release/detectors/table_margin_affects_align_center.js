@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// One detector implementation for checking the CSS margin property which 
+// affects the center-aligned table element by HTML align attribute.
+// @author : luyuan.china@gmail.com
+// @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=4
+//
+// The align attribute of table elements make the table itself align center
+// being relative to its containing block. In non-IE browsers, it will be
+// transformed to CSS property - 'margin-left:auto' and 'margin-right:auto'.
+// So the detector first check the center-aligned table elements by HTML align
+// attribute, ignoring the empty table element and invisible table (the width
+// or height is zero).
+//
+// Record the inline style value of 'margin-left' and 'margin-right', then
+// get the absolute left position of the table (called original position).
+// Now set the inline 'margin-left' and 'margin-right' properties be 'auto' for
+// table, it would be best to use !important to make its specificity be the
+// highest, then also get the absolute left position (called new position).
+// Restore the 'margin-left' and 'margin-right' properties of the table, and if
+// the new position is different from the original position, we think that the
+// CSS margin property which affects the center-aligned table element by HTML // align attribute.
+
+
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(

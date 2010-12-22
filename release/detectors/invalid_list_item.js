@@ -14,52 +14,65 @@
  * limitations under the License.
  */
 
+// One detector implementation for checking 'IE6 IE7 IE8 (Q) will  ignore
+// LI DD DT element end tag' problems
+// @author : duanlixin@gmail.com
+// @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=8
+//
+// Check each node, when the node is LI DT DD,
+// then check the next node, if the next node is a text node,
+// there may be a problem.
+// If the next node is not LI DT DD node and is a visible node,
+// there may be a problem.
+
 addScriptToInject(function() {
 
-var VALID_LIST_NEXT_TAGS = {
-  LI: ['LI'],
-  DT: ['DT', 'DD'],
-  DD: ['DT', 'DD']
-};
+  var VALID_LIST_NEXT_TAGS;
+  VALID_LIST_NEXT_TAGS = {
+    LI: ['LI'],
+    DT: ['DT', 'DD'],
+    DD: ['DT', 'DD']
+  };
 
-chrome_comp.CompDetect.declareDetector(
+  chrome_comp.CompDetect.declareDetector(
 
-'invalid_list_item',
+    'invalid_list_item',
 
-chrome_comp.CompDetect.ScanDomBaseDetector,
+    chrome_comp.CompDetect.ScanDomBaseDetector,
 
-null, // constructor
+    null, // constructor
 
-function checkNode(node, context) {
-  if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
-    return;
+    function checkNode(node, context) {
+      if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
+        return;
 
-  var validNextTags = VALID_LIST_NEXT_TAGS[node.tagName];
-  var whiteSpacePre = chrome_comp.getComputedStyle(node).whiteSpace == 'pre';
-  // Find first valid or invalid visible sibling.
-  if (validNextTags instanceof Array) {
-    for (var sibling = node.nextSibling; sibling;
-        sibling = sibling.nextSibling) {
-      switch (sibling.nodeType) {
-        case Node.TEXT_NODE:
-          var text = sibling.nodeValue;
-          if ((text && whiteSpacePre) || chrome_comp.trim(text)) {
-            this.addProblem('HY1005', [sibling]);
-            return;
+      var validNextTags = VALID_LIST_NEXT_TAGS[node.tagName];
+      var whiteSpacePre =
+          chrome_comp.getComputedStyle(node).whiteSpace == 'pre';
+      // Find first valid or invalid visible sibling.
+      if (validNextTags instanceof Array) {
+        for (var sibling = node.nextSibling; sibling;
+             sibling = sibling.nextSibling) {
+          switch (sibling.nodeType) {
+            case Node.TEXT_NODE:
+              var text = sibling.nodeValue;
+              if ((text && whiteSpacePre) || chrome_comp.trim(text)) {
+                this.addProblem('HY1005', [sibling]);
+                return;
+              }
+              break;
+            case Node.ELEMENT_NODE:
+              if (validNextTags.indexOf(sibling.tagName) != -1)
+                return;
+              if (chrome_comp.getComputedStyle(sibling).display != 'none') {
+                this.addProblem('HY1005', [sibling]);
+                return;
+              }
+              break;
           }
-          break;
-        case Node.ELEMENT_NODE:
-          if (validNextTags.indexOf(sibling.tagName) != -1)
-            return;
-          if (chrome_comp.getComputedStyle(sibling).display != 'none') {
-            this.addProblem('HY1005', [sibling]);
-            return;
-          }
-          break;
+        }
       }
     }
-  }
-}
-); // declareDetector
+    ); // declareDetector
 
 });
