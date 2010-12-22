@@ -14,29 +14,21 @@
  * limitations under the License.
  */
 
-// One detector implementation for checking that the HTML 'disibled' attribute
-// which visible difference in browsers.
+// One detector implementation for checking the empty cells.
 // @author: qianbaokun@gmail.com
 // @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=11
 //       https://code.google.com/p/compatibility-detector/issues/detail?id=12
 //
-
-
-
-// =============================================
-// 此 detector 检测了空单元格的显示差异.
-// 在表格的分离边框模型中,空单元格的边框某些情况下会消失..
-// 并且 IE6 IE7 IE8(Q) 中空单元格的上下 'padding' 属性会失效.
+// In the separated borders model, the border of the empty cell will disappear
+// in some cases. And the 'padding-top' and 'padding-bottom' of the empty cell
+// will disappear in IE6, IE7 and IE8 quirks mode.
 //
-// 这个 detector 会依次检测所有 HTML 节点，检测思路如下:
-// 1. 过滤所有文本节点，不可视节点.
-// 2. 过滤计算后样式为 'hidn'的 TH TD 标记.
-// 3. 检测出分离边框模型，并且带有边框设置的单元格.
-// 4. 通过检测单元格内后代元素的状况来决定他
-//
-//
-//
-
+// The detector check all table cell elements (TD and TH), ignoring the
+// invisible and 'empty-cells:hidden' elements.
+// Check that if the table is using the separated borders model and the present
+// cell is set the border.
+// Check the descendant elements to determine that the cell is real empty, then
+// report this issue.
 
 
 addScriptToInject(function() {
