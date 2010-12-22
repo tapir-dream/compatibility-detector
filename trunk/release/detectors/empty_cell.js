@@ -139,7 +139,7 @@ function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
     return;
 
-  if (node.tagName == 'TD' || node.tagname == 'TH') {
+  if (node.tagName == 'TD' || node.tagName == 'TH') {
     var style = chrome_comp.getComputedStyle(node);
     if (style.emptyCells == 'hide')
       return;
