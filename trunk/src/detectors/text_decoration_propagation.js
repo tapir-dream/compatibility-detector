@@ -14,6 +14,40 @@
  * limitations under the License.
  */
 
+// One detector implementation for checking that the 'text-decoration' property
+// which Text decorations visible difference in browsers.
+// @author: qianbaokun@gmail.com
+// @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=29
+//
+// Because the W3C CSS 2.1 specification on the style of 'text-decoration'
+// property is inheritable description is not clear.
+//
+// This makes the realization of different browsers may arise in specific
+// differences.
+// The detector checks all nodes, and do the following treatment:
+// 1. Filter all text nodes, not visible nodes and the node has no parent
+//    element.
+// 2. Filter Quirks Mode in the 'position: absolute' and 'position: fixed'
+//    elements.
+// 3. Filter set is -100 the following 'top' 'left' and 'text-indent' elements.
+//    Because their may display area at the outside,can't visible and
+//    not display differences.
+// 4. WebkitTextDecorationsInEffect property by text rendering style of the
+//    current node the parent node render the existence of different styles.
+// 5. If there is illustrated in the same show differences.
+
+// =============================================
+// 因为 W3C CSS 2.1 规范中对样式 'text-decoration' 属性的可继承性描述不明确,
+// 这使得不同浏览器在具体实现时可能产生差异.
+//
+// The detector check all nodes, and do the following treatment:
+// 1. 过滤所有文本节点，不可视节点和没有父元素的节点
+// 2. 过滤 Quirks Mode 中的 'position:absolute' 'position:fixed' 元素
+// 3. 过滤设定值为 -100 以下的 'top' 'left' 和 'text-indent' 元素，因为他们可能
+// 处于可显示区域外而无法看出显示差异。
+// 4. 通过 WebkitTextDecorationsInEffect 属性当前节点的文本渲染样式与父节点的
+// 渲染样式是否存在不同。如果相同则说明存在显示差异。
+
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
