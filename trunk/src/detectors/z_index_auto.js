@@ -14,34 +14,32 @@
  * limitations under the License.
  */
 
-// One detector implementation for checking 'z-index is empty will generate
-// a new stack context' problems
+// One detector implementation for checking that the 'z-index' property which 
+// value is 'auto' will establishe a new stacking context.
 // @author : qianbaokun@gmail.com
 // @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=114
 //
-// In Internet Explorer 6 and  Internet Explorer 7 and
-// Internet Explorer 8 Quirks Mode, the element style is position of non-static
-// will produce a new stack context.
+// The non-static positioned elements will establishe a new stacking context in 
+// IE6, IE7 and IE8 quirks mode.
 //
-// It will lead to stacked display differences with other browsers.
-// The program checked all elements of positioning is non-static and visible,
-// filter not set value of 'z-index' property with HTML tags.
+// The detector check all non-static positioned visible elements and ignore the
+// elements which the value of 'z-index' property are not 'auto' to avoid the
+// False-Positive.
 //
-// Taking into account this may cause it to be find very many web pages,
-// the program will only checking the overlap of the elements, and they set
-// the background-image or background color, and the descendants of the node
-// set style postion non-static.
-//
+// The detector will check the overlapped and background-setted elements and
+// have the non-static positioned descendants.
+// 
 // This detector attempts to achieve the balance between
 // the precision complexity.
 // This approach: advantages is easy to understand and implement.
 // This difference:
-// If elements set background color similar or background image is transparent
-// or overlapping elements of the positioning of descendant elements do
-// not overlap. All will result in no difference in visual.
+// If overlapped elements are set the similar background color or transparent 
+// background image, or their descendants do not overlap, it will result no
+// difference in visual.
 //
-// In fact, position elements no set value of 'z-index' property,
-// there is a potential compatibility issues.
+// In fact, the default value of 'z-index' property set on positioned elements
+// will have the potential compatibility issues.
+
 
 addScriptToInject(function() {
 

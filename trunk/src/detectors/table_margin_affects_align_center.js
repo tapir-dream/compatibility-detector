@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-// One detector implementation for checking 'margin-left' and 'margin-right' 
-// properties affecting the table element which is center alignment problems
+// One detector implementation for checking the CSS margin property which 
+// affects the center-aligned table element by HTML align attribute.
 // @author : luyuan.china@gmail.com
 // @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=4
 //
