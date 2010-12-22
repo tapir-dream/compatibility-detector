@@ -13,6 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ 
+// One detector implementation for checking the elements of the 
+// percentage width in the element using shrink-to-fit width.
+// @author : luyuan.china@gmail.com
+// @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=6
+//
+// In CSS2.1 specification, a floating or absolutely positioned or the inline
+// block element will use the shrink-to-fit width if its 'width' is computed as
+// 'auto'. Calculation of the shrink-to-fit width will refer to its contents,
+// and if it contains the children elements setting percentage width, the result
+// is not defined in the specification explicitly. Thus, each browser will
+// render differently, and this issue also involves the almost standards mode.
+//
+// We check the elements using shrink-to-fit width, ignoring the replaced
+// elements and the root element.
+// Determine the element using available width as its shrink-to-fit width, we
+// must ignore such elements because there is no difference in this case.
+// Then get all percentage width descendants. if the length of the result is
+// larger than 0, we continue.
+// Ignore the absolutely positioned and invisible elements, then record the
+// offset width of present descendant, setting its width property to 'auto',
+// and record the new offset width. If the new value is different from the old
+// one, we consider that there may have the compatibility issue.
+
 
 addScriptToInject(function() {
 
