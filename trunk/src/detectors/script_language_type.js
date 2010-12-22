@@ -30,8 +30,8 @@ So the code in following tags will only be executed correctly in IE:
 <script language='vbs'>...</script>
 <script language='jscript.encode'>...</script>
 <script language='vbscript.encode'>...</script>
-(The attribute 'language' is not recommend, but there are still some pages using
-it.)
+(The attribute 'language' is not recommended, but there are still some pages
+using it now.)
 
 A more detailed list:
                              IE6/7/8   Chrome 9.0.597.0 dev
