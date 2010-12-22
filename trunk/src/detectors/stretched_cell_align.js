@@ -29,7 +29,9 @@
 // (not 'auto' and the percentage).
 // Get the real value and the setting value of the cell. Here the real value can
 // be gotten by getComputedStyle method, and setting value is the computed value
-// in W3C CSS2.1 specification. But the getComputedStyle method cannot get the // real computed value of the width property, so used a tricky way to get the // real computed value of the said properties. A 'display:none' element can be
+// in W3C CSS2.1 specification. But the getComputedStyle method cannot get the 
+// real computed value of the width property, so used a tricky way to get the 
+// real computed value of the said properties. A 'display:none' element can be
 // gotten the corrent value of its width property by using getComputedStyle
 // method.
 //
