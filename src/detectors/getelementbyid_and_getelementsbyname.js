@@ -17,6 +17,8 @@
 // Detector for document.getElementById and document.getElementsByName
 // @author : xingyunshisui@gmail.com
 // @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=1
+// @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=44
+// $bug: https://code.google.com/p/compatibility-detector/issues/detail?id=117
 //
 // Document.getElementById and document.getElementsByName is introduced in DOM 
 // level 1. Document.getElementById(elementId) returns the Element whose ID is 

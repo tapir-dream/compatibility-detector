@@ -14,6 +14,30 @@
  * limitations under the License.
  */
 
+// Detector for checking problems about 'border-spacing' property and 
+// cellspacing attribute in the collapsing border model.
+// @author : xingyunshisui@gmail.com
+// @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=24
+// @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=119
+
+// 'border-spacing' property specify the horizontal and vertical distance that
+// separates adjoining cell borders. The effect of setting cellspacing attribute
+// is the same as set 'border-spacing' property. IE6 IE7 IE8(Q) doesn't support
+// 'border-spacing' property, and cellspacing attribute is still works in the
+// collapsing border model('border-collapse:collapse').
+
+// First we check all 'display : table' and 'display : inline-table' elements, 
+// then detect problems in two cases:
+// 1. table-like-element use collapsing border model. If the element has 
+// attribute cellspacing and it's value is nonzero, then report problem RX1008.
+// 2. table-like-element use separated borders model. If the element has 
+// attribute cellspacing and it's value is unequal to the value of 
+// border-horizontal-spacing or border-vertical-spacing, then report problem 
+// RE1020. If the table-like-element has no attribute cellspacing and the value
+// of 'border-horizontal-spacing' or 'border-vertical-spacing' greater than 2px,
+// then report problem RE1020(TABLE has 2px border-spacing default in IE and
+// omiting difference causes by 1px).
+
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
@@ -58,16 +82,17 @@ function checkNode(node, context) {
               return;
             }
           } else {
-            // 2px is talbe tag default table-cell space in chrome
+            // TABLE has 2px border-spacing default in IE and omiting difference
+            // causes by 1px
             if (hSpacing > 2 || vSpacing > 2) {
               this.addProblem('RE1020', [node]);
               return;
             }
           }
-        }
-        // Other html tag set display:table and display:inline-table
-        if (node.tagName != 'TABLE' && (hSpacing || vSpacing))
+        // Other elements which set 'display:table' or 'display:inline-table'
+        } else if (hSpacing || vSpacing) {
           this.addProblem('RE1020', [node]);
+        }
         break;
     }
   }
