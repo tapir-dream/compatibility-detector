@@ -14,29 +14,28 @@
  * limitations under the License.
  */
 
-// One detector implementation for checking the HTML align attribute for several
-// elements transformed into floating element.
-// @author : luyuan.china@gmail.com
-// @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=5
-//
-// The align attribute for objects, images, tables, frames, etc., causes the 
-// object to float to the left or right margin. Floating objects generally 
-// begin a new line.
-// In other word, the align attribute for the said elements will be transformed
-// into CSS 'float' property in the corresponding direction.
-//
-// First, we ignore the inline and invisible elements. And get the children
-// elements of the present checked element, recording the left-aligned and
-// right-aligned said elements' information (the node object, its position and
-// its alignment). If there are less then two elements satisfied with 
-// conditions, we do not continue.
-//
-// Try to enlarge the width of the element, we get the new position of the
-// elements satisfied with conditions. By comparing the changes in the
-// position to determine that if there may have the compatibility issue.
-// At last, restore the style of the element.
-
-
+/**
+ * @fileoverview: One detector implementation for checking the HTML align
+ * attribute for several elements transformed into floating element.
+ * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=5
+ *
+ * The align attribute for objects, images, tables, frames, etc., causes the 
+ * object to float to the left or right margin. Floating objects generally 
+ * begin a new line.
+ * In other word, the align attribute for the said elements will be transformed
+ * into CSS 'float' property in the corresponding direction.
+ *
+ * First, we ignore the inline and invisible elements. And get the children
+ * elements of the present checked element, recording the left-aligned and
+ * right-aligned said elements' information (the node object, its position and
+ * its alignment). If there are less then two elements satisfied with 
+ * conditions, we do not continue.
+ *
+ * Try to enlarge the width of the element, we get the new position of the
+ * elements satisfied with conditions. By comparing the changes in the
+ * position to determine that if there may have the compatibility issue.
+ * At last, restore the style of the element.
+ */
 
 addScriptToInject(function() {
 
