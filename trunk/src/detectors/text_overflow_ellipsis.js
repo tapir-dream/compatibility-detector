@@ -15,7 +15,7 @@
  */
 
 /*
- * One detector implementation for checking 'text-overflow: ellipsis can cause
+ * @fileoverview: One detector implementation for checking 'text-overflow: ellipsis can cause
  * compatibility issues' problems
  * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=30
 
