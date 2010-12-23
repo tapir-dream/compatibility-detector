@@ -16,9 +16,8 @@
 
 /**
  * @fileoverview: One detector implementation for checking the empty cells.
- * @author: qianbaokun@gmail.com
  * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=11
- *      https://code.google.com/p/compatibility-detector/issues/detail?id=12
+ *       https://code.google.com/p/compatibility-detector/issues/detail?id=12
  *
  * In the separated borders model, the border of the empty cell will disappear
  * in some cases. And the 'padding-top' and 'padding-bottom' of the empty cell
