@@ -46,7 +46,7 @@ function hasCommentBeforeDTD(element) {
     return;
   while (prev.previousSibling)
     prev = prev.previousSibling;
-  if (prev && prev.nodeType == 8)
+  if (prev && prev.nodeType == 8 && !chrome_comp.inQuirksMode())
     return prev;
 }
 
