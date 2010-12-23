@@ -15,8 +15,8 @@
  */
 
 /**
- * @fileoverview: One detector implementation for checking that the 'z-index' property which
- * value is 'auto' will establishe a new stacking context.
+ * @fileoverview: One detector implementation for checking that the 'z-index'
+ * property which value is 'auto' will establishe a new stacking context.
  * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=114
  *
  * The non-static positioned elements will establishe a new stacking context in
