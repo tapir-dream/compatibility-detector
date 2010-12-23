@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,11 +19,11 @@
  * the event of onreadystatechange' problems
  * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=17
 
- * 
+ *
  * Check each node, if this node both have onreadystatechange and onload,
  * we will suppose that the auther consider this issue ,no problem.
  * If the node just only has onreadystatechange ,there may be a problem.
- * 
+ *
  */
 
 addScriptToInject(function() {
