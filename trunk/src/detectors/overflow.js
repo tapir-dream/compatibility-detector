@@ -14,6 +14,15 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview: Three detector implementation for checking problems associated
+ * with 'overflow', for more information, see inline comments.
+ *
+ * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=36
+ *       https://code.google.com/p/compatibility-detector/issues/detail?id=23
+ *       https://code.google.com/p/compatibility-detector/issues/detail?id=37
+ */
+
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
@@ -37,8 +46,10 @@ function checkNode(node, context) {
     return TABLELIKE_VALUES.indexOf(display) != -1;
   }
 
-  // In Chrome, if one of the two values is 'visible' and the other is not,
-  // the computed value of the 'visible' one will be converted into 'auto'.
+  // In Chrome, if one of the two values of 'overflow-x' and 'overflow-y' is
+  // 'visible' and the other is not, the computed value of the 'visible' one
+  // will be converted into 'auto'.
+  // This function will return the specified value of them is 'visible' or not.
   function overflowIsVisible(node) {
     var style = chrome_comp.getComputedStyle(node);
     if (style.overflow == 'visible')
@@ -159,7 +170,8 @@ function checkNode(node, context) {
   // RD1002
   /*
   // In [IE6 IE7(Q) IE8(Q)], if an element's specified size is not big enouth to
-  // contain its child elements, and its 'overflow' is 'visible',
+  // contain its child elements, and its 'overflow' is 'visible', the element's
+  // size will be stretch by its content.
   if (node.scrollWidth > node.clientWidth ||
       node.scrollHeight > node.clientHeight) {
     // To get the computed value of 'width' or 'height', set the 'display'

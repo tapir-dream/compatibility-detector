@@ -15,8 +15,11 @@
  */
 
 /**
- * @fileoverview: One detector implementation for checking problems -
- * 'VBScript, JScript.Encode and VBScript.Encode is only supported by IE'.
+ * @fileoverview: One detector implementation for checking problems - VBScript,
+ * JScript.Encode and VBScript.Encode are only supported by IE.
+ *
+ * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=3
+ *       https://code.google.com/p/compatibility-detector/issues/detail?id=116
  *
  * VBScript is only supported by IE, if a SCRIPT tag is declared as VBScript,
  * other browsers will not execute that code.
