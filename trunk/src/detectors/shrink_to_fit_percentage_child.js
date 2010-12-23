@@ -75,8 +75,9 @@ function getAllPercentageWidthDescendant(element) {
     var width = getRealComputedWidth(ch[i]);
     if (width == undefined)
       continue;
-    if (isPercentageWidth(width))
+    if (isPercentageWidth(width)) {
       desceList.push(ch[i]);
+    }
   }
   return desceList;
 }
@@ -99,6 +100,10 @@ function isTableElement(element) {
   return chrome_comp.getComputedStyle(element).display.indexOf('table') != -1;
 }
 
+function isInlineElement(element) {
+  return chrome_comp.getComputedStyle(element).display == 'inline';
+}
+
 chrome_comp.CompDetect.declareDetector(
 
 'shrink_to_fit_percentage_child',
@@ -117,6 +122,8 @@ function checkNode(node, context) {
   if (chrome_comp.isReplacedElement(node))
     return;
   if (isTableElement(node))
+    return;
+  if (isInlineElement(node))
     return;
   var realWidth = getRealComputedWidth(node);
   if (realWidth == undefined)
