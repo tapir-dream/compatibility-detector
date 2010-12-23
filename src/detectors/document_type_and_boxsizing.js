@@ -85,6 +85,10 @@ function getRealComputedWidthAndHeight(element) {
   return { width: width, height: height };
 }
 
+function isTableElement(element) {
+  return chrome_comp.getComputedStyle(element).display.indexOf('table') != -1;
+}
+
 chrome_comp.CompDetect.declareDetector(
 
 'document_type_and_boxsizing',
@@ -149,7 +153,10 @@ function checkNode(node, context) {
     return
   
   var display = chrome_comp.getComputedStyle(node).display;
-  if (display == 'inline')
+  if (display == 'inline' || display == 'none')
+    return;
+  
+  if (isTableElement(node))
     return;
   
   var real = getRealComputedWidthAndHeight(node);
