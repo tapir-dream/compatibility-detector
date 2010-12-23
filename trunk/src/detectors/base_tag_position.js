@@ -14,6 +14,23 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview: One detector implementation for checking the HTML base element
+ * position for all elements.
+ * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=111
+ *
+ * The BASE element allows authors to specify a document's base URI explicitly.
+ * The BASE tag in BODY, and set the target attribute, the link will lead to
+ * open the page in different ways, there are differences in all browser.
+ *
+ * The detector checks all nodes, and do the following treatment:
+ * 1. Filter all text nodes, and the node is not visible.
+ * 2. Filter tag name is not BASE.
+ * 3. If the BASE tag Within Body tag.
+ * 4. checks all links tag, if any one of them in BASE tag the previous.
+ *    So there are differences in all browsers.
+ */
+
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(

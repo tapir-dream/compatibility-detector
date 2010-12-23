@@ -14,6 +14,26 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview: One detector implementation for checking the HTML
+ * INPUT[type=radio] elements for all elements.
+ * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=106
+ *
+ * SGML basic types:
+ * ID and NAME tokens must begin with a letter ([A-Za-z]) and may be followed
+ * by any number of letters, digits ([0-9]), hyphens ("-"), underscores ("_"),
+ * colons (":"), and periods (".").
+ *
+ * If you do not meet the above specifications, will result in all the
+ * different browsers of INPUT[type=radio] select options.
+ *
+ * The detector checks all nodes, and do the following treatment:
+ * 1. Check all INPUT[type=radio] element
+ * 2. If not set HTML name attribute, So have differences in all browsers.
+ * 3. If name value is not SGML basic types of NAME tokens, So have differences
+      in all browsers.
+ */
+
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
@@ -22,8 +42,10 @@ chrome_comp.CompDetect.declareDetector(
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
-null, // constructor
-
+function constructor() {
+  this.propertyValueRegExp_ =
+      /^[A-Za-z0-9]$|^[A-Za-z0-9][A-Za-z0-9\-\_\:\b]+$/;
+},
 
 function checkNode(node, context) {
 
@@ -34,13 +56,16 @@ function checkNode(node, context) {
     return;
 
   var inputTypeValue = node.getAttribute('type');
-  var propertyValueRegExp_ = /^[A-Za-z0-9]$|^[A-Za-z0-9][A-Za-z0-9\-\_\:\b]+$/;
-  var inputNameValue = node.getAttribute('name');
 
   if (inputTypeValue != 'radio')
     return;
 
-  if (!propertyValueRegExp_.test(inputNameValue))
+  if (!node.hasAttribute('name'))
+   this.addProblem('HF9009', [node]);
+
+  var inputNameValue = node.getAttribute('name');
+
+  if (!this.propertyValueRegExp_.test(inputNameValue))
     this.addProblem('HF9009', [node]);
 
 }
