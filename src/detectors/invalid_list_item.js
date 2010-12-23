@@ -15,10 +15,11 @@
  */
 
 /**
- * One detector implementation for checking 'IE6 IE7 IE8 (Q) will  ignore
- * LI DD DT element end tag' problems
+ * @fileoverview: One detector implementation for checking 'IE6 IE7 IE8 (Q)
+ *  will ignore LI DD DT element end tag' problems
+ *
  * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=8
-
+ *
  * Check each node, when the node is LI DT DD,
  * then check the next node, if the next node is a text node,
  * there may be a problem.
