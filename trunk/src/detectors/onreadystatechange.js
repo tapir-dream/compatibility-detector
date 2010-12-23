@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview: One detector implementation for checking 'IE6 IE7 IE8 extends
+ * the event of onreadystatechange' problems
+ * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=17
+
+ * 
+ * Check each node, if this node both have onreadystatechange and onload,
+ * we will suppose that the auther consider this issue ,no problem.
+ * If the node just only has onreadystatechange ,there may be a problem.
+ * 
+ */
+
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
