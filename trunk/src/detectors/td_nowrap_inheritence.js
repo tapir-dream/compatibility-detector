@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,19 +24,19 @@
  * of the 'white-space' property from the table. And the HTML nowrap attribute
  * for table cell element (TD and TH) will be transformed into the CSS property
  * 'white-space:nowrap' in all browsers.
- * MSDN notes that care should be taken when the noWrap property is used in 
+ * MSDN notes that care should be taken when the noWrap property is used in
  * conjunction with the width attribute of table or td elements.
- * If a td element has its noWrap set to true and the WIDTH attribute of its 
- * table element is set to a smaller dimension than the rendered content of the 
- * td element, wordwrap does not occur. In this case, the noWrap setting takes 
+ * If a td element has its noWrap set to true and the WIDTH attribute of its
+ * table element is set to a smaller dimension than the rendered content of the
+ * td element, wordwrap does not occur. In this case, the noWrap setting takes
  * precedence over the WIDTH attribute. (refer to
  * http://msdn.microsoft.com/en-us/library/ms534196(VS.85).aspx)
  * So this detector should check the situation that MSDN notes.
  *
- * First check all table cell elements, getting its real computed value of 
- * width. the getComputedStyle method cannot get the real computed value of the 
- * width property, so used a tricky way to get the real computed value of the 
- * said properties. A 'display:none' element can be gotten the corrent value of 
+ * First check all table cell elements, getting its real computed value of
+ * width. the getComputedStyle method cannot get the real computed value of the
+ * width property, so used a tricky way to get the real computed value of the
+ * said properties. A 'display:none' element can be gotten the corrent value of
  * its width property by using getComputedStyle method.
  *
  * If the real computed value of 'width' is 'auto', we should check that whether

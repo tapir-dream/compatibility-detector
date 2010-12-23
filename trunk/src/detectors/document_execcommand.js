@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
@@ -60,7 +60,7 @@ function constructor(rootNode) {
 },
 
 function checkNode(node, context) {
-  if (Node.ELEMENT_NODE != node.nodeType || node.tagName != 'IFRAME' || 
+  if (Node.ELEMENT_NODE != node.nodeType || node.tagName != 'IFRAME' ||
       context.isDisplayNone())
     return;
 

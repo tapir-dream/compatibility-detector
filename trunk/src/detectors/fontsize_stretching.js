@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -39,7 +39,7 @@ function checkNode(node, additionalData) {
   var chFontSize;
   for (var i = 0, j = ch.length; i < j; i++) {
     chFontSize = parseInt(chrome_comp.getComputedStyle(ch[i]).fontSize, 10);
-    if ((chFontSize > fontSize) && 
+    if ((chFontSize > fontSize) &&
         (chrome_comp.getComputedStyle(ch[i]).display != 'none'))
       this.addProblem('RD1011', [ch[i]]);
   }

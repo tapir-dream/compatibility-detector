@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,20 +28,20 @@ null, // constructor
 function checkNode(node, additionalData) {
   function isBaseTargetBlank() {
     var baseList = document.getElementsByTagName('base');
-    return { 
-      IE: baseList.length > 0 && 
+    return {
+      IE: baseList.length > 0 &&
           baseList[baseList.length - 1].target.toLowerCase() == '_blank',
-      Chrome: baseList.length > 0 && 
+      Chrome: baseList.length > 0 &&
           baseList[0].target.toLowerCase() == '_blank'
     }
   }
 
   if (Node.ELEMENT_NODE != node.nodeType)
     return;
-  
+
   if (node.tagName != 'A' && node.tagName != 'AREA')
     return;
-  
+
   var href = node.href.trim(), reCus = /^\w*$/gi;
   var map = {
     IE: {

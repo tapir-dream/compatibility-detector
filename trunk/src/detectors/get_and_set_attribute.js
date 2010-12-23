@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,10 +44,10 @@ function constructor(rootNode) {
       'mouseup', 'mouseover', 'mousemove', 'mouseout', 'keydown', 'keypress',
       'keyup', 'load', 'unload', 'select', 'submit', 'reset'];
 
-  //When setting one of attributes below(attr1, attr2) on an element, such as 
-  //element.setAttribute('disabled', 'disabled'), element.disabled will get 
-  //Boolean true instead of String 'disabled'. And set attribute 'readonly', 
-  //'nowrap' etc. will make element.readOnly to be Boolean true, but 
+  //When setting one of attributes below(attr1, attr2) on an element, such as
+  //element.setAttribute('disabled', 'disabled'), element.disabled will get
+  //Boolean true instead of String 'disabled'. And set attribute 'readonly',
+  //'nowrap' etc. will make element.readOnly to be Boolean true, but
   //element.readonly is undefined.
   var attrs = ['async', 'defer', 'disabled', 'checked', 'multiple', 'selected',
       'compact', 'declare', 'readonly', 'nowrap', 'nohref', 'noshade'];
@@ -61,7 +61,7 @@ function constructor(rootNode) {
     if (result == null && !hasOwnProperty)
       return;
     //filter jQuery and prototype
-    if (!attributeName || isCalledFromJquery(arguments) || 
+    if (!attributeName || isCalledFromJquery(arguments) ||
         isCalledFromPrototype(attributeName))
       return;
 
@@ -77,18 +77,18 @@ function constructor(rootNode) {
         // 4. In IE6, IE7 and IE8(Q), element.getAttribute('style') returns an
         // object and 5. element.getAttribute('onEventName') returns a function.
         // In Chrome etc it returns a string or null.
-        lowerCaseAttrName == 'style' || 
-        (lowerCaseAttrName.slice(2) == 'on' && 
+        lowerCaseAttrName == 'style' ||
+        (lowerCaseAttrName.slice(2) == 'on' &&
           events.indexOf(lowerCaseAttrName.slice(2)) >= 0) ||
         // In IE6, IE7 and IE8(Q) element.getAttribute('disabled') returns true
         // or false; It returns a String or null in Chrome etc.
-        attrs.indexOf(lowerCaseAttrName) >= 0 || 
-        // <img src="xx.img" width="200px" />, In IE678 
+        attrs.indexOf(lowerCaseAttrName) >= 0 ||
+        // <img src="xx.img" width="200px" />, In IE678
         // IMG.getAttribute('width') returns NUMBER 200; In chrome it returns
-        // String "200px". If IMG has no attribute width, in IE678 
-        // IMG.getAttribute('width') returns original width of image, and in 
+        // String "200px". If IMG has no attribute width, in IE678
+        // IMG.getAttribute('width') returns original width of image, and in
         // chrome it returns null.
-        ((lowerCaseAttrName == 'width' || lowerCaseAttrName == 'height') && 
+        ((lowerCaseAttrName == 'width' || lowerCaseAttrName == 'height') &&
           this[lowerCaseAttrName] != result))
       This.addProblem('SD9006', {
         nodes: [this],
@@ -105,7 +105,7 @@ function constructor(rootNode) {
     if (!attributeName || !attributeValue || isCalledFromJquery(arguments))
       return;
 
-    //When setting attributes below and the resource value is specified by 
+    //When setting attributes below and the resource value is specified by
     //relative path. In IE8(S) and Chrome element.src returns the absolute path
     //src: SCRIPT, INPUT[type=image], FRAME, IFRAME, IMG
     //href: A, AREA, LINK, BASE
@@ -118,7 +118,7 @@ function constructor(rootNode) {
         // an object as the second param, and 5. element.setAttribute('onclick',
         // func) requires a function as the second param.
         // Cases of other primitive types which also work in Chrome are ignored.
-        (lowerCaseAttrName.slice(2) == 'on' && 
+        (lowerCaseAttrName.slice(2) == 'on' &&
           events.indexOf(lowerCaseAttrName.slice(2)) >= 0 &&
           (attributeType == 'function' || attributeType == 'string')) ||
         //attributeType == 'object' ||
@@ -132,11 +132,11 @@ function constructor(rootNode) {
         // 6. In IE6, IE7 and IE8(Q) element.setAttribute('innerHTML', htmlText)
         // equivalent to element.innerHTML. offsetHeight etc is the same.
         (this.hasOwnProperty(attributeName) &&
-          attributeValue != this[attributeName] && 
+          attributeValue != this[attributeName] &&
           exceptiveAttrs.concat(attrs).indexOf(lowerCaseAttrName) < 0))
       This.addProblem('SD9006', {
         nodes: [this],
-        details: this.tagName + '.setAttribute("' + attributeName + 
+        details: this.tagName + '.setAttribute("' + attributeName +
           '",' + attributeValue + ')',
         needsStack: true
       });
@@ -156,7 +156,7 @@ function constructor(rootNode) {
     }
     return false;
   }
-  
+
   function isCalledFromPrototype(attributeName){
     return attributeName == '_countedByPrototype';
   }

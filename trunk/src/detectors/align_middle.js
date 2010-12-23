@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,7 +33,7 @@ chrome_comp.CompDetect.ScanDomBaseDetector,
 
 function constructor(rootNode) {
   /*
-   * The comment or XML declaration before DTD will make the DTD be invalid in 
+   * The comment or XML declaration before DTD will make the DTD be invalid in
    * IE, so that the HTML document will be in quirks mode in IE.
    */
   function hasCommentBeforeDTD(element) {
@@ -57,7 +57,7 @@ function constructor(rootNode) {
   var compatMode = document.compatMode.toLowerCase();
   var publicId = (doctype) ? doctype.publicId : 0;
   var systemId = (doctype) ? doctype.systemId : 0;
-  doctypeInIE = doctypeInWebKit = doctypeInGecko = 
+  doctypeInIE = doctypeInWebKit = doctypeInGecko =
     (compatMode == 'backcompat') ? 'Q' : 'S';
   if (hasCommentBeforeDTD(rootNode))
     doctypeInIE = 'Q';
@@ -85,13 +85,13 @@ function constructor(rootNode) {
     }
   }
 
-  // A DOCTYPE declaration with an internal subset will trigger standards mode 
+  // A DOCTYPE declaration with an internal subset will trigger standards mode
   // in Firefox, and it will trigger quirks mode in Webkit.
   // for example: <!DOCTYPE HTML [ <!ELEMENT TEST - - (P) > ]>
   if (doctypeInWebKit == 'Q' && doctype && !publicId && !systemId) {
     doctypeInGecko = 'S';
   }
-  
+
   this.doctypes = {
     ie: doctypeInIE,
     webkit: doctypeInWebKit,
@@ -103,13 +103,13 @@ function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType)
     return;
 
-  if (!node.hasAttribute('align') || 
+  if (!node.hasAttribute('align') ||
       chrome_comp.getAttributeLowerCase(node, 'align') != 'middle')
     return;
   var tagName = node.tagName;
   var doctypes = this.doctypes;
   if (!VALID_ALIGN_MIDDLE_TAGS.hasOwnProperty(node.tagName)) {
-    if ((tagName == 'DIV' || tagName == 'P') && 
+    if ((tagName == 'DIV' || tagName == 'P') &&
         chrome_comp.getComputedStyle(node).textAlign == '-webkit-center')
       this.addProblem('HA1003', [node]);
     else if (/H[1-6]/.test(tagName))

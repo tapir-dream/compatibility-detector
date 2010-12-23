@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- 
+
 /**
- * @fileoverview: One detector implementation for checking the elements of the 
+ * @fileoverview: One detector implementation for checking the elements of the
  * percentage width in the element using shrink-to-fit width.
  * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=6
  *

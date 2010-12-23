@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,7 @@ function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType)
     return;
 
-  this.locationReloadRegexp_ = 
+  this.locationReloadRegexp_ =
     /([^\w$]*location([.]reload|\[["']reload["']\])\s?\(([\'\"][a-zA-Z0-9#]))|([^\w$]*window([.]location|\[["']location["']\])([.]reload|\[["']reload["']\])\s?\(([\'\"][a-zA-Z0-9#]))/g
   this.multiLineScriptCommentsRegexp_ = /\/\*([\S\s]*?)\*\//g;
   this.oneLineScriptCommentsRegexp_ = /[^:\/]\/\/[^\n\r]*/gm;
