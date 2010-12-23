@@ -14,6 +14,19 @@
  * limitations under the License.
  */
 
+/**
+ * One detector implementation for checking 'Font tag set color feature
+ * may affect text-decoration color of ancestor element' problems
+ * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=25
+
+ * First if the ancestor element has no feature of text-decoration ,
+ * there will be no problem.
+ * Otherwise , the color of node is not equal the color of it's ancestor while 
+ * in standard mode, color attribute causes problem in IE6 and IE7 and
+ * in quirks mode, color attribute causes problem in Chrome and Safari.
+ *
+*/
+
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
