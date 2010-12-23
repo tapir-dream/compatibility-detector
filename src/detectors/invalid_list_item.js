@@ -25,7 +25,7 @@
  * there may be a problem.
  * If the next node is not LI DT DD node and is a visible node,
  * there may be a problem.
-*/
+ */
 
 addScriptToInject(function() {
 
