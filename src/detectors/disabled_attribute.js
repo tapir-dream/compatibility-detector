@@ -15,7 +15,7 @@
  */
 
 /**
- * @fileoverview: One detector implementation for checking the HTML disable
+ * @fileoverview: One detector implementation for checking the HTML disabled
  * attribute for all elements.
  * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=20
  * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=115
