@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -58,7 +58,7 @@ function checkNode(node, additionalData) {
   var pl = parseInt(style.paddingLeft, 10);
   var bi = chrome_comp.getComputedStyle(node).backgroundImage;
   var bc = chrome_comp.getComputedStyle(node).backgroundColor;
-  if (((btw || brw || bbw || blw) && (btc != t || brc != t || bbc != t || 
+  if (((btw || brw || bbw || blw) && (btc != t || brc != t || bbc != t ||
       blc != t)) || ((pt || pr || pb || pl) && (bi || bc != t))) {
     this.addProblem('RD3029', [node]);
   }

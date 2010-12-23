@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the 'License');
@@ -31,7 +31,7 @@ function checkNode(node, additionalData) {
     return;
   // Get non-HTML BODY of the background-attachment property
   var background_attachment =
-      chrome_comp.getDefinedStylePropertyByName(node, true, 
+      chrome_comp.getDefinedStylePropertyByName(node, true,
           'background-attachment');
 
   if (background_attachment == 'fixed')

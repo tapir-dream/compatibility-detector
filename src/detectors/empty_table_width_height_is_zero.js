@@ -1,4 +1,4 @@
-﻿/*
+﻿/**
  * Copyright 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,7 +29,7 @@ function checkNode(node, additionalData) {
       Node.ELEMENT_NODE != node.parentNode.nodeType ||
       node.tagName != 'TABLE')
     return;
-  if (node.tagName == 'TABLE' && (node.offsetWidth != 0 || 
+  if (node.tagName == 'TABLE' && (node.offsetWidth != 0 ||
       node.offsetHeight != 0)) {
     if (node.children.length == 0)
       this.addProblem('RE1016', [node]);

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,7 +28,7 @@ null, // constructor
 function checkNode(node, additionalData) {
   /*
   function isShrinkToFit(node) {
-    var width = window.chrome_comp.getDefinedStylePropertyByName(node, true, 
+    var width = window.chrome_comp.getDefinedStylePropertyByName(node, true,
       'width');
     if (width && width != 'auto') return;
     var position = window.chrome_comp.getComputedStyle(node).position,
@@ -46,7 +46,7 @@ function checkNode(node, additionalData) {
     return;
   if (chrome_comp.getComputedStyle(node).position != 'relative')
     return;
-  for (var i = 0, j = node.getElementsByTagName('*'), k = j.length; i < k; 
+  for (var i = 0, j = node.getElementsByTagName('*'), k = j.length; i < k;
       i++) {
     var pos = chrome_comp.getComputedStyle(j[i]).position;
     var isCB = (pos == 'absolute' && j[i].offsetParent == node);

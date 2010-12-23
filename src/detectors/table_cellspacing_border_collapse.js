@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,13 +27,13 @@
  * 'border-spacing' property, and cellspacing attribute is still works in the
  * collapsing border model('border-collapse:collapse').
  *
- * First we check all 'display : table' and 'display : inline-table' elements, 
+ * First we check all 'display : table' and 'display : inline-table' elements,
  * then detect problems in two cases:
- * 1. table-like-element use collapsing border model. If the element has 
+ * 1. table-like-element use collapsing border model. If the element has
  * attribute cellspacing and it's value is nonzero, then report problem RX1008.
- * 2. table-like-element use separated borders model. If the element has 
- * attribute cellspacing and it's value is unequal to the value of 
- * border-horizontal-spacing or border-vertical-spacing, then report problem 
+ * 2. table-like-element use separated borders model. If the element has
+ * attribute cellspacing and it's value is unequal to the value of
+ * border-horizontal-spacing or border-vertical-spacing, then report problem
  * RE1020. If the table-like-element has no attribute cellspacing and the value
  * of 'border-horizontal-spacing' or 'border-vertical-spacing' greater than 2px,
  * then report problem RE1020(TABLE has 2px border-spacing default in IE and
@@ -63,8 +63,8 @@ function checkNode(node, context) {
     var borderCollapse = computedStyle.borderCollapse;
     switch (borderCollapse) {
       case 'collapse':
-        if (node.hasAttribute('cellspacing') && 
-            parseInt(node.getAttribute('cellspacing'), 10) > 0 && 
+        if (node.hasAttribute('cellspacing') &&
+            parseInt(node.getAttribute('cellspacing'), 10) > 0 &&
             node.childElementCount > 0) {
           this.addProblem('RX1008', [node]);
         }

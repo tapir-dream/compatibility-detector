@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,21 +28,21 @@ null, // constructor
 function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType)
     return;
-  
-  if ((isForbiddenByAttribute(node) ^ 
+
+  if ((isForbiddenByAttribute(node) ^
       (isForbiddenByCssProperty(node) || isForbiddenByEvent(node))))
     this.addProblem('BX2050', [node]);
-  
+
   function isForbiddenByEvent(element){
     return element.onselectstart && element.onselectstart() == false;
   }
-  
+
   function isForbiddenByCssProperty(element){
     return chrome_comp.getComputedStyle(node).webkitUserSelect == 'none';
   }
-  
+
   function isForbiddenByAttribute(element){
-    return element.hasAttribute('unselectable') && 
+    return element.hasAttribute('unselectable') &&
         element.getAttribute('unselectable') == 'on';
   }
 }
