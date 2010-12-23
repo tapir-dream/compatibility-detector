@@ -144,7 +144,14 @@ function checkNode(node, context) {
       this.addProblem('HG8001', [node]);
     return;
   }
-
+  
+  if (this.doctypeInIE == 'S' && this.doctypeInWebKit == 'S')
+    return
+  
+  var display = chrome_comp.getComputedStyle(node).display;
+  if (display == 'inline')
+    return;
+  
   var real = getRealComputedWidthAndHeight(node);
   if (real.width == 'auto' && real.height == 'auto')
     return;
