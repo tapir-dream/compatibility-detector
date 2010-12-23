@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html chrome_comp_test="radio_name">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+</head>
+<body>
+<form>
+	<input type="radio" expectedProblems="HF9009"/>No NAME radio group
+	<input type="radio" expectedProblems="HF9009"/>No NAME radio group
+	<input type="radio" expectedProblems="HF9009"/>No NAME radio group
+	<input type="radio" expectedProblems="HF9009"/>No NAME radio group
+</form>
+<br />
+<form>
+	<input type="radio" name="" expectedProblems="HF9009"/>Empty character radio group
+	<input type="radio" name="" expectedProblems="HF9009"/>Empty character radio group
+	<input type="radio" name="" expectedProblems="HF9009"/>Empty character radio group
+	<input type="radio" name="" expectedProblems="HF9009"/>Empty character radio group
+</form>
+<br />
+<form>
+	<input type="radio" name=":" expectedProblems="HF9009"/>Colon character radio group
+	<input type="radio" name=":" expectedProblems="HF9009"/>Colon character radio group
+	<input type="radio" name=":" expectedProblems="HF9009"/>Colon character radio group
+	<input type="radio" name=":" expectedProblems="HF9009"/>Colon character radio group
+</form>
+<br />
+<form>
+	<input type="radio" name="." expectedProblems="HF9009"/>Point character radio group
+	<input type="radio" name="." expectedProblems="HF9009"/>Point character radio group
+	<input type="radio" name="." expectedProblems="HF9009"/>Point character radio group
+	<input type="radio" name="." expectedProblems="HF9009"/>Point character radio group
+</form>
+<br />
+<form>
+	<input type="radio" name="-" expectedProblems="HF9009"/>Minus character radio group
+	<input type="radio" name="-" expectedProblems="HF9009"/>Minus character radio group
+	<input type="radio" name="-" expectedProblems="HF9009"/>Minus character radio group
+	<input type="radio" name="-" expectedProblems="HF9009"/>Minus character radio group
+</form>
+<br />
+<form>
+	<input type="radio" name="囧" expectedProblems="HF9009"/>Chinese characters radio group
+	<input type="radio" name="囧" expectedProblems="HF9009"/>Chinese characters radio group
+	<input type="radio" name="囧" expectedProblems="HF9009"/>Chinese characters radio group
+	<input type="radio" name="囧" expectedProblems="HF9009"/>Chinese characters radio group
+</form>
+
+<form>
+	<input type="radio" name="a1" />Normal
+	<input type="radio" name="a1" />Normal
+	<input type="radio" name="a1" />Normal
+	<input type="radio" name="a1" />Normal
+</form>
+</body>
+</html>

@@ -43,6 +43,10 @@
       //====here things are temporary, used to delete, don't paste from the bottom up=====
 
       //=========Review===========
+      "detectors/base_tag_position.js",                     //HJ2001
+      "detectors/radio_name.js",                            //HF9009
+      "detectors/document_type_and_boxsizing.js",           //HG8001 RD8001
+      "detectors/align_middle.js",                          //HA1003
       //====here things are temporary, used to delete, don't paste from the bottom up=====
 
       // Verified
@@ -78,6 +82,8 @@
       "detectors/get_element_by_id_and_name.js"             //BX9010
       "detectors/percent_height_in_auto_height.js",         //RE8010 RD8026
       "detectors/element_click.js",                         //SD9025
+      "detectors/radio_name.js",                            //HF9009
+      "detectors/document_type_and_boxsizing.js",           //HG8001 RD8001
 
       // Started --> Warning
       "detectors/align_middle.js",                          //HA1003
@@ -87,7 +93,7 @@
       "detectors/font_style_element_affects_css.js",        //RX3007
       "detectors/overflow.js",                              //RX1002 RD1002
       "detectors/full_shape_space_no_wrap.js",              //BX1009
-
+      "detectors/base_tag_position.js",                     //HJ2001
 
       // WontFix
       "detectors/right_floats_stretch_parent_elements.js",  //RD8006
@@ -145,8 +151,6 @@
       //qbk
       "detectors/img_empty_src_and_img_lowsrc.js",
       "detectors/frame_margin.js",
-      "detectors/radio_name.js",
-      "detectors/base_tag_position.js",
       "detectors/float_center_css.js",
       "detectors/execScript.js",
       "detectors/window_eval.js",

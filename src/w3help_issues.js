@@ -298,7 +298,9 @@ var issueIds = [
   'SD9025',
   'RD8026',
   'BX8017',
-  'RM8015'
+  'RM8015',
+  'HF9009',
+  'HJ2001'
 ];
 
 var issues = { };

@@ -287,6 +287,8 @@
   "BX9041": { "message": "各浏览器创建 XMLHttpRequest 对象的方式不同" },
   "BX8042": { "message": "各主流浏览器均不支持非标准的 LAYER 元素" },
   "BX8017": {"message": "只有 IE Chrome Safari 支持 'zoom' 特性并且他们的具体实现方式不同"},
+  "HF9009": {"message": "各浏览器对表单元素单选按钮组设置非 CDATA 标准的 name 属性值解析不同"},
+  "HJ2001": {"message": "各浏览器对 BASE 元素前后的超链接的默认 target 处理存在差异"},
   "HH8001_suggestion": { "message": "按标准推荐的方法写注释标签，如：" },
   "HR9001_suggestion": { "message": "首先，对于动态页面必须确保 HTTP \"Content-Type\" 头字段的 \"charset\" 参数与页面自身编码相符，且务必在页面的 META 元素中也声明相符的字符编码信息。对于静态页面，必须保证页面中 META 元素声明中 \"http-equiv\" 为 \"Content-Type\" 对应的值中的 \"charset\" 的值与页面自身编码相符。" },
   "HD9001_suggestion": { "message": "当 URI 中含有非 ASCII 字符时，不要依赖浏览器对 URI 的编码方式，以避免产生差异。建议：" },
@@ -543,6 +545,8 @@
   "BX8017_suggestion": { "message": "由于各浏览器对 'zoom' 的实现上存在差异，并且Firefox Opera 并不支持 'zoom'，因此不建议为 'zoom' 设定值大于 1 的值来对元素进行缩放应用。" },
   "BX9041_suggestion": { "message": "判断浏览器版本，使用不同的 XMLHttpRequest 对象创建方式。如：" },
   "BX8042_suggestion": { "message": "放弃使用 LAYER 元素，改用 CSS 中的绝对定位样式 'position:absloute' 处理相关情况。" },
+  "HF9009_suggestion": { "message": "单选按钮的 \"name\" 属性值必须以字母 ([A-Za-z])和数字（[0-9]）开头 ，其后由任何字母、数字、连字符(\"-\")、下划线(\"_\")、冒号(\":\")和句号 (\".\") 组成。" },
+  "HJ2001_suggestion": { "message": "不要在 HEAD 元素之外定义 BASE 元素，保证各浏览器兼容。" },
 
 
   //wangjun
