@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-// One detector implementation for checking the empty cells.
-// @author: qianbaokun@gmail.com
-// @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=11
-//       https://code.google.com/p/compatibility-detector/issues/detail?id=12
-//
-// In the separated borders model, the border of the empty cell will disappear
-// in some cases. And the 'padding-top' and 'padding-bottom' of the empty cell
-// will disappear in IE6, IE7 and IE8 quirks mode.
-//
-// The detector check all table cell elements (TD and TH), ignoring the
-// invisible and 'empty-cells:hidden' elements.
-// Check that if the table is using the separated borders model and the present
-// cell is set the border.
-// Check the descendant elements to determine that the cell is real empty, then
-// report this issue.
+/**
+ * @fileoverview: One detector implementation for checking the empty cells.
+ * @author: qianbaokun@gmail.com
+ * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=11
+ *      https://code.google.com/p/compatibility-detector/issues/detail?id=12
+ *
+ * In the separated borders model, the border of the empty cell will disappear
+ * in some cases. And the 'padding-top' and 'padding-bottom' of the empty cell
+ * will disappear in IE6, IE7 and IE8 quirks mode.
+ *
+ * The detector check all table cell elements (TD and TH), ignoring the
+ * invisible and 'empty-cells:hidden' elements.
+ * Check that if the table is using the separated borders model and the present
+ * cell is set the border.
+ * Check the descendant elements to determine that the cell is real empty, then
+ * report this issue.
+ */
 
 
 addScriptToInject(function() {
@@ -150,7 +152,7 @@ function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
     return;
 
-  if (node.tagName == 'TD' || node.tagname == 'TH') {
+  if (node.tagName == 'TD' || node.tagName == 'TH') {
     var style = chrome_comp.getComputedStyle(node);
     if (style.emptyCells == 'hide')
       return;
