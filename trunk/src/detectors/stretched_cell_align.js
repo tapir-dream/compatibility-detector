@@ -14,42 +14,46 @@
  * limitations under the License.
  */
 
-// One detector implementation for checking that if the table cell set the width
-// is stretched.
-// @author : luyuan.china@gmail.com
-// @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=35
-//
-// Though we set a width for a table cell, it does not stand for using that
-// value necessarily. The cell may be computed as another value for some reason.
-// If a cell is set the width (its value of the width property is not auto),
-// stretched, and content in the cell will not align by the computed value but
-// by the setting value in IE6, IE7 and IE8 quirks mode.
-//
-// First of all, check all table cell elements which are set the absolute width
-// (not 'auto' and the percentage).
-// Get the real value and the setting value of the cell. Here the real value can
-// be gotten by getComputedStyle method, and setting value is the computed value
-// in W3C CSS2.1 specification. But the getComputedStyle method cannot get the 
-// real computed value of the width property, so used a tricky way to get the 
-// real computed value of the said properties. A 'display:none' element can be
-// gotten the corrent value of its width property by using getComputedStyle
-// method.
-//
-// So we get the two principal values. Second is to get the value of
-// 'text-align' property because we do not consider the left-aligned element.
-//
-// At last, if the cell is really stretched by the table and not by its
-// contents, and contains the inflow content, we report this issue.
-
+/**
+ * @fileoverview: One detector implementation for checking that if the table
+ * cell set the width is stretched.
+ * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=35
+ *
+ * Though we set a width for a table cell, it does not stand for using that
+ * value necessarily. The cell may be computed as another value for some reason.
+ * If a cell is set the width (its value of the width property is not auto),
+ * stretched, and content in the cell will not align by the computed value but
+ * by the setting value in IE6, IE7 and IE8 quirks mode.
+ *
+ * First of all, check all table cell elements which are set the absolute width
+ * (not 'auto' and the percentage).
+ * Get the real value and the setting value of the cell. Here the real value can
+ * be gotten by getComputedStyle method, and setting value is the computed value
+ * in W3C CSS2.1 specification. But the getComputedStyle method cannot get the 
+ * real computed value of the width property, so used a tricky way to get the 
+ * real computed value of the said properties. A 'display:none' element can be
+ * gotten the corrent value of its width property by using getComputedStyle
+ * method.
+ *
+ * So we get the two principal values. Second is to get the value of
+ * 'text-align' property because we do not consider the left-aligned element.
+ *
+ * At last, if the cell is really stretched by the table and not by its
+ * contents, and contains the inflow content, we report this issue.
+ */
 
 addScriptToInject(function() {
 
 function getRealComputedWidth(element) {
-  var inlineDisplay = element.style.display;
-  element.style.display = 'none !important';
-  var width = chrome_comp.getComputedStyle(element).width;
-  element.style.display = null;
-  element.style.display = (inlineDisplay) ? inlineDisplay : null;
+  var x = element.cloneNode(false);
+  x.style.display = 'none !important';
+  var p = element.parentElement;
+  if (!p)
+    return;
+  p.appendChild(x);
+  var width = chrome_comp.getComputedStyle(x).width;
+  p.removeChild(x);
+  x = null;
   return width;
 }
 
@@ -64,13 +68,8 @@ function isStretched(element) {
   return oldWidth == newWidth;
 }
 
-function isPercentageWidth(element) {
-  var inlineDisplay = element.style.display;
-  element.style.display = 'none !important';
-  var width = chrome_comp.getComputedStyle(element).width;
-  element.style.display = null;
-  element.style.display = (inlineDisplay) ? inlineDisplay : null;
-  return width.slice(-1) == '%';
+function isPercentageWidth(width) {
+  return width.slice(-1) == '%' && width != '100%';
 }
 
 function hasBackground(element) {
@@ -119,10 +118,13 @@ function checkNode(node, context) {
  if (node.tagName != 'TD' && node.tagName != 'TH')
     return;
 
-  if (getRealComputedWidth(node) == 'auto')
+  var realWidth = getRealComputedWidth(node);
+  if (realWidth == undefined)
+    return;
+  if (realWidth == 'auto')
     return;
 
-  if (isPercentageWidth(node))
+  if (isPercentageWidth(realWidth))
     return;
 
   var usedWidth = parseInt(chrome_comp.getComputedStyle(node).width, 10);

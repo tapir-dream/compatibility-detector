@@ -14,53 +14,55 @@
  * limitations under the License.
  */
  
-// One detector implementation for checking the elements of the 
-// percentage width in the element using shrink-to-fit width.
-// @author : luyuan.china@gmail.com
-// @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=6
-//
-// In CSS2.1 specification, a floating or absolutely positioned or the inline
-// block element will use the shrink-to-fit width if its 'width' is computed as
-// 'auto'. Calculation of the shrink-to-fit width will refer to its contents,
-// and if it contains the children elements setting percentage width, the result
-// is not defined in the specification explicitly. Thus, each browser will
-// render differently, and this issue also involves the almost standards mode.
-//
-// We check the elements using shrink-to-fit width, ignoring the replaced
-// elements and the root element.
-// Determine the element using available width as its shrink-to-fit width, we
-// must ignore such elements because there is no difference in this case.
-// Then get all percentage width descendants. if the length of the result is
-// larger than 0, we continue.
-// Ignore the absolutely positioned and invisible elements, then record the
-// offset width of present descendant, setting its width property to 'auto',
-// and record the new offset width. If the new value is different from the old
-// one, we consider that there may have the compatibility issue.
-
+/**
+ * @fileoverview: One detector implementation for checking the elements of the 
+ * percentage width in the element using shrink-to-fit width.
+ * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=6
+ *
+ * In CSS2.1 specification, a floating or absolutely positioned or the inline
+ * block element will use the shrink-to-fit width if its 'width' is computed as
+ * 'auto'. Calculation of the shrink-to-fit width will refer to its contents,
+ * and if it contains the children elements setting percentage width, the result
+ * is not defined in the specification explicitly. Thus, each browser will
+ * render differently, and this issue also involves the almost standards mode.
+ *
+ * We check the elements using shrink-to-fit width, ignoring the replaced
+ * elements and the root element.
+ * Determine the element using available width as its shrink-to-fit width, we
+ * must ignore such elements because there is no difference in this case.
+ * Then get all percentage width descendants. if the length of the result is
+ * larger than 0, we continue.
+ * Ignore the absolutely positioned and invisible elements, then record the
+ * offset width of present descendant, setting its width property to 'auto',
+ * and record the new offset width. If the new value is different from the old
+ * one, we consider that there may have the compatibility issue.
+ */
 
 addScriptToInject(function() {
 
 function getRealComputedWidth(element) {
   var x = element.cloneNode(false);
   x.style.display = 'none !important';
-  element.parentElement.appendChild(x);
+  var p = element.parentElement;
+  if (!p)
+    return;
+  p.appendChild(x);
   var width = chrome_comp.getComputedStyle(x).width;
-  element.parentElement.removeChild(x);
+  p.removeChild(x);
   x = null;
   return width;
 }
 
-function isShrinkToFit(element) {
+function isShrinkToFit(element, width) {
   var style = chrome_comp.getComputedStyle(element);
   if ((style.float == 'none') && (style.display != 'inline-block') &&
       (style.position == 'static' || style.position == 'relative'))
     return false;
-  if (getRealComputedWidth(element) == 'auto')
+  if (width == 'auto')
     return true;
 }
 
-function isPercentageWidth(element) {
-  var width = getRealComputedWidth(element)
+function isPercentageWidth(width) {
   return width.slice(-1) == '%' && width != '100%';
 }
 
@@ -70,7 +72,10 @@ function getAllPercentageWidthDescendant(element) {
   for (var i = 0, j = ch.length; i < j; i++) {
     if (!chrome_comp.isElementTrulyDisplayable(ch[i]))
       continue;
-    if (isPercentageWidth(ch[i]))
+    var width = getRealComputedWidth(ch[i]);
+    if (width == undefined)
+      continue;
+    if (isPercentageWidth(width))
       desceList.push(ch[i]);
   }
   return desceList;
@@ -90,6 +95,10 @@ function isVisible(element) {
   return element.offsetWidth && element.offsetHeight;
 }
 
+function isTableElement(element) {
+  return chrome_comp.getComputedStyle(element).display.indexOf('table') != -1;
+}
+
 chrome_comp.CompDetect.declareDetector(
 
 'shrink_to_fit_percentage_child',
@@ -105,15 +114,18 @@ function checkNode(node, context) {
 
   if (node.tagName == 'MARQUEE' || node.tagName == 'HTML')
     return;
-  
-  if (!isShrinkToFit(node))
-    return;
-
   if (chrome_comp.isReplacedElement(node))
     return;
-
+  if (isTableElement(node))
+    return;
+  var realWidth = getRealComputedWidth(node);
+  if (realWidth == undefined)
+    return;
+  if (!isShrinkToFit(node, realWidth))
+    return;
   if (isUsingAvailableWidth(node))
     return;
+
   var descendantList = getAllPercentageWidthDescendant(node);
   if (descendantList.length < 1)
     return;
