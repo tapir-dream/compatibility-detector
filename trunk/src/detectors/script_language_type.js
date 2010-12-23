@@ -14,63 +14,64 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview: One detector implementation for checking problems -
+ * 'VBScript, JScript.Encode and VBScript.Encode is only supported by IE'.
+ *
+ * VBScript is only supported by IE, if a SCRIPT tag is declared as VBScript,
+ * other browsers will not execute that code.
+ * The same is true for 'JScript.Encode' and 'VBScript.Encode'.
+ *
+ * So the code in following tags will only be executed correctly in IE:
+ * <script type='text/vbscript'>...</script>
+ * <script type='text/vbs'>...</script>
+ * <script language='vbscript'>...</script>
+ * <script language='vbs'>...</script>
+ * <script language='jscript.encode'>...</script>
+ * <script language='vbscript.encode'>...</script>
+ * (The attribute 'language' is not recommended, but there are still some pages
+ * using it now.)
+ *
+ * A more detailed list:
+ *                              IE6/7/8   Chrome 9.0.597.0 dev
+ * [type]
+ * text/javascript:              OK        OK
+ * text/ecmascript:              OK        OK
+ * text/livescript:              OK        OK
+ * text/javascript1.1:           OK        OK
+ * text/javascript1.2:           OK        OK
+ * text/javascript1.3:           OK        OK
+ * text/jscript:                 OK        OK
+ * text/vbscript:                OK
+ * text/vbs:                     OK
+ * application/javascript:                 OK
+ *
+ * [Language]
+ * javascript:                   OK        OK
+ * ecmascript:                   OK        OK
+ * livescript:                   OK        OK
+ * javascript1.0:                          OK
+ * javascript1.1:                OK        OK
+ * javascript1.2:                OK        OK
+ * javascript1.3:                OK        OK
+ * javascript1.4:                          OK
+ * javascript1.5:                          OK
+ * javascript1.6:                          OK
+ * javascript1.7:                          OK
+ * jscript:                      OK        OK
+ * vbscript:                     OK
+ * vbs:                          OK
+ *
+ * [Language Encode]
+ * jscript.encode:               OK
+ * vbscript.encode:              OK
+ *
+ * [Mix]
+ * text/javascript language=vbs: OK        OK
+ * (We didn't check this situation now.)
+ */
+
 addScriptToInject(function() {
-/*
-One detector implementation for checking problems - 'VBScript, JScript.Encode
-and VBScript.Encode is only supported by IE'.
-
-VBScript is only supported by IE, if a SCRIPT tag is declared as VBScript, other
-browsers will not execute that code.
-The same is true for 'JScript.Encode' and 'VBScript.Encode'.
-
-So the code in following tags will only be executed correctly in IE:
-<script type='text/vbscript'>...</script>
-<script type='text/vbs'>...</script>
-<script language='vbscript'>...</script>
-<script language='vbs'>...</script>
-<script language='jscript.encode'>...</script>
-<script language='vbscript.encode'>...</script>
-(The attribute 'language' is not recommended, but there are still some pages
-using it now.)
-
-A more detailed list:
-                             IE6/7/8   Chrome 9.0.597.0 dev
-[type]
-text/javascript:              OK        OK
-text/ecmascript:              OK        OK
-text/livescript:              OK        OK
-text/javascript1.1:           OK        OK
-text/javascript1.2:           OK        OK
-text/javascript1.3:           OK        OK
-text/jscript:                 OK        OK
-text/vbscript:                OK
-text/vbs:                     OK
-application/javascript:                 OK
-
-[Language]
-javascript:                   OK        OK
-ecmascript:                   OK        OK
-livescript:                   OK        OK
-javascript1.0:                          OK
-javascript1.1:                OK        OK
-javascript1.2:                OK        OK
-javascript1.3:                OK        OK
-javascript1.4:                          OK
-javascript1.5:                          OK
-javascript1.6:                          OK
-javascript1.7:                          OK
-jscript:                      OK        OK
-vbscript:                     OK
-vbs:                          OK
-
-[Language Encode]
-jscript.encode:               OK
-vbscript.encode:              OK
-
-[Mix]
-text/javascript language=vbs: OK        OK
-(We didn't check this situation now.)
-*/
 
 chrome_comp.CompDetect.declareDetector(
 
