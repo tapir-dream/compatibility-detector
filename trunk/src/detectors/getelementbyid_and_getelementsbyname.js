@@ -14,34 +14,36 @@
  * limitations under the License.
  */
 
-// Detector for document.getElementById and document.getElementsByName
-// @author : xingyunshisui@gmail.com
-// @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=1
-// @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=44
-// $bug: https://code.google.com/p/compatibility-detector/issues/detail?id=117
-//
-// Document.getElementById and document.getElementsByName is introduced in DOM 
-// level 1. Document.getElementById(elementId) returns the Element whose ID is 
-// given by elementId. If no such element exists, returns null.
-// Document.getElementsByName(elementName) returns the (possibly empty) 
-// collection of elements whose name value is given by elementName. This method 
-// is case sensitive.
-//
-// In IE6 IE7 IE8(Q), document.getElementById(elementId) is case insensitive, 
-// document.getElementById('X') will get element whose value of id attribute is 
-// 'x'. And for a part of elements, it's confused with ID and name attribute, 
-// document.getElementById(elementName) will return element whose value of name 
-// attribute is equal to elementName.
-//
-// In IE6 IE7 IE8, for a part of elements, 
-// document.getElementsByName(elementName) is case insensitive, 
-// document.getElementsByName('X') will get elements whose value of name 
-// attribute is 'x'.
-
-// First hook document.getElementById and document.getElementsByName, so that we
-// can catch the argument id or name. When calling these methods and gets no 
-// result, then traverse DOM tree. If case insensitive argument id or name is 
-// existing in document, report problem.
+/**
+ * @fileoverview: One detector implementation for checking
+ * document.getElementById and document.getElementsByName
+ * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=1
+ * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=44
+ * $bug: https://code.google.com/p/compatibility-detector/issues/detail?id=117
+ *
+ * Document.getElementById and document.getElementsByName is introduced in DOM 
+ * level 1. Document.getElementById(elementId) returns the Element whose ID is 
+ * given by elementId. If no such element exists, returns null.
+ * Document.getElementsByName(elementName) returns the (possibly empty) 
+ * collection of elements whose name value is given by elementName. This method 
+ * is case sensitive.
+ *
+ * In IE6 IE7 IE8(Q), document.getElementById(elementId) is case insensitive, 
+ * document.getElementById('X') will get element whose value of id attribute is 
+ * 'x'. And for a part of elements, it's confused with ID and name attribute, 
+ * document.getElementById(elementName) will return element whose value of name 
+ * attribute is equal to elementName.
+ *
+ * In IE6 IE7 IE8, for a part of elements, 
+ * document.getElementsByName(elementName) is case insensitive, 
+ * document.getElementsByName('X') will get elements whose value of name 
+ * attribute is 'x'.
+ *
+ * First hook document.getElementById and document.getElementsByName, so that we
+ * can catch the argument id or name. When calling these methods and gets no 
+ * result, then traverse DOM tree. If case insensitive argument id or name is 
+ * existing in document, report problem.
+ */
 
 addScriptToInject(function() {
 
