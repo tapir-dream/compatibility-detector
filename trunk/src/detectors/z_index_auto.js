@@ -14,32 +14,32 @@
  * limitations under the License.
  */
 
-// One detector implementation for checking that the 'z-index' property which
-// value is 'auto' will establishe a new stacking context.
-// @author: qianbaokun@gmail.com
-// @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=114
-//
-// The non-static positioned elements will establishe a new stacking context in
-// IE6, IE7 and IE8 quirks mode.
-//
-// The detector check all non-static positioned visible elements and ignore the
-// elements which the value of 'z-index' property are not 'auto' to avoid the
-// False-Positive.
-//
-// The detector will check the overlapped and background-setted elements and
-// have the non-static positioned descendants.
-//
-// This detector attempts to achieve the balance between
-// the precision complexity.
-// This approach: advantages is easy to understand and implement.
-// This difference:
-// If overlapped elements are set the similar background color or transparent
-// background image, or their descendants do not overlap, it will result no
-// difference in visual.
-//
-// In fact, the default value of 'z-index' property set on positioned elements
-// will have the potential compatibility issues.
-
+/**
+ * @fileoverview: One detector implementation for checking that the 'z-index' property which
+ * value is 'auto' will establishe a new stacking context.
+ * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=114
+ *
+ * The non-static positioned elements will establishe a new stacking context in
+ * IE6, IE7 and IE8 quirks mode.
+ *
+ * The detector check all non-static positioned visible elements and ignore the
+ * elements which the value of 'z-index' property are not 'auto' to avoid the
+ * False-Positive.
+ *
+ * The detector will check the overlapped and background-setted elements and
+ * have the non-static positioned descendants.
+ *
+ * This detector attempts to achieve the balance between
+ * the precision complexity.
+ * This approach: advantages is easy to understand and implement.
+ * This difference:
+ * If overlapped elements are set the similar background color or transparent
+ * background image, or their descendants do not overlap, it will result no
+ * difference in visual.
+ *
+ * In fact, the default value of 'z-index' property set on positioned elements
+ * will have the potential compatibility issues.
+ */
 
 addScriptToInject(function() {
 
