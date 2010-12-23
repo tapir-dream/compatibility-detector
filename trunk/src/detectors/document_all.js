@@ -54,6 +54,7 @@
  * the three head operations, return document.all in the case ignored.
  * and Check HTML tag events attribute.
  */
+
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
