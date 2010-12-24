@@ -50,22 +50,32 @@ function hasCommentBeforeDTD(element) {
     return prev;
 }
 
-function hasBorder(element) {
+function hasHorizontalBorder(element) {
   var style = chrome_comp.getComputedStyle(element);
-  var borderTop = parseInt(style.borderTopWidth, 10);
   var borderRight = parseInt(style.borderRightWidth, 10);
-  var borderBottom = parseInt(style.borderBottomWidth, 10);
   var borderLeft = parseInt(style.borderLeftWidth, 10);
-  return borderTop || borderRight || borderBottom || borderLeft;
+  return borderRight || borderLeft;
 }
 
-function hasPadding(element) {
+function hasVerticalBorder(element) {
+  var style = chrome_comp.getComputedStyle(element);
+  var borderTop = parseInt(style.borderTopWidth, 10);
+  var borderBottom = parseInt(style.borderBottomWidth, 10);
+  return borderTop || borderBottom;
+}
+
+function hasHorizontalPadding(element) {
+  var style = chrome_comp.getComputedStyle(element);
+  var paddingRight = parseInt(style.paddingRight, 10);
+  var paddingLeft = parseInt(style.paddingLeft, 10);
+  return paddingRight || paddingLeft;
+}
+
+function hasVerticalPadding(element) {
   var style = chrome_comp.getComputedStyle(element);
   var paddingTop = parseInt(style.paddingTop, 10);
-  var paddingRight = parseInt(style.paddingRight, 10);
   var paddingBottom = parseInt(style.paddingBottom, 10);
-  var paddingLeft = parseInt(style.paddingLeft, 10);
-  return paddingTop || paddingRight || paddingBottom || paddingLeft
+  return paddingTop || paddingBottom;
 }
 
 function getRealComputedWidthAndHeight(element) {
@@ -148,21 +158,25 @@ function checkNode(node, context) {
       this.addProblem('HG8001', [node]);
     return;
   }
-  
+
   if (this.doctypeInIE == 'S' && this.doctypeInWebKit == 'S')
     return
-  
+
   var display = chrome_comp.getComputedStyle(node).display;
   if (display == 'inline' || display == 'none')
     return;
-  
+
   if (isTableElement(node))
     return;
-  
+
   var real = getRealComputedWidthAndHeight(node);
   if (real.width == 'auto' && real.height == 'auto')
     return;
-  if (!hasPadding(node) && !hasBorder(node))
+  if (real.width != 'auto' && !hasHorizontalPadding(node) &&
+      !hasHorizontalBorder(node))
+    return;
+  if (real.height != 'auto' && !hasVerticalPadding(node) &&
+      !hasVerticalBorder(node))
     return;
 
   if (tag == 'INPUT')
