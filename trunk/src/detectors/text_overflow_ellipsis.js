@@ -45,6 +45,9 @@ null, // constructor
 function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType ||context.isDisplayNone())
     return;
+  if (node.tagName == 'SCRIPT')
+    return;
+
   // Recursively check if the length of sub-elements than the parent element
   function loopForNode(nodeElement, nodeWidth) {
     var node = nodeElement;

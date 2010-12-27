@@ -152,6 +152,10 @@ function checkNode(node, context) {
     return;
 
   var tag = node.tagName;
+
+  if (tag == 'SCRIPT')
+    return;
+
   var inputType = '';
   if (tag == 'HTML') {
     if (this.commentBeforeDTD)
