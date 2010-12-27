@@ -16,6 +16,65 @@
 
 addScriptToInject(function() {
 
+function getRealComputedHeight(element) {
+  var x = element.cloneNode(false);
+  x.style.display = 'none !important';
+  var parent = element.parentElement;
+  if (!parent)
+    return;
+  if (parent.lastElementChild === element)
+    parent.appendChild(x);
+  else
+    parent.insertBefore(x, element);
+  var height = chrome_comp.getComputedStyle(x).height;
+  parent.removeChild(x);
+  x = null;
+  return height;
+}
+
+function isPercentageHeight(height) {
+  return height.slice(-1) == '%';
+}
+
+function isTable(element) {
+  return chrome_comp.getComputedStyle(element).display == 'table';
+}
+
+function isBlockFormattingContext(element) {
+  var style = chrome_comp.getComputedStyle(element);
+  var display = style.display;
+  var cssFloat = style.float;
+  var position = style.position;
+  var overflow = style.overflow;
+  var overflowX = style.overflowX;
+  var overflowY = style.overflowY;
+  return (display == 'inline-block') || (display == 'table') ||
+    (display == 'table-cell') || (display == 'table-caption') ||
+    (position == 'absolute') || (position == 'fixed') ||
+    (overflow != 'visible') || (overflowX != 'visible') ||
+    (overflowY != 'visible');
+}
+
+function getContainingBlock(element) {
+  var position = chrome_comp.getComputedStyle(element).position;
+  if (element == document.documentElement)
+    return null;
+  if (position == 'fixed')
+    return null;
+  if (position == 'absolute')
+    return element.offsetParent;
+  var nod = element;
+  while (nod) {
+    if (nod == document.body) return document.documentElement;
+    if (nod.parentNode) nod = nod.parentNode;
+    if (chrome_comp.getComputedStyle(nod).display ==
+        'block' || isBlockFormattingContext(nod)) {
+      return nod;
+    }
+  }
+  return null;
+}
+
 chrome_comp.CompDetect.declareDetector(
 
 'percent_height_in_auto_height',
@@ -25,82 +84,30 @@ chrome_comp.CompDetect.ScanDomBaseDetector,
 null, // constructor
 
 function checkNode(node, context) {
-  function isAutoHeight(element) {
-    var inlineDisplay = element.style.display;
-    element.style.display = 'none !important';
-    var height = chrome_comp.getComputedStyle(element).height;
-    element.style.display = null;
-    element.style.display = (inlineDisplay) ? inlineDisplay : null;
-    return height == 'auto';
-  }
-
-  function isPercentageHeight(element) {
-    var inlineDisplay = element.style.display;
-    element.style.display = 'none !important';
-    var height = chrome_comp.getComputedStyle(element).height;
-    element.style.display = null;
-    element.style.display = (inlineDisplay) ? inlineDisplay : null;
-    return height.slice(-1) == '%';
-  }
-
-  function isTable(element) {
-    return chrome_comp.getComputedStyle(element).display == 'table';
-  }
-
-  function isBlockFormattingContext(element) {
-    var style = chrome_comp.getComputedStyle(element);
-    var display = style.display;
-    var cssFloat = style.float;
-    var position = style.position;
-    var overflow = style.overflow;
-    var overflowX = style.overflowX;
-    var overflowY = style.overflowY;
-    return (display == 'inline-block') || (display == 'table') ||
-      (display == 'table-cell') || (display == 'table-caption') ||
-      (position == 'absolute') || (position == 'fixed') ||
-      (overflow != 'visible') || (overflowX != 'visible') ||
-      (overflowY != 'visible');
-  }
-
-  function getContainingBlock(element) {
-    var position = chrome_comp.getComputedStyle(element).position;
-    if (element == document.documentElement)
-      return null;
-    if (position == 'fixed')
-      return null;
-    if (position == 'absolute')
-      return element.offsetParent;
-    var nod = element;
-    while (nod) {
-      if (nod == document.body) return document.documentElement;
-      if (nod.parentNode) nod = nod.parentNode;
-      if (chrome_comp.getComputedStyle(nod).display ==
-          'block' || isBlockFormattingContext(nod)) {
-        return nod;
-      }
-    }
-    return null;
-  }
-
-
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone() ||
       // Firefox Standard mode RE8010 issue is ignored.
       !chrome_comp.inQuirksMode())
     return;
 
-  if (!isPercentageHeight(node))
+  if (node.tagName == 'SCRIPT')
+    return;
+
+  var realHeight = getRealComputedHeight(node);
+  if (realHeight == undefined)
+    return;
+  if (!isPercentageHeight(realHeight))
     return;
   var cb = getContainingBlock(node);
   if (!cb)
     return;
   while (cb) {
-    if (!isAutoHeight(cb) && cb.tagName != 'BODY')
+    if (realHeight != 'auto' && cb.tagName != 'BODY')
       return;
-    if (cb.tagName == 'BODY' && isAutoHeight(cb))
+    if (cb.tagName == 'BODY' && realHeight == 'auto')
       return;
     cb = getContainingBlock(cb);
   }
-
+alert(444);
   var oldHeight = parseInt(chrome_comp.getComputedStyle(node).height);
   var inlineHeight = node.style.height;
   node.style.height = 'auto !important';

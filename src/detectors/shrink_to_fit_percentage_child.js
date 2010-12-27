@@ -117,6 +117,9 @@ function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
     return;
 
+  if (node.tagName == 'SCRIPT')
+    return;
+
   if (node.tagName == 'MARQUEE' || node.tagName == 'HTML')
     return;
   if (chrome_comp.isReplacedElement(node))
