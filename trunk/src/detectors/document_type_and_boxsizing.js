@@ -145,6 +145,10 @@ function constructor(rootNode) {
       this.doctypeInWebKit = diffMap[publicId]['WebKit'];
     }
   }
+  if (doctype.name == '"xmlns:xsl=\'http://www.w3.org/1999/xsl/transform\'"') {
+    this.doctypeInIE = 'S';
+    this.doctypeInWebKit = 'Q';
+  }
 },
 
 function checkNode(node, context) {
