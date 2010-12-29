@@ -46,8 +46,16 @@ function hasCommentBeforeDTD(element) {
     return;
   while (prev.previousSibling)
     prev = prev.previousSibling;
-  if (prev && prev.nodeType == 8 && !chrome_comp.inQuirksMode())
+  if (prev && prev.nodeType == 8 && !chrome_comp.inQuirksMode()) {
+    var comm = prev.nodeValue.split(/\s+/);
+    if (comm.length < 1)
+      return prev;
+    if (comm[0] != '[if')
+      return prev;
+    if (/^!IE/g.test(comm[1]))
+      return;
     return prev;
+  }
 }
 
 function hasHorizontalBorder(element) {
@@ -162,8 +170,10 @@ function checkNode(node, context) {
 
   var inputType = '';
   if (tag == 'HTML') {
-    if (this.commentBeforeDTD)
+    if (this.commentBeforeDTD) {
+      alert(node);
       this.addProblem('HG8001', [node]);
+    }
     return;
   }
 
