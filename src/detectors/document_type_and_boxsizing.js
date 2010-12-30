@@ -103,6 +103,33 @@ function getRealComputedWidthAndHeight(element) {
   return { width: width, height: height };
 }
 
+function isWidthStretched(element) {
+  var ch = element.children;
+  var w = parseInt(chrome_comp.getComputedStyle(element).width, 10);
+  if (ch.length < 1)
+    return;
+  for (var i = 0, j = ch.length; i < j; i++) {
+    var width = ch[i].offsetWidth;
+    if (width >= w)
+      return true;
+  }
+}
+
+function isHeightStretched(element) {
+  var ch = element.children;
+  var h = parseInt(chrome_comp.getComputedStyle(element).height, 10);
+  var lh = parseInt(chrome_comp.getComputedStyle(element).lineHeight, 10);
+  if (lh >= h)
+    return true;
+  if (ch.length < 1)
+    return;
+  for (var i = 0, j = ch.length; i < j; i++) {
+    var height = ch[i].offsetHeight;
+    if (height >= h)
+      return true;
+  }
+}
+
 function isTableElement(element) {
   return chrome_comp.getComputedStyle(element).display.indexOf('table') != -1;
 }
@@ -145,6 +172,11 @@ function constructor(rootNode) {
       'systemId': '',
       'IE': 'Q',
       'WebKit': 'S'
+    },
+    '-//W3C//DTD HTML 4.0 Transitional//EN': {
+      'systemId': 'http://www.w3.org/TR/REC-html40/loose.dtd',
+      'IE': 'S',
+      'WebKit': 'Q'
     }
   }
   if (diffMap[publicId]) {
@@ -153,7 +185,8 @@ function constructor(rootNode) {
       this.doctypeInWebKit = diffMap[publicId]['WebKit'];
     }
   }
-  if (doctype.name == '"xmlns:xsl=\'http://www.w3.org/1999/xsl/transform\'"') {
+  if (doctype && doctype.name ==
+      '"xmlns:xsl=\'http://www.w3.org/1999/xsl/transform\'"') {
     this.doctypeInIE = 'S';
     this.doctypeInWebKit = 'Q';
   }
@@ -171,7 +204,6 @@ function checkNode(node, context) {
   var inputType = '';
   if (tag == 'HTML') {
     if (this.commentBeforeDTD) {
-      alert(node);
       this.addProblem('HG8001', [node]);
     }
     return;
@@ -195,6 +227,10 @@ function checkNode(node, context) {
     return;
   if (real.height != 'auto' && !hasVerticalPadding(node) &&
       !hasVerticalBorder(node))
+    return;
+  if (real.width != 'auto' && isWidthStretched(node))
+    return;
+  if (real.height != 'auto' && isHeightStretched(node))
     return;
 
   if (tag == 'INPUT')
