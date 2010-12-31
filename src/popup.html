@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Chrome Compatibility Detector</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  font: 14px/22px 'Microsoft YaHei', Simsun, Verdana, Geneva, sans-serif;
+}
+body {
+  width:600px;
+}
+div.loading {
+  display: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  text-align: center;
+  cursor: default;
+}
+div.loading > span {
+  display: inline-block;
+  margin-top: 120px;
+  padding-left: 26px;
+  background: url(popup_loading.gif) no-repeat 0 3px;
+  color: #333;
+}
+section {
+  height: 35px;
+  border-bottom: #888 solid 1px;
+  background: url(popup_res.png) repeat-x 0 0;
+  font-weight: normal;
+}
+section > h1 {
+  padding-left: 50px;
+  background: url(popup_res.png) no-repeat 16px -44px;
+  line-height: 34px;
+  color: #ccc;
+}
+section > nav {
+  float: right;
+  margin-top: -30px;
+  padding-right: 6px;
+}
+section > nav > span {
+  float: left;
+  margin: 0 3px;
+  width: 90px;
+  height: 30px;
+  border: #888 solid 1px;
+  background: #d9d9d9;
+  -webkit-border-top-left-radius: 6px;
+  -webkit-border-top-right-radius: 6px;
+  -webkit-transition: all 200ms ease-in-out;
+  text-align: center;
+  line-height: 28px;
+  color: #666;
+  cursor: pointer;
+}
+section > nav > span:hover {
+  background: #fff;
+  color: #000;
+}
+article {
+  min-height: 200px;
+  max-height: 500px;
+  padding: 10px 5px;
+  overflow-y: auto;
+  background :#f8f8f8;
+}
+article > div {
+  display: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  text-align: center;
+  cursor: default;
+}
+article > div > span {
+  display: inline-block;
+  margin-top: 120px;
+  padding-left: 26px;
+  background: url(popup_loading.gif) no-repeat 0 3px;
+  color: #333;
+}
+article > ul {
+  display: none;
+}
+article > ul > li {
+  padding: 5px 5px 5px 20px;
+  background: url(popup_res.png) no-repeat 0 -79px;
+  border-bottom: #ccc dashed 1px;
+}
+strong, em {
+  font-weight: normal;
+  font-style: normal;
+}
+strong {
+  color: crimson;
+}
+em {
+  color: forestgreen;
+}
+
+
+
+body.loading div.loading {
+  display: block;
+}
+body.loading nav {
+  display: none;
+}
+body.base span.base,
+body.advanced span.advanced {
+  width:90px;
+  color:#333;
+  background:#f8f8f8;
+  border:#888 solid 1px;
+  border-bottom:#f8f8f8 solid 1px;
+}
+body.base ul.base,
+body.advanced ul.advanced {
+  display: block;
+}
+article.processing > div {
+  display: block;
+}
+
+
+
+
+#detectionResult table {
+  border-collapse: collapse;
+  width: 590px;
+  table-layout:fixed;
+  margin: 5px 0;
+}
+
+#detectionResult td, #detectionResult th {
+  padding: 3px 5px;
+  border: 1px solid silver;
+}
+
+#detectionResult th {
+  background: #E0E0E0;
+  font-weight: normal;
+  text-align: center;
+}
+
+tr > td:last-child, tr > th:last-child {
+  width: 70px;
+  text-align: center;
+}
+
+tr > td:first-child, tr > th:first-child {
+  width: 30px;
+  text-align: center;
+}
+
+#detectionResult, #noProblemFoundInfo, #errorArea, #warningArea {
+  display: none;
+}
+
+#detectionResult > div {
+  margin-top: 5px;
+}
+</style>
+</head>
+<body class="base">
+<div class="loading"><span>页面加载中，请稍候……<span></div>
+<section>
+  <h1>Chrome Compatibility Detector</h1>
+  <nav id="tab">
+    <span class="base">基本检测</span>
+    <span class="advanced">高级检测</span>
+  </nav>
+</section>
+<article id="content">
+  <div><span>正在检测，请稍候……<span></div>
+  <ul id="base_detection" class="base"></ul>
+  <ul id="advanced_detection" class="advanced">
+  <div id="noProblemFoundInfo">目前没有发现兼容性问题。</div>
+  <div id="detectionResult">
+    <h2 id="allProblemsSummary"></h2>
+    <div id="errorArea">
+      <h3 id="errorProblemsSummary"></h3>
+      <table id="errorProblems">
+      <tbody>
+      <tr>
+        <th><input id="errorCheckAll" type="checkbox" /></th>
+        <th>问题描述</th>
+        <th>问题数量</th>
+      </tr>
+      </tbody>
+      </table>
+    </div>
+    <div id="warningArea">
+      <h3 id="warningProblemsSummary"></h3>
+      <table id="warningProblems">
+      <tbody>
+      <tr>
+      <th><input id="warningCheckAll" type="checkbox" /></th>
+      <th>问题描述</th>
+      <th>问题数量</th>
+      </tr>
+      </tbody>
+      </table>
+    </div>
+  </div>
+  </ul>
+</article>
+
+<script>
+var backgroundPage = chrome.extension.getBackgroundPage();
+var tabId = backgroundPage.activeTabId;
+
+/**
+ * @ Send messages to background page.
+ */
+function sendMessageToBackgroundPage(message) {
+  backgroundPage.getMessageFromPopUpPage(message);
+}
+
+/**
+ * @ Get messages from background page.
+ * *** Called from background page only ***
+ */
+function getMessageFromeBackgroundPage(message) {
+  switch (message.type) {
+    case 'complete':
+      setStatus('complete');
+      break;
+    case 'loading':
+      setStatus('loading');
+      break;
+  }
+}
+
+var $ = function(id) { return document.getElementById(id); };
+var $body = document.body;
+var $tab = $('tab');
+var $content = $('content');
+var $baseDetection = $('base_detection');
+var $advancedDetection = $('advanced_detection');
+
+//var notice = chrome.i18n.getMessage("notice");
+
+/**
+ * @ baseDetection
+ */
+function baseDetection() {
+  $content.className = 'processing';
+  chrome.tabs.sendRequest(tabId, {type: 'baseDetection'}, function(data) {
+    var result = [];
+    // data.documentMode
+    if (data.documentMode.pageDTD) {
+      result.push('<li>本页设置了 DTD。');
+      var KB001 = '更多内容请参见：<a href="http://www.w3help.org/zh-cn/kb/001" target="_blank">KB001: 兼容性问题与浏览器的内核及渲染模式</a>。';
+      if (data.documentMode.strangeName || data.documentMode.strangePublicId || data.documentMode.strangeSystemId)
+        result.push('此 DTD 不属于常见的 DTD。');
+      if (data.documentMode.hasCommentBeforeDTD)
+        result.push('本页 DTD 之前存在注释或者 XML 声明等内容，有可能在 IE 中使浏览器进入混杂模式。更多内容请参见：<a href="http://www.w3help.org/zh-cn/causes/HG8001" target="_blank">HG8001: DTD 之前的非空白字符在某些情况下会使该 DTD 失效</a>。');
+      if (data.documentMode.compatMode.IE == data.documentMode.compatMode.WebKit) {
+        var mode = (data.documentMode.compatMode.WebKit == 'S') ? '标准模式' : '混杂模式';
+        result.push('在 IE 和 Chrome 中将触发<em>相同</em>的渲染模式，均为' + mode + '。');
+        if (data.documentMode.compatMode.WebKit == 'Q') {
+          result.push('但渲染模式为<strong>混杂模式</strong>，建议使用能触发标准模式的 DTD， 以减少出现兼容性问题的可能。' + KB001);
+        }
+        result.push('</li>');
+      } else {
+        result.push('<li>在 IE 和 Chrome 中将触发<strong>不同</strong>的渲染模式，建议更换 DTD，减少出现兼容性问题的可能。' + KB001 + '</li>');
+      }
+    } else {
+      result.push('<li>本页没有设置 DTD，在所有浏览器中将以<strong>混杂模式</strong>渲染，建议使用能触发标准模式的 DTD， 以减少出现兼容性问题的可能。' + KB001);
+    }
+    // data.DOM
+    result.push('<li>页面 DOM 节点总数为 <em>' + data.DOM.count + '</em> 个。</li>');
+    if (data.DOM.IECondComm.length)
+      result.push('<li>发现仅 IE 支持的条件注释 <strong>' + data.DOM.IECondComm.length + '</strong> 个。</li>');
+    // data.HTMLBase.HTMLDeprecatedTag
+    var deprecatedTag = [];
+    for (var i in data.HTMLBase.HTMLDeprecatedTag) {
+      deprecatedTag.push(i);
+    }
+    if (deprecatedTag.length) {
+      for (var i = 0; i < deprecatedTag.length; i++) {
+        result.push('<li>发现过期标签 <strong>' + deprecatedTag[i] + '</strong>，不建议使用。');
+      }
+    } else {
+      result.push('<li>本页中没有使用任何过期标签。</li>');
+    }
+    // data.HTMLBase.HTMLDeprecatedAttribute
+    // 待修改元数据格式。
+    var deprecatedAttribute = Object.keys(data.HTMLBase.HTMLDeprecatedAttribute);
+    if (deprecatedAttribute.length) {
+      for (var i = 0; i < deprecatedAttribute.length; i++) {
+        result.push('<li>发现过期属性 <strong>' + deprecatedAttribute[i] + '</strong>，位于标签 <strong> ');
+        for (var j in data.HTMLBase.HTMLDeprecatedAttribute[deprecatedAttribute[i]]) {
+          result.push(j +' ');
+        }
+        result.push('</strong>内，已不建议使用。');
+      }
+    } else {
+      result.push('<li>本页中没有使用任何过期属性。</li>');
+    }
+
+    // Show result.
+    $baseDetection.innerHTML = result.join('');
+    $content.className = '';
+    sendMessageToBackgroundPage({type: 'base', tabId: tabId});
+  });
+}
+
+/**
+ * @ Change pop-up page's status.
+ * Called from:
+ * 1. Background page when pop-up page has been shown.
+ * 2. Pop-up page.
+ */
+function setStatus(status) {
+  switch (status) {
+    case 'loading':
+      $body.className = 'loading';
+      break;
+    case 'complete':
+      setStatus('base')
+      break;
+    case 'base':
+      $body.className = 'base';
+      baseDetection();
+      break;
+    case 'advanced':
+      $body.className = 'advanced';
+      advancedDetection();
+      break;
+  }
+}
+
+/**
+ * @ Get tab status.
+ * Get current tab's status and call setStatus.
+ */
+chrome.tabs.sendRequest(tabId, {type: 'getReadyState'}, function(readyState) {
+  setStatus(readyState == 'complete' ? 'complete' : 'loading');
+});
+
+/**
+ * @ Change the tab panel.
+ */
+$tab.addEventListener('click', function(event) {
+  var currentStatus = $body.className;
+  var status = event.target.className;
+  if (status && currentStatus != status) {
+    setStatus(status);
+  }
+});
+
+/**
+ * @ Close pop-up page.
+ * Called when pop-up page closed.
+ */
+window.addEventListener('unload', function() {
+
+});
+
+var detections = backgroundPage.detections;
+var detection = detections[tabId];
+if (!detection) {
+  detection = { };
+  detection.problems = { };
+  detection.totalProblems = 0;
+  detection.actualTotalProblems = 0;
+  detection.totalErrors = 0;
+  detection.totalWarnings = 0;
+  detection.enabled = false;
+  detection.detected = false;
+  detection.annotatedProblems = { };
+  detections[tabId] = detection;
+}
+
+/**
+ * @ Advanced detection.
+ */
+function advancedDetection() {
+  detection.enabled = true;
+  if (detection.detected) {
+    var problems = detection.problems;
+    if (Object.keys(problems).length == 0) {
+      showNoProblemResult();
+    } else {
+      for (var typeId in problems) {
+        var problem = problems[typeId];
+        updateDetectionResult(typeId, problem);
+        updateSummary(problem.severity);
+      }
+      restoreAnnotationCheck();
+    }
+  } else {
+    $content.className = 'processing';
+    detectProblems();
+  }
+}
+
+// 侦测并报告问题
+function detectProblems() {
+  chrome.tabs.sendRequest(tabId, { type: 'CheckNode'});
+}
+
+// 添加兼容性问题检测结果
+function addCompatibilityResult(issue) {
+//  console.info('in addCompatibilityResult');
+//  console.info(issue);
+
+  var typeId = issue.reason;
+  var problem = detection.problems[typeId];
+  var isNewProblem = false;
+  var severity;
+  if (!problem) {
+    isNewProblem = true;
+    severity = issue.severity;
+    problem = {};
+    problem.severity = severity;
+    problem.description = issue.description;
+    detection.problems[typeId] = problem;
+
+    detection.totalProblems++;
+
+    severity == 'error' ? detection.totalErrors++ :
+      detection.totalWarnings++;
+  }
+  problem.occurrencesNumber = issue.occurrencesNumber;
+
+  // 若开启了检测，则直接显示检测结果
+  if (detection.enabled) {
+    updateDetectionResult(typeId, problem);
+    isNewProblem && updateSummary(severity);
+  }
+}
+
+function setEndOfDetection(totalProblems) {
+  //console.info('in setEndOfDetection, total problems : ' + totalProblems);
+  detection.actualTotalProblems = totalProblems;
+  if (detection.totalProblems == totalProblems)
+    detection.detected = true;
+  // If totalProblems is 0, show no compatibility problems found infomation
+  if (totalProblems == 0)
+    showNoProblemResult();
+}
+
+chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+  //console.info('request.type : ' + request.type);
+  switch (request.type) {
+    case 'CompatibilityResult':
+      addCompatibilityResult(request);
+      break;
+    case 'EndOfDetection':
+      setEndOfDetection(request.totalProblems);
+      break;
+  }
+});
+
+/**
+ *
+ * @param {error | warning} type
+ */
+function updateSummary(type) {
+  var number = type == 'warning' ? 'totalWarnings' : 'totalErrors';
+  var summary = chrome.i18n.getMessage(type + 'ProblemsSummary',
+      [detection[number]]);
+  var allProblemsSummary = chrome.i18n.getMessage('allProblemsSummary',
+      [detection.totalProblems]);
+
+  $(type + 'ProblemsSummary').innerHTML = summary;
+  $('allProblemsSummary').innerHTML = allProblemsSummary;
+}
+
+function updateDetectionResult(typeId, problem) {
+  //console.info('in detectionResult');
+  var severity = problem.severity;
+  $content.className = '';
+  $('detectionResult').style.display = 'block';
+  $(severity + 'Area').style.display = 'block';
+  var table = $(severity + 'Problems').firstElementChild;
+  var problemRow = $(typeId);
+  if (problemRow) {
+    problemRow.cells[2].innerText = problem.occurrencesNumber;
+  } else {
+    var row = document.createElement('tr');
+    row.setAttribute('id', typeId);
+    table.appendChild(row);
+    insertCell(row, problem.occurrencesNumber);
+    insertCell(row, problem.description);
+    var checkbox = insertCell(row, '<input type="checkbox" name="' +
+        severity + '" class="issue" />').firstElementChild;
+    checkbox.addEventListener('click', toggleCheckProblem, false);
+  }
+
+  function insertCell(row, html) {
+    var cell = row.insertCell(0);
+    cell.innerHTML = html;
+    return cell;
+  }
+}
+
+function showNoProblemResult() {
+  $content.className = '';
+  $('noProblemFoundInfo').style.display = 'block';
+}
+
+/**
+ * Update annotation status
+ * @param {Array} checkboxes
+ */
+function updateAnnotatedStatus(checkboxes) {
+  var annotatedProblems = detection.annotatedProblems;
+  checkboxes.forEach(function(checkbox) {
+    var issueId = checkbox.parentNode.parentNode.id;
+    if (annotatedProblems[issueId] && !checkbox.checked)
+      delete annotatedProblems[issueId];
+    else if (!annotatedProblems[issueId] && checkbox.checked)
+      annotatedProblems[issueId] = issueId;
+  });
+  //console.info(annotatedProblems);
+  return Object.keys(annotatedProblems);
+}
+
+// Handle one checkbox click event
+function toggleCheckProblem() {
+  var annotatedProblems = updateAnnotatedStatus([this]);
+  annotate(annotatedProblems);
+  updateCheckAllStatus(this);
+}
+
+// Handle check all or check no checkbox click event
+function toggleCheckAllProblems(checkAll, type) {
+  var checkboxes = Array.prototype.slice.call(document.getElementsByName(type));
+  var checked = checkAll.checked;
+  checkboxes.forEach(function(checkbox) {
+    checkbox.checked = checked;
+  });
+  var problems = updateAnnotatedStatus(checkboxes);
+  annotate(problems);
+}
+
+function updateCheckAllStatus(checkbox) {
+  var checkAll = $(checkbox.name + 'CheckAll');
+  if (checkbox.checked) {
+    var checkboxes = document.getElementsByName(checkbox.name);
+    for (var i = 0, l = checkboxes.length; i < l; i++) {
+      if (!checkboxes[i].checked) {
+        return;
+      }
+    }
+    checkAll.checked = true;
+  } else {
+    checkAll.checked = false;
+  }
+}
+
+// Annotate problems on the target node in the page
+function annotate(problems) {
+  chrome.tabs.sendRequest(tabId, { type: 'AnnotationOff' }, function() {
+    if (problems.length) {
+      chrome.tabs.sendRequest(tabId, {
+        type: 'AnnotationOn',
+        issusId: problems
+      });
+    }
+  });
+}
+
+function restoreAnnotationCheck() {
+  Object.keys(detection.annotatedProblems).forEach(function(issueId) {
+    $(issueId).firstElementChild.firstElementChild.checked = true;
+  });
+}
+
+$('errorCheckAll').addEventListener('click', function() {
+  toggleCheckAllProblems(this, 'error');
+}, false);
+
+$('warningCheckAll').addEventListener('click', function() {
+  toggleCheckAllProblems(this, 'warning');
+}, false);
+</script>
+</body>
+</html>

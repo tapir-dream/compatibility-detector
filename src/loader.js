@@ -23,6 +23,7 @@ const INJECTED_SCRIPT_ATTR_NAME = 'chrome_comp_injectedScript';
 // script to the page.
 // Use window.eval(scriptString) to inject the script.
 var script = document.createElement('script');
+
 script.appendChild(document.createTextNode(
   'document.documentElement.addEventListener("' + INJECT_SCRIPT_EVENT_NAME +
   // The name of this function is an indicator of injected code
@@ -67,13 +68,20 @@ docElement.setAttribute('chrome_comp_injected', true);
 //   documentElement's attribute: chrome_comp_reason, chrome_comp_severity
 // Request message format:
 //   type('CompatibilityResult'), reason, severity
+
 docElement.addEventListener('chrome_comp_problemDetected', function() {
   var reason = docElement.getAttribute('chrome_comp_reason');
   var severity = docElement.getAttribute('chrome_comp_severity');
+  var description = docElement.getAttribute('chrome_comp_description');
+  var occurrencesNumber =
+    docElement.getAttribute('chrome_comp_occurrencesNumber');
+
   chrome.extension.sendRequest({
     type: 'CompatibilityResult',
-    reason: reason,
-    severity: severity
+    reason: reason, // typeId, RCA No.
+    severity: severity,
+    description: description,
+    occurrencesNumber: occurrencesNumber
   }, function() { });
 });
 
@@ -82,7 +90,10 @@ docElement.addEventListener('chrome_comp_problemDetected', function() {
 // Request message format:
 //   type('EndOfDetection')
 docElement.addEventListener('chrome_comp_endOfDetection', function() {
-  chrome.extension.sendRequest({ type: 'EndOfDetection' });
+  chrome.extension.sendRequest({
+    type: 'EndOfDetection',
+    totalProblems: docElement.getAttribute('totalProblems')
+  });
 });
 
 // For the page to get language dependent message text from the extension.
@@ -90,9 +101,35 @@ docElement.addEventListener('chrome_comp_endOfDetection', function() {
 // Depends on:
 //   documentElement's attribute: chrome_comp_messageName,
 //   chrome_comp_messageParams, chrome_comp_messageResult
+
 docElement.addEventListener('chrome_comp_getMessage', function() {
   var name = docElement.getAttribute('chrome_comp_messageName');
   var params = docElement.getAttribute('chrome_comp_messageParams');
   docElement.setAttribute('chrome_comp_messageResult',
       chrome.i18n.getMessage(name, params ? JSON.parse(params) : undefined));
 });
+
+chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+  switch (request.type) {
+    case 'reloadPage':
+      reloadPage();
+      break;
+    case 'CheckNode':
+      checkNode();
+      break;
+  }
+});
+
+//docElement.addEventListener('chrome_comp_reportProblem', function() {
+//  chrome.extension.sendRequest({ type: 'ReportProblem' });
+//}, false);
+
+function checkNode() {
+  var event = document.createEvent('Event');
+  event.initEvent('chrome_comp_checkNode', true, true);
+  document.documentElement.dispatchEvent(event);
+}
+
+function reloadPage() {
+  window.location.reload();
+}
