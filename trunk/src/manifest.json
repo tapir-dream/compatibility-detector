@@ -16,7 +16,7 @@
 
 {
   "name": "__MSG_extensionName__",
-  "version": "1.2",
+  "version": "1.5",
   "description": "__MSG_extensionDescription__",
   "background_page": "background.html",
   "default_locale": "zh_CN",
@@ -26,6 +26,7 @@
   // "options_page": "options.html",
   "permissions": [ "tabs", "http://*/*", "https://*/*" ],
   "browser_action": {
+    "popup": "popup.html",
     "default_icon": "icon_normal.png",
     "default_title": "__MSG_resultNotAvailable__"
   },
@@ -34,25 +35,16 @@
     "matches": [ "http://*/*", "https://*/*", "file://*" ],
     "js": [
       "loader.js",
+      "base_detection.js",
       "framework.js",
       "config.js",
       "w3help_issues.js",
       "non_w3help_issues.js",
 
-      //============unit test===========
-      //====here things are temporary, used to delete, don't paste from the bottom up=====
-
-      //=========Review===========
-      "detectors/base_tag_position.js",                     //HJ2001
-      "detectors/radio_name.js",                            //HF9009
-      "detectors/document_type_and_boxsizing.js",           //HG8001 RD8001
-      "detectors/align_middle.js",                          //HA1003
-      //====here things are temporary, used to delete, don't paste from the bottom up=====
-
       // Verified
       "detectors/decoration_font_color.js",                 //RX3011
       "detectors/disabled_attribute.js",                    //HF3005 HF3013
-      "detectors/getelementbyid_and_getelementsbyname.js",  //SD9012 (SD9001 SD9002 is Error downgraded to Warning)
+      "detectors/getelementbyid_and_getelementsbyname.js",  //SD9012 (SD9001 SD9002 Error downgraded to Warning )
       "detectors/table_margin_affects_align_center.js",     //RX8004
       "detectors/empty_cell.js",                            //RE1013 RE1012
       "detectors/marquee_width.js",                         //BX1030
@@ -65,102 +57,11 @@
       "detectors/text_overflow_ellipsis.js",                //RT3005
       "detectors/shrink_to_fit_percentage_child.js",        //RX8017
       "detectors/overflow.js",                              //RV1001
-      "detectors/text_decoration_propagation.js",           //RT3002
-      "detectors/td_nowrap_inheritence.js",                 //RX1003
-      "detectors/stretched_cell_align.js",                  //RE8014
 
       // Verified --> Error downgraded to Warning
       "detectors/document_all.js",                          //BX9002
       "detectors/script_language_type.js",                  //BT9005 BT9006
       "detectors/align_nowrap.js",                          //RX8015
-      "detectors/z_index_auto.js",                          //RM8015
-
-      /*********************************
-
-      // Started --> Error
-      "detectors/z_index_auto.js",                          //RM8015
-      "detectors/get_element_by_id_and_name.js"             //BX9010
-      "detectors/percent_height_in_auto_height.js",         //RE8010 RD8026
-      "detectors/element_click.js",                         //SD9025
-      "detectors/radio_name.js",                            //HF9009
-      "detectors/document_type_and_boxsizing.js",           //HG8001 RD8001
-
-      // Started --> Warning
-      "detectors/align_middle.js",                          //HA1003
-      "detectors/img_text_decoration.js",                   //RT3001
-      "detectors/table_cellspacing_border_collapse.js",     //RE1020
-      "detectors/white_space_after_iframe_object.js",       //HT1001
-      "detectors/font_style_element_affects_css.js",        //RX3007
-      "detectors/overflow.js",                              //RX1002 RD1002
-      "detectors/full_shape_space_no_wrap.js",              //BX1009
-      "detectors/base_tag_position.js",                     //HJ2001
-
-      // WontFix
-      "detectors/right_floats_stretch_parent_elements.js",  //RD8006
-      "detectors/mouse_enter_leave.js"                      //BT9017
-      "detectors/scroll_top_left.js",                       //BX9008
-      "detectors/img_alt_title.js",                         //HO3003
-      "detectors/zoom_style.js",                            //BX8017
-      "detectors/word_wrap_spaces.js",                      //RT1008
-      "detectors/get_and_set_attribute.js",                 //SD9006
-
-      // WontFix Test results url is Zero or url less 20
-      "detectors/zoom_style.js",                            //BX8017 ... Test results url is 0
-      "detectors/conditional_comments.js",                  //BT8004 (Error downgraded to Warning) ... url less
-
-      //===============Uncategorized==================
-
-      "detectors/useragent_check.js",
-      "detectors/plugin.js",
-      "detectors/minimal_font_size.js",
-      "detectors/absolute_font_size.js",
-      "detectors/colspan_width_adjustment.js",
-      "detectors/get_year.js",
-      "detectors/missing_tags.js",
-      "detectors/table_border_color.js",
-      "detectors/tr_height.js",
-      "detectors/style_attribute_value_in_braces.js",
-      "detectors/img_padding.js",
-      "detectors/bold_element_font_weight.js",
-      "detectors/fieldset_width.js",
-      "detectors/iframe_scroll.js",
-      "detectors/navigator_language.js",
-      "detectors/nbsp_before_object.js",
-      "detectors/meta_content_separator.js",
-
-      //lzq add
-      "detectors/empty_table_width_height_is_zero.js",
-      "detectors/zero_hight_flow_element.js",
-      "detectors/clear_property_on_flow_element.js",
-      "detectors/float_element_overflow_container.js",
-      "detectors/empty_float_left_element_in_auto_tablelayout.js",
-
-      //wangjun
-      "detectors/option_label_attribute.js",
-      "detectors/select_options_add_remove_option.js",
-      "detectors/nowrap_attribute.js",
-      "detectors/background_attachment_scroll.js",
-      "detectors/iframe_background_color_transparent.js",
-      "detectors/forbidden_content_selection.js",
-
-      //luyuan
-      "detectors/associating_map_only_by_id_attribute.js",
-      "detectors/object_onerror.js",
-      "detectors/clonenode_script.js",
-
-      //qbk
-      "detectors/img_empty_src_and_img_lowsrc.js",
-      "detectors/frame_margin.js",
-      "detectors/float_center_css.js",
-      "detectors/execScript.js",
-      "detectors/window_eval.js",
-      "detectors/location_reload.js",
-      "detectors/array_direct_volume.js",
-      "detectors/window_navigate.js",
-      "detectors/document_execcommand.js",
-      "detectors/window_constructor.js",
-      "detectors/setTimeout_setInterval.js",
-      *************************************************/
 
       "annotation.js"
     ],

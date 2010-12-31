@@ -1527,13 +1527,18 @@ chrome_comp.CompDetect = (function() {
           chrome_comp_reason: typeId,
           chrome_comp_severity:
               (occurrence.severityLevel || issue.severityLevel) >= 7 ?
-                  'error' : 'warning'
+                  'error' : 'warning',
+          chrome_comp_description: issue.issueDescription,
+          chrome_comp_occurrencesNumber: issue.occurrences.length
       });
     },
 
     // Send the result of the compatibility detection for current page.
     sendDetectionResults: function() {
-      chrome_comp.sendRequest('chrome_comp_endOfDetection');
+      var problems = chrome_comp.CompDetect.getAllProblems();
+      chrome_comp.sendRequest('chrome_comp_endOfDetection', {
+        totalProblems : Object.keys(problems).length
+      });
     },
 
     // Diagnose  compatibility issues on current page
@@ -1860,8 +1865,11 @@ chrome_comp.CompDetect.ScanDomBaseDetector.prototype.canCheckNow = function() {
   return this.gatherAllProblemNodes_ || !this.hasProblem_;
 };
 
-window.addEventListener('load',
-    chrome_comp.CompDetect.diagnoseCompatibilityIssues, false);
+//window.addEventListener('load',
+//    chrome_comp.CompDetect.diagnoseCompatibilityIssues, false);
+document.documentElement.addEventListener('chrome_comp_checkNode', function() {
+  chrome_comp.CompDetect.diagnoseCompatibilityIssues();
+}, false);
 window.addEventListener('unload',
     chrome_comp.CompDetect.cleanUpDetectors, false);
 

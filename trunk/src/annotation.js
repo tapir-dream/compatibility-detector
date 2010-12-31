@@ -67,21 +67,28 @@ function preprocessAnnotations() {
   if (!annotations.length) {
     var sequence = 0;
     var problems = chrome_comp.CompDetect.getAllProblems();
+    var issusId = document.documentElement.getAttribute('issusId');
+    // console.log(issusId.split(','));
+    document.documentElement.removeAttribute('issusId');
     for (var typeId in problems) {
-      var problem = problems[typeId];
+      if(issusId && issusId.split(',').indexOf(typeId) != -1) {
+        // console.log(issusId);
+        var problem = problems[typeId];
       // Sanity check to ensure this entry is valid (not an injected property
       // by the host page.
-      if (problem && problem.occurrences && problem.occurrences.length) {
-        for (var i = 0, c = problem.occurrences.length; i < c; i++) {
-          var annotation = problem.occurrences[i];
-          annotation.problem = problem;
-          // This sequence is to ensure the sorting is stable when multiple
-          // annotations has the same position.
-          annotation.originalSequnece = sequence++;
-          annotations.push(annotation);
-          updateAnnotationTopLeft(annotation);
+        if (problem && problem.occurrences && problem.occurrences.length) {
+          for (var i = 0, c = problem.occurrences.length; i < c; i++) {
+            var annotation = problem.occurrences[i];
+            annotation.problem = problem;
+            // This sequence is to ensure the sorting is stable when multiple
+            // annotations has the same position.
+            annotation.originalSequnece = sequence++;
+            annotations.push(annotation);
+            updateAnnotationTopLeft(annotation);
+          }
         }
       }
+
     }
     annotations.sort(compareAnnotations);
   }
@@ -357,6 +364,7 @@ function refreshAnnotations() {
 }
 
 function showAnnotations() {
+  annotations = [];
   if (annotationsDiv)
     return;
   preprocessAnnotations();
@@ -522,7 +530,11 @@ document.documentElement.addEventListener('chrome_comp_AnnotationOff',
 });
 
 chrome.extension.onRequest.addListener(function (request, sender, response) {
+  if (request.type == 'AnnotationOn') {
+    document.documentElement.setAttribute('issusId', request.issusId);
+  }
   var event = document.createEvent('Event');
   event.initEvent('chrome_comp_' + request.type, true, true);
   document.documentElement.dispatchEvent(event);
+  response && response();
 });
