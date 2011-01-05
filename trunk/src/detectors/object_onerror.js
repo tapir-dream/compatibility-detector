@@ -14,6 +14,15 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview: One detector implementation for checking problems about the
+ * OBJECT elements.
+ *
+ * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=88
+ *       https://code.google.com/p/compatibility-detector/issues/detail?id=125
+ *       https://code.google.com/p/compatibility-detector/issues/detail?id=126
+ */
+
 addScriptToInject(function() {
 
 function isAuto(element) {
