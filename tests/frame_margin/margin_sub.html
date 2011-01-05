@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+* {font:16px 'Trebuchet MS';}
+body{background:#FFFF00;}
+</style>
+</head>
+<body>
+<script>
+  if (!window.getComputedStyle) {
+    window.getComputedStyle = function ($target) {
+      return $target.currentStyle;
+    };
+  }
+  document.open();
+  document.write("<div>margin-top:"+getComputedStyle(document.body, null).marginTop+"</div>");
+  document.write("<div>margin-bottom:"+getComputedStyle(document.body, null).marginBottom+"</div>");
+  document.write("<div>margin-left:"+getComputedStyle(document.body, null).marginLeft+"</div>");
+  document.write("<div>margin-right:"+getComputedStyle(document.body, null).marginRight+"</div>");
+  document.close();
+</script>
+</body>
+</html>
