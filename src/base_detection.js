@@ -1,14 +1,23 @@
+var detectionType = 'base';
+var summaryInformation = null;
 /**
  * @ chrome.extension.onRequest.addListener
  */
 chrome.extension.onRequest.addListener(function(request, sender, response) {
+  console.log('CS.onRequest: ', JSON.stringify(request), detectionType);
   switch (request.type) {
-    case 'getReadyState':
-      response(document.readyState);
+    case 'checkPermission':
+      response();
+      break;
+    case 'getDetectionType':
+      response(document.readyState == 'complete' ? detectionType : null);
+      break;
+    case 'setDetectionType':
+      detectionType = request.detectionType;
+      response(detectionType);
       break;
     case 'baseDetection':
-      response(document.summaryInformation ?
-          document.summaryInformation : baseDetection());
+      response(summaryInformation ? summaryInformation : baseDetection());
       break;
   }
 });
@@ -167,7 +176,7 @@ function baseDetection() {
     }
   };
 
-  var summaryInformation = {
+  summaryInformation = {
     'HTMLBase': {
       'HTMLDeprecatedAttribute': {},
       'HTMLDeprecatedTag': {}
@@ -443,6 +452,5 @@ function baseDetection() {
   infoManager.documentMode.getCompatMode();
   infoManager.DOM.getIECondComm(document.documentElement);
 
-  document.summaryInformation = summaryInformation;
   return summaryInformation;
 }

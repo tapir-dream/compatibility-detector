@@ -2,112 +2,44 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Chrome Compatibility Detector</title>
 </head>
 <body>
 <script>
 /**
- * @ Change BrowserAction's status.
- * status: [on | off | disabled]
- * Possible changes: off (default) -> on (click browser action button)
+ * Change BrowserAction's status.
+ * Status: [normal | warning]
  */
-const BADEG_TEXT = {
-  'on': 'on',
-  'off': 'off'
-};
-const BADEG_COLOR = {
-  'on': [0, 255, 0, 255],
-  'off': [255, 0, 0, 255]
+const ICON_PATH = {
+  'normal': 'icon_normal.png',
+  'warning': 'icon_warning.png'
 };
 function setBrowserAction(status, tabId) {
-//  chrome.browserAction.setIcon({
-//    path: 'icon_normal.png',
-//    tabId: tabId
-//  });
-  chrome.browserAction.setBadgeText({
-    text: BADEG_TEXT[status],
+  chrome.browserAction.setIcon({
+    path: ICON_PATH[status],
     tabId: tabId
   });
-  chrome.browserAction.setBadgeBackgroundColor({
-    color: BADEG_COLOR[status],
+  chrome.browserAction.setTitle({
+    title: chrome.i18n.getMessage(status + 'TitleText'),
     tabId: tabId
   });
 }
-// Default status is off.
-setBrowserAction('off');
-
-/**
- * @ Send messages to pop-up page.
- * Return false if pop-up page is not open.
- */
-function sendMessageToPopUpPage(message) {
-  var popUpPage = chrome.extension.getViews({type: 'popup'})[0];
-  if (popUpPage) {
-    popUpPage.getMessageFromeBackgroundPage(message);
-    return true;
-  } else {
-    return false;
-  }
-}
-
-/**
- * @ Get messages from pop-up page.
- * *** Called from pop-up page only ***
- */
-function getMessageFromPopUpPage(message) {
-  switch (message.type) {
-    case 'base':
-      if(!tabs[message.tabId]) {
-        tabs[message.tabId] = {};
-        setBrowserAction('on', message.tabId);
-      }
-      tabs[message.tabId].base = true;
-      break;
-  }
-}
-
-// Active tab's id.
-var activeTabId = null;
 
 // Each page's information.
-var tabs = {};
+var detections = { };
 
-/**
- * @ Ensure activeTabId can be set when extention loaded.
- * 不是必须，只是为了避免“扩展管理”页面载入后无 activeTabId。
- */
-chrome.tabs.getSelected(null, function(tab) {
-  activeTabId = tab.id;
-});
-
-/**
- * @ Get active tab's id when tab selection changed.
- */
-chrome.tabs.onSelectionChanged.addListener(function(tabId, selectInfo) {
-  activeTabId = tabId;
-});
-
-/**
- * @ Change status when tab loaded or refreshed.
- * If pop-up page is open, set extension's status to 'on'.
- */
+// Change status when tab loaded or refreshed.
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
   if (changeInfo.status == 'loading') {
-    delete tabs[tabId];
     delete detections[tabId];
-    setBrowserAction('off', tabId);
+    setBrowserAction('normal', tabId);
   }
-  if (tabId == activeTabId) sendMessageToPopUpPage({type: changeInfo.status});
 });
 
-/**
- * @ Delete tab's information when tab closed.
- */
+// Delete tab's information when tab closed.
 chrome.tabs.onRemoved.addListener(function(tabId) {
-  delete tabs[tabId];
   delete detections[tabId];
 });
-
-var detections = { };
 </script>
 </body>
 </html>

@@ -30,8 +30,8 @@ function isAuto(element) {
   element.style.display = 'none !important';
   var width = chrome_comp.getComputedStyle(element).width;
   var height = chrome_comp.getComputedStyle(element).height;
-  element.style.display = null;
-  element.style.display = (inlineDisplay) ? inlineDisplay : null;
+  element.style.display = '';
+  element.style.display = (inlineDisplay) ? inlineDisplay : '';
   return (width == 'auto') || (height == 'auto');
 }
 
