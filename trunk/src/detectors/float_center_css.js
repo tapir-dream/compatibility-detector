@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview: One detector implementation for checking the CSS float:center
+ * value for all elements.
+ * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=105
+ *
+ * WebKit Source CSSParser.cpp file:
+ * CSSPropertyFloat: // left | right | none | inherit + center for buggy CSS
+ * This is WebKit a compatibility strategy.
+ * Therefore, the detected elements to set the style for the center,
+ * can accurately detect the problem.
+ */
+
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
@@ -27,8 +39,7 @@ null, // constructor
 function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
     return;
-
-  if (window.chrome_comp.getDefinedStylePropertyByName(node, true, 'float') ===
+  if (chrome_comp.getDefinedStylePropertyByName(node, true, 'float') ===
       'center')
     this.addProblem('RM1025', [node]);
 }

@@ -26,8 +26,8 @@
   "numberOfIssues": { "message": "找到 $1 个警告和 $2 个错误" },
   "hideAnnotations": { "message": "点击图标隐藏标注" },
   "showAnnotations": { "message": "点击图标显示标注" },
-  "noIssueFound": { "message": "没有发现兼容性问题" },
-  "resultNotAvailable": { "message": "没有兼容性检测结果\n刷新页面重新检测" },
+  "normalTitleText": { "message": "点击此按钮开始检测本页面的兼容性问题" },
+  "warningTitleText": { "message": "已有检测结果\n点击查看" },
 
   "allProblemsSummary": { "message": "总计 $1 个兼容性问题，其中："},
   "errorProblemsSummary": { "message": "错误级别问题 $1 个："},
@@ -293,6 +293,8 @@
   "BX8017": {"message": "只有 IE Chrome Safari 支持 'zoom' 特性并且他们的具体实现方式不同"},
   "HF9009": {"message": "各浏览器对表单元素单选按钮组设置非 CDATA 标准的 name 属性值解析不同"},
   "HJ2001": {"message": "各浏览器对 BASE 元素前后的超链接的默认 target 处理存在差异"},
+  "RM1025": {"message": "Chrome Safari 认为 'float:center' 是合法值且其计算值为 'none'"},
+  "HM1002": {"message": "各浏览器对 'marginwidth' 和 'marginheight' 属性的错误设定值的处理不同"},
   "HH8001_suggestion": { "message": "按标准推荐的方法写注释标签，如：" },
   "HR9001_suggestion": { "message": "首先，对于动态页面必须确保 HTTP \"Content-Type\" 头字段的 \"charset\" 参数与页面自身编码相符，且务必在页面的 META 元素中也声明相符的字符编码信息。对于静态页面，必须保证页面中 META 元素声明中 \"http-equiv\" 为 \"Content-Type\" 对应的值中的 \"charset\" 的值与页面自身编码相符。" },
   "HD9001_suggestion": { "message": "当 URI 中含有非 ASCII 字符时，不要依赖浏览器对 URI 的编码方式，以避免产生差异。建议：" },
@@ -551,7 +553,8 @@
   "BX8042_suggestion": { "message": "放弃使用 LAYER 元素，改用 CSS 中的绝对定位样式 'position:absloute' 处理相关情况。" },
   "HF9009_suggestion": { "message": "单选按钮的 \"name\" 属性值必须以字母 ([A-Za-z])和数字（[0-9]）开头 ，其后由任何字母、数字、连字符(\"-\")、下划线(\"_\")、冒号(\":\")和句号 (\".\") 组成。" },
   "HJ2001_suggestion": { "message": "不要在 HEAD 元素之外定义 BASE 元素，保证各浏览器兼容。" },
-
+  "RM1025_suggestion": { "message": "避免使用非法的 'float' 特性值。"},
+  "HM1002_suggestion": { "message": "在使用 \"marginwidth\" 和 \"marginheight\" 时应严格遵照规范中的描述，要对其设定大于等于零的整数值。"},
 
   //wangjun
   "HF3012": {"message": "IE6 Firefox Chrome(Q) Safari(Q) 不支持 OPTION 元素的 label 属性"},

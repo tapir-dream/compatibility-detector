@@ -14,15 +14,30 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview: One detector implementation for checking the HTML marginwidth
+ * and marginheight attribute for FRAME and IFRAME elements.
+ * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=109
+ *
+ * HTML marginwidth and marginheight is % Pixels type in HTML 4 DTD
+ * % Pixels is NUMBER tokens
+ * NUMBER tokens must contain at least one digit ([0-9]) in SGML basic types
+ *
+ * Therefore, the detection of elements attribute values to determine
+ * whether there can be potential problems.
+ */
+
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
-'frame_margin_width_and_height',
+'frame_margin',
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
-null, // constructor
+function constructor() {
+  this.propertyValueRegExp_ = /(^\d+$)|(^\s*$)|^null$/;
+},
 
 function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
@@ -31,11 +46,9 @@ function checkNode(node, context) {
   if (node.tagName != 'FRAME' && node.tagName != 'IFRAME')
     return;
 
-  var propertyValueRegExp_ = /(^\d+$)|(^\s*$)|^null$/;
-
-  if (!propertyValueRegExp_.test(node.getAttribute('marginwidth')))
+  if (!this.propertyValueRegExp_.test(node.getAttribute('marginwidth')))
     this.addProblem('HM1002', [node]);
-  if (!propertyValueRegExp_.test(node.getAttribute('marginheight')))
+  if (!this.propertyValueRegExp_.test(node.getAttribute('marginheight')))
     this.addProblem('HM1002', [node]);
 }
 ); // declareDetector
