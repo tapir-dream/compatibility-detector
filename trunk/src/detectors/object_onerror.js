@@ -16,6 +16,16 @@
 
 addScriptToInject(function() {
 
+function isAuto(element) {
+  var inlineDisplay = element.style.display;
+  element.style.display = 'none !important';
+  var width = chrome_comp.getComputedStyle(element).width;
+  var height = chrome_comp.getComputedStyle(element).height;
+  element.style.display = null;
+  element.style.display = (inlineDisplay) ? inlineDisplay : null;
+  return (width == 'auto') || (height == 'auto');
+}
+
 chrome_comp.CompDetect.declareDetector(
 
 'object_onerror',
@@ -39,12 +49,17 @@ function checkNode(node, additionalData) {
     'CLSID:6BF52A52-394A-11D3-B153-00C04F79FAA6',
     'CLSID:22D6F312-B0F6-11D0-94AB-0080C74C7E95'
   ];
-  if (!node.getAttribute('onerror') || !node.onerror)
-    return;
-  var classid = node.getAttribute('classid').toUpperCase();
-  if (supportedClassid.indexOf(classid) == -1) {
+  var classid = node.getAttribute('classid');
+  var classidUpper = (classid) ? classid.toUpperCase() : '';
+  var hasClassid = classid != '';
+  var isSupportedClassid = supportedClassid.indexOf(classidUpper) != -1;
+  var hasOnerror = node.getAttribute('onerror') || node.onerror;
+  if (isSupportedClassid)
+    this.addProblem('HO9006', [node]);
+  if (hasOnerror && !isSupportedClassid)
     this.addProblem('BT2022', [node]);
-  }
+  if (isAuto(node))
+    this.addProblem('HO1007', [node]);
 }
 ); // declareDetector
 
