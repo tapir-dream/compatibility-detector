@@ -114,8 +114,8 @@ function showHighlight() {
     highlightDiv.className = className;
     highlightDiv.style.left = (rect.left - 1) + 'px';
     highlightDiv.style.top = (rect.top - 1) + 'px';
-    highlightDiv.style.width = rect.width + 'px';
-    highlightDiv.style.height = rect.height + 'px';
+    highlightDiv.style.width = (rect.width - 1) + 'px';
+    highlightDiv.style.height = (rect.height - 1)+ 'px';
   }
 }
 
@@ -242,15 +242,21 @@ function showBalloon(index) {
     window.scrollTo(window.scrollX, tagDiv.offsetTop);
   } else {
     var balloonBottom = balloonDiv.offsetTop + balloonDiv.offsetHeight;
-    if (balloonBottom > window.scrollY + window.innerHeight)
+    if (balloonBottom > window.scrollY + window.innerHeight) {
+      balloonDiv.style.top = tagDiv.offsetTop - balloonDiv.offsetHeight + "px";
       window.scrollTo(window.scrollX, balloonBottom - window.innerHeight);
+    }
   }
   if (tagDiv.offsetLeft < window.scrollX) {
     window.scrollTo(tagDiv.offsetLeft, window.scrollY);
   } else {
     var balloonRight = balloonDiv.offsetLeft + balloonDiv.offsetWidth;
-    if (balloonRight > window.scrollX + window.innerWidth)
+    if (balloonRight > window.scrollX + window.innerWidth) {
+
+      balloonDiv.style.left = tagDiv.offsetLeft - balloonDiv.offsetWidth +
+          annotation.rectangles[0].width + "px";
       window.scrollTo(balloonRight - window.innerWidth, window.scrollY);
+    }
   }
   balloonDiv.annotationIndex = index;
   showHighlight.apply(balloonDiv);
@@ -279,12 +285,16 @@ function isDescendentOf(e1, e2) {
 function onDocumentMouseDown(event) {
   // Do nothing if the mouse is clicking on the scroll bar.
   if (event.target == document.documentElement &&
-      (event.clientX > window.scrollX + document.documentElement.clientWidth ||
-       event.clientY > window.scrollY + document.documentElement.clientHeight))
+      (event.clientX > window.scrollX + document.documentElement.scrollWidth ||
+       event.clientY > window.scrollY + document.documentElement.scrollHeight))
     return;
   if (balloonDiv && !isDescendentOf(event.target, balloonDiv))
     balloonDiv.style.display = 'none';
 }
+
+function onDocumentMouseWheel(event) {
+  onDocumentMouseDown(event);
+}  
 
 function onDocumentKeyDown(event) {
   if (balloonDiv && balloonDiv.style.display == 'block') {
@@ -448,6 +458,7 @@ function showAnnotations() {
       'background: #FFC;' +
       'padding: 5px;' +
       'border: solid thin #888;' +
+      'border-top-left-radius: 6px;' +
       'border-bottom-left-radius: 6px;' +
       'border-top-right-radius: 6px;' +
       'border-bottom-right-radius: 6px;' +
@@ -501,6 +512,7 @@ function showAnnotations() {
   setAnnotationTagsPosition(annotations);
   showBalloon(0);
   document.addEventListener('mousedown', onDocumentMouseDown, true);
+  document.addEventListener('mousewheel', onDocumentMouseWheel, true);
   document.addEventListener('keydown', onDocumentKeyDown, true);
   refreshTimer = window.setInterval(refreshAnnotations, 300);
 }
