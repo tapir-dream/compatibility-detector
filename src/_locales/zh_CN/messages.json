@@ -37,6 +37,7 @@
   "popup_noProblem": { "message": "目前没有发现兼容性问题。" },
   "popup_issueDescription": { "message": "问题描述" },
   "popup_issueCount": { "message": "问题数量" },
+  "popup_checkboxEffectTip": {"message": "注：选中问题对应的复选框可在页面上标注问题节点，并显示单个问题的详细信息。"},
 
   "bd_aboutRCAorKB": { "message": "更多内容请参见：" },
   "bd_hasDTD": { "message": "本页设置了 DTD。" },
