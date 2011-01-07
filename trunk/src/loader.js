@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+var detectionStatus = window.sessionStorage['chrome_comp_detection_status'];
+
+if (detectionStatus == 'enabled') {
+  
 var docElement = document.documentElement;
 
 const INJECT_SCRIPT_EVENT_NAME = 'chrome_comp_injectScript';
@@ -37,28 +41,6 @@ script.appendChild(document.createTextNode(
   '");});'));
 docElement.appendChild(script);
 
-function addSourceToInject(source, debug) {
-  if (debug) {
-    var script = document.createElement('script');
-    script.appendChild(document.createTextNode(source));
-    docElement.appendChild(script);
-  } else {
-    var event = document.createEvent('Event');
-    event.initEvent(INJECT_SCRIPT_EVENT_NAME, true, true);
-    docElement.setAttribute(INJECTED_SCRIPT_ATTR_NAME, source);
-    docElement.dispatchEvent(event);
-  }
-}
-
-/**
- * Injects script from content script to the page.
- * @param scriptFunction a function object or string, it will be converted to
- *     string and inject into the page as eval('(string of scriptFunction)()')
- */
-function addScriptToInject(scriptFunction, debug) {
-  addSourceToInject('(' + scriptFunction.toString() + ')()', debug);
-}
-
 // Set flag in shared dom to indicate the start part has been injected.
 docElement.setAttribute('chrome_comp_injected', true);
 
@@ -78,7 +60,7 @@ docElement.addEventListener('chrome_comp_problemDetected', function() {
 
   chrome.extension.sendRequest({
     type: 'CompatibilityResult',
-    reason: reason, // typeId, RCA No.
+    reason: reason, // typeId, RCA Number
     severity: severity,
     description: description,
     occurrencesNumber: occurrencesNumber
@@ -109,27 +91,60 @@ docElement.addEventListener('chrome_comp_getMessage', function() {
       chrome.i18n.getMessage(name, params ? JSON.parse(params) : undefined));
 });
 
+}
+
 chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
   switch (request.type) {
-    case 'reloadPage':
-      reloadPage();
-      break;
-    case 'CheckNode':
-      checkNode();
+    case 'DetectProblems':
+      detectProblems();
       break;
   }
 });
 
-//docElement.addEventListener('chrome_comp_reportProblem', function() {
-//  chrome.extension.sendRequest({ type: 'ReportProblem' });
-//}, false);
-
+/*
 function checkNode() {
   var event = document.createEvent('Event');
   event.initEvent('chrome_comp_checkNode', true, true);
   document.documentElement.dispatchEvent(event);
 }
+*/
 
-function reloadPage() {
-  window.location.reload();
+function detectProblems() {
+  if (!detectionStatus) {
+    window.sessionStorage['chrome_comp_detection_status'] = 'enabled';
+    window.location.reload();
+  }
+}
+
+/*
+docElement.addEventListener('chrome_comp_reportProblem', function() {
+  chrome.extension.sendRequest({ type: 'ReportProblem' });
+}, false);
+*/
+
+function addSourceToInject(source, debug) {
+  if (detectionStatus == 'enabled') {
+    inject();
+  }
+  function inject() {
+    if (debug) {
+      var script = document.createElement('script');
+      script.appendChild(document.createTextNode(source));
+      docElement.appendChild(script);
+    } else {
+      var event = document.createEvent('Event');
+      event.initEvent(INJECT_SCRIPT_EVENT_NAME, true, true);
+      docElement.setAttribute(INJECTED_SCRIPT_ATTR_NAME, source);
+      docElement.dispatchEvent(event);
+    }
+  }
+}
+
+/**
+ * Injects script from content script to the page.
+ * @param scriptFunction a function object or string, it will be converted to
+ *     string and inject into the page as eval('(string of scriptFunction)()')
+ */
+function addScriptToInject(scriptFunction, debug) {
+  addSourceToInject('(' + scriptFunction.toString() + ')()', debug);
 }
