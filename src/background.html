@@ -12,7 +12,9 @@
  */
 const ICON_PATH = {
   'normal': 'icon_normal.png',
-  'warning': 'icon_warning.png'
+  'ok': 'icon_ok.png',
+  'warning': 'icon_warning.png',
+  'error': 'icon_error.png'
 };
 function setBrowserAction(status, tabId) {
   chrome.browserAction.setIcon({
@@ -35,6 +37,7 @@ function DetectionResult() {
   this.totalWarnings = 0;
   this.detected = false;
   this.annotatedProblems = {};
+  this.browserActionStatus = 'ok';
 }
 
 function Problem(severity, description) {
@@ -76,10 +79,19 @@ function addCompatibilityResult(tabId, issue) {
 
     detectionResult.totalProblems++;
 
-    if (severity == 'error')
+    if (severity == 'error') {
+      if (detectionResult.browserActionStatus != severity) {
+        detectionResult.browserActionStatus = severity;
+        setBrowserAction(severity, tabId);
+      }
       detectionResult.totalErrors++;
-    else
+    } else {
+      if (detectionResult.browserActionStatus == 'ok') {
+        detectionResult.browserActionStatus = severity;
+        setBrowserAction(severity, tabId);
+      }
       detectionResult.totalWarnings++;
+    }
   }
   problem.occurrencesNumber = issue.occurrencesNumber;
 
@@ -137,6 +149,9 @@ function annotate(problems) {
 chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
   var tabId = sender.tab.id;
   switch (request.type) {
+    case 'setStatus':
+      setBrowserAction(request.status, tabId)
+      break;
     case 'CompatibilityResult':
       addCompatibilityResult(tabId, request);
       break;

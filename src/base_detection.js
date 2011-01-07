@@ -1,10 +1,11 @@
 var detectionType = 'base';
+if (window.sessionStorage['chrome_comp_detection_status'] == 'enabled') {
+  detectionType = 'advanced';
+}
 var summaryInformation = null;
-/**
- * @ chrome.extension.onRequest.addListener
- */
+
 chrome.extension.onRequest.addListener(function(request, sender, response) {
-  console.log('CS.onRequest: ', JSON.stringify(request), detectionType);
+  // console.log('CS.onRequest: ', JSON.stringify(request), detectionType);
   switch (request.type) {
     case 'checkPermission':
       response();
@@ -23,7 +24,7 @@ chrome.extension.onRequest.addListener(function(request, sender, response) {
 });
 
 /**
- * @ baseDetection
+ * Base detection.
  */
 function baseDetection() {
   var HTMLDeprecatedTag = {
@@ -250,7 +251,8 @@ function baseDetection() {
     },
     'documentMode': {
       'getPageDTD': function() {
-        summaryInformation.documentMode.pageDTD = document.doctype ? true : false;
+        summaryInformation.documentMode.pageDTD =
+            document.doctype ? true : false;
       },
       'getCompatMode': function() {
         function hasCommentBeforeDTD() {
@@ -451,6 +453,23 @@ function baseDetection() {
   infoManager.DOM.getDOMCount();
   infoManager.documentMode.getCompatMode();
   infoManager.DOM.getIECondComm(document.documentElement);
+
+  var status = 'ok';
+  if (!summaryInformation.documentMode.pageDTD ||
+      (summaryInformation.documentMode.pageDTD &&
+      (summaryInformation.documentMode.strangeName ||
+      summaryInformation.documentMode.strangePublicId ||
+      summaryInformation.documentMode.strangeSystemId ||
+      summaryInformation.documentMode.hasCommentBeforeDTD ||
+      !(summaryInformation.documentMode.compatMode.IE ==
+      summaryInformation.documentMode.compatMode.WebKit &&
+      summaryInformation.documentMode.compatMode.IE == 'S'))) ||
+      summaryInformation.DOM.IECondComm.length ||
+      Object.keys(summaryInformation.HTMLBase.HTMLDeprecatedTag).length ||
+      Object.keys(summaryInformation.HTMLBase.HTMLDeprecatedAttribute).length) {
+    status = 'warning';
+  }
+  chrome.extension.sendRequest({type: 'setStatus', status: status});
 
   return summaryInformation;
 }
