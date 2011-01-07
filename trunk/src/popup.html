@@ -256,7 +256,6 @@ void function() {
      * Show base detection resault.
      */
     function showBaseDetectionResault(data) {
-      backgroundPage.setBrowserAction('warning', tabId);
       $content.className = 'processing';
       var result = [];
 
@@ -342,7 +341,7 @@ void function() {
       if (deprecatedAttributesLength) {
         for (var i = 0; i < deprecatedAttributesLength; ++i) {
           var tagListString = [];
-          var attrs = 
+          var attrs =
               data.HTMLBase.HTMLDeprecatedAttribute[deprecatedAttributes[i]];
           for (var attr in attrs) {
             tagListString.push(attr);
@@ -407,6 +406,12 @@ void function() {
       chrome.tabs.sendRequest(tabId, {type: 'getDetectionType'},
           function(detectionType) {
           setStatus(detectionType ? detectionType : 'loading');
+          // If the page reloaded for advanced detect, the pop-up page's status
+          // will be 'advanced', but base detection must run, the BrowserAction
+          // need the detection result.
+          if (detectionType == 'advanced' && $baseDetection.innerHTML == '') {
+            baseDetection();
+          }
       });
 
       // Change status when tab loaded or refreshed.
@@ -414,7 +419,14 @@ void function() {
         if (tabId == updatedTabId) {
           if (changeInfo.status == 'complete') {
             $baseDetection.innerHTML = '';
-            checkPermission(function() {setStatus('base');});
+            checkPermission(function() {
+              chrome.tabs.sendRequest(tabId, {type: 'getDetectionType'},
+                  function(detectionType) {
+                    // Same with "Get current tab's detectionType" part.
+                    if (detectionType == 'advanced') baseDetection();
+                    setStatus(detectionType);
+              });
+            });
           } else {
             setStatus('loading');
           }
@@ -434,7 +446,7 @@ void function() {
         }
       });
 
-      // Base dtection.
+      // Base detection.
       baseDetection = function() {
         chrome.tabs.sendRequest(tabId, {type: 'baseDetection'},
             showBaseDetectionResault);
@@ -487,7 +499,7 @@ void function() {
                                               calledByAddProblem) {
         var occurrencesNumber = problem.occurrencesNumber;
         // Prevent adding one problem repeatedly.
-        if (calledByAddProblem && 
+        if (calledByAddProblem &&
             detectionResult.problems[typeId] &&
             occurrencesNumber ==
                 detectionResult.problems[typeId].occurrencesNumber)
@@ -587,7 +599,7 @@ void function() {
         });
         restoreCheckAll(document.getElementsByName('warning'), 'warning');
         restoreCheckAll(document.getElementsByName('error'), 'error');
-        
+
         function restoreCheckAll(checkboxes, type) {
           for (var i = 0, length = checkboxes.length; i < length; ++i) {
             if (!checkboxes[i].checked)
