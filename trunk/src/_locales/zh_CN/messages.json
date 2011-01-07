@@ -28,8 +28,8 @@
   "showAnnotations": { "message": "点击图标显示标注" },
   "normalTitleText": { "message": "点击此按钮开始检测本页面的兼容性问题" },
   "okTitleText": { "message": "暂时没有发现问题" },
-  "warningTitleText": { "message": "发现警告级别的问题" },
-  "errorTitleText": { "message": "发现错误级别的问题" },
+  "warningTitleText": { "message": "发现警告级别的问题\n点击查看" },
+  "errorTitleText": { "message": "发现错误级别的问题\n点击查看" },
 
   "popup_cannotDetect": { "message": "不能检测本页面。" },
   "popup_loading": { "message": "页面加载中，请稍候……" },
