@@ -27,7 +27,9 @@
   "hideAnnotations": { "message": "点击图标隐藏标注" },
   "showAnnotations": { "message": "点击图标显示标注" },
   "normalTitleText": { "message": "点击此按钮开始检测本页面的兼容性问题" },
-  "warningTitleText": { "message": "已有检测结果\n点击查看" },
+  "okTitleText": { "message": "暂时没有发现问题" },
+  "warningTitleText": { "message": "发现警告级别的问题" },
+  "errorTitleText": { "message": "发现错误级别的问题" },
 
   "popup_cannotDetect": { "message": "不能检测本页面。" },
   "popup_loading": { "message": "页面加载中，请稍候……" },
@@ -37,7 +39,7 @@
   "popup_noProblem": { "message": "目前没有发现兼容性问题。" },
   "popup_issueDescription": { "message": "问题描述" },
   "popup_issueCount": { "message": "问题数量" },
-  "popup_checkboxEffectTip": {"message": "注：选中问题对应的复选框可在页面上标注问题节点，并显示单个问题的详细信息。"},
+  "popup_checkboxEffectTip": {"message": "提示：选中问题对应的复选框可在页面上标注问题节点，并显示单个问题的详细信息。"},
 
   "bd_aboutRCAorKB": { "message": "更多内容请参见：" },
   "bd_hasDTD": { "message": "本页设置了 DTD。" },
