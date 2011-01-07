@@ -1865,11 +1865,8 @@ chrome_comp.CompDetect.ScanDomBaseDetector.prototype.canCheckNow = function() {
   return this.gatherAllProblemNodes_ || !this.hasProblem_;
 };
 
-//window.addEventListener('load',
-//    chrome_comp.CompDetect.diagnoseCompatibilityIssues, false);
-document.documentElement.addEventListener('chrome_comp_checkNode', function() {
-  chrome_comp.CompDetect.diagnoseCompatibilityIssues();
-}, false);
+window.addEventListener('load',
+    chrome_comp.CompDetect.diagnoseCompatibilityIssues, false);
 window.addEventListener('unload',
     chrome_comp.CompDetect.cleanUpDetectors, false);
 

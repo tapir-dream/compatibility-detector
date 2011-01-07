@@ -26,19 +26,137 @@ function setBrowserAction(status, tabId) {
 }
 
 // Each page's information.
-var detections = { };
+var gDetectionResults = { };
+
+function DetectionResult() {
+  this.problems = {};
+  this.totalProblems = 0;
+  this.totalErrors = 0;
+  this.totalWarnings = 0;
+  this.detected = false;
+  this.annotatedProblems = {};
+}
+
+function Problem(severity, description) {
+  this.severity = severity;
+  this.description = description;
+  this.occurrencesNumber = 0;
+}
+
+function getDetectionResult(tabId) {
+  var detectionResult = gDetectionResults[tabId];
+  if (!detectionResult) {
+    detectionResult = new DetectionResult();
+    gDetectionResults[tabId] = detectionResult;
+  }
+  return detectionResult;
+}
+
+function getPopup() {
+  return chrome.extension.getViews({type: 'popup'})[0];
+}
+
+/**
+ * Add compatibility problem detection result to cache and show in popup page
+ * if popup page is opened.
+ * @param {Number} tabId
+ * @param {Object} issue
+ */
+function addCompatibilityResult(tabId, issue) {
+  var detectionResult = getDetectionResult(tabId);
+  var reason = issue.reason;
+  var problem = detectionResult.problems[reason];
+  var isNewProblem = false;
+  var severity;
+  if (!problem) {
+    isNewProblem = true;
+    severity = issue.severity;
+    problem = new Problem(severity, issue.description);
+    detectionResult.problems[reason] = problem;
+
+    detectionResult.totalProblems++;
+
+    if (severity == 'error')
+      detectionResult.totalErrors++;
+    else
+      detectionResult.totalWarnings++;
+  }
+  problem.occurrencesNumber = issue.occurrencesNumber;
+
+  // Show result if popup page is opened.
+  var popup = getPopup();
+  if (popup && popup.updateDetectionResult) {
+    popup.updateDetectionResult(reason, problem, true);
+    if (isNewProblem && popup.updateSummary)
+      popup.updateSummary(severity);
+  }
+}
+
+function stopAddingDetectionResult(tabId, totalProblems) {
+  var detectionResult = getDetectionResult(tabId);
+  detectionResult.detected = true;
+
+  var popup = getPopup();
+  // If totalProblems is 0, show no compatibility problems found infomation.
+  if (totalProblems == 0 && popup) {
+    popup.showNoProblemResult();
+  } else {
+    annotateAllIssues(tabId);
+  }
+}
+
+
+function annotateAllIssues(tabId) {
+  var detectionResult = getDetectionResult(tabId);
+  var problems = Object.keys(detectionResult.problems);
+  problems.forEach(function(typeId) {
+    detectionResult.annotatedProblems[typeId] = typeId;
+  });
+  annotate(problems);
+  var popup = getPopup();
+  if (popup && popup.restoreAnnotationCheck) {
+    popup.restoreAnnotationCheck();
+  }
+}
+
+// Annotate problems on the target node in the page
+function annotate(problems) {
+  chrome.tabs.getSelected(null, function(tab) {
+    var tabId = tab.id;
+    chrome.tabs.sendRequest(tabId, { type: 'AnnotationOff' }, function() {
+      if (problems.length) {
+        chrome.tabs.sendRequest(tabId, {
+          type: 'AnnotationOn',
+          issusId: problems
+        });
+      }
+    });
+  });
+}
+
+chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+  var tabId = sender.tab.id;
+  switch (request.type) {
+    case 'CompatibilityResult':
+      addCompatibilityResult(tabId, request);
+      break;
+    case 'EndOfDetection':
+      stopAddingDetectionResult(tabId, request.totalProblems);
+      break;
+  }
+});
 
 // Change status when tab loaded or refreshed.
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
   if (changeInfo.status == 'loading') {
-    delete detections[tabId];
+    delete gDetectionResults[tabId];
     setBrowserAction('normal', tabId);
   }
 });
 
 // Delete tab's information when tab closed.
 chrome.tabs.onRemoved.addListener(function(tabId) {
-  delete detections[tabId];
+  delete gDetectionResults[tabId];
 });
 </script>
 </body>

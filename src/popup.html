@@ -187,6 +187,11 @@ tr > td:first-child, tr > th:first-child {
 #detectionResult > div {
   margin-top: 5px;
 }
+
+#detectionResult > p {
+  color:#999;
+  font-size: 12px;
+}
 </style>
 <script type="text/javascript">
 void function() {
@@ -204,7 +209,7 @@ void function() {
     w3helpLocale = DEFAULT_LOCALE;
   w3helpLocale = 'http://www.w3help.org/' + w3helpLocale;
 
-  function StringTemplate(param) {
+  function stringTemplate(param) {
     return param.str.replace(param.regexp || /\${([^{}]*)}/g,
         function(a,b) {
           var r = param.obj[b];
@@ -216,9 +221,9 @@ void function() {
     return document.getElementById(id);
   }
 
-  function bulidHTMLView(templateObject,element) {
+  function bulidHTMLView(templateObject, element) {
     var HTMTemplate = element.innerHTML;
-    element.innerHTML = StringTemplate({
+    element.innerHTML = stringTemplate({
       str: HTMTemplate,
       obj: templateObject
     });
@@ -230,12 +235,14 @@ void function() {
       popup_cannotDetect: chrome.i18n.getMessage('popup_cannotDetect'),
       popup_loading: chrome.i18n.getMessage('popup_loading'),
       popup_baseDetection: chrome.i18n.getMessage('popup_baseDetection'),
-      popup_advancedDetection: chrome.i18n.getMessage('popup_advancedDetection'),
+      popup_advancedDetection: chrome.i18n.getMessage(
+          'popup_advancedDetection'),
       popup_detecting: chrome.i18n.getMessage('popup_detecting'),
       popup_noProblem: chrome.i18n.getMessage('popup_noProblem'),
       popup_issueDescription: chrome.i18n.getMessage('popup_issueDescription'),
-      popup_issueCount: chrome.i18n.getMessage('popup_issueCount')
-    },$('warp'));
+      popup_issueCount: chrome.i18n.getMessage('popup_issueCount'),
+      popup_checkboxEffectTip: chrome.i18n.getMessage('popup_checkboxEffectTip')
+    }, $('warp'));
 
     var $body = document.body;
     var $tab = $('tab');
@@ -298,7 +305,7 @@ void function() {
         }
       } else {
         result.push('<li>' + chrome.i18n.getMessage('bd_noDTD', [
-          '<strong>' + chrome.i18n.getMessage('bd_different') + '</strong>'
+          '<strong>' + chrome.i18n.getMessage('bd_Q') + '</strong>'
         ]) + chrome.i18n.getMessage('bd_reducePossibility') + '</li>');
       }
       // Process data.DOM to HTML
@@ -314,11 +321,11 @@ void function() {
             ]) + '</li>');
       // Process data.HTMLBase.HTMLDeprecatedTag to HTML
       var deprecatedTag = [];
-      for (var i in data.HTMLBase.HTMLDeprecatedTag) {
-        deprecatedTag.push(i);
+      for (var tag in data.HTMLBase.HTMLDeprecatedTag) {
+        deprecatedTag.push(tag);
       }
       if (deprecatedTag.length) {
-        for (var i = 0; i < deprecatedTag.length; i++) {
+        for (var i = 0; i < deprecatedTag.length; ++i) {
           result.push('<li>' +
               chrome.i18n.getMessage('bd_hasDeprecatedTag', [
                 '<strong>' + deprecatedTag[i] + '</strong>'
@@ -329,16 +336,20 @@ void function() {
             chrome.i18n.getMessage('bd_noDeprecatedTag') + '</li>');
       }
       // Process data.HTMLBase.HTMLDeprecatedAttribute to HTML
-      var deprecatedAttribute = Object.keys(data.HTMLBase.HTMLDeprecatedAttribute);
-      if (deprecatedAttribute.length) {
-        for (var i = 0; i < deprecatedAttribute.length; i++) {
+      var deprecatedAttributes =
+          Object.keys(data.HTMLBase.HTMLDeprecatedAttribute);
+      var deprecatedAttributesLength = deprecatedAttributes.length;
+      if (deprecatedAttributesLength) {
+        for (var i = 0; i < deprecatedAttributesLength; ++i) {
           var tagListString = [];
-          for (var j in data.HTMLBase.HTMLDeprecatedAttribute[deprecatedAttribute[i]]) {
-            tagListString.push(j);
+          var attrs = 
+              data.HTMLBase.HTMLDeprecatedAttribute[deprecatedAttributes[i]];
+          for (var attr in attrs) {
+            tagListString.push(attr);
           }
           result.push('<li>' +
               chrome.i18n.getMessage('bd_hasDeprecatedAttribute',[
-                '<strong>' + deprecatedAttribute[i] + '</strong>',
+                '<strong>' + deprecatedAttributes[i] + '</strong>',
                 '<strong>' + tagListString.join(' ') + '</strong>'
               ]) + '</li>');
         }
@@ -429,29 +440,19 @@ void function() {
             showBaseDetectionResault);
       }
 
-      var detections = backgroundPage.detections;
-      var detection = detections[tabId];
-      if (!detection) {
-        detection = {
-          problems: { },
-          totalProblems: 0,
-          actualTotalProblems: 0,
-          totalErrors: 0,
-          totalWarnings: 0,
-          enabled: false,
-          detected: false,
-          annotatedProblems: { }
-        };
-        detections[tabId] = detection;
+      var detectionResult = backgroundPage.getDetectionResult(tabId);
+
+      function detectProblems() {
+        chrome.tabs.sendRequest(tabId, {type: 'DetectProblems'});
       }
 
       /**
        * Advanced detection.
        */
       window.advancedDetection = function() {
-        detection.enabled = true;
-        if (detection.detected) {
-          var problems = detection.problems;
+        // If detection finished, then show result from cache.
+        if (detectionResult.detected) {
+          var problems = detectionResult.problems;
           if (Object.keys(problems).length == 0) {
             showNoProblemResult();
           } else {
@@ -463,76 +464,35 @@ void function() {
             restoreAnnotationCheck();
           }
         } else {
-          $content.className = 'processing';
           detectProblems();
         }
       }
-
-      function detectProblems() {
-        chrome.tabs.sendRequest(tabId, { type: 'CheckNode'});
-      }
-
-      function addCompatibilityResult(issue) {
-        var typeId = issue.reason;
-        var problem = detection.problems[typeId];
-        var isNewProblem = false;
-        var severity;
-        if (!problem) {
-          isNewProblem = true;
-          severity = issue.severity;
-          problem = {};
-          problem.severity = severity;
-          problem.description = issue.description;
-          detection.problems[typeId] = problem;
-          detection.totalProblems++;
-          severity == 'error' ? detection.totalErrors++ :
-              detection.totalWarnings++;
-        }
-        problem.occurrencesNumber = issue.occurrencesNumber;
-
-        if (detection.enabled) {
-          updateDetectionResult(typeId, problem);
-          isNewProblem && updateSummary(severity);
-        }
-      }
-
-      function setEndOfDetection(totalProblems) {
-        detection.actualTotalProblems = totalProblems;
-        if (detection.totalProblems == totalProblems)
-          detection.detected = true;
-        // If totalProblems is 0, show no compatibility problems found infomation
-        if (totalProblems == 0)
-          showNoProblemResult();
-      }
-
-      chrome.extension.onRequest.addListener(function(request,
-                                                      sender,
-                                                      sendResponse) {
-        switch (request.type) {
-          case 'CompatibilityResult':
-            addCompatibilityResult(request);
-            break;
-          case 'EndOfDetection':
-            setEndOfDetection(request.totalProblems);
-            break;
-        }
-      });
 
       /**
        * function updateSummary
        * @param {error | warning} type
        */
-      function updateSummary(type) {
+      window.updateSummary = function(type) {
         var number = type == 'warning' ? 'totalWarnings' : 'totalErrors';
         var summary = chrome.i18n.getMessage(type + 'ProblemsSummary',
-            [detection[number]]);
+            [detectionResult[number]]);
         var allProblemsSummary = chrome.i18n.getMessage('allProblemsSummary',
-            [detection.totalProblems]);
+            [detectionResult.totalProblems]);
         $(type + 'ProblemsSummary').innerHTML = summary;
         $('allProblemsSummary').innerHTML = allProblemsSummary;
       }
 
-      function updateDetectionResult(typeId, problem) {
+      window.updateDetectionResult = function(typeId,
+                                              problem,
+                                              calledByAddProblem) {
+        var occurrencesNumber = problem.occurrencesNumber;
+        // Prevent adding one problem repeatedly.
+        if (calledByAddProblem && 
+            detectionResult.problems[typeId] &&
+            occurrencesNumber ==
+                detectionResult.problems[typeId].occurrencesNumber)
+          return;
+
         var severity = problem.severity;
         $content.className = '';
         $('detectionResult').style.display = 'block';
@@ -540,7 +500,7 @@ void function() {
         var table = $(severity + 'Problems').firstElementChild;
         var problemRow = $(typeId);
         if (problemRow) {
-          problemRow.cells[2].innerText = problem.occurrencesNumber;
+          problemRow.cells[2].innerText = occurrencesNumber;
         } else {
           var row = document.createElement('tr');
           row.setAttribute('id', typeId);
@@ -559,7 +519,7 @@ void function() {
         }
       }
 
-      function showNoProblemResult() {
+      window.showNoProblemResult = function() {
         $content.className = '';
         $('noProblemFoundInfo').style.display = 'block';
       }
@@ -569,7 +529,7 @@ void function() {
        * @param {Array} checkboxes
        */
       function updateAnnotatedStatus(checkboxes) {
-        var annotatedProblems = detection.annotatedProblems;
+        var annotatedProblems = detectionResult.annotatedProblems;
         checkboxes.forEach(function(checkbox) {
           var issueId = checkbox.parentNode.parentNode.id;
           if (annotatedProblems[issueId] && !checkbox.checked)
@@ -580,14 +540,20 @@ void function() {
         return Object.keys(annotatedProblems);
       }
 
-      // Handle one checkbox click event
+      /**
+       * Handle one checkbox click event.
+       */
       function toggleCheckProblem() {
         var annotatedProblems = updateAnnotatedStatus([this]);
-        annotate(annotatedProblems);
+        backgroundPage.annotate(annotatedProblems);
         updateCheckAllStatus(this);
       }
 
-      // Handle check all or check no checkbox click event
+      /**
+       * Handle check all or check no checkbox click event.
+       * @param {Element} checkAll
+       * @param {String} type
+       */
       function toggleCheckAllProblems(checkAll, type) {
         var checkboxes =
             Array.prototype.slice.call(document.getElementsByName(type));
@@ -596,14 +562,14 @@ void function() {
           checkbox.checked = checked;
         });
         var problems = updateAnnotatedStatus(checkboxes);
-        annotate(problems);
+        backgroundPage.annotate(problems);
       }
 
       function updateCheckAllStatus(checkbox) {
         var checkAll = $(checkbox.name + 'CheckAll');
         if (checkbox.checked) {
           var checkboxes = document.getElementsByName(checkbox.name);
-          for (var i = 0, l = checkboxes.length; i < l; i++) {
+          for (var i = 0, length = checkboxes.length; i < length; ++i) {
             if (!checkboxes[i].checked) {
               return;
             }
@@ -614,22 +580,21 @@ void function() {
         }
       }
 
-      // Annotate problems on the target node in the page
-      function annotate(problems) {
-        chrome.tabs.sendRequest(tabId, { type: 'AnnotationOff' }, function() {
-          if (problems.length) {
-            chrome.tabs.sendRequest(tabId, {
-              type: 'AnnotationOn',
-              issusId: problems
-            });
-          }
-        });
-      }
-
       function restoreAnnotationCheck() {
-        Object.keys(detection.annotatedProblems).forEach(function(issueId) {
+        var annotatedProblems = detectionResult.annotatedProblems;
+        Object.keys(annotatedProblems).forEach(function(issueId) {
           $(issueId).firstElementChild.firstElementChild.checked = true;
         });
+        restoreCheckAll(document.getElementsByName('warning'), 'warning');
+        restoreCheckAll(document.getElementsByName('error'), 'error');
+        
+        function restoreCheckAll(checkboxes, type) {
+          for (var i = 0, length = checkboxes.length; i < length; ++i) {
+            if (!checkboxes[i].checked)
+              return;
+          }
+          $(type + 'CheckAll').checked = true;
+        }
       }
 
       $('errorCheckAll').addEventListener('click', function() {
@@ -687,6 +652,7 @@ void function() {
         </tbody>
         </table>
       </div>
+      <p>${popup_checkboxEffectTip}</p>
     </div>
     </ul>
   </article>
