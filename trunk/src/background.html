@@ -30,7 +30,8 @@ function setBrowserAction(status, tabId) {
 // Each page's information.
 var gDetectionResults = { };
 
-function DetectionResult() {
+function DetectionResult(tabId) {
+  this.tabId = tabId;
   this.problems = {};
   this.totalProblems = 0;
   this.totalErrors = 0;
@@ -40,16 +41,43 @@ function DetectionResult() {
   this.browserActionStatus = 'ok';
 }
 
+DetectionResult.prototype.addProblem = function(problem, reason) {
+  this.problems[reason] = problem;
+  this.totalProblems++;
+  var severity = problem.severity;
+  if (severity == 'error') {
+    this.totalErrors++;
+    if (this.browserActionStatus != severity) {
+      this.browserActionStatus = severity;
+      setBrowserAction(severity, this.tabId);
+    }
+  } else {
+    this.totalWarnings++;
+    if (this.browserActionStatus == 'ok') {
+      this.browserActionStatus = severity;
+      setBrowserAction(severity, this.tabId);
+    }
+  }
+};
+
+DetectionResult.prototype.getProblem = function(reason) {
+  return this.problems[reason];
+}
+
 function Problem(severity, description) {
   this.severity = severity;
   this.description = description;
   this.occurrencesNumber = 0;
 }
 
+Problem.prototype.setOccurrencesNumber = function(number) {
+  this.occurrencesNumber = number;
+};
+
 function getDetectionResult(tabId) {
   var detectionResult = gDetectionResults[tabId];
   if (!detectionResult) {
-    detectionResult = new DetectionResult();
+    detectionResult = new DetectionResult(tabId);
     gDetectionResults[tabId] = detectionResult;
   }
   return detectionResult;
@@ -65,41 +93,25 @@ function getPopup() {
  * @param {Number} tabId
  * @param {Object} issue
  */
-function addCompatibilityResult(tabId, issue) {
+function addDetectedProblemToResult(tabId, issue) {
   var detectionResult = getDetectionResult(tabId);
   var reason = issue.reason;
-  var problem = detectionResult.problems[reason];
+  var problem = detectionResult.getProblem(reason);
   var isNewProblem = false;
   var severity;
   if (!problem) {
     isNewProblem = true;
     severity = issue.severity;
     problem = new Problem(severity, issue.description);
-    detectionResult.problems[reason] = problem;
-
-    detectionResult.totalProblems++;
-
-    if (severity == 'error') {
-      if (detectionResult.browserActionStatus != severity) {
-        detectionResult.browserActionStatus = severity;
-        setBrowserAction(severity, tabId);
-      }
-      detectionResult.totalErrors++;
-    } else {
-      if (detectionResult.browserActionStatus == 'ok') {
-        detectionResult.browserActionStatus = severity;
-        setBrowserAction(severity, tabId);
-      }
-      detectionResult.totalWarnings++;
-    }
+    detectionResult.addProblem(problem, reason);
   }
-  problem.occurrencesNumber = issue.occurrencesNumber;
+  problem.setOccurrencesNumber(issue.occurrencesNumber);
 
   // Show result if popup page is opened.
   var popup = getPopup();
-  if (popup && popup.updateDetectionResult) {
+  if (popup) {
     popup.updateDetectionResult(reason, problem, true);
-    if (isNewProblem && popup.updateSummary)
+    if (isNewProblem)
       popup.updateSummary(severity);
   }
 }
@@ -117,7 +129,6 @@ function stopAddingDetectionResult(tabId, totalProblems) {
   }
 }
 
-
 function annotateAllIssues(tabId) {
   var detectionResult = getDetectionResult(tabId);
   var problems = Object.keys(detectionResult.problems);
@@ -125,13 +136,12 @@ function annotateAllIssues(tabId) {
     detectionResult.annotatedProblems[typeId] = typeId;
   });
   annotate(problems);
-  var popup = getPopup();
-  if (popup && popup.restoreAnnotationCheck) {
-    popup.restoreAnnotationCheck();
-  }
 }
 
-// Annotate problems on the target node in the page
+/**
+ * Annotate problems on the target node in the page
+ * @param {Array} problems
+ */
 function annotate(problems) {
   chrome.tabs.getSelected(null, function(tab) {
     var tabId = tab.id;
@@ -140,6 +150,11 @@ function annotate(problems) {
         chrome.tabs.sendRequest(tabId, {
           type: 'AnnotationOn',
           issusId: problems
+        }, function() {
+          var popup = getPopup();
+          if (popup) {
+            popup.restoreAnnotationCheck();
+          }
         });
       }
     });
@@ -153,7 +168,7 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
       setBrowserAction(request.status, tabId)
       break;
     case 'CompatibilityResult':
-      addCompatibilityResult(tabId, request);
+      addDetectedProblemToResult(tabId, request);
       break;
     case 'EndOfDetection':
       stopAddingDetectionResult(tabId, request.totalProblems);
