@@ -147,7 +147,9 @@ void function() {
         for (var i = 0; i < tagsLength; ++i) {
           var tagListString = [];
           var attrs =
-              data.HTMLBase.HTMLDeprecatedAttribute[tagsHaveDeprecatedAttributes[i]];
+              data.HTMLBase.HTMLDeprecatedAttribute[
+                tagsHaveDeprecatedAttributes[i]
+              ];
           for (var attr in attrs) {
             tagListString.push(attr);
           }
@@ -188,7 +190,6 @@ void function() {
       }
     }
 
-
     var tabId = null;
     var baseDetection = null;
     window.updateSummary = function() {};
@@ -199,13 +200,20 @@ void function() {
       // Get current tab's id, many functions need it.
       tabId = tab.id;
 
+      /**
+       * Check whether the content script exists. If not, detection will be
+       * disabled. Can't check by url, because some url is an exception, like
+       * https://chrome.google.com/extensions?hl=zh-CN
+       */
       function checkPermission(callback) {
         var timer = setTimeout(function() {
           $body.className = 'disabled';
-        }, 100);
+        }, 300);
         chrome.tabs.sendRequest(tabId, {type: 'checkPermission'}, function() {
           clearTimeout(timer);
-          if (callback) callback();
+          if (callback) {
+            callback();
+          }
         });
       }
       checkPermission();
@@ -231,9 +239,11 @@ void function() {
               chrome.tabs.sendRequest(tabId, {type: 'getDetectionType'},
                   function(detectionType) {
                     // Same with "Get current tab's detectionType" part.
-                    if (detectionType == 'advanced') baseDetection();
+                    if (detectionType == 'advanced') {
+                      baseDetection();
+                    }
                     setStatus(detectionType);
-              });
+                  });
             });
           } else {
             setStatus('loading');
@@ -249,8 +259,8 @@ void function() {
           chrome.tabs.sendRequest(tabId,
               {type: 'setDetectionType', detectionType: status},
               function(detectionType) {
-            setStatus(detectionType);
-          });
+                setStatus(detectionType);
+              });
         }
       });
 
