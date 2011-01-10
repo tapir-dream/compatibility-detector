@@ -5,7 +5,6 @@ if (window.sessionStorage['chrome_comp_detection_status'] == 'enabled') {
 var summaryInformation = null;
 
 chrome.extension.onRequest.addListener(function(request, sender, response) {
-  // console.log('CS.onRequest: ', JSON.stringify(request), detectionType);
   switch (request.type) {
     case 'checkPermission':
       response();
