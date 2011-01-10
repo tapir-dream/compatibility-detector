@@ -468,7 +468,9 @@ function baseDetection() {
       Object.keys(summaryInformation.HTMLBase.HTMLDeprecatedAttribute).length) {
     status = 'warning';
   }
-  chrome.extension.sendRequest({type: 'setStatus', status: status});
-
+  chrome.extension.sendRequest({
+    type: 'setStatus',
+    status: status
+  });
   return summaryInformation;
 }

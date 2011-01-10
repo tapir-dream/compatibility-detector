@@ -16,7 +16,38 @@ const ICON_PATH = {
   'warning': 'icon_warning.png',
   'error': 'icon_error.png'
 };
+
+const DETECTION_COMPAT_STATUS_OF_PRIORITY = {
+  'normal': 0,
+  'ok': 1,
+  'warning': 2,
+  'error': 3
+};
+
+function getDetectionCompatStatus(tabId) {
+  var detectionResult = getDetectionResult(tabId);
+  if (detectionResult)
+    return detectionResult.detectionCompatStatus;
+  else
+    return 'normal';
+}
+
+function setDetectionCompatStatus(tabId, status) {
+  var detectionResult = getDetectionResult(tabId);
+  if (detectionResult)
+    detectionResult.detectionCompatStatus = status;
+}
+
+function getDetectionCompatStatusOfPriority(tabId, status) {
+  var currentUrlDetectionStatus = getDetectionCompatStatus(tabId);
+  return DETECTION_COMPAT_STATUS_OF_PRIORITY[currentUrlDetectionStatus] >=
+      DETECTION_COMPAT_STATUS_OF_PRIORITY[status] ?
+      currentUrlDetectionStatus : status;
+}
+
 function setBrowserAction(status, tabId) {
+  status = getDetectionCompatStatusOfPriority(tabId, status);
+  setDetectionCompatStatus(tabId, status);
   chrome.browserAction.setIcon({
     path: ICON_PATH[status],
     tabId: tabId
@@ -39,6 +70,7 @@ function DetectionResult(tabId) {
   this.detected = false;
   this.annotatedProblems = {};
   this.browserActionStatus = 'ok';
+  this.detectionCompatStatus = 'normal';
 }
 
 DetectionResult.prototype.addProblem = function(problem, reason) {
@@ -165,7 +197,7 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
   var tabId = sender.tab.id;
   switch (request.type) {
     case 'setStatus':
-      setBrowserAction(request.status, tabId)
+      setBrowserAction(request.status, tabId);
       break;
     case 'CompatibilityResult':
       addDetectedProblemToResult(tabId, request);
