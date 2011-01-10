@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-var detectionStatus = window.sessionStorage['chrome_comp_detection_status'];
+var detectionEnabled =
+    window.sessionStorage['chrome_comp_detection_status'] ==
+        window.location.href;
 
-if (detectionStatus == window.location.href) {
+if (detectionEnabled) {
   
 var docElement = document.documentElement;
 
@@ -110,7 +112,7 @@ function checkNode() {
 */
 
 function detectProblems() {
-  if (detectionStatus != window.location.href) {
+  if (!detectionEnabled) {
     window.sessionStorage['chrome_comp_detection_status'] =
         window.location.href;
     window.location.reload();
@@ -124,7 +126,7 @@ docElement.addEventListener('chrome_comp_reportProblem', function() {
 */
 
 function addSourceToInject(source, debug) {
-  if (detectionStatus == window.location.href) {
+  if (detectionEnabled) {
     inject();
   }
   function inject() {
