@@ -16,7 +16,7 @@
 
 var detectionStatus = window.sessionStorage['chrome_comp_detection_status'];
 
-if (detectionStatus == 'enabled') {
+if (detectionStatus == window.location.href) {
   
 var docElement = document.documentElement;
 
@@ -110,8 +110,9 @@ function checkNode() {
 */
 
 function detectProblems() {
-  if (!detectionStatus) {
-    window.sessionStorage['chrome_comp_detection_status'] = 'enabled';
+  if (detectionStatus != window.location.href) {
+    window.sessionStorage['chrome_comp_detection_status'] =
+        window.location.href;
     window.location.reload();
   }
 }
@@ -123,7 +124,7 @@ docElement.addEventListener('chrome_comp_reportProblem', function() {
 */
 
 function addSourceToInject(source, debug) {
-  if (detectionStatus == 'enabled') {
+  if (detectionStatus == window.location.href) {
     inject();
   }
   function inject() {
