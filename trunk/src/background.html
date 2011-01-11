@@ -116,8 +116,16 @@ function getPopup() {
  * @param {Object} issue
  */
 function addDetectedProblemToResult(tabId, issue) {
-  var detectionResult = getDetectionResult(tabId);
   var reason = issue.reason;
+  // First show result if popup page is opened, consider all detection result
+  // cache has shown on the popup page this time, so it can't add one problem
+  // repeatedly.
+  var popup = getPopup();
+  if (popup) {
+    popup.updateDetectionResult(reason, issue);
+  }
+  
+  var detectionResult = getDetectionResult(tabId);
   var problem = detectionResult.getProblem(reason);
   var isNewProblem = false;
   var severity;
@@ -128,17 +136,12 @@ function addDetectedProblemToResult(tabId, issue) {
     detectionResult.addProblem(problem, reason);
   }
   problem.setOccurrencesNumber(issue.occurrencesNumber);
-
-  // Show result if popup page is opened.
-  var popup = getPopup();
-  if (popup) {
-    popup.updateDetectionResult(reason, problem, true);
-    if (isNewProblem)
-      popup.updateSummary(severity);
+  if (popup && isNewProblem) {
+    popup.updateSummary(severity);
   }
 }
 
-function stopAddingDetectionResult(tabId, totalProblems) {
+function stopAddingDetectedProblem(tabId, totalProblems) {
   var detectionResult = getDetectionResult(tabId);
   detectionResult.detected = true;
 
@@ -147,6 +150,8 @@ function stopAddingDetectionResult(tabId, totalProblems) {
   if (totalProblems == 0 && popup) {
     popup.showNoProblemResult();
   } else {
+    if (popup)
+      popup.setDetectionFinishedMessage();
     annotateAllIssues(tabId);
   }
 }
@@ -196,7 +201,7 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
       addDetectedProblemToResult(tabId, request);
       break;
     case 'EndOfDetection':
-      stopAddingDetectionResult(tabId, request.totalProblems);
+      stopAddingDetectedProblem(tabId, request.totalProblems);
       break;
   }
 });

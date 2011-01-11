@@ -154,7 +154,7 @@ article.processing > div {
 
 #detectionResult table {
   border-collapse: collapse;
-  width: 590px;
+  width: 100%;
   table-layout:fixed;
   margin: 5px 0;
 }
@@ -212,7 +212,9 @@ tr > td:first-child, tr > th:first-child {
     <ul id="advanced_detection" class="advanced">
     <div id="noProblemFoundInfo">${popup_noProblem}</div>
     <div id="detectionResult">
-      <h2 id="allProblemsSummary"></h2>
+      <h2>
+        <span id="detectionStatus">${popup_detectionStatus}</span><span id="allProblemsSummary"></span>
+      </h2>
       <div id="errorArea">
         <h3 id="errorProblemsSummary"></h3>
         <table id="errorProblems">
