@@ -122,9 +122,9 @@ function addDetectedProblemToResult(tabId, issue) {
   // repeatedly.
   var popup = getPopup();
   if (popup) {
-    popup.updateDetectionResult(reason, issue);
+    popup.updateDetectionResult(tabId, reason, issue);
   }
-  
+
   var detectionResult = getDetectionResult(tabId);
   var problem = detectionResult.getProblem(reason);
   var isNewProblem = false;

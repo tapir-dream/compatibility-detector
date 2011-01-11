@@ -36,9 +36,9 @@
   "popup_baseDetection": { "message": "基本检测" },
   "popup_advancedDetection": { "message": "高级检测" },
   "popup_detecting": { "message": "正在检测，请稍候……" },
-  "popup_noProblem": { "message": "目前没有发现兼容性问题。" },
+  "popup_noProblem": { "message": "没有发现兼容性问题。" },
   "popup_issueDescription": { "message": "问题描述" },
-  "popup_issueCount": { "message": "问题数量" },
+  "popup_issueCount": { "message": "出现次数" },
   "popup_checkboxEffectTip": {"message": "提示：选中问题对应的复选框可在页面上标注问题节点，并显示单个问题的详细信息。"},
   "popup_detectionStatus": {"message": "仍在检测中，目前"},
 
@@ -52,11 +52,11 @@
   "bd_same": { "message": "相同的" },
   "bd_different": { "message": "不同的" },
   "bd_reducePossibility": { "message": "以减少出现兼容性问题的可能。" },
-  "bd_inQuirksMode": { "message": "但渲染模式为 $1，建议使用能触发标准模式的 DTD，" },
+  "bd_inQuirksMode": { "message": "建议使用能触发标准模式的 DTD，" },
   "bd_differentDTD": { "message": "在 IE 和 Chrome 中将触发 $1 渲染模式，建议更换 DTD，" },
   "bd_noDTD": { "message": "本页没有设置 DTD，在所有浏览器中将以 $1 渲染，建议使用能触发标准模式的 DTD，" },
   "bd_nodeCount": { "message": "页面 DOM 节点总数为 $1 个。" },
-  
+
   "bd_styleTotalCount": { "message": "本页 STYLE 节点总数为 $1 个。" },
   "bd_styleNoInBodyCount": { "message": "(未放置在 HEAD 标签内的节点数为 $1 个)" },
   "bd_noStyleTotalCount": { "message": "本页中没有使用 STYLE 标签。" },
@@ -66,7 +66,7 @@
   "bd_scriptNoInBodyCount": { "message": "(未放置在 HEAD 标签内的节点数为 $1 个)" },
   "bd_noScriptTotalCount": { "message": "本页中没有使用 SCRIPT 标签。" },
   "bd_noScriptNoInBodyCount": { "message": "(本页中 SCRIPT 标签均放置在 HEAD 标签内)" },
-  
+
   "bd_IECondCommCount": { "message": "发现仅 IE 支持的条件注释 $1 个。" },
   "bd_hasDeprecatedTag": { "message": "发现过期标签 $1，不建议使用。" },
   "bd_noDeprecatedTag": { "message": "本页中没有使用任何过期标签。" },

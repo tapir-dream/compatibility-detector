@@ -65,9 +65,8 @@ void function() {
       var result = [];
 
       var KB001 = chrome.i18n.getMessage('bd_aboutRCAorKB') +
-          '<a href="' + w3helpLocale +
-          '/kb/001" target="_blank">' +
-          chrome.i18n.getMessage('KB001') + '</a>。';
+          '<a href="' + w3helpLocale + '/kb/001" target="_blank">' +
+          chrome.i18n.getMessage('KB001') + '</a>';
 
       if (data.documentMode.pageDTD) {
         result.push('<li>' + chrome.i18n.getMessage('bd_hasDTD'));
@@ -78,61 +77,46 @@ void function() {
         if (data.documentMode.hasCommentBeforeDTD)
           result.push(chrome.i18n.getMessage('bd_makeIEBeInQuirksMode') +
               chrome.i18n.getMessage('bd_aboutRCAorKB') +
-              '<a href="' + w3helpLocale +
-              '/causes/HG8001" target="_blank">' +
-              chrome.i18n.getMessage('HG8001') +
-              '</a>。');
+              '<a href="' + w3helpLocale + '/causes/HG8001" target="_blank">' +
+              chrome.i18n.getMessage('HG8001') + '</a>');
         if (data.documentMode.compatMode.IE ==
             data.documentMode.compatMode.WebKit) {
           var mode = (data.documentMode.compatMode.WebKit == 'S')
-              ? chrome.i18n.getMessage('bd_S')
-              : chrome.i18n.getMessage('bd_Q');
-          result.push(chrome.i18n.getMessage('bd_sameDTD', [
-            '<em>' + chrome.i18n.getMessage('bd_same') + '</em>',
-            '<em>'+ mode + '</em>'
-          ]));
+              ? '<em>' + chrome.i18n.getMessage('bd_S') + '</em>'
+              : '<strong>' + chrome.i18n.getMessage('bd_Q') + '</strong>';
+          result.push(chrome.i18n.getMessage('bd_sameDTD',
+              ['<em>' + chrome.i18n.getMessage('bd_same') + '</em>', mode]));
           if (data.documentMode.compatMode.WebKit == 'Q') {
-            result.push(chrome.i18n.getMessage('bd_sameDTD', [
-              '<em>' + chrome.i18n.getMessage('bd_same') + '</em>',
-              '<em>'+ mode + '</em>'
-            ]));
-            result.push(chrome.i18n.getMessage('bd_inQuirksMode', [
-              '<strong>' + chrome.i18n.getMessage('bd_Q') + '</strong>'
-            ]) + chrome.i18n.getMessage('bd_reducePossibility') + KB001);
+            result.push(chrome.i18n.getMessage('bd_inQuirksMode') +
+                chrome.i18n.getMessage('bd_reducePossibility') + KB001);
           }
           result.push('</li>');
         } else {
-          result.push('<li>' + chrome.i18n.getMessage('bd_differentDTD',[
-            '<strong>' + chrome.i18n.getMessage('bd_different') + '</strong>'
-          ]) + chrome.i18n.getMessage('bd_reducePossibility') +
+          result.push('<li>' + chrome.i18n.getMessage('bd_differentDTD',
+              ['<strong>' + chrome.i18n.getMessage('bd_different') +
+              '</strong>']) + chrome.i18n.getMessage('bd_reducePossibility') +
               KB001 + '</li>');
         }
       } else {
-        result.push('<li>' + chrome.i18n.getMessage('bd_noDTD', [
-          '<strong>' + chrome.i18n.getMessage('bd_Q') + '</strong>'
-        ]) + chrome.i18n.getMessage('bd_reducePossibility') + '</li>');
+        result.push('<li>' + chrome.i18n.getMessage('bd_noDTD',
+            ['<strong>' + chrome.i18n.getMessage('bd_Q') + '</strong>']) +
+            chrome.i18n.getMessage('bd_reducePossibility') + '</li>');
       }
       // Process data.DOM to HTML
-      result.push('<li>' +
-          chrome.i18n.getMessage('bd_nodeCount', [
-            '<em>' + data.DOM.count + '</em>'
-          ]) + '</li>');
+      result.push('<li>' + chrome.i18n.getMessage('bd_nodeCount',
+          ['<em>' + data.DOM.count + '</em>']) + '</li>');
 
       if (data.DOM.IECondComm.length)
-        result.push('<li>' +
-            chrome.i18n.getMessage('bd_IECondCommCount', [
-              '<strong>' + data.DOM.IECondComm.length + '</strong>'
-            ]) + '</li>');
+        result.push('<li>' + chrome.i18n.getMessage('bd_IECondCommCount',
+            ['<strong>' + data.DOM.IECondComm.length + '</strong>']) + '</li>');
       // Process data.STYLE to HTML
       result.push('<li>');
       if (data.STYLE.totalCount != 0) {
-        result.push(chrome.i18n.getMessage('bd_styleTotalCount', [
-            '<em>' + data.STYLE.totalCount + '</em>'
-          ]));
+        result.push(chrome.i18n.getMessage('bd_styleTotalCount',
+            ['<em>' + data.STYLE.totalCount + '</em>']));
         if (data.STYLE.noInBodyCount != 0) {
-          result.push(chrome.i18n.getMessage('bd_styleNoInBodyCount', [
-            '<strong>' + data.STYLE.noInBodyCount + '</strong>'
-          ]));
+          result.push(chrome.i18n.getMessage('bd_styleNoInBodyCount',
+              ['<strong>' + data.STYLE.noInBodyCount + '</strong>']));
         } else {
           result.push(chrome.i18n.getMessage('bd_noStyleNoInBodyCount'));
         }
@@ -143,13 +127,11 @@ void function() {
       // Process data.SCRIPT to HTML
       result.push('<li>');
       if (data.SCRIPT.totalCount != 0) {
-        result.push(chrome.i18n.getMessage('bd_scriptTotalCount', [
-            '<em>' + data.SCRIPT.totalCount + '</em>'
-          ]));
+        result.push(chrome.i18n.getMessage('bd_scriptTotalCount',
+            ['<em>' + data.SCRIPT.totalCount + '</em>']));
         if (data.SCRIPT.noInBodyCount != 0) {
-          result.push(chrome.i18n.getMessage('bd_scriptNoInBodyCount', [
-            '<strong>' + data.SCRIPT.noInBodyCount + '</strong>'
-          ]));
+          result.push(chrome.i18n.getMessage('bd_scriptNoInBodyCount',
+              ['<strong>' + data.SCRIPT.noInBodyCount + '</strong>']));
         } else {
           result.push(chrome.i18n.getMessage('bd_noScriptNoInBodyCount'));
         }
@@ -165,10 +147,8 @@ void function() {
       var deprecatedTagLength = deprecatedTag.length;
       if (deprecatedTagLength) {
         for (var i = 0; i < deprecatedTagLength; ++i) {
-          result.push('<li>' +
-              chrome.i18n.getMessage('bd_hasDeprecatedTag', [
-                '<strong>' + deprecatedTag[i] + '</strong>'
-              ]) + '</li>');
+          result.push('<li>' + chrome.i18n.getMessage('bd_hasDeprecatedTag',
+              ['<strong>' + deprecatedTag[i] + '</strong>']) + '</li>');
         }
       } else {
         result.push('<li>' +
@@ -189,10 +169,9 @@ void function() {
             tagListString.push(attr);
           }
           result.push('<li>' +
-              chrome.i18n.getMessage('bd_hasDeprecatedAttribute',[
-                '<strong>' + tagsHaveDeprecatedAttributes[i] + '</strong>',
-                '<strong>' + tagListString.join(' ') + '</strong>'
-              ]) + '</li>');
+              chrome.i18n.getMessage('bd_hasDeprecatedAttribute',
+              ['<strong>' + tagsHaveDeprecatedAttributes[i] + '</strong>',
+              '<strong>' + tagListString.join(' ') + '</strong>']) + '</li>');
         }
       } else {
         result.push('<li>' +
@@ -323,7 +302,7 @@ void function() {
           } else {
             for (var typeId in problems) {
               var problem = problems[typeId];
-              updateDetectionResult(typeId, problem);
+              updateDetectionResult(tabId, typeId, problem);
               updateSummary(problem.severity);
             }
             setDetectionFinishedMessage();
@@ -333,7 +312,7 @@ void function() {
           detectProblems();
         }
       }
-      
+
       window.setDetectionFinishedMessage = function() {
         var detectionStatus = $('detectionStatus');
         detectionStatus.innerHTML = chrome.i18n.getMessage('detectionFinished');
@@ -354,7 +333,10 @@ void function() {
         $('allProblemsSummary').innerHTML = allProblemsSummary;
       }
 
-      window.updateDetectionResult = function(typeId, problem) {
+      window.updateDetectionResult = function(senderTabId, typeId, problem) {
+        if (tabId != senderTabId)
+          return;
+
         var detectionResult = getDetectionResult(tabId);
         var occurrencesNumber = problem.occurrencesNumber;
 
