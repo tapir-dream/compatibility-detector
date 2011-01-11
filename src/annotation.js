@@ -238,6 +238,10 @@ function showBalloon(index,isScrollIntoView) {
   balloonDiv.style.display = 'block ';
   balloonDiv.style.left = tagDiv.offsetLeft + 'px';
   balloonDiv.style.top = tagDiv.offsetTop + tagDiv.offsetHeight + 'px';
+
+  if (isScrollIntoView)
+    tagDiv.scrollIntoView();
+
   if (tagDiv.offsetTop > window.scrollY) {
     var balloonBottom = balloonDiv.offsetTop + balloonDiv.offsetHeight;
     if (balloonBottom > window.scrollY + window.innerHeight) {
@@ -252,9 +256,6 @@ function showBalloon(index,isScrollIntoView) {
           annotation.rectangles[0].width + "px";
     }
   }
-
-  if (isScrollIntoView)
-    tagDiv.scrollIntoView();
 
   balloonDiv.annotationIndex = index;
   showHighlight.apply(balloonDiv);
