@@ -188,6 +188,14 @@ function baseDetection() {
     'DOM': {
       'count': 0,
       'IECondComm': []
+    },
+    'STYLE': {
+      'totalCount': 0,
+      'noInBodyCount': 0
+    },
+    'SCRIPT': {
+      'totalCount': 0,
+      'noInBodyCount': 0
     }
   };
 
@@ -409,6 +417,62 @@ function baseDetection() {
             summaryInformation.DOM.IECondComm.push(currentNode.nodeValue);
         }
       }
+    },
+    'STYLE': {
+      'getTotalCount': function() {
+        var styles = document.getElementsByTagName("STYLE");
+        var len = styles.length;
+        for (var i = 0; i <len; i++) {
+          if (styles[i].parentElement.tagName == 'DIV' &&
+              styles[i].parentElement.getAttribute('class') ==
+              'chrome-comp-annotations') {
+            --len;
+          }
+        }
+        summaryInformation.STYLE.totalCount = len;
+      },
+      'getNoInBodyCount': function() {
+        var styles = document.getElementsByTagName("STYLE");
+        var len = styles.length;
+        var counter = 0;
+        for(var i = 0 ; i < len; i++){
+          if (styles[i].parentElement.tagName != 'HEAD' &&
+              !(styles[i].parentElement.tagName == 'DIV' &&
+              styles[i].parentElement.getAttribute('class') ==
+              'chrome-comp-annotations')) {
+            ++counter;
+          }
+        }
+        summaryInformation.STYLE.noInBodyCount = counter;
+      }      
+    },
+    'SCRIPT': {
+      'getTotalCount': function() {
+        var scripts = document.getElementsByTagName("SCRIPT");
+        var len = scripts.length;
+        for (var i = 0; i <len; i++) {
+          if (scripts[i].parentElement.tagName == 'HTML' &&
+              scripts[i].parentElement.getAttribute('chrome_comp_injected') ==
+              'true') {
+            len--;
+          }
+        }
+        summaryInformation.SCRIPT.totalCount = len;
+      },
+      'getNoInBodyCount': function() {
+        var scripts = document.getElementsByTagName("SCRIPT");
+        var len = scripts.length;
+        var counter = 0;
+        for(var i = 0 ; i < len; i++){
+          if (scripts[i].parentElement.tagName != 'HEAD' &&
+              !(scripts[i].parentElement.tagName == 'HTML' &&
+              scripts[i].parentElement.getAttribute('chrome_comp_injected') ==
+              'true')) {
+            counter++;
+          }
+        }
+        summaryInformation.SCRIPT.noInBodyCount = counter;
+      }      
     }
   };
 
@@ -450,6 +514,10 @@ function baseDetection() {
   scanAllElements();
   infoManager.documentMode.getPageDTD();
   infoManager.DOM.getDOMCount();
+  infoManager.STYLE.getTotalCount();
+  infoManager.STYLE.getNoInBodyCount();
+  infoManager.SCRIPT.getTotalCount();
+  infoManager.SCRIPT.getNoInBodyCount();
   infoManager.documentMode.getCompatMode();
   infoManager.DOM.getIECondComm(document.documentElement);
 
@@ -464,6 +532,8 @@ function baseDetection() {
       summaryInformation.documentMode.compatMode.WebKit &&
       summaryInformation.documentMode.compatMode.IE == 'S'))) ||
       summaryInformation.DOM.IECondComm.length ||
+      summaryInformation.STYLE.noInBodyCount != 0 ||
+      summaryInformation.SCRIPT.noInBodyCount != 0 ||
       Object.keys(summaryInformation.HTMLBase.HTMLDeprecatedTag).length ||
       Object.keys(summaryInformation.HTMLBase.HTMLDeprecatedAttribute).length) {
     status = 'warning';
