@@ -3,13 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Chrome Compatibility Detector</title>
-</head>
-<body>
 <script>
-/**
- * Change BrowserAction's status.
- * Status: [normal | warning]
- */
 const ICON_PATH = {
   'normal': 'icon_normal.png',
   'ok': 'icon_ok.png',
@@ -108,10 +102,6 @@ Problem.prototype.setOccurrencesNumber = function(number) {
 
 function getDetectionResult(tabId) {
   var detectionResult = gDetectionResults[tabId];
-  if (!detectionResult) {
-    detectionResult = new DetectionResult(tabId);
-    gDetectionResults[tabId] = detectionResult;
-  }
   return detectionResult;
 }
 
@@ -196,6 +186,9 @@ function annotate(problems) {
 chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
   var tabId = sender.tab.id;
   switch (request.type) {
+    case 'ContentScriptInjected':
+      gDetectionResults[tabId] = new DetectionResult(tabId);
+      break;
     case 'setStatus':
       setBrowserAction(request.status, tabId);
       break;
@@ -221,5 +214,7 @@ chrome.tabs.onRemoved.addListener(function(tabId) {
   delete gDetectionResults[tabId];
 });
 </script>
+</head>
+<body>
 </body>
 </html>

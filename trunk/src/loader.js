@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+chrome.extension.sendRequest({type: 'ContentScriptInjected'});
 
 var detectionEnabled =
     window.sessionStorage['chrome_comp_detection_status'] ==
         window.location.href;
 
 if (detectionEnabled) {
-  
+
 var docElement = document.documentElement;
 
 const INJECT_SCRIPT_EVENT_NAME = 'chrome_comp_injectScript';

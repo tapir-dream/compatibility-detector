@@ -239,46 +239,43 @@ void function() {
        * disabled. Can't check by url, because some url is an exception, like
        * https://chrome.google.com/extensions?hl=zh-CN
        */
-      function checkPermission(callback) {
-        var timer = setTimeout(function() {
+      function checkPermission() {
+        if (backgroundPage.gDetectionResults[tabId]) {
+          return true;
+        } else {
           $body.className = 'disabled';
-        }, 300);
-        chrome.tabs.sendRequest(tabId, {type: 'checkPermission'}, function() {
-          clearTimeout(timer);
-          if (callback) {
-            callback();
-          }
-        });
+          return false;
+        }
       }
       checkPermission();
 
       // Get current tab's detectionType.
       chrome.tabs.sendRequest(tabId, {type: 'getDetectionType'},
           function(detectionType) {
-          setStatus(detectionType ? detectionType : 'loading');
-          // If the page reloaded for advanced detect, the pop-up page's status
-          // will be 'advanced', but base detection must run, the BrowserAction
-          // need the detection result.
-          if (detectionType == 'advanced' && $baseDetection.innerHTML == '') {
-            baseDetection();
-          }
-      });
+            setStatus(detectionType ? detectionType : 'loading');
+            // If the page reloaded for advanced detect, the pop-up page's
+            // status will be 'advanced', but base detection must run, the
+            // BrowserAction need the detection result.
+            if (detectionType == 'advanced' && $baseDetection.innerHTML == '') {
+              baseDetection();
+            }
+          });
 
       // Change status when tab loaded or refreshed.
       chrome.tabs.onUpdated.addListener(function(updatedTabId, changeInfo) {
         if (tabId == updatedTabId) {
           if (changeInfo.status == 'complete') {
             $baseDetection.innerHTML = '';
-            checkPermission(function() {
+            if (checkPermission()) {
               chrome.tabs.sendRequest(tabId, {type: 'getDetectionType'},
                   function(detectionType) {
+                    setStatus(detectionType);
                     // Same with "Get current tab's detectionType" part.
                     if (detectionType == 'advanced') {
                       baseDetection();
                     }
-                    setStatus(detectionType);
                   });
-            });
+            }
           } else {
             setStatus('loading');
           }

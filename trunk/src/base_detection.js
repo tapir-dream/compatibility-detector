@@ -1,14 +1,11 @@
 var detectionType = 'base';
-if (window.sessionStorage['chrome_comp_detection_status'] == 'enabled') {
+if (window.sessionStorage['chrome_comp_detection_status']) {
   detectionType = 'advanced';
 }
 var summaryInformation = null;
 
 chrome.extension.onRequest.addListener(function(request, sender, response) {
   switch (request.type) {
-    case 'checkPermission':
-      response();
-      break;
     case 'getDetectionType':
       response(document.readyState == 'complete' ? detectionType : null);
       break;
@@ -17,7 +14,9 @@ chrome.extension.onRequest.addListener(function(request, sender, response) {
       response(detectionType);
       break;
     case 'baseDetection':
-      response(summaryInformation ? summaryInformation : baseDetection());
+      if (!summaryInformation)
+        baseDetection();
+      response(summaryInformation);
       break;
   }
 });
@@ -444,7 +443,7 @@ function baseDetection() {
           }
         }
         summaryInformation.STYLE.noInBodyCount = counter;
-      }      
+      }
     },
     'SCRIPT': {
       'getTotalCount': function() {
@@ -472,7 +471,7 @@ function baseDetection() {
           }
         }
         summaryInformation.SCRIPT.noInBodyCount = counter;
-      }      
+      }
     }
   };
 
