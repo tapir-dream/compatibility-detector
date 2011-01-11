@@ -112,10 +112,10 @@ function showHighlight() {
     }
     highlightDiv.style.display = 'block';
     highlightDiv.className = className;
-    highlightDiv.style.left = (rect.left - 1) + 'px';
-    highlightDiv.style.top = (rect.top - 1) + 'px';
-    highlightDiv.style.width = (rect.width - 1) + 'px';
-    highlightDiv.style.height = (rect.height - 1)+ 'px';
+    highlightDiv.style.left = rect.left + 'px';
+    highlightDiv.style.top = rect.top + 'px';
+    highlightDiv.style.width = rect.width + 'px';
+    highlightDiv.style.height = rect.height + 'px';
   }
 }
 
@@ -429,12 +429,14 @@ function showAnnotations() {
       'opacity: 1 }' +
     '.chrome-comp-highlight-error {' +
       'position: absolute;' +
+      'box-sizing: border-box;' +
       'z-index: 99999999;' +
       'opacity: 0.5;' +
       'background:#F00;' +
       'border:solid thin #A10 }' +
     '.chrome-comp-highlight-warning {' +
       'position: absolute;' +
+      'box-sizing: border-box;' +
       'z-index: 99999999;' +
       'opacity: 0.5;' +
       'background:#FA0;' +
