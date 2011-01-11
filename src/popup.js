@@ -45,6 +45,7 @@ void function() {
       popup_noProblem: chrome.i18n.getMessage('popup_noProblem'),
       popup_issueDescription: chrome.i18n.getMessage('popup_issueDescription'),
       popup_issueCount: chrome.i18n.getMessage('popup_issueCount'),
+      popup_detectionStatus: chrome.i18n.getMessage('popup_detectionStatus'),
       popup_checkboxEffectTip: chrome.i18n.getMessage('popup_checkboxEffectTip')
     }, $('warp'));
 
@@ -226,6 +227,7 @@ void function() {
 
     var tabId = null;
     var baseDetection = null;
+    window.setDetectionFinishedMessage = function() {};
     window.updateSummary = function() {};
     window.updateDetectionResult = function() {};
     window.showNoProblemResult = function() {};
@@ -324,11 +326,17 @@ void function() {
               updateDetectionResult(typeId, problem);
               updateSummary(problem.severity);
             }
+            setDetectionFinishedMessage();
             restoreAnnotationCheck();
           }
         } else {
           detectProblems();
         }
+      }
+      
+      window.setDetectionFinishedMessage = function() {
+        var detectionStatus = $('detectionStatus');
+        detectionStatus.innerHTML = chrome.i18n.getMessage('detectionFinished');
       }
 
       /**
@@ -346,17 +354,9 @@ void function() {
         $('allProblemsSummary').innerHTML = allProblemsSummary;
       }
 
-      window.updateDetectionResult = function(typeId,
-                                              problem,
-                                              calledByAddProblem) {
+      window.updateDetectionResult = function(typeId, problem) {
         var detectionResult = getDetectionResult(tabId);
         var occurrencesNumber = problem.occurrencesNumber;
-        // Prevent adding one problem repeatedly.
-        if (calledByAddProblem &&
-            detectionResult.problems[typeId] &&
-            occurrencesNumber ==
-                detectionResult.problems[typeId].occurrencesNumber)
-          return;
 
         var severity = problem.severity;
         $content.className = '';

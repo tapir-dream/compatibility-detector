@@ -40,6 +40,7 @@
   "popup_issueDescription": { "message": "问题描述" },
   "popup_issueCount": { "message": "问题数量" },
   "popup_checkboxEffectTip": {"message": "提示：选中问题对应的复选框可在页面上标注问题节点，并显示单个问题的详细信息。"},
+  "popup_detectionStatus": {"message": "仍在检测中，目前"},
 
   "bd_aboutRCAorKB": { "message": "更多内容请参见：" },
   "bd_hasDTD": { "message": "本页设置了 DTD。" },
@@ -72,7 +73,8 @@
   "bd_hasDeprecatedAttribute": { "message": "发现过期属性 $1，位于标签 $2 内，已不建议使用。" },
   "bd_noDeprecatedAttribute": { "message": "本页中没有使用任何过期属性。" },
 
-  "allProblemsSummary": { "message": "总计 $1 个兼容性问题，其中："},
+  "detectionFinished": { "message": "检测完成。"},
+  "allProblemsSummary": { "message": "发现 $1 个兼容性问题，其中："},
   "errorProblemsSummary": { "message": "错误级别问题 $1 个："},
   "warningProblemsSummary": { "message": "警告级别问题 $1 个："},
 
