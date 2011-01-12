@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-// One detector implementation for checking that the 'text-decoration' property
-// which Text decorations visible difference in browsers.
-// @author: qianbaokun@gmail.com
-// @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=29
-//
-// Because the W3C CSS 2.1 specification on the style of 'text-decoration'
-// property is inheritable description is not clear.
-//
-// This makes the realization of different browsers may arise in specific
-// differences.
-// The detector checks all nodes, and do the following treatment:
-// 1. Filter all text nodes, not visible nodes and the node has no parent
-//    element.
-// 2. Filter Quirks Mode in the 'position: absolute' and 'position: fixed'
-//    elements.
-// 3. Filter set is -100 the following 'top' 'left' and 'text-indent' elements.
-//    Because their may display area at the outside,can't visible and
-//    not display differences.
-// 4. WebkitTextDecorationsInEffect property by text rendering style of the
-//    current node the parent node render the existence of different styles.
-// 5. If there is illustrated in the same show differences.
+/**
+ * @fileoverview: One detector implementation for checking that the
+ * 'text-decoration' property which Text decorations visible difference in
+ * browsers.
+ * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=29
+ *
+ * In W3C CSS 2.1 specification, the description aboout the inheritence of the
+ * 'text-decoration' property is not very clear.
+ *
+ * This makes the realization of different browsers may arise in specific
+ * differences.
+ * The detector checks all nodes, and do the following treatment:
+ * 1. Filter all text nodes, invisible nodes and the nodes which have no parent
+ *    element.
+ * 2. Filter quirks mode on the 'position: absolute' and 'position: fixed'
+ *    elements.
+ * 3. Filter the element set 'top' and 'left' properties less than -100,
+ *    because they may be invisible.
+ * 4. At last, report the issue according to WebkitTextDecorationsInEffect
+ *    property.
+ */
 
 addScriptToInject(function() {
 

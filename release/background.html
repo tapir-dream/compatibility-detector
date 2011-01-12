@@ -1,155 +1,225 @@
-<!--
- Copyright 2010 Google Inc.
-
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
-      http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
--->
+<!DOCTYPE html>
 <html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Chrome Compatibility Detector</title>
 <script>
-var detectionResults = { };
+const ICON_PATH = {
+  'normal': 'icon_normal.png',
+  'ok': 'icon_ok.png',
+  'warning': 'icon_warning.png',
+  'error': 'icon_error.png'
+};
 
-chrome.tabs.onRemoved.addListener(function(tabId) {
-  delete detectionResults[tabId];
-});
+const DETECTION_COMPAT_STATUS_OF_PRIORITY = {
+  'normal': 0,
+  'ok': 1,
+  'warning': 2,
+  'error': 3
+};
 
-function refreshTitle(tabId, finished) {
-  var title;
-  if (tabId in detectionResults) {
-    var result = detectionResults[tabId];
-    title = chrome.i18n.getMessage('numberOfIssues',
-                [result.totalWarnings, result.totalErrors]) + '\n' +
-            chrome.i18n.getMessage(result.annotationStatus ?
-                'hideAnnotations' : 'showAnnotations');
-  } else if (finished) {
-    title = chrome.i18n.getMessage('noIssueFound');
-  } else {
-    title = chrome.i18n.getMessage('resultNotAvailable');
-  }
+function getDetectionCompatStatus(tabId) {
+  var detectionResult = getDetectionResult(tabId);
+  if (detectionResult)
+    return detectionResult.detectionCompatStatus;
+  else
+    return 'normal';
+}
 
+function setDetectionCompatStatus(tabId, status) {
+  var detectionResult = getDetectionResult(tabId);
+  if (detectionResult)
+    detectionResult.detectionCompatStatus = status;
+}
+
+function getDetectionCompatStatusOfPriority(tabId, status) {
+  var currentUrlDetectionStatus = getDetectionCompatStatus(tabId);
+  return DETECTION_COMPAT_STATUS_OF_PRIORITY[currentUrlDetectionStatus] >=
+      DETECTION_COMPAT_STATUS_OF_PRIORITY[status] ?
+      currentUrlDetectionStatus : status;
+}
+
+function setBrowserAction(status, tabId) {
+  status = getDetectionCompatStatusOfPriority(tabId, status);
+  setDetectionCompatStatus(tabId, status);
+  chrome.browserAction.setIcon({
+    path: ICON_PATH[status],
+    tabId: tabId
+  });
   chrome.browserAction.setTitle({
-    title: title,
+    title: chrome.i18n.getMessage(status + 'TitleText'),
     tabId: tabId
   });
 }
 
-chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-  if (changeInfo.status == 'loading') {
-    delete detectionResults[tabId];
-    chrome.browserAction.setIcon({
-      path: 'icon_normal.png',
-      tabId: tabId
-    });
-    chrome.browserAction.setBadgeText({
-      text: '',
-      tabId: tabId
-    });
-    refreshTitle(tabId);
-  }
-});
+// Each page's information.
+var gDetectionResults = { };
 
-chrome.browserAction.onClicked.addListener(function(tab) {
-  var tabId = tab.id;
-  if (tabId in detectionResults) {
-    if (detectionResults[tabId].annotationStatus) {
-      chrome.tabs.sendRequest(tabId, { type: 'AnnotationOff' });
-      detectionResults[tabId].annotationStatus = false;
-    } else {
-      chrome.tabs.sendRequest(tabId, { type: 'AnnotationOn' });
-      detectionResults[tabId].annotationStatus = true;
-    }
-    refreshTitle(tabId);
-  }
-  /*
-    var windowId = detectionResults[tabId].windowId;
-    if (windowId != undefined) {
-      delete detectionResults[tabId].windowId;
-      chrome.windows.remove(windowId);
-    }
-    chrome.windows.create({
-      url : 'display_issues.html#' + tabId
-    }, function(window) {
-      if (detectionResults[tabId]) {
-        detectionResults[tabId].windowId = window.id;
-      }
-    });
-  */
-});
-
-function addCompatibilityResult(tabId, severity) {
-  if (!detectionResults[tabId]) {
-    detectionResults[tabId] = { };
-    detectionResults[tabId].totalErrors = 0;
-    detectionResults[tabId].totalWarnings = 0;
-  }
-
-  if (severity == 'error')
-    detectionResults[tabId].totalErrors++;
-  else
-    detectionResults[tabId].totalWarnings++;
- 
-  var totalErrors = detectionResults[tabId].totalErrors;
-  var totalWarnings = detectionResults[tabId].totalWarnings;
-  if (totalErrors) {
-    chrome.browserAction.setBadgeBackgroundColor({
-      color: [ 255, 0, 0, 255 ],
-      tabId: tabId
-    });
-    chrome.browserAction.setIcon({
-      path: 'icon_error.png',
-      tabId: tabId
-    });
-    chrome.browserAction.setBadgeText({
-      text: String(totalErrors),
-      tabId: tabId
-    });
-  } else {
-    chrome.browserAction.setBadgeBackgroundColor({
-      color: [ 255, 224, 0, 255 ],
-      tabId: tabId
-    });
-    chrome.browserAction.setIcon({
-      path: 'icon_warning.png',
-      tabId: tabId
-    });
-    chrome.browserAction.setBadgeText({
-      text: String(totalWarnings),
-      tabId: tabId
-    });
-  }
-  refreshTitle(tabId);
+function DetectionResult(tabId) {
+  this.tabId = tabId;
+  this.problems = {};
+  this.totalProblems = 0;
+  this.totalErrors = 0;
+  this.totalWarnings = 0;
+  this.detected = false;
+  this.annotatedProblems = {};
+  this.browserActionStatus = 'ok';
+  this.detectionCompatStatus = 'normal';
 }
 
-function setEndOfDetectionStatus(tabId) {
-  if (!detectionResults[tabId]) {
-    chrome.browserAction.setIcon({
-      path: 'icon_ok.png',
-      tabId: tabId
-    });
-    refreshTitle(tabId, true);
+DetectionResult.prototype.addProblem = function(problem, reason) {
+  this.problems[reason] = problem;
+  this.totalProblems++;
+  var severity = problem.severity;
+  if (severity == 'error') {
+    this.totalErrors++;
+    if (this.browserActionStatus != severity) {
+      this.browserActionStatus = severity;
+      setBrowserAction(severity, this.tabId);
+    }
+  } else {
+    this.totalWarnings++;
+    if (this.browserActionStatus == 'ok') {
+      this.browserActionStatus = severity;
+      setBrowserAction(severity, this.tabId);
+    }
   }
+};
+
+DetectionResult.prototype.getProblem = function(reason) {
+  return this.problems[reason];
+}
+
+function Problem(severity, description) {
+  this.severity = severity;
+  this.description = description;
+  this.occurrencesNumber = 0;
+}
+
+Problem.prototype.setOccurrencesNumber = function(number) {
+  this.occurrencesNumber = number;
+};
+
+function getDetectionResult(tabId) {
+  var detectionResult = gDetectionResults[tabId];
+  return detectionResult;
+}
+
+function getPopup() {
+  return chrome.extension.getViews({type: 'popup'})[0];
+}
+
+/**
+ * Add compatibility problem detection result to cache and show in popup page
+ * if popup page is opened.
+ * @param {Number} tabId
+ * @param {Object} issue
+ */
+function addDetectedProblemToResult(tabId, issue) {
+  var reason = issue.reason;
+  // First show result if popup page is opened, consider all detection result
+  // cache has shown on the popup page this time, so it can't add one problem
+  // repeatedly.
+  var popup = getPopup();
+  if (popup) {
+    popup.updateDetectionResult(tabId, reason, issue);
+  }
+
+  var detectionResult = getDetectionResult(tabId);
+  var problem = detectionResult.getProblem(reason);
+  var isNewProblem = false;
+  var severity;
+  if (!problem) {
+    isNewProblem = true;
+    severity = issue.severity;
+    problem = new Problem(severity, issue.description);
+    detectionResult.addProblem(problem, reason);
+  }
+  problem.setOccurrencesNumber(issue.occurrencesNumber);
+  if (popup && isNewProblem) {
+    popup.updateSummary(severity);
+  }
+}
+
+function stopAddingDetectedProblem(tabId, totalProblems) {
+  var detectionResult = getDetectionResult(tabId);
+  detectionResult.detected = true;
+
+  var popup = getPopup();
+  // If totalProblems is 0, show no compatibility problems found infomation.
+  if (totalProblems == 0 && popup) {
+    popup.showNoProblemResult();
+  } else {
+    if (popup)
+      popup.setDetectionFinishedMessage();
+    annotateAllIssues(tabId);
+  }
+}
+
+function annotateAllIssues(tabId) {
+  var detectionResult = getDetectionResult(tabId);
+  var problems = Object.keys(detectionResult.problems);
+  problems.forEach(function(typeId) {
+    detectionResult.annotatedProblems[typeId] = typeId;
+  });
+  annotate(problems);
+}
+
+/**
+ * Annotate problems on the target node in the page
+ * @param {Array} problems
+ */
+function annotate(problems) {
+  chrome.tabs.getSelected(null, function(tab) {
+    var tabId = tab.id;
+    chrome.tabs.sendRequest(tabId, { type: 'AnnotationOff' }, function() {
+      if (problems.length) {
+        chrome.tabs.sendRequest(tabId, {
+          type: 'AnnotationOn',
+          issusId: problems
+        }, function() {
+          var popup = getPopup();
+          if (popup) {
+            popup.restoreAnnotationCheck();
+          }
+        });
+      }
+    });
+  });
 }
 
 chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+  var tabId = sender.tab.id;
   switch (request.type) {
+    case 'ContentScriptInjected':
+      gDetectionResults[tabId] = new DetectionResult(tabId);
+      break;
+    case 'setStatus':
+      setBrowserAction(request.status, tabId);
+      break;
     case 'CompatibilityResult':
-      addCompatibilityResult(sender.tab.id, request.severity);
+      addDetectedProblemToResult(tabId, request);
       break;
     case 'EndOfDetection':
-      setEndOfDetectionStatus(sender.tab.id);
+      stopAddingDetectedProblem(tabId, request.totalProblems);
       break;
   }
 });
 
+// Change status when tab loaded or refreshed.
+chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+  if (changeInfo.status == 'loading') {
+    delete gDetectionResults[tabId];
+    setBrowserAction('normal', tabId);
+  }
+});
+
+// Delete tab's information when tab closed.
+chrome.tabs.onRemoved.addListener(function(tabId) {
+  delete gDetectionResults[tabId];
+});
 </script>
+</head>
 <body>
 </body>
 </html>

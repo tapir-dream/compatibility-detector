@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,8 +14,28 @@
  * limitations under the License.
  */
 
-addScriptToInject(function() {
-/*
+/**
+ * @fileoverview: One detector implementation for checking problems - VBScript,
+ * JScript.Encode and VBScript.Encode are only supported by IE.
+ *
+ * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=3
+ *       https://code.google.com/p/compatibility-detector/issues/detail?id=116
+ *
+ * VBScript is only supported by IE, if a SCRIPT tag is declared as VBScript,
+ * other browsers will not execute that code.
+ * The same is true for 'JScript.Encode' and 'VBScript.Encode'.
+ *
+ * So the code in following tags will only be executed correctly in IE:
+ * <script type='text/vbscript'>...</script>
+ * <script type='text/vbs'>...</script>
+ * <script language='vbscript'>...</script>
+ * <script language='vbs'>...</script>
+ * <script language='jscript.encode'>...</script>
+ * <script language='vbscript.encode'>...</script>
+ * (The attribute 'language' is not recommended, but there are still some pages
+ * using it now.)
+ *
+ * A more detailed list:
  *                              IE6/7/8   Chrome 9.0.597.0 dev
  * [type]
  * text/javascript:              OK        OK
@@ -53,6 +73,8 @@ addScriptToInject(function() {
  * text/javascript language=vbs: OK        OK
  * (We didn't check this situation now.)
  */
+
+addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 

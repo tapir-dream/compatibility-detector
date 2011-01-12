@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,40 +14,40 @@
  * limitations under the License.
  */
 
-// One detector implementation for checking the inheritence of 'nowrap' for the 
-// table cell elements.
-// @author : luyuan.china@gmail.com
-// @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=118
-//
-// In CSS2.1 specification, the 'white-space' property can be inherited. So if
-// a table is set 'white-space:nowrap', its cell elements will inherit the value
-// of the 'white-space' property from the table. And the HTML nowrap attribute
-// for table cell element (TD and TH) will be transformed into the CSS property
-// 'white-space:nowrap' in all browsers.
-// MSDN notes that care should be taken when the noWrap property is used in 
-// conjunction with the width attribute of table or td elements.
-// If a td element has its noWrap set to true and the WIDTH attribute of its 
-// table element is set to a smaller dimension than the rendered content of the 
-// td element, wordwrap does not occur. In this case, the noWrap setting takes 
-// precedence over the WIDTH attribute. (refer to
-// http://msdn.microsoft.com/en-us/library/ms534196(VS.85).aspx)
-// So this detector should check the situation that MSDN notes.
-//
-// First check all table cell elements, getting its real computed value of 
-// width. the getComputedStyle method cannot get the real computed value of the 
-// width property, so used a tricky way to get the real computed value of the 
-// said properties. A 'display:none' element can be gotten the corrent value of 
-// its width property by using getComputedStyle method.
-//
-// If the real computed value of 'width' is 'auto', we should check that whether
-// the 'white-space:nowrap' is inherited from the ancestors, then if the
-// children elements will be affected by 'white-space:nowrap', report this
-// issue.
-// If the real computed value of 'width' is not 'auto'. We should check that
-// whether the 'white-space' property is 'nowrap' and the width of the cell is
-// percentage, then if the children elements will be affected by
-// 'white-space:nowrap', and report this issue too.
-
+/**
+ * @fileoverview: One detector implementation for checking the inheritence of
+ * 'nowrap' for the table cell elements.
+ * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=118
+ *
+ * In CSS2.1 specification, the 'white-space' property can be inherited. So if
+ * a table is set 'white-space:nowrap', its cell elements will inherit the value
+ * of the 'white-space' property from the table. And the HTML nowrap attribute
+ * for table cell element (TD and TH) will be transformed into the CSS property
+ * 'white-space:nowrap' in all browsers.
+ * MSDN notes that care should be taken when the noWrap property is used in
+ * conjunction with the width attribute of table or td elements.
+ * If a td element has its noWrap set to true and the WIDTH attribute of its
+ * table element is set to a smaller dimension than the rendered content of the
+ * td element, wordwrap does not occur. In this case, the noWrap setting takes
+ * precedence over the WIDTH attribute. (refer to
+ * http://msdn.microsoft.com/en-us/library/ms534196(VS.85).aspx)
+ * So this detector should check the situation that MSDN notes.
+ *
+ * First check all table cell elements, getting its real computed value of
+ * width. the getComputedStyle method cannot get the real computed value of the
+ * width property, so used a tricky way to get the real computed value of the
+ * said properties. A 'display:none' element can be gotten the corrent value of
+ * its width property by using getComputedStyle method.
+ *
+ * If the real computed value of 'width' is 'auto', we should check that whether
+ * the 'white-space:nowrap' is inherited from the ancestors, then if the
+ * children elements will be affected by 'white-space:nowrap', report this
+ * issue.
+ * If the real computed value of 'width' is not 'auto'. We should check that
+ * whether the 'white-space' property is 'nowrap' and the width of the cell is
+ * percentage, then if the children elements will be affected by
+ * 'white-space:nowrap', and report this issue too.
+ */
 
 addScriptToInject(function() {
 
@@ -57,21 +57,17 @@ function isNowrap(element) {
 }
 
 function isNowrapInherited(element) {
-  if (!isNowrap(element))
-    return;
-  var table = element.offsetParent;
+  var table = element.parentElement;
   var tableInlineWhiteSpace = table.style.whiteSpace;
-  table.style.whiteSpace = 'pre-line !important';
+  table.style.whiteSpace = 'normal !important';
   var computedWhiteSpace = chrome_comp.getComputedStyle(element).whiteSpace;
   table.style.whiteSpace = null;
   table.style.whiteSpace =
       (tableInlineWhiteSpace) ? tableInlineWhiteSpace : null;
-  return computedWhiteSpace == 'pre-line';
+  return computedWhiteSpace == 'normal';
 }
 
 function isChildrenAffectedByCellsWhiteSpace(element) {
-  if (!isNowrap(element))
-    return;
   var inlineWhiteSpace = element.style.whiteSpace;
   var op = element.offsetParent;
   var inlineTableWhiteSpace = op.style.whiteSpace;
@@ -89,9 +85,12 @@ function isChildrenAffectedByCellsWhiteSpace(element) {
 function getRealComputedWidth(element) {
   var x = element.cloneNode(false);
   x.style.display = 'none !important';
-  element.parentElement.appendChild(x);
+  var p = element.parentElement;
+  if (!p)
+    return;
+  p.appendChild(x);
   var width = chrome_comp.getComputedStyle(x).width;
-  element.parentElement.removeChild(x);
+  p.removeChild(x);
   x = null;
   return width;
 }
@@ -114,15 +113,19 @@ function checkNode(node, context) {
 
   if ((node.tagName != 'TH') && (node.tagName != 'TD'))
     return;
+  if (!isNowrap(node))
+    return;
 
   var realWidth = getRealComputedWidth(node);
+  if (realWidth == undefined)
+    return;
   if (realWidth == 'auto') {
     if (isNowrapInherited(node)) {
       if (isChildrenAffectedByCellsWhiteSpace(node))
         this.addProblem('RX1003', [node]);
     }
   } else {
-    if (isNowrap(node) && !isPercentageWidth(realWidth)) {
+    if (!isPercentageWidth(realWidth)) {
       if (isChildrenAffectedByCellsWhiteSpace(node))
         this.addProblem('RX1003', [node]);
     }

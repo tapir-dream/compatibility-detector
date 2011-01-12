@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +12,25 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ */
+
+/**
+ * @fileoverview: One detector implementation for checking problems - Fullwidth
+ * spaces at the tail of an element's content are ignored in IE if the element's
+ * 'hasLayout' is true.
+ * In fact, Fullwidth Space means Ideographic Space, it is :
+ * Unicode:     U+3000
+ * HTML entity: &#12288;
+ *
+ * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=39
+ *
+ * In IE, if an element has layout, the fullwidth spaces at the tail of its
+ * content will be ignored, in other browsers will not.
+ * So, if the ignored fullwidth spaces are visible (has background color, or
+ * their 'text-decoration' is not 'none'), this area will look different in
+ * IE and other browsers.
+ * And, if the has layout element's width is determined by its content, the
+ * element's width will different too.
  */
 
 addScriptToInject(function() {
@@ -28,13 +47,13 @@ function checkNode(node, context) {
   if (Node.TEXT_NODE != node.nodeType || context.isDisplayNone())
     return;
 
-  // Whether it has full shape space at the end
+  // Whether it has full shape space at the end.
   var text = node.nodeValue;
   var result = text.match(/^(.*?)(\u3000+)(\s*)$/);
   if (!result)
     return;
 
-  // Whether it's the descendant of a hasLayout element
+  // Whether it's the descendant of a hasLayout element.
   for (var parentNode = node.parentElement; parentNode;
        parentNode = parentNode.parentElement) {
     if (parentNode == document.body)
@@ -45,7 +64,7 @@ function checkNode(node, context) {
   if (!parentNode)
     return;
 
-  // Whether it is the last inline element in the line which has width
+  // Whether it is the last inline element in the line which has width.
   var parentNode = node;
   while (parentNode) {
     for (var sibling = parentNode.nextSibling; sibling;
@@ -67,7 +86,7 @@ function checkNode(node, context) {
     }
     // Our content is at the end of out parent box. But we need to check
     // the parent style, as the parent's siblings may be just behind us
-    // if the parent is also inline (or inline block)
+    // if the parent is also inline (or inline block).
     parentNode = parentNode.parentElement;
     var style = chrome_comp.getComputedStyle(parentNode);
     if (!style)
@@ -83,7 +102,7 @@ function checkNode(node, context) {
     var color = style && style.backgroundColor;
     if (!color || color == 'rgba(0, 0, 0, 0)')
       return false;
-    // Compares our background color with that of parent
+    // Compares our background color with that of parent.
     var parentColor;
     var parent = element.parentNode;
     while (parent) {
@@ -129,7 +148,7 @@ function checkNode(node, context) {
 
     if (hasTextDecoration(parent))
       return true;
-    // Check parent element style direction is 'ltr' or 'rtl'
+    // Check parent element style direction is 'ltr' or 'rtl'.
     if (hasTextDirection(parent))
       return false;
 
@@ -160,10 +179,10 @@ function checkNode(node, context) {
     var offsetHeight = parent.offsetHeight;
     var newSiblingBoxes = getSiblingBoxes(parent, child);
 
-    // Restore old value
+    // Restore old value.
     node.nodeValue = text;
 
-    // Check siblings' poisition and size
+    // Check siblings' poisition and size.
     for (var i = 0, len = newSiblingBoxes.length; i < len; ++i) {
       for (var j = 0; j < 4; ++j) {
         if (newSiblingBoxes[i][j] != oldSiblingBoxes[i][j])
@@ -171,28 +190,28 @@ function checkNode(node, context) {
       }
     }
 
-    // Check parent's position and size, if changed, go to parent' parent
-    // for more checking, otherwise there's no problem
+    // Check parent's position and size, if changed, go to parent' parent for
+    // more checking, otherwise there's no problem.
     if (offsetLeft == oldParentLeft &&
         offsetTop == oldParentTop &&
         offsetWidth == oldParentWidth &&
         offsetHeight == oldParentHeight) {
       return false;
     } else if (offsetLeft != oldParentLeft || offsetTop != oldParentTop) {
-      // If parent's position changed, report as a problem
+      // If parent's position changed, report as a problem.
       return true;
     } else {
       var style = chrome_comp.getComputedStyle(parent);
       // Parent's size changed, if it has border or has different background
-      // color, report as a problem
+      // color, report as a problem.
       if (parseInt(style.borderRightWidth, 10) | 0 > 0 ||
           parseInt(style.borderBottomWidth, 10) | 0 > 0 ||
           hasDiffBackgroundColor(parent)) {
         return true;
       }
     }
-    // Parent's size changed, but it has neither border nor background
-    // color, no visual effect so far. Need more checking
+    // Parent's size changed, but it has neither border nor background color,
+    // no visual effect so far. Need more checking.
     return checkProblem(parent.parentNode, parent);
   }
 

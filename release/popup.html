@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Chrome Compatibility Detector</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  font: 14px/22px 'Microsoft YaHei', Simsun, Verdana, Geneva, sans-serif;
+}
+body {
+  width:600px;
+}
+div.disabled,
+div.loading {
+  display: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  text-align: center;
+  cursor: default;
+}
+div.disabled > span {
+  display: inline-block;
+  margin-top: 120px;
+  color: #900;
+}
+div.loading > span {
+  display: inline-block;
+  margin-top: 120px;
+  padding-left: 26px;
+  background: url(popup_loading.gif) no-repeat 0 3px;
+  color: #333;
+}
+section {
+  height: 35px;
+  border-bottom: #888 solid 1px;
+  background: url(popup_res.png) repeat-x 0 0;
+  font-weight: normal;
+}
+section > h1 {
+  padding-left: 35px;
+  background: url(popup_res.png) no-repeat 5px -44px;
+  line-height: 34px;
+  color: #ccc;
+}
+section > nav {
+  float: right;
+  margin-top: -30px;
+  padding-right: 6px;
+}
+section > nav > span {
+  float: left;
+  margin: 0 3px;
+  width: 90px;
+  height: 30px;
+  border: #888 solid 1px;
+  background: #d9d9d9;
+  -webkit-border-top-left-radius: 6px;
+  -webkit-border-top-right-radius: 6px;
+  -webkit-transition: all 100ms ease-in-out;
+  text-align: center;
+  line-height: 28px;
+  color: #666;
+  cursor: pointer;
+}
+section > nav > span:hover {
+  background: #fff;
+  color: #000;
+}
+article {
+  min-height: 200px;
+  max-height: 500px;
+  padding: 10px 5px;
+  overflow-y: auto;
+  background :#f8f8f8;
+}
+article > div {
+  display: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  text-align: center;
+  cursor: default;
+}
+article > div > span {
+  display: inline-block;
+  margin-top: 120px;
+  padding-left: 26px;
+  background: url(popup_loading.gif) no-repeat 0 3px;
+  color: #333;
+}
+article > ul {
+  display: none;
+}
+article > ul > li {
+  padding: 5px 5px 5px 20px;
+  background: url(popup_res.png) no-repeat 0 -79px;
+  border-bottom: #ccc dashed 1px;
+}
+strong, em {
+  font-weight: normal;
+  font-style: normal;
+}
+strong {
+  color: crimson;
+}
+em {
+  color: forestgreen;
+}
+
+/**
+ * Pop-up page's status:
+ *   default
+ *   disabled
+ *   loading
+ *   base
+ *   advanced
+ */
+body.default nav,
+body.disabled nav,
+body.loading nav {
+  display: none;
+}
+body.disabled div.disabled,
+body.loading div.loading {
+  display: block;
+}
+body.base span.base,
+body.advanced span.advanced {
+  width:90px;
+  color:#333;
+  background:#f8f8f8;
+  border:#888 solid 1px;
+  border-bottom:#f8f8f8 solid 1px;
+}
+body.base ul.base,
+body.advanced ul.advanced {
+  display: block;
+}
+article.processing > div {
+  display: block;
+}
+
+
+
+
+#detectionResult table {
+  border-collapse: collapse;
+  width: 100%;
+  table-layout:fixed;
+  margin: 5px 0;
+}
+
+#detectionResult td, #detectionResult th {
+  padding: 3px 5px;
+  border: 1px solid silver;
+}
+
+#detectionResult th {
+  background: #E0E0E0;
+  font-weight: normal;
+  text-align: center;
+}
+
+tr > td:last-child, tr > th:last-child {
+  width: 70px;
+  text-align: center;
+}
+
+tr > td:first-child, tr > th:first-child {
+  width: 30px;
+  text-align: center;
+}
+
+#detectionResult, #noProblemFoundInfo, #errorArea, #warningArea {
+  display: none;
+}
+
+#detectionResult > div {
+  margin-top: 5px;
+}
+
+#detectionResult > p {
+  color:#999;
+  font-size: 12px;
+}
+</style>
+<script type="text/javascript" src="popup.js"></script>
+</head>
+<body class="default">
+<div id="warp">
+  <div class="disabled"><span>${popup_cannotDetect}</span></div>
+  <div class="loading"><span>${popup_loading}</span></div>
+  <section>
+    <h1>Chrome Compatibility Detector</h1>
+    <nav id="tab">
+      <span class="base">${popup_baseDetection}</span>
+      <span class="advanced">${popup_advancedDetection}</span>
+    </nav>
+  </section>
+  <article id="content">
+    <div><span>${popup_detecting}</span></div>
+    <ul id="base_detection" class="base"></ul>
+    <ul id="advanced_detection" class="advanced">
+    <div id="noProblemFoundInfo">${popup_noProblem}</div>
+    <div id="detectionResult">
+      <h2>
+        <span id="detectionStatus">${popup_detectionStatus}</span><span id="allProblemsSummary"></span>
+      </h2>
+      <div id="errorArea">
+        <h3 id="errorProblemsSummary"></h3>
+        <table id="errorProblems">
+        <tbody>
+        <tr>
+          <th><input id="errorCheckAll" type="checkbox"></th>
+          <th>${popup_issueDescription}</th>
+          <th>${popup_issueCount}</th>
+        </tr>
+        </tbody>
+        </table>
+      </div>
+      <div id="warningArea">
+        <h3 id="warningProblemsSummary"></h3>
+        <table id="warningProblems">
+        <tbody>
+        <tr>
+        <th><input id="warningCheckAll" type="checkbox"></th>
+        <th>${popup_issueDescription}</th>
+        <th>${popup_issueCount}</th>
+        </tr>
+        </tbody>
+        </table>
+      </div>
+      <p>${popup_checkboxEffectTip}</p>
+    </div>
+    </ul>
+  </article>
+</div>
+</body>
+</html>

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +12,28 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ */
+
+/**
+ * @fileoverview: One detector implementation for checking influence of the
+ * 'text-align' property on the block level elements.
+ * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=34
+ *
+ * The 'text-align' property can apply to all kinds of elements including the
+ * block level elements in W3C CSS 1 specification which IE6, IE7 and IE8
+ * quirks mode follow, but in CSS2.1 specification, it changes to applying to
+ * only the inline level elements or contents. So, this property can apply to
+ * the block level elements in the said versions of IE.
+ *
+ * The detector check all nodes, and do the following treatment:
+ * 1. Ignore all text nodes, invisible elements and the elements having no
+ *    parent.
+ * 2. Ignore the standards mode in IE.
+ * 3. Check the elements set the 'text-align' property.
+ * 4. Check the elements whose left margin and right margin are the same. If
+ *    no, report the issue.
+ * 5. Check the elements whose right margin is 0 and is not floating right. If
+ *    yes, report the issue.
  */
 
 addScriptToInject(function() {
