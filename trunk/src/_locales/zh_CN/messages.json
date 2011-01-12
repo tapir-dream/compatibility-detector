@@ -58,14 +58,14 @@
   "bd_nodeCount": { "message": "页面 DOM 节点总数为 $1 个。" },
 
   "bd_styleTotalCount": { "message": "本页 STYLE 节点总数为 $1 个。" },
-  "bd_styleNoInBodyCount": { "message": "(未放置在 HEAD 标签内的节点数为 $1 个)" },
+  "bd_styleNoInHeadCount": { "message": "(未放置在 HEAD 标签内的节点数为 $1 个)" },
   "bd_noStyleTotalCount": { "message": "本页中没有使用 STYLE 标签。" },
-  "bd_noStyleNoInBodyCount": { "message": "(本页中 STYLE 标签均放置在 HEAD 标签内)" },
+  "bd_noStyleNoInHeadCount": { "message": "(本页中 STYLE 标签均放置在 HEAD 标签内)" },
 
   "bd_scriptTotalCount": { "message": "本页 SCRIPT 节点总数为 $1 个。" },
-  "bd_scriptNoInBodyCount": { "message": "(未放置在 HEAD 标签内的节点数为 $1 个)" },
+  "bd_scriptNoInHeadCount": { "message": "(未放置在 HEAD 标签内的节点数为 $1 个)" },
   "bd_noScriptTotalCount": { "message": "本页中没有使用 SCRIPT 标签。" },
-  "bd_noScriptNoInBodyCount": { "message": "(本页中 SCRIPT 标签均放置在 HEAD 标签内)" },
+  "bd_noScriptNoInHeadCount": { "message": "(本页中 SCRIPT 标签均放置在 HEAD 标签内)" },
 
   "bd_IECondCommCount": { "message": "发现仅 IE 支持的条件注释 $1 个。" },
   "bd_hasDeprecatedTag": { "message": "发现过期标签 $1，不建议使用。" },

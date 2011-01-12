@@ -190,11 +190,11 @@ function baseDetection() {
     },
     'STYLE': {
       'totalCount': 0,
-      'noInBodyCount': 0
+      'noInHeadCount': 0
     },
     'SCRIPT': {
       'totalCount': 0,
-      'noInBodyCount': 0
+      'noInHeadCount': 0
     }
   };
 
@@ -418,59 +418,41 @@ function baseDetection() {
       }
     },
     'STYLE': {
-      'getTotalCount': function() {
-        var styles = document.getElementsByTagName("STYLE");
-        var len = styles.length;
-        for (var i = 0; i <len; i++) {
-          if (styles[i].parentElement.tagName == 'DIV' &&
-              styles[i].parentElement.getAttribute('class') ==
-              'chrome-comp-annotations') {
-            --len;
-          }
-        }
-        summaryInformation.STYLE.totalCount = len;
+      'getDetectorStyles': function() {
+        return document.getElementsByClassName(
+            'chrome-comp-annotations').length;
       },
-      'getNoInBodyCount': function() {
-        var styles = document.getElementsByTagName("STYLE");
-        var len = styles.length;
-        var counter = 0;
-        for(var i = 0 ; i < len; i++){
-          if (styles[i].parentElement.tagName != 'HEAD' &&
-              !(styles[i].parentElement.tagName == 'DIV' &&
-              styles[i].parentElement.getAttribute('class') ==
-              'chrome-comp-annotations')) {
-            ++counter;
-          }
-        }
-        summaryInformation.STYLE.noInBodyCount = counter;
+      'getTotalCount': function() {
+        summaryInformation.STYLE.totalCount =
+            document.querySelectorAll('style').length -
+            this.getDetectorStyles();
+        return summaryInformation.STYLE.totalCount;
+      },
+      'getNoInHeadCount': function() {
+        summaryInformation.STYLE.noInHeadCount =
+            document.querySelectorAll('style').length -
+            document.querySelectorAll('body style').length -
+            this.getDetectorStyles();
+        return summaryInformation.STYLE.noInHeadCount;
       }
     },
     'SCRIPT': {
-      'getTotalCount': function() {
-        var scripts = document.getElementsByTagName("SCRIPT");
-        var len = scripts.length;
-        for (var i = 0; i <len; i++) {
-          if (scripts[i].parentElement.tagName == 'HTML' &&
-              scripts[i].parentElement.getAttribute('chrome_comp_injected') ==
-              'true') {
-            len--;
-          }
-        }
-        summaryInformation.SCRIPT.totalCount = len;
+      'getDetectorScripts': function() {
+        return document.querySelectorAll(
+            'html[chrome_comp_injected] > script').length;
       },
-      'getNoInBodyCount': function() {
-        var scripts = document.getElementsByTagName("SCRIPT");
-        var len = scripts.length;
-        var counter = 0;
-        for(var i = 0 ; i < len; i++){
-          if (scripts[i].parentElement.tagName != 'HEAD' &&
-              !(scripts[i].parentElement.tagName == 'HTML' &&
-              scripts[i].parentElement.getAttribute('chrome_comp_injected') ==
-              'true')) {
-            counter++;
-          }
-        }
-        summaryInformation.SCRIPT.noInBodyCount = counter;
+      'getTotalCount': function() {
+        summaryInformation.SCRIPT.totalCount =
+            document.querySelectorAll('script').length -
+            this.getDetectorScripts();
+        return summaryInformation.SCRIPT.totalCount;
+      },
+      'getNoInHeadCount': function() {
+        summaryInformation.SCRIPT.noInHeadCount =
+            this.getTotalCount() -
+            this.getDetectorScripts() -
+            document.querySelectorAll('head script').length;
+        return summaryInformation.SCRIPT.noInHeadCount;
       }
     }
   };
@@ -514,9 +496,9 @@ function baseDetection() {
   infoManager.documentMode.getPageDTD();
   infoManager.DOM.getDOMCount();
   infoManager.STYLE.getTotalCount();
-  infoManager.STYLE.getNoInBodyCount();
+  infoManager.STYLE.getNoInHeadCount();
   infoManager.SCRIPT.getTotalCount();
-  infoManager.SCRIPT.getNoInBodyCount();
+  infoManager.SCRIPT.getNoInHeadCount();
   infoManager.documentMode.getCompatMode();
   infoManager.DOM.getIECondComm(document.documentElement);
 
@@ -531,8 +513,8 @@ function baseDetection() {
       summaryInformation.documentMode.compatMode.WebKit &&
       summaryInformation.documentMode.compatMode.IE == 'S'))) ||
       summaryInformation.DOM.IECondComm.length ||
-      summaryInformation.STYLE.noInBodyCount != 0 ||
-      summaryInformation.SCRIPT.noInBodyCount != 0 ||
+      summaryInformation.STYLE.noInHeadCount != 0 ||
+      summaryInformation.SCRIPT.noInHeadCount != 0 ||
       Object.keys(summaryInformation.HTMLBase.HTMLDeprecatedTag).length ||
       Object.keys(summaryInformation.HTMLBase.HTMLDeprecatedAttribute).length) {
     status = 'warning';
