@@ -32,7 +32,7 @@
   "errorTitleText": { "message": "发现错误级别的问题\n点击查看" },
 
   "popup_cannotDetect": { "message": "不能检测本页面。" },
-  "popup_loading": { "message": "页面加载中，请稍候……" },
+  "popup_loading": { "message": "等待页面加载完毕……" },
   "popup_baseDetection": { "message": "基本检测" },
   "popup_advancedDetection": { "message": "高级检测" },
   "popup_detecting": { "message": "正在检测，请稍候……" },
