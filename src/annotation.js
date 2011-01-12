@@ -124,7 +124,7 @@ function hideHighlight() {
     highlightDivs[i].style.display = 'none';
 }
 
-function showBalloon(index,isScrollIntoView) {
+function showBalloon(index, isScrollIntoView) {
   if (index < 0 || index >= annotations.length)
     return;
 
@@ -159,7 +159,7 @@ function showBalloon(index,isScrollIntoView) {
     previousLink.innerText = chrome_comp.getMessage('previous');
     previousLink.href = '#';
     previousLink.onclick = function() {
-      showBalloon(this.annotationIndex - 1,true);
+      showBalloon(this.annotationIndex - 1, true);
       return false;
     };
     navigationDiv.appendChild(previousLink);
@@ -167,7 +167,7 @@ function showBalloon(index,isScrollIntoView) {
     nextLink.innerText = chrome_comp.getMessage('next');
     nextLink.href = '#';
     nextLink.onclick = function() {
-      showBalloon(this.annotationIndex + 1,true);
+      showBalloon(this.annotationIndex + 1, true);
       return false;
     };
     navigationDiv.appendChild(nextLink);
@@ -287,18 +287,18 @@ function onDocumentKeyDown(event) {
   if (balloonDiv && balloonDiv.style.display == 'block') {
     switch (event.keyCode) {
       case 36: // Home
-        showBalloon(0,true);
+        showBalloon(0, true);
         break;
       case 37: // Arrow Left
       case 38: // Arrow Up
-        showBalloon(balloonDiv.annotationIndex - 1,true);
+        showBalloon(balloonDiv.annotationIndex - 1, true);
         break;
       case 39: // Arrow Right
       case 40: // Arrow Down
-        showBalloon(balloonDiv.annotationIndex + 1,true);
+        showBalloon(balloonDiv.annotationIndex + 1, true);
         break;
       case 35: // End
-        showBalloon(annotations.length - 1,true);
+        showBalloon(annotations.length - 1, true);
         break;
       default:
         return;

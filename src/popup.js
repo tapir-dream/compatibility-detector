@@ -114,11 +114,11 @@ void function() {
       if (data.STYLE.totalCount != 0) {
         result.push(chrome.i18n.getMessage('bd_styleTotalCount',
             ['<em>' + data.STYLE.totalCount + '</em>']));
-        if (data.STYLE.noInBodyCount != 0) {
-          result.push(chrome.i18n.getMessage('bd_styleNoInBodyCount',
-              ['<strong>' + data.STYLE.noInBodyCount + '</strong>']));
+        if (data.STYLE.noInHeadCount != 0) {
+          result.push(chrome.i18n.getMessage('bd_styleNoInHeadCount',
+              ['<strong>' + data.STYLE.noInHeadCount + '</strong>']));
         } else {
-          result.push(chrome.i18n.getMessage('bd_noStyleNoInBodyCount'));
+          result.push(chrome.i18n.getMessage('bd_noStyleNoInHeadCount'));
         }
       } else {
         result.push(chrome.i18n.getMessage('bd_noStyleTotalCount'));
@@ -129,11 +129,11 @@ void function() {
       if (data.SCRIPT.totalCount != 0) {
         result.push(chrome.i18n.getMessage('bd_scriptTotalCount',
             ['<em>' + data.SCRIPT.totalCount + '</em>']));
-        if (data.SCRIPT.noInBodyCount != 0) {
-          result.push(chrome.i18n.getMessage('bd_scriptNoInBodyCount',
-              ['<strong>' + data.SCRIPT.noInBodyCount + '</strong>']));
+        if (data.SCRIPT.noInHeadCount != 0) {
+          result.push(chrome.i18n.getMessage('bd_scriptNoInHeadCount',
+              ['<strong>' + data.SCRIPT.noInHeadCount + '</strong>']));
         } else {
-          result.push(chrome.i18n.getMessage('bd_noScriptNoInBodyCount'));
+          result.push(chrome.i18n.getMessage('bd_noScriptNoInHeadCount'));
         }
       } else {
         result.push(chrome.i18n.getMessage('bd_noScriptTotalCount'));

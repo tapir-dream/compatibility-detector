@@ -58,14 +58,14 @@
   "bd_nodeCount": { "message": "There are $1 DOM nodes in this page." },
 
   "bd_styleTotalCount": { "message": "There are $1 STYLE nodes in this page" },
-  "bd_styleNoInBodyCount": { "message": " ($1 not put inside the HEAD tag)." },
+  "bd_styleNoInHeadCount": { "message": " ($1 not put inside the HEAD tag)." },
   "bd_noStyleTotalCount": { "message": "There is no STYLE nodes in this page." },
-  "bd_noStyleNoInBodyCount": { "message": " (all put inside the HEAD tag)." },
+  "bd_noStyleNoInHeadCount": { "message": " (all put inside the HEAD tag)." },
 
   "bd_scriptTotalCount": { "message": "There are $1 SCRIPT nodes in this page" },
-  "bd_scriptNoInBodyCount": { "message": " ($1 not put inside the HEAD tag)." },
+  "bd_scriptNoInHeadCount": { "message": " ($1 not put inside the HEAD tag)." },
   "bd_noScriptTotalCount": { "message": "There is no SCRIPT nodes in this page." },
-  "bd_noScriptNoInBodyCount": { "message": " (all put inside the HEAD tag)." },
+  "bd_noScriptNoInHeadCount": { "message": " (all put inside the HEAD tag)." },
 
   "bd_IECondCommCount": { "message": "There are $1 conditional comments in this page, which is only supported by IE." },
   "bd_hasDeprecatedTag": { "message": "There are deprecated tag $1 in this page, it should not be used any more." },

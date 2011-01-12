@@ -59,7 +59,7 @@ docElement.addEventListener('chrome_comp_problemDetected', function() {
   var severity = docElement.getAttribute('chrome_comp_severity');
   var description = docElement.getAttribute('chrome_comp_description');
   var occurrencesNumber =
-    docElement.getAttribute('chrome_comp_occurrencesNumber');
+      docElement.getAttribute('chrome_comp_occurrencesNumber');
 
   chrome.extension.sendRequest({
     type: 'CompatibilityResult',
