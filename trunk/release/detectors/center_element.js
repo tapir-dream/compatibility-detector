@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +12,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ */
+
+/**
+ * @fileoverview: One detector implementation for checking the alignment of
+ *  the CENTER element.
+ * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=33
+ *
+ * The CENTER element will make its descendants align center, but In IE, the
+ * CENTER element also make itself align center.
+ * So check all CENTER elements, and get the computed value of 'margin-left' and
+ * 'margin-right' properties, if the absolute value between the two values is
+ * greater than 1, then report this issue.
  */
 
 addScriptToInject(function() {

@@ -1,0 +1,143 @@
+/*
+ * Copyright 2010 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+{
+  "extensionName": { "message": "Chrome Compatibility Detection Extention" },
+  "extensionDescription": { "message": "Detects web page compatibility issues. Developed by Google Chrome Team." },
+  "previous": { "message": "Previous" },
+  "next": { "message": "Next" },
+  "close": { "message": "Close" },
+  "moreInfo": { "message": "More Info" },
+  "mOfN": { "message": "$1 of $2" },
+  "suggestion": { "message": "Suggestion: " },
+  "numberOfIssues": { "message": "Found $1 warning(s) and $2 error(s)." },
+  "hideAnnotations": { "message": "Click to hide annotations." },
+  "showAnnotations": { "message": "Click to show annotations." },
+  "normalTitleText": { "message": "Click to start detecting compatibility issues on this page" },
+  "okTitleText": { "message": "No issues found. Great!" },
+  "warningTitleText": { "message": "Some warning level compatiblility issues are found.\nClick to view." },
+  "errorTitleText": { "message": "Some error level compatiblility issues are found.\nClick to view." },
+
+  "popup_cannotDetect": { "message": "This page cannot be detected." },
+  "popup_loading": { "message": "Loading..." },
+  "popup_baseDetection": { "message": "Basic" },
+  "popup_advancedDetection": { "message": "Advanced" },
+  "popup_detecting": { "message": "Detection running..." },
+  "popup_noProblem": { "message": "No compatibility issue found." },
+  "popup_issueDescription": { "message": "Issue Description" },
+  "popup_issueCount": { "message": "Occurrences" },
+  "popup_checkboxEffectTip": { "message": "Tips: click the checkbox to show corresponding annotations on the page." },
+  "popup_detectionStatus": { "message": "Detecting..." },
+
+  "bd_aboutRCAorKB": { "message": "For details, refer to:" },
+  "bd_hasDTD": { "message": "This page has a DTD." },
+  "bd_strangeDTD": { "message": "This DTD is not frequently used." },
+  "bd_makeIEBeInQuirksMode": { "message": "There are comments or XML header before the DTD in this page, which will turn the page into quirks mode in IE." },
+  "bd_S": { "message": "standards mode" },
+  "bd_Q": { "message": "quirks mode" },
+  "bd_sameDTD": { "message": " IE and Chrome will use $1 rendering mode, which is $2." },
+  "bd_same": { "message": "the same" },
+  "bd_different": { "message": "different" },
+  "bd_reducePossibility": { "message": "to reduce the possibility of triggering a compatibility issue." },
+  "bd_inQuirksMode": { "message": "It is better to use a DTD that makes the page rendered in stardards mode, " },
+  "bd_differentDTD": { "message": " IE and Chrome will render in $1, it is better to change the DTD, " },
+  "bd_noDTD": { "message": "There is no DTD on this page, and it will be rendered in $1 in all browsers. It is better to use a DTD that makes the page rendered in stardards mode." },
+  "bd_nodeCount": { "message": "There are $1 DOM nodes in this page." },
+
+  "bd_styleTotalCount": { "message": "There are $1 STYLE nodes in this page" },
+  "bd_styleNoInBodyCount": { "message": " ($1 not put inside the HEAD tag)." },
+  "bd_noStyleTotalCount": { "message": "There is no STYLE nodes in this page." },
+  "bd_noStyleNoInBodyCount": { "message": " (all put inside the HEAD tag)." },
+
+  "bd_scriptTotalCount": { "message": "There are $1 SCRIPT nodes in this page" },
+  "bd_scriptNoInBodyCount": { "message": " ($1 not put inside the HEAD tag)." },
+  "bd_noScriptTotalCount": { "message": "There is no SCRIPT nodes in this page." },
+  "bd_noScriptNoInBodyCount": { "message": " (all put inside the HEAD tag)." },
+
+  "bd_IECondCommCount": { "message": "There are $1 conditional comments in this page, which is only supported by IE." },
+  "bd_hasDeprecatedTag": { "message": "There are deprecated tag $1 in this page, it should not be used any more." },
+  "bd_noDeprecatedTag": { "message": "This page does not use any deprecated tags." },
+  "bd_hasDeprecatedAttribute": { "message": "There are deprecated attribute $1 in tag  $2, it should not be used any more." },
+  "bd_noDeprecatedAttribute": { "message": "This page does not use any deprecated attributes." },
+
+  "detectionFinished": { "message": "Detection complete."},
+  "allProblemsSummary": { "message": "Found $1 compatibility issues:"},
+  "errorProblemsSummary": { "message": "$1 errors:" },
+  "warningProblemsSummary": { "message": "$1 warnings:" },
+
+  "KB001": { "message": "Compatibility issues and browser's rendering engine and rendering mode" },
+
+  "BT1025": { "message": "IE will ignore the trailing full shaped whitespaces in elements which trigger 'hasLayout'" },
+  "BT1025_suggestion": { "message": "Avoid using full shaped whitespaces, use '&nbsp;' instead." },
+  "BT9005": { "message": "VBScript is only supported by IE" },
+  "BT9005_suggestion": { "message": "Don't use VBScript. Use JavaScript instead." },
+  "BT9006": { "message": "JScript.Encode is only supported by IE" },
+  "BT9006_suggestion": { "message": "Don't use IE only features for scripting" },
+  "BX1030": { "message": "IE8(S) Firefox Opera Chrome Safari will refer to child element's width when calculating MARQUEE's width in some conditions" },
+  "BX1030_suggestion": { "message": "Alwarys explicitly specify the width for MARQUEE elements." },
+  "BX9002": { "message": "document.all is not supported by all browsers" },
+  "BX9002_suggestion": { "message": "Do not use document.all. Use document.getElementById, document.getElementsByTagName, which is already standardized in W3C DOM specification." },
+  "BX9021": { "message": "IE6 IE7 IE8 extend the onreadystatechange event" },
+  "BX9021_suggestion": { "message": "In W3C stardards, only XmlHttpRequest object has onreadystatechange event  (refer to XMLHttpRequest specification)." },
+  "HA8001": { "message": "In IE6 IE7 IE8(Q), the CENTER element will make elements aligned to center. But in IE(S) Opera(S), text in tables will also be centered. (TODO: clarify)" },
+  "HA8001_suggestion": { "message": "Do not use CENTER tag. Use CSS's 'text-align' instead." },
+  "HF3005": { "message": "\"disabled\" attribute can be used on non-form elements in  IE6 IE7 IE8" },
+  "HF3005_suggestion": { "message": "Avoid using \"disabled\" attribute on non-form elements" },
+  "HF3013": { "message": "IE6 IE7 do not support disabled attribute for OPTION and OPTGROUP tags" },
+  "HF3013_suggestion": { "message": "Use other ways to make OPTION and OPTGROUP disabled, such as removing those elements by script" },
+  "HY1005": { "message": "IE6 IE7 IE8(Q) treat non list elments inside UL, OL, DL differently" },
+  "HY1005_suggestion": { "message": "It is not recommended to use other elements inside LI, DD, DT" },
+  "RE1012": { "message": "In IE6 IE7 IE8(Q) Firefox(Q) Opera(Q), empty table cells may not have borders in some situation" },
+  "RE1012_suggestion": { "message": "Avoid empty table cells, fill them with &nbsp;" },
+  "RE1013": { "message": "In IE6 IE7 IE8(Q), the 'padding' style for cells to the top and bottom of an empty cell is not effective" },
+  "RE1013_suggestion": { "message": "Avoid empty table cells, fill them with &nbsp;" },
+  "RE1020": { "message": "IE6 IE7 IE8(Q) do not support 'border-spacing'" },
+  "RE1020_suggestion": { "message": "'border-spacing' is not supported by all browsers.  TABLE's cellspacing can be used if border-spacings are equal for all edges." },
+  "RX1008": { "message": "In IE6 IE7 IE8(Q), cellspacing attribute will be effective for TABLE with collapsed borders (TODO: verify)" },
+  "RX1008_suggestion": { "message": "When using border-collapse:collapse, make sure that TABLE's cellspacing is 0." },
+  "RE8014": { "message": "In IE6 IE7 IE8(Q), TABLE cells are aligned by element's original width, instead of the actual width that is enlarged by some reason." },
+  "RE8014_suggestion": { "message": "Do not specify width for both TABLE and columns in it. If each column's width is set, TABLE's width should use the default value(\"auto\"). If TABLE's width is set, at least one column's width should be \"auto\"." },
+  "RM8015": { "message": "In IE6 IE7 IE8(Q), new layers will be created for positioned elements with default 'z-index' value in some situation. (TODO: verify)" },
+  "RM8015_suggestion": { "message": "Understand the relationship between layers and 'z-index'. (TODO: verify)" },
+  "RT3002": { "message": "'text-decoration' is not rendered in the same way for elements and their descendant in all browsers" },
+  "RT3002_suggestion": { "message": "Use a reasonable solution according to the specific needs. (TODO: verify)" },
+  "RT3005": { "message": "'text-overflow:ellipsis' will cause compatibility issue" },
+  "RT3005_suggestion": { "message": "Do not use 'text-overflow:ellipsis' for block elements" },
+  "RT8003": { "message": "In IE6 IE7 IE8(Q), 'text-align' will be applied to block elements, and for quirks mode in all browsers, it can not be inherited by TABLE element" },
+  "RT8003_suggestion": { "message": "Avoid using 'text-align' for child block or TABLE elements that has a smaller width." },
+  "RV1001": { "message": "In IE, when 'overflow-x' or 'overflow-y' is not set to 'visible', the computed value for the other is 'visible', not 'auto'" },
+  "RV1001_suggestion": { "message": "set both 'overflow-x' and 'overflow-y', do not use 'hidden' and 'visible' together" },
+  "RX1003": { "message": "In IE6 IE7 IE8(Q), 'white-space' is not inherited in some situations" },
+  "RX1003_suggestion": { "message": "Specify 'white-space' for TD and its child elements. Do not let TD inherite its parent's 'white-space'. Or avoid set width and white-space:nowrap / nowrap for TD elements" },
+  "RX3011": { "message": "FONT element's color will be applied to its parent's decoration color in some situations." },
+  "RX3011_suggestion": { "message": "FONT is deprecated, and should not be used any more." },
+  "RX8004": { "message": "In non-IE browsers, TABLE's 'margin' will affect TABLE's align attribute" },
+  "RX8004_suggestion": { "message": "Since align attribute is deprecated for TABLE, use CSS instead" },
+  "RX8015": { "message": "In IE6 IE7 IE8(Q), align='left|right' is not treated correctly for IMG, OBJECT, IFRAME, TABLE elements" },
+  "RX8015_suggestion": { "message": "align attribute is deprecated. Use CSS 'float' instead for IMG, OBJECT, IFRAME, TABLE, APPLET, EMBED elements." },
+  "RX8017": { "message": "IE renders 'shrink-to-fit' incorrectly for floating non-replaced elements which have percent width" },
+  "RX8017_suggestion": { "message": "Specify width for floating element explicitly." },
+  "SD9012": { "message": "IE6 IE7 IE8 do not match in case sensitive way for getElementsByName method" },
+  "SD9012_suggestion": { "message": "Always use the exactly same text for element's ID and string constant in scripts." },
+
+  "HO9006": { "message": "Firefox and Opera do not support the using of Windows Media Player or Flash by specifying classid for OBJECT element" },
+  "HO9006_suggestion": { "message": "Do not use classid for OBJECT." },
+
+  // The following messages are auto generated by update_w3help_issue.sh. Don't modify them by hand.
+
+
+  "lastLine": { "message": "lastLine" }
+}

@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2010 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,6 +14,24 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview: One detector implementation for checking 'text-overflow:
+ * ellipsis can cause compatibility issues' problems
+ * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=30
+ *
+ * 'text-overflow' is the new CSS3 feature, in draft form;
+ * This feature can be applied to block-level elements,
+ * inline elements and cells, when its value is 'ellipsis',
+ * the text will be cut off with an ellipsis said.
+ * Therefore, not all browsers support this new feature , such as Firefox.
+ *
+ * When the trigger the following conditions may cause compatibility problems:
+ * An element to set this feature,
+ * Set the width of the element,
+ * Set the overflow: hidden,
+ * 'word-wrap' value is not a break-word.
+ */
+
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
@@ -27,6 +45,9 @@ null, // constructor
 function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType ||context.isDisplayNone())
     return;
+  if (node.tagName == 'SCRIPT')
+    return;
+
   // Recursively check if the length of sub-elements than the parent element
   function loopForNode(nodeElement, nodeWidth) {
     var node = nodeElement;

@@ -16,7 +16,7 @@
 
 {
   "name": "__MSG_extensionName__",
-  "version": "1.2",
+  "version": "0.9",
   "description": "__MSG_extensionDescription__",
   "background_page": "background.html",
   "default_locale": "zh_CN",
@@ -26,14 +26,16 @@
   // "options_page": "options.html",
   "permissions": [ "tabs", "http://*/*", "https://*/*" ],
   "browser_action": {
+    "popup": "popup.html",
     "default_icon": "icon_normal.png",
-    "default_title": "__MSG_resultNotAvailable__"
+    "default_title": "__MSG_normalTitleText__"
   },
   "content_scripts": [
   {
     "matches": [ "http://*/*", "https://*/*", "file://*" ],
     "js": [
       "loader.js",
+      "base_detection.js",
       "framework.js",
       "config.js",
       "w3help_issues.js",

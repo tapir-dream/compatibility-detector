@@ -67,21 +67,28 @@ function preprocessAnnotations() {
   if (!annotations.length) {
     var sequence = 0;
     var problems = chrome_comp.CompDetect.getAllProblems();
+    var issusId = document.documentElement.getAttribute('issusId');
+    // console.log(issusId.split(','));
+    document.documentElement.removeAttribute('issusId');
     for (var typeId in problems) {
-      var problem = problems[typeId];
+      if(issusId && issusId.split(',').indexOf(typeId) != -1) {
+        // console.log(issusId);
+        var problem = problems[typeId];
       // Sanity check to ensure this entry is valid (not an injected property
       // by the host page.
-      if (problem && problem.occurrences && problem.occurrences.length) {
-        for (var i = 0, c = problem.occurrences.length; i < c; i++) {
-          var annotation = problem.occurrences[i];
-          annotation.problem = problem;
-          // This sequence is to ensure the sorting is stable when multiple
-          // annotations has the same position.
-          annotation.originalSequnece = sequence++;
-          annotations.push(annotation);
-          updateAnnotationTopLeft(annotation);
+        if (problem && problem.occurrences && problem.occurrences.length) {
+          for (var i = 0, c = problem.occurrences.length; i < c; i++) {
+            var annotation = problem.occurrences[i];
+            annotation.problem = problem;
+            // This sequence is to ensure the sorting is stable when multiple
+            // annotations has the same position.
+            annotation.originalSequnece = sequence++;
+            annotations.push(annotation);
+            updateAnnotationTopLeft(annotation);
+          }
         }
       }
+
     }
     annotations.sort(compareAnnotations);
   }
@@ -105,8 +112,8 @@ function showHighlight() {
     }
     highlightDiv.style.display = 'block';
     highlightDiv.className = className;
-    highlightDiv.style.left = (rect.left - 1) + 'px';
-    highlightDiv.style.top = (rect.top - 1) + 'px';
+    highlightDiv.style.left = rect.left + 'px';
+    highlightDiv.style.top = rect.top + 'px';
     highlightDiv.style.width = rect.width + 'px';
     highlightDiv.style.height = rect.height + 'px';
   }
@@ -117,7 +124,7 @@ function hideHighlight() {
     highlightDivs[i].style.display = 'none';
 }
 
-function showBalloon(index) {
+function showBalloon(index,isScrollIntoView) {
   if (index < 0 || index >= annotations.length)
     return;
 
@@ -152,7 +159,7 @@ function showBalloon(index) {
     previousLink.innerText = chrome_comp.getMessage('previous');
     previousLink.href = '#';
     previousLink.onclick = function() {
-      showBalloon(this.annotationIndex - 1);
+      showBalloon(this.annotationIndex - 1,true);
       return false;
     };
     navigationDiv.appendChild(previousLink);
@@ -160,7 +167,7 @@ function showBalloon(index) {
     nextLink.innerText = chrome_comp.getMessage('next');
     nextLink.href = '#';
     nextLink.onclick = function() {
-      showBalloon(this.annotationIndex + 1);
+      showBalloon(this.annotationIndex + 1,true);
       return false;
     };
     navigationDiv.appendChild(nextLink);
@@ -231,22 +238,28 @@ function showBalloon(index) {
   balloonDiv.style.display = 'block ';
   balloonDiv.style.left = tagDiv.offsetLeft + 'px';
   balloonDiv.style.top = tagDiv.offsetTop + tagDiv.offsetHeight + 'px';
-  if (tagDiv.offsetTop < window.scrollY) {
-    window.scrollTo(window.scrollX, tagDiv.offsetTop);
-  } else {
+
+  if (isScrollIntoView)
+    tagDiv.scrollIntoView();
+
+  if (tagDiv.offsetTop > window.scrollY) {
     var balloonBottom = balloonDiv.offsetTop + balloonDiv.offsetHeight;
-    if (balloonBottom > window.scrollY + window.innerHeight)
-      window.scrollTo(window.scrollX, balloonBottom - window.innerHeight);
+    if (balloonBottom > window.scrollY + window.innerHeight) {
+      balloonDiv.style.top = tagDiv.offsetTop - balloonDiv.offsetHeight + "px";
+    }
   }
-  if (tagDiv.offsetLeft < window.scrollX) {
-    window.scrollTo(tagDiv.offsetLeft, window.scrollY);
-  } else {
+  if (tagDiv.offsetLeft > window.scrollX) {
     var balloonRight = balloonDiv.offsetLeft + balloonDiv.offsetWidth;
-    if (balloonRight > window.scrollX + window.innerWidth)
-      window.scrollTo(balloonRight - window.innerWidth, window.scrollY);
+    if (balloonRight > window.scrollX + window.innerWidth) {
+
+      balloonDiv.style.left = tagDiv.offsetLeft - balloonDiv.offsetWidth +
+          annotation.rectangles[0].width + "px";
+    }
   }
+
   balloonDiv.annotationIndex = index;
   showHighlight.apply(balloonDiv);
+  /*
   window.console.log(annotation.problem.issueDescription);
   // Show the primary node in the console. In developer tool, the user can
   // see the details of the node in the console panel.
@@ -254,6 +267,7 @@ function showBalloon(index) {
     window.console.log(annotation.nodes);
   if (annotation.stack)
     window.console.log(annotation.stack);
+  */
 }
 
 function onTagClick() {
@@ -269,32 +283,22 @@ function isDescendentOf(e1, e2) {
   return false;
 }
 
-function onDocumentMouseDown(event) {
-  // Do nothing if the mouse is clicking on the scroll bar.
-  if (event.target == document.documentElement &&
-      (event.clientX > window.scrollX + document.documentElement.clientWidth ||
-       event.clientY > window.scrollY + document.documentElement.clientHeight))
-    return;
-  if (balloonDiv && !isDescendentOf(event.target, balloonDiv))
-    balloonDiv.style.display = 'none';
-}
-
 function onDocumentKeyDown(event) {
   if (balloonDiv && balloonDiv.style.display == 'block') {
     switch (event.keyCode) {
       case 36: // Home
-        showBalloon(0);
+        showBalloon(0,true);
         break;
       case 37: // Arrow Left
       case 38: // Arrow Up
-        showBalloon(balloonDiv.annotationIndex - 1);
+        showBalloon(balloonDiv.annotationIndex - 1,true);
         break;
       case 39: // Arrow Right
       case 40: // Arrow Down
-        showBalloon(balloonDiv.annotationIndex + 1);
+        showBalloon(balloonDiv.annotationIndex + 1,true);
         break;
       case 35: // End
-        showBalloon(annotations.length - 1);
+        showBalloon(annotations.length - 1,true);
         break;
       default:
         return;
@@ -357,6 +361,7 @@ function refreshAnnotations() {
 }
 
 function showAnnotations() {
+  annotations = [];
   if (annotationsDiv)
     return;
   preprocessAnnotations();
@@ -424,12 +429,14 @@ function showAnnotations() {
       'opacity: 1 }' +
     '.chrome-comp-highlight-error {' +
       'position: absolute;' +
+      'box-sizing: border-box;' +
       'z-index: 99999999;' +
       'opacity: 0.5;' +
       'background:#F00;' +
       'border:solid thin #A10 }' +
     '.chrome-comp-highlight-warning {' +
       'position: absolute;' +
+      'box-sizing: border-box;' +
       'z-index: 99999999;' +
       'opacity: 0.5;' +
       'background:#FA0;' +
@@ -440,6 +447,7 @@ function showAnnotations() {
       'background: #FFC;' +
       'padding: 5px;' +
       'border: solid thin #888;' +
+      'border-top-left-radius: 6px;' +
       'border-bottom-left-radius: 6px;' +
       'border-top-right-radius: 6px;' +
       'border-bottom-right-radius: 6px;' +
@@ -492,7 +500,6 @@ function showAnnotations() {
 
   setAnnotationTagsPosition(annotations);
   showBalloon(0);
-  document.addEventListener('mousedown', onDocumentMouseDown, true);
   document.addEventListener('keydown', onDocumentKeyDown, true);
   refreshTimer = window.setInterval(refreshAnnotations, 300);
 }
@@ -505,7 +512,6 @@ function hideAnnotations() {
   annotationsDiv = null;
   highlightDivs = [];
   balloonDiv = null;
-  document.removeEventListener('mousedown', onDocumentMouseDown, true);
   document.removeEventListener('keydown', onDocumentKeyDown, true);
   window.clearInterval(refreshTimer);
 }
@@ -522,7 +528,11 @@ document.documentElement.addEventListener('chrome_comp_AnnotationOff',
 });
 
 chrome.extension.onRequest.addListener(function (request, sender, response) {
+  if (request.type == 'AnnotationOn') {
+    document.documentElement.setAttribute('issusId', request.issusId);
+  }
   var event = document.createEvent('Event');
   event.initEvent('chrome_comp_' + request.type, true, true);
   document.documentElement.dispatchEvent(event);
+  response && response();
 });
