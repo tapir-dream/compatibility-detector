@@ -25,12 +25,12 @@ var docElement = document.documentElement;
 
 const INJECT_SCRIPT_EVENT_NAME = 'chrome_comp_injectScript';
 const INJECTED_SCRIPT_ATTR_NAME = 'chrome_comp_injectedScript';
+const PROBLEM_DETECTED_EVENT_NAME = 'chrome_comp_problemDetected';
 
 // Creates a script node on the page to inject arbitary script from content
 // script to the page.
 // Use window.eval(scriptString) to inject the script.
 var script = document.createElement('script');
-
 script.appendChild(document.createTextNode(
   'document.documentElement.addEventListener("' + INJECT_SCRIPT_EVENT_NAME +
   // The name of this function is an indicator of injected code
@@ -48,13 +48,13 @@ docElement.appendChild(script);
 docElement.setAttribute('chrome_comp_injected', true);
 
 // Passes compatibility results from the page to the extension background page.
-// Event name: 'chrome_comp_result'
+// Event name: chrome_comp_problemDetected
 // Depends on:
-//   documentElement's attribute: chrome_comp_reason, chrome_comp_severity
+//   documentElement's attribute: chrome_comp_reason, chrome_comp_severity,
+//   chrome_comp_description, chrome_comp_occurrencesNumber
 // Request message format:
 //   type('CompatibilityResult'), reason, severity
-
-docElement.addEventListener('chrome_comp_problemDetected', function() {
+docElement.addEventListener(PROBLEM_DETECTED_EVENT_NAME, function() {
   var reason = docElement.getAttribute('chrome_comp_reason');
   var severity = docElement.getAttribute('chrome_comp_severity');
   var description = docElement.getAttribute('chrome_comp_description');
@@ -73,7 +73,7 @@ docElement.addEventListener('chrome_comp_problemDetected', function() {
 // Triggers endOfDetection event from the page to the extension background page.
 // Event name: 'chrome_comp_endOfDetection'
 // Request message format:
-//   type('EndOfDetection')
+//   type('EndOfDetection'), totalProblems
 docElement.addEventListener('chrome_comp_endOfDetection', function() {
   chrome.extension.sendRequest({
     type: 'EndOfDetection',
@@ -86,7 +86,6 @@ docElement.addEventListener('chrome_comp_endOfDetection', function() {
 // Depends on:
 //   documentElement's attribute: chrome_comp_messageName,
 //   chrome_comp_messageParams, chrome_comp_messageResult
-
 docElement.addEventListener('chrome_comp_getMessage', function() {
   var name = docElement.getAttribute('chrome_comp_messageName');
   var params = docElement.getAttribute('chrome_comp_messageParams');
@@ -94,7 +93,7 @@ docElement.addEventListener('chrome_comp_getMessage', function() {
       chrome.i18n.getMessage(name, params ? JSON.parse(params) : undefined));
 });
 
-}
+} // end if
 
 chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
   switch (request.type) {
@@ -104,14 +103,6 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
   }
 });
 
-/*
-function checkNode() {
-  var event = document.createEvent('Event');
-  event.initEvent('chrome_comp_checkNode', true, true);
-  document.documentElement.dispatchEvent(event);
-}
-*/
-
 function detectProblems() {
   if (!detectionEnabled) {
     window.sessionStorage['chrome_comp_detection_status'] =
@@ -120,27 +111,20 @@ function detectProblems() {
   }
 }
 
-/*
-docElement.addEventListener('chrome_comp_reportProblem', function() {
-  chrome.extension.sendRequest({ type: 'ReportProblem' });
-}, false);
-*/
-
 function addSourceToInject(source, debug) {
-  if (detectionEnabled) {
-    inject();
+  if (!detectionEnabled) {
+    return;
   }
-  function inject() {
-    if (debug) {
-      var script = document.createElement('script');
-      script.appendChild(document.createTextNode(source));
-      docElement.appendChild(script);
-    } else {
-      var event = document.createEvent('Event');
-      event.initEvent(INJECT_SCRIPT_EVENT_NAME, true, true);
-      docElement.setAttribute(INJECTED_SCRIPT_ATTR_NAME, source);
-      docElement.dispatchEvent(event);
-    }
+
+  if (debug) {
+    var script = document.createElement('script');
+    script.appendChild(document.createTextNode(source));
+    docElement.appendChild(script);
+  } else {
+    var event = document.createEvent('Event');
+    event.initEvent(INJECT_SCRIPT_EVENT_NAME, true, true);
+    docElement.setAttribute(INJECTED_SCRIPT_ATTR_NAME, source);
+    docElement.dispatchEvent(event);
   }
 }
 

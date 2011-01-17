@@ -525,14 +525,18 @@ document.documentElement.addEventListener('chrome_comp_AnnotationOff',
     function() {
       hideAnnotations();
     });
+
 });
 
 chrome.extension.onRequest.addListener(function (request, sender, response) {
   if (request.type == 'AnnotationOn') {
+    // TODO: rename 'issusId' to 'chrome_comp_reasons'
     document.documentElement.setAttribute('issusId', request.issusId);
   }
   var event = document.createEvent('Event');
+  // TODO: use fixed event name
   event.initEvent('chrome_comp_' + request.type, true, true);
   document.documentElement.dispatchEvent(event);
-  response && response();
+  if (response)
+    response();
 });
