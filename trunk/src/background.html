@@ -4,6 +4,10 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Chrome Compatibility Detector</title>
 <script>
+
+// Each page's information. This is a tabId to DetectionResult map.
+var gDetectionResults = {};
+
 const ICON_PATH = {
   'normal': 'icon_normal.png',
   'ok': 'icon_ok.png',
@@ -33,10 +37,10 @@ function setDetectionCompatStatus(tabId, status) {
 }
 
 function getDetectionCompatStatusOfPriority(tabId, status) {
-  var currentUrlDetectionStatus = getDetectionCompatStatus(tabId);
-  return DETECTION_COMPAT_STATUS_OF_PRIORITY[currentUrlDetectionStatus] >=
+  var currentStatus = getDetectionCompatStatus(tabId);
+  return DETECTION_COMPAT_STATUS_OF_PRIORITY[currentStatus] >=
       DETECTION_COMPAT_STATUS_OF_PRIORITY[status] ?
-      currentUrlDetectionStatus : status;
+      currentStatus : status;
 }
 
 function setBrowserAction(status, tabId) {
@@ -52,17 +56,14 @@ function setBrowserAction(status, tabId) {
   });
 }
 
-// Each page's information.
-var gDetectionResults = {};
-
 function DetectionResult(tabId) {
   this.tabId = tabId;
-  this.problems = {};
+  this.problems = {};  // maps reason to Problem object
   this.totalProblems = 0;
   this.totalErrors = 0;
   this.totalWarnings = 0;
   this.detected = false;
-  this.annotatedProblems = {};
+  this.annotatedProblems = {};  // maps reason to true
   this.browserActionStatus = 'ok';
   this.detectionCompatStatus = 'normal';
 }
@@ -101,12 +102,19 @@ Problem.prototype.setOccurrencesNumber = function(number) {
 };
 
 function getDetectionResult(tabId) {
-  var detectionResult = gDetectionResults[tabId];
-  return detectionResult;
+  return gDetectionResults[tabId];
+}
+
+function log(message) {
+  window.console.log(message);
 }
 
 function getPopup() {
-  return chrome.extension.getViews({type: 'popup'})[0];
+  var views = chrome.extension.getViews({type: 'popup'});
+  log('views.length=' + views.length);
+  if (views.length > 0)
+    return views[0];
+  return null;
 }
 
 /**
@@ -158,25 +166,26 @@ function stopAddingDetectedProblem(tabId, totalProblems) {
 
 function annotateAllIssues(tabId) {
   var detectionResult = getDetectionResult(tabId);
-  var problems = Object.keys(detectionResult.problems);
-  problems.forEach(function(typeId) {
-    detectionResult.annotatedProblems[typeId] = typeId;
+  var reasons = Object.keys(detectionResult.problems);
+  reasons.forEach(function(reason) {
+    detectionResult.annotatedProblems[reason] = true;
   });
-  annotate(problems);
+  annotate(reasons);
 }
 
 /**
  * Annotate problems on the target node in the page
- * @param {Array} problems
+ * @param {Array} reasons
  */
-function annotate(problems) {
+function annotate(reasons) {
   chrome.tabs.getSelected(null, function(tab) {
     var tabId = tab.id;
     chrome.tabs.sendRequest(tabId, { type: 'AnnotationOff' }, function() {
-      if (problems.length) {
+      if (reasons.length) {
         chrome.tabs.sendRequest(tabId, {
           type: 'AnnotationOn',
-          issusId: problems
+          // TODO: rename issusId to reasons
+          issusId: reasons
         }, function() {
           var popup = getPopup();
           if (popup) {
@@ -192,6 +201,7 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
   var tabId = sender.tab.id;
   switch (request.type) {
     case 'ContentScriptInjected':
+      // TODO: do not create DetectionResult here!
       gDetectionResults[tabId] = new DetectionResult(tabId);
       break;
     case 'setStatus':
