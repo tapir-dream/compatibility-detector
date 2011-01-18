@@ -13,11 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-chrome.extension.sendRequest({type: 'ContentScriptInjected'});
+
+function log(message) {
+  // Add return here to disable all logs
+  window.console.log(message);
+}
 
 var detectionEnabled =
     window.sessionStorage['chrome_comp_detection_status'] ==
         window.location.href;
+
+// Delete the key so that refresh the page again will get a clean page.
+delete window.sessionStorage['chrome_comp_detection_status'];
 
 if (detectionEnabled) {
 

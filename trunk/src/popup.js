@@ -4,18 +4,26 @@ const W3HELP_LOCALES = {
   'zh-cn': true
 };
 
+const STATUS_BASE = 'base';
+const STATUS_ADVANCED = 'advanced';
+
 var w3helpLocale = chrome.i18n.getMessage('@@ui_locale');
+
+// TODO: '@@ui_locale' can be en_GB
 if (w3helpLocale)
   w3helpLocale = w3helpLocale.toLowerCase().replace('_', '-');
 if (!W3HELP_LOCALES.hasOwnProperty(w3helpLocale))
   w3helpLocale = DEFAULT_LOCALE;
 w3helpLocale = 'http://www.w3help.org/' + w3helpLocale;
 
+// ----
+// Helper functions
+
 function stringTemplate(param) {
   return param.str.replace(param.regexp || /\${([^{}]*)}/g,
       function(a,b) {
         var r = param.obj[b];
-        return (typeof r == "string") ? r : a ;
+        return (typeof r == 'string') ? r : a ;
       })
 }
 
@@ -31,7 +39,17 @@ function bulidHTMLView(templateObject, element) {
   });
 }
 
-document.addEventListener("DOMContentLoaded", function() {
+function log(message) {
+  var backgroundPage = chrome.extension.getBackgroundPage();
+  backgroundPage.log('(popup.js) ' + message);
+}
+
+// ----
+// Event handlers
+
+// TODO: break the huge anonymous into pieces
+document.addEventListener('DOMContentLoaded', function() {
+  log('DOMContentLoaded begin');
   // HTMLView i18n
   bulidHTMLView({
     popup_cannotDetect: chrome.i18n.getMessage('popup_cannotDetect'),
@@ -55,10 +73,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
   var backgroundPage = chrome.extension.getBackgroundPage();
 
-  /**
-   * Show base detection resault.
-   */
-  function showBaseDetectionResault(data) {
+  function showBaseDetectionResult(data) {
+    log('showBaseDetectionResult begin');
     $content.className = 'processing';
     var result = [];
 
@@ -175,6 +191,7 @@ document.addEventListener("DOMContentLoaded", function() {
       result.push('<li>' +
           chrome.i18n.getMessage('bd_noDeprecatedAttribute') + '</li>');
     }
+
     // Show result.
     $baseDetection.innerHTML = result.join('');
     $content.className = '';
@@ -184,6 +201,7 @@ document.addEventListener("DOMContentLoaded", function() {
    * Change pop-up page's status.
    */
   function setStatus(status) {
+    log('setStatus: ' + status);
     switch (status) {
       case 'disabled':
         $body.className = 'disabled';
@@ -191,105 +209,29 @@ document.addEventListener("DOMContentLoaded", function() {
       case 'loading':
         $body.className = 'loading';
         break;
-      case 'base':
+      case STATUS_BASE:
         $body.className = 'base';
-        baseDetection();
         break;
-      case 'advanced':
+      case STATUS_ADVANCED:
         $body.className = 'advanced';
-        advancedDetection();
         break;
     }
   }
 
-  var tabId = null;
-  var baseDetection = null;
+  var baseDetection = function() {};
+
   window.setDetectionFinishedMessage = function() {};
   window.updateSummary = function() {};
   window.updateDetectionResult = function() {};
   window.showNoProblemResult = function() {};
   window.restoreAnnotationCheck = function() {};
+
+  // TODO: break the huge anonymous function into pieces
   chrome.tabs.getSelected(null, function(tab) {
     // Get current tab's id, many functions need it.
-    tabId = tab.id;
+    var tabId = tab.id;
 
-    /**
-     * Check whether the content script exists. If not, detection will be
-     * disabled. Can't check by url, because some url is an exception, like
-     * https://chrome.google.com/extensions?hl=zh-CN
-     */
-    function checkPermission() {
-      if (backgroundPage.gDetectionResults[tabId]) {
-        return true;
-      } else {
-        $body.className = 'disabled';
-        return false;
-      }
-    }
-    checkPermission();
-
-    // Get current tab's detectionType.
-    chrome.tabs.sendRequest(tabId, {type: 'getDetectionType'},
-        function(detectionType) {
-          setStatus(detectionType ? detectionType : 'loading');
-          // If the page reloaded for advanced detect, the pop-up page's
-          // status will be 'advanced', but base detection must run, the
-          // BrowserAction need the detection result.
-          if (detectionType == 'advanced' && $baseDetection.innerHTML == '') {
-            baseDetection();
-          }
-        });
-
-    // Change status when tab loaded or refreshed.
-    chrome.tabs.onUpdated.addListener(function(updatedTabId, changeInfo) {
-      if (tabId == updatedTabId) {
-        if (changeInfo.status == 'complete') {
-          $baseDetection.innerHTML = '';
-          if (checkPermission()) {
-            chrome.tabs.sendRequest(tabId, {type: 'getDetectionType'},
-                function(detectionType) {
-                  setStatus(detectionType);
-                  // Same with "Get current tab's detectionType" part.
-                  if (detectionType == 'advanced') {
-                    baseDetection();
-                  }
-                });
-          }
-        } else {
-          setStatus('loading');
-        }
-      }
-    });
-
-    // Change the tab panel.
-    $tab.addEventListener('click', function(event) {
-      var currentStatus = $body.className;
-      var status = event.target.className;
-      if (status && currentStatus != status) {
-        chrome.tabs.sendRequest(tabId,
-            {type: 'setDetectionType', detectionType: status},
-            function(detectionType) {
-              setStatus(detectionType);
-            });
-      }
-    });
-
-    // Base detection.
-    baseDetection = function() {
-      chrome.tabs.sendRequest(tabId, {type: 'baseDetection'},
-          showBaseDetectionResault);
-    }
-
-    function getDetectionResult(tabId) {
-      return backgroundPage.getDetectionResult(tabId);
-    }
-    function detectProblems() {
-      chrome.tabs.sendRequest(tabId, {type: 'DetectProblems'});
-    }
-
-    /**
-     * Advanced detection.
-     */
+    // Advanced detection.
     window.advancedDetection = function() {
       var detectionResult = getDetectionResult(tabId);
       // If detection finished, then show result from cache.
@@ -322,7 +264,7 @@ document.addEventListener("DOMContentLoaded", function() {
      */
     window.updateSummary = function(type) {
       var detectionResult = getDetectionResult(tabId);
-      var number = type == 'warning' ? 'totalWarnings' : 'totalErrors';
+      var number = (type == 'warning')? 'totalWarnings' : 'totalErrors';
       var summary = chrome.i18n.getMessage(type + 'ProblemsSummary',
           [detectionResult[number]]);
       var allProblemsSummary = chrome.i18n.getMessage('allProblemsSummary',
@@ -369,29 +311,91 @@ document.addEventListener("DOMContentLoaded", function() {
       $('noProblemFoundInfo').style.display = 'block';
     }
 
+    window.restoreAnnotationCheck = function() {
+      var detectionResult = getDetectionResult(tabId);
+      var annotatedReasons = detectionResult.annotatedReasons;
+      Object.keys(annotatedReasons).forEach(function(reason) {
+        $(reason).firstElementChild.firstElementChild.checked = true;
+      });
+      restoreCheckAll(document.getElementsByName('warning'), 'warning');
+      restoreCheckAll(document.getElementsByName('error'), 'error');
+
+      function restoreCheckAll(checkboxes, type) {
+        for (var i = 0, length = checkboxes.length; i < length; ++i) {
+          if (!checkboxes[i].checked)
+            return;
+        }
+        $(type + 'CheckAll').checked = true;
+      }
+    }
+
+    // use local variable: tabId
+    runBaseDetection = function () {
+      log('runBaseDetection begin');
+      // TODO: check DetectionResult.baseResultHTML first
+      chrome.tabs.sendRequest(tabId, {type: 'runBaseDetection'},
+          showBaseDetectionResult);
+    };
+
+    var detectionResult = getDetectionResult(tabId);
+    if (detectionResult.showAdvanced) {
+      setStatus(STATUS_ADVANCED);
+      advancedDetection();
+    } else {
+      setStatus(STATUS_BASE);
+      runBaseDetection();
+    }
+
+    // Change the tab panel.
+    log('$tab.addEventListener click');
+    $tab.addEventListener('click', function(event) {
+      var currentDetecionType = $body.className;
+      var status = event.target.className;
+      log('$tab click fired, status=' + status);
+      if (status && currentDetecionType != status) {
+        // TODO: modify this
+        var detectionResult = getDetectionResult(tabId);
+        detectionResult.showAdvanced = (status == 'advanced');
+        if (detectionResult.showAdvanced) {
+          setStatus(STATUS_ADVANCED);
+          advancedDetection();
+        } else {
+          setStatus(STATUS_BASE);
+          runBaseDetection();
+        }
+      }
+    });
+
+    function getDetectionResult(tabId) {
+      return backgroundPage.getDetectionResult(tabId);
+    }
+    function detectProblems() {
+      chrome.tabs.sendRequest(tabId, {type: 'DetectProblems'});
+    }
+
     /**
      * Update annotation status
      * @param {Array} checkboxes
      */
     function updateAnnotatedStatus(checkboxes) {
       var detectionResult = getDetectionResult(tabId);
-      var annotatedProblems = detectionResult.annotatedProblems;
+      var annotatedReasons = detectionResult.annotatedReasons;
       checkboxes.forEach(function(checkbox) {
-        var issueId = checkbox.parentNode.parentNode.id;
-        if (annotatedProblems[issueId] && !checkbox.checked)
-          delete annotatedProblems[issueId];
-        else if (!annotatedProblems[issueId] && checkbox.checked)
-          annotatedProblems[issueId] = issueId;
+        var reason = checkbox.parentNode.parentNode.id;
+        if (annotatedReasons[reason] && !checkbox.checked)
+          delete annotatedReasons[reason];
+        else if (!annotatedReasons[reason] && checkbox.checked)
+          annotatedReasons[reason] = true;
       });
-      return Object.keys(annotatedProblems);
+      return Object.keys(annotatedReasons);
     }
 
     /**
      * Handle one checkbox click event.
      */
     function toggleCheckProblem() {
-      var annotatedProblems = updateAnnotatedStatus([this]);
-      backgroundPage.annotate(annotatedProblems);
+      var annotatedReasons = updateAnnotatedStatus([this]);
+      backgroundPage.annotate(annotatedReasons);
       updateCheckAllStatus(this);
     }
 
@@ -423,24 +427,6 @@ document.addEventListener("DOMContentLoaded", function() {
         checkAll.checked = true;
       } else {
         checkAll.checked = false;
-      }
-    }
-
-    window.restoreAnnotationCheck = function() {
-      var detectionResult = getDetectionResult(tabId);
-      var annotatedProblems = detectionResult.annotatedProblems;
-      Object.keys(annotatedProblems).forEach(function(issueId) {
-        $(issueId).firstElementChild.firstElementChild.checked = true;
-      });
-      restoreCheckAll(document.getElementsByName('warning'), 'warning');
-      restoreCheckAll(document.getElementsByName('error'), 'error');
-
-      function restoreCheckAll(checkboxes, type) {
-        for (var i = 0, length = checkboxes.length; i < length; ++i) {
-          if (!checkboxes[i].checked)
-            return;
-        }
-        $(type + 'CheckAll').checked = true;
       }
     }
 
