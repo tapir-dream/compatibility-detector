@@ -1,30 +1,16 @@
-var detectionType = 'base';
-if (window.sessionStorage['chrome_comp_detection_status']) {
-  detectionType = 'advanced';
-}
-var summaryInformation = null;
 
 chrome.extension.onRequest.addListener(function(request, sender, response) {
+  log('(base_detection.js) onRequest, request.type=' + request.type);
   switch (request.type) {
-    case 'getDetectionType':
-      response(document.readyState == 'complete' ? detectionType : null);
-      break;
-    case 'setDetectionType':
-      detectionType = request.detectionType;
-      response(detectionType);
-      break;
-    case 'baseDetection':
-      if (!summaryInformation)
-        baseDetection();
+    case 'runBaseDetection':
+      var summaryInformation = runBaseDetection();
       response(summaryInformation);
       break;
   }
 });
 
-/**
- * Base detection.
- */
-function baseDetection() {
+function runBaseDetection() {
+  // TODO: break this into pieces
   var HTMLDeprecatedTag = {
     'APPLET': true,
     'BASEFONT': true,
@@ -175,7 +161,7 @@ function baseDetection() {
     }
   };
 
-  summaryInformation = {
+  var summaryInformation = {
     'HTMLBase': {
       'HTMLDeprecatedAttribute': {},
       'HTMLDeprecatedTag': {}
@@ -199,7 +185,7 @@ function baseDetection() {
   };
 
   var infoManager = {
-     'getNodes': function(rootNode,func) {
+     getNodes: function(rootNode,func) {
         var nodeIterator = document.createNodeIterator(
             rootNode, NodeFilter.SHOW_ALL, null, false);
         var currentNode;
@@ -410,7 +396,7 @@ function baseDetection() {
             return true;
         });
         var ieCondCommRegExp = /\[\s*if\s*[^\]][\s\w]*\]/i;
-        for (var i = 0, c = nodes.length; i < c; i++) {
+        for (var i = 0, c = nodes.length; i < c; ++i) {
           var currentNode = nodes[i];
           if (ieCondCommRegExp.test(currentNode.nodeValue))
             summaryInformation.DOM.IECondComm.push(currentNode.nodeValue);
@@ -469,7 +455,7 @@ function baseDetection() {
   function scanAllElements() {
     var elementList =
         Array.prototype.slice.call(document.getElementsByTagName('*'));
-    for (var i = 0, len = elementList.length; i < len; i++) {
+    for (var i = 0, len = elementList.length; i < len; ++i) {
       var element = elementList[i];
       var tagName = element.tagName;
       var attributes = element.attributes;

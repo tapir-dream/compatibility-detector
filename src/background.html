@@ -22,28 +22,19 @@ const DETECTION_COMPAT_STATUS_OF_PRIORITY = {
   'error': 3
 };
 
-function getDetectionCompatStatus(tabId) {
-  var detectionResult = getDetectionResult(tabId);
-  if (detectionResult)
-    return detectionResult.detectionCompatStatus;
-  else
-    return 'normal';
-}
-
 function setDetectionCompatStatus(tabId, status) {
-  var detectionResult = getDetectionResult(tabId);
-  if (detectionResult)
-    detectionResult.detectionCompatStatus = status;
+  getDetectionResult(tabId).detectionCompatStatus = status;
 }
 
 function getDetectionCompatStatusOfPriority(tabId, status) {
-  var currentStatus = getDetectionCompatStatus(tabId);
+  var currentStatus = getDetectionResult(tabId).detectionCompatStatus;
   return DETECTION_COMPAT_STATUS_OF_PRIORITY[currentStatus] >=
       DETECTION_COMPAT_STATUS_OF_PRIORITY[status] ?
       currentStatus : status;
 }
 
 function setBrowserAction(status, tabId) {
+  log('setBrowserAction: status=' + status + ', tabId=' + tabId);
   status = getDetectionCompatStatusOfPriority(tabId, status);
   setDetectionCompatStatus(tabId, status);
   chrome.browserAction.setIcon({
@@ -58,12 +49,19 @@ function setBrowserAction(status, tabId) {
 
 function DetectionResult(tabId) {
   this.tabId = tabId;
-  this.problems = {};  // maps reason to Problem object
+
   this.totalProblems = 0;
   this.totalErrors = 0;
   this.totalWarnings = 0;
+
+  this.problems = {};  // maps reason to Problem object
+  this.annotatedReasons = {};  // maps reason to true
+
+  // TODO: what is this?
   this.detected = false;
-  this.annotatedProblems = {};  // maps reason to true
+
+  this.showAdvanced = false;  // remember which tab to show
+
   this.browserActionStatus = 'ok';
   this.detectionCompatStatus = 'normal';
 }
@@ -101,8 +99,16 @@ Problem.prototype.setOccurrencesNumber = function(number) {
   this.occurrencesNumber = number;
 };
 
+/**
+ * @return {DetectionResult} the detection result, will NOT be null
+ */
 function getDetectionResult(tabId) {
-  return gDetectionResults[tabId];
+  var result = gDetectionResults[tabId];
+  if (!result) {
+    result = new DetectionResult(tabId);
+    gDetectionResults[tabId] = result;
+  }
+  return result;
 }
 
 function log(message) {
@@ -134,6 +140,12 @@ function addDetectedProblemToResult(tabId, issue) {
   }
 
   var detectionResult = getDetectionResult(tabId);
+
+  // When switching to advanced tab the first time, the page will be reloaded,
+  // and the last showAdvanced flag will be cleared. We want to show advanced
+  // tab next time, so set the flag here.
+  detectionResult.showAdvanced = true;
+
   var problem = detectionResult.getProblem(reason);
   var isNewProblem = false;
   var severity;
@@ -168,7 +180,7 @@ function annotateAllIssues(tabId) {
   var detectionResult = getDetectionResult(tabId);
   var reasons = Object.keys(detectionResult.problems);
   reasons.forEach(function(reason) {
-    detectionResult.annotatedProblems[reason] = true;
+    detectionResult.annotatedReasons[reason] = true;
   });
   annotate(reasons);
 }
@@ -198,12 +210,9 @@ function annotate(reasons) {
 }
 
 chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+  log('onRequest, request.type=' + request.type);
   var tabId = sender.tab.id;
   switch (request.type) {
-    case 'ContentScriptInjected':
-      // TODO: do not create DetectionResult here!
-      gDetectionResults[tabId] = new DetectionResult(tabId);
-      break;
     case 'setStatus':
       setBrowserAction(request.status, tabId);
       break;
