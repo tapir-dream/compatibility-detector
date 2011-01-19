@@ -19,12 +19,15 @@ function log(message) {
   window.console.log(message);
 }
 
+const DETECTION_STATUS_NAME = 'chrome_comp_detection_status';
+const CHROME_COMP_LOAD = 'chrome_comp_load';
+
 var detectionEnabled =
-    window.sessionStorage['chrome_comp_detection_status'] ==
+    window.sessionStorage[DETECTION_STATUS_NAME] ==
         window.location.href;
 
 // Delete the key so that refresh the page again will get a clean page.
-delete window.sessionStorage['chrome_comp_detection_status'];
+delete window.sessionStorage[DETECTION_STATUS_NAME];
 
 if (detectionEnabled) {
 
@@ -112,9 +115,14 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
 
 function detectProblems() {
   if (!detectionEnabled) {
-    window.sessionStorage['chrome_comp_detection_status'] =
+    window.sessionStorage[DETECTION_STATUS_NAME] =
         window.location.href;
     window.location.reload();
+  } else {
+    // Trigger page script's detection
+    var event = document.createEvent('Event');
+    event.initEvent(CHROME_COMP_LOAD, true, true);
+    window.dispatchEvent(event);
   }
 }
 
