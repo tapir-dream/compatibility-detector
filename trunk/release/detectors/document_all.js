@@ -54,10 +54,6 @@
  * the three head operations, return document.all in the case ignored.
  * and Check HTML tag events attribute.
  */
-// In order to reveal the problem as accurately as possible, filter out all
-// the script notes, all conditional statements, short circuit,
-// the three head operations, return document.all in the case ignored.
-// and Check HTML tag events attribute.
 
 addScriptToInject(function() {
 

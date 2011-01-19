@@ -15,6 +15,7 @@
  */
 
 addScriptToInject(function() {
+
 var annotations = [];
 var annotationsDiv = null;
 var highlightDivs = [];
@@ -31,7 +32,7 @@ function compareAnnotations(a1, a2) {
 function updateAnnotationTopLeft(annotation) {
   annotation.rectangles = [];
   var rectsFromAncestor = [];
-  for (var i = 0, c = annotation.nodes.length; i < c; i++) {
+  for (var i = 0, c = annotation.nodes.length; i < c; ++i) {
     var node = annotation.nodes[i];
     var rects = annotation.rectCallback(node);
     if (rects.fromAncestor) {
@@ -68,16 +69,15 @@ function preprocessAnnotations() {
     var sequence = 0;
     var problems = chrome_comp.CompDetect.getAllProblems();
     var issusId = document.documentElement.getAttribute('issusId');
-    // console.log(issusId.split(','));
     document.documentElement.removeAttribute('issusId');
+    // TODO: rename typeId to reason
     for (var typeId in problems) {
       if(issusId && issusId.split(',').indexOf(typeId) != -1) {
-        // console.log(issusId);
         var problem = problems[typeId];
-      // Sanity check to ensure this entry is valid (not an injected property
-      // by the host page.
+        // Sanity check to ensure this entry is valid (not an injected property
+        // by the host page.
         if (problem && problem.occurrences && problem.occurrences.length) {
-          for (var i = 0, c = problem.occurrences.length; i < c; i++) {
+          for (var i = 0, c = problem.occurrences.length; i < c; ++i) {
             var annotation = problem.occurrences[i];
             annotation.problem = problem;
             // This sequence is to ensure the sorting is stable when multiple
@@ -88,7 +88,6 @@ function preprocessAnnotations() {
           }
         }
       }
-
     }
     annotations.sort(compareAnnotations);
   }
@@ -100,7 +99,7 @@ function showHighlight() {
   var annotation = annotations[this.annotationIndex];
   var className = annotation.isError ?
       'chrome-comp-highlight-error' : 'chrome-comp-highlight-warning';
-  for (var i = 0, c = annotation.rectangles.length; i < c; i++) {
+  for (var i = 0, c = annotation.rectangles.length; i < c; ++i) {
     var rect = annotation.rectangles[i];
     var highlightDiv;
     if (i < highlightDivs.length) {
@@ -120,11 +119,11 @@ function showHighlight() {
 }
 
 function hideHighlight() {
-  for (var i = 0, c = highlightDivs.length; i < c; i++)
+  for (var i = 0, c = highlightDivs.length; i < c; ++i)
     highlightDivs[i].style.display = 'none';
 }
 
-function showBalloon(index,isScrollIntoView) {
+function showBalloon(index, isScrollIntoView) {
   if (index < 0 || index >= annotations.length)
     return;
 
@@ -159,7 +158,7 @@ function showBalloon(index,isScrollIntoView) {
     previousLink.innerText = chrome_comp.getMessage('previous');
     previousLink.href = '#';
     previousLink.onclick = function() {
-      showBalloon(this.annotationIndex - 1,true);
+      showBalloon(this.annotationIndex - 1, true);
       return false;
     };
     navigationDiv.appendChild(previousLink);
@@ -167,7 +166,7 @@ function showBalloon(index,isScrollIntoView) {
     nextLink.innerText = chrome_comp.getMessage('next');
     nextLink.href = '#';
     nextLink.onclick = function() {
-      showBalloon(this.annotationIndex + 1,true);
+      showBalloon(this.annotationIndex + 1, true);
       return false;
     };
     navigationDiv.appendChild(nextLink);
@@ -287,18 +286,18 @@ function onDocumentKeyDown(event) {
   if (balloonDiv && balloonDiv.style.display == 'block') {
     switch (event.keyCode) {
       case 36: // Home
-        showBalloon(0,true);
+        showBalloon(0, true);
         break;
       case 37: // Arrow Left
       case 38: // Arrow Up
-        showBalloon(balloonDiv.annotationIndex - 1,true);
+        showBalloon(balloonDiv.annotationIndex - 1, true);
         break;
       case 39: // Arrow Right
       case 40: // Arrow Down
-        showBalloon(balloonDiv.annotationIndex + 1,true);
+        showBalloon(balloonDiv.annotationIndex + 1, true);
         break;
       case 35: // End
-        showBalloon(annotations.length - 1,true);
+        showBalloon(annotations.length - 1, true);
         break;
       default:
         return;
@@ -315,7 +314,7 @@ function setAnnotationTagsPosition(annotations) {
   var lastOriginalTop = 0;
   var lastRight = 0;
   var lastBottom = 0;
-  for (var i = 0, c = annotations.length; i < c; i++) {
+  for (var i = 0, c = annotations.length; i < c; ++i) {
     var annotation = annotations[i];
     var x = annotation.left;
     var y = annotation.top;
@@ -342,7 +341,7 @@ function refreshAnnotations() {
   if (!annotationsDiv)
     return;
   var positionChanged = false;
-  for (var i = 0, c = annotations.length; i < c; i++) {
+  for (var i = 0, c = annotations.length; i < c; ++i) {
     if (updateAnnotationTopLeft(annotations[i]))
       positionChanged = true;
   }
@@ -482,7 +481,7 @@ function showAnnotations() {
       'cursor: default; }';
   annotationsDiv.appendChild(styleElement);
 
-  for (var i = 0, c = annotations.length; i < c; i++) {
+  for (var i = 0, c = annotations.length; i < c; ++i) {
     var annotation = annotations[i];
     var tag = document.createElement('div');
     annotation.isError =
@@ -517,22 +516,22 @@ function hideAnnotations() {
 }
 
 document.documentElement.addEventListener('chrome_comp_AnnotationOn',
-    function() {
-      showAnnotations();
-    });
-
+                                          showAnnotations);
 document.documentElement.addEventListener('chrome_comp_AnnotationOff',
-    function() {
-      hideAnnotations();
-    });
+                                          hideAnnotations);
+
 });
 
 chrome.extension.onRequest.addListener(function (request, sender, response) {
+  log('(annotation.js) onRequest, request.type=' + request.type);
   if (request.type == 'AnnotationOn') {
+    // TODO: rename 'issusId' to 'chrome_comp_reasons'
     document.documentElement.setAttribute('issusId', request.issusId);
   }
   var event = document.createEvent('Event');
+  // TODO: use fixed event name
   event.initEvent('chrome_comp_' + request.type, true, true);
   document.documentElement.dispatchEvent(event);
-  response && response();
+  if (response)
+    response();
 });
