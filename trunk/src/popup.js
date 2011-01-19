@@ -218,7 +218,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
-  var baseDetection = function() {};
+  var runBaseDetection = function() {};
 
   window.setDetectionFinishedMessage = function() {};
   window.updateSummary = function() {};
