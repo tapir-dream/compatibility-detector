@@ -54,6 +54,10 @@ chrome_comp.CompDetect.NonScanDomBaseDetector,
 
 function constructor(rootNode) {
   var that = this;
+  var ids;
+  var commonNames;
+  var namesOfEmbed;
+  var namesOfFrameAndParam;
 
   this.getElementById_ = function(result, originalArguments, callStack) {
     var arg0 = originalArguments[0];
@@ -72,7 +76,7 @@ function constructor(rootNode) {
     var names = getNames();
     if (!result && names.commonNames.concat(names.namesOfEmbed)
         .indexOf(lowerCaseArg0) >= 0) {
-      // caller is null when call document.getElementById() in window scope
+      // Caller is null when call document.getElementById() in window scope
       var caller = arguments.callee.caller.caller;
       // Filter jQuery
       if (!(caller && caller.caller && /jQuery/.test(caller.caller.caller)))
@@ -106,34 +110,38 @@ function constructor(rootNode) {
 
   // Get all elements with id attribute in the document
   function getIds() {
-    var ids = [];
-    var elements = document.querySelectorAll('[id]');
-    Array.prototype.forEach.call(elements, function(element) {
-      ids.push(element.getAttribute('id').toLowerCase());
-    });
+    if (!ids) {
+      ids = [];
+      var elements = document.querySelectorAll('[id]');
+      Array.prototype.forEach.call(elements, function(element) {
+        ids.push(element.getAttribute('id').toLowerCase());
+      });
+    }
     return ids;
   }
 
   // Get names of specified element in the document
   function getNames() {
-    var commonNames = [];
-    var namesOfEmbed = [];
-    var namesOfFrameAndParam = [];
+    if (!commonNames) {
+      commonNames = [];
+      namesOfEmbed = [];
+      namesOfFrameAndParam = [];
 
-    var elements = document.querySelectorAll('[name]');
-    var commonTags = ['A', 'APPLET', 'BUTTON', 'FORM', 'IFRAME', 'IMG',
-        'INPUT', 'MAP', 'META', 'OBJECT', 'SELECT', 'TEXTAREA'];
+      var elements = document.querySelectorAll('[name]');
+      var commonTags = ['A', 'APPLET', 'BUTTON', 'FORM', 'IFRAME', 'IMG',
+          'INPUT', 'MAP', 'META', 'OBJECT', 'SELECT', 'TEXTAREA'];
 
-    Array.prototype.forEach.call(elements, function(element) {
-      var tagName = element.tagName;
-      var name = element.getAttribute('name').toLowerCase();
-      if (commonTags.indexOf(tagName) >= 0)
-        commonNames.push(name);
-      else if (tagName == 'EMBED')
-        namesOfEmbed.push(name)
-      else if (tagName == 'FRAME' || tagName == 'PARAM')
-        namesOfFrameAndParam.push(name);
-    });
+      Array.prototype.forEach.call(elements, function(element) {
+        var tagName = element.tagName;
+        var name = element.getAttribute('name').toLowerCase();
+        if (commonTags.indexOf(tagName) >= 0)
+          commonNames.push(name);
+        else if (tagName == 'EMBED')
+          namesOfEmbed.push(name)
+        else if (tagName == 'FRAME' || tagName == 'PARAM')
+          namesOfFrameAndParam.push(name);
+      });
+    }
     return {
       'commonNames': commonNames,
       'namesOfEmbed': namesOfEmbed,
