@@ -1058,6 +1058,8 @@ chrome_comp.CompDetect = (function() {
   // Array which contains all type detectors
   var detectors_ = [];
 
+  var detectionStarted = false;
+
   // All problems reported so far.
   // key: type id
   // value: serialized report data, which includes all the occurrences of the
@@ -1541,8 +1543,20 @@ chrome_comp.CompDetect = (function() {
       });
     },
 
+    diagnoseCompatibilityIssuesManually: function() {
+      if ('complete' != document.readyState)
+        return;
+      // Start detection immediately
+      chrome_comp.CompDetectorConfig.delayRunDetection = false;
+      chrome_comp.CompDetect.diagnoseCompatibilityIssues();
+    },
+
     // Diagnose  compatibility issues on current page
     diagnoseCompatibilityIssues : function() {
+      if (detectionStarted)
+        return;
+      detectionStarted = true;
+
       function loadHandlerForCompDetector() {
         var startTime = new Date().getTime();
         chrome_comp.trace('Start compatibility detection...' +
@@ -1867,6 +1881,8 @@ chrome_comp.CompDetect.ScanDomBaseDetector.prototype.canCheckNow = function() {
 
 window.addEventListener('load',
     chrome_comp.CompDetect.diagnoseCompatibilityIssues, false);
+window.addEventListener('chrome_comp_load',
+    chrome_comp.CompDetect.diagnoseCompatibilityIssuesManually, false);
 window.addEventListener('unload',
     chrome_comp.CompDetect.cleanUpDetectors, false);
 
