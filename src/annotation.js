@@ -498,7 +498,7 @@ function showAnnotations() {
   }
 
   setAnnotationTagsPosition(annotations);
-  showBalloon(0);
+  showBalloon(0, true);
   document.addEventListener('keydown', onDocumentKeyDown, true);
   refreshTimer = window.setInterval(refreshAnnotations, 300);
 }
