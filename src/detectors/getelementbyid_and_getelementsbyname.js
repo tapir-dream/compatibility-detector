@@ -61,7 +61,7 @@ function constructor(rootNode) {
 
   this.getElementById_ = function(result, originalArguments, callStack) {
     var arg0 = originalArguments[0];
-    if (arg0 == undefined)
+    if (arg0 == undefined || typeof arg0 != 'string')
       return;
     var lowerCaseArg0 = arg0.toLowerCase();
     var lowerCaseIds = getIds();
