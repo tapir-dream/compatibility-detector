@@ -186,14 +186,17 @@ baseDetector.resetSummaryInformation = function() {
       count: 0,
       IECondComm: []
     },
-    // TODO: rename noInHead to notInHead
     STYLE: {
       totalCount: 0,
-      noInHeadCount: 0
+      notInHeadCount: 0
     },
     SCRIPT: {
       totalCount: 0,
-      noInHeadCount: 0
+      notInHeadCount: 0
+    },
+    LINK: {
+      totalCount: 0,
+      notInHeadCount: 0
     }
   };
 };
@@ -406,43 +409,33 @@ baseDetector.initIECondComm = function(rootNode) {
   }
 };
 
-baseDetector.getDetectorStyles = function() {
-  return document.getElementsByClassName('chrome-comp-annotations').length;
+baseDetector.initStyle = function() {
+  var detectorStyleCount =
+      document.getElementsByClassName('chrome-comp-annotations').length;
+  var styleCount =
+      document.querySelectorAll('style').length - detectorStyleCount;
+
+  baseDetector.summaryInformation.STYLE.notInHeadCount =
+      styleCount - document.querySelectorAll('body style').length;
+  baseDetector.summaryInformation.STYLE.totalCount = styleCount;
 };
 
-baseDetector.initTotalStyleCount = function() {
-  baseDetector.summaryInformation.STYLE.totalCount =
-      document.querySelectorAll('style').length -
-      baseDetector.getDetectorStyles();
-  return baseDetector.summaryInformation.STYLE.totalCount;
+
+baseDetector.initScript = function() {
+  var detectorScripts =
+      document.querySelectorAll('html[chrome_comp_injected] > script').length;
+  var scriptCount =
+      document.querySelectorAll('script').length - detectorScripts;
+  baseDetector.summaryInformation.SCRIPT.totalCount = scriptCount;
+  baseDetector.summaryInformation.SCRIPT.notInHeadCount =
+      scriptCount - document.querySelectorAll('head script').length;
 };
 
-baseDetector.initNotInHeadStyleCount = function() {
-  baseDetector.summaryInformation.STYLE.noInHeadCount =
-      document.querySelectorAll('style').length -
-      document.querySelectorAll('body style').length -
-      baseDetector.getDetectorStyles();
-  return baseDetector.summaryInformation.STYLE.noInHeadCount;
-};
-
-baseDetector.getDetectorScripts = function() {
-  return document.querySelectorAll(
-      'html[chrome_comp_injected] > script').length;
-};
-
-baseDetector.initTotalScriptCount = function() {
-  baseDetector.summaryInformation.SCRIPT.totalCount =
-      document.querySelectorAll('script').length -
-      baseDetector.getDetectorScripts();
-  return baseDetector.summaryInformation.SCRIPT.totalCount;
-};
-
-baseDetector.initNotInHeadScriptCount = function() {
-  baseDetector.summaryInformation.SCRIPT.noInHeadCount =
-      baseDetector.initTotalScriptCount() -
-      baseDetector.getDetectorScripts() -
-      document.querySelectorAll('head script').length;
-  return baseDetector.summaryInformation.SCRIPT.noInHeadCount;
+baseDetector.initLink= function() {
+  var linkCount = document.querySelectorAll('link').length;
+  baseDetector.summaryInformation.LINK.totalCount = linkCount;
+  baseDetector.summaryInformation.LINK.notInHeadCount =
+      linkCount - document.querySelectorAll('head link').length;
 };
 
 baseDetector.scanAllElements = function() {
@@ -473,25 +466,24 @@ baseDetector.scanAllElements = function() {
   }
 };
 
-function runBaseDetection() {
-  baseDetector.resetSummaryInformation();
-  baseDetector.scanAllElements();
-
+baseDetector.init = function (){
   baseDetector.initPageDTD();
-  baseDetector.initTotalStyleCount();
-  baseDetector.initNotInHeadStyleCount();
-  baseDetector.initTotalScriptCount();
-  baseDetector.initNotInHeadScriptCount();
+  baseDetector.initStyle();
+  baseDetector.initScript();
+  baseDetector.initLink();
   baseDetector.initCompatMode();
   baseDetector.initIECondComm(document.documentElement);
+}
 
+function getBaseDetectionStatus() {
   var status = 'ok';
   var summaryInformation = baseDetector.summaryInformation;
   var documentMode = summaryInformation.documentMode;
   if (!documentMode.pageDTD ||
       summaryInformation.DOM.IECondComm.length ||
-      summaryInformation.STYLE.noInHeadCount ||
-      summaryInformation.SCRIPT.noInHeadCount ||
+      summaryInformation.STYLE.notInHeadCount ||
+      summaryInformation.SCRIPT.notInHeadCount ||
+      summaryInformation.LINK.notInHeadCount ||
       Object.keys(summaryInformation.HTMLBase.HTMLDeprecatedTag).length ||
       Object.keys(summaryInformation.HTMLBase.HTMLDeprecatedAttribute).length) {
     status = 'warning';
@@ -504,12 +496,20 @@ function runBaseDetection() {
       status = 'warning';
     }
   }
+  return status;
+}
+
+function runBaseDetection() {
+  baseDetector.resetSummaryInformation();
+  baseDetector.scanAllElements();
+  baseDetector.init();
+
   chrome.extension.sendRequest({
     type: 'setStatus',
-    status: status
+    status: getBaseDetectionStatus()
   });
 
-  return summaryInformation;
+  return baseDetector.summaryInformation;
 }
 
 chrome.extension.onRequest.addListener(function(request, sender, response) {
