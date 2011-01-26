@@ -258,7 +258,6 @@ function showBalloon(index, isScrollIntoView) {
 
   balloonDiv.annotationIndex = index;
   showHighlight.apply(balloonDiv);
-  /*
   window.console.log(annotation.problem.issueDescription);
   // Show the primary node in the console. In developer tool, the user can
   // see the details of the node in the console panel.
@@ -266,7 +265,6 @@ function showBalloon(index, isScrollIntoView) {
     window.console.log(annotation.nodes);
   if (annotation.stack)
     window.console.log(annotation.stack);
-  */
 }
 
 function onTagClick() {
