@@ -128,35 +128,51 @@ function showBaseDetectionResult(data) {
     result.push('<li>' + chrome.i18n.getMessage('bd_IECondCommCount',
         ['<strong>' + data.DOM.IECondComm.length + '</strong>']) + '</li>');
 
-  // Process data.STYLE to HTML
+  // Process data.LINK to HTML
   result.push('<li>');
-  if (data.STYLE.totalCount != 0) {
-    result.push(chrome.i18n.getMessage('bd_styleTotalCount',
-        ['<em>' + data.STYLE.totalCount + '</em>']));
-    if (data.STYLE.noInHeadCount != 0) {
-      result.push(chrome.i18n.getMessage('bd_styleNoInHeadCount',
-          ['<strong>' + data.STYLE.noInHeadCount + '</strong>']));
+  if (data.LINK.totalCount) {
+    result.push(chrome.i18n.getMessage('bd_linkTotalCount',
+        ['<em>' + data.LINK.totalCount + '</em>']));
+    if (data.LINK.notInHeadCount) {
+      result.push(chrome.i18n.getMessage('bd_linkNotInHeadCount',
+          ['<strong>' + data.LINK.notInHeadCount + '</strong>']));
     } else {
-      result.push(chrome.i18n.getMessage('bd_noStyleNoInHeadCount'));
+      result.push(chrome.i18n.getMessage('bd_noLinkNotInHead'));
     }
   } else {
-    result.push(chrome.i18n.getMessage('bd_noStyleTotalCount'));
+    result.push(chrome.i18n.getMessage('bd_noLink'));
+  }
+  result.push('</li>');
+
+  // Process data.STYLE to HTML
+  result.push('<li>');
+  if (data.STYLE.totalCount) {
+    result.push(chrome.i18n.getMessage('bd_styleTotalCount',
+        ['<em>' + data.STYLE.totalCount + '</em>']));
+    if (data.STYLE.notInHeadCount) {
+      result.push(chrome.i18n.getMessage('bd_styleNotInHeadCount',
+          ['<strong>' + data.STYLE.notInHeadCount + '</strong>']));
+    } else {
+      result.push(chrome.i18n.getMessage('bd_noStyleNotInHead'));
+    }
+  } else {
+    result.push(chrome.i18n.getMessage('bd_noStyle'));
   }
   result.push('</li>');
 
   // Process data.SCRIPT to HTML
   result.push('<li>');
-  if (data.SCRIPT.totalCount != 0) {
+  if (data.SCRIPT.totalCount) {
     result.push(chrome.i18n.getMessage('bd_scriptTotalCount',
         ['<em>' + data.SCRIPT.totalCount + '</em>']));
-    if (data.SCRIPT.noInHeadCount != 0) {
-      result.push(chrome.i18n.getMessage('bd_scriptNoInHeadCount',
-          ['<strong>' + data.SCRIPT.noInHeadCount + '</strong>']));
+    if (data.SCRIPT.notInHeadCount) {
+      result.push(chrome.i18n.getMessage('bd_scriptNotInHeadCount',
+          ['<strong>' + data.SCRIPT.notInHeadCount + '</strong>']));
     } else {
-      result.push(chrome.i18n.getMessage('bd_noScriptNoInHeadCount'));
+      result.push(chrome.i18n.getMessage('bd_noScriptNotInHead'));
     }
   } else {
-    result.push(chrome.i18n.getMessage('bd_noScriptTotalCount'));
+    result.push(chrome.i18n.getMessage('bd_noScript'));
   }
   result.push('</li>');
 
