@@ -160,22 +160,6 @@ function showBaseDetectionResult(data) {
   }
   result.push('</li>');
 
-  // Process data.SCRIPT to HTML
-  result.push('<li>');
-  if (data.SCRIPT.totalCount) {
-    result.push(chrome.i18n.getMessage('bd_scriptTotalCount',
-        ['<em>' + data.SCRIPT.totalCount + '</em>']));
-    if (data.SCRIPT.notInHeadCount) {
-      result.push(chrome.i18n.getMessage('bd_scriptNotInHeadCount',
-          ['<strong>' + data.SCRIPT.notInHeadCount + '</strong>']));
-    } else {
-      result.push(chrome.i18n.getMessage('bd_noScriptNotInHead'));
-    }
-  } else {
-    result.push(chrome.i18n.getMessage('bd_noScript'));
-  }
-  result.push('</li>');
-
   // Process data.HTMLBase.HTMLDeprecatedTag to HTML
   var deprecatedTag = [];
   for (var tag in data.HTMLBase.HTMLDeprecatedTag) {

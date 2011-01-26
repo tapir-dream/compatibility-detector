@@ -46,11 +46,6 @@
   "bd_noStyle": { "message": "There is no STYLE nodes in this page." },
   "bd_noStyleNotInHead": { "message": " (all put inside the HEAD tag)." },
 
-  "bd_scriptTotalCount": { "message": "There are $1 SCRIPT nodes in this page" },
-  "bd_scriptNotInHeadCount": { "message": " ($1 not put inside the HEAD tag)." },
-  "bd_noScript": { "message": "There is no SCRIPT nodes in this page." },
-  "bd_noScriptNotInHead": { "message": " (all put inside the HEAD tag)." },
-
   "bd_linkTotalCount": { "message": "There are $1 LINK nodes in this page" },
   "bd_linkNotInHeadCount": { "message": " ($1 not put inside the HEAD tag)." },
   "bd_noLink": { "message": "There is no LINK nodes in this page." },
