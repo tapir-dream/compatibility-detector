@@ -151,3 +151,10 @@ function addSourceToInject(source, debug) {
 function addScriptToInject(scriptFunction, debug) {
   addSourceToInject('(' + scriptFunction.toString() + ')()', debug);
 }
+
+// Send a message to background: Page unloaded.
+window.addEventListener('unload', function() {
+  chrome.extension.sendRequest({
+    type: 'PageUnloaded'
+  });
+});
