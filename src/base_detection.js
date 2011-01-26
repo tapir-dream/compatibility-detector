@@ -190,10 +190,6 @@ baseDetector.resetSummaryInformation = function() {
       totalCount: 0,
       notInHeadCount: 0
     },
-    SCRIPT: {
-      totalCount: 0,
-      notInHeadCount: 0
-    },
     LINK: {
       totalCount: 0,
       notInHeadCount: 0
@@ -420,17 +416,6 @@ baseDetector.initStyle = function() {
   baseDetector.summaryInformation.STYLE.totalCount = styleCount;
 };
 
-
-baseDetector.initScript = function() {
-  var detectorScripts =
-      document.querySelectorAll('html[chrome_comp_injected] > script').length;
-  var scriptCount =
-      document.querySelectorAll('script').length - detectorScripts;
-  baseDetector.summaryInformation.SCRIPT.totalCount = scriptCount;
-  baseDetector.summaryInformation.SCRIPT.notInHeadCount =
-      scriptCount - document.querySelectorAll('head script').length;
-};
-
 baseDetector.initLink= function() {
   var linkCount = document.querySelectorAll('link').length;
   baseDetector.summaryInformation.LINK.totalCount = linkCount;
@@ -469,7 +454,6 @@ baseDetector.scanAllElements = function() {
 baseDetector.init = function (){
   baseDetector.initPageDTD();
   baseDetector.initStyle();
-  baseDetector.initScript();
   baseDetector.initLink();
   baseDetector.initCompatMode();
   baseDetector.initIECondComm(document.documentElement);
@@ -482,7 +466,6 @@ function getBaseDetectionStatus() {
   if (!documentMode.pageDTD ||
       summaryInformation.DOM.IECondComm.length ||
       summaryInformation.STYLE.notInHeadCount ||
-      summaryInformation.SCRIPT.notInHeadCount ||
       summaryInformation.LINK.notInHeadCount ||
       Object.keys(summaryInformation.HTMLBase.HTMLDeprecatedTag).length ||
       Object.keys(summaryInformation.HTMLBase.HTMLDeprecatedAttribute).length) {

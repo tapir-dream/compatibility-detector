@@ -46,11 +46,6 @@
   "bd_noStyle": { "message": "本页中没有使用 STYLE 标签。" },
   "bd_noStyleNotInHead": { "message": " (本页中 STYLE 标签均放置在 HEAD 标签内)。" },
 
-  "bd_scriptTotalCount": { "message": "本页 SCRIPT 节点总数为 $1 个" },
-  "bd_scriptNotInHeadCount": { "message": " (未放置在 HEAD 标签内的节点数为 $1 个)。" },
-  "bd_noScript": { "message": "本页中没有使用 SCRIPT 标签。" },
-  "bd_noScriptNotInHead": { "message": " (本页中 SCRIPT 标签均放置在 HEAD 标签内)。" },
-
   "bd_linkTotalCount": { "message": "本页 LINK 节点总数为 $1 个" },
   "bd_linkNotInHeadCount": { "message": " (未放置在 HEAD 标签内的节点数为 $1 个)。" },
   "bd_noLink": { "message": "本页中没有使用 LINK 标签。" },
