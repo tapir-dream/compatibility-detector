@@ -1,6 +1,6 @@
 {
-  "extensionName": { "message": "兼容性检测工具 (由Google提供)" },
-  "extensionDescription": { "message": "检测网页兼容性问题。由 Google Chrome 项目组开发。" },
+  "extensionName": { "message": "兼容性检测工具" },
+  "extensionDescription": { "message": "检测网页兼容性问题。由 Google Chrome 项目组发起。" },
   "previous": { "message": "上一个" },
   "next": { "message": "下一个" },
   "close": { "message": "关闭" },

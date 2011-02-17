@@ -94,7 +94,6 @@ article > div > span {
   display: inline-block;
   margin-top: 120px;
   padding-left: 26px;
-  background: url(popup_loading.gif) no-repeat 0 3px;
   color: #333;
 }
 article > ul {
@@ -217,6 +216,7 @@ tr:hover > td {
 <script type="text/javascript" src="popup.js"></script>
 </head>
 <body class="default">
+
 <div id="warp">
   <div class="disabled"><span>${popup_cannotDetect}</span></div>
   <div class="loading"><span>${popup_loading}</span></div>
@@ -228,42 +228,44 @@ tr:hover > td {
     </nav>
   </section>
   <article id="content">
-    <div><span>${popup_detecting}</span></div>
     <ul id="base_detection" class="base"></ul>
     <ul id="advanced_detection" class="advanced">
-    <div id="noProblemFoundInfo">${popup_noProblem}</div>
-    <div id="detectionResult">
-      <h2>
-        <span id="detectionStatus">${popup_detectionStatus}</span><span id="allProblemsSummary"></span>
-      </h2>
-      <div id="errorArea">
-        <h3 id="errorProblemsSummary"></h3>
-        <table id="errorProblems">
-        <tbody>
-        <tr>
-          <th><input id="errorCheckAll" type="checkbox"></th>
+      <div id="advancedRunning">${popup_detecting}</div>
+      <div id="noProblemFoundInfo">${popup_noProblem}</div>
+      <div id="detectionResult">
+        <h2>
+          <span id="detectionStatus">${popup_detectionStatus}</span>
+          <span id="allProblemsSummary"></span>
+        </h2>
+        <div id="errorArea">
+          <h3 id="errorProblemsSummary"></h3>
+          <table id="errorProblems">
+          <tbody>
+          <tr>
+            <th><input id="errorCheckAll" type="checkbox"></th>
+            <th>${popup_issueDescription}</th>
+            <th>${popup_issueCount}</th>
+          </tr>
+          </tbody>
+          </table>
+        </div>
+        <div id="warningArea">
+          <h3 id="warningProblemsSummary"></h3>
+          <table id="warningProblems">
+          <tbody>
+          <tr>
+          <th><input id="warningCheckAll" type="checkbox"></th>
           <th>${popup_issueDescription}</th>
           <th>${popup_issueCount}</th>
-        </tr>
-        </tbody>
-        </table>
+          </tr>
+          </tbody>
+          </table>
+        </div>
+        <p>${popup_checkboxEffectTip}</p>
       </div>
-      <div id="warningArea">
-        <h3 id="warningProblemsSummary"></h3>
-        <table id="warningProblems">
-        <tbody>
-        <tr>
-        <th><input id="warningCheckAll" type="checkbox"></th>
-        <th>${popup_issueDescription}</th>
-        <th>${popup_issueCount}</th>
-        </tr>
-        </tbody>
-        </table>
-      </div>
-      <p>${popup_checkboxEffectTip}</p>
-    </div>
     </ul>
   </article>
 </div>
+
 </body>
 </html>
