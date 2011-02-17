@@ -1,3 +1,6 @@
+/**
+ * @fileoverview This file is used by popup.html
+ */
 
 // TODO: put these status variables in background.html
 var DEFAULT_LOCALE = 'zh-cn'; // TODO: change to en when w3help ready.
@@ -122,43 +125,39 @@ function showBaseDetectionResult(data) {
   }
 
   // Process data.DOM to HTML
-  result.push('<li>' + chrome.i18n.getMessage('bd_nodeCount',
-      ['<em>' + data.DOM.count + '</em>']) + '</li>');
   if (data.DOM.IECondComm.length)
     result.push('<li>' + chrome.i18n.getMessage('bd_IECondCommCount',
         ['<strong>' + data.DOM.IECondComm.length + '</strong>']) + '</li>');
 
   // Process data.LINK to HTML
-  result.push('<li>');
-  if (data.LINK.totalCount) {
+  if (data.LINK.notInHeadCount) {
+    result.push('<li>');
     result.push(chrome.i18n.getMessage('bd_linkTotalCount',
         ['<em>' + data.LINK.totalCount + '</em>']));
-    if (data.LINK.notInHeadCount) {
-      result.push(chrome.i18n.getMessage('bd_linkNotInHeadCount',
-          ['<strong>' + data.LINK.notInHeadCount + '</strong>']));
-    } else {
-      result.push(chrome.i18n.getMessage('bd_noLinkNotInHead'));
-    }
+    result.push(chrome.i18n.getMessage('bd_linkNotInHeadCount',
+        ['<strong>' + data.LINK.notInHeadCount + '</strong>']));
+    // TODO: remove all bd_noLinkNotInHead
+    // result.push(chrome.i18n.getMessage('bd_noLinkNotInHead'));
+    result.push('</li>');
   } else {
-    result.push(chrome.i18n.getMessage('bd_noLink'));
+    // TODO: remove all bd_noLink
+    // result.push('<li>' + chrome.i18n.getMessage('bd_noLink') + '</li>');
   }
-  result.push('</li>');
 
   // Process data.STYLE to HTML
-  result.push('<li>');
-  if (data.STYLE.totalCount) {
+  if (data.STYLE.notInHeadCount) {
+    result.push('<li>');
     result.push(chrome.i18n.getMessage('bd_styleTotalCount',
         ['<em>' + data.STYLE.totalCount + '</em>']));
-    if (data.STYLE.notInHeadCount) {
-      result.push(chrome.i18n.getMessage('bd_styleNotInHeadCount',
-          ['<strong>' + data.STYLE.notInHeadCount + '</strong>']));
-    } else {
-      result.push(chrome.i18n.getMessage('bd_noStyleNotInHead'));
-    }
+    result.push(chrome.i18n.getMessage('bd_styleNotInHeadCount',
+        ['<strong>' + data.STYLE.notInHeadCount + '</strong>']));
+    // TODO: remove all bd_noStyleNotInHead
+    // result.push(chrome.i18n.getMessage('bd_noStyleNotInHead'));
+    result.push('</li>');
   } else {
-    result.push(chrome.i18n.getMessage('bd_noStyle'));
+    // TODO: remove all bd_noStyle
+    // result.push(chrome.i18n.getMessage('bd_noStyle'));
   }
-  result.push('</li>');
 
   // Process data.HTMLBase.HTMLDeprecatedTag to HTML
   var deprecatedTag = [];
@@ -300,6 +299,7 @@ function updateDetectionResult(senderTabId, typeId, problem) {
   if (selectedTabId != senderTabId)
     return;
 
+  $('advancedRunning').style.display = 'none';
   var detectionResult = getDetectionResult(selectedTabId);
   var occurrencesNumber = problem.occurrencesNumber;
 
@@ -330,6 +330,7 @@ function updateDetectionResult(senderTabId, typeId, problem) {
 }
 
 function showNoProblemResult() {
+  $('advancedRunning').style.display = 'none';
   $('content').className = '';
   $('noProblemFoundInfo').style.display = 'block';
 }
@@ -355,7 +356,20 @@ function restoreAnnotationCheck() {
   }
 }
 
+function stringStartsWith(s, prefix) {
+  return s.substring(0, prefix.length) == prefix;
+}
+
 function onGetSelectedTab(tab) {
+  var prefix = tab.url.substring(0, 4);
+  var NO_CONTENT_SCRIPT_URL = 'https://chrome.google.com/';
+  if (stringStartsWith(tab.url, NO_CONTENT_SCRIPT_URL) ||
+      prefix != 'http' && prefix != 'file') {
+    // Show the cannot detect message
+    document.body.className = 'disabled';
+    return;
+  }
+
   selectedTabId = tab.id;
   hasSelectedTabId = true;
 
@@ -458,3 +472,14 @@ function updateCheckAllStatus(checkbox) {
 }
 
 window.addEventListener('load', windowLoad, false);
+
+chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
+  log('onRequest, request.type=' + request.type);
+  var tabId = sender.tab.id;
+  switch (request.type) {
+    case 'PageLoad':
+      // Re-run basic check
+      runBaseDetection();
+      break;
+  }
+});

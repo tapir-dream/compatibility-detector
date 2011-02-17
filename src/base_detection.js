@@ -1,3 +1,13 @@
+/**
+ * @fileoverview This file contains a quick check of the page, include:
+ *  - whether DTD exists, and is valid
+ *  - deprecated HTML tags and attributes
+ *  - LIND and STYLE elements that are not put inside the HEAD section
+ *  - IE's conditional comments
+ *
+ * We must ensure that it will not run for a long time. Its result should not
+ * be cached.
+ */
 
 var baseDetector = {};
 

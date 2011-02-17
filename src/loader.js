@@ -15,8 +15,8 @@
  */
 
 function log(message) {
-  // Add return here to disable all logs
-  window.console.log(message);
+  // Uncomment this for debugging. Comment it before release:
+  // window.console.log(message);
 }
 
 const DETECTION_STATUS_NAME = 'chrome_comp_detection_status';
@@ -152,7 +152,14 @@ function addScriptToInject(scriptFunction, debug) {
   addSourceToInject('(' + scriptFunction.toString() + ')()', debug);
 }
 
-// Send a message to background: Page unloaded.
+// Send 'PageLoad' message to popup so that it will re-check this page.
+window.addEventListener('load', function() {
+  chrome.extension.sendRequest({
+    type: 'PageLoad'
+  });
+});
+
+// Send 'PageUnloaded' message to background for it to clean up result cache
 window.addEventListener('unload', function() {
   chrome.extension.sendRequest({
     type: 'PageUnloaded'
