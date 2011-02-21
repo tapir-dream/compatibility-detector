@@ -325,6 +325,8 @@
   "HJ2001": {"message": "各浏览器对 BASE 元素前后的超链接的默认 target 处理存在差异"},
   "RM1025": {"message": "Chrome Safari 认为 'float:center' 是合法值且其计算值为 'none'"},
   "HM1002": {"message": "各浏览器对 'marginwidth' 和 'marginheight' 属性的错误设定值的处理不同"},
+  "BT1038": {"message": "只有 IE 支持 IMG INPUT[type=image] 标记内的 lowsrc 属性"},
+
   "HH8001_suggestion": { "message": "按标准推荐的方法写注释标签，如：" },
   "HR9001_suggestion": { "message": "首先，对于动态页面必须确保 HTTP \"Content-Type\" 头字段的 \"charset\" 参数与页面自身编码相符，且务必在页面的 META 元素中也声明相符的字符编码信息。对于静态页面，必须保证页面中 META 元素声明中 \"http-equiv\" 为 \"Content-Type\" 对应的值中的 \"charset\" 的值与页面自身编码相符。" },
   "HD9001_suggestion": { "message": "当 URI 中含有非 ASCII 字符时，不要依赖浏览器对 URI 的编码方式，以避免产生差异。建议：" },
@@ -585,6 +587,7 @@
   "HJ2001_suggestion": { "message": "不要在 HEAD 元素之外定义 BASE 元素，保证各浏览器兼容。" },
   "RM1025_suggestion": { "message": "避免使用非法的 'float' 特性值。"},
   "HM1002_suggestion": { "message": "在使用 \"marginwidth\" 和 \"marginheight\" 时应严格遵照规范中的描述，要对其设定大于等于零的整数值。"},
+  "BT1038_suggestion": { "message": "如无特殊应用需求，应避免使用 lowsrc 为属性名，防止他与 IE 扩展属性混淆。"},
 
   "HF3012": {"message": "IE6 Firefox Chrome(Q) Safari(Q) 不支持 OPTION 元素的 label 属性"},
   "HF3012_suggestion": { "message": "尽量避免在 OPTION 元素上使用 label 属性，如果想替代 OPTION 原有的内容值，请使用 Javascript。" },

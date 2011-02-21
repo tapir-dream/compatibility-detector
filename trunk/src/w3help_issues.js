@@ -302,7 +302,9 @@ var issueIds = [
   'RM8015',
   'HF9009',
   'HJ2001',
-  'HM1002'
+  'HM1002',
+  'BT1038',
+  'HO1002'
 ];
 
 var issues = { };

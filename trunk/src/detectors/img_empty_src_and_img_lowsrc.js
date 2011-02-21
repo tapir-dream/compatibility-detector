@@ -14,20 +14,11 @@
  * limitations under the License.
  */
 
-addScriptToInject(function() {
-
-chrome_comp.CompDetect.declareDetector(
-
-'img_empty_src_and_lowsrc',
-
-chrome_comp.CompDetect.ScanDomBaseDetector,
-
-null, // constructor
-
-/*
- * Detect 2 problems: HO1002 and BT1038
- *
- * Step:
+/**
+ * @fileoverview: One detector implementation for checking 'IE lowsrc
+ * attribute and empty src attribute' problems
+ * @bug:https://code.google.com/p/compatibility-detector/issues/detail?id=107
+ *      https://code.google.com/p/compatibility-detector/issues/detail?id=108
  *
  * HO1002: check all IMG and INPUT[type="image"] elements, if it has no "src"
  *  attribute or the value of "src" is empty, then report problem.
@@ -37,6 +28,17 @@ null, // constructor
  *  then report problem.
  */
 
+addScriptToInject(function() {
+
+chrome_comp.CompDetect.declareDetector(
+
+'img_empty_src_and_img_lowsrc',
+
+chrome_comp.CompDetect.ScanDomBaseDetector,
+
+function constructor() {
+  this.testIntegerValueRegExp = /^\s*\d+\s*$/;
+},
 
 function checkNode(node, context) {
 
@@ -45,14 +47,26 @@ function checkNode(node, context) {
   if (node.tagName != 'IMG' && node.tagName != 'INPUT')
     return;
 
-  if (node.tagName === 'INPUT' && node.getAttribute('type') != 'image')
+  if (node.tagName == 'INPUT' && node.getAttribute('type') != 'image')
     return;
 
-  if (!node.hasAttribute('src') || node.getAttribute('src') === '')
-    this.addProblem('HO1002', [node]);
+  if (node.getAttribute('src'))
+    return;
 
-  if ((!node.hasAttribute('src') || node.getAttribute('src') === '') &&
-       node.hasAttribute('lowsrc'))
+  // This is a filter, when the IMG tag set to width or height ,
+  // and the width and height values is valid values,
+  // then the IMG tag is probably in order to achieve images of
+  // the region in the visual Lazy loading and other requirements,
+  // they should not be detected.
+  if (node.hasAttribute('width') || node.hasAttribute('height')) {
+    if (this.testIntegerValueRegExp.test(node.getAttribute('width')) ||
+        this.testIntegerValueRegExp.test(node.getAttribute('height')))
+      return;
+  }
+
+  this.addProblem('HO1002', [node]);
+
+  if (node.getAttribute('lowsrc'))
     this.addProblem('BT1038', [node]);
 }
 ); // declareDetector

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html chrome_comp_test='img_empty_src_and_img_lowsrc'>
+<head>
+</head>
+<body>
+<div style="background:red">
+  <img lowsrc='img.png' expectedProblems="BT1038 HO1002" />
+</div>
+
+<div style="background:red">
+  <img lowsrc='img.png' src expectedProblems="BT1038 HO1002" />
+</div>
+
+<div style="background:red">
+  <img lowsrc='img.png' src="" expectedProblems="BT1038 HO1002" />
+</div>
+
+<div style="background:red">
+  <input type="image" lowsrc='img.png' expectedProblems="BT1038 HO1002" />
+</div>
+
+<div style="background:red">
+  <input type="image" lowsrc='img.png' src expectedProblems="BT1038 HO1002" />
+</div>
+
+<div style="background:red">
+  <input type="image" lowsrc='img.png' src="" expectedProblems="BT1038 HO1002" />
+</div>
+
+<div style="background:red">
+  <img src expectedProblems="HO1002" />
+</div>
+
+<div style="background:red">
+  <input type="image" src expectedProblems="HO1002" />
+</div>
+
+<div style="background:green">
+  <img lowsrc='img.png' src="img.png" />
+</div>
+
+<div style="background:green">
+  <img src='' width="100" height="100" />
+</div>
+
+<div style="background:green">
+  <img src width="100" height="100"/>
+</div>
+
+<div style="background:green">
+  <input type="image" lowsrc='img.png' src="img.png" />
+</div>
+
+<div style="background:red">
+  <input type="image" src='' width="100" height="100" />
+</div>
+
+<div style="background:red">
+  <input type="image" src width="100" height="100" />
+</div>
+</body>
+</html>
