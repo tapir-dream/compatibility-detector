@@ -116,9 +116,9 @@
   "RX8017_suggestion": { "message": "Specify width for floating element explicitly." },
   "SD9012": { "message": "IE6 IE7 IE8 do not match in case sensitive way for getElementsByName method" },
   "SD9012_suggestion": { "message": "Always use the exactly same text for element's ID and string constant in scripts." },
-
   "HO9006": { "message": "Firefox and Opera do not support the using of Windows Media Player or Flash by specifying classid for OBJECT element" },
   "HO9006_suggestion": { "message": "Do not use classid for OBJECT." },
-
+  "BT1038": {"message": "Only IE supports lowsrc attribuite for IMG and INPUT[type=image]"},
+  "BT1038_suggestion": { "message": "Avoid using the lowsrc attribute." },
   "lastLine": { "message": "lastLine" }
 }
