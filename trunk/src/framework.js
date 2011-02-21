@@ -37,6 +37,8 @@ window.chrome_comp = (function() {
 
     COLOR_TRANSPARENT: 'rgba(0, 0, 0, 0)',
 
+    SPECIFIED_VALUE: 'chrome_comp_specified_value',
+
     WHITESPACE: /[ \t\r\n]/,
     LEADING_WHITESPACES: /^[ \t\r\n]+/,
     TRAILING_WHITESPACES: /[ \t\r\n]+$/,
@@ -262,21 +264,30 @@ window.chrome_comp = (function() {
       return value ? value.toLowerCase() : value;
     },
 
-    // TODO: document on chrome_comp_computedStyleCache
-    getComputedStyle: function(ele) {
+    getComputedStyle: function(ele, pseudo) {
       if (!ele)
         return;
       var computedStyle = ele.chrome_comp_computedStyleCache;
       if (computedStyle)
         return computedStyle;
       try {
-        computedStyle = ele.ownerDocument.defaultView.getComputedStyle(ele, '');
+        computedStyle = ele.ownerDocument.defaultView.getComputedStyle(ele,
+            pseudo);
         ele.chrome_comp_computedStyleCache = computedStyle;
         return computedStyle;
       } catch (e) {
         chrome_comp.printError('getComputedStyle error: ', e);
         chrome_comp.trace(ele);
       }
+    },
+
+    /** 
+     * The cacheSpecifiedValue function caches the specified value of
+     * margin, border, padding, width and height properties in the property
+     * of every element. So we retrieve these values here.
+     */
+    getSpecifiedValue: function(ele) {
+      return ele[chrome_comp.SPECIFIED_VALUE];
     },
 
     // Note: for scan dom detectors, please use context.isDisplayNone() in
@@ -1199,8 +1210,15 @@ chrome_comp.CompDetect = (function() {
     while (currentNode = nodeIterator.nextNode())
       nodes.push(currentNode);
 
-    for (var i = 0, c = nodes.length; i < c; i++)
+    for (var i = 0, c = nodes.length; i < c; i++) {
+      // The content script will inject a SCRIPT element before the HEAD
+      // element to add a listener for the root element, so we must ignore the
+      // injected SCRIPT element for the processNode function.
+      if (nodes[i].tagName == 'SCRIPT' &&
+          nodes[i].parentElement == document.documentElement)
+        continue;
       processNode(nodes[i], compDetectorArray);
+    }
 
     blockStack_ = [];
     hasLayoutStack_ = [];
@@ -1352,6 +1370,70 @@ chrome_comp.CompDetect = (function() {
     } finally {
       chrome_comp.enableHooks(true);
     }
+  }
+
+  /**
+   * Hide the root element to get the specified value of margin, border,
+   * padding, width and height properties of the elements, and cache these
+   * values.
+   */
+  function cacheSpecifiedValue() {
+    // In this function, we can cache many information of each element.
+    // Because getting the truly state (show or hide) of the element need to
+    // refer to its ancestor, so we can cache this state passingly.
+    function getTrulyDisplayable(ele, style) {
+      if (style.display == 'none')
+        return 'none';
+      if (ele.parentElement[chrome_comp.SPECIFIED_VALUE] &&
+          ele.parentElement[chrome_comp.SPECIFIED_VALUE].display == 'none')
+        return 'none';
+      return style.display;
+    }
+    
+    var root = document.documentElement;
+    if (!root) {
+      chrome_comp.printError('Error getting the specified value.');
+      return;
+    }
+    var allElements = root.getElementsByTagName('*');
+    var inlineDisplay = root.style.display;
+    root.style.display = 'none !important';
+    // We cache some properties' specified values when the root element is
+    // invisible. When we change the display style of the root node, the
+    // browser's rendering engine may do some optimization, and page layout
+    // will not be changed.
+    // To enforce the reflow, we get the value of offsetWidth here. Refer to
+    // http://www.stubbornella.org/content/2009/03/27/
+    // reflows-repaints-css-performance-making-your-javascript-slow/
+    // and
+    // http://www.mozilla.org/newlayout/doc/reflow.html.
+    root.offsetWidth;
+    for (var i = 0, len = allElements.length; i < len; ++i) {
+      var element = allElements[i];
+      var style = chrome_comp.getComputedStyle(element);
+      element[chrome_comp.SPECIFIED_VALUE] = {
+        width: style.width,
+        height: style.height,
+        marginLeft: style.marginLeft,
+        marginRight: style.marginRight,
+        marginTop: style.marginTop,
+        marginBottom: style.marginBottom,
+        borderLeftWidth: style.borderLeftWidth,
+        borderRightWidth: style.borderRightWidth,
+        borderTopWidth: style.borderTopWidth,
+        borderBottomWidth: style.borderBottomWidth,
+        paddingTop: style.paddingTop,
+        paddingBottom: style.paddingBottom,
+        paddingLeft: style.paddingLeft,
+        paddingRight: style.paddingRight,
+        display: getTrulyDisplayable(element, style)
+      };
+    }
+    root.style.display = null;
+    if (inlineDisplay)
+      root.style.display = inlineDisplay;
+    // To enforce the reflow, the same as the previous.
+    root.offsetWidth;
   }
 
   return {
@@ -1558,6 +1640,7 @@ chrome_comp.CompDetect = (function() {
       if (detectionStarted)
         return;
       detectionStarted = true;
+      cacheSpecifiedValue();
 
       function loadHandlerForCompDetector() {
         var startTime = new Date().getTime();
