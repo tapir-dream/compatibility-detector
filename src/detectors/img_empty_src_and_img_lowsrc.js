@@ -15,13 +15,9 @@
  */
 
 /**
- * @fileoverview: One detector implementation for checking 'IE lowsrc
- * attribute and empty src attribute' problems
+ * @fileoverview: One detector implementation for checking IE has lowsrc
+ * attribute problems
  * @bug:https://code.google.com/p/compatibility-detector/issues/detail?id=107
- *      https://code.google.com/p/compatibility-detector/issues/detail?id=108
- *
- * HO1002: check all IMG and INPUT[type="image"] elements, if it has no "src"
- *  attribute or the value of "src" is empty, then report problem.
  *
  * BT1038: check all IMG and INPUT[type="image"] elements, if it has no "src"
  *  attribute or the value of "src" is empty, and it has "lowsrc" attribute,
@@ -36,9 +32,7 @@ chrome_comp.CompDetect.declareDetector(
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
-function constructor() {
-  this.testIntegerValueRegExp = /^\s*\d+\s*$/;
-},
+null, //constructor
 
 function checkNode(node, context) {
 
@@ -52,19 +46,6 @@ function checkNode(node, context) {
 
   if (node.getAttribute('src'))
     return;
-
-  // This is a filter, when the IMG tag set to width or height ,
-  // and the width and height values is valid values,
-  // then the IMG tag is probably in order to achieve images of
-  // the region in the visual Lazy loading and other requirements,
-  // they should not be detected.
-  if (node.hasAttribute('width') || node.hasAttribute('height')) {
-    if (this.testIntegerValueRegExp.test(node.getAttribute('width')) ||
-        this.testIntegerValueRegExp.test(node.getAttribute('height')))
-      return;
-  }
-
-  this.addProblem('HO1002', [node]);
 
   if (node.getAttribute('lowsrc'))
     this.addProblem('BT1038', [node]);
