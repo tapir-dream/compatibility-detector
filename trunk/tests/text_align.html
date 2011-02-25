@@ -1,34 +1,46 @@
-<!-- RT8006 -->
-<table border=1 id="table1">
+<!DOCTYPE html>
+<html chrome_comp_test="text_align">
+<head>
+</head>
+<body>
+<table border="1">
   <tr>
-    <td width=200 style="text-align:center;">
-      <div style='width:100;background-color:red'>xxxxxxxx</div>
+    <td width="400" style="text-align:center; background-color:red;" expectedProblems="RT8003">
+      <div style="width:200px;">Have problems</div>
     </td>
   </tr>
 </table>
 
-<div style="width:200;text-align:right;">
-  <div style='width:100;background-color:red'>xxxxxxxx</div>
+<div style="width:400px; text-align:right;" expectedProblems="RT8003">
+  <div style="width:200px; background-color:red;">Have problems</div>
 </div>
-<div style="width:200;display:inline-block;text-align:right;">
-  <div style='width:100;background-color:red'>xxxxxxxx</div>
+<div style="width:400px; display:inline-block; text-align:right;" expectedProblems="RT8003">
+  <div style="width:200px; background-color:red;">Have problems</div>
+</div>
+
+<br />
+<div style="width:400px; text-align:center; background:red;" expectedProblems="RT8003">
+  <div style="width:200px">Have problems</div>
 </div>
 
 <br />
 <br />
 <span>Followings don't have problems</span>
-<div style="width:200;text-align:center;">
-  <div style='width:100;display:inline-block;background-color:red'>zzzzzzzz</div>
+<div style="width:400px; text-align:center;">
+  <div style="width:200px; display:inline-block; background-color:green;">Don't have problems</div>
 </div>
 
-<div style="width:200;text-align:left;">
-  <div style='width:100;background-color:red'>zzzzzzzz</div>
+<div style="width:400px; text-align:left;">
+  <div style="width:200px; background-color:green;">Don't have problems</div>
 </div>
 
-<div style="width:200;direction:rtl;text-align:right;">
-  <div style='width:100;background-color:red'>zzzzzzzz</div>
+<div style="width:400px; direction:rtl; text-align:right;">
+  <div style="width:200px; background-color:green;">Don't have problems</div>
 </div>
 
-<div style="width:200;text-align:center;">
-  <div style='width:100;float:left;background-color:red'>zzzzzzzz</div>
+<div style="width:400px; text-align:center;">
+  <div style="width:200px; float:left; background-color:green;">Don't have problems</div>
 </div>
+
+</body>
+</html>
