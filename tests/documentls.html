@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+<script>
+var xmlDoc;
+if (window.ActiveXObject) {
+  xmlDoc = new ActiveXObject("Microsoft.XMLDOM");
+} else {
+  xmlDoc = document.implementation.createDocument('', '', null);
+}
+xmlDoc.async = false;
+xmlDoc.load('documentls.xml');
+document.write(xmlDoc.getElementsByTagName('*')[0].tagName);
+</script>
+</body>
+</html>
