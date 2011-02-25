@@ -23,17 +23,13 @@
  * block level elements in W3C CSS 1 specification which IE6, IE7 and IE8
  * quirks mode follow, but in CSS2.1 specification, it changes to applying to
  * only the inline level elements or contents. So, this property can apply to
- * the block level elements in the said versions of IE.
+ * the block level elements in IE6/7/8.
  *
  * The detector check all nodes, and do the following treatment:
  * 1. Ignore all text nodes, invisible elements and the elements having no
  *    parent.
- * 2. Ignore the standards mode in IE.
- * 3. Check the elements set the 'text-align' property.
- * 4. Check the elements whose left margin and right margin are the same. If
- *    no, report the issue.
- * 5. Check the elements whose right margin is 0 and is not floating right. If
- *    yes, report the issue.
+ * 2. Check the elements set the 'text-align' property.
+ * 3. Check for child elements whose width is less than the parent.
  */
 
 addScriptToInject(function() {
@@ -44,99 +40,47 @@ chrome_comp.CompDetect.declareDetector(
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
-function construtor() {
-  this.getCompatMode_ = function() {
-    function isIEDTDBug() {
-      var html = document.documentElement
-      var prev = html;
-      while (prev.previousSibling)
-        prev = prev.previousSibling;
-      if (prev && prev.nodeType == 8)
-        return true;
-    }
-
-    var doctypeInIE;
-    var doctypeInWebKit
-    var diffMap;
-    var pid = (document.doctype) ? document.doctype.publicId : 0;
-    var sid = (document.doctype) ? document.doctype.systemId : 0;
-    var cm = document.compatMode.toLowerCase();
-    doctypeInIE = doctypeInWebKit = (cm == 'backcompat') ? 'Q' : 'S';
-    if (isIEDTDBug()) {
-      doctypeInIE = 'Q';
-    }
-    diffMap = {
-      '-//W3C//DTD HTML 4.0 Transitional//EN': {
-        'systemId': 'http://www.w3.org/TR/html4/loose.dtd',
-        'IE': 'S',
-        'WebKit': 'Q'
-      },
-      'ISO/IEC 15445:2000//DTD HTML//EN': {
-        'systemId': '',
-        'IE': 'Q',
-        'WebKit': 'S'
-      },
-      'ISO/IEC 15445:1999//DTD HTML//EN': {
-        'systemId': '',
-        'IE': 'Q',
-        'WebKit': 'S'
-      }
-    }
-    if (diffMap[pid]) {
-      if (diffMap[pid]['systemId'] == sid) {
-        doctypeInIE = diffMap[pid]['IE'];
-        doctypeInWebKit = diffMap[pid]['WebKit'];
-      }
-    }
-    return {
-      doctypeInIE: doctypeInWebKit,
-      doctypeInWebKit: doctypeInWebKit
-    };
-  }();
-}, // constructor
+null, // constructor
 
 function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
-    return;
-
-  if (this.getCompatMode_.doctypeInIE === 'S')
     return;
 
   var style = chrome_comp.getComputedStyle(node);
   var display = style.display;
   var textAlign = style.textAlign;
   var direction = style.direction;
+  var THRESHOLD = 1;
 
   if ((display == 'block' || display == 'inline-block' ||
       display == 'table-cell') &&
       (textAlign == 'center' ||
       (direction == 'ltr' && textAlign == 'right') ||
       (direction == 'rtl' && textAlign == 'left'))) {
-    var parentElementMaxWidth = parseInt(node.style.width, 10);
+    var containerWidth = parseInt(style.width, 10);
     var child = node.firstElementChild;
-    do {
-      if (child) {
-        var childStyle = chrome_comp.getComputedStyle(child);
-        if (childStyle.display == 'block' &&
-            childStyle.float == 'none' &&
-            (childStyle.position == 'static' ||
-            childStyle.position == 'relative')) {
-          var childWidth = parseInt(child.style.width, 10) +
-              parseInt(childStyle.paddingLeft, 10) +
-              parseInt(childStyle.paddingRight, 10);
-          if (Math.abs(parseInt(childStyle.marginLeft, 10) -
-              parseInt(childStyle.marginRight, 10)) > 1 &&
-              childWidth + 1 < parentElementMaxWidth) {
-            this.addProblem('RT8003', {
-              nodes: [node],
-              details: parentElementMaxWidth + 'vs' + childWidth
-            });
-            return;
-          }
+    while (child) {
+      var childStyle = chrome_comp.getComputedStyle(child);
+      if (childStyle.display == 'block' &&
+          childStyle.float == 'none' &&
+          (childStyle.position == 'static' ||
+          childStyle.position == 'relative')) {
+        var childWidth = child.offsetWidth +
+            parseInt(childStyle.marginLeft, 10) +
+            parseInt(childStyle.marginRight, 10);
+        if (childWidth < containerWidth - THRESHOLD) {
+          // If child's width is smaller than container's width,
+          // it may aligned differently in IE.
+          this.addProblem('RT8003', {
+            nodes: [node, child],
+            details: 'container width: ' + containerWidth +
+            ', child element width: '+ childWidth
+          });
+          return;
         }
-        child = child.nextElementSibling;
       }
-    } while (child && child != node.lastElementChild);
+      child = child.nextElementSibling;
+    }
   }
 }
 ); // declareDetector
