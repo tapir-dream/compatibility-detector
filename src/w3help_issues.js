@@ -304,7 +304,8 @@ var issueIds = [
   'HJ2001',
   'HM1002',
   'BT1038',
-  'HO1002'
+  'HO1002',
+  'BX9055'
 ];
 
 var issues = { };

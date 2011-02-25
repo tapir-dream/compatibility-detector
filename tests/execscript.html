@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html chrome_comp_test='execscript'>
+<head>
+</head>
+<body>
+<script>
+chrome_comp.expectProblems(
+    window.execScript('function(){}','VBScript'), 'BX9055');
+chrome_comp.expectProblems(
+    window.execScript('(function(){})()','python'), 'BX9055');
+chrome_comp.expectProblems(
+    window.execScript('(function(){})()','JScript'), 'BX9055');
+window.execScript('(function(){})()','JavaScript');
+window.execScript('(function(){})()','JavaScript 1.4');
+window.execScript('(function(){})()','===JavaScript===');
+window.execScript('(function(){})()');
+</script>
+</body>
+</html>
