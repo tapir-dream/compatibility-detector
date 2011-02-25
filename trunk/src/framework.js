@@ -282,9 +282,9 @@ window.chrome_comp = (function() {
     },
 
     /** 
-     * The cacheSpecifiedValue function caches the specified value of
-     * margin, border, padding, width and height properties in the property
-     * of every element. So we retrieve these values here.
+     * The cacheSpecifiedValue function caches the specified value of margin,
+     * border, padding, width and height properties in the property of every
+     * element. So we retrieve these values here.
      */
     getSpecifiedValue: function(ele) {
       return ele[chrome_comp.SPECIFIED_VALUE];
@@ -354,47 +354,59 @@ window.chrome_comp = (function() {
     },
 
     /**
-     * Determines if a node is a shrink-to-fit container element.
+     * Determines if a node establishes a new block formatting context.
+     * About block formatting context refer to
+     * http://www.w3.org/TR/CSS21/visuren.html#block-formatting.
      */
-    isShrinkToFit: function(node, checkActuallyShrunk) {
+    isBlockFormattingContext: function(node) {
       if (!node || Node.ELEMENT_NODE != node.nodeType)
         return false;
 
       var style = chrome_comp.getComputedStyle(node);
-      var display = style.display;
-      if (display == 'none' || display == 'inline' ||
-          display == 'inline-table' || display == 'table')
+      if (style.float != 'none' ||
+          style.position == 'absolute' ||
+          style.position == 'fixed' ||
+          style.display == 'inline-block' ||
+          style.display == 'table' ||
+          style.display == 'table-cell' ||
+          style.display == 'table-caption' ||
+          style.overflow != 'visible' ||
+          style.overflowX != 'visible' ||
+          style.overflowY != 'visible')
+        return true;
+      return false;
+    },
+
+    isTableElement: function(node) {
+      if (!node || Node.ELEMENT_NODE != node.nodeType)
+        return false;
+      return chrome_comp.getComputedStyle(node).display.indexOf('table') != -1;
+    },
+
+    /**
+     * Determines if a node is a shrink-to-fit container element.
+     */
+    isShrinkToFit: function(node) {
+      if (!node || Node.ELEMENT_NODE != node.nodeType)
         return false;
 
-      var definedWidth = chrome_comp.getDefinedStylePropertyByName(node, false,
-          'width');
-      if (definedWidth && definedWidth != 'auto')
+      var specifiedWidth = chrome_comp.getSpecifiedValue(node).width;
+      if (specifiedWidth != 'auto')
         return false;
-
-      var result = undefined;
-      if (style.display == 'inline-block') {
-        result = true;
-      } else if (style.float != 'none') {
-        result = true;
-      } else if (style.position == 'fixed' || style.position == 'absolute') {
-        var definedLeft = chrome_comp.getDefinedStylePropertyByName(node,
-            false, 'left');
-        if (!definedLeft || definedLeft == 'auto') {
-          result = true;
-        } else {
-          var definedRight = chrome_comp.getDefinedStylePropertyByName(node,
-              false, 'right');
-          result = !definedRight || definedRight == 'auto';
-        }
+      // For the floating elements, the inline block elements and the absolutely
+      // positioned elements, if 'width' is 'auto', the used value is the
+      // shrink-to-fit width. Refer to:
+      // http://www.w3.org/TR/CSS21/visudet.html#shrink-to-fit-float
+      var style = chrome_comp.getComputedStyle(node);
+      if (style.display == 'inline-block' || style.float != 'none')
+        return true;
+      if (style.position == 'absolute' || style.position == 'fixed') {
+        // Note: for the absolutely positioned elements, if 'left' and 'right'
+        // are both not 'auto', the 'width' is not 'shrink-to-fit'.
+        if (style.left == 'auto' || style.right == 'auto')
+          return true;
       }
-      if (result === undefined)
-        return chrome_comp.isShrinkToFit(node.parentNode);
-      if (result && checkActuallyShrunk) {
-        // TODO: FIXME: This is not accurate.
-        return node.offsetWidth !=
-               chrome_comp.getContainingBlock(node).offsetWidth;
-      }
-      return result;
+      return false;
     },
 
     /**
@@ -483,12 +495,24 @@ window.chrome_comp = (function() {
     },
 
     isReplacedElement: function(element) {
+      var TAG_NAME_LIST = {
+        APPLET: true,
+        BUTTON: true,
+        EMBED: true,
+        HR: true,
+        IFRAME: true,
+        IMG: true,
+        INPUT: true,
+        ISINDEX: true,
+        MARQUEE: true,
+        OBJECT: true,
+        SELECT: true,
+        TEXTAREA: true
+      };
       if (element) {
-        var tagName = element.tagName;
-        return tagName == 'IMG' || tagName == 'OBJECT' || tagName == 'EMBED' ||
-               tagName == 'BUTTON' || tagName == 'TEXTAREA' ||
-               tagName == 'INPUT' || tagName == 'SELECT' || tagName == 'IFRAME';
+        return element.tagName in TAG_NAME_LIST;
       }
+      return false;
     },
 
     getNextNodeInDocument: function(node) {
@@ -499,29 +523,42 @@ window.chrome_comp = (function() {
       }
     },
 
+    HASLAYOUT_TAG_NAME_LIST: {
+      APPLET: true,
+      BODY: true,
+      BUTTON: true,
+      EMBED: true,
+      FIELDSET: true,
+      HR: true,
+      HTML: true,
+      IFRAME: true,
+      IMG: true,
+      INPUT: true,
+      LEGEND: true,
+      MARQUEE: true,
+      OBJECT: true,
+      SELECT: true,
+      TABLE: true,
+      TD: true,
+      TEXTAREA: true,
+      TH: true,
+      TR: true
+    },
+
     hasLayoutInIE: function(element) {
       if (!(element && element.nodeType == Node.ELEMENT_NODE))
         return false;
-      var tagName = element.tagName;
-      if (tagName == 'TD' || tagName == 'TH' ||
-          tagName == 'IMG' || tagName == 'HR' ||
-          tagName == 'INPUT' || tagName == 'BUTTON' ||
-          tagName == 'FILE' || tagName == 'SELECT' ||
-          tagName == 'TEXTAREA' || tagName == 'FIELDSET')
+      if (element.tagName in this.HASLAYOUT_TAG_NAME_LIST)
         return true;
       var style = chrome_comp.getComputedStyle(element);
       if (style.float != 'none' ||
           style.position == 'absolute' ||
           style.display == 'inline-block' ||
-          parseInt(chrome_comp.getDefinedStylePropertyByName(
-              element, false, 'width')) > 0 ||
-          parseInt(chrome_comp.getDefinedStylePropertyByName(
-              element, false, 'height')) > 0 ||
+          parseInt(chrome_comp.getSpecifiedValue(element).width) > 0 ||
+          parseInt(chrome_comp.getSpecifiedValue(element).height) > 0 ||
           style.zoom != '1')
         return true;
-      var definedZoom = chrome_comp.getDefinedStylePropertyByName(element,
-          false, 'zoom');
-      return definedZoom && definedZoom != 'normal';
+      return false;
     },
 
     /**
