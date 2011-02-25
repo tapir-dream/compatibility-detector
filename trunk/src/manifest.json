@@ -19,8 +19,9 @@
     "matches": [ "http://*/*", "https://*/*", "file://*" ],
     "js": [
       "loader.js",
-      "base_detection.js",
       "framework.js",
+      "framework_shared.js",
+      "base_detection.js",
       "config.js",
       "w3help_issues.js",
       "non_w3help_issues.js",
