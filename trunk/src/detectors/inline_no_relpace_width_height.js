@@ -14,6 +14,16 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview: Check non-replaced inline element's height and width
+ * settings only take effect in quirks mode in IE problems.
+ * 
+ * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=91
+ *
+ * Check document mode, when in quirks mode and the node is inline
+ * non-replaced elements, if it sets width or height, there may be a problem.
+ */
+
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
@@ -22,25 +32,20 @@ chrome_comp.CompDetect.declareDetector(
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
-null, // constructor
+function constructor(rootNode) {
+  // TODO: check for Chrome / IE inconsistence for document.compatMode
+  this.inStandardsMode = !chrome_comp.inQuirksMode();
+},
 
-function checkNode(node, additionalData) {
-  //check document type
-  if (document.compatMode == 'CSS1Compat')
+function checkNode(node, context) {
+  if (this.inStandardsMode)
     return;
-
-  if (Node.ELEMENT_NODE != node.nodeType ||
-      !chrome_comp.isInlineNoReplacedElement(node))
+  if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
     return;
-
-  var width =
-      chrome_comp.getDefinedStylePropertyByName(node, true, 'width');
-  var height =
-      chrome_comp.getDefinedStylePropertyByName(node, true, 'height');
-
-  if((width && width != 'auto') || (height && height != 'auto')){
-    var display=chrome_comp.getComputedStyle(node).display;
-    if(display == 'inline')
+  if (chrome_comp.getComputedStyle(node).display == 'inline' &&
+      !chrome_comp.isReplacedElement(node)) {
+    var specifiedStyle = chrome_comp.getSpecifiedValue(node); 
+    if (specifiedStyle.width != 'auto' || specifiedStyle.height != 'auto')
       this.addProblem('RD1014', [node]);
   }
 }
