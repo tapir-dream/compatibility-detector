@@ -120,5 +120,7 @@
   "HO9006_suggestion": { "message": "Do not use classid for OBJECT." },
   "BT1038": {"message": "Only IE supports lowsrc attribuite for IMG and INPUT[type=image]"},
   "BT1038_suggestion": { "message": "Avoid using the lowsrc attribute." },
+  "BX9055": {"message": "window.execScript is not supported by all browsers" },
+  "BX9055_suggestion": { "message": "Please make sure your target browsers support window.execScript." },
   "lastLine": { "message": "lastLine" }
 }
