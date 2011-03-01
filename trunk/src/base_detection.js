@@ -13,101 +13,30 @@ var baseDetector = {};
 
 baseDetector.HTML_DEPRECATED_TAGS = {
   APPLET: true,
-  BASEFONT: true,
   CENTER: true,
-  DIR: true,
   FONT: true,
-  ISINDEX: true,
-  MENU: true,
   S: true,
   STRIKE: true,
-  U: true
+  U: true,
+  LAYER: true
 };
 
 baseDetector.HTML_DEPRECATED_ATTRIBUTES = {
   align: {
-    CAPTION: true,
-    APPLET: true,
     IFRAME: true,
     IMG: true,
-    INPUT: true,
     OBJECT: true,
-    LEGEND:true,
-    TABLE:true,
-    HR: true,
-    DIV: true,
-    H1: true,
-    H2: true,
-    H3: true,
-    H4: true,
-    H5: true,
-    H6: true,
-    P: true
-  },
-  alink: {
-    BODY: true
-  },
-  alt: {
-    APPLET: true
-  },
-  archive: {
-    APPLET: true
-  },
-  background: {
-    BODY: true
-  },
-  bgcolor: {
-    TABLE: true,
-    TR: true,
-    TD: true,
-    TH: true,
-    BODY: true
-  },
-  border: {
-    IMG: true,
-    OBJECT: true
-  },
-  clear: {
-    BR: true
-  },
-  code: {
-    APPLET: true
-  },
-  codebase: {
-    APPLET: true
+    TABLE:true
   },
   color: {
-    BASEFONT: true,
-    FONT: true
-  },
-  compact: {
-    DIR: true,
-    DL: true,
-    MENU: true,
-    OL: true,
-    UL: true
-  },
-  face: {
-    BASEFONT: true,
     FONT: true
   },
   height: {
     TD: true,
-    TH: true,
-    APPLET: true
-  },
-  hreflang: {
-    A: true,
-    LINK: true
+    TH: true
   },
   language: {
     SCRIPT: true
-  },
-  link: {
-    BODY:true
-  },
-  name: {
-    APPLET:true
   },
   noshade: {
     HR: true
@@ -116,48 +45,10 @@ baseDetector.HTML_DEPRECATED_ATTRIBUTES = {
     TD: true,
     TH: true
   },
-  object: {
-    APPLET: true
-  },
-  prompt: {
-    ISINDEX: true
-  },
   size: {
     HR: true,
     FONT: true,
     BASEFONT:true
-  },
-  start: {
-    OL: true
-  },
-  text: {
-    BODY: true
-  },
-  type: {
-    LI: true,
-    OL: true,
-    UL: true
-  },
-  value: {
-    LI: true
-  },
-  version: {
-    HTML: true
-  },
-  vlink: {
-    BODY: true
-  },
-  vspace: {
-    APPLET: true,
-    IMG: true,
-    OBJECT: true
-  },
-  width: {
-    HR: true,
-    TD: true,
-    TH: true,
-    APPLET: true,
-    PRE: true
   }
 };
 
@@ -193,15 +84,9 @@ baseDetector.resetSummaryInformation = function() {
       compatMode: {}
     },
     DOM: {
-      count: 0,
       IECondComm: []
     },
-    STYLE: {
-      totalCount: 0,
-      notInHeadCount: 0
-    },
     LINK: {
-      totalCount: 0,
       notInHeadCount: 0
     }
   };
@@ -415,20 +300,9 @@ baseDetector.initIECondComm = function(rootNode) {
   }
 };
 
-baseDetector.initStyle = function() {
-  var detectorStyleCount =
-      document.getElementsByClassName('chrome-comp-annotations').length;
-  var styleCount =
-      document.querySelectorAll('style').length - detectorStyleCount;
-
-  baseDetector.summaryInformation.STYLE.notInHeadCount =
-      styleCount - document.querySelectorAll('body style').length;
-  baseDetector.summaryInformation.STYLE.totalCount = styleCount;
-};
 
 baseDetector.initLink= function() {
   var linkCount = document.querySelectorAll('link').length;
-  baseDetector.summaryInformation.LINK.totalCount = linkCount;
   baseDetector.summaryInformation.LINK.notInHeadCount =
       linkCount - document.querySelectorAll('head link').length;
 };
@@ -463,7 +337,6 @@ baseDetector.scanAllElements = function() {
 
 baseDetector.init = function (){
   baseDetector.initPageDTD();
-  baseDetector.initStyle();
   baseDetector.initLink();
   baseDetector.initCompatMode();
   baseDetector.initIECondComm(document.documentElement);
@@ -475,7 +348,6 @@ function getBaseDetectionStatus() {
   var documentMode = summaryInformation.documentMode;
   if (!documentMode.pageDTD ||
       summaryInformation.DOM.IECondComm.length ||
-      summaryInformation.STYLE.notInHeadCount ||
       summaryInformation.LINK.notInHeadCount ||
       Object.keys(summaryInformation.HTMLBase.HTMLDeprecatedTag).length ||
       Object.keys(summaryInformation.HTMLBase.HTMLDeprecatedAttribute).length) {

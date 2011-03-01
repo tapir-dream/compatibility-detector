@@ -39,23 +39,12 @@
   "bd_inQuirksMode": { "message": "建议使用能触发标准模式的 DTD，" },
   "bd_differentDTD": { "message": "在 IE 和 Chrome 中将触发 $1 渲染模式，建议更换 DTD，" },
   "bd_noDTD": { "message": "本页没有设置 DTD，在所有浏览器中将以 $1 渲染，建议使用能触发标准模式的 DTD，" },
-  "bd_nodeCount": { "message": "页面 DOM 节点总数为 $1 个。" },
 
-  "bd_styleTotalCount": { "message": "本页 STYLE 节点总数为 $1 个" },
-  "bd_styleNotInHeadCount": { "message": " (未放置在 HEAD 标签内的节点数为 $1 个)。" },
-  "bd_noStyle": { "message": "本页中没有使用 STYLE 标签。" },
-  "bd_noStyleNotInHead": { "message": " (本页中 STYLE 标签均放置在 HEAD 标签内)。" },
-
-  "bd_linkTotalCount": { "message": "本页 LINK 节点总数为 $1 个" },
-  "bd_linkNotInHeadCount": { "message": " (未放置在 HEAD 标签内的节点数为 $1 个)。" },
-  "bd_noLink": { "message": "本页中没有使用 LINK 标签。" },
-  "bd_noLinkNotInHead": { "message": " (本页中 LINK 标签均放置在 HEAD 标签内)。" },
+  "bd_linkNotInHeadCount": { "message": "有 $1 个 LINK 标记未放置在 HEAD 标签内，如果是动态创建的此标签，可能会导致它失效。" },
 
   "bd_IECondCommCount": { "message": "发现仅 IE 支持的条件注释 $1 个。" },
-  "bd_hasDeprecatedTag": { "message": "发现不推荐使用的标签 $1，建议不使用它。" },
-  "bd_noDeprecatedTag": { "message": "本页中没有使用任何不推荐使用的标签。" },
-  "bd_hasDeprecatedAttribute": { "message": "发现不推荐使用的属性 $1，位于标签 $2 内，建议不使用它。" },
-  "bd_noDeprecatedAttribute": { "message": "本页中没有使用任何不推荐使用的属性。" },
+  "bd_hasDeprecatedTag": { "message": "发现会导致兼容问题的不推荐使用的标签 $1，建议替换它。" },
+  "bd_hasDeprecatedAttribute": { "message": "发现会导致兼容问题的不推荐使用的属性 $1，位于标签 $2 内，建议替换它。" },
 
   "detectionFinished": { "message": "检测完成。"},
   "allProblemsSummary": { "message": "发现 $1 个兼容性问题，其中："},

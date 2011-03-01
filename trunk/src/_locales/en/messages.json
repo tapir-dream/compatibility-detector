@@ -39,23 +39,12 @@
   "bd_inQuirksMode": { "message": "It is better to use a DTD that makes the page rendered in stardards mode, " },
   "bd_differentDTD": { "message": " IE and Chrome will render in $1, it is better to change the DTD, " },
   "bd_noDTD": { "message": "There is no DTD on this page, and it will be rendered in $1 in all browsers. It is better to use a DTD that makes the page rendered in stardards mode, " },
-  "bd_nodeCount": { "message": "There are $1 DOM nodes in this page." },
 
-  "bd_styleTotalCount": { "message": "There are $1 STYLE nodes in this page" },
-  "bd_styleNotInHeadCount": { "message": " ($1 not put inside the HEAD tag)." },
-  "bd_noStyle": { "message": "There is no STYLE node in this page." },
-  "bd_noStyleNotInHead": { "message": " (all put inside the HEAD tag)." },
-
-  "bd_linkTotalCount": { "message": "There are $1 LINK nodes in this page" },
-  "bd_linkNotInHeadCount": { "message": " ($1 not put inside the HEAD tag)." },
-  "bd_noLink": { "message": "There is no LINK node in this page." },
-  "bd_noLinkNotInHead": { "message": " (all put inside the HEAD tag)." },
+  "bd_linkNotInHeadCount": { "message": "There are $1 LINK tags not put inside the HEAD tag, If they are dynamically created, they may fail." },
 
   "bd_IECondCommCount": { "message": "There are $1 conditional comments in this page, which is only supported by IE." },
-  "bd_hasDeprecatedTag": { "message": "There is deprecated tag $1 in this page, it should not be used any more." },
-  "bd_noDeprecatedTag": { "message": "This page does not use any deprecated tags." },
-  "bd_hasDeprecatedAttribute": { "message": "There is deprecated attribute $1 in tag  $2, it should not be used any more." },
-  "bd_noDeprecatedAttribute": { "message": "This page does not use any deprecated attributes." },
+  "bd_hasDeprecatedTag": { "message": "There is deprecated tag $1 which may cause compatibility issues in this page. Suggest to replace it." },
+  "bd_hasDeprecatedAttribute": { "message": "There is deprecated attribute $1 in tag $2, which may cause compatibility issues in this page. Suggest to replace it." },
 
   "detectionFinished": { "message": "Detection complete. "},
   "allProblemsSummary": { "message": "Found $1 compatibility issues:"},
