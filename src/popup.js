@@ -132,31 +132,9 @@ function showBaseDetectionResult(data) {
   // Process data.LINK to HTML
   if (data.LINK.notInHeadCount) {
     result.push('<li>');
-    result.push(chrome.i18n.getMessage('bd_linkTotalCount',
-        ['<em>' + data.LINK.totalCount + '</em>']));
     result.push(chrome.i18n.getMessage('bd_linkNotInHeadCount',
         ['<strong>' + data.LINK.notInHeadCount + '</strong>']));
-    // TODO: remove all bd_noLinkNotInHead
-    // result.push(chrome.i18n.getMessage('bd_noLinkNotInHead'));
     result.push('</li>');
-  } else {
-    // TODO: remove all bd_noLink
-    // result.push('<li>' + chrome.i18n.getMessage('bd_noLink') + '</li>');
-  }
-
-  // Process data.STYLE to HTML
-  if (data.STYLE.notInHeadCount) {
-    result.push('<li>');
-    result.push(chrome.i18n.getMessage('bd_styleTotalCount',
-        ['<em>' + data.STYLE.totalCount + '</em>']));
-    result.push(chrome.i18n.getMessage('bd_styleNotInHeadCount',
-        ['<strong>' + data.STYLE.notInHeadCount + '</strong>']));
-    // TODO: remove all bd_noStyleNotInHead
-    // result.push(chrome.i18n.getMessage('bd_noStyleNotInHead'));
-    result.push('</li>');
-  } else {
-    // TODO: remove all bd_noStyle
-    // result.push(chrome.i18n.getMessage('bd_noStyle'));
   }
 
   // Process data.HTMLBase.HTMLDeprecatedTag to HTML
@@ -170,9 +148,6 @@ function showBaseDetectionResult(data) {
       result.push('<li>' + chrome.i18n.getMessage('bd_hasDeprecatedTag',
           ['<strong>' + deprecatedTag[i] + '</strong>']) + '</li>');
     }
-  } else {
-    result.push('<li>' +
-        chrome.i18n.getMessage('bd_noDeprecatedTag') + '</li>');
   }
 
   // Process data.HTMLBase.HTMLDeprecatedAttribute to HTML
@@ -194,9 +169,6 @@ function showBaseDetectionResult(data) {
           ['<strong>' + tagsHaveDeprecatedAttributes[i] + '</strong>',
           '<strong>' + tagListString.join(' ') + '</strong>']) + '</li>');
     }
-  } else {
-    result.push('<li>' +
-        chrome.i18n.getMessage('bd_noDeprecatedAttribute') + '</li>');
   }
 
   // Show result.
