@@ -2,27 +2,35 @@
 <html chrome_comp_test="scroll_top_left">
 <head>
 <script src="jquery.js"></script>
+
 <script>
+$(window).scrollLeft();
+</script>
+
+<script>
+function testScroll() {
+  document.body.scrollTop;
+  chrome_comp.expectProblems(document.documentElement.scrollLeft, 'BX9008');
+  document.documentElement.scrollTop;
+}
+function testScroll1() {
   $(window).scrollLeft();
+}
+function testScroll2() {
+  window.pageXOffset || document.body.scrollLeft;
+}
+function testScroll3() {
+  document.documentElement.scrollLeft || document.body.scrollLeft;
+}
 </script>
-<script>
-  function testScroll() {
-    document.body.scrollTop;
-    chrome_comp.expectProblems(document.documentElement.scrollLeft, 'BX9008');
-    document.documentElement.scrollTop;
-  }
-  function testScroll1() {
-    $(window).scrollLeft();
-  }
-  function testScroll2() {
-    window.pageXOffset;
-    document.body.scrollLeft;
-  }
-</script>
-<body onload='testScroll(); testScroll1(); testScroll2()'>
+
+<body onload='testScroll(); testScroll1(); testScroll2(); testScroll3()'>
+
 <h1>Test</h1>
+
 <script>
 testScroll1();
 </script>
+
 </body>
 </html>
