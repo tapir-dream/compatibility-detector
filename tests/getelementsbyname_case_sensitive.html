@@ -1,15 +1,0 @@
-<!doctype html>
-<html chrome_comp_test="getelementbyid_and_getelementsbyname">	<head></head>	<body>
-		<input class="main_w" type="text" name="aa" />
-		<input type="text" name="aA" />
-		<div name="divName">DIV</div>
-		<button type="button" name="BT"></button>
-		<div id="info"></div>
-		<script type="text/javascript">
-			document.getElementById("info").innerHTML = document.getElementsByName("DIVNAME").length;
-		  document.getElementsByName("aa");
-		  chrome_comp.expectProblems(document.getElementsByName("AA"), "SD9012");
-		  chrome_comp.expectProblems(document.getElementsByName("Aa"), "SD9012");
-			chrome_comp.expectProblems(document.getElementsByName("bt"), "SD9012");
-		</script>
-	</body></html>

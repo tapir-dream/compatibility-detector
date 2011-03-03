@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html chrome_comp_test="getelementbyid_and_getelementsbyname">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+<a Name="Foo">a[Name=Foo]</a><br>
+<button NAME="foo">button[NAME=foo]</button><br>
+<span Id="Foo">span[Id=Foo]</span><br>
+<em ID="foo">em[ID=foo]</em><br>
+<br>
+<span Id="Bar">span[Id=Bar]</span><br>
+<em ID="bar">em[ID=bar]</em><br>
+<a Name="Bar">a[Name=Bar]</a><br>
+<button NAME="bar">button[NAME=bar]</button><br>
+
+<script>
+// Return 'a[Name=Foo]' in IE6 IE7 IE8(Q), but 'em[ID=foo]' in IE8(S) Chrome.
+chrome_comp.expectProblems(document.getElementById('foo'), 'SD9001');
+// Return 'span[Id=Bar]' in IE6 IE7 IE8(Q), but 'em[ID=bar]' in IE8(S) Chrome.
+chrome_comp.expectProblems(document.getElementById('bar'), 'SD9002');
+// Return 'span[Id=Bar]' in IE, but 'a[Name=Bar]' in Chrome.
+chrome_comp.expectProblems(document.getElementsByName('Bar')[0], 'SD9012');
+</script>
+
+<pre style="border: 1px solid black;">
+<script>
+document.writeln("document.getElementById('foo'): " +
+    document.getElementById('foo').innerHTML);
+document.writeln("document.getElementById('bar'): " +
+    document.getElementById('bar').innerHTML);
+document.writeln("document.getElementsByName('Bar')[0]: " +
+    document.getElementsByName('Bar')[0].innerHTML);
+</script>
+</pre>
+</body>
+</html>
