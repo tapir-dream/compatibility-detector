@@ -44,9 +44,16 @@ function checkNode(node, context) {
     return;
   if (chrome_comp.getComputedStyle(node).display == 'inline' &&
       !chrome_comp.isReplacedElement(node)) {
-    var specifiedStyle = chrome_comp.getSpecifiedValue(node); 
-    if (specifiedStyle.width != 'auto' || specifiedStyle.height != 'auto')
-      this.addProblem('RD1014', [node]);
+    var specifiedStyle = chrome_comp.getSpecifiedValue(node);
+    if (specifiedStyle.width != 'auto' || specifiedStyle.height != 'auto') {
+      // When the inline element has specified size, no content, and background 
+      // image, it may be invisible in Chrome. So upgrade to error level.
+      if (chrome_comp.getComputedStyle(node).backgroundImage != 'none' &&
+          !node.hasChildNodes())
+        this.addProblem('RD1014', {nodes: [node], severityLevel: 9});
+      else
+        this.addProblem('RD1014', {nodes: [node]});
+    }
   }
 }
 ); // declareDetector
