@@ -551,6 +551,8 @@ window.chrome_comp = (function() {
       if (element.tagName in this.HASLAYOUT_TAG_NAME_LIST)
         return true;
       var style = chrome_comp.getComputedStyle(element);
+      if (!chrome_comp.getSpecifiedValue(element))
+        return false;
       if (style.float != 'none' ||
           style.position == 'absolute' ||
           style.display == 'inline-block' ||
