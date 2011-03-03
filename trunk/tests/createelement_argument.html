@@ -1,10 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html chrome_comp_test="createelement_argument">
 <head>
 </head>
 <body>
 <script>
-var div = document.createElement('<div></div>');
+var div;
+
+// Put chrome_comp.expectProblems and problematic statement in the same line!
+chrome_comp.expectProblems('', 'SD9010'); div = document.createElement('<div></div>');
+
 div.innerHTML = 'div';
 document.body.appendChild(div);
 </script>

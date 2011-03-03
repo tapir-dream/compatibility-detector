@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html chrome_comp_test="documentls">
 <head>
 </head>
 <body>
@@ -11,7 +11,10 @@ if (window.ActiveXObject) {
   xmlDoc = document.implementation.createDocument('', '', null);
 }
 xmlDoc.async = false;
-xmlDoc.load('documentls.xml');
+
+// Put chrome_comp.expectProblems and problematic statement in the same line!
+chrome_comp.expectProblems('', 'SD9008'); xmlDoc.load('documentls.xml');
+
 document.write(xmlDoc.getElementsByTagName('*')[0].tagName);
 </script>
 </body>
