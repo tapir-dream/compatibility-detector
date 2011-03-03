@@ -284,9 +284,15 @@ window.chrome_comp = (function() {
     /** 
      * The cacheSpecifiedValue function caches the specified value of margin,
      * border, padding, width and height properties in the property of every
-     * element. So we retrieve these values here.
+     * element. So we retrieve these values here. If there is no cached value or
+     * there is no specified node, we just return the empty object.
+     * @param {object} ele the specified node.
+     * @return {object} return the specified value of the node or the empty
+     *     object.
      */
     getSpecifiedValue: function(ele) {
+      if (!ele || !ele[chrome_comp.SPECIFIED_VALUE])
+        return {};
       return ele[chrome_comp.SPECIFIED_VALUE];
     },
 
@@ -551,8 +557,6 @@ window.chrome_comp = (function() {
       if (element.tagName in this.HASLAYOUT_TAG_NAME_LIST)
         return true;
       var style = chrome_comp.getComputedStyle(element);
-      if (!chrome_comp.getSpecifiedValue(element))
-        return false;
       if (style.float != 'none' ||
           style.position == 'absolute' ||
           style.display == 'inline-block' ||
