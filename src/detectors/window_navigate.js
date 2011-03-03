@@ -14,6 +14,15 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Check use window.navigate method control page redirects.
+ * @bug https://code.google.com/p/compatibility-detector/issues/detail?id=100
+ *
+ * window.navigate can loads the specified URL to the current window in IE
+ * and Opera, but other browsers(Chrome, Firefox, Safari) do not support it.
+ * Refer to: http://msdn.microsoft.com/en-us/library/ms536638(v=VS.85).aspx
+ */
+
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
