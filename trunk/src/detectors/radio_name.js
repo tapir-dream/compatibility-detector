@@ -15,14 +15,14 @@
  */
 
 /**
- * @fileoverview: One detector implementation for checking the HTML
- * INPUT[type=radio] elements for all elements.
- * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=106
+ * @fileoverview Check the HTML INPUT[type=radio] elements for all elements.
+ * @bug https://code.google.com/p/compatibility-detector/issues/detail?id=106
  *
  * SGML basic types:
  * ID and NAME tokens must begin with a letter ([A-Za-z]) and may be followed
  * by any number of letters, digits ([0-9]), hyphens ("-"), underscores ("_"),
  * colons (":"), and periods (".").
+ * Refer to: http://www.w3.org/TR/html4/types.html#type-cdata
  *
  * If you do not meet the above specifications, will result in all the
  * different browsers of INPUT[type=radio] select options.
@@ -30,8 +30,8 @@
  * The detector checks all nodes, and do the following treatment:
  * 1. Check all INPUT[type=radio] element
  * 2. If not set HTML name attribute, So have differences in all browsers.
- * 3. If name value is not SGML basic types of NAME tokens, So have differences
-      in all browsers.
+ * 3. If name value is not SGML basic types of NAME tokens, So have
+      differences in all browsers.
  */
 
 addScriptToInject(function() {
@@ -44,7 +44,7 @@ chrome_comp.CompDetect.ScanDomBaseDetector,
 
 function constructor() {
   this.propertyValueRegExp_ =
-      /^[A-Za-z0-9]$|^[A-Za-z0-9][A-Za-z0-9\-\_\:\b]+$/;
+      /^[A-Za-z][\w\-\:\.]*$/;
 },
 
 function checkNode(node, context) {
@@ -60,11 +60,20 @@ function checkNode(node, context) {
   if (inputTypeValue != 'radio')
     return;
 
-  if (!node.hasAttribute('name'))
-   this.addProblem('HF9009', [node]);
+  // Check <input type='radio' /> format
+  if (!node.hasAttribute('name')) {
+    this.addProblem('HF9009', [node]);
+    return;
+  }
 
+  // Check <input type='radio' name /> format
   var inputNameValue = node.getAttribute('name');
+  if (inputNameValue == null) {
+    this.addProblem('HF9009', [node]);
+    return;
+  }
 
+  // Check name value is not SGML basic types
   if (!this.propertyValueRegExp_.test(inputNameValue))
     this.addProblem('HF9009', [node]);
 
