@@ -15,9 +15,9 @@
  */
 
 /**
- * @fileoverview: One detector implementation for checking influence of the
+ * @fileoverview One detector implementation for checking influence of the
  * 'text-align' property on the block level elements.
- * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=34
+ * @bug https://code.google.com/p/compatibility-detector/issues/detail?id=34
  *
  * The 'text-align' property can apply to all kinds of elements including the
  * block level elements in W3C CSS 1 specification which IE6, IE7 and IE8
@@ -28,7 +28,8 @@
  * The detector check all nodes, and do the following treatment:
  * 1. Ignore all text nodes, invisible elements and the elements having no
  *    parent.
- * 2. Check the elements set the 'text-align' property.
+ * 2. Check the elements set the 'text-align' property, and it is not empty
+ *    node, its offsetHeight is bigger than 0.
  * 3. Check for child elements whose width is less than the parent.
  */
 
@@ -51,7 +52,6 @@ function checkNode(node, context) {
   var textAlign = style.textAlign;
   var direction = style.direction;
   var THRESHOLD = 1;
-
   if ((display == 'block' || display == 'inline-block' ||
       display == 'table-cell') &&
       (textAlign == 'center' ||
@@ -61,7 +61,9 @@ function checkNode(node, context) {
     var child = node.firstElementChild;
     while (child) {
       var childStyle = chrome_comp.getComputedStyle(child);
-      if (childStyle.display == 'block' &&
+      if (child.offsetHeight > 0 &&
+          childStyle.innerText != '' &&
+          childStyle.display == 'block' &&
           childStyle.float == 'none' &&
           (childStyle.position == 'static' ||
           childStyle.position == 'relative')) {
