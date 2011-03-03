@@ -53,10 +53,10 @@ function checkNode(node, context) {
   var direction = style.direction;
   var THRESHOLD = 1;
   if ((display == 'block' || display == 'inline-block' ||
-      display == 'table-cell') &&
+          display == 'table-cell') &&
       (textAlign == 'center' ||
-      (direction == 'ltr' && textAlign == 'right') ||
-      (direction == 'rtl' && textAlign == 'left'))) {
+          (direction == 'ltr' && textAlign == 'right') ||
+          (direction == 'rtl' && textAlign == 'left'))) {
     var containerWidth = parseInt(style.width, 10);
     var child = node.firstElementChild;
     while (child) {
@@ -66,13 +66,13 @@ function checkNode(node, context) {
           childStyle.display == 'block' &&
           childStyle.float == 'none' &&
           (childStyle.position == 'static' ||
-          childStyle.position == 'relative')) {
+              childStyle.position == 'relative')) {
         var childWidth = child.offsetWidth +
             parseInt(childStyle.marginLeft, 10) +
             parseInt(childStyle.marginRight, 10);
         if (childWidth < containerWidth - THRESHOLD) {
           // If child's width is smaller than container's width,
-          // it may aligned differently in IE.
+          // it may be aligned differently in IE.
           this.addProblem('RT8003', {
             nodes: [node, child],
             details: 'container width: ' + containerWidth +

@@ -3,58 +3,77 @@
 <head>
 </head>
 <body>
+
+<p>1.</p>
 <table border="1">
   <tr>
-    <td width="400" style="text-align:center; background-color:red;" expectedProblems="RT8003">
-      <div style="width:200px;">Have problems</div>
+    <td width="400" style="text-align:center;" expectedProblems="RT8003">
+      <div style="width:200px;">td text-align:center; &gt; div</div>
     </td>
   </tr>
 </table>
 
-<div style="width:400px; text-align:right;" expectedProblems="RT8003">
-  <div style="width:200px; background-color:red;">Have problems</div>
-</div>
-<div style="width:400px; display:inline-block; text-align:right;" expectedProblems="RT8003">
-  <div style="width:200px; background-color:red;">Have problems</div>
+<p>2.</p>
+<div style="text-align:center; width:400px; border:1px solid;" expectedProblems="RT8003">
+  <div style="width:200px; border:1px solid;">div text-align:center; &gt; div</div>
 </div>
 
-<br />
-<div style="width:400px; text-align:center; background:red;" expectedProblems="RT8003">
-  <div style="width:200px">Have problems</div>
+<p>3.</p>
+<div style="text-align:right; width:400px; border:1px solid;" expectedProblems="RT8003">
+  <div style="width:200px; border:1px solid;">div text-align:right; &gt; div</div>
 </div>
 
-<br />
-<br />
-<span>Followings don't have problems</span>
-<div style="width:400px; text-align:center;">
-  <div style="width:200px; display:inline-block; background-color:green;">Don't have problems</div>
+<p>4.</p>
+<div style="text-align:right; display:inline-block; width:400px; border:1px solid;" expectedProblems="RT8003">
+  <div style="width:200px; border:1px solid;">div text-align:right; display:inline-block; &gt; div</div>
+</div>
+<span>text after inline-block div</span>
+
+<hr/>
+
+
+<h2>The followings don't have problems</h2>
+
+<p>A1.</p>
+<div style="text-align:center; width:400px; border:1px solid;">
+  <div style="display:inline-block; width:200px; border:1px solid;">div text-align:center; &gt; div display:inline-block;</div>
 </div>
 
-<div style="width:400px; text-align:left;">
-  <div style="width:200px; background-color:green;">Don't have problems</div>
+<p>A2.</p>
+<div style="text-align:left; width:400px; border:1px solid;">
+  <div style="width:200px; border:1px solid;">div text-align:left; &gt; div</div>
 </div>
 
-<div style="width:400px; direction:rtl; text-align:right;">
-  <div style="width:200px; background-color:green;">Don't have problems</div>
+<p>A3.</p>
+<div style="text-align:right; direction:rtl; width:400px; border:1px solid;">
+  <div style="width:200px; border:1px solid;">div text-align:right; direction:rtl; &gt; div</div>
 </div>
 
-<div style="width:400px; text-align:center;">
-  <div style="width:200px; float:left; background-color:green;">Don't have problems</div>
+<p>A4.</p>
+<div style="text-align:center; width:400px; border:1px solid;">
+  <div style="float:left; width:200px; border:1px solid;">div text-align:center; &gt; div float:left;</div>
+</div>
+<div style="clear:both"></div>
+
+<p>A5.</p>
+<div style="text-align:center; width:400px; border:1px solid;">
+  <b>div text-align:center;</b> &gt; br
+  <br style="display:block; width:200px; border:1px solid;" />
 </div>
 
-<br />
-<br />
-<br />
-
-<div style="width:400px; height:20px; text-align:center; background-color:green;">
-  Don't have problems because it's layout were not visible.
-  <br style="display:block; width:200px;" />
+<p>A6.</p>
+<div style="text-align:center; width:400px; border:1px solid;">
+  <b>div text-align:center;</b> &gt; div (with blank text and no border)
+  <div style="width:200px;"> </div>
 </div>
 
-<div style="width:400px; height:20px; text-align:center; background-color:green;">
-  Don't have problems because it's layout were not visible.
-  <div style="width:200px; font-size:0px; line-height:0px;"></div>
+<p>A7.</p>
+<div style="text-align:center; width:400px; border:1px solid;">
+  <b>div text-align:center;</b> &gt; div (with blank text and visible border)
+  <div style="width:200px; border:1px solid;"> </div>
 </div>
+
+<p>(End of test)</p>
 
 </body>
 </html>
