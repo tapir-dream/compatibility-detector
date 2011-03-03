@@ -15,33 +15,37 @@
  */
 
 /**
- * Detector for document.getElementById and document.getElementsByName
- * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=1
- * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=44
- * $bug: https://code.google.com/p/compatibility-detector/issues/detail?id=117
+ * @fileoverview Detector for document.getElementById and
+ * document.getElementsByName problems.
+ * @bug https://code.google.com/p/compatibility-detector/issues/detail?id=1
+ * @bug https://code.google.com/p/compatibility-detector/issues/detail?id=44
+ * @bug https://code.google.com/p/compatibility-detector/issues/detail?id=117
  *
- * Document.getElementById and document.getElementsByName is introduced in DOM
- * level 1. Document.getElementById(elementId) returns the Element whose ID is
- * given by elementId. If no such element exists, returns null.
- * Document.getElementsByName(elementName) returns the (possibly empty)
- * collection of elements whose name value is given by elementName. This method
- * is case sensitive.
+ * In IE6 IE7 IE8(Q), the argument of document.getElementById(elementId) is case
+ * insensitive. And for some elements, document.getElementById(elementName) can
+ * work too, for these element, elementId and elementName are equal, and,
+ * elementName is case-insensitive too.
  *
- * In IE6 IE7 IE8(Q), document.getElementById(elementId) is case insensitive,
- * document.getElementById('X') will get element whose value of id attribute is
- * 'x'. And for a part of elements, it's confused with ID and name attribute,
- * document.getElementById(elementName) will return element whose value of name
- * attribute is equal to elementName.
+ * In IE6 IE7 IE8, for some elements, the argument of
+ * document.getElementsByName(elementName) is case-insensitive.
  *
- * In IE6 IE7 IE8, for a part of elements,
- * document.getElementsByName(elementName) is case insensitive,
- * document.getElementsByName('X') will get elements whose value of name
- * attribute is 'x'.
+ * For the first problem, hook document.getElementById, so that we can get the
+ * argument, it may means id or name.
+ * Then, simulate IE's document.getElementById method, put the argument in it,
+ * compare return values of the original one and the simulate one, if they are
+ * dismatch, report problem.
  *
- * First hook document.getElementById and document.getElementsByName, so that we
- * can catch the argument id or name. When calling these methods and gets no
- * result, then traverse DOM tree. If case insensitive argument id or name is
- * existing in document, report problem.
+ * For the second problem, hook document.getElementsByName, so that we can get
+ * the argument, it is a name value.
+ * Then, simulate IE's document.getElementsByName method, put the argument in
+ * it, check its return values, if there are any element which 'name'
+ * attribute's value is not equals the argument by case sensitive, report
+ * problem.
+ *
+ * Note: document.getElementsByName can only get elements whose tag name in
+ * MIX_UP_TAGS and its name is matched (case-insensitive), but Chrome can
+ * get all elements whose name is matched. We only check the case-insensitive
+ * problem here. Detection of this problem may be added in the future.
  */
 
 addScriptToInject(function() {
@@ -53,115 +57,137 @@ chrome_comp.CompDetect.declareDetector(
 chrome_comp.CompDetect.NonScanDomBaseDetector,
 
 function constructor(rootNode) {
-  var that = this;
-  var ids;
-  var commonNames;
-  var namesOfEmbed;
-  var namesOfFrameAndParam;
+  var This = this;
+  var MIX_UP_TAGS = ['a', 'applet', 'button', 'embed', 'form', 'iframe',
+    'img', 'input', 'map', 'meta', 'object', 'select', 'textarea'];
 
+  /**
+   * Get an xpath expression, match elements whose tag name is 'tagName', and
+   * its attribute 'attribute' equals 'value' in case-insensitive.
+   * @return An xpath expression, like:
+   * //*[translate(@id,"ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+   * "abcdefghijklmnopqrstuvwxyz")="foo"]
+   */
+  function getXpathExpression(tagName, attribute, value) {
+    return '//' + tagName + '[translate(@' + attribute +
+        ',"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz")="' +
+        value.toLowerCase() + '"]';
+  }
+
+  /**
+   * Get all elements whose id and name is mixed in IE6 IE7 IE8(Q), and only
+   * these elements can use method document.getElementsByName() in IE.
+   * @return An xpath expression, like:
+   * //a[translate(@name,"ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+   * "abcdefghijklmnopqrstuvwxyz")="foo"] |
+   * //applet[translate(@name,"ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+   * "abcdefghijklmnopqrstuvwxyz")="foo"] |
+   * //...
+   * TODO: Find a better xpath expression.
+   */
+  function getXpathExpressionOfMixUpTags(value) {
+    var xpathExpressions = [];
+    MIX_UP_TAGS.forEach(function(tagName) {
+      xpathExpressions.push(getXpathExpression(tagName, 'name', value));
+    });
+    return xpathExpressions.join('|');
+  }
+
+  /**
+   * Simulate IE's document.getElementById.
+   */
+  function getElementByIdInIE(idOrName) {
+    // Match *[id=value] and MixUpTags[name=value], case-insensitive.
+    var xpathExpression = getXpathExpression('*', 'id', idOrName) + '|' +
+    getXpathExpressionOfMixUpTags(idOrName);
+    // Returns a ordered node snapshot, that includes all elements whose id or
+    // name is case-insensitive equal to argument 'idOrName'.
+    var elements = document.evaluate(xpathExpression, document, null,
+        XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+    // elements.snapshotItem(0) may be null.
+    return elements.snapshotItem(0);
+  }
+
+  // Hook document.getElementById.
   this.getElementById_ = function(result, originalArguments, callStack) {
-    var arg0 = originalArguments[0];
-    if (arg0 == undefined || typeof arg0 != 'string')
+    if (originalArguments.length == 0)
       return;
-    var lowerCaseArg0 = arg0.toLowerCase();
-    var lowerCaseIds = getIds();
-
-    // Handle SD9002
-    if (!result && lowerCaseIds.indexOf(lowerCaseArg0) >= 0) {
-      addProblem('SD9002');
+    var idOrName = originalArguments[0];
+    var elementInIE = getElementByIdInIE(idOrName);
+    if (result == elementInIE)
+      return;
+    // Get a wrong element, problem detected.
+    var issueId;
+    var details;
+    if (elementInIE.id.toLowerCase() == idOrName.toLowerCase()) {
+      issueId = 'SD9002';
+      details = 'argument = ' + idOrName + ', id = ' + elementInIE.id + '.';
+    // The elementInIE's id not case-insensitive equal to idOrName, its name
+    // must be case-insensitive equal to idOrName.
+    } else {
+      issueId = 'SD9001';
+      details = 'argument = ' + idOrName + ', name = ' + elementInIE.name + '.';
     }
-
-    // Handle SD9001, document.getElementById(case-sensitive name)
-    // Still works in IE67Q
-    var names = getNames();
-    if (!result && names.commonNames.concat(names.namesOfEmbed)
-        .indexOf(lowerCaseArg0) >= 0) {
-      // Caller is null when call document.getElementById() in window scope
-      var caller = arguments.callee.caller.caller;
-      // Filter jQuery
-      if (!(caller && caller.caller && /jQuery/.test(caller.caller.caller)))
-        addProblem('SD9001');
-    }
-
-    function addProblem(id) {
-      that.addProblem(id, {
-        nodes: [this],
-        details: 'document.getElementById(' + arg0 + ')',
-        needsStack: true,
-        severityLevel: 3
-      });
-    }
+    This.addProblem(issueId, {
+      nodes: [elementInIE],
+      details: details,
+      stack: chrome_comp.dumpStack(),
+      severityLevel: 3
+    });
   };
 
-  // Handle SD9012
+  /**
+   * Simulate IE's document.getElementsByName.
+   */
+  function getElementsByNameInIE(name) {
+    var xpathExpression = getXpathExpressionOfMixUpTags(name);
+    var elements = document.evaluate(xpathExpression, document, null,
+        XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+    var returnElements = [];
+    for (var i = 0, length = elements.snapshotLength; i < length; i++) {
+      returnElements.push(elements.snapshotItem(i));
+    }
+    return returnElements;
+  }
+
+  // Hook document.getElementsByName.
   this.getElementsByName_ = function(result, originalArguments, callStack) {
-    var arg0 = originalArguments[0];
-    var names = getNames();
-
-    if (result.length == 0 && names.commonNames
-        .concat(names.namesOfFrameAndParam).indexOf(arg0.toLowerCase()) >= 0) {
-      that.addProblem('SD9012', {
-        nodes: [this],
-        details: 'document.getElementsByName(' + arg0 + ')',
-        needsStack: true
-      });
+    if (originalArguments.length == 0)
+      return;
+    // If get one wrong element, report problem.
+    var name = originalArguments[0];
+    var elementsInIE = getElementsByNameInIE(name);
+    // If result is not empty and elementsInIE is empty, it's another problem.
+    // FF & Chrome can get <div name='foo'></div> by this method, but IE can't.
+    // Problem SD9012 only detect the name value is case-insensitive.
+    if (!elementsInIE)
+      return;
+    for (var i = 0, length = elementsInIE.length; i < length; i++) {
+      var element = elementsInIE[i];
+      if (element.name != name) {
+        This.addProblem('SD9012', {
+          nodes: [element],
+          details: 'argument = ' + name + '; name = ' + element.name + '.',
+          stack: chrome_comp.dumpStack(),
+          severityLevel: 3
+        });
+      }
     }
   };
-
-  // Get all elements with id attribute in the document
-  function getIds() {
-    if (!ids) {
-      ids = [];
-      var elements = document.querySelectorAll('[id]');
-      Array.prototype.forEach.call(elements, function(element) {
-        ids.push(element.getAttribute('id').toLowerCase());
-      });
-    }
-    return ids;
-  }
-
-  // Get names of specified element in the document
-  function getNames() {
-    if (!commonNames) {
-      commonNames = [];
-      namesOfEmbed = [];
-      namesOfFrameAndParam = [];
-
-      var elements = document.querySelectorAll('[name]');
-      var commonTags = ['A', 'APPLET', 'BUTTON', 'FORM', 'IFRAME', 'IMG',
-          'INPUT', 'MAP', 'META', 'OBJECT', 'SELECT', 'TEXTAREA'];
-
-      Array.prototype.forEach.call(elements, function(element) {
-        var tagName = element.tagName;
-        var name = element.getAttribute('name').toLowerCase();
-        if (commonTags.indexOf(tagName) >= 0)
-          commonNames.push(name);
-        else if (tagName == 'EMBED')
-          namesOfEmbed.push(name)
-        else if (tagName == 'FRAME' || tagName == 'PARAM')
-          namesOfFrameAndParam.push(name);
-      });
-    }
-    return {
-      'commonNames': commonNames,
-      'namesOfEmbed': namesOfEmbed,
-      'namesOfFrameAndParam': namesOfFrameAndParam
-    };
-  }
 }, //constructor
 
 function setUp() {
   chrome_comp.CompDetect.registerExistingMethodHook(
-      Document.prototype, 'getElementById', this.getElementById_);
+      document, 'getElementById', this.getElementById_);
   chrome_comp.CompDetect.registerExistingMethodHook(
-      Document.prototype, 'getElementsByName', this.getElementsByName_);
+      document, 'getElementsByName', this.getElementsByName_);
 },
 
 function cleanUp() {
   chrome_comp.CompDetect.unregisterExistingMethodHook(
-      Document.prototype, 'getElementById', this.getElementById_);
+      document, 'getElementById', this.getElementById_);
   chrome_comp.CompDetect.unregisterExistingMethodHook(
-      Document.prototype, 'getElementsByName', this.getElementsByName_);
+      document, 'getElementsByName', this.getElementsByName_);
 }
 ); // declareDetector
 
