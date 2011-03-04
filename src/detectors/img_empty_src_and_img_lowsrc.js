@@ -15,9 +15,10 @@
  */
 
 /**
- * @fileoverview: One detector implementation for checking IE has lowsrc
+ * @fileoverview One detector implementation for checking IE has lowsrc
  * attribute problems
- * @bug:https://code.google.com/p/compatibility-detector/issues/detail?id=107
+ * @bug https://code.google.com/p/compatibility-detector/issues/detail?id=107
+ * WontFix
  *
  * BT1038: check all IMG and INPUT[type="image"] elements, if it has no "src"
  *  attribute or the value of "src" is empty, and it has "lowsrc" attribute,
