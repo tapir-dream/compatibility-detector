@@ -14,6 +14,22 @@
  * limitations under the License.
  */
 
+ /**
+  * @fileoverview Check IE6 IE7 IE8 (Q) BUTTON tag type default value is not
+  * submit
+  *
+  * @bug https://code.google.com/p/compatibility-detector/issues/detail?id=90
+  * WontFix
+  *
+  * Design:
+  * Check each BUTTON node, if the node is in a form, and its type is not
+  * set properly, there may be a problem.
+  * Valid types are: submit, button, reset.
+  *
+  * But if there is onclick="javascript:return false", there will not be
+  * compatibility issue. Have no good way to deal with it, mark as WontFix now.
+  */
+
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
@@ -34,6 +50,7 @@ function checkNode(node, additionalData) {
     this.addProblem('HF9015', [node]);
   }
 }
+
 ); // declareDetector
 
 });
