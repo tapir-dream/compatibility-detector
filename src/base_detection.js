@@ -80,8 +80,12 @@ baseDetector.resetSummaryInformation = function() {
       HTMLDeprecatedTag: {}
     },
     documentMode: {
-      pageDTD: '',
-      compatMode: {}
+      hasDocType: false,
+      compatMode: {IE: 'Q', WebKit: 'Q'},
+      publicId: '',
+      hasComment: false,
+      hasConditionalComment: false,
+      isUnusualDocType: false
     },
     DOM: {
       IECondComm: []
@@ -114,178 +118,8 @@ baseDetector.addDeprecatedAttribute = function(paramObject) {
   HTMLDeprecatedAttribute[attribute][tagName] = tagName;
 };
 
-baseDetector.initPageDTD = function() {
-  baseDetector.summaryInformation.documentMode.pageDTD =
-      document.doctype ? true : false;
-};
-
-/**
- * List common DTDs.
- * <!DOCTYPE [name] PUBLIC [publicId] [systemId] >
- * This list is based on:
- * http://hsivonen.iki.fi/doctype/
- */
-baseDetector.PUBLIC_ID_WHITE_LIST = {
-  '-//W3C//DTD HTML 3.2 Final//EN': {
-    systemId: ''
-  },
-  '-//W3C//DTD HTML 4.0//EN': {
-    systemId: ''
-  },
-  '-//W3C//DTD HTML 4.01//EN': {
-    systemId: ''
-  },
-  '-//W3C//DTD HTML 4.0//EN': {
-    systemId: 'http://www.w3.org/TR/html4/strict.dtd'
-  },
-  '-//W3C//DTD HTML 4.01//EN': {
-    systemId: 'http://www.w3.org/TR/html4/strict.dtd'
-  },
-  '-//W3C//DTD HTML 4.0 Transitional//EN': {
-    systemId: ''
-  },
-  '-//W3C//DTD HTML 4.01 Transitional//EN': {
-    systemId: ''
-  },
-  '-//W3C//DTD HTML 4.01 Transitional//EN': {
-    systemId: 'http://www.w3.org/TR/html4/loose.dtd'
-  },
-  '-//W3C//DTD HTML 4.01 Transitional//EN': {
-    systemId:
-        'http://www.w3.org/TR/1999/REC-html401-19991224/loose.dtd'
-  },
-  '-//W3C//DTD XHTML 1.1//EN': {
-    systemId: 'http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd'
-  },
-  '-//W3C//DTD XHTML Basic 1.0//EN': {
-    systemId: 'http://www.w3.org/TR/xhtml-basic/xhtml-basic10.dtd'
-  },
-  '-//W3C//DTD XHTML 1.0 Strict//EN': {
-    systemId: 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'
-  },
-  '-//W3C//DTD XHTML 1.0 Transitional//EN': {
-    systemId:
-        'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'
-  },
-  'ISO/IEC 15445:1999//DTD HyperText Markup Language//EN': {
-    systemId: ''
-  },
-  '-//W3C//DTD HTML 4.0 Transitional//EN': {
-    systemId: 'http://www.w3.org/TR/html4/loose.dtd'
-  },
-  'ISO/IEC 15445:2000//DTD HTML//EN': {
-    systemId: ''
-  },
-  'ISO/IEC 15445:1999//DTD HTML//EN': {
-    systemId: ''
-  },
-  '-//W3C//DTD HTML 4.0 Transitional//EN': {
-    systemId: 'http://www.w3.org/TR/REC-html40/loose.dtd'
-  }
-};
-
-/**
- * List the difference between IE and WebKit on the interpretion of DTD.
- * This list is based on:
- * http://hsivonen.iki.fi/doctype/
- */
-baseDetector.COMPAT_MODE_DIFF_MAP = {
-  '-//W3C//DTD HTML 4.0 Transitional//EN': {
-    systemId: 'http://www.w3.org/TR/html4/loose.dtd',
-    IE: 'S',
-    WebKit: 'Q'
-  },
-  'ISO/IEC 15445:2000//DTD HTML//EN': {
-    systemId: '',
-    IE: 'Q',
-    WebKit: 'S'
-  },
-  'ISO/IEC 15445:1999//DTD HTML//EN': {
-    systemId: '',
-    IE: 'Q',
-    WebKit: 'S'
-  },
-  '-//W3C//DTD HTML 4.0 Transitional//EN': {
-    systemId: 'http://www.w3.org/TR/REC-html40/loose.dtd',
-    IE: 'S',
-    WebKit: 'Q'
-  }
-};
-
 baseDetector.initCompatMode = function() {
-
-  function hasCommentBeforeDTD() {
-    var prev = document.documentElement;
-    if (!prev)
-      return false;
-    while (prev.previousSibling)
-      prev = prev.previousSibling;
-    var compatMode = document.compatMode.toLowerCase();
-    if (prev && prev.nodeType == Node.COMMENT_NODE &&
-        compatMode == 'css1compat') {
-      // TODO: add comments here
-      var comm = prev.nodeValue.split(/\s+/);
-      if (comm.length < 1)
-        return true;
-      if (comm[0] != '[if')
-        return true;
-      if (/^!IE/g.test(comm[1]))
-        return false;
-      return true;
-    }
-    return false;
-  }
-
-  var doctype = document.doctype;
-  var name = doctype ? doctype.name.toLowerCase() : '';
-  var publicId = doctype ? doctype.publicId : '';
-  var systemId = doctype ? doctype.systemId : '';
-  var compatMode = document.compatMode.toLowerCase();
-
-  if (name != 'html')
-    baseDetector.summaryInformation.documentMode.strangeName = true;
-  if (baseDetector.PUBLIC_ID_WHITE_LIST[publicId]) {
-    if (baseDetector.PUBLIC_ID_WHITE_LIST[publicId].systemId != systemId)
-      baseDetector.summaryInformation.documentMode.strangeSystemId = true;
-  } else {
-    baseDetector.summaryInformation.documentMode.strangePublicId = true;
-  }
-  if (name == 'html' && publicId == '' && systemId == '') {
-    baseDetector.summaryInformation.documentMode.strangePublicId = false;
-    baseDetector.summaryInformation.documentMode.strangeSystemId = false;
-  }
-  var doctypeInIE = (compatMode == 'backcompat') ? 'Q' : 'S';
-  var doctypeInWebKit = doctypeInIE;
-
-  // IE will render in quirks mode if there are comment before DTD. Chrome will
-  // ignore the comment. Refer to:
-  // http://www.w3help.org/zh-cn/causes/HG8001
-  // TODO: check if IE9 is the same as Chrome.
-  if (hasCommentBeforeDTD()) {
-    doctypeInIE = 'Q';
-    baseDetector.summaryInformation.documentMode.hasCommentBeforeDTD = true;
-  }
-
-  if (baseDetector.COMPAT_MODE_DIFF_MAP[publicId]) {
-    if (baseDetector.COMPAT_MODE_DIFF_MAP[publicId]['systemId'] == systemId) {
-      doctypeInIE = baseDetector.COMPAT_MODE_DIFF_MAP[publicId]['IE'];
-      doctypeInWebKit = baseDetector.COMPAT_MODE_DIFF_MAP[publicId]['WebKit'];
-    }
-  }
-
-  if (document.doctype) {
-    // This DTD makes IE render in standards mode, Chrome in quirks mode
-    // <!DOCTYPE "xmlns:xsl='http://www.w3.org/1999/XSL/Transform'">
-    // Sample URL: http://www.nasa.gov/
-    if (document.doctype.name.toLowerCase() ==
-        "\"xmlns:xsl='http://www.w3.org/1999/xsl/transform'\"") {
-      doctypeInIE = 'S';
-      doctypeInWebKit = 'Q';
-    }
-  }
-  baseDetector.summaryInformation.documentMode.compatMode.IE = doctypeInIE;
-  baseDetector.summaryInformation.documentMode.compatMode.WebKit =
-      doctypeInWebKit;
+  baseDetector.summaryInformation.documentMode = chrome_comp.documentMode;
 };
 
 baseDetector.initIECondComm = function(rootNode) {
@@ -336,7 +170,6 @@ baseDetector.scanAllElements = function() {
 };
 
 baseDetector.init = function (){
-  baseDetector.initPageDTD();
   baseDetector.initLink();
   baseDetector.initCompatMode();
   baseDetector.initIECondComm(document.documentElement);
@@ -346,18 +179,17 @@ function getBaseDetectionStatus() {
   var status = 'ok';
   var summaryInformation = baseDetector.summaryInformation;
   var documentMode = summaryInformation.documentMode;
-  if (!documentMode.pageDTD ||
+  if (!documentMode.hasDocType ||
       summaryInformation.DOM.IECondComm.length ||
       summaryInformation.LINK.notInHeadCount ||
       Object.keys(summaryInformation.HTMLBase.HTMLDeprecatedTag).length ||
       Object.keys(summaryInformation.HTMLBase.HTMLDeprecatedAttribute).length) {
     status = 'warning';
-  } else if (documentMode.pageDTD) {
-    if (documentMode.strangeName ||
-        documentMode.strangePublicId ||
-        documentMode.strangeSystemId ||
+  } else if (documentMode.hasDocType) {
+    if (documentMode.isUnusualDocType ||
         documentMode.hasCommentBeforeDTD ||
-        documentMode.compatMode.IE != documentMode.compatMode.WebKit) {
+        documentMode.hasConditionalCommentBeforeDTD ||
+        documentMode.IE != documentMode.WebKit) {
       status = 'warning';
     }
   }

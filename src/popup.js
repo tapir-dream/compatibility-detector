@@ -82,47 +82,66 @@ function showBaseDetectionResult(data) {
   $('content').className = 'processing';
 
   var result = [];
+  var dtdLink = '<a href="' + w3helpLocale + '/kb/001#common_dtd' +
+      '" target="_blank">' + chrome.i18n.getMessage('bd_DTDTableTitle') + 
+      '</a>';
 
-  var KB001 = chrome.i18n.getMessage('bd_aboutRCAorKB') +
-      '<a href="' + w3helpLocale + '/kb/001" target="_blank">' +
-      chrome.i18n.getMessage('KB001') + '</a>';
+  var kb001 = chrome.i18n.getMessage('bd_aboutRCAorKB', ['<a href="' +
+      w3helpLocale + '/kb/001" target="_blank">' +
+      chrome.i18n.getMessage('kb001') + '</a>']);
+  var isUnusualDocType = data.documentMode.isUnusualDocType;
+  var quirksMode = '<strong>' + chrome.i18n.getMessage('bd_Q') + '</strong>';
+  var standardsMode = '<em>' + chrome.i18n.getMessage('bd_S') + '</em>';
+  var mode = (data.documentMode.WebKit == 'S') ? standardsMode :
+      quirksMode;
+  var hg8001 = chrome.i18n.getMessage('bd_aboutRCAorKB', ['<a href="' +
+      w3helpLocale + '/causes/HG8001" target="_blank">' +
+      chrome.i18n.getMessage('HG8001') + '</a>']);
 
   // Process data.documentMode
-  if (data.documentMode.pageDTD) {
-    result.push('<li>' + chrome.i18n.getMessage('bd_hasDTD'));
-    if (data.documentMode.strangeName ||
-        data.documentMode.strangePublicId ||
-        data.documentMode.strangeSystemId)
-      result.push(chrome.i18n.getMessage('bd_strangeDTD'));
-    if (data.documentMode.hasCommentBeforeDTD)
-      result.push(chrome.i18n.getMessage('bd_makeIEBeInQuirksMode') +
-          chrome.i18n.getMessage('bd_aboutRCAorKB') +
-          '<a href="' + w3helpLocale + '/causes/HG8001" target="_blank">' +
-          chrome.i18n.getMessage('HG8001') + '</a>');
-    if (data.documentMode.compatMode.IE ==
-        data.documentMode.compatMode.WebKit) {
-      var mode = (data.documentMode.compatMode.WebKit == 'S')
-          ? '<em>' + chrome.i18n.getMessage('bd_S') + '</em>'
-          : '<strong>' + chrome.i18n.getMessage('bd_Q') + '</strong>';
+  result.push('<li>');
+  if (data.documentMode.hasDocType) {
+    result.push(chrome.i18n.getMessage('bd_hasDTD', [dtdLink]));
+    if (isUnusualDocType) {
+      result.push(chrome.i18n.getMessage('bd_strangeDTD', [mode]));
+    }
+    if (data.documentMode.hasConditionalCommentBeforeDTD) {
+      result.push(chrome.i18n.getMessage('bd_hasConditionalComm', [mode]));
+    } else if (data.documentMode.hasCommentBeforeDTD) {
+      result.push(chrome.i18n.getMessage('bd_makeIEBeInQuirksMode') + hg8001);
+    }
+    result.push('<br />');
+
+    if (data.documentMode.IE ==
+        data.documentMode.WebKit) {
       result.push(chrome.i18n.getMessage('bd_sameDTD',
           ['<em>' + chrome.i18n.getMessage('bd_same') + '</em>', mode]));
-      if (data.documentMode.compatMode.WebKit == 'Q') {
-        result.push(chrome.i18n.getMessage('bd_inQuirksMode') +
-            chrome.i18n.getMessage('bd_reducePossibility') + KB001);
+      if (data.documentMode.WebKit == 'Q') {
+        result.push(chrome.i18n.getMessage('bd_reducePossibility') + kb001);
       }
-      result.push('</li>');
     } else {
-      result.push('<li>' + chrome.i18n.getMessage('bd_differentDTD',
-          ['<strong>' + chrome.i18n.getMessage('bd_different') +
-          '</strong>']) + chrome.i18n.getMessage('bd_reducePossibility') +
-          KB001 + '</li>');
+      if (!isUnusualDocType) {
+        if (data.documentMode.IE) {
+          result.push(chrome.i18n.getMessage('bd_differentDTD',
+              [(data.documentMode.IE == 'Q') ? quirksMode
+              : standardsMode, (data.documentMode.WebKit == 'Q') ?
+              quirksMode : standardsMode]) +
+              chrome.i18n.getMessage('bd_reducePossibility') + kb001);
+        } else {
+          result.push(chrome.i18n.getMessage('bd_removeComment'));
+        }
+      } else {
+        result.push(chrome.i18n.getMessage('bd_reducePossibility') +
+            kb001);
+      }
     }
-
   } else {
-    result.push('<li>' + chrome.i18n.getMessage('bd_noDTD',
+    // The page has no doctype.
+    result.push(chrome.i18n.getMessage('bd_noDTD',
         ['<strong>' + chrome.i18n.getMessage('bd_Q') + '</strong>']) +
-        chrome.i18n.getMessage('bd_reducePossibility') + '</li>');
+        chrome.i18n.getMessage('bd_reducePossibility') + kb001);
   }
+  result.push('</li>');
 
   // Process data.DOM to HTML
   if (data.DOM.IECondComm.length)
