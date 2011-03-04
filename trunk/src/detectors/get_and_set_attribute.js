@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @bug https://code.google.com/p/compatibility-detector/issues/detail?id=2
+ * WontFix
+ */
+
 // Detector for element.getAttribute and element.setAttribute
 //
 // Element.getAttribute(attributeName) is introduced in DOM level 1, which

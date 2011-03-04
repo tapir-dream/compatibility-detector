@@ -15,9 +15,10 @@
  */
 
 /**
- * @fileoverview: Check whether the second argument of window.execScript is
+ * @fileoverview Check whether the second argument of window.execScript is
  * valid.
- * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=102
+ * @bug https://code.google.com/p/compatibility-detector/issues/detail?id=102
+ * WontFix
  *
  * window.execScript can execute non-javascript in IE, but not in Chrome.
  * Other browsers do not support it. We just check whether the second argument

@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @bug https://code.google.com/p/compatibility-detector/issues/detail?id=14
+ * WontFix
+ */
+
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
