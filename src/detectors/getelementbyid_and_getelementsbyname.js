@@ -99,7 +99,7 @@ function constructor(rootNode) {
   function getElementByIdInIE(idOrName) {
     // Match *[id=value] and MixUpTags[name=value], case-insensitive.
     var xpathExpression = getXpathExpression('*', 'id', idOrName) + '|' +
-    getXpathExpressionOfMixUpTags(idOrName);
+        getXpathExpressionOfMixUpTags(idOrName);
     // Returns a ordered node snapshot, that includes all elements whose id or
     // name is case-insensitive equal to argument 'idOrName'.
     var elements = document.evaluate(xpathExpression, document, null,
@@ -110,9 +110,16 @@ function constructor(rootNode) {
 
   // Hook document.getElementById.
   this.getElementById_ = function(result, originalArguments, callStack) {
-    if (originalArguments.length == 0)
+    // Variable result will be undefined in an illegal invocation.
+    if (originalArguments.length == 0 || typeof result == 'undefined')
       return;
     var idOrName = originalArguments[0];
+    // Ignore calling by JQurey, JQuery will create an element with a name
+    // 'script' + new Date().getTime(), and try to call document.getElementById
+    // by using that name.
+    if (/^script\d+$/.test(idOrName))
+      return;
+    // Compare gotten elements.
     var elementInIE = getElementByIdInIE(idOrName);
     if (result == elementInIE)
       return;
@@ -152,7 +159,8 @@ function constructor(rootNode) {
 
   // Hook document.getElementsByName.
   this.getElementsByName_ = function(result, originalArguments, callStack) {
-    if (originalArguments.length == 0)
+    // Variable result will be undefined in an illegal invocation.
+    if (originalArguments.length == 0 || typeof result == 'undefined')
       return;
     // If get one wrong element, report problem.
     var name = originalArguments[0];
@@ -167,7 +175,7 @@ function constructor(rootNode) {
       if (element.name != name) {
         This.addProblem('SD9012', {
           nodes: [element],
-          details: 'argument = ' + name + '; name = ' + element.name + '.',
+          details: 'argument = ' + name + ', name = ' + element.name + '.',
           stack: chrome_comp.dumpStack(),
           severityLevel: 3
         });
