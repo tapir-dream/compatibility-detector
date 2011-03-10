@@ -281,7 +281,7 @@ window.chrome_comp = (function() {
       }
     },
 
-    /** 
+    /**
      * The cacheSpecifiedValue function caches the specified value of margin,
      * border, padding, width and height properties in the property of every
      * element. So we retrieve these values here. If there is no cached value or
@@ -1432,7 +1432,7 @@ chrome_comp.CompDetect = (function() {
         return 'none';
       return style.display;
     }
-    
+
     var root = document.documentElement;
     if (!root) {
       chrome_comp.printError('Error getting the specified value.');
@@ -1685,6 +1685,16 @@ chrome_comp.CompDetect = (function() {
       detectionStarted = true;
       cacheSpecifiedValue();
 
+      var timer = chrome_comp.CompDetectorConfig.delayRunDetectionTimer;
+      // Check whether we need to immediately call load handler of
+      // CompDetector.
+      if (chrome_comp.CompDetectorConfig.delayRunDetection &&
+          typeof timer == 'number') {
+        window.setTimeout(loadHandlerForCompDetector, timer);
+      } else {
+        loadHandlerForCompDetector();
+      }
+
       function loadHandlerForCompDetector() {
         var startTime = new Date().getTime();
         chrome_comp.trace('Start compatibility detection...' +
@@ -1709,23 +1719,46 @@ chrome_comp.CompDetect = (function() {
         for (var i = 0, c = detectors_.length; i < c; ++i)
           detectors_[i].postAnalyze();
 
-        var detectionTime = new Date().getTime() - startTime;
-        window.console.log('Finished compatibility detection in ' +
-            detectionTime + ' ms');
+        var ASYNC_OPERATION_CHECK_INTERVAL = 100;
+        // The value if maximum time for waiting the asynchronized
+        // operation finsih.
+        var MAX_TIME_WAITINGFINISH = 2000;
+        var startTimeForPolling = new Date().getTime();
+        var timerId;
+        if (isAllAsyncDetectionFinished()) {
+          onAllAsyncDetectionFinished();
+        } else {
+          timerId = setInterval(waitForAsyncDetectionFinished,
+              ASYNC_OPERATION_CHECK_INTERVAL);
+        }
 
-        chrome_comp.CompDetect.sendDetectionResults();
-        if (chrome_comp.CompDetectorConfig.unitTestMode)
-          checkDetectionResults(document.documentElement);
-      }
+        function waitForAsyncDetectionFinished() {
+          var runningTime = new Date().getTime() - startTimeForPolling;
+          if (isAllAsyncDetectionFinished() ||
+              runningTime > MAX_TIME_WAITINGFINISH) {
+            onAllAsyncDetectionFinished();
+          }
+        }
 
-      var timer = chrome_comp.CompDetectorConfig.delayRunDetectionTimer;
-      // Check whether we need to immediately call load handler of
-      // CompDetector.
-      if (chrome_comp.CompDetectorConfig.delayRunDetection &&
-          typeof timer == 'number') {
-        window.setTimeout(loadHandlerForCompDetector, timer);
-      } else {
-        loadHandlerForCompDetector();
+        function isAllAsyncDetectionFinished() {
+          for (var i = 0, c = detectors_.length; i < c; ++i) {
+            if (!detectors_[i].isAsyncOperationFinished())
+              return false;
+          }
+          return true;
+        }
+
+        function onAllAsyncDetectionFinished() {
+          // clear timeId
+          if (timerId)
+            clearInterval(timerId);
+          var detectionTime = new Date().getTime() - startTime;
+          window.console.log('Finished compatibility detection in ' +
+              detectionTime + ' ms');
+          chrome_comp.CompDetect.sendDetectionResults();
+          if (chrome_comp.CompDetectorConfig.unitTestMode)
+            checkDetectionResults(document.documentElement);
+        }
       }
     },
 
@@ -1887,6 +1920,7 @@ chrome_comp.CompDetect.BaseDetector = function(rootNode) {
   this.window_ = window;
   this.document_ = window.document;
   this.hasProblem_ = false;
+  this.isAsyncOperationFinished_ = true;
 };
 
 chrome_comp.CompDetect.BaseDetector.detectorName = 'BaseDetector';
@@ -1895,6 +1929,16 @@ chrome_comp.CompDetect.BaseDetector.prototype.postAnalyze = function() {
   // The detector developer must implement his/her own logic for
   // postAnalyze if he/she need this.
 };
+
+chrome_comp.CompDetect.BaseDetector.prototype.isAsyncOperationFinished =
+    function() {
+      return this.isAsyncOperationFinished_;
+    };
+
+chrome_comp.CompDetect.BaseDetector.prototype.setAsyncOperationFinished  =
+    function(finished) {
+      this.isAsyncOperationFinished_ = finished;
+    };
 
 /**
  * Adds a new detected problem.
