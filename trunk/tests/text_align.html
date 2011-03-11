@@ -29,6 +29,12 @@
 </div>
 <span>text after inline-block div</span>
 
+<p>5.</p>
+<div style="text-align:center; width:400px; border:1px solid;" expectedProblems="RT8003">
+  <b>div text-align:center;</b> &gt; div (with blank text and visible border)
+  <div style="width:200px; border:1px solid;"> </div>
+</div>
+
 <hr/>
 
 
@@ -65,12 +71,6 @@
 <div style="text-align:center; width:400px; border:1px solid;">
   <b>div text-align:center;</b> &gt; div (with blank text and no border)
   <div style="width:200px;"> </div>
-</div>
-
-<p>A7.</p>
-<div style="text-align:center; width:400px; border:1px solid;">
-  <b>div text-align:center;</b> &gt; div (with blank text and visible border)
-  <div style="width:200px; border:1px solid;"> </div>
 </div>
 
 <p>(End of test)</p>
