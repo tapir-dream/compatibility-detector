@@ -1,0 +1,49 @@
+<html chrome_comp_test="expression">
+<head>
+<style expectedProblems="BT9010">
+body {background-color:expression((new Date()).getHours()%2 ? "#B8D4FF" : "#F08A00");}
+</style>
+</head>
+<body>
+<p>1.</p>
+<div style="border-width:10px; border-style:solid; border-color:expression((new Date()).getHours()%2 ? '#EEE' : '#FF0');" expectedProblems="BT9010">
+  border-color:expression
+</div>
+
+<p>2.</p>
+<div style=" border-width:10px; border-style:solid; +border-color:expression((new Date()).getHours()%2 ? '#EEE' : '#FF0');" expectedProblems="BT9010">
+  +border-color:expression
+</div>
+
+<p>3.</p>
+<div style="border-width:10px; border-style:solid; _border-color:expression((new Date()).getHours()%2 ? '#EEE' : '#FF0');" expectedProblems="BT9010">
+  _border-color:expression
+</div>
+
+<p>4.</p>
+<div style="border-width:10px; border-style:solid; *border-color:expression((new Date()).getHours()%2 ? '#EEE' : '#FF0');" expectedProblems="BT9010">
+  *border-color:expression
+</div>
+
+<hr/>
+
+<h2>The followings don't have problems</h2>
+
+<p>A1.</p>
+<div style="border-width:10px; border-style:solid; border-color:#FF0);">
+  border-color:#FF0
+</div>
+
+<p>A2.</p>
+<div>
+  <style>
+     body {font-size:16px;}
+  </style>
+  <pre>
+  &lt;style&gt;
+     body {font-size:16px;}
+  &lt;/style&gt;
+  </pre>
+</div>
+</body>
+</html>
