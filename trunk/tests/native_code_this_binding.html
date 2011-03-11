@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html chrome_comp_test="native_code_this_binding">
+<head>
+</head>
+<body>
+<div id="d">1</div>
+<script>
+var a = document.getElementById;
+// Put chrome_comp.expectProblems and problematic statement in the same line!
+chrome_comp.expectProblems('', 'SD9005'); a('d');
+</script>
+</body>
+</html>

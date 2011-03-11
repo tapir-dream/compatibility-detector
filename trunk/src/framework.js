@@ -792,6 +792,9 @@ chrome_comp.ExistingMethodHookObject = function(object, existingMethodName) {
   var This = this;
   // this is orginal this context for orginal function call
   this.newMethodHandler_ = function() {
+    // Store the object and existingMethodName for the handler.
+    var methodName = This.existingMethodName_;
+    var hookedObject = This.hookedObject_;
     if (!This.enabled_ || chrome_comp.areHooksDisabled())
       return This.saveExistingMethodHandler_.apply(this, arguments);
 
@@ -807,7 +810,8 @@ chrome_comp.ExistingMethodHookObject = function(object, existingMethodName) {
     var cacheHandlers = This.hookHandlersForExistingMethod_.concat();
     for (var i = 0, c = cacheHandlers.length; i < c; ++i) {
       try {
-        cacheHandlers[i].call(this, result, arguments, callStack);
+        cacheHandlers[i].call(this, result, arguments, callStack, methodName,
+            hookedObject);
       } catch (e) {
         chrome_comp.printError('Error in existing method handler: ', e);
       }
