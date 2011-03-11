@@ -1,67 +1,104 @@
 <!-- 123 -->
 <!DOCTYPE html>
-<html chrome_comp_test="document_type_and_boxsizing" expectedProblems="HG8001">
+<html chrome_comp_test="document_type_and_boxsizing">
 <head>
-<style>
-	* { font:14px 'Trebuchet MS'; border-color:black; }
-	.ok { background:lightgreen; }
-	.fail { background:red; }
-</style>
 </head>
 <body>
-border:10px; padding:10px; width:auto; height:auto;
-<div style="border:10px solid; padding:10px; width:auto; height:auto;" class="ok">DIV</div>
+<p>1. HG8001 document type</p>
+<div>
+<script>
+document.write('IE: ' + chrome_comp.documentMode.IE + '<br />WebKit: ' +
+    chrome_comp.documentMode.WebKit);
+</script>
+</div>
+
+<p>2. RX1010 [IMG] padding:10px;</p>
+<div>
+<img src="http://www.google.com/images/logo_sm.gif" style="padding:10px;" expectedProblems="RX1010" />
+</div>
+
+<p>3. RD8001 [H1] border:10px; padding:10px; width:100px; height:100px;</p>
+<h1 style="border:10px solid; padding:10px; margin:0; width:100px; height:100px;" expectedProblems="RD8001">H1</h1>
 <br />
 
-border:0; padding:0; width:100px; height:100px;
-<p style="border:0; padding:0; margin:0; width:100px; height:100px;" class="ok">P</p>
+<p>4. RD8001 [INPUT] border:10px solid; width:100px; height:100px; box-sizing:content-box;</p>
+<div>
+<input type="reset" style="border:10px solid; width:100px; height:100px; box-sizing:content-box;" expectedProblems="RD8001" />
+</div>
 <br />
 
-border:10px; padding:10px; width:100px; height:100px;
-<h1 style="border:10px solid; padding:10px; margin:0; width:100px; height:100px;" class="fail" expectedProblems="RD8001">H1</h1>
+<p>5. RD8001 [HR] border:10px solid; width:100px; height:100px;</p>
+<hr style="border:10px solid; width:100px; height:100px;" align="left" expectedProblems="RD8001" />
 <br />
 
-border:10px; padding:10px; width:100px; height:100px; -webkit-box-sizing:border-box;
-<pre style="border:10px solid; padding:10px; margin:0; width:100px; height:100px; -webkit-box-sizing:border-box;" class="ok">PRE</pre>
+<p>6. RD8001 [INPUT] border:10px solid black; width:100px; height:100px;</p>
+<div>
+<input type="text" style="border:10px solid black; width:100px; height:100px;" expectedProblems="RD8001" />
+</div>
 <br />
 
-padding:10px; width:100px; height:100px; -webkit-box-sizing:border-box;
-<blockquote style="padding:10px; margin:0; width:100px; height:100px; -webkit-box-sizing:border-box;" class="ok">BLOCKQUOTE</blockquote>
+<p>7. RD8001 [OBJECT] border:30px solid; width:100px; height:100px;</p>
+<div>
+<object data="http://www.google.com/images/logo_sm.gif" style="width:100px; height:100px; border:30px solid;" expectedProblems="RD8001"></object>
+</div>
+
+
+<h2>The followings don't have problems</h2>
+<p>A1. [IMG] border:10px; width:100px; height:100px;</p>
+<div>
+<img src="http://www.google.com/images/logo_sm.gif" style="border:10px; width:100px; height:100px;" />
+</div>
+
+<p>A2. [DIV] border:10px; padding:10px; width:auto; height:auto;</p>
+<div style="border:10px solid; padding:10px; width:auto; height:auto;">DIV</div>
 <br />
 
-border:10px solid; width:100px; height:100px;
-<div><button style="border:10px solid; width:100px; height:100px;" class="ok">BUTTON</button></div>
+<p>A3. [DIV] border:0; padding:0; width:100px; height:100px;</p>
+<p style="border:0; padding:0; margin:0; width:100px; height:100px;">P</p>
 <br />
 
-border:10px solid; width:100px; height:100px; -webkit-box-sizing:content-box;
-<div><input type="reset" value="RESET" style="border:10px solid; width:100px; height:100px; -webkit-box-sizing:content-box;" class="fail" expectedProblems="RD8001" /></div>
+<p>A4. [PRE] border:10px; padding:10px; width:100px; height:100px; -webkit-box-sizing:border-box;</p>
+<pre style="border:10px solid; padding:10px; margin:0; width:100px; height:100px; -webkit-box-sizing:border-box;">PRE</pre>
 <br />
 
-border:10px solid; width:100px; height:100px; -webkit-box-sizing:content-box;
-<table style="border:10px solid; width:100px; height:100px; -webkit-box-sizing:content-box;" class="ok">
+<p>A5. [BLOCKQUOTE] padding:10px; width:100px; height:100px; box-sizing:border-box;</p>
+<blockquote style="padding:10px; margin:0; width:100px; height:100px; box-sizing:border-box;">BLOCKQUOTE</blockquote>
+<br />
+
+<p>A6. [BUTTON] border:10px solid; width:100px; height:100px;</p>
+<div>
+<button style="border:10px solid; width:100px; height:100px;">BUTTON</button>
+</div>
+<br />
+
+<p>A7. [TABLE] border:10px solid; width:100px; height:100px; -webkit-box-sizing:content-box;</p>
+<table style="border:10px solid; width:100px; height:100px; -webkit-box-sizing:content-box;">
 	<tr>
 		<td>TABLE</td>
 	</tr>
 </table>
 <br />
 
-border:10px solid; width:100px; height:100px;
-<hr style="border:10px solid; width:100px; height:100px;" class="fail" align="left" expectedProblems="RD8001" />
+<p>A8. [IMG] border:10px solid; width:100px; height:100px;</p>
+<div>
+<img style="border:10px solid; width:100px; height:100px;" src="http://www.google.com/images/logo_sm.gif" />
+</div>
 <br />
 
-border:10px solid; width:100px; height:100px;
-<div><img style="border:10px solid; width:100px; height:100px;" src="http://www.google.com/images/logo_sm.gif" class="ok" /></div>
+<p>A9. [INPUT] border:10px solid black; width:100px; height:100px; box-sizing:border-box;</p>
+<div>
+<input type="password" value="PASSWORD" style="border:10px solid black; width:100px; height:100px; box-sizing:border-box;" />
+</div>
 <br />
 
-border:10px solid black; width:100px; height:100px;
-<div><input type="text" value="TEXT" style="border:10px solid black; width:100px; height:100px;" class="fail" expectedProblems="RD8001" /></div>
-<br />
+<p>A10. [IFRAME] border:10px solid; width:100px; height:100px;</p>
+<div>
+<iframe src="http://www.google.com" style="border:10px solid; width:100px; height:100px;"></iframe>
+</div>
 
-border:10px solid black; width:100px; height:100px; -webkit-box-sizing:border-box;
-<div><input type="password" value="PASSWORD" style="border:10px solid black; width:100px; height:100px; -webkit-box-sizing:border-box;" class="ok" /></div>
-<br />
-
-border:10px solid; width:100px; height:100px;
-<div><iframe src="http://www.google.com" style="border:10px solid; width:100px; height:100px;" class="ok"></iframe></div>
+<p>A11. [EMBED] width:100px; height:100px;</p>
+<div>
+<embed src="clock.swf" type="application/x-shockwave-flash" quality="high" pluginspage="http://www.macromedia.com/go/getflashplayer" style="width:100px; height:100px;" />
+</div>
 </body>
 </html>
