@@ -41,7 +41,196 @@ chrome_comp.CompDetect.declareDetector(
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
-null, // constructor
+function constructor() {
+  this.THRESHOLD_OF_CENTER = 5;
+  this.THRESHOLD_OF_LEFT = this.THRESHOLD_OF_CENTER;
+  this.THRESHOLD_OF_RIGHT = this.THRESHOLD_OF_CENTER;
+  var This = this;
+
+  /**
+   * Detection center position to be rendered element, four parameters.
+   *
+   * containerRect.left
+   * ^
+   * |
+   * |<---      containerRect.width     --->|
+   * +--------------------------------------+
+   * |        *expect render position       |
+   * |        childRect.left                |
+   * |    |<->|--->child margin<---|<->|    |
+   * |    +---+--------------------+---+    |
+   * |    |   |<--childRect.width->|   |    |
+   * |    |   |                    |   |    |
+   * |    +---+--------------------+---+    |
+   * +--------------------------------------+
+   *
+   * If the element is center render, it position is:
+   * render position = containerRect.left + (containerRect.width -
+   *     (childRect.width + childMarginLeft + childMarginRight) / 2) +
+   *     marginLeft;
+   *
+   * ps: nodeRect.width = node.offsetWidth =
+   *     content width + padding width + border width
+   *
+   * child node actual render position is childRect.left.
+   * so comparison the two values, then know whether is
+   * the render exact position.
+   *
+   * @param {containerRect} Containing block rect data.
+   * @param {childRect} Child element rect data.
+   * @param {childSpecifiedStyle} Child element specified style data.
+   * @param {containerComputedStyle} Containing block computed style data.
+   * @return {boolean}
+   */
+
+  this.isCenterAligned = function(containerRect, childRect,
+      childSpecifiedStyle, containerComputedStyle) {
+    var actualChildCenterRenderPosition = childRect.left;
+    var childMarginLeft = This.parseInt(childSpecifiedStyle.marginLeft);
+    var childMarginRight = This.parseInt(childSpecifiedStyle.marginRight);
+    var expectChildCenterRenderPosition = containerRect.left +
+        Math.floor((containerRect.width - childRect.width -
+        childMarginLeft - childMarginRight) / 2) + childMarginLeft;
+    return Math.abs(actualChildCenterRenderPosition -
+        expectChildCenterRenderPosition) <= This.THRESHOLD_OF_CENTER;
+  };
+
+  /**
+   * Detection left position to be rendered element, four parameters.
+   *
+   * containerRect.left
+   * ^
+   * |  |<--      content width       -->|
+   * |<---      containerRect.width     --->|
+   * +--------------------------------------+
+   * |      *expect render position         |
+   * |      childRect.left                  |
+   * |  |<->|--->child margin<---|<->|      |
+   * |  +---+--------------------+---+      |
+   * |  |   |    child node      |   |      |
+   * |  |   |                    |   |      |
+   * |  +---+--------------------+---+      |
+   * +--------------------------------------+
+   *
+   * If the element is left render, it position is:
+   * render position = containerRect.left + borderLeftWidth +
+   *     containerPaddingLeft + childMarginLeft;
+   *
+   * child node actual render position is childRect.left.
+   * so comparison the two values, then know whether is
+   * the render exact position.
+   *
+   * @param {containerRect} Containing block rect data.
+   * @param {childRect} Child element rect data.
+   * @param {childSpecifiedStyle} Child element specified style data.
+   * @param {containerComputedStyle} Containing block computed style data.
+   * @return {boolean}
+   */
+  this.isLeftAligned = function(containerRect, childRect,
+      childSpecifiedStyle, containerComputedStyle) {
+    var containerBorderLeftWidth =
+        This.parseInt(containerComputedStyle.borderLeftWidth);
+    var containerPaddingLeft =
+        This.parseInt(containerComputedStyle.paddingLeft);
+    var childMarginLeft = This.parseInt(childSpecifiedStyle.marginLeft);
+    var expectChildRightRenderPosition = containerRect.left +
+        containerBorderLeftWidth + containerPaddingLeft + childMarginLeft;
+    return Math.abs(childRect.left -
+        expectChildRightRenderPosition) <= This.THRESHOLD_OF_LEFT;
+  };
+
+  /**
+   * Detection right position to be rendered element, four parameters.
+   *
+   *                      containerRect.right
+   *                                        ^
+   * |  |<--      content width       -->|  |
+   * |<---      containerRect.width     --->|
+   * +--------------------------------------+
+   * |         expect render position*      |
+   * |                 childRect.right      |
+   * |      |<->|--->child margin<---|<->|  |
+   * |      +---+--------------------+---+  |
+   * |      |   |    child node      |   |  |
+   * |      |   |                    |   |  |
+   * |      +---+--------------------+---+  |
+   * +--------------------------------------+
+   *
+   * If the element is right render, it position is:
+   * render position = containerRect.right - containerBorderRightWidth -
+   *    containerPaddingRight - childMarginRight
+   *    containerPaddingLeft + childMarginLeft;
+   *
+   * child node actual render position is childRect.left.
+   * so comparison the two values, then know whether is
+   * the render exact position.
+   *
+   * @param {containerRect} Containing block rect data.
+   * @param {childRect} Child element rect data.
+   * @param {childSpecifiedStyle} Child element specified style data.
+   * @param {containerComputedStyle} Containing block computed style data.
+   * @return {boolean}
+   */
+  this.isRightAligned = function(containerRect, childRect,
+      childSpecifiedStyle, containerComputedStyle) {
+    var containerWidth = containerRect.width;
+    var containerBorderRightWidth =
+        This.parseInt(containerComputedStyle.borderRightWidth);
+    var containerPaddingRight =
+        This.parseInt(containerComputedStyle.paddingRight);
+    var childMarginRight = This.parseInt(childSpecifiedStyle.marginRight);
+    var actualChildRightRenderPosition = childRect.right;
+    var expectChildRightRenderPosition =
+        containerRect.right - containerBorderRightWidth -
+        containerPaddingRight - childMarginRight;
+    return Math.abs(actualChildRightRenderPosition -
+        expectChildRightRenderPosition) <= This.THRESHOLD_OF_RIGHT;
+  };
+
+  this.checkChild = function (node, isAligned) {
+    var containerRect = node.getBoundingClientRect();
+    var containerStyle = chrome_comp.getComputedStyle(node);
+    var child = node.firstElementChild;
+    while (child) {
+      var childStyle = chrome_comp.getComputedStyle(child);
+      var childSpecifiedStyle = chrome_comp.getSpecifiedValue(child);
+      if (child.offsetHeight > 0 &&
+          childStyle.innerText != '' &&
+          childStyle.display == 'block' &&
+          childStyle.float == 'none' &&
+          (childStyle.position == 'static' ||
+              childStyle.position == 'relative')) {
+          var childRect = child.getBoundingClientRect();
+          if (!isAligned(containerRect, childRect,
+              childSpecifiedStyle, containerStyle)) {
+            this.addProblem('RT8003', {
+              nodes: [node, child],
+              details: 'container width: ' + containerRect.width +
+              ', child element width: '+ childRect.width
+            });
+            return;
+          }
+      }
+      child = child.nextElementSibling;
+    }
+  };
+
+  /**
+   * Native paseInt function extends, one parameter.
+   * object null funciton undefined boolean string will be converted to 0.
+   * @param {jsValue}
+   * @return {number}
+   */
+  this.parseInt = function(value) {
+    if (!value)
+      return 0;
+    var result = parseInt(value, 10);
+    if (isNaN(result))
+      return 0;
+    return result;
+  };
+},
+
 
 function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
@@ -51,39 +240,30 @@ function checkNode(node, context) {
   var display = style.display;
   var textAlign = style.textAlign;
   var direction = style.direction;
-  var THRESHOLD = 1;
-  if ((display == 'block' || display == 'inline-block' ||
-          display == 'table-cell') &&
-      (textAlign == 'center' ||
-          (direction == 'ltr' && textAlign == 'right') ||
-          (direction == 'rtl' && textAlign == 'left'))) {
-    var containerWidth = parseInt(style.width, 10);
-    var child = node.firstElementChild;
-    while (child) {
-      var childStyle = chrome_comp.getComputedStyle(child);
-      if (child.offsetHeight > 0 &&
-          childStyle.innerText != '' &&
-          childStyle.display == 'block' &&
-          childStyle.float == 'none' &&
-          (childStyle.position == 'static' ||
-              childStyle.position == 'relative')) {
-        var childWidth = child.offsetWidth +
-            parseInt(childStyle.marginLeft, 10) +
-            parseInt(childStyle.marginRight, 10);
-        if (childWidth < containerWidth - THRESHOLD) {
-          // If child's width is smaller than container's width,
-          // it may be aligned differently in IE.
-          this.addProblem('RT8003', {
-            nodes: [node, child],
-            details: 'container width: ' + containerWidth +
-            ', child element width: '+ childWidth
-          });
-          return;
-        }
-      }
-      child = child.nextElementSibling;
-    }
+  var BLOCK_DISPLAY_LIST = {
+    block: true,
+    'inline-block': true,
+    'table-cell': true
+  };
+
+  if (!(display in BLOCK_DISPLAY_LIST))
+    return;
+
+  if (textAlign == 'center') {
+    this.checkChild(node, this.isCenterAligned);
+    return;
   }
+
+  if (direction == 'ltr' && textAlign == 'right') {
+    this.checkChild(node, this.isRightAligned);
+    return;
+  }
+
+  if (direction == 'rtl' && textAlign == 'left') {
+    this.checkChild(node, this.isLeftAligned);
+    return;
+  }
+
 }
 ); // declareDetector
 
