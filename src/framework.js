@@ -562,7 +562,8 @@ window.chrome_comp = (function() {
           style.display == 'inline-block' ||
           parseInt(chrome_comp.getSpecifiedValue(element).width) > 0 ||
           parseInt(chrome_comp.getSpecifiedValue(element).height) > 0 ||
-          style.zoom != '1')
+          chrome_comp.getDefinedStylePropertyByName(element, false,
+              'zoom') != null)
         return true;
       return false;
     },
