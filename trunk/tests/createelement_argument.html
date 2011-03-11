@@ -4,13 +4,26 @@
 </head>
 <body>
 <script>
-var div;
-
-// Put chrome_comp.expectProblems and problematic statement in the same line!
-chrome_comp.expectProblems('', 'SD9010'); div = document.createElement('<div></div>');
-
-div.innerHTML = 'div';
-document.body.appendChild(div);
+function addInput() {
+  var input;
+  try {
+    input = document.createElement(
+      '<input name="text1" type="text" value="text1" />');
+  } catch(e) {
+    input = document.createElement('input');
+    input.name = 'text1';
+  }
+  document.body.appendChild(input);
+}
+function addDiv() {
+  var div;
+  // Put chrome_comp.expectProblems and problematic statement in the same line!
+  chrome_comp.expectProblems('', 'SD9010'); div = document.createElement('<div></div>');
+  div.innerHTML = 'div';
+  document.body.appendChild(div);
+}
+addInput();
+addDiv();
 </script>
 </body>
 </html>
