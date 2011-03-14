@@ -15,11 +15,11 @@
  */
 
 /**
- * @fileoverview: One detector implementation for checking the CSS margin
- * property which affects the center-aligned table element by HTML align
- * attribute.
- * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=4
+ * @fileoverview Check the CSS margin property which affects table element whose
+ * HTML 'align' attribute is 'center'.
+ * @bug https://code.google.com/p/compatibility-detector/issues/detail?id=4
  *
+ * http://w3help.org/zh-cn/causes/RX8004
  * The align attribute of table elements make the table itself align center
  * being relative to its containing block. In non-IE browsers, it will be
  * transformed to CSS property - 'margin-left:auto' and 'margin-right:auto'.
@@ -49,32 +49,46 @@ chrome_comp.CompDetect.ScanDomBaseDetector,
 null, // constructor
 
 function checkNode(node, context) {
-  if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone() ||
-      node.tagName != 'TABLE')
+  if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
     return;
 
-  if (chrome_comp.getAttributeLowerCase(node, 'align') != 'center')
+  if (node.tagName != 'TABLE' ||
+      chrome_comp.getAttributeLowerCase(node, 'align') != 'center')
     return;
 
-  if (node.offsetWidth == 0 || node.offsetHeight == 0)
+  if (node.offsetWidth == 0 || node.offsetHeight == 0 || node.innerText == '')
     return;
 
-  if (node.innerText == '')
-    return;
+  // Save old style.
+  var oldInlineMarginLeft = node.style.marginLeft;
+  var oldInlineMarginRight = node.style.marginRight;
+  var oldOffsetLeft = node.offsetLeft;
 
-  var inlineMarginLeft = node.style.marginLeft;
-  var inlineMarginRight = node.style.marginRight;
-  var left = node.getBoundingClientRect().left;
+  // Change marginLeft/Right to auto.
   node.style.marginLeft = 'auto !important';
   node.style.marginRight = 'auto !important';
-  var newLeft = node.getBoundingClientRect().left;
+  var newOffsetLeft = node.offsetLeft;
+
+  // Restore old style.
+  // Must set marginLeft/Right to null first, or it will not change if the
+  // old value is empty string.
   node.style.marginLeft = null;
-  node.style.marginLeft = (inlineMarginLeft) ? inlineMarginLeft : null;
   node.style.marginRight = null;
-  node.style.marginRight = (inlineMarginRight) ? inlineMarginRight : null;
-  if ((left != newLeft) && (newLeft != left + 1))
-    this.addProblem('RX8004', [node]);
+  node.style.marginLeft = oldInlineMarginLeft;
+  node.style.marginRight = oldInlineMarginRight;
+
+  // Check if table moves.
+  var THRESHOLD = 5;
+  if (Math.abs(oldOffsetLeft - newOffsetLeft) > THRESHOLD) {
+    this.addProblem('RX8004', {
+      nodes: [node],
+      severityLevel: 1,
+      details: 'oldOffsetLeft=' + oldOffsetLeft +
+               ', newOffsetLeft=' + newOffsetLeft
+    });
+  }
 }
+
 ); // declareDetector
 
 });
