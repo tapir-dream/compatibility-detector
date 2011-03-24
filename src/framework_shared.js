@@ -158,9 +158,19 @@ var COMPAT_MODE_DIFF_PUBLIC_ID_MAP = {
 
 var CONDITIONAL_COMMENT_REGEXP = /\[\s*if\s+[^\]][\s\w]*\]/i;
 
-// Check for conditional comments like:
-// <!--[if !IE]> HTML <![endif]-->
-var NOT_IE_HIDDEN_CONDITIONAL_COMMENT_REGEXP = /^\[if\s+!IE\]>.*<!\[endif\]$/i;
+// Check for downlevel-revealed opening conditional comments like:
+// <![if !IE]> or <![if false]>
+var NOT_IE_REVEALED_OPENING_CONDITIONAL_COMMENT_REGEXP =
+    /^\[if\s+(!IE|false)\]$/i;
+// Check for downlevel-revealed closing conditional comments like:
+// <![endif]>
+var REVEALED_CLOSING_CONDITIONAL_COMMENT_REGEXP = /^\[endif\s*\]$/i;
+
+// Check for downlevel-hidden conditional comments like:
+// <!--[if !IE]> HTML <![endif]--> or
+// <!--[if false]> HTML <![endif]-->
+var NOT_IE_HIDDEN_CONDITIONAL_COMMENT_REGEXP =
+    /^\[if\s+(!IE|false)\]>.*<!\[endif\]$/i;
 
 /**
  * <!DOCTYPE "xmlns:xsl='http://www.w3.org/1999/XSL/Transform'">
@@ -200,6 +210,48 @@ function isNotIEHiddenConditionalComment(nodeValue) {
 }
 
 /**
+ * Determine if a string is a downlevel-revealed closing conditional comments.
+ * The downlevel-revealed conditional comment can include content in browsers 
+ * that do not recognize conditional comments. Although the conditional comment
+ * itself is ignored, the HTML content inside it is not.
+ * About conditional comments, refer to:
+ * http://msdn.microsoft.com/en-us/library/ms537512(v=vs.85).aspx
+ * @param {string} string the nodeValue of the comment node.
+ */
+function isRevealedClosingConditionalComment(nodeValue) {
+  return REVEALED_CLOSING_CONDITIONAL_COMMENT_REGEXP.test(nodeValue);
+}
+
+/**
+ * Determine if a string is a "not IE" downlevel-revealed opening conditional
+ * comment.
+ * About conditional comments, refer to:
+ * http://msdn.microsoft.com/en-us/library/ms537512(v=vs.85).aspx
+ * @param {string} string the nodeValue of the comment node.
+ */
+function isNotIERevealedOpeningConditionalComment(nodeValue) {
+  return NOT_IE_REVEALED_OPENING_CONDITIONAL_COMMENT_REGEXP.test(nodeValue);
+}
+
+/**
+ * <![if false]><!--some text--><![endif]> is a kind of downlevel-revealed
+ * conditional comment. <![endif]> is the closing, and <![if false]> is the
+ * opening. If we meet the downlevel-revealed closing conditional comment, we
+ * should get its opening part.
+ * About conditional comments, refer to:
+ * http://msdn.microsoft.com/en-us/library/ms537512(v=vs.85).aspx
+ */
+function getPreviousRevealedOpeningConditionalComment(node) {
+  var prev = node.previousSibling;
+  for (; prev; prev = prev.previousSibling) {
+    if (isNotIERevealedOpeningConditionalComment(prev.nodeValue)) {
+      return prev;
+    }
+  }
+  return null;
+}
+
+/**
  * Check if there has comment before the doctype, and return an object.
  * @return {object} return an object, the key hasCommentBeforeDTD record if
  *     there has comment before the DTD, the key hasConditionalCommentBeforeDTD
@@ -220,23 +272,41 @@ function checkForCommentBeforeDTD() {
   // <!DOCTYPE html>
   // <!-- some text -->
   // <html>
-  for (var prev = doctype.previousSibling;
-      prev;
-      prev = prev.previousSibling) {
+  var prev = doctype.previousSibling;
+  for (; prev; prev = prev.previousSibling) {
     if (prev.nodeType == Node.COMMENT_NODE) {
-      var isConditionalComm = isConditionalComment(prev.nodeValue);
+      var nodeValue = prev.nodeValue;
+      // For a downlevel-revealed closing conditional comment, it is usually a
+      // part of a downlevel-revealed condition comment group. We just jump to
+      // its opening part comment. Such as:
+      // <![if false]><!--startView:homePage--><![endif]>
+      // <!DOCTYPE html>
+      // Sample URL: http://www.usa.canon.com/cusa/home
+      if (isRevealedClosingConditionalComment(nodeValue)) {
+        prev = getPreviousRevealedOpeningConditionalComment(prev);
+        // We should consider that if there is no opening part comment.
+        if (!prev) {
+          result.hasConditionalCommentBeforeDTD = true;
+          return result;
+        }
+        continue;
+      }
+      // The comment is not a conditional comment and downlevel-revealed
+      // closing conditional comment, and it is not inside a downlevel-revealed
+      // conditional comment group. It is just a common comment.
+      var isConditionalComm = isConditionalComment(nodeValue);
       if (!isConditionalComm) {
         result.hasCommentBeforeDTD = true;
         continue;
       }
       // Conditional comments in IE are so complicated, we just consider one
       // situation, if the comments before doctype are all IE's conditional
-      // comments with downlevel-hidden !IE expression, There's no difference
+      // comments with downlevel-hidden !IE expression, there's no difference
       // between IE and Chrome. Such as
       // <!--[if !IE]> some text <![endif]--> 
       // <!DOCTYPE html>
       // Sample URL: http://www.reuters.com/
-      if (!isNotIEHiddenConditionalComment(prev.nodeValue)) {
+      if (!isNotIEHiddenConditionalComment(nodeValue)) {
         result.hasConditionalCommentBeforeDTD = true;
       }
     }
