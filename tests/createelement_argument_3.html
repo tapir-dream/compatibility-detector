@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html chrome_comp_test="createelement_argument">
+<head>
+<script>
+// We add some functions and properties in Object.prototype, and these keys
+// should not be iterated by the createelement_arguments detector.
+Object.prototype.myfunction = function() { return "function"; };
+Object.prototype.myfunction2 = function() { return "function2"; };
+Object.prototype.myproperty = "property";
+Object.prototype.myproperty2 = "property2";
+</script>
+</head>
+<body>
+</body>
+</html>
