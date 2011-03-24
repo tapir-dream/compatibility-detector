@@ -80,9 +80,12 @@ function checkNode(node, context) {
   // Check if table moves.
   var THRESHOLD = 5;
   if (Math.abs(oldOffsetLeft - newOffsetLeft) > THRESHOLD) {
+    var severityLevel = 1;
+    if (0 == oldOffsetLeft)
+      severityLevel = 9;
     this.addProblem('RX8004', {
       nodes: [node],
-      severityLevel: 1,
+      severityLevel: severityLevel,
       details: 'oldOffsetLeft=' + oldOffsetLeft +
                ', newOffsetLeft=' + newOffsetLeft
     });

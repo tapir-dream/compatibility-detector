@@ -2,6 +2,8 @@
 <html chrome_comp_test="table_margin_affects_align_center">
 <body>
 
+<h1>RX8004</h1>
+
 <p>Note: The container DIV is 300px wide, the inner TABLE is 201px wide, if not
 otherwise mentioned.</p>
 
@@ -65,6 +67,15 @@ otherwise mentioned.</p>
   </table>
 </div>
 
+<p>5.</p>
+<div style="position:relative; width:300px; border:1px solid;">
+  <table align="center" style="margin:0;" width="201" border="1" expectedProblems="RX8004">
+    <tr>
+      <td>table align="center" margin:0;
+      </td>
+    </tr>
+  </table>
+</div>
 <hr/>
 <h2>The followings don't have problems.</h2>
 
