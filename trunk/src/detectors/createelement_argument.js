@@ -51,6 +51,12 @@ function constructor(rootNode) {
     var arg0 = (originalArguments[0] + '').trim();
     if (!arg0)
       return;
+    // Mootools tries to use document.createElement('<input name=x>') to tell if
+    // the current browser can accept HTML String in the createElement method.
+    // So we must ignore the pages using Mootools. Refer to:
+    // http://mootools.net/download/get/mootools-core-1.3.1-full-compat.js
+    if (arg0 == '<input name=x>')
+      return;
     // Only IE supports using a HTML markup string as argument. We just check
     // the first character after trim.
     if (arg0[0] == '<') {
@@ -98,6 +104,10 @@ function postAnalyze() {
   // scripts will not be executed. So in general the errorList object just has
   // one key.
   for (var arg in this.errorList) {
+    // Some pages may modify Object.prototype and add new functions. We should
+    // ignore them when iterating this.errorList.
+    if (typeof this.errorList[arg] != 'object' || !this.errorList[arg].stack)
+      continue;
     var stack = this.errorList[arg].stack;
     var caller = this.errorList[arg].caller;
     if (caller)
@@ -106,7 +116,7 @@ function postAnalyze() {
       caller = 'global context';
     this.addProblem('SD9010', {
       stack: stack,
-      details: 'createElement(' + arg + ')' + '\nError in: ' + caller
+      details: 'document.createElement("' + arg + '")' + '\nError in: ' + caller
     });
   }
 }
