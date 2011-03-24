@@ -14,7 +14,18 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Check if there are paddings on images when IE is Quirks Mode.
+ * @bug https://code.google.com/p/compatibility-detector/issues/detail?id=149
+ *
+ * Get the real document mode in IE first. If the document mode in IE is Quirks
+ * Mode and the node is an image with paddings, report this issue.
+ */
+
 addScriptToInject(function() {
+
+if (chrome_comp.documentMode.IE != 'Q')
+  return;
 
 chrome_comp.CompDetect.declareDetector(
 
@@ -22,11 +33,10 @@ chrome_comp.CompDetect.declareDetector(
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
-null, // constructor
+null,
 
 function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType ||
-      !chrome_comp.inQuirksMode() ||
       node.tagName != 'IMG')
     return;
 
@@ -35,7 +45,12 @@ function checkNode(node, context) {
       parseInt(computedStyle.paddingTop, 10) ||
       parseInt(computedStyle.paddingRight, 10) ||
       parseInt(computedStyle.paddingBottom, 10))
-    this.addProblem('RX1010', [node]);
+    this.addProblem('RX1010', {
+      nodes: [node],
+      details: '{padding: ' + computedStyle.paddingTop + ' ' +
+          computedStyle.paddingRight + ' ' + computedStyle.paddingBottom +
+          ' ' + computedStyle.paddingLeft + ';}'
+    });
 }
 ); // declareDetector
 
