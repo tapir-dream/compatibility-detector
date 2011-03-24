@@ -4,7 +4,8 @@
 <head>
 </head>
 <body>
-<p>1. HG8001 document type</p>
+<h1>HG8001</h1>
+<p>1. document type</p>
 <div>
 <script>
 document.write('IE: ' + chrome_comp.documentMode.IE + '<br />WebKit: ' +
@@ -12,32 +13,28 @@ document.write('IE: ' + chrome_comp.documentMode.IE + '<br />WebKit: ' +
 </script>
 </div>
 
-<p>2. RX1010 [IMG] padding:10px;</p>
-<div>
-<img src="http://www.google.com/images/logo_sm.gif" style="padding:10px;" expectedProblems="RX1010" />
-</div>
-
-<p>3. RD8001 [H1] border:10px; padding:10px; width:100px; height:100px;</p>
+<h1>RD8001</h1>
+<p>2. [H1] border:10px; padding:10px; width:100px; height:100px;</p>
 <h1 style="border:10px solid; padding:10px; margin:0; width:100px; height:100px;" expectedProblems="RD8001">H1</h1>
 <br />
 
-<p>4. RD8001 [INPUT] border:10px solid; width:100px; height:100px; box-sizing:content-box;</p>
+<p>3. [INPUT] border:10px solid; width:100px; height:100px; box-sizing:content-box;</p>
 <div>
 <input type="reset" style="border:10px solid; width:100px; height:100px; box-sizing:content-box;" expectedProblems="RD8001" />
 </div>
 <br />
 
-<p>5. RD8001 [HR] border:10px solid; width:100px; height:100px;</p>
+<p>4. [HR] border:10px solid; width:100px; height:100px;</p>
 <hr style="border:10px solid; width:100px; height:100px;" align="left" expectedProblems="RD8001" />
 <br />
 
-<p>6. RD8001 [INPUT] border:10px solid black; width:100px; height:100px;</p>
+<p>5. [INPUT] border:10px solid black; width:100px; height:100px;</p>
 <div>
 <input type="text" style="border:10px solid black; width:100px; height:100px;" expectedProblems="RD8001" />
 </div>
 <br />
 
-<p>7. RD8001 [OBJECT] border:30px solid; width:100px; height:100px;</p>
+<p>6. [OBJECT] border:30px solid; width:100px; height:100px;</p>
 <div>
 <object data="http://www.google.com/images/logo_sm.gif" style="width:100px; height:100px; border:30px solid;" expectedProblems="RD8001"></object>
 </div>

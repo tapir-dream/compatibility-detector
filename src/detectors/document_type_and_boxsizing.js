@@ -19,7 +19,6 @@
  * the box which the 'width' and 'height' properties apply.
  * @bug https://code.google.com/p/compatibility-detector/issues/detail?id=56
  * @bug https://code.google.com/p/compatibility-detector/issues/detail?id=57
- * @bug https://code.google.com/p/compatibility-detector/issues/detail?id=149
  *
  * The comment or XML declaration before DTD will make the DTD be invalid in IE
  * so that the HTML document will be in quirks mode in IE. We must get the real
@@ -62,25 +61,6 @@ function hasVerticalPadding(element) {
   var paddingTop = parseInt(style.paddingTop, 10);
   var paddingBottom = parseInt(style.paddingBottom, 10);
   return paddingTop || paddingBottom;
-}
-
-/**
- * Check If the image has padding because the images cannot be set padding when
- * IE is Quirks Mode. Refer to:
- * http://msdn.microsoft.com/en-us/library/bb250395(v=vs.85).aspx
- * #cssenhancements_topic3.
- * @param {object} element the DOM element to test
- * @return {object} an object storing if the element is an image element and has
- *     padding.
- */
-function checkPaddingOnImage(element) {
-  var result = {isImage: false, hasPadding: false};
-  if (element.tagName != 'IMG')
-    return result;
-  result.isImage = true;
-  result.hasPadding = hasHorizontalPadding(element) ||
-      hasVerticalPadding(element);
-  return result;
 }
 
 /**
@@ -224,7 +204,7 @@ function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
     return;
 
-  var tag = node.tagName;
+  var tagName = node.tagName;
 
   // Only check when IE is Quirks Mode.
   if (!this.isIEInQuirksMode)
@@ -232,20 +212,10 @@ function checkNode(node, context) {
 
   var specifiedValue = chrome_comp.getSpecifiedValue(node);
 
-  var imagePadding = checkPaddingOnImage(node);
-  if (imagePadding.isImage) {
-    if (imagePadding.hasPadding) {
-      this.addProblem('RX1010', {
-        nodes: [node],
-        details: '{padding: ' + specifiedValue.paddingTop + ' ' +
-            specifiedValue.paddingRight + ' ' + specifiedValue.paddingBottom +
-            ' ' + specifiedValue.paddingLeft + ';}'
-      });
-    }
-    // The 'width' and 'height' of images apply on the content box in all
-    // browsers. In following cases, there are no differences.
+  // The 'width' and 'height' of images apply on the content box in all
+  // browsers. In following cases, there are no differences.
+  if (tagName == 'IMG')
     return;
-  }
 
   if (!isBlockOrReplacedElement(specifiedValue, node))
     return;
@@ -281,7 +251,7 @@ function checkNode(node, context) {
     // border-box subtracting the scrollbar's size. So If there are OBJECT and
     // EMBED set 'width' or 'height' and borders or padding, we should report
     // this issue.
-    if (tag == 'OBJECT' || tag == 'EMBED') {
+    if (tagName == 'OBJECT' || tagName == 'EMBED') {
       this.addProblem('RD8001', {nodes: [node], details: details});
     } else {
       // For other replaced elements, we report the issue when Chrome is

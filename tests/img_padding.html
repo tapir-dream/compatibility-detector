@@ -1,4 +1,13 @@
-<html>
-<img src="img.png">
-<img style="padding:20px; background:gold" src="img.png">
+<html chrome_comp_test="img_padding">
+<head>
+</head>
+<body>
+<h1>RX1010</h1>
+<p>1. The image with paddings</p>
+<img style="border:5px solid black; padding:20px; background:gold" src="img.png" expectedProblems="RX1010" />
+<br />
+<h2>The followings don't have problems</h2>
+<p>A1. The image without paddings</p>
+<img style="border:5px solid black;" src="img.png" />
+</body>
 </html>
