@@ -19,6 +19,7 @@
  * scrollLeft properties.
  * @bug https://code.google.com/p/compatibility-detector/issues/detail?id=16
  *
+ * http://w3help.org/zh-cn/causes/BX9008
  * The scrollTop and scrollLeft properties are not included in any public
  * standard, and have different behavior in different browsers.
  * In IE and Firefox, document.body.scrollTop/Left work in quirks mode but not
@@ -28,9 +29,10 @@
  * standars mode. And document.documentElement.scrollTop/Left always return 0,
  * according to https://bugs.webkit.org/show_bug.cgi?id=5991
  *
- * For detecting these, we define a new getter/setter to get
- * document.documentElement.scrollTop/Left. If the page try to use
- * scrollTop/Left on document.documentElement, we can catch it.
+ * To detect these, we define a new scrollTop/Left getter/setter for both
+ * document.documentElement and document.body. If the page only uses
+ * scrollTop/Left on document.documentElement but not on document.body,
+ * we will report it.
  */
 
 addScriptToInject(function() {
@@ -54,6 +56,9 @@ function constructor(rootNode) {
   this.lastCaller_ = null;
 
   this.onGetterCalled_ = function(id, result) {
+    // caller 1 is anonymous function parameter in registerSimplePropertyHook.
+    // caller 2 is ExistingMethodHookObject.newMethodHandler_.
+    // caller 3 is the original caller.
     var caller = arguments.callee.caller.caller.caller;
     if (caller == this.lastCaller_) {
       // Only record the first occurrence in one function.
@@ -65,10 +70,6 @@ function constructor(rootNode) {
     }
 
     var callerSource = caller.toString();
-
-    // TODO: Omit jQuery, because ...
-    if (callerSource.indexOf('jQuery') != -1)
-      return;
 
     switch (id) {
       case 0:
@@ -109,7 +110,6 @@ function constructor(rootNode) {
     if (this.getterCallStacks_[0] && !this.getterCallStacks_[2]) {
       // documentElement.scrollLeft without paired body.scrollLeft.
       this.addProblem('BX9008', {stack: this.getterCallStacks_[0]});
-
     } else if (!this.getterCallStacks_[0] && this.getterCallStacks_[2] &&
         !this.getterResults_[2]) {
       // body.scrollLeft without paired documentElement.scrollLeft.
@@ -122,7 +122,6 @@ function constructor(rootNode) {
     if (this.getterCallStacks_[1] && !this.getterCallStacks_[3]) {
       // docElement.scrollTop without paired body.scrollTop
       this.addProblem('BX9008', {stack: this.getterCallStacks_[1]});
-
     } else if (!this.getterCallStacks_[1] && this.getterCallStacks_[3] &&
         !this.getterResults_[3]) {
       // body.scrollTop without paired docElement.scrollTop.
@@ -160,7 +159,6 @@ function constructor(rootNode) {
     if (this.bodyHooksReady_)
       return;
     this.bodyHooksReady_ = true;
-
     var This = this;
     chrome_comp.CompDetect.registerSimplePropertyHook(
         document.body, 'scrollLeft',
