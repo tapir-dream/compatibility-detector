@@ -222,14 +222,10 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
     case 'EndOfDetection':
       stopAddingDetectedProblem(tabId, request.totalProblems);
       break;
-  }
-});
-
-// Change status when tab loaded or refreshed.
-chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-  if (changeInfo.status == 'loading') {
-    delete gDetectionResults[tabId];
-    setBrowserAction('normal', tabId);
+    case 'PageUnloaded':
+      delete gDetectionResults[tabId];
+      setBrowserAction('normal', tabId);
+      break;
   }
 });
 

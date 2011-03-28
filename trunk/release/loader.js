@@ -15,8 +15,8 @@
  */
 
 function log(message) {
-  // Add return here to disable all logs
-  window.console.log(message);
+  // Uncomment this for debugging. Comment it before release:
+  // window.console.log(message);
 }
 
 const DETECTION_STATUS_NAME = 'chrome_comp_detection_status';
@@ -145,9 +145,33 @@ function addSourceToInject(source, debug) {
 
 /**
  * Injects script from content script to the page.
- * @param scriptFunction a function object or string, it will be converted to
- *     string and inject into the page as eval('(string of scriptFunction)()')
+ * @param {function} scriptFunction A function object (or string), it will be
+ *     injected into the page as eval('(scriptFunction.toString())()').
  */
 function addScriptToInject(scriptFunction, debug) {
   addSourceToInject('(' + scriptFunction.toString() + ')()', debug);
 }
+
+/**
+ * Creates shared code both in content script and in page script.
+ * @param {function} scriptFunction It will be injected to the page, and also
+ *     executed in content script.
+ */
+function addScriptToInjectAndExecuteInContentScript(scriptFunction) {
+  addScriptToInject(scriptFunction);
+  scriptFunction();
+}
+
+// Send 'PageLoad' message to popup so that it will re-check this page.
+window.addEventListener('load', function() {
+  chrome.extension.sendRequest({
+    type: 'PageLoad'
+  });
+});
+
+// Send 'PageUnloaded' message to background for it to clean up result cache
+window.addEventListener('unload', function() {
+  chrome.extension.sendRequest({
+    type: 'PageUnloaded'
+  });
+});
