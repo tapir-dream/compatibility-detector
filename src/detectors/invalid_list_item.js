@@ -29,8 +29,7 @@
 
 addScriptToInject(function() {
 
-  var VALID_LIST_NEXT_TAGS;
-  VALID_LIST_NEXT_TAGS = {
+  var VALID_LIST_NEXT_TAGS = {
     LI: ['LI'],
     DT: ['DT', 'DD'],
     DD: ['DT', 'DD']
@@ -51,27 +50,28 @@ addScriptToInject(function() {
       var validNextTags = VALID_LIST_NEXT_TAGS[node.tagName];
       var whiteSpacePre =
           chrome_comp.getComputedStyle(node).whiteSpace == 'pre';
+      if (!(validNextTags instanceof Array))
+        return;
       // Find first valid or invalid visible sibling.
-      if (validNextTags instanceof Array) {
-        for (var sibling = node.nextSibling; sibling;
-             sibling = sibling.nextSibling) {
-          switch (sibling.nodeType) {
-            case Node.TEXT_NODE:
-              var text = sibling.nodeValue;
-              if ((text && whiteSpacePre) || chrome_comp.trim(text)) {
-                this.addProblem('HY1005', [sibling]);
-                return;
-              }
-              break;
-            case Node.ELEMENT_NODE:
-              if (validNextTags.indexOf(sibling.tagName) != -1)
-                return;
-              if (chrome_comp.getComputedStyle(sibling).display != 'none') {
-                this.addProblem('HY1005', [sibling]);
-                return;
-              }
-              break;
-          }
+      for (var sibling = node.nextSibling; sibling;
+           sibling = sibling.nextSibling) {
+        switch (sibling.nodeType) {
+          case Node.TEXT_NODE:
+            var text = sibling.nodeValue;
+            if ((text && whiteSpacePre) || chrome_comp.trim(text)) {
+              this.addProblem('HY1005', [sibling]);
+              return;
+            }
+            break;
+          case Node.ELEMENT_NODE:
+            if (validNextTags.indexOf(sibling.tagName) != -1)
+              return;
+            if (chrome_comp.getComputedStyle(sibling).display != 'none' &&
+                sibling.innerText.trim()) {
+              this.addProblem('HY1005', [sibling]);
+              return;
+            }
+            break;
         }
       }
     }
