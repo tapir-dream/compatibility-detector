@@ -21,534 +21,594 @@ window.chrome_comp = (function() {
   // >=0 if hook is enabled.
   var hookDisabledCount_ = 0;
 
-  var messageCache_ = { };
+  var messageCache_ = {};
 
-  const BLOCK_DISPLAY_VALUES = {
-    'block' : true,
-    'inline-block' : true,
-    'list-item' : true,
-    'table' : true,
-    'inline-table' : true,
-    'table-cell' : true,
-    'table-caption' : true
+  var BLOCK_DISPLAY_VALUES = {
+    block: true,
+    'inline-block': true,
+    'list-item': true,
+    table: true,
+    'inline-table': true,
+    'table-cell': true,
+    'table-caption': true
   };
 
   return {
 
-  COLOR_TRANSPARENT : 'rgba(0, 0, 0, 0)',
+    COLOR_TRANSPARENT: 'rgba(0, 0, 0, 0)',
 
-  WHITESPACE : /[ \t\r\n]/,
-  LEADING_WHITESPACES : /^[ \t\r\n]+/,
-  TRAILING_WHITESPACES : /[ \t\r\n]+$/,
+    SPECIFIED_VALUE: 'chrome_comp_specified_value',
 
-  // cache Node reference
-  Node : window.Node,
+    WHITESPACE: /[ \t\r\n]/,
+    LEADING_WHITESPACES: /^[ \t\r\n]+/,
+    TRAILING_WHITESPACES: /[ \t\r\n]+$/,
 
-  enableHooks : function(enable) {
-    hookDisabledCount_ += (enable ? 1 : -1);
-  },
+    // cache Node reference
+    Node: window.Node,
 
-  areHooksDisabled : function() {
-    return hookDisabledCount_ < 0;
-  },
+    enableHooks: function(enable) {
+      hookDisabledCount_ += (enable ? 1 : -1);
+    },
 
-  // Uses it to prompt debug message.
-  trace : function(msg) {
-    if (chrome_comp.CompDetectorConfig.canTraceBug) {
-      console.log(new Date().getTime() + ' $comp-detect for : ' +
-          chrome_comp.getTargetPageURL() + '$');
-      console.log(msg);
-    }
-  },
+    areHooksDisabled: function() {
+      return hookDisabledCount_ < 0;
+    },
 
-  // Uses it to implement inherit logic in JavaScript
-  extend : function(subClass, superClass) {
-    // Use prototype chain to inherit baseClass's method.
-    var F = function() {};
-    F.prototype = superClass.prototype;
-    subClass.prototype = new F();
-    subClass.prototype.constructor = subClass;
-
-    subClass.superclass = superClass.prototype;
-    if (superClass.prototype.constructor == Object.prototype.constructor) {
-      superClass.prototype.constructor = superClass;
-    }
-  },
-
-  clone : function(object) {
-    function StubObj() { }
-    StubObj.prototype = object;
-    var newObj = new StubObj();
-    newObj.chrome_comp_getInternalObject = function() {
-      return this.__proto__;
-    }
-    newObj.toString = function() {
-      try {
-        return this.__proto__.toString();
-      } catch (e) {
-        return 'object Object';
+    // Uses it to prompt debug message.
+    trace: function(msg) {
+      if (chrome_comp.CompDetectorConfig.canTraceBug) {
+        console.log(new Date().getTime() + ' $chrome_comp for : ' +
+            chrome_comp.getTargetPageURL() + '$');
+        console.log(msg);
       }
-    }
-    return newObj;
-  },
+    },
 
-  ellipsize : function(string, maxLength) {
-    return string ? (string.length > maxLength ?
-                     string.substring(0, maxLength - 3) + '...' : string)
-                  : '';
-  },
+    // Uses it to implement inherit logic in JavaScript
+    extend: function(subClass, superClass) {
+      // Use prototype chain to inherit baseClass's method.
+      function tempCtor() {};
+      tempCtor.prototype = superClass.prototype;
+      subClass.superclass = superClass.prototype;
+      subClass.prototype = new tempCtor();
+      subClass.prototype.constructor = subClass;
 
-  /**
-   * Trim leading and trailing white spaces. It differs from String.trim()
-   * that this function doesn't trim non-breakable spaces (\xA0).
-   */
-  trim : function(s) {
-    return s.replace(chrome_comp.LEADING_WHITESPACES, '')
-            .replace(chrome_comp.TRAILING_WHITESPACES, '');
-  },
-
-  /**
-   * Send a request to the content script. The content script uses
-   * document.documentElement.addEventListener(name, function()...) to
-   * listen to the request. The parameters and result are passed with
-   * attributes of document.documentElement.
-   */
-  sendRequest : function(name, params, resultName) {
-    var event = document.createEvent('Event');
-    event.initEvent(name, true, true);
-    if (params) {
-      for (var i in params) {
-        if (params[i] != undefined)
-          document.documentElement.setAttribute(i, params[i]);
+      // TODO: is the following necessary?
+      if (superClass.prototype.constructor == Object.prototype.constructor) {
+        superClass.prototype.constructor = superClass;
       }
-    }
-    document.documentElement.dispatchEvent(event);
-    if (params) {
-      for (var i in params)
-        document.documentElement.removeAttribute(i);
-    }
-    if (resultName) {
-      var result = document.documentElement.getAttribute(resultName);
-      document.documentElement.removeAttribute(resultName);
-      return result;
-    }
-  },
+    },
 
-  getMessage : function(name, params) {
-    var result;
-    if (!params) {
-      result = messageCache_[name];
-      if (result)
+    clone: function(object) {
+      function stubObj() {}
+      stubObj.prototype = object;
+      var newObj = new stubObj();
+      // TODO: add comments here
+      newObj.chrome_comp_getInternalObject = function() {
+        return this.__proto__;
+      }
+      // TODO: add comments here
+      newObj.toString = function() {
+        try {
+          return this.__proto__.toString();
+        } catch (e) {
+          return 'object Object';
+        }
+      }
+      return newObj;
+    },
+
+    ellipsize: function(string, maxLength) {
+      return string ? (string.length > maxLength ?
+                       string.substring(0, maxLength - 3) + '...' : string)
+                    : '';
+    },
+
+    /**
+     * Trim leading and trailing white spaces. It differs from String.trim()
+     * that this function doesn't trim non-breakable spaces (\xA0).
+     */
+    trim: function(s) {
+      return s.replace(chrome_comp.LEADING_WHITESPACES, '')
+              .replace(chrome_comp.TRAILING_WHITESPACES, '');
+    },
+
+    /**
+     * Send a request to the content script. The content script uses
+     * document.documentElement.addEventListener(name, function()...) to
+     * listen to the request. The parameters and result are passed with
+     * attributes of document.documentElement.
+     */
+    sendRequest: function(name, params, resultName) {
+      var event = document.createEvent('Event');
+      event.initEvent(name, true, true);
+      if (params) {
+        for (var i in params) {
+          if (params[i] != undefined)
+            document.documentElement.setAttribute(i, params[i]);
+        }
+      }
+      document.documentElement.dispatchEvent(event);
+      if (params) {
+        for (var i in params)
+          document.documentElement.removeAttribute(i);
+      }
+      if (resultName) {
+        var result = document.documentElement.getAttribute(resultName);
+        document.documentElement.removeAttribute(resultName);
         return result;
-    }
-
-    result = chrome_comp.sendRequest('chrome_comp_getMessage', {
-      chrome_comp_messageName : name,
-      chrome_comp_messageParams : JSON.stringify(params)
-    }, 'chrome_comp_messageResult');
-
-    if (!params)
-      messageCache_[name] = result;
-    return result;
-  },
-
-  /**
-   * Dumps the current calling stack, stripping out all frames that are in
-   * detector injected code.
-   */
-  dumpStack : function() {
-    // Disable hooks during dumpStack() because Error.stack might enumerate
-    // properties which will trigger some property hook.
-    chrome_comp.enableHooks(false);
-    try {
-      var stack = new Error().stack;
-      var pos = stack.lastIndexOf('chrome_comp_injector');
-      var pos1 = stack.indexOf('\n', pos);
-      return pos1 == -1 ? '' : stack.substring(pos1 + 1);
-    } finally {
-      chrome_comp.enableHooks(true);
-    }
-  },
-
-  getSourceAndLine : function(stack) {
-    stack = stack || chrome_comp.dumpStack();
-    var r = /at .*:[0-9]+(?=:[0-9]+)/.exec(stack);
-    return r ? r[0].replace(/^at /, '') : null;
-  },
-
-  /**
-   * Don't directly use Error.stack because it will cause recursive property
-   * hooks. Use this function instead.
-   */
-  printError : function(message, e) {
-    if (!e)
-      e = new Error();
-    chrome_comp.enableHooks(false);
-    try {
-      chrome_comp.trace(message + (e.stack || e));
-    } finally {
-      chrome_comp.enableHooks(true);
-    }
-  },
-
-  /**
-   * Check if a call stack is called directly or indirectly from an extension.
-   */
-  isCalledFromExtension : function(stackDump) {
-    return (stackDump || chrome_comp.dumpStack()).
-        indexOf('chrome-extension://') >= 0;
-  },
-
-  getCallSite : function(stackDump) {
-    if (!stackDump)
-      stackDump = chrome_comp.dumpStack();
-    var pos = stackDump.indexOf('\n', pos);
-    return pos == -1 ? stackDump : stackDump.substring(0, pos);
-  },
-
-  setPropertyIfNeed : function(obj, property, value) {
-    if (typeof obj[property] == 'undefined')
-      obj[property] = value;
-  },
-
-  filterFunctionCallStackByFunctionSignature : function(initialCallStack,
-                                                        functionSignature) {
-    var currentCallStack = initialCallStack;
-    var i = 0;
-    var caller, callerContent;
-    while (currentCallStack.caller) {
-      if (i > 20) {
-        chrome_comp.trace('caller checking stack overflow: ' + callerContent);
-        break;
       }
+    },
+
+    getMessage: function(name, params) {
+      var result;
+      if (!params) {
+        result = messageCache_[name];
+        if (result)
+          return result;
+      }
+
+      result = chrome_comp.sendRequest('chrome_comp_getMessage', {
+        chrome_comp_messageName: name,
+        chrome_comp_messageParams: JSON.stringify(params)
+      }, 'chrome_comp_messageResult');
+
+      if (!params)
+        messageCache_[name] = result;
+      return result;
+    },
+
+    /**
+     * Dumps the current calling stack, stripping out all frames that are in
+     * detector injected code.
+     */
+    dumpStack: function() {
+      // Disable hooks during dumpStack() because Error.stack might enumerate
+      // properties which will trigger some property hook.
+      chrome_comp.enableHooks(false);
       try {
-        caller = currentCallStack.caller;
-        callerContent = caller.toString();
-        // When found the call is called by some library, we ignore this
-        // call.
-        if (callerContent.search(functionSignature) > -1) {
-          return true;
+        var stack = new Error().stack;
+        var pos = stack.lastIndexOf('chrome_comp_injector');
+        var pos1 = stack.indexOf('\n', pos);
+        return pos1 == -1 ? '' : stack.substring(pos1 + 1);
+      } finally {
+        chrome_comp.enableHooks(true);
+      }
+    },
+
+    getSourceAndLine: function(stack) {
+      stack = stack || chrome_comp.dumpStack();
+      var r = /at .*:[0-9]+(?=:[0-9]+)/.exec(stack);
+      return r ? r[0].replace(/^at /, '') : null;
+    },
+
+    /**
+     * Don't directly use Error.stack because it will cause recursive property
+     * hooks. Use this function instead.
+     */
+    printError: function(message, e) {
+      if (!e)
+        e = new Error();
+      chrome_comp.enableHooks(false);
+      try {
+        chrome_comp.trace(message + (e.stack || e));
+      } finally {
+        chrome_comp.enableHooks(true);
+      }
+    },
+
+    /**
+     * Check if a call stack is called directly or indirectly from an extension.
+     */
+    isCalledFromExtension: function(stackDump) {
+      return (stackDump || chrome_comp.dumpStack()).
+          indexOf('chrome-extension://') >= 0;
+    },
+
+    getCallSite: function(stackDump) {
+      if (!stackDump)
+        stackDump = chrome_comp.dumpStack();
+      var pos = stackDump.indexOf('\n', pos);
+      return pos == -1 ? stackDump : stackDump.substring(0, pos);
+    },
+
+    setPropertyIfNeed: function(obj, property, value) {
+      if (typeof obj[property] == 'undefined')
+        obj[property] = value;
+    },
+
+    filterFunctionCallStackByFunctionSignature: function(initialCallStack,
+                                                          functionSignature) {
+      var currentCallStack = initialCallStack;
+      var i = 0;
+      var caller, callerContent;
+      while (currentCallStack.caller) {
+        if (i > 20) {
+          chrome_comp.trace('caller checking stack overflow: ' + callerContent);
+          break;
         }
+        try {
+          caller = currentCallStack.caller;
+          callerContent = caller.toString();
+          // When found the call is called by some library, we ignore this
+          // call.
+          if (callerContent.search(functionSignature) > -1) {
+            return true;
+          }
+        } catch (e) {
+          chrome_comp.printError('trace caller stack error: ', e);
+        }
+        currentCallStack = caller.arguments.callee;
+        i++;
+      }
+      return false;
+    },
+
+    getTargetPageURL: function() {
+      return targetPageURL_;
+    },
+
+    nodeContents: function(node) {
+      // TODO: avoid using outerHTML to improve performance.
+      if (this.Node.ELEMENT_NODE == node.nodeType)
+        return node.outerHTML;
+      else if (this.Node.TEXT_NODE == node.nodeType)
+        return node.nodeValue;
+      else
+        return node.toString();
+    },
+
+    getAttributeLowerCase: function(ele, name) {
+      if (!ele || !name || Node.ELEMENT_NODE != ele.nodeType)
+        return null;
+      var value = ele.getAttribute(name);
+      return value ? value.toLowerCase() : value;
+    },
+
+    getComputedStyle: function(ele, pseudo) {
+      if (!ele)
+        return;
+      var computedStyle = ele.chrome_comp_computedStyleCache;
+      if (computedStyle)
+        return computedStyle;
+      try {
+        computedStyle = ele.ownerDocument.defaultView.getComputedStyle(ele,
+            pseudo);
+        ele.chrome_comp_computedStyleCache = computedStyle;
+        return computedStyle;
       } catch (e) {
-        chrome_comp.printError('trace caller stack error: ', e);
+        chrome_comp.printError('getComputedStyle error: ', e);
+        chrome_comp.trace(ele);
       }
-      currentCallStack = caller.arguments.callee;
-      i++;
-    }
-    return false;
-  },
+    },
 
-  getTargetPageURL : function() {
-    return targetPageURL_;
-  },
+    /**
+     * The cacheSpecifiedValue function caches the specified value of margin,
+     * border, padding, width and height properties in the property of every
+     * element. So we retrieve these values here. If there is no cached value or
+     * there is no specified node, we just return the empty object.
+     * @param {object} ele the specified node.
+     * @return {object} return the specified value of the node or the empty
+     *     object.
+     */
+    getSpecifiedValue: function(ele) {
+      if (!ele || !ele[chrome_comp.SPECIFIED_VALUE])
+        return {};
+      return ele[chrome_comp.SPECIFIED_VALUE];
+    },
 
-  nodeContents : function(node) {
-    // TODO: avoid using outerHTML to improve performance.
-    if (this.Node.ELEMENT_NODE == node.nodeType)
-      return node.outerHTML;
-    else if (this.Node.TEXT_NODE == node.nodeType)
-      return node.nodeValue;
-    else
-      return node.toString();
-  },
-
-  getAttributeLowerCase : function(ele, name) {
-    if (!ele || !name || Node.ELEMENT_NODE != ele.nodeType)
-      return null;
-    var value = ele.getAttribute(name);
-    return value ? value.toLowerCase() : value;
-  },
-
-  getComputedStyle : function(ele) {
-    if (!ele)
-      return;
-    var computedStyle = ele.chrome_comp_computedStyleCache;
-    if (computedStyle)
-      return computedStyle;
-    try {
-      computedStyle = ele.ownerDocument.defaultView.getComputedStyle(ele, '');
-      ele.chrome_comp_computedStyleCache = computedStyle;
-      return computedStyle;
-    } catch (e) {
-      chrome_comp.printError('getComputedStyle error: ', e);
-      chrome_comp.trace(ele);
-    }
-  },
-
-  // Note: for scan dom detectors, please use context.isDisplayNone() in
-  // checkNode() instead of this function to improve performance.
-  isElementTrulyDisplayable : function(ele) {
-    var ownerDocument = ele.ownerDocument;
-    var body = ownerDocument.body;
-    if (!body)
-      return false;
-    var bodyStyle = chrome_comp.getComputedStyle(body);
-    if (bodyStyle.display == 'none')
-      return false;
-    while (ele) {
-      if (ele == ownerDocument)
+    // Note: for scan dom detectors, please use context.isDisplayNone() in
+    // checkNode() instead of this function to improve performance.
+    isElementTrulyDisplayable: function(ele) {
+      var ownerDocument = ele.ownerDocument;
+      var body = ownerDocument.body;
+      if (!body)
         return false;
-      if (ele == body)
+      var bodyStyle = chrome_comp.getComputedStyle(body);
+      if (bodyStyle.display == 'none')
+        return false;
+      while (ele) {
+        if (ele == ownerDocument)
+          return false;
+        if (ele == body)
+          return true;
+        var eleStyle = chrome_comp.getComputedStyle(ele);
+        if (eleStyle.display == 'none')
+          return false;
+        ele = ele.parentNode;
+      }
+      return false;
+    },
+
+    startsBlockBox: function(node) {
+      if (!node)
+        return false;
+      var style = chrome_comp.getComputedStyle(node);
+      return style && BLOCK_DISPLAY_VALUES.hasOwnProperty(style.display);
+    },
+
+    startsNewLine: function(node) {
+      if (!node)
+        return false;
+      if (node.tagName == 'BR')
         return true;
-      var eleStyle = chrome_comp.getComputedStyle(ele);
-      if (eleStyle.display == 'none')
+      var style = chrome_comp.getComputedStyle(node);
+      if (!style)
         return false;
-      ele = ele.parentNode;
-    }
-    return false;
-  },
+      var display = style.display;
+      return display == 'block' || display == 'table' || display == 'list-item';
+    },
 
-  startsBlockBox : function(node) {
-    if (!node)
-      return false;
-    var style = chrome_comp.getComputedStyle(node);
-    return style && BLOCK_DISPLAY_VALUES.hasOwnProperty(style.display);
-  },
-
-  startsNewLine : function(node) {
-    if (!node)
-      return false;
-    if (node.tagName == 'BR')
-      return true;
-    var style = chrome_comp.getComputedStyle(node);
-    if (!style)
-      return false;
-    var display = style.display;
-    return display == 'block' || display == 'table' || display == 'list-item';
-  },
-
-  getContainingBlock: function(node) {
-    if (Node.ELEMENT_NODE != node.nodeType)
-      node = node.parentNode;
-    if (Node.ELEMENT_NODE != node.nodeType)
-      return document.body;
-    switch (chrome_comp.getComputedStyle(node).position) {
-      case 'fixed':
+    getContainingBlock: function(node) {
+      if (Node.ELEMENT_NODE != node.nodeType)
+        node = node.parentNode;
+      if (Node.ELEMENT_NODE != node.nodeType)
         return document.body;
-      case 'absolute':
-        return node.offsetParent;
-      default:
-        for (var parent = node.parentNode; Node.ELEMENT_NODE == parent.nodeType;
-             parent = parent.parentNode) {
-          if (chrome_comp.getComputedStyle(parent).display == 'block')
-            return parent;
-        }
-        return document.body;
-    }
-  },
+      switch (chrome_comp.getComputedStyle(node).position) {
+        case 'fixed':
+          return document.body;
+        case 'absolute':
+          return node.offsetParent;
+        default:
+          for (var parent = node.parentNode;
+               Node.ELEMENT_NODE == parent.nodeType;
+               parent = parent.parentNode) {
+            if (chrome_comp.getComputedStyle(parent).display == 'block')
+              return parent;
+          }
+          return document.body;
+      }
+    },
 
-  /**
-   * Determines if a node is a shrink-to-fit container element.
-   */
-  isShrinkToFit : function(node, checkActuallyShrunk) {
-    if (!node || Node.ELEMENT_NODE != node.nodeType)
+    /**
+     * Determines if a node establishes a new block formatting context.
+     * About block formatting context refer to
+     * http://www.w3.org/TR/CSS21/visuren.html#block-formatting.
+     */
+    isBlockFormattingContext: function(node) {
+      if (!node || Node.ELEMENT_NODE != node.nodeType)
+        return false;
+
+      var style = chrome_comp.getComputedStyle(node);
+      if (style.float != 'none' ||
+          style.position == 'absolute' ||
+          style.position == 'fixed' ||
+          style.display == 'inline-block' ||
+          style.display == 'table' ||
+          style.display == 'table-cell' ||
+          style.display == 'table-caption' ||
+          style.overflow != 'visible' ||
+          style.overflowX != 'visible' ||
+          style.overflowY != 'visible')
+        return true;
       return false;
+    },
 
-    var style = chrome_comp.getComputedStyle(node);
-    var display = style.display;
-    if (display == 'none' || display == 'inline' || display == 'inline-table' ||
-        display == 'table')
+    isTableElement: function(node) {
+      if (!node || Node.ELEMENT_NODE != node.nodeType)
+        return false;
+      return chrome_comp.getComputedStyle(node).display.indexOf('table') != -1;
+    },
+
+    /**
+     * Determines if a node is a shrink-to-fit container element.
+     */
+    isShrinkToFit: function(node) {
+      if (!node || Node.ELEMENT_NODE != node.nodeType)
+        return false;
+
+      var specifiedWidth = chrome_comp.getSpecifiedValue(node).width;
+      if (specifiedWidth != 'auto')
+        return false;
+      // For the floating elements, the inline block elements and the absolutely
+      // positioned elements, if 'width' is 'auto', the used value is the
+      // shrink-to-fit width. Refer to:
+      // http://www.w3.org/TR/CSS21/visudet.html#shrink-to-fit-float
+      var style = chrome_comp.getComputedStyle(node);
+      if (style.display == 'inline-block' || style.float != 'none')
+        return true;
+      if (style.position == 'absolute' || style.position == 'fixed') {
+        // Note: for the absolutely positioned elements, if 'left' and 'right'
+        // are both not 'auto', the 'width' is not 'shrink-to-fit'.
+        if (style.left == 'auto' || style.right == 'auto')
+          return true;
+      }
       return false;
+    },
 
-    var definedWidth = chrome_comp.getDefinedStylePropertyByName(node, false,
-        'width');
-    if (definedWidth && definedWidth != 'auto')
-      return false;
-
-    var result = undefined;
-    if (style.display == 'inline-block') {
-      result = true;
-    } else if (style.float != 'none') {
-      result = true;
-    } else if (style.position == 'fixed' || style.position == 'absolute') {
-      var definedLeft = chrome_comp.getDefinedStylePropertyByName(node,
-          false, 'left');
-      if (!definedLeft || definedLeft == 'auto') {
-        result = true;
-      } else {
-        var definedRight = chrome_comp.getDefinedStylePropertyByName(node,
-            false, 'right');
-        result = !definedRight || definedRight == 'auto';
-      }
-    }
-    if (result === undefined)
-      return chrome_comp.isShrinkToFit(node.parentNode);
-    if (result && checkActuallyShrunk) {
-      // FIXME: This is not accurate.
-      return node.offsetWidth !=
-             chrome_comp.getContainingBlock(node).offsetWidth;
-    }
-    return result;
-  },
-
-  /**
-   * Returns style information that is defined on specified node (including
-   * inline style).
-   * @param {object} node node to get prorotypes for.
-   * @param {boolean} authorOnly Determines whether only author styles need to
-   *     be added.
-   * @return {object} Style collection descriptor.
-   */
-  getNodeDefinedStyles : function(node, authorOnly) {
-    if (node.nodeType != this.Node.ELEMENT_NODE)
-      return [];
-    var macthedCSSStyles = [];
-    var stylesPerRule;
-    var matchedRules = node.ownerDocument.defaultView.getMatchedCSSRules(
-        node, '', authorOnly);
-    if (matchedRules) {
-      for (var i = 0, c = matchedRules.length; i < c; ++i) {
-        var rule = matchedRules[i];
-
-        var ruleStyle = rule.style;
-        stylesPerRule = {};
-        for (var j = 0, c1 = ruleStyle.length; j < c1; ++j) {
-          var name = ruleStyle[j];
-          stylesPerRule[name] = ruleStyle.getPropertyValue(name);
-        }
-        macthedCSSStyles.push(stylesPerRule);
-      }
-    }
-    // Get inline style
-    var inlineStyle = node.style;
-    if (inlineStyle && (inlineStyle instanceof CSSStyleDeclaration)) {
-      var inlineStyleColletion = {};
-      for (var j = 0, c = inlineStyle.length; j < c; ++j) {
-        var name = inlineStyle[j];
-        inlineStyleColletion[name] = inlineStyle.getPropertyValue(name);
-      }
-      macthedCSSStyles.push(inlineStyleColletion);
-    }
-    return macthedCSSStyles;
-  },
-
-  /**
-   * Returns specified style property information that is defined on specified
-   * node (including inline style) by name.
-   * @param {object} node node to get prototypes for.
-   * @param {boolean} authorOnly Determines whether only author styles need to
-   *     be added.
-   * @return {object} value of specified style property information. Return
-   *     undefined if the specified property is not defined on the node.
-   */
-  getDefinedStylePropertyByName : function(node, authorOnly, propertyName) {
-    var value;
-    if (node) {
-      if (node.style) {
-        value = node.style.getPropertyValue(propertyName);
-        if (node.style.getPropertyPriority(propertyName))
-          return value;
-      }
-      var styleRules = node.ownerDocument.defaultView.getMatchedCSSRules(
+    /**
+     * Returns style information that is defined on specified node (including
+     * inline style).
+     * @param {object} node node to get prorotypes for.
+     * @param {boolean} authorOnly Determines whether only author styles need to
+     *     be added.
+     * @return {object} Style collection descriptor.
+     */
+    getNodeDefinedStyles: function(node, authorOnly) {
+      if (node.nodeType != this.Node.ELEMENT_NODE)
+        return [];
+      var macthedCSSStyles = [];
+      var stylesPerRule;
+      var matchedRules = node.ownerDocument.defaultView.getMatchedCSSRules(
           node, '', authorOnly);
-      if (styleRules) {
-        for (var i = styleRules.length - 1; i >= 0; i--) {
-          var style = styleRules[i].style;
-          if (style.getPropertyPriority(propertyName))
-            return style.getPropertyValue(propertyName);
-          if (!value)
-            value = style.getPropertyValue(propertyName);
+      if (matchedRules) {
+        for (var i = 0, c = matchedRules.length; i < c; ++i) {
+          var rule = matchedRules[i];
+
+          var ruleStyle = rule.style;
+          stylesPerRule = {};
+          for (var j = 0, c1 = ruleStyle.length; j < c1; ++j) {
+            var name = ruleStyle[j];
+            stylesPerRule[name] = ruleStyle.getPropertyValue(name);
+          }
+          macthedCSSStyles.push(stylesPerRule);
         }
       }
-    }
-    return value;
-  },
-
-  getDefinedStylePropertyByName2 : function(node, authorOnly, propertyName) {
-    if (node) {
-      var macthedCSSStyles =
-          chrome_comp.getNodeDefinedStyles(node, authorOnly);
-      for (var i = 0, c = macthedCSSStyles.length; i < c; ++i) {
-        var styelsPerRule = macthedCSSStyles[i];
-        if (propertyName in styelsPerRule)
-          return styelsPerRule[propertyName];
+      // Get inline style
+      var inlineStyle = node.style;
+      if (inlineStyle && (inlineStyle instanceof CSSStyleDeclaration)) {
+        var inlineStyleColletion = {};
+        for (var j = 0, c = inlineStyle.length; j < c; ++j) {
+          var name = inlineStyle[j];
+          inlineStyleColletion[name] = inlineStyle.getPropertyValue(name);
+        }
+        macthedCSSStyles.push(inlineStyleColletion);
       }
-    }
-  },
+      return macthedCSSStyles;
+    },
 
-  isReplacedElement: function(element) {
-    if (element) {
-      var tagName = element.tagName;
-      return tagName == 'IMG' || tagName == 'OBJECT' || tagName == 'EMBED' ||
-             tagName == 'BUTTON' || tagName == 'TEXTAREA' ||
-             tagName == 'INPUT' || tagName == 'SELECT' || tagName == 'IFRAME';
-    }
-  },
+    /**
+     * Returns specified style property information that is defined on specified
+     * node (including inline style) by name.
+     * @param {object} node node to get prototypes for.
+     * @param {boolean} authorOnly Determines whether only author styles need to
+     *     be added.
+     * @return {object} value of specified style property information. Return
+     *     undefined if the specified property is not defined on the node.
+     */
+    getDefinedStylePropertyByName: function(node, authorOnly, propertyName) {
+      var value;
+      if (node) {
+        if (node.style) {
+          value = node.style.getPropertyValue(propertyName);
+          if (node.style.getPropertyPriority(propertyName))
+            return value;
+        }
+        var styleRules = node.ownerDocument.defaultView.getMatchedCSSRules(
+            node, '', authorOnly);
+        if (styleRules) {
+          for (var i = styleRules.length - 1; i >= 0; i--) {
+            var style = styleRules[i].style;
+            if (style.getPropertyPriority(propertyName))
+              return style.getPropertyValue(propertyName);
+            if (!value)
+              value = style.getPropertyValue(propertyName);
+          }
+        }
+      }
+      return value;
+    },
 
-  getNextNodeInDocument : function(node) {
-    while (node) {
-      if (node.nextSibling)
-        return node.nextSibling;
-      node = node.parentNode;
-    }
-  },
+    getDefinedStylePropertyByName2: function(node, authorOnly, propertyName) {
+      if (node) {
+        var macthedCSSStyles =
+            chrome_comp.getNodeDefinedStyles(node, authorOnly);
+        for (var i = 0, c = macthedCSSStyles.length; i < c; ++i) {
+          var styelsPerRule = macthedCSSStyles[i];
+          if (propertyName in styelsPerRule)
+            return styelsPerRule[propertyName];
+        }
+      }
+    },
 
-  hasLayoutInIE: function(element) {
-    if (!(element && element.nodeType == Node.ELEMENT_NODE))
+    isReplacedElement: function(element) {
+      var TAG_NAME_LIST = {
+        APPLET: true,
+        BUTTON: true,
+        EMBED: true,
+        HR: true,
+        IFRAME: true,
+        IMG: true,
+        INPUT: true,
+        ISINDEX: true,
+        MARQUEE: true,
+        OBJECT: true,
+        SELECT: true,
+        TEXTAREA: true
+      };
+      if (element) {
+        return element.tagName in TAG_NAME_LIST;
+      }
       return false;
-    var tagName = element.tagName;
-    if (tagName == 'TD' || tagName == 'TH' ||
-        tagName == 'IMG' || tagName == 'HR' ||
-        tagName == 'INPUT' || tagName == 'BUTTON' ||
-        tagName == 'FILE' || tagName == 'SELECT' ||
-        tagName == 'TEXTAREA' || tagName == 'FIELDSET')
-      return true;
-    var style = chrome_comp.getComputedStyle(element);
-    if (style.float != 'none' ||
-        style.position == 'absolute' ||
-        style.display == 'inline-block' ||
-        parseInt(chrome_comp.getDefinedStylePropertyByName(
-            element, false, 'width')) > 0 ||
-        parseInt(chrome_comp.getDefinedStylePropertyByName(
-            element, false, 'height')) > 0 ||
-        style.zoom != '1')
-      return true;
-    var definedZoom = chrome_comp.getDefinedStylePropertyByName(element, false,
-          'zoom');
-    return definedZoom && definedZoom != 'normal';
-  },
+    },
 
-  /**
-   * Determines if a node affects normal flow.
-   * @param {Node} node the DOM node to test
-   * @param {boolean=} opt_ignoreFixedPosition if 'position: fixed' is ignored
-   *     (because some browsers don't support it). Default is not to ignore.
-   * @return 0 if doesn't affect; 1 if affects; -1 if not determined (e.g. a
-   *     span which we don't want to traverse the children)
-   */
-  mayAffectNormalFlow: function(node, opt_ignoreFixedPosition) {
-    switch (node.nodeType) {
-      case Node.TEXT_NODE:
-        return node.textContent ? 1 : 0;
-      case Node.ELEMENT_NODE:
-        var style = chrome_comp.getComputedStyle(node);
-        var position = style.position;
-        if (position == 'absolute' ||
-            (!opt_ignoreFixedPosition && position == 'fixed'))
-          return 0;
+    getNextNodeInDocument: function(node) {
+      while (node) {
+        if (node.nextSibling)
+          return node.nextSibling;
+        node = node.parentNode;
+      }
+    },
 
-        if (style.float != 'none')
-          return 0;
+    HASLAYOUT_TAG_NAME_LIST: {
+      APPLET: true,
+      BODY: true,
+      BUTTON: true,
+      EMBED: true,
+      FIELDSET: true,
+      HR: true,
+      HTML: true,
+      IFRAME: true,
+      IMG: true,
+      INPUT: true,
+      LEGEND: true,
+      MARQUEE: true,
+      OBJECT: true,
+      SELECT: true,
+      TABLE: true,
+      TD: true,
+      TEXTAREA: true,
+      TH: true,
+      TR: true
+    },
 
-        var display = style.display;
-        switch (display) {
-          case 'none':
+    hasLayoutInIE: function(element) {
+      if (!(element && element.nodeType == Node.ELEMENT_NODE))
+        return false;
+      if (element.tagName in this.HASLAYOUT_TAG_NAME_LIST)
+        return true;
+      var style = chrome_comp.getComputedStyle(element);
+      if (style.float != 'none' ||
+          style.position == 'absolute' ||
+          style.display == 'inline-block' ||
+          parseInt(chrome_comp.getSpecifiedValue(element).width) > 0 ||
+          parseInt(chrome_comp.getSpecifiedValue(element).height) > 0 ||
+          chrome_comp.getDefinedStylePropertyByName(element, false,
+              'zoom') != null)
+        return true;
+      return false;
+    },
+
+    /**
+     * Determines if a node affects normal flow.
+     * @param {Node} node the DOM node to test
+     * @param {boolean=} opt_ignoreFixedPosition if 'position: fixed' is ignored
+     *     (because some browsers don't support it). Default is not to ignore.
+     * @return 0 if doesn't affect; 1 if affects; -1 if not determined (e.g. a
+     *     span which we don't want to traverse the children)
+     */
+    mayAffectNormalFlow: function(node, opt_ignoreFixedPosition) {
+      switch (node.nodeType) {
+        case Node.TEXT_NODE:
+          return node.textContent ? 1 : 0;
+        case Node.ELEMENT_NODE:
+          var style = chrome_comp.getComputedStyle(node);
+          var position = style.position;
+          if (position == 'absolute' ||
+              (!opt_ignoreFixedPosition && position == 'fixed'))
             return 0;
-          case 'inline':
-            return chrome_comp.isReplacedElement(node) ? 1 : -1;
-          default:
-            return 1;
-        }
-      case Node.COMMENT_NODE:
-        return 0;
-      default:
-        return 1;
-    }
-  },
 
-  inQuirksMode: function() {
-    return document.compatMode != 'CSS1Compat';
-  }
+          if (style.float != 'none')
+            return 0;
+
+          var display = style.display;
+          switch (display) {
+            case 'none':
+              return 0;
+            case 'inline':
+              return chrome_comp.isReplacedElement(node) ? 1 : -1;
+            default:
+              return 1;
+          }
+        case Node.COMMENT_NODE:
+          return 0;
+        default:
+          return 1;
+      }
+    },
+
+    inQuirksMode: function() {
+      return document.compatMode != 'CSS1Compat';
+    }
 
   };  // return
 })();
@@ -560,8 +620,9 @@ chrome_comp.Rect = function(x, y, w, h) {
   this.height = h;
 };
 
+// TODO: use .prototype.abc = ... for each function?
 chrome_comp.Rect.prototype = {
-  createFromString : function(rectString) {
+  createFromString: function(rectString) {
     // The input rectSring supposed to be array to contain 'x, y, width, height'
     var valueArray = eval(rectString);
     if (valueArray instanceof Array) {
@@ -574,19 +635,19 @@ chrome_comp.Rect.prototype = {
     return false;
   },
 
-  clone : function() {
+  clone: function() {
     return new chrome_comp.Rect(this.left, this.top,
                                 this.width, this.height);
   },
 
-  copy : function(rect) {
+  copy: function(rect) {
     this.left = rect.left;
     this.top = rect.top;
     this.width = rect.width;
     this.height = rect.height;
   },
 
-  intersection : function(rect) {
+  intersection: function(rect) {
     var x0 = Math.max(this.left, rect.left);
     var x1 = Math.min(this.left + this.width, rect.left + rect.width);
     if (x0 <= x1) {
@@ -605,7 +666,7 @@ chrome_comp.Rect.prototype = {
     return false;
   },
 
-  unionRect : function(rect) {
+  unionRect: function(rect) {
     var right = Math.max(this.left + this.width, rect.left + rect.width);
     var bottom = Math.max(this.top + this.height, rect.top + rect.height);
     this.left = Math.min(this.left, rect.left);
@@ -614,68 +675,60 @@ chrome_comp.Rect.prototype = {
     this.height = bottom - this.top;
   },
 
-  toString : function() {
+  toString: function() {
     return '(' + this.left + ', ' + this.top + ' - ' + this.width + 'w x ' +
            this.height + 'h)';
   },
 
-  containsInVertical : function(another) {
+  containsInVertical: function(another) {
     return this.top <= another.top &&
            this.top + this.height >= another.top + another.height;
   },
 
-  containsInHorizontal : function(another) {
+  containsInHorizontal: function(another) {
     return this.left <= another.left &&
            this.left + this.width >= another.left + another.width;
   },
 
-  contains : function(another) {
+  contains: function(another) {
     return this.containsInHorizontal(another) && containsInVertical(another);
   },
 
-  isEmpty : function() {
+  isEmpty: function() {
     return (this.width <= 0 || this.height <= 0);
   }
 };
 
-
-chrome_comp.PageUtil = (function() {
-  // Private data member.
-
-  // Private function is to get the rectangle bands of the specified text node.
-  return {
+chrome_comp.PageUtil = {
     // Gets ele's left coordinate related to current page
-    pageLeft : function(ele) {
+    pageLeft: function(ele) {
       return ele.offsetParent ?
-        ele.offsetLeft + chrome_comp.PageUtil.pageLeft(ele.offsetParent) :
+        ele.offsetLeft + this.pageLeft(ele.offsetParent) :
         ele.offsetLeft;
     },
 
     // Gets ele's top coordinate related to current page
-    pageTop : function(ele) {
+    pageTop: function(ele) {
       return ele.offsetParent ?
-          ele.offsetTop + chrome_comp.PageUtil.pageTop(ele.offsetParent) :
+          ele.offsetTop + this.pageTop(ele.offsetParent) :
           ele.offsetTop;
     },
 
     // Gets ele's left coordinate related to its parent node
-    parentLeft : function(ele) {
+    parentLeft: function(ele) {
       var parentNode = ele.parentNode;
       return parentNode == ele.offsetParent ?
-          ele.offsetLeft :
-          chrome_comp.PageUtil.pageLeft(ele) -
-              chrome_comp.PageUtil.pageLeft(parentNode);
+          ele.offsetLeft : this.pageLeft(ele) - this.pageLeft(parentNode);
     },
 
     // Gets ele's top coordinate related to its parent node
-    parentTop : function(ele) {
+    parentTop: function(ele) {
       var parentNode = ele.parentNode;
       return parentNode == ele.offsetParent ?
-          ele.offsetTop : chrome_comp.PageUtil.pageTop(ele) -
-                          chrome_comp.PageUtil.pageTop(parentNode);
+          ele.offsetTop : this.pageTop(ele) - this.pageTop(parentNode);
     },
 
-    getNodeRects : function(node) {
+    getNodeRects: function(node) {
       if (!node)
         return [];
       var clientRects;
@@ -720,12 +773,12 @@ chrome_comp.PageUtil = (function() {
         rects.fromAncestor = true;
       return rects;
     }
-  };
-})();
+};
 
 // param: @object, object, point to the object which has API we want to hook
 // param: @existingMethodName, string, point to the name of API which we want to
 //    hook
+// TODO: rename to ExistingMethodHook
 chrome_comp.ExistingMethodHookObject = function(object, existingMethodName) {
   if (typeof object[existingMethodName] != 'function')
     throw new Error('the target property is not a function');
@@ -739,6 +792,9 @@ chrome_comp.ExistingMethodHookObject = function(object, existingMethodName) {
   var This = this;
   // this is orginal this context for orginal function call
   this.newMethodHandler_ = function() {
+    // Store the object and existingMethodName for the handler.
+    var methodName = This.existingMethodName_;
+    var hookedObject = This.hookedObject_;
     if (!This.enabled_ || chrome_comp.areHooksDisabled())
       return This.saveExistingMethodHandler_.apply(this, arguments);
 
@@ -754,7 +810,8 @@ chrome_comp.ExistingMethodHookObject = function(object, existingMethodName) {
     var cacheHandlers = This.hookHandlersForExistingMethod_.concat();
     for (var i = 0, c = cacheHandlers.length; i < c; ++i) {
       try {
-        cacheHandlers[i].call(this, result, arguments, callStack);
+        cacheHandlers[i].call(this, result, arguments, callStack, methodName,
+            hookedObject);
       } catch (e) {
         chrome_comp.printError('Error in existing method handler: ', e);
       }
@@ -822,6 +879,7 @@ chrome_comp.ExistingMethodHookObject.prototype.unregisterHookHandler = function(
   return false;
 };
 
+// TODO: remove this, it is not used anymore
 // ObjectWrapDelegate class will create a empty object(wrapper), map its
 // prototype to the 'originalObject', then search all non-function properties
 // (except those properties which match the propertyNameFilter) of the
@@ -1053,7 +1111,7 @@ chrome_comp.SimplePropertyHookObject.prototype.unregisterHookHandler =
   return false;
 };
 
-//******************** The compatibility detector framework *******************
+// ******************** The compatibility detector framework ******************
 chrome_comp.CompDetect = (function() {
   // Array which contains all type detectors
   var detectors_ = [];
@@ -1064,9 +1122,9 @@ chrome_comp.CompDetect = (function() {
   // key: type id
   // value: serialized report data, which includes all the occurrences of the
   //     type of problem
-  var problems_ = { };
-  var actualJSProblems_ = { };
-  var expectedJSProblems_ = { };
+  var problems_ = {};
+  var actualJSProblems_ = {};
+  var expectedJSProblems_ = {};
   var mismatchedProblems_ = [];
 
   // Control re-entrance of addProblem().
@@ -1090,9 +1148,9 @@ chrome_comp.CompDetect = (function() {
     if (!frame)
       return false;
     if (!frame.values)
-      frame.values = { };
+      frame.values = {};
     if (!frame.values[currentScanDomDetector_])
-      frame.values[currentScanDomDetector_] = { };
+      frame.values[currentScanDomDetector_] = {};
     frame.values[currentScanDomDetector_][name] = value;
     return true;
   }
@@ -1143,45 +1201,45 @@ chrome_comp.CompDetect = (function() {
   }
 
   var scanDomContext_ = {
-    getParentBlock : function(opt_offset) {
+    getParentBlock: function(opt_offset) {
       var frame = getCurrentStackFrame(blockStack_, opt_offset);
       return frame ? frame.element : null;
     },
-    getCurrentHasLayoutInIE : function(opt_offset) {
+    getCurrentHasLayoutInIE: function(opt_offset) {
       var frame = getCurrentStackFrame(hasLayoutStack_, opt_offset);
       return frame ? frame.element : null;
     },
-    putValueInBlockStack : function(name, value, opt_offset) {
+    putValueInBlockStack: function(name, value, opt_offset) {
       return putValueInStack(blockStack_, name, value, opt_offset);
     },
-    getValueInBlockStack : function(name, opt_offset) {
+    getValueInBlockStack: function(name, opt_offset) {
       return getValueInStack(blockStack_, name, opt_offset);
     },
-    deleteValueInBlockStack : function(name, opt_offset) {
+    deleteValueInBlockStack: function(name, opt_offset) {
       return deleteValueInStack(blockStack_, name, opt_offset);
     },
-    clearValuesInBlockStack : function(opt_offset) {
+    clearValuesInBlockStack: function(opt_offset) {
       clearValuesInStack(blockStack_, opt_offset);
     },
-    addPopHandlerInBlockStack : function(handler, opt_offset) {
+    addPopHandlerInBlockStack: function(handler, opt_offset) {
       addPopHandlerInStack(blockStack_, handler, opt_offset);
     },
-    putValueInHasLayoutInIEStack : function(name, value, opt_offset) {
+    putValueInHasLayoutInIEStack: function(name, value, opt_offset) {
       return putValueInStack(hasLayoutStack_, name, value, opt_offset);
     },
-    getValueInHasLayoutInIEStack : function(name, opt_offset) {
+    getValueInHasLayoutInIEStack: function(name, opt_offset) {
       return getValueInStack(hasLayoutStack_, name, opt_offset);
     },
-    deleteValueInHasLayoutInIEStack : function(name, opt_offset) {
+    deleteValueInHasLayoutInIEStack: function(name, opt_offset) {
       return deleteValueInStack(hasLayoutStack_, name, opt_offset);
     },
-    clearValuesInHasLayoutInIEStack : function(opt_offset) {
+    clearValuesInHasLayoutInIEStack: function(opt_offset) {
       clearValuesInStack(hasLayoutStack_, opt_offset);
     },
-    addPopHandlerInHasLayoutInIEStack : function(handler, opt_offset) {
+    addPopHandlerInHasLayoutInIEStack: function(handler, opt_offset) {
       addPopHandlerInStack(hasLayoutStack_, handler, opt_offset);
     },
-    isDisplayNone : function() {
+    isDisplayNone: function() {
       return displayNoneEndNode_ ? true : false;
     }
   };
@@ -1200,8 +1258,15 @@ chrome_comp.CompDetect = (function() {
     while (currentNode = nodeIterator.nextNode())
       nodes.push(currentNode);
 
-    for (var i = 0, c = nodes.length; i < c; i++)
+    for (var i = 0, c = nodes.length; i < c; i++) {
+      // The content script will inject a SCRIPT element before the HEAD
+      // element to add a listener for the root element, so we must ignore the
+      // injected SCRIPT element for the processNode function.
+      if (nodes[i].tagName == 'SCRIPT' &&
+          nodes[i].parentElement == document.documentElement)
+        continue;
       processNode(nodes[i], compDetectorArray);
+    }
 
     blockStack_ = [];
     hasLayoutStack_ = [];
@@ -1237,11 +1302,11 @@ chrome_comp.CompDetect = (function() {
     if (Node.ELEMENT_NODE == currentNode.nodeType) {
       if (chrome_comp.startsBlockBox(currentNode)) {
         endNode = chrome_comp.getNextNodeInDocument(currentNode);
-        blockStack_.push({ element: currentNode, endNode: endNode });
+        blockStack_.push({element: currentNode, endNode: endNode});
       }
       if (chrome_comp.hasLayoutInIE(currentNode)) {
         endNode = endNode || chrome_comp.getNextNodeInDocument(currentNode);
-        hasLayoutStack_.push({ element: currentNode, endNode: endNode });
+        hasLayoutStack_.push({element: currentNode, endNode: endNode});
       }
       if (chrome_comp.getComputedStyle(currentNode).display == 'none' &&
           !displayNoneEndNode_) {
@@ -1355,8 +1420,72 @@ chrome_comp.CompDetect = (function() {
     }
   }
 
+  /**
+   * Hide the root element to get the specified value of margin, border,
+   * padding, width and height properties of the elements, and cache these
+   * values.
+   */
+  function cacheSpecifiedValue() {
+    // In this function, we can cache many information of each element.
+    // Because getting the truly state (show or hide) of the element need to
+    // refer to its ancestor, so we can cache this state passingly.
+    function getTrulyDisplayable(ele, style) {
+      if (style.display == 'none')
+        return 'none';
+      if (ele.parentElement[chrome_comp.SPECIFIED_VALUE] &&
+          ele.parentElement[chrome_comp.SPECIFIED_VALUE].display == 'none')
+        return 'none';
+      return style.display;
+    }
+
+    var root = document.documentElement;
+    if (!root) {
+      chrome_comp.printError('Error getting the specified value.');
+      return;
+    }
+    var allElements = root.getElementsByTagName('*');
+    var inlineDisplay = root.style.display;
+    root.style.display = 'none !important';
+    // We cache some properties' specified values when the root element is
+    // invisible. When we change the display style of the root node, the
+    // browser's rendering engine may do some optimization, and page layout
+    // will not be changed.
+    // To enforce the reflow, we get the value of offsetWidth here. Refer to
+    // http://www.stubbornella.org/content/2009/03/27/
+    // reflows-repaints-css-performance-making-your-javascript-slow/
+    // and
+    // http://www.mozilla.org/newlayout/doc/reflow.html.
+    root.offsetWidth;
+    for (var i = 0, len = allElements.length; i < len; ++i) {
+      var element = allElements[i];
+      var style = chrome_comp.getComputedStyle(element);
+      element[chrome_comp.SPECIFIED_VALUE] = {
+        width: style.width,
+        height: style.height,
+        marginLeft: style.marginLeft,
+        marginRight: style.marginRight,
+        marginTop: style.marginTop,
+        marginBottom: style.marginBottom,
+        borderLeftWidth: style.borderLeftWidth,
+        borderRightWidth: style.borderRightWidth,
+        borderTopWidth: style.borderTopWidth,
+        borderBottomWidth: style.borderBottomWidth,
+        paddingTop: style.paddingTop,
+        paddingBottom: style.paddingBottom,
+        paddingLeft: style.paddingLeft,
+        paddingRight: style.paddingRight,
+        display: getTrulyDisplayable(element, style)
+      };
+    }
+    root.style.display = null;
+    if (inlineDisplay)
+      root.style.display = inlineDisplay;
+    // To enforce the reflow, the same as the previous.
+    root.offsetWidth;
+  }
+
   return {
-    getAllProblems : function() {
+    getAllProblems: function() {
       return problems_;
     },
 
@@ -1364,7 +1493,7 @@ chrome_comp.CompDetect = (function() {
       if (!object || !method || !handler)
         return;
       if (!object.hasOwnProperty('chrome_comp_methodHooks'))
-        object.chrome_comp_methodHooks = { };
+        object.chrome_comp_methodHooks = {};
       var hookObject = object.chrome_comp_methodHooks[method];
       if (!hookObject) {
         hookObject = new chrome_comp.ExistingMethodHookObject(object, method);
@@ -1390,6 +1519,7 @@ chrome_comp.CompDetect = (function() {
       return false;
     },
 
+    // TODO: remove this, it is not used anymore
     registerExistingPropertyHook: function(
         ownerObject, ownerProperty, property, handler) {
       if (!ownerObject || !ownerProperty || !property || !handler)
@@ -1398,7 +1528,7 @@ chrome_comp.CompDetect = (function() {
       if (!object || typeof object != 'object')
         return false;
       if (!ownerObject.hasOwnProperty('chrome_comp_wrapDelegates'))
-        ownerObject.chrome_comp_wrapDelegates = { };
+        ownerObject.chrome_comp_wrapDelegates = {};
       var wrapDelegate = ownerObject.chrome_comp_wrapDelegates[ownerProperty];
       if (!wrapDelegate) {
         wrapDelegate = new chrome_comp.ObjectWrapDelegate(object);
@@ -1410,6 +1540,7 @@ chrome_comp.CompDetect = (function() {
       return wrapDelegate.watch(property, handler);
     },
 
+    // TODO: remove this, it is not used anymore
     unregisterExistingPropertyHook: function(
         ownerObject, ownerProperty, property, handler) {
       if (!ownerObject || !ownerProperty || !property || !handler ||
@@ -1438,7 +1569,7 @@ chrome_comp.CompDetect = (function() {
       if (!object || !property || !handler)
         return;
       if (!object.hasOwnProperty('chrome_comp_propertyHooks'))
-        object.chrome_comp_propertyHooks = { };
+        object.chrome_comp_propertyHooks = {};
       var hookObject = object.chrome_comp_propertyHooks[property];
       if (!hookObject) {
         hookObject = new chrome_comp.SimplePropertyHookObject(object,
@@ -1494,6 +1625,7 @@ chrome_comp.CompDetect = (function() {
         /*,... methods */) {
       if (chrome_comp.CompDetectorConfig.disabledDetectors[name])
         return null;
+      // TODO: eval should only be used for deserialization (style guide)
       // Dynamically create a named function as the new constructor.
       // The name is useful for debugging because we'll see meaningful type
       // in the printed stack trace.
@@ -1520,7 +1652,7 @@ chrome_comp.CompDetect = (function() {
     },
 
     // Run all scan-dom type detectors for current page.
-    runScanDomDetectorsForCurrentPage : function() {
+    runScanDomDetectorsForCurrentPage: function() {
       detectPageWithScanDomTypeDetectors();
     },
 
@@ -1539,7 +1671,7 @@ chrome_comp.CompDetect = (function() {
     sendDetectionResults: function() {
       var problems = chrome_comp.CompDetect.getAllProblems();
       chrome_comp.sendRequest('chrome_comp_endOfDetection', {
-        totalProblems : Object.keys(problems).length
+        totalProblems: Object.keys(problems).length
       });
     },
 
@@ -1552,10 +1684,21 @@ chrome_comp.CompDetect = (function() {
     },
 
     // Diagnose  compatibility issues on current page
-    diagnoseCompatibilityIssues : function() {
+    diagnoseCompatibilityIssues: function() {
       if (detectionStarted)
         return;
       detectionStarted = true;
+      cacheSpecifiedValue();
+
+      var timer = chrome_comp.CompDetectorConfig.delayRunDetectionTimer;
+      // Check whether we need to immediately call load handler of
+      // CompDetector.
+      if (chrome_comp.CompDetectorConfig.delayRunDetection &&
+          typeof timer == 'number') {
+        window.setTimeout(loadHandlerForCompDetector, timer);
+      } else {
+        loadHandlerForCompDetector();
+      }
 
       function loadHandlerForCompDetector() {
         var startTime = new Date().getTime();
@@ -1581,28 +1724,51 @@ chrome_comp.CompDetect = (function() {
         for (var i = 0, c = detectors_.length; i < c; ++i)
           detectors_[i].postAnalyze();
 
-        var detectionTime = new Date().getTime() - startTime;
-        window.console.log('Finished compatibility detection in ' +
-            detectionTime + ' ms');
+        var ASYNC_OPERATION_CHECK_INTERVAL = 100;
+        // The value if maximum time for waiting the asynchronized
+        // operation finsih.
+        var MAX_TIME_WAITINGFINISH = 2000;
+        var startTimeForPolling = new Date().getTime();
+        var timerId;
+        if (isAllAsyncDetectionFinished()) {
+          onAllAsyncDetectionFinished();
+        } else {
+          timerId = setInterval(waitForAsyncDetectionFinished,
+              ASYNC_OPERATION_CHECK_INTERVAL);
+        }
 
-        chrome_comp.CompDetect.sendDetectionResults();
-        if (chrome_comp.CompDetectorConfig.unitTestMode)
-          checkDetectionResults(document.documentElement);
-      }
+        function waitForAsyncDetectionFinished() {
+          var runningTime = new Date().getTime() - startTimeForPolling;
+          if (isAllAsyncDetectionFinished() ||
+              runningTime > MAX_TIME_WAITINGFINISH) {
+            onAllAsyncDetectionFinished();
+          }
+        }
 
-      var timer = chrome_comp.CompDetectorConfig.delayRunDetectionTimer;
-      // Check whether we need to immediately call load handler of
-      // CompDetector.
-      if (chrome_comp.CompDetectorConfig.delayRunDetection &&
-          typeof timer == 'number') {
-        window.setTimeout(loadHandlerForCompDetector, timer);
-      } else {
-        loadHandlerForCompDetector();
+        function isAllAsyncDetectionFinished() {
+          for (var i = 0, c = detectors_.length; i < c; ++i) {
+            if (!detectors_[i].isAsyncOperationFinished())
+              return false;
+          }
+          return true;
+        }
+
+        function onAllAsyncDetectionFinished() {
+          // clear timeId
+          if (timerId)
+            clearInterval(timerId);
+          var detectionTime = new Date().getTime() - startTime;
+          window.console.log('Finished compatibility detection in ' +
+              detectionTime + ' ms');
+          chrome_comp.CompDetect.sendDetectionResults();
+          if (chrome_comp.CompDetectorConfig.unitTestMode)
+            checkDetectionResults(document.documentElement);
+        }
       }
     },
 
     // See chrome_comp.CompDetect.BaseDetector.prototype.addProblem.
-    addProblem : function(typeId, opt_information) {
+    addProblem: function(typeId, opt_information) {
       if (inAddProblem_)
         return;
 
@@ -1616,9 +1782,9 @@ chrome_comp.CompDetect = (function() {
 
         // This keeps backward-compatibility with original interface.
         if (opt_information instanceof Array)
-          opt_information = { nodes: opt_information };
+          opt_information = {nodes: opt_information };
         if (!opt_information)
-          opt_information = { };
+          opt_information = {};
 
         // Constructs report data
         var data = problems_[typeId];
@@ -1725,7 +1891,7 @@ chrome_comp.CompDetect = (function() {
     },
 
     // Used in unit test for JavaScript problems.
-    expectProblems : function(x, expected) {
+    expectProblems: function(x, expected) {
       if (chrome_comp.CompDetectorConfig.unitTestMode) {
         var sourceAndLine = chrome_comp.getSourceAndLine();
         expectedJSProblems_[sourceAndLine] = expected;
@@ -1734,7 +1900,7 @@ chrome_comp.CompDetect = (function() {
       }
     },
 
-    cleanUpDetectors : function() {
+    cleanUpDetectors: function() {
       for (var i = 0, c = detectors_.length; i < c; ++i)
         detectors_[i].cleanUp();
     }
@@ -1743,8 +1909,7 @@ chrome_comp.CompDetect = (function() {
 
 
 // ************************** BaseDetector implementation*********************
-// @author : jnd@chromium.org
-// each detector must implement the following method
+// Each detector must implement the following method
 // * postAnalyze(), this method will be called before calling hasProblem, it is
 //   supposed to do some post analysis in this method.
 //
@@ -1760,6 +1925,7 @@ chrome_comp.CompDetect.BaseDetector = function(rootNode) {
   this.window_ = window;
   this.document_ = window.document;
   this.hasProblem_ = false;
+  this.isAsyncOperationFinished_ = true;
 };
 
 chrome_comp.CompDetect.BaseDetector.detectorName = 'BaseDetector';
@@ -1768,6 +1934,16 @@ chrome_comp.CompDetect.BaseDetector.prototype.postAnalyze = function() {
   // The detector developer must implement his/her own logic for
   // postAnalyze if he/she need this.
 };
+
+chrome_comp.CompDetect.BaseDetector.prototype.isAsyncOperationFinished =
+    function() {
+      return this.isAsyncOperationFinished_;
+    };
+
+chrome_comp.CompDetect.BaseDetector.prototype.setAsyncOperationFinished  =
+    function(finished) {
+      this.isAsyncOperationFinished_ = finished;
+    };
 
 /**
  * Adds a new detected problem.
@@ -1803,19 +1979,19 @@ chrome_comp.CompDetect.BaseDetector.prototype.addProblem = function(
 // This detector will not be registered, and will be used directly to report
 // internal exception
 chrome_comp.CompDetect.InternalExceptionDetector = function(rootNode) {
-  chrome_comp.CompDetect.BaseDetector.call(this, rootNode);
+  chrome_comp.CompDetect.InternalExceptionDetector.superclass.constructor.call(
+      this, rootNode);
 };
 chrome_comp.extend(chrome_comp.CompDetect.InternalExceptionDetector,
                    chrome_comp.CompDetect.BaseDetector);
 
 chrome_comp.CompDetect.InternalExceptionDetector.report = function(exception) {
-  this.addProblem('##0000', { details: exception });
+  this.addProblem('##0000', {details: exception});
 };
 
 
 // ********************** NonScanDomBaseDetector implementation***************
-// @author : jnd@chromium.org
-// each non scan-dom type detector is derived from NonScanDomBaseDetector and
+// Each non scan-dom type detector is derived from NonScanDomBaseDetector and
 // implement the following method
 // * setUp: setup the trap
 // * cleanUp: clean up the trap
@@ -1839,12 +2015,11 @@ chrome_comp.CompDetect.NonScanDomBaseDetector.prototype.cleanUp = function() {
 };
 
 // ************************** ScanDomBaseDetector implementation***************
-// @author : jnd@chromium.org
-// each scan-dom detector is dervided from ScanDomBaseDetector and implement the
+// Each scan-dom detector is dervided from ScanDomBaseDetector and implement the
 // following method
-// * checkNode(node, context),  this method is responsible for checking
+// * checkNode(node, context), this method is responsible for checking
 //    whether the input node has same problem the detector is designed to check.
-// * canCheckNow(),  this method is responsible for telling detection tool
+// * canCheckNow(), this method is responsible for telling detection tool
 //    whether the detector want to check node or not, it will be called before
 //    calling checkNode, if the method return false, the checkNode will be skip
 //    for this time.
