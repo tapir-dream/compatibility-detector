@@ -34,39 +34,41 @@ chrome_comp.CompDetect.NonScanDomBaseDetector,
 
 function constructor(rootNode) {
   var This = this;
+  // The map for recording the errors, we make the argument of the method as the
+  // key.
+  this.errorArgumentMap = {};
+  this.lastErrorArgument = '';
   // The last function which calls the createElement method. We initialize it
   // with an empty function to avoid "caller == This.lastCaller" when the method
   // is running in the global context at the first hook.
   this.lastCaller = function() {};
-  // The argument for the last called createElement method.
-  this.lastArgument = '';
-  // The map for recording the errors, we make the argument of the method as the
-  // key.
-  this.errorList = {};
 
   this.createElementHandler = function(result, originalArguments, callStack) {
+    // caller 1 is ExistingMethodHookObject.newMethodHandler_.
+    // caller 2 is the original caller.
     var caller = arguments.callee.caller.caller;
-    var lastCaller = This.lastCaller;
-    var lastArgument = This.lastArgument
     var arg0 = (originalArguments[0] + '').trim();
-    if (!arg0)
-      return;
     // Mootools tries to use document.createElement('<input name=x>') to tell if
     // the current browser can accept HTML String in the createElement method.
     // So we must ignore the pages using Mootools. Refer to:
     // http://mootools.net/download/get/mootools-core-1.3.1-full-compat.js
-    if (arg0 == '<input name=x>')
+    // Another version uses '<input name="x">'.
+    if (!arg0 || arg0 == '<input name=x>' || arg0 == '<input name="x">') {
+      This.lastErrorArgument = '';
+      This.lastCaller = function() {};
       return;
+    }
+
     // Only IE supports using a HTML markup string as argument. We just check
     // the first character after trim.
     if (arg0[0] == '<') {
       // Record the error information for postAnalyze.
-      This.errorList[arg0] = {
+      This.errorArgumentMap[arg0] = {
         stack: chrome_comp.dumpStack(),
         caller: caller
       };
       // Record these values for the next hook.
-      This.lastArgument = arg0;
+      This.lastErrorArgument = arg0;
       This.lastCaller = caller;
     } else {
       // Some pages use a buggy way such as
@@ -81,10 +83,12 @@ function constructor(rootNode) {
       // If the caller this time is equal to the last one, it means the
       // continual called createElement methods are in the same function or
       // context. We can not report the issue in this situation, so delete this
-      // error in the errorList object.
-      if (caller == lastCaller) {
-        delete This.errorList[lastArgument];
+      // error in the errorArgumentMap object.
+      if (caller == This.lastCaller) {
+        delete This.errorArgumentMap[This.lastErrorArgument];
       }
+      This.lastErrorArgument = '';
+      This.lastCaller = function() {};
     }
   };
 },
@@ -101,15 +105,16 @@ function cleanUp() {
 
 function postAnalyze() {
   // If the script in a page throws this createElement method error, the rest of
-  // scripts will not be executed. So in general the errorList object just has
-  // one key.
-  for (var arg in this.errorList) {
+  // scripts will not be executed. So in general the errorArgumentMap object
+  // just has one key.
+  for (var arg in this.errorArgumentMap) {
     // Some pages may modify Object.prototype and add new functions. We should
-    // ignore them when iterating this.errorList.
-    if (typeof this.errorList[arg] != 'object' || !this.errorList[arg].stack)
+    // ignore them when iterating this.errorArgumentMap.
+    if (typeof this.errorArgumentMap[arg] != 'object' ||
+        !this.errorArgumentMap[arg].stack)
       continue;
-    var stack = this.errorList[arg].stack;
-    var caller = this.errorList[arg].caller;
+    var stack = this.errorArgumentMap[arg].stack;
+    var caller = this.errorArgumentMap[arg].caller;
     if (caller)
       caller = chrome_comp.ellipsize(caller.toString(), 200);
     else
