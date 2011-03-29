@@ -1283,6 +1283,16 @@ chrome_comp.CompDetect = (function() {
       popStack(hasLayoutStack_);
     if (displayNoneEndNode_ && currentNode == displayNoneEndNode_)
       displayNoneEndNode_ = null;
+    // If currentNode's display is none, set displayNoneEndNode_ here, so that
+    // scanDomContext_.isDisplayNone will work properly.
+    var endNode;
+    if (Node.ELEMENT_NODE == currentNode.nodeType) {
+      if (!displayNoneEndNode_ &&
+          chrome_comp.getComputedStyle(currentNode).display == 'none') {
+        endNode = endNode || chrome_comp.getNextNodeInDocument(currentNode);
+        displayNoneEndNode_ = endNode;
+      }
+    }
 
     // Check all detectors for this node.
     for (var i = 0, c = compDetectorArray.length; i < c; ++i) {
@@ -1298,20 +1308,14 @@ chrome_comp.CompDetect = (function() {
       }
     }
 
-    var endNode;
     if (Node.ELEMENT_NODE == currentNode.nodeType) {
       if (chrome_comp.startsBlockBox(currentNode)) {
-        endNode = chrome_comp.getNextNodeInDocument(currentNode);
+        endNode = endNode || chrome_comp.getNextNodeInDocument(currentNode);
         blockStack_.push({element: currentNode, endNode: endNode});
       }
       if (chrome_comp.hasLayoutInIE(currentNode)) {
         endNode = endNode || chrome_comp.getNextNodeInDocument(currentNode);
         hasLayoutStack_.push({element: currentNode, endNode: endNode});
-      }
-      if (chrome_comp.getComputedStyle(currentNode).display == 'none' &&
-          !displayNoneEndNode_) {
-        displayNoneEndNode_ = endNode ||
-            chrome_comp.getNextNodeInDocument(currentNode);
       }
     }
   }
