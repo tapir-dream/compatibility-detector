@@ -15,89 +15,74 @@
  */
 
 /**
- * @fileoverview: One detector implementation for checking that if the table
- * cell set the width is stretched.
- * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=35
+ * @fileoverview Check if a table cell is stretched and its width's specified
+ *  value is smaller than the computed value.
+ * @bug https://code.google.com/p/compatibility-detector/issues/detail?id=35
  *
- * Though we set a width for a table cell, it does not stand for using that
- * value necessarily. The cell may be computed as another value for some reason.
- * If a cell is set the width (its value of the width property is not auto),
- * stretched, and content in the cell will not align by the computed value but
- * by the setting value in IE6, IE7 and IE8 quirks mode.
+ * When we set the width for a table cell, it does not mean that the value will
+ * be used. The cell's width may be computed as another value, for reasons such
+ * as: the table's width is larger, or the content inside the cell is too wide.
+ * When a cell is stretched, and its computed width is bigger than the specified
+ * value(which is not auto), the content width in the cell will be limited to
+ * the specified value in IE6, IE7 and IE8(Q).
  *
- * First of all, check all table cell elements which are set the absolute width
- * (not 'auto' and the percentage).
- * Get the real value and the setting value of the cell. Here the real value can
- * be gotten by getComputedStyle method, and setting value is the computed value
- * in W3C CSS2.1 specification. But the getComputedStyle method cannot get the
- * real computed value of the width property, so used a tricky way to get the
- * real computed value of the said properties. A 'display:none' element can be
- * gotten the corrent value of its width property by using getComputedStyle
- * method.
- *
- * So we get the two principal values. Second is to get the value of
- * 'text-align' property because we do not consider the left-aligned element.
- *
- * At last, if the cell is really stretched by the table and not by its
- * contents, and contains the inflow content, we report this issue.
+ * 1. Check all table cells whose width is set(not 'auto') and is not a
+ *    percentage value.
+ * 2. Get the value of 'text-align', because we do not consider the
+ *    left-aligned elements.
+ * 3. If the cell is stretched by the table and not by its contents, and
+ *    contains inflow content, we report this as a problem.
  */
 
 addScriptToInject(function() {
 
-function getRealComputedWidth(element) {
-  var x = element.cloneNode(false);
-  x.style.display = 'none !important';
-  var p = element.parentElement;
-  if (!p)
-    return;
-  p.appendChild(x);
-  var width = chrome_comp.getComputedStyle(x).width;
-  p.removeChild(x);
-  x = null;
-  return width;
+function isPercentageString(str) {
+  return str.slice(-1) == '%';
 }
 
-function isStretched(element) {
-  var table = element.offsetParent;
-  var inlineWidth = table.style.width;
-  var oldWidth = element.offsetWidth;
+// TODO: put this into framework
+function isCellStretchedByTable(cell) {
+  var table = cell.offsetParent;
+  var oldInlineTableWidth = table.style.width;
+  var oldCellOffsetWidth = cell.offsetWidth;
+
+  // Set table's width to 0px, so that the cell will not be stretched.
   table.style.width = '0px !important';
-  var newWidth = element.offsetWidth;
+  var newCellOffsetWidth = cell.offsetWidth;
+
+  // Restore table's inline width.
   table.style.width = null;
-  table.style.width = (inlineWidth) ? inlineWidth : null;
-  return oldWidth == newWidth;
+  table.style.width = oldInlineTableWidth;
+
+  return oldCellOffsetWidth == newCellOffsetWidth;
 }
 
-function isPercentageWidth(width) {
-  return width.slice(-1) == '%' && width != '100%';
-}
-
-function hasBackground(element) {
-  var style = chrome_comp.getComputedStyle(element);
-  if ((!style.backgroundColor || style.backgroundColor == 'transparent' ||
-      style.backgroundColor == chrome_comp.COLOR_TRANSPARENT) &&
-      (!style.backgroundImage || style.backgroundImage == 'none'))
-    return false;
-  return true;
-}
-
+/**
+ * Whether there is inflow content in the child elements.
+ * Ignore absolute/fixed positioned elements and float elements.
+ */
 function hasInflowContent(element) {
-  var ch = element.childNodes;
-  if (ch.length == 0)
-    return false;
-  if (ch.length == 1 && ch[0].nodeType == 3 && /^\s+$/g.test(ch[0].nodeValue))
-    return false
-  for (var i = 0, j = ch.length; i < j; i++) {
-    if (ch[i].nodeType == 3) {
-      if (!/^\s+$/g.test(ch[i].nodeValue))
+  var childNodes = element.childNodes;
+  // Check direct child text nodes.
+  for (var i = 0, len = childNodes.length; i < len; ++i) {
+    var childNode = childNodes[i];
+    if (childNode.nodeType == Node.TEXT_NODE) {
+      if (!/^\s+$/g.test(childNode.nodeValue))
         return true;
-    } else if (ch[i].nodeType == 1) {
-      var style = chrome_comp.getComputedStyle(ch[i]);
-      if (style.position != 'absolute' && style.position != 'fixed' &&
-          style.float == 'none')
-        return arguments.callee(ch[i])
-      else
-        return false;
+    }
+  }
+  // Check child element nodes.
+  for (var i = 0, len = childNodes.length; i < len; ++i) {
+    var childNode = childNodes[i];
+    if (childNode.nodeType == Node.ELEMENT_NODE) {
+      var style = chrome_comp.getComputedStyle(childNode);
+      if (style.position == 'absolute' || style.position == 'fixed' ||
+          style.float != 'none' || style.display == 'none')
+        continue;
+      // TODO: check for visibility
+      var result = hasInflowContent(childNode);
+      if (result)
+        return true;
     }
   }
   return false;
@@ -115,29 +100,35 @@ function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
     return;
 
- if (node.tagName != 'TD' && node.tagName != 'TH')
+  if (node.tagName != 'TD' && node.tagName != 'TH')
     return;
 
-  var realWidth = getRealComputedWidth(node);
-  if (realWidth == undefined)
-    return;
-  if (realWidth == 'auto')
-    return;
-
-  if (isPercentageWidth(realWidth))
+  var specifiedValue = chrome_comp.getSpecifiedValue(node);
+  var specifiedWidthStr = specifiedValue.width;
+  if (!specifiedWidthStr || specifiedWidthStr == 'auto' ||
+      isPercentageString(specifiedWidthStr))
     return;
 
-  var usedWidth = parseInt(chrome_comp.getComputedStyle(node).width, 10);
-  var computedWidth = parseInt(getRealComputedWidth(node), 10);
+  var computedWidth = parseInt(chrome_comp.getComputedStyle(node).width, 10);
+  var specifiedWidth = parseInt(specifiedWidthStr, 10);
+  // TODO: use SHRESHOLD here
+  if ((computedWidth <= specifiedWidth))
+    return;
+
   var textAlign = chrome_comp.getComputedStyle(node).textAlign;
-  if ((usedWidth <= computedWidth))
+  if (!textAlign || textAlign.indexOf('left') != -1 ||
+      textAlign.indexOf('auto') != -1)
     return;
-  if (((textAlign.indexOf('left') != -1) || (textAlign.indexOf('auto') != -1)))
-    return;
-  if ((!isStretched(node)) && (hasInflowContent(node)))
-    this.addProblem('RE8014', [node]);
 
+  if (!isCellStretchedByTable(node) && hasInflowContent(node)) {
+    this.addProblem('RE8014', {
+      nodes: [node],
+      details: 'specifiedWidth=' + specifiedWidth + ', computedWidth=' +
+          computedWidth
+    });
+  }
 }
+
 ); // declareDetector
 
 });
