@@ -31,6 +31,12 @@ document.writeln("document.getElementById('bar'): " +
     document.getElementById('bar').innerHTML);
 document.writeln("document.getElementsByName('Bar')[0]: " +
     document.getElementsByName('Bar')[0].innerHTML);
+// Will get null.
+document.writeln("document.getElementById(): " +
+    document.getElementById());
+// Will get an empty node list.
+document.writeln("document.getElementsByName(): " +
+    document.getElementsByName());
 </script>
 </pre>
 </body>
