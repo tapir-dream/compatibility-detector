@@ -15,16 +15,19 @@
  */
 
 /**
- * @fileoverview: Check non-replaced inline element's height and width
+ * @fileoverview Check non-replaced inline element's height and width
  * settings only take effect in quirks mode in IE problems.
  * 
- * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=91
+ * @bug https://code.google.com/p/compatibility-detector/issues/detail?id=91
  *
- * Check document mode, when in quirks mode and the node is inline
- * non-replaced elements, if it sets width or height, there may be a problem.
+ * Check document mode, when in quirks mode and found a inline non-replaced
+ * element sets width or height, report problem.
  */
 
 addScriptToInject(function() {
+
+if (chrome_comp.documentMode.IE != 'Q')
+  return;
 
 chrome_comp.CompDetect.declareDetector(
 
@@ -32,24 +35,23 @@ chrome_comp.CompDetect.declareDetector(
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
-function constructor(rootNode) {
-  // TODO: check for Chrome / IE inconsistence for document.compatMode
-  this.inStandardsMode = !chrome_comp.inQuirksMode();
-},
+null, // constructor
 
 function checkNode(node, context) {
-  if (this.inStandardsMode)
-    return;
+
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
     return;
-  if (chrome_comp.getComputedStyle(node).display == 'inline' &&
+  var style = chrome_comp.getComputedStyle(node);
+  if (style.display == 'inline' &&
       !chrome_comp.isReplacedElement(node)) {
     var specifiedStyle = chrome_comp.getSpecifiedValue(node);
+    // If the inline non-replace element's width/height is specified, and it
+    // has background image but has no content or child elements, the layout
+    // will be very different in IE and Chrome, so in this case ,increase
+    // severity level to error.
     if (specifiedStyle.width != 'auto' || specifiedStyle.height != 'auto') {
-      // When the inline element has specified size, no content, and background 
-      // image, it may be invisible in Chrome. So upgrade to error level.
-      if (chrome_comp.getComputedStyle(node).backgroundImage != 'none' &&
-          !node.hasChildNodes())
+      if (style.backgroundImage != 'none' &&
+          (!node.hasChildNodes() || node.innerText.trim() == ""))
         this.addProblem('RD1014', {nodes: [node], severityLevel: 9});
       else
         this.addProblem('RD1014', {nodes: [node]});
