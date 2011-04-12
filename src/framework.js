@@ -268,12 +268,15 @@ window.chrome_comp = (function() {
       if (!ele)
         return;
       var computedStyle = ele.chrome_comp_computedStyleCache;
-      if (computedStyle)
+      if (computedStyle && !pseudo)
         return computedStyle;
       try {
         computedStyle = ele.ownerDocument.defaultView.getComputedStyle(ele,
             pseudo);
-        ele.chrome_comp_computedStyleCache = computedStyle;
+        // We cannot cache the style of the pseudo element on the current
+        // element here, or it will override the style of this element itself.
+        if (!pseudo)
+          ele.chrome_comp_computedStyleCache = computedStyle;
         return computedStyle;
       } catch (e) {
         chrome_comp.printError('getComputedStyle error: ', e);
