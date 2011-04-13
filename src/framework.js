@@ -112,6 +112,10 @@ window.chrome_comp = (function() {
               .replace(chrome_comp.TRAILING_WHITESPACES, '');
     },
 
+    isAutoOrNull: function(value) {
+      return 'auto' == value || null == value;
+    },
+
     /**
      * Send a request to the content script. The content script uses
      * document.documentElement.addEventListener(name, function()...) to
@@ -284,21 +288,6 @@ window.chrome_comp = (function() {
       }
     },
 
-    /**
-     * The cacheSpecifiedValue function caches the specified value of margin,
-     * border, padding, width and height properties in the property of every
-     * element. So we retrieve these values here. If there is no cached value or
-     * there is no specified node, we just return the empty object.
-     * @param {object} ele the specified node.
-     * @return {object} return the specified value of the node or the empty
-     *     object.
-     */
-    getSpecifiedValue: function(ele) {
-      if (!ele || !ele[chrome_comp.SPECIFIED_VALUE])
-        return {};
-      return ele[chrome_comp.SPECIFIED_VALUE];
-    },
-
     // Note: for scan dom detectors, please use context.isDisplayNone() in
     // checkNode() instead of this function to improve performance.
     isElementTrulyDisplayable: function(ele) {
@@ -399,8 +388,8 @@ window.chrome_comp = (function() {
       if (!node || Node.ELEMENT_NODE != node.nodeType)
         return false;
 
-      var specifiedWidth = chrome_comp.getSpecifiedValue(node).width;
-      if (specifiedWidth != 'auto')
+      var specifiedWidth = chrome_comp.getSpecifiedStyleValue(node, 'width');
+      if (!chrome_comp.isAutoOrNull(specifiedWidth))
         return false;
       // For the floating elements, the inline block elements and the absolutely
       // positioned elements, if 'width' is 'auto', the used value is the
@@ -419,44 +408,16 @@ window.chrome_comp = (function() {
     },
 
     /**
-     * Returns style information that is defined on specified node (including
-     * inline style).
-     * @param {object} node node to get prorotypes for.
-     * @param {boolean} authorOnly Determines whether only author styles need to
-     *     be added.
-     * @return {object} Style collection descriptor.
+     * Returns specified style property information that is defined on specified
+     * node (including inline style) by name.
+     * @param {object} node node to get prototypes for.
+     * @param {string} propertyName CSS property name.
+     * @return {object} value of specified style property information. Return
+     *     null if the specified property is not defined on the node.
      */
-    getNodeDefinedStyles: function(node, authorOnly) {
-      if (node.nodeType != this.Node.ELEMENT_NODE)
-        return [];
-      var macthedCSSStyles = [];
-      var stylesPerRule;
-      var matchedRules = node.ownerDocument.defaultView.getMatchedCSSRules(
-          node, '', authorOnly);
-      if (matchedRules) {
-        for (var i = 0, c = matchedRules.length; i < c; ++i) {
-          var rule = matchedRules[i];
-
-          var ruleStyle = rule.style;
-          stylesPerRule = {};
-          for (var j = 0, c1 = ruleStyle.length; j < c1; ++j) {
-            var name = ruleStyle[j];
-            stylesPerRule[name] = ruleStyle.getPropertyValue(name);
-          }
-          macthedCSSStyles.push(stylesPerRule);
-        }
-      }
-      // Get inline style
-      var inlineStyle = node.style;
-      if (inlineStyle && (inlineStyle instanceof CSSStyleDeclaration)) {
-        var inlineStyleColletion = {};
-        for (var j = 0, c = inlineStyle.length; j < c; ++j) {
-          var name = inlineStyle[j];
-          inlineStyleColletion[name] = inlineStyle.getPropertyValue(name);
-        }
-        macthedCSSStyles.push(inlineStyleColletion);
-      }
-      return macthedCSSStyles;
+    getSpecifiedStyleValue: function(node, propertyName) {
+      return chrome_comp.getDefinedStylePropertyByName(node, true,
+          propertyName);
     },
 
     /**
@@ -465,42 +426,42 @@ window.chrome_comp = (function() {
      * @param {object} node node to get prototypes for.
      * @param {boolean} authorOnly Determines whether only author styles need to
      *     be added.
+     * @param {string} propertyName CSS property name.
      * @return {object} value of specified style property information. Return
-     *     undefined if the specified property is not defined on the node.
+     *     null if the specified property is not defined on the node.
      */
+    // TODO: replace getDefinedStylePropertyByName with getSpecifiedStyleValue
+    // This name is too long and has useless authorOnly parameter.
     getDefinedStylePropertyByName: function(node, authorOnly, propertyName) {
-      var value;
-      if (node) {
-        if (node.style) {
-          value = node.style.getPropertyValue(propertyName);
-          if (node.style.getPropertyPriority(propertyName))
-            return value;
-        }
-        var styleRules = node.ownerDocument.defaultView.getMatchedCSSRules(
-            node, '', authorOnly);
-        if (styleRules) {
-          for (var i = styleRules.length - 1; i >= 0; i--) {
-            var style = styleRules[i].style;
-            if (style.getPropertyPriority(propertyName))
-              return style.getPropertyValue(propertyName);
-            if (!value)
-              value = style.getPropertyValue(propertyName);
-          }
-        }
+      // CSSStyleDeclaration.getPropertyValue returns null instead of
+      // empty string if the property has not been set in Webkit. So we
+      // initialize the return value as null here.
+      // http://www.w3.org/TR/DOM-Level-2-Style/css.html#CSS-CSSStyleDeclaration
+      var value = null;
+      if (!node || node.nodeType != Node.ELEMENT_NODE)
+        return value;
+
+      if (node.style) {
+        value = node.style.getPropertyValue(propertyName);
+        // The !important style takes precedence.
+        if (node.style.getPropertyPriority(propertyName))
+          return value;
+      }
+
+      var styleRules = node.ownerDocument.defaultView.getMatchedCSSRules(
+          node, '', authorOnly);
+      if (!styleRules)
+        return value;
+
+      for (var i = styleRules.length - 1; i >= 0; --i) {
+        var style = styleRules[i].style;
+        // The !important style may override inline style.
+        if (style.getPropertyPriority(propertyName))
+          return style.getPropertyValue(propertyName);
+        if (!value)
+          value = style.getPropertyValue(propertyName);
       }
       return value;
-    },
-
-    getDefinedStylePropertyByName2: function(node, authorOnly, propertyName) {
-      if (node) {
-        var macthedCSSStyles =
-            chrome_comp.getNodeDefinedStyles(node, authorOnly);
-        for (var i = 0, c = macthedCSSStyles.length; i < c; ++i) {
-          var styelsPerRule = macthedCSSStyles[i];
-          if (propertyName in styelsPerRule)
-            return styelsPerRule[propertyName];
-        }
-      }
     },
 
     isReplacedElement: function(element) {
@@ -560,13 +521,14 @@ window.chrome_comp = (function() {
       if (element.tagName in this.HASLAYOUT_TAG_NAME_LIST)
         return true;
       var style = chrome_comp.getComputedStyle(element);
+      var width = chrome_comp.getSpecifiedStyleValue(element, 'width');
+      var height = chrome_comp.getSpecifiedStyleValue(element, 'height');
       if (style.float != 'none' ||
           style.position == 'absolute' ||
           style.display == 'inline-block' ||
-          parseInt(chrome_comp.getSpecifiedValue(element).width) > 0 ||
-          parseInt(chrome_comp.getSpecifiedValue(element).height) > 0 ||
-          chrome_comp.getDefinedStylePropertyByName(element, false,
-              'zoom') != null)
+          !chrome_comp.isAutoOrNull(width) ||
+          !chrome_comp.isAutoOrNull(height) ||
+          chrome_comp.getSpecifiedStyleValue(element, 'zoom') != null)
         return true;
       return false;
     },
@@ -1427,70 +1389,6 @@ chrome_comp.CompDetect = (function() {
     }
   }
 
-  /**
-   * Hide the root element to get the specified value of margin, border,
-   * padding, width and height properties of the elements, and cache these
-   * values.
-   */
-  function cacheSpecifiedValue() {
-    // In this function, we can cache many information of each element.
-    // Because getting the truly state (show or hide) of the element need to
-    // refer to its ancestor, so we can cache this state passingly.
-    function getTrulyDisplayable(ele, style) {
-      if (style.display == 'none')
-        return 'none';
-      if (ele.parentElement[chrome_comp.SPECIFIED_VALUE] &&
-          ele.parentElement[chrome_comp.SPECIFIED_VALUE].display == 'none')
-        return 'none';
-      return style.display;
-    }
-
-    var root = document.documentElement;
-    if (!root) {
-      chrome_comp.printError('Error getting the specified value.');
-      return;
-    }
-    var allElements = root.getElementsByTagName('*');
-    var inlineDisplay = root.style.display;
-    root.style.display = 'none !important';
-    // We cache some properties' specified values when the root element is
-    // invisible. When we change the display style of the root node, the
-    // browser's rendering engine may do some optimization, and page layout
-    // will not be changed.
-    // To enforce the reflow, we get the value of offsetWidth here. Refer to
-    // http://www.stubbornella.org/content/2009/03/27/
-    // reflows-repaints-css-performance-making-your-javascript-slow/
-    // and
-    // http://www.mozilla.org/newlayout/doc/reflow.html.
-    root.offsetWidth;
-    for (var i = 0, len = allElements.length; i < len; ++i) {
-      var element = allElements[i];
-      var style = chrome_comp.getComputedStyle(element);
-      element[chrome_comp.SPECIFIED_VALUE] = {
-        width: style.width,
-        height: style.height,
-        marginLeft: style.marginLeft,
-        marginRight: style.marginRight,
-        marginTop: style.marginTop,
-        marginBottom: style.marginBottom,
-        borderLeftWidth: style.borderLeftWidth,
-        borderRightWidth: style.borderRightWidth,
-        borderTopWidth: style.borderTopWidth,
-        borderBottomWidth: style.borderBottomWidth,
-        paddingTop: style.paddingTop,
-        paddingBottom: style.paddingBottom,
-        paddingLeft: style.paddingLeft,
-        paddingRight: style.paddingRight,
-        display: getTrulyDisplayable(element, style)
-      };
-    }
-    root.style.display = null;
-    if (inlineDisplay)
-      root.style.display = inlineDisplay;
-    // To enforce the reflow, the same as the previous.
-    root.offsetWidth;
-  }
-
   return {
     getAllProblems: function() {
       return problems_;
@@ -1695,7 +1593,6 @@ chrome_comp.CompDetect = (function() {
       if (detectionStarted)
         return;
       detectionStarted = true;
-      cacheSpecifiedValue();
 
       var timer = chrome_comp.CompDetectorConfig.delayRunDetectionTimer;
       // Check whether we need to immediately call load handler of
