@@ -1081,8 +1081,6 @@ chrome_comp.CompDetect = (function() {
   // Array which contains all type detectors
   var detectors_ = [];
 
-  var detectionStarted = false;
-
   // All problems reported so far.
   // key: type id
   // value: serialized report data, which includes all the occurrences of the
@@ -1228,7 +1226,7 @@ chrome_comp.CompDetect = (function() {
       // element to add a listener for the root element, so we must ignore the
       // injected SCRIPT element for the processNode function.
       if (nodes[i].tagName == 'SCRIPT' &&
-          nodes[i].parentElement == document.documentElement)
+          nodes[i].parentNode == document.documentElement)
         continue;
       processNode(nodes[i], compDetectorArray);
     }
@@ -1337,7 +1335,7 @@ chrome_comp.CompDetect = (function() {
       checkDetectionResultForNode(element,
           element.getAttribute('expectedproblems'));
       var childNodes = element.childNodes;
-      const CHILD_PREFIX = 'expectedproblemschild';
+      var CHILD_PREFIX = 'expectedproblemschild';
       for (var i = 0, c = element.attributes.length; i < c; i++) {
         var attr = element.attributes[i];
         var name = attr.name;
@@ -1580,20 +1578,8 @@ chrome_comp.CompDetect = (function() {
       });
     },
 
-    diagnoseCompatibilityIssuesManually: function() {
-      if ('complete' != document.readyState)
-        return;
-      // Start detection immediately
-      chrome_comp.CompDetectorConfig.delayRunDetection = false;
-      chrome_comp.CompDetect.diagnoseCompatibilityIssues();
-    },
-
     // Diagnose  compatibility issues on current page
     diagnoseCompatibilityIssues: function() {
-      if (detectionStarted)
-        return;
-      detectionStarted = true;
-
       var timer = chrome_comp.CompDetectorConfig.delayRunDetectionTimer;
       // Check whether we need to immediately call load handler of
       // CompDetector.
@@ -1958,10 +1944,10 @@ chrome_comp.CompDetect.ScanDomBaseDetector.prototype.canCheckNow = function() {
   return this.gatherAllProblemNodes_ || !this.hasProblem_;
 };
 
-window.addEventListener('load',
+var CHROME_COMP_LOAD = 'chrome_comp_load';
+
+window.addEventListener(CHROME_COMP_LOAD,
     chrome_comp.CompDetect.diagnoseCompatibilityIssues, false);
-window.addEventListener('chrome_comp_load',
-    chrome_comp.CompDetect.diagnoseCompatibilityIssuesManually, false);
 window.addEventListener('unload',
     chrome_comp.CompDetect.cleanUpDetectors, false);
 
