@@ -573,8 +573,69 @@ window.chrome_comp = (function() {
 
     inQuirksMode: function() {
       return document.compatMode != 'CSS1Compat';
-    }
+    },
 
+    toInt: function(value) {
+      if (!value)
+        return 0;
+      var result = parseInt(value, 10);
+      if (isNaN(result))
+        return 0;
+      return result;
+    },
+
+    /**
+     * Get an element's margin edge, border edge, padding edge and content
+     * edge's coordinates.
+     * @param {Element} element Target element.
+     * @return {object} Contains 4 rectangles: marginBox, borderBox, paddingBox,
+     *     contentBox, each rectangle has 4 members: left, top, right, bottom.
+     */
+    getLayoutBoxes: function(element) {
+      var boundingClientRect = element.getBoundingClientRect();
+
+      // Adjust the box to the page.
+      var borderEdge = {
+        top: boundingClientRect.top + window.pageYOffset,
+        left: boundingClientRect.left + window.pageXOffset,
+        bottom: boundingClientRect.bottom + window.pageYOffset,
+        right: boundingClientRect.right + window.pageXOffset
+      };
+  
+      var style = chrome_comp.getComputedStyle(element);
+      var marginEdge = {
+        top: borderEdge.top - chrome_comp.toInt(style.marginTop),
+        left: borderEdge.left - chrome_comp.toInt(style.marginLeft),
+        bottom: borderEdge.bottom + chrome_comp.toInt(style.marginBottom),
+        right: borderEdge.right + chrome_comp.toInt(style.marginRight)
+      };
+
+      // Use clientWidth/clientHeight to exclude the scroll bar.
+      var paddingEdgeTop =
+          borderEdge.top + chrome_comp.toInt(style.borderTopWidth);
+      var paddingEdgeLeft =
+          borderEdge.left + chrome_comp.toInt(style.borderLeftWidth);
+      var paddingEdge = {
+        top: paddingEdgeTop,
+        left: paddingEdgeLeft,
+        bottom: paddingEdgeTop + element.clientHeight,
+        right: paddingEdgeLeft + element.clientWidth
+      };
+
+      var contentEdge = {
+        top: paddingEdge.top + chrome_comp.toInt(style.paddingTop),
+        left: paddingEdge.left + chrome_comp.toInt(style.paddingLeft),
+        bottom: paddingEdge.bottom - chrome_comp.toInt(style.paddingBottom),
+        right: paddingEdge.right - chrome_comp.toInt(style.paddingRight)
+      };
+  
+      return {
+        marginEdge: marginEdge,
+        borderEdge: borderEdge,
+        paddingEdge: paddingEdge,
+        contentEdge: contentEdge
+      };
+    }
   };  // return
 })();
 
