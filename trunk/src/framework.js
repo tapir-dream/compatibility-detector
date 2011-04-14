@@ -595,47 +595,48 @@ window.chrome_comp = (function() {
       var boundingClientRect = element.getBoundingClientRect();
 
       // Adjust the box to the page.
-      var borderEdge = {
-        top: boundingClientRect.top + window.pageYOffset,
+      var borderBox = {
         left: boundingClientRect.left + window.pageXOffset,
-        bottom: boundingClientRect.bottom + window.pageYOffset,
-        right: boundingClientRect.right + window.pageXOffset
+        top: boundingClientRect.top + window.pageYOffset,
+        right: boundingClientRect.right + window.pageXOffset,
+        bottom: boundingClientRect.bottom + window.pageYOffset
       };
   
       var style = chrome_comp.getComputedStyle(element);
-      var marginEdge = {
-        top: borderEdge.top - chrome_comp.toInt(style.marginTop),
-        left: borderEdge.left - chrome_comp.toInt(style.marginLeft),
-        bottom: borderEdge.bottom + chrome_comp.toInt(style.marginBottom),
-        right: borderEdge.right + chrome_comp.toInt(style.marginRight)
+      var marginBox = {
+        left: borderBox.left - chrome_comp.toInt(style.marginLeft),
+        top: borderBox.top - chrome_comp.toInt(style.marginTop),
+        right: borderBox.right + chrome_comp.toInt(style.marginRight),
+        bottom: borderBox.bottom + chrome_comp.toInt(style.marginBottom)
       };
 
       // Use clientWidth/clientHeight to exclude the scroll bar.
-      var paddingEdgeTop =
-          borderEdge.top + chrome_comp.toInt(style.borderTopWidth);
-      var paddingEdgeLeft =
-          borderEdge.left + chrome_comp.toInt(style.borderLeftWidth);
-      var paddingEdge = {
-        top: paddingEdgeTop,
-        left: paddingEdgeLeft,
-        bottom: paddingEdgeTop + element.clientHeight,
-        right: paddingEdgeLeft + element.clientWidth
+      var paddingBoxLeft =
+          borderBox.left + chrome_comp.toInt(style.borderLeftWidth);
+      var paddingBoxTop =
+          borderBox.top + chrome_comp.toInt(style.borderTopWidth);
+      var paddingBox = {
+        left: paddingBoxLeft,
+        top: paddingBoxTop,
+        right: paddingBoxLeft + element.clientWidth,
+        bottom: paddingBoxTop + element.clientHeight
       };
 
-      var contentEdge = {
-        top: paddingEdge.top + chrome_comp.toInt(style.paddingTop),
-        left: paddingEdge.left + chrome_comp.toInt(style.paddingLeft),
-        bottom: paddingEdge.bottom - chrome_comp.toInt(style.paddingBottom),
-        right: paddingEdge.right - chrome_comp.toInt(style.paddingRight)
+      var contentBox = {
+        left: paddingBox.left + chrome_comp.toInt(style.paddingLeft),
+        top: paddingBox.top + chrome_comp.toInt(style.paddingTop),
+        right: paddingBox.right - chrome_comp.toInt(style.paddingRight),
+        bottom: paddingBox.bottom - chrome_comp.toInt(style.paddingBottom)
       };
   
       return {
-        marginEdge: marginEdge,
-        borderEdge: borderEdge,
-        paddingEdge: paddingEdge,
-        contentEdge: contentEdge
+        marginBox: marginBox,
+        borderBox: borderBox,
+        paddingBox: paddingBox,
+        contentBox: contentBox
       };
     }
+
   };  // return
 })();
 
