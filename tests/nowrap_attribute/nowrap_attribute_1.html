@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html chrome_comp_test="nowrap_attribute">
+<head>
+<style>
+body {font:16px/20px Arial;}
+</style>
+<script>
+window.onload = function(){
+  var nodeList = document.body.getElementsByClassName('set_nowrap');
+  for (var i = 0, c = nodeList.length; i < c; ++i)
+    nodeList[i].noWrap= true;
+}
+</script>
+</head>
+<body>
+
+<pre>
+&lt;script&gt;
+window.onload = function(){
+  var nodeList = document.body.getElementsByClassName('*');
+  for (var i = 0, c = nodeList.length; i &lt; c; ++i)
+    nodeList[i].noWrap= true;
+}
+&lt;/script&gt;
+</pre>
+
+<p>1.</p>
+<div class="set_nowrap" style="width:150px; border:1px solid #000;" expectedProblems="HE1003">DIV tag have problems</div>
+
+<p>2.</p>
+<dl>
+  <dt class="set_nowrap" style="width:150px; border:1px solid #000;" expectedProblems="HE1003">DT tag Have problems</dt>
+  <dd class="set_nowrap" style="width:150px; border:1px solid #000;" expectedProblems="HE1003">DD tag Have problems</dd>
+</dl>
+
+<hr/>
+
+<h2>The followings don't have problems</h2>
+
+<p>A1.</p>
+<h1 class="set_nowrap" style="width:300px; border:1px solid #000;">H1 tag don't have problems</h1>
+
+<p>A2.</p>
+<p class="set_nowrap" style="width:300px; border:1px solid #000;">P tag don't have problems</p>
+
+<p>A3.</p>
+<ul>
+  <li class="set_nowrap" style="width:300px; border:1px solid #000;">LI tag don't have problems</li>
+</ul>
+
+<p>A4.</p>
+<span class="set_nowrap" style="display:block; width:300px; border:1px solid #000;" >SPAN tag don't have problems</span>
+
+<p>A5.</p>
+<table class="set_nowrap" style="width:300px;">
+  <tr>
+    <th class="set_nowrap" style=" border:1px solid #000;">TH tag don't have problems</th>
+  </tr>
+  <tr>
+    <td class="set_nowrap" style=" border:1px solid #000;">TD tag don't have problems</td>
+  </tr>
+</table>
+
+<p>A6.</p>
+<h3 class="set_nowrap" style="width:300px; border:1px solid #000 white-space:nowrap;">H3 tag style is white-space:nowrap don't have problems</h3>
+
+<p>A7.</p>
+<p class="set_nowrap" style="width:300px; border:1px solid #000 white-space:nowrap;">P tag style is white-space:nowrap don't have problems</p>
+
+<p>A8.</p>
+<div class="set_nowrap" style="width:600px; border:1px solid #000;" >DIV tag width is 600px don't have problems</div>
+
+<p>(End of test)</p>
+</body>
+</html>
