@@ -15,13 +15,14 @@
  */
 
 /*
- * 1. in IE6 IE7 IE8(Q) 'white-space' priority level:
- *    CSS property > nowrap attribute.
- * 2. object.noWrap = true can't overlap effect of 'white-space' property
- *    that set by author, but it can overlap effect of 'white-space' property
- *    through setting by UA(normal) or nowrap attribute(nowrap).
- * 3. set object.noWrap to true or false only affect the 'white-space'
- *    property of DIV DD DT.
+ * @fileoverview Check nowrap attribute on all elements.
+ * @bug https://code.google.com/p/compatibility-detector/issues/detail?id=43
+ *
+ * Check DIV DT DD elmement.
+ * If meet all of the following 3 conditions, then report issue 'HE1003':
+ * 1. It has nowrap attribute or node.noWrap is true.
+ * 2. The computed 'white-space' is not 'nowrap'
+ * 3. The child is wider than parent.
  */
 
 addScriptToInject(function() {
@@ -32,39 +33,75 @@ chrome_comp.CompDetect.declareDetector(
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
-null, // constructor
-
-/*
- * report problem if meeting one of the following 2 conditions:
- * 1. If element has nowrap attribute and computed value of 'white-space'
- *    property is not 'nowrap'.
- *    1.1. Current element DOM object has not noWrap DOM attribute;
- *    1.2. element DOM object has noWrap DOM attribute and attribute value is
- *         excluding false, 0, '', null, undefined, NaN etc.
- * 2. Author set elementDomObject.noWrap = true and not set 'white-space'
- *    property. This equals to only set nowrap attribute.
- */
+function constructor() {
+  this.isTextNodeOverflowContainer = function(container) {
+    var containerWidth = container.getBoundingClientRect().width;
+    var oldWhiteSpace = container.style.whiteSpace;
+    // Set container style property, in order to accurately calculate
+    // width vale of the text does not wrap.
+    container.style.whiteSpace = 'nowrap !important';
+    var childNodes = container.childNodes;
+    var result = false;
+    for (var i = 0, c = childNodes.length; i < c; ++i) {
+      if (childNodes[i].nodeType == Node.TEXT_NODE) {
+        var textNodeWidth = chrome_comp.getTextNodeRect(childNodes[i]).width;
+        if (textNodeWidth > containerWidth) {
+          result = true;
+          break;
+        }
+      }
+    }
+    container.style.whiteSpace = null;
+    container.style.whiteSpace = oldWhiteSpace;
+    return result;
+  };
+},
 
 function checkNode(node, context) {
-  if(Node.ELEMENT_NODE != node.nodeType)
+  // Only detect ELEMENT_NODE and visible Element.
+  if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
     return;
   var tagName = node.tagName;
-  // if BODY has nowrap attribute, DIV and P can inherit from BODY and apply
-  // 'white-space : nowrap' in IE6 IE7 IE8(Q).
-  // The page may has problem when only detecting BODY
-  if ((tagName != 'BODY' && tagName != 'DIV' && tagName != 'DT' &&
-      tagName != 'DD') || context.isDisplayNone())
+
+  // BODY tag can set nowrap attribute too, it can affect its descendant
+  // inline elements, but this situation is very rare in practice, so we
+  // do not detect it.
+  var CHECK_TAGNAMES = {DIV: true, DT: true, DD: true};
+
+  if (!(tagName in CHECK_TAGNAMES))
     return;
 
   var computedStyle = chrome_comp.getComputedStyle(node);
-  var defStyle =
-    chrome_comp.getDefinedStylePropertyByName(node, '', 'white-space');
 
-  //main
-  if ((node.hasAttribute('nowrap') && computedStyle.whiteSpace != 'nowrap' &&
-      (!node.hasOwnProperty('noWrap') || node.noWrap)) ||
-      (node.noWrap && !defStyle)) {
-    this.addProblem('HE1003', [node]);
+  if (computedStyle.whiteSpace == 'nowrap')
+    return;
+
+  var hasNoWrapAttribute = node.hasAttribute('nowrap');
+  var hasNoWrapProperty = node.hasOwnProperty('noWrap');
+  // As long as the node.noWrap is false and whiteSpace style is not
+  // nowrap and has nowrap attribute, then IE is no problem.
+  // TODO: IE has node.noWrap property, Chrome without it.
+  // If js set node.noWrap = true, will is add custom Property in Chrome.
+  if (hasNoWrapAttribute && hasNoWrapProperty && !node.noWrap)
+     return;
+
+  // HTML has nowrap attribute and node object has not nowrap property.
+  if (hasNoWrapAttribute && !hasNoWrapProperty) {
+    if (this.isTextNodeOverflowContainer(node))
+      this.addProblem('HE1003', {
+        nodes: [node],
+        details: node.tagName + ' nowrap="' +
+            node.getAttribute('nowrap') + '"'
+      });
+  }
+
+  // HTML has not nowrap attribute and node has nowrap property and it is true.
+  if (!hasNoWrapAttribute && hasNoWrapProperty && node.noWrap) {
+    if (this.isTextNodeOverflowContainer(node))
+      this.addProblem('HE1003', {
+        nodes: [node],
+        details: node.tagName + '.noWrap=true'
+      });
   }
 }
 ); // declareDetector

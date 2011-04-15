@@ -1,26 +1,51 @@
-<!DOCTYPE html> 
-<html chrome_comp_test="nowrap_attribute"> 
-<head> 
-</head> 
-<body style="font:12px Arial;">
-	<div expectedProblems="HE1003" nowrap="nowrap" id="d0" style="width:100px;background:#DDD;">nowrap nowrap nowrap attribute</div>
-	<dl>
-        <dt expectedProblems="HE1003" nowrap id="dt" style="width:100px;background:#DDD;">DT: DT: DT: DT: DT: DT: </dt>
-        <dd expectedProblems="HE1003" nowrap style="width:100px;background:#DDD;">DD: DD: DD: DD: DD: DD: </dd>
-    </dl>
-	<div expectedProblems="HE1003" id="d1" style="width:100px;background:#DDD;">object.noWrap = true without 'white-space' of CSS property</div>
-	<br />
-	<div id="d2" style="width:100px;background:#DDD;white-space:normal;">object.noWrap = true with 'white-space' of CSS property</div>
-	<br />
-	<div id="d3" nowrap style="width:100px;background:#DDD;">object.noWrap = false and has nowrap attribute</div>
-	<br/>
-	<div id="d4" nowrap style="width:100px;background:#DDD;">object.noWrap = undefined and has nowrap attribute</div>
-	
-	
-	<script type="text/javascript">
-		document.getElementById("d1").noWrap = true;
-		document.getElementById("d3").noWrap = false;
-		document.getElementById("d4").noWrap = undefined;
-	</script>
+<!DOCTYPE html>
+<html chrome_comp_test="nowrap_attribute">
+<head>
+<style>
+body {font:16px/20px Arial;}
+</style>
+</head>
+<body>
+<p>1.</p>
+<div style="width:120px; border:1px solid #000;" nowrap expectedProblems="HE1003">DIV tag nowrap attribute have problems</div>
+
+<p>2.</p>
+<dl>
+  <dt style="width:120px; border:1px solid #000;" nowrap expectedProblems="HE1003">DT tag nowrap attribute have problems</dt>
+  <dd style="width:120px; border:1px solid #000;" nowrap expectedProblems="HE1003">DD tag nowrap attribute have problems</dd>
+</dl>
+
+<hr/>
+
+<h2>The followings don't have problems</h2>
+
+<p>A1.</p>
+<h1 style="width:120px; border:1px solid #000;" nowrap>H1 tag  nowrap attribute don't have problems</h1>
+
+<p>A2.</p>
+<p style="width:120px; border:1px solid #000;" nowrap>P tag nowrap attribute don't have problems</p>
+
+<p>A3.</p>
+<ul>
+  <li style="width:120px; border:1px solid #000;"nowrap>LI tag nowrap attribute don't have problems</li>
+</ul>
+
+<p>A4.</p>
+<span style="display:block; width:120px; border:1px solid #000;" nowrap>SPAN tag nowrap attribute don't have problems</span>
+
+<p>A5.</p>
+<table style="width:120px;">
+  <tr>
+    <th style=" border:1px solid #000;" nowrap>TH tag nowrap attribute don't have problems</th>
+  </tr>
+  <tr>
+    <td style=" border:1px solid #000;" nowrap>TD tag nowrap attribute don't have problems</td>
+  </tr>
+</table>
+
+<p>A6.</p>
+<div style="width:600px; border:1px solid #000;" nowrap>DIV tag width is 600px don't have problems</div>
+
+<p>(End of test)</p>
 </body>
 </html>
