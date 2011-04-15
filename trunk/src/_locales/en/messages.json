@@ -125,5 +125,7 @@
   "BT1038_suggestion": { "message": "Avoid using the lowsrc attribute." },
   "BX9055": {"message": "window.execScript is not supported by all browsers" },
   "BX9055_suggestion": { "message": "Please make sure your target browsers support window.execScript." },
+  "RE8015": { "message": "Changing the 'display' property default values for HTML table elements will not affect their behavior in IE" },
+  "RE8015_suggestion": { "message": "Avoid to modify the 'display' property default values for HTML table elements. If need to hide the table like elements (display: none) and restore to visible, we can set an illegal value£¬e.g. TR.style.display = '';"},
   "lastLine": { "message": "lastLine" }
 }
