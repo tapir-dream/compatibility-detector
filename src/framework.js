@@ -601,7 +601,7 @@ window.chrome_comp = (function() {
         right: boundingClientRect.right + window.pageXOffset,
         bottom: boundingClientRect.bottom + window.pageYOffset
       };
-  
+
       var style = chrome_comp.getComputedStyle(element);
       var marginBox = {
         left: borderBox.left - chrome_comp.toInt(style.marginLeft),
@@ -628,17 +628,222 @@ window.chrome_comp = (function() {
         right: paddingBox.right - chrome_comp.toInt(style.paddingRight),
         bottom: paddingBox.bottom - chrome_comp.toInt(style.paddingBottom)
       };
-  
+
       return {
         marginBox: marginBox,
         borderBox: borderBox,
         paddingBox: paddingBox,
         contentBox: contentBox
       };
+    },
+
+    hasBorder: function(element) {
+      var computedStyle = chrome_comp.getComputedStyle(element);
+      if (chrome_comp.toInt(computedStyle.borderTopWidth) == 0 &&
+          chrome_comp.toInt(computedStyle.borderRightWidth) == 0 &&
+          chrome_comp.toInt(computedStyle.borderBottomWidth) == 0 &&
+          chrome_comp.toInt(computedStyle.borderLeftWidth) == 0)
+        return false;
+      return true;
+    },
+
+    hasBackground: function(element) {
+      var computedStyle = chrome_comp.getComputedStyle(element);
+      if (computedStyle.backgroundColor == 'rgba(0, 0, 0, 0)' &&
+          computedStyle.backgroundImage == 'none')
+        return false;
+      return true;
+    },
+
+    hasVisibleFloatingChild: function(element) {
+      var childNodes = Array.prototype.slice.call(element.children);
+      var nodes = [];
+      for (var i = 0, c = childNodes.length; i < c; ++i) {
+        var childNode = childNodes[i];
+        var computedStyle = chrome_comp.getComputedStyle(childNode);
+        if (computedStyle['float'] != 'none' &&
+            computedStyle.display != 'none' &&
+            childNode.offsetWidth > 0)
+          return true;
+      }
+      return false;
+    },
+
+    isMarginLeftAuto: function(element) {
+      return chrome_comp.getSpecifiedStyleValue(element,
+          'margin-left') == 'auto';
+    },
+
+    isMarginRightAuto: function(element) {
+      return chrome_comp.getSpecifiedStyleValue(element,
+          'margin-right') == 'auto';
+    },
+
+    /**
+     * If the node is set width value, marginLeft and marginRight
+     * value is 'auto', this box is align center.
+     */
+    isCenterAlignedByMarginAndWidth: function(element) {
+      var computedStyle = chrome_comp.getComputedStyle(element);
+      // Display is inline-table or table-row/table-cell/table-...
+      // all not auto center aligned.
+      if (computedStyle.display.indexOf('table-') == 0 ||
+          computedStyle.display == 'inline-talbe')
+        return false;
+      var width = chrome_comp.getSpecifiedStyleValue(element, 'width');
+      // Only display is table and not set style width, can use html attribute
+      // width value instead of style width value.
+      if (width == null && computedStyle.display == 'table')
+        width = element.getAttribute('width');
+      var marginLeft =
+          chrome_comp.getSpecifiedStyleValue(element, 'margin-left');
+      var marginRight =
+          chrome_comp.getSpecifiedStyleValue(element, 'margin-right');
+      if (!chrome_comp.isAutoOrNull(width) &&
+          marginLeft == 'auto' && marginRight == 'auto') {
+        return true;
+      }
+      return false;
+    },
+
+    /**
+     * containerRect.left
+     * ^
+     * |
+     * |<---   containerContentBoxWidth   --->|
+     * +--------------------------------------+
+     * |    *expect render position           |
+     * |    child marginLayoutBox left        |
+     * |    |<-- childMarginLayoutBox -->|    |
+     * |    +----------------------------+    |
+     * |    |         child node         |    |
+     * |    |                            |    |
+     * |    +----------------------------+    |
+     * +--------------------------------------+
+     *
+     * @param {Element} container
+     * @param {Element} child
+     * @param {number=} opt_threshold value to ignore small differences of the
+     *      layout, default is 1.
+     * @return {boolean}
+     */
+    isVisuallyCenterAligned: function(container, child, opt_threshold) {
+      if ("number" != typeof opt_threshold)
+        opt_threshold = 1;
+      var containerLayoutBoxes = chrome_comp.getLayoutBoxes(container);
+      var childLayoutBoxes = chrome_comp.getLayoutBoxes(child);
+      if (chrome_comp.util.width(childLayoutBoxes.marginBox) >
+          chrome_comp.util.width(containerLayoutBoxes.contentBox))
+        return true;
+      var leftGap = childLayoutBoxes.marginBox.left -
+          containerLayoutBoxes.contentBox.left;
+      var rightGap = containerLayoutBoxes.contentBox.right -
+          childLayoutBoxes.marginBox.right;
+      return Math.abs(leftGap - rightGap) <= opt_threshold;
+    },
+
+    /**
+     *          containerContentLayoutBox.right
+     *                                        ^
+     * |<-- containerContentLayoutBoxWidth -->|
+     * +--------------------------------------+
+     * |               expect render position*|
+     * |       containerContentLayoutBox.right|
+     * |         |<-- childMarginLayoutBox -->|
+     * |         +----------------------------+
+     * |         |        child node          |
+     * |         |                            |
+     * |         +----------------------------+
+     * +--------------------------------------+
+     *
+     * @param {Element} container
+     * @param {Element} child
+     * @param {number=} opt_threshold value to ignore small differences of the
+     *      layout, default is 1.
+     * @return {boolean}
+     */
+    isVisuallyRightAligned: function(container, child, opt_threshold) {
+      if ("number" != typeof opt_threshold)
+        opt_threshold = 1;
+      var containerLayoutBoxes = chrome_comp.getLayoutBoxes(container);
+      var childLayoutBoxes = chrome_comp.getLayoutBoxes(child);
+      var containerContentBoxRight = containerLayoutBoxes.contentBox.right;
+      var childMarginBoxRight = childLayoutBoxes.marginBox.right;
+      // If child margin box right greater than container contentBox right
+      // (child margin box right overflow container contentBox right),
+      // then the align layout will be invalid, not detecor.
+      if (childMarginBoxRight > containerContentBoxRight)
+        return true;
+      return containerContentBoxRight - childMarginBoxRight <= opt_threshold;
+    },
+
+    /**
+     * containerContentLayoutBox.left
+     * ^
+     * |<--containerContentLayoutBox.width -->|
+     * +--------------------------------------+
+     * |*expect render position               |
+     * |containerContentLayoutBox.left        |
+     * |<-- childMarginLayoutBox -->|         |
+     * +----------------------------+         |
+     * |         child node         |         |
+     * |                            |         |
+     * +----------------------------+         |
+     * +--------------------------------------+
+     *
+     * @param {Element} container
+     * @param {Element} child
+     * @param {number=} opt_threshold value to ignore small differences of the
+     *      layout, default is 1.
+     * @return {boolean}
+     */
+    isVisuallyLeftAligned: function(container, child, opt_threshold) {
+      if ("number" != typeof opt_threshold)
+        opt_threshold = 1;
+      var containerLayoutBoxes = chrome_comp.getLayoutBoxes(container);
+      var childLayoutBoxes = chrome_comp.getLayoutBoxes(child);
+      var containerContentBoxLeft = containerLayoutBoxes.contentBox.left;
+      var childMarginBoxLeft = childLayoutBoxes.marginBox.left;
+      // If child margin box left smaller than container contentBox left
+      // (child margin box left overflow container contentBox left),
+      // then the align layout will be invalid, not detecor.
+      if (childMarginBoxLeft < containerContentBoxLeft)
+        return true;
+      return containerContentBoxLeft - childMarginBoxLeft <= opt_threshold;
+    },
+
+    /**
+     * Get text node rect. If param is not text node, will return false.
+     * @param {TextNode} textNode
+     * @return {ClientRect} rect is a map, have keys
+     *     {top,bottom,left,right,width,height}, or null if not a text node.
+     */
+    getTextNodeRect: function(textNode) {
+      if (textNode.nodeType != Node.TEXT_NODE)
+        return null;
+      var range = document.createRange();
+      range.selectNode(textNode);
+      return range.getBoundingClientRect();
     }
 
   };  // return
 })();
+
+chrome_comp.util = {};
+
+/**
+ * @param {Object} rect A rectangle object, has left/right property.
+ */
+chrome_comp.util.width = function(rect) {
+  return rect.right - rect.left;
+};
+
+/**
+ * @param {Object} rect A rectangle object, has top/bottom property.
+ */
+chrome_comp.util.height = function(rect) {
+  return rect.bottom - rect.top;
+};
 
 chrome_comp.Rect = function(x, y, w, h) {
   this.left = x;
