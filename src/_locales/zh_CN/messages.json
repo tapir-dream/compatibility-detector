@@ -612,7 +612,9 @@
   "RD8026": { "message": "各浏览器对于未明确设定高度的包含块内包含百分比单位高度的块级元素或行内块元素的高度计算存在差异" },
   "RD8026_suggestion": { "message": "要对设置有百分比高度的块级元素的包含块设置明确的 height 属性值。" },
   "RE1020": { "message": "IE6 IE7 IE8(Q) 不支持 border-spacing 特性" },
-  "RE1020_suggestion": { "message": "'border-spacing' 不是所有浏览器都能很好的支持，若水平和垂直方向的空间相等，可以用 TABLE 的 cellspacing 属性代替 'border-spacing' 特性。"}
+  "RE1020_suggestion": { "message": "'border-spacing' 不是所有浏览器都能很好的支持，若水平和垂直方向的空间相等，可以用 TABLE 的 cellspacing 属性代替 'border-spacing' 特性。"},
 
+  "RE8015": { "message": "IE 中 TABLE 等表格类元素的 'display' 特性的值被设置为 'table'、'inline-table' 之外的其他合法值后其 TABLE 特性不受影响" },
+  "RE8015_suggestion": { "message": "避免改变表格类元素的默认 'display' 特性。若需要隐藏某个表格类元素，即设定其 'display' 特性为 'none'，之后需要恢复其的可视状态，可以为其设定一个非法的 'display' 特性的值，如：TR.style.display = '';"}
 
 }
