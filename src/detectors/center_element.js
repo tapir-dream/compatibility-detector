@@ -15,15 +15,20 @@
  */
 
 /**
- * @fileoverview: One detector implementation for checking the alignment of
- *  the CENTER element.
- * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=33
+ * @fileoverview Check the alignment of the CENTER element.
+ * @bug https://code.google.com/p/compatibility-detector/issues/detail?id=33
  *
  * The CENTER element will make its descendants align center, but In IE, the
  * CENTER element also make itself align center.
- * So check all CENTER elements, and get the computed value of 'margin-left' and
- * 'margin-right' properties, if the absolute value between the two values is
- * greater than 1, then report this issue.
+ *
+ * This detector will check all nodes, and do the following things:
+ * 1. Check CENTER tag.
+ * 2. Ignore CENTER is not normal flow layout.
+ * 3. Check for child elements whose width is less than the parent. if it is
+ *    large, then not continue to detector.
+ * 4. Calculate the left rect position， whether the location is expected
+ *    match the IE rendering. if it is true, then not continue to detector.
+ * 5. The remaining cases has problems.
  */
 
 addScriptToInject(function() {
@@ -34,18 +39,52 @@ chrome_comp.CompDetect.declareDetector(
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
-null, // constructor
+function constructor() {
+  this.THRESHOLD_OF_CENTER = 5;
+  this.THRESHOLD_OF_HEIGHT = 3;
+},
 
 function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType ||
-      node.tagName != 'CENTER')
+      context.isDisplayNone() || node.tagName != 'CENTER')
     return;
 
-  var style = chrome_comp.getComputedStyle(node);
-  var marginLeft = parseInt(style.marginLeft, 10);
-  var marginRight = parseInt(style.marginRight, 10);
-  if (Math.abs(marginLeft - marginRight) > 1)
-    this.addProblem('HA8001', [node]);
+  if (chrome_comp.mayAffectNormalFlow(node) != 1 ||
+      (node.offsetHeight <= this.THRESHOLD_OF_HEIGHT &&
+          node.innerText == '' &&
+          !chrome_comp.hasBorder(node) &&
+          !chrome_comp.hasBackground(node)))
+    return;
+
+  var parentNode = node.parentElement;
+
+  // If element marginLeft and marginRight value is 'auto',
+  // and width value is not 'auto', the layout is auto align center,
+  // use chrome_comp.isCenterAlignedByMarginAndWidth methods deteciton.
+  // if return true, then text-align invalid in IE6/7, not detecor.
+  if (chrome_comp.isCenterAlignedByMarginAndWidth(node))
+    return;
+
+  // Element margin-left or margin-right style is auto. element marginBox will
+  // full parent container content box, text-align layout invalid in IE6/7.
+  if (chrome_comp.isMarginLeftAuto(node) ||
+      chrome_comp.isMarginRightAuto(node))
+    return;
+
+  if (chrome_comp.isVisuallyCenterAligned(parentNode, node,
+      this.THRESHOLD_OF_CENTER))
+    return;
+
+  var containerContentWidth = chrome_comp.util.width(
+      chrome_comp.getLayoutBoxes(parentNode).contentBox);
+  var childMarginBoxWidth = chrome_comp.util.width(
+      chrome_comp.getLayoutBoxes(node).marginBox);
+
+  this.addProblem('HA8001', {
+    nodes: [node, parentNode],
+    details: 'container content box width: ' +  containerContentWidth  + 'px' +
+        ', CENTER element width: '+ childMarginBoxWidth + 'px'
+  });
 }
 ); // declareDetector
 
