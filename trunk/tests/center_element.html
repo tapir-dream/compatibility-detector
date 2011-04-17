@@ -1,36 +1,86 @@
-<!DOCTYPE html> 
-<html chrome_comp_test="center_element"> 
-<head> 
-<style> 
-  body, table { font:12px/1 Tahoma; color:navy; }
-</style> 
-</head> 
-<body> 
-<div style="width:120px; padding:10px 0; background:mediumblue;"> 
-  <center id="d1" style="width:80px; height: 80px; padding:10px 0; background:royalblue;" expectedProblems="HA8001"> 
-  </center> 
-</div> 
-<div style="width:120px; padding:10px 0; background:mediumblue;"> 
-  <center id="d1" style="width:80px; height: 80px; margin:auto; padding:10px 0; background:royalblue;"> 
-  </center> 
-</div> 
-<br /> 
-<div style="width:120px; padding:10px 0; background:mediumblue;"> 
-  <center id="d2" style="width:100%; padding:10px 0; background:royalblue;"> 
-    <table id="t2" style="width:50px; height:30px; background:lavender;"> 
-      <tr> 
-        <td>123</td> 
-      </tr> 
-    </table> 
-  </center> 
+<!DOCTYPE html>
+<html chrome_comp_test="center_element">
+<head>
+<style>
+  center,div {border:1px solid #000;}
+</style>
+</head>
+<body>
+<p>1. Normal CENTER</p>
+<div style="width:120px;">
+  <center id="d1" style="width:80px; height: 80px; padding:10px 0;" expectedProblems="HA8001">
+    CENTER tag width:80px; height: 80px;
+  </center>
 </div>
-<div style="width:100px; height:100px; padding:50px; background:gold;">
-  <center style="width:100px; height:100px; background:silver;"></center>
+
+<p>2. CENTER height is 1px and not text and has border.</p>
+<div style="width:200px;">
+  <center style="width: 100px; height: 5px; overflow:hidden;" expectedProblems="HA8001">
+    CENTER tag width:100px; height: 5px; border:1px solid #000;
+  </center>
 </div>
-<div style="width:100px; height:100px; border:5px dashed black; background:gold;">
-  <center style="width:100px; height:100px; background:silver;"></center>
+
+<p>3. CENTER height is 1px and not text and has not border, but has background.</p>
+<div style="width:200px;">
+  <center style="width: 100px; height: 5px; overflow:hidden; border:0 none; background:gray" expectedProblems="HA8001">
+    CENTER tag width:100px; height: 5px; background:gray;
+  </center>
 </div>
-<center style="float: left; width: 100px; height: 100px; background: silver">
+
+<hr />
+
+<h2>The followings don't have problems</h2>
+
+<p>A1.</p>
+<div style="width:120px; padding:10px 0;">
+  <center style="width:80px; height: 80px; margin:auto; padding:10px 0;">
+  </center>
+</div>
+
+<p>A2.</p>
+<div style="width:120px; padding:10px 0;">
+  <center style="width:100%; padding:10px 0;">
+    <table style="width:50px; height:30px;">
+      <tr>
+        <td>container width:120px -&gt; CENTER width: 100% -&gt; TABLE</td>
+      </tr>
+    </table>
+  </center>
+</div>
+<p>A2.</p>
+<div style="width:100px; height:100px; padding:50px;">
+  <center style="width:100px; height:100px;">container width:100px; padding:50px; -&gt; CENTER width 100px</center>
+</div>
+
+<p>A3.</p>
+<div style="width:100px; height:100px; border:5px dashed black;">
+  <center style="width:100px; height:100px;">container width:100px; border:5px; -&gt; CENTER width 100px</center>
+</div>
+
+<p>A4.</p>
+<div style="width:200px; padding:0 100px;">
+  <center style="width:400px; border:1px solid;">
+    CENTER overflow container box
+  </center>
+</div>
+
+<p>A4.</p>
+<div style="width:200px;">
+  <center style="width:160px; margin:0 auto; border:1px solid;">
+    CENTER style is width:160px; margin:0 auto;
+  </center>
+</div>
+
+<p>A5.CENTER height is 1px and not text and has not border.</p>
+<div style="width:200px;">
+  <center style="width: 100px; height: 1px; overflow:hidden; border:0 none;">
+  </center>
+</div>
+
+<p>A6.</p>
+<center style="float: left; width: 100px; height: 100px;">
+CENTER style is float:left
 </center>
-</body> 
+
+</body>
 </html>
