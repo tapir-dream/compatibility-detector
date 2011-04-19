@@ -58,6 +58,11 @@ function checkNode(node, context) {
 
   var parentNode = node.parentElement;
 
+  var styleWidth = chrome_comp.getSpecifiedStyleValue(node, 'width');
+  // If element width is auto or 100%, will full container, not detector.
+  if (chrome_comp.isAutoOrNull(styleWidth) || '100%' == styleWidth)
+    return;
+
   // If element marginLeft and marginRight value is 'auto',
   // and width value is not 'auto', the layout is auto align center,
   // use chrome_comp.isCenterAlignedByMarginAndWidth methods deteciton.
