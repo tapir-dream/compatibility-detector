@@ -294,7 +294,7 @@ function crossOriginCSSCallback(xhr) {
  * to avoid the relative path problem.
  */
 function processCSSText(text) {
-  var URL_REGEXP = /\burl(\s*)?\(/g;
+  var URL_REGEXP = /\burl(\s*)?\(/gi;
   text = text.replace(URL_REGEXP, 'del_url$1(');
   return text;
 }
