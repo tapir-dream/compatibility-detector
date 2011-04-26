@@ -1,44 +1,106 @@
-<style>
-  * { font:12px Arial; }
-  marquee { background:#aaa; height:30px; vertical-align:top; }
-  table {   table-layout:auto;1 }
-</style>
+<!DOCTYPE html>
+<html chrome_comp_test="marquee_width">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+</head>
+<body>
+<p>1.</p>
 <table style="border:1px solid black; width:50px;" cellspacing="0" cellpadding="0">
   <tr>
     <td>
-      <marquee direction="up" scrolldelay="30" scrollamount="1">
-      <div style="width:100px; background:#eee;">MARQUEE - DIV</div>
+      <marquee style="background:#AAA; height:30px; vertical-align:top;" direction="up" scrolldelay="30" scrollamount="1" expectedProblems="BX1030">
+      <div style="width:100px; background:#eee;">MARQUEE width is auto, sub-element DIV width is 2500px.</div>
       </marquee>
     </td>
   </tr>
 </table>
-<br>
+
+<p>2.</p>
 <table style="border:1px solid black; width:50px;" cellspacing="0" cellpadding="0">
   <tr>
     <td>
-      <marquee direction="right" scrolldelay="30" scrollamount="1">
-      <div style="width:100px; background:#eee;">MARQUEE - DIV</div>
+      <marquee style="background:#AAA; height:30px; vertical-align:top;" direction="right" scrolldelay="30" scrollamount="1" expectedProblems="BX1030">
+      <div style="width:100px; background:#eee;">MARQUEE width is auto, sub-element DIV width is 2500px.</div>
       </marquee>
     </td>
   </tr>
 </table>
-<br>
+
+<p>3.</p>
 <table style="border:1px solid black; width:50px;" cellspacing="0" cellpadding="0">
   <tr>
     <td>
-      <marquee direction="down" scrolldelay="30" scrollamount="1">
-      <div style="width:100px; background:#eee;">MARQUEE - DIV</div>
+      <marquee style="background:#AAA; height:30px; vertical-align:top;" direction="down" scrolldelay="30" scrollamount="1" expectedProblems="BX1030">
+      <div style="width:100px; background:#eee;">MARQUEE width is auto, sub-element DIV width is 100px.</div>
       </marquee>
     </td>
   </tr>
 </table>
-<br>
-<span>No problem case</span>
-<br>
-<table style="border:1px solid black; width:50px;" cellspacing="0" cellpadding="0">
+
+<p>4.</p>
+<table style="border:1px solid black;" cellspacing="0" cellpadding="0">
   <tr>
-    <td><marquee direction="left" scrolldelay="30" scrollamount="1">
-      <div style="background:#eee;">DIV</div>
+    <td><marquee style="background:#AAA; height:30px; vertical-align:top;" direction="left" scrolldelay="30" scrollamount="1" expectedProblems="BX1030">
+       <div style="background:#eee; width:2500px">MARQUEE width is auto, sub-element DIV width is 2500px.</div>
       </marquee></td>
   </tr>
 </table>
+
+<p>5.</p>
+<table style="border:1px solid black; width:50px;" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><marquee style="background:#AAA; height:30px; vertical-align:top;" direction="left" scrolldelay="5" scrollamount="1" width="100%" expectedProblems="BX1030">
+      <div style="background:#eee; width:1500px">MARQUEE width is 100%, sub-element DIV width is 1500px.</div>
+      </marquee></td>
+  </tr>
+</table>
+
+<p>6.</p>
+<table style="border:1px solid black;" cellspacing="0" cellpadding="0">
+  <tr>
+    <td>
+      <div>
+        <marquee style="background:#AAA; height:30px; vertical-align:top;" direction="left" scrolldelay="30" scrollamount="1" expectedProblems="BX1030">
+          <div style="background:#eee; width:1000px">MARQUEE width is auto, sub-element DIV width is 2500px.</div>
+        </marquee>
+      </div>
+    </td>
+  </tr>
+</table>
+
+<hr/>
+
+<h2>The followings don't have problems</h2>
+<p>A1.</p>
+<table style="border:1px solid black;" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><marquee style="background:#AAA; height:30px; vertical-align:top;" direction="left" scrolldelay="30" scrollamount="1" width="30">
+      <div style="background:#eee;">MARQUEE width is 30px, sub-element DIV width is 100px.</div>
+      </marquee></td>
+  </tr>
+</table>
+
+<p>A2.</p>
+<table style="border:1px solid black;" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><marquee style="background:#AAA; height:30px; vertical-align:top;" direction="left" scrolldelay="30" scrollamount="1" width="30">
+       <div style="background:#eee; width:2500px">MARQUEE width is 30px, sub-element DIV width is width:2500px.</div>
+      </marquee></td>
+  </tr>
+</table>
+
+<p>A3.</p>
+<table style="border:1px solid black;" cellspacing="0" cellpadding="0">
+  <tr>
+    <td>
+      <div style="width:300px;">
+        <marquee style="background:#AAA; height:30px; vertical-align:top;" direction="left" scrolldelay="30" scrollamount="1">
+          <div style="background:#eee; width:2500px">MARQUEE width is auto, sub-element DIV width is 2500px.</div>
+        </marquee>
+      </div>
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>
