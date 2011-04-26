@@ -157,5 +157,32 @@ ins {display:block; text-decoration:none;}
   <div style="width:500px; height:100px; margin:50px 0; border-style:none; padding:0; background:gold;">div &gt; div width:500px; height:100px; margin:50px 0;</div>
 </div>
 
+<p>A9.1. Bad coding practice: Forget clear float. (1)</p>
+<div style="width:500px;">
+  <ins>div width:500px;</ins>
+  <div style="border-style:none; padding:0;">
+    <div style="float:left; width:300px; height:100px;">div &gt; div float:left; width:300px; height:100px;</div>
+  </div>
+  <div style="clear:both;">
+    <ins>div clear:both;</ins>
+  </div>
+</div>
+
+<p>A9.2. Bad coding practice: Forget clear float. (2)</p>
+<div style="width:500px; height:200px; position:relative;">
+  <ins>div width:500px; height:200px; position:relative;</ins>
+  <div style="border-style:none; padding:0;">
+    <div style="float:left; width:300px; height:100px;">div &gt; div float:left; width:300px; height:100px;</div>
+  </div>
+  <div style="position:absolute; top:10px;">
+    <ins>div position:absolute; top:10px;</ins>
+  </div>
+</div>
+<br>
+<br>
+<br>
+<br>
+<br>
+
 </body>
 </html>
