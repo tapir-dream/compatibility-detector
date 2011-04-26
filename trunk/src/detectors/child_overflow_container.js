@@ -35,6 +35,39 @@ chrome_comp.CompDetect.declareDetector(
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
 function constructor() {
+  this.THRESHOLD_X = 20;
+  this.THRESHOLD_Y = this.THRESHOLD_X / 2;
+
+  // TODO: Move this function into framework.
+  this.getVisuallyNextElementSibling = function(element) {
+    var nextElement = element;
+    while (nextElement = nextElement.nextElementSibling) {
+      var style = chrome_comp.getComputedStyle(nextElement);
+      if (style.display != 'none' &&
+          (style.position != 'absolute' ||
+              style.position == 'absolute' &&
+                  style.top == 'auto' && style.right == 'auto' &&
+                  style.bottom == 'auto' && style.left == 'auto'))
+        return nextElement;
+    }
+    return null;
+  };
+
+  /**
+   * Merge two arrays into one, and remove any duplicate values.
+   * @param {array} arrayA Array you wang to merge.
+   * @param {array} arrayB Array you wang to merge.
+   * @return {array} The new array which merged from arrayA and arrayB.
+   */
+  this.mergeArrays = function(arrayA, arrayB) {
+    var i = arrayB.length;
+    while (i--) {
+      var item = arrayB[i];
+      if (arrayA.indexOf(item) == -1)
+        arrayA.push(item);
+    }
+    return arrayA;
+  };
 }, // constructor
 
 function checkNode(node, context) {
@@ -59,7 +92,8 @@ function checkNode(node, context) {
     return;
 
   // These child elements will stretch current node.
-  var affectedElements = [];
+  var childrenOverflowHorizontally = [];
+  var childrenOverflowVertically = [];
 
   // If contentBoxInIE is different with contentBoxInChrome, problem detected.
   var contentBoxInChrome = chrome_comp.getLayoutBoxes(node).contentBox;
@@ -73,16 +107,17 @@ function checkNode(node, context) {
   var children = node.children;
   for (var i = 0, c = children.length; i < c; ++i) {
     var child = children[i];
-    var childIsOverflow = false;
+    var childIsOverflowInHorizontal = false;
+    var childIsOverflowInVertical = false;
     var childStyle = chrome_comp.getComputedStyle(child);
-    var display = childStyle.display;
-    var position = childStyle.position;
+    var childDisplay = childStyle.display;
+    var childPosition = childStyle.position;
     // Absolutely positioned element will not stretch its parent element.
     // Inline element will not have much impact on the layout.
-    if (display == 'none' || display == 'inline' || position == 'absolute')
+    if (childDisplay == 'none' || childDisplay == 'inline' ||
+        childPosition == 'absolute')
       continue;
-    var childMarginBox =
-        chrome_comp.getLayoutBoxes(child).marginBox;
+    var childMarginBox = chrome_comp.getLayoutBoxes(child).marginBox;
     // Relatively positioned element will stretch its parent element, like it
     // has no offset (dosn't setted 'top', 'right', 'bottom', 'left'). So adjust
     // its coordinates is necessary.
@@ -90,21 +125,16 @@ function checkNode(node, context) {
     // If its 'left' and 'right' is both setted, 'right' will be ignored when
     // its container block's direction is 'ltr', or 'left' will be ignored when
     // its container block's direction is 'rtl'.
-    if (position == 'relative') {
-      var specifiedTop =
-          chrome_comp.getSpecifiedStyleValue(child, 'top');
-      var specifiedRight =
-          chrome_comp.getSpecifiedStyleValue(child, 'right');
-      var specifiedBottom =
-          chrome_comp.getSpecifiedStyleValue(child, 'bottom');
-      var specifiedLeft
-          = chrome_comp.getSpecifiedStyleValue(child, 'left');
+    if (childPosition == 'relative') {
+      var specifiedTop = chrome_comp.getSpecifiedStyleValue(child, 'top');
+      var specifiedRight = chrome_comp.getSpecifiedStyleValue(child, 'right');
+      var specifiedBottom = chrome_comp.getSpecifiedStyleValue(child, 'bottom');
+      var specifiedLeft = chrome_comp.getSpecifiedStyleValue(child, 'left');
       var offsetX = 0;
       var offsetY = 0;
       if (specifiedRight)
         offsetX = -parseInt(childStyle.right);
-      if (specifiedLeft &&
-          (nodeStyle.direction == 'ltr' || !specifiedRight))
+      if (specifiedLeft && (nodeStyle.direction == 'ltr' || !specifiedRight))
         offsetX = parseInt(childStyle.left);
       if (specifiedBottom)
         offsetY = -parseInt(childStyle.bottom);
@@ -117,12 +147,12 @@ function checkNode(node, context) {
     }
     if (doHorizontalCheck) {
       // For "direction:rtl".
-      if(childMarginBox.left < contentBoxInIE.left) {
-        childIsOverflow = true;
+      if (childMarginBox.left < contentBoxInIE.left - this.THRESHOLD_X) {
+        childIsOverflowInHorizontal = true;
         contentBoxInIE.left = childMarginBox.left;
       }
-      if(childMarginBox.right > contentBoxInIE.right) {
-        childIsOverflow = true;
+      if (childMarginBox.right > contentBoxInIE.right + this.THRESHOLD_X) {
+        childIsOverflowInHorizontal = true;
         contentBoxInIE.right = childMarginBox.right;
       }
     }
@@ -130,45 +160,101 @@ function checkNode(node, context) {
       // The top edge will only be stretch if child node's margin-top is not
       // collapsed with its parent element in IE. In fact, if this happens, the
       // bottom edge will be bigger in IE, but not top edge be smaller.
-      if(childMarginBox.top < contentBoxInIE.top) {
+      if (childMarginBox.top < contentBoxInIE.top - this.THRESHOLD_Y) {
         // If margin collapsed in IE, continue.
-        if((Math.ceil(contentBoxInChrome.top - childMarginBox.top) ==
+        if ((Math.ceil(contentBoxInChrome.top - childMarginBox.top) ==
                 parseInt(childStyle.marginTop)) &&
             parseInt(nodeStyle.paddingTop) == 0 &&
             parseInt(nodeStyle.borderTopWidth) == 0 &&
             !chrome_comp.hasLayoutInIE(node)) {
           continue;
         }
-        childIsOverflow = true;
+        childIsOverflowInVertical = true;
         contentBoxInIE.top = childMarginBox.top;
       }
-      if(childMarginBox.bottom > contentBoxInIE.bottom) {
+      if (childMarginBox.bottom > contentBoxInIE.bottom + this.THRESHOLD_Y) {
         // If margin collapsed in IE, continue.
-        if((Math.ceil(childMarginBox.bottom - contentBoxInChrome.bottom) ==
-                parseInt(childStyle.marginBottom)) &&
+        if (Math.ceil(childMarginBox.bottom - contentBoxInChrome.bottom) ==
+                parseInt(childStyle.marginBottom) &&
             parseInt(nodeStyle.paddingBottom) == 0 &&
             parseInt(nodeStyle.borderBottomWidth) == 0 &&
             !chrome_comp.hasLayoutInIE(node)) {
           continue;
         }
-        childIsOverflow = true;
+        childIsOverflowInVertical = true;
         contentBoxInIE.bottom = childMarginBox.bottom;
       }
     }
-    if (childIsOverflow)
-      affectedElements.push(child);
+    if (childIsOverflowInHorizontal) {
+      childrenOverflowHorizontally.push(child);
+    }
+    if (childIsOverflowInVertical) {
+      childrenOverflowVertically.push(child);
+    }
   }
 
+  var widthInChrome = chrome_comp.util.width(contentBoxInChrome);
+  var heightInChrome = chrome_comp.util.height(contentBoxInChrome);
+  var widthInIE = chrome_comp.util.width(contentBoxInIE);
+  var heightInIE = chrome_comp.util.height(contentBoxInIE);
+
+  // No problem.
+  if (widthInChrome == widthInIE && heightInChrome == heightInIE)
+    return;
+
+  // Check whether has visually affect, and filter affected elements.
+  // If this node has no border and background, do more check.
+  // TODO: Do more check in parent element: floats/absolutely positioned...
+  if (!chrome_comp.hasBorder(node) && !chrome_comp.hasBackground(node)) {
+    var nextElement = this.getVisuallyNextElementSibling(node);
+    // Has visually next sibling element, if the next sibling element's vertical
+    // position is the same position in IE, don't report problem, because there
+    // has no visually difference in this case.
+    if (nextElement) {
+      var nextElementMarginBox =
+          chrome_comp.getLayoutBoxes(nextElement).marginBox;
+      if (childrenOverflowVertically.length &&
+          nextElementMarginBox.top >= contentBoxInIE.bottom +
+              parseInt(nodeStyle.marginBottom) +
+              parseInt(nodeStyle.paddingBottom) - this.THRESHOLD_Y)
+        childrenOverflowVertically.length = 0;
+    }
+    // Element's height is 0, or has no visually next sibling element, these
+    // cases is generally caused by forget to clear floats, if this node is not
+    // overflow from its parent element's content box in IE, don't report
+    // problem too.
+    if (heightInChrome == 0 || !nextElement) {
+      var parent = node.parentElement;
+      var parentContentBox = chrome_comp.getLayoutBoxes(parent).contentBox;
+      if (childrenOverflowHorizontally.length &&
+          contentBoxInIE.left - parseInt(nodeStyle.marginLeft) -
+              parseInt(nodeStyle.paddingLeft) >= parentContentBox.left -
+              this.THRESHOLD_X &&
+          contentBoxInIE.right + parseInt(nodeStyle.marginRight) +
+              parseInt(nodeStyle.paddingRight) <= parentContentBox.right +
+              this.THRESHOLD_X)
+        childrenOverflowHorizontally.length = 0;
+      if (childrenOverflowVertically.length &&
+          contentBoxInIE.top - parseInt(nodeStyle.marginTop) -
+              parseInt(nodeStyle.paddingTop) >= parentContentBox.top -
+              this.THRESHOLD_Y &&
+          contentBoxInIE.bottom + parseInt(nodeStyle.marginBottom) +
+              parseInt(nodeStyle.paddingBottom) <= parentContentBox.bottom +
+              this.THRESHOLD_Y)
+        childrenOverflowVertically.length = 0;
+    }
+  }
+
+  var affectedElements = this.mergeArrays(childrenOverflowHorizontally,
+      childrenOverflowVertically);
   if (affectedElements.length == 0)
     return;
 
   // The first highlight element is the stretched element.
   affectedElements.unshift(node);
   var details = "Content box's size in Chrome: " +
-      chrome_comp.util.width(contentBoxInChrome) + ' * ' +
-      chrome_comp.util.height(contentBoxInChrome) + ', in IE: ' +
-      chrome_comp.util.width(contentBoxInIE) + ' * ' +
-      chrome_comp.util.height(contentBoxInIE) + '.';
+      widthInChrome + ' * ' + heightInChrome + ', in IE: ' +
+      widthInIE + ' * ' + heightInIE + '.';
   this.addProblem('RD1002', {
     nodes: affectedElements,
     details: details
