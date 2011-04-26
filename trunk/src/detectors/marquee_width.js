@@ -15,16 +15,15 @@
  */
 
 /**
- * @fileoverview: One detector implementation for checking the auto-width
- * MARQUEE elements.
- * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=13
+ * @fileoverview Check auto-width MARQUEE elements.
+ * @bug https://code.google.com/p/compatibility-detector/issues/detail?id=13
  *
  * Check all MARQUEE elements.
  * Get the width of the parent element of the present MARQUEE element.
  * Ignore the MARQUEE element that do not in the table cell, and ignore the
  * table that is not in automatic table layout algorithm.
- * Record the rects of the parent element and BODY element. Then, set the
- * MARQUEE element be invisible. If the rects of the said elements are changed,
+ * Record the rects of the parent element. Then, set the MARQUEE element
+ * be invisible. If the rects of the parent elements are changed,
  * report the issue and restore the style of the MARQUEE element.
  */
 
@@ -36,29 +35,77 @@ chrome_comp.CompDetect.declareDetector(
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
-null, // constructor
+function constructor() {
+  this.canStretchAutoLayoutTable = function(node) {
+    var computedStyle = chrome_comp.getComputedStyle(node);
+    while (computedStyle.display != 'table' &&
+        computedStyle.display != 'inline-table' &&
+        node.tagName != 'BODY') {
+      var width = chrome_comp.getSpecifiedStyleValue(node, 'width');
+      var htmlAttributeWidth = node.getAttribute('width');
+      if (chrome_comp.isAutoOrNull(width) && htmlAttributeWidth)
+        width = htmlAttributeWidth;
+      if (computedStyle.display == 'block' && width)
+        return false;
+      node = node.parentElement;
+      computedStyle = chrome_comp.getComputedStyle(node);
+    }
+
+    // The node ancestor is table or inline talbe,
+    // if the ancestor tableLayout style is the 'auto',
+    // can stretch auto Layout, reutrn true.
+    if (node.tagName != 'BODY')
+      return computedStyle.tableLayout == 'auto';
+    else
+      return false;
+  };
+
+  this.addCustomProblem = function(node, level) {
+    this.addProblem('BX1030', {
+      nodes: [node],
+      severityLevel: level,
+      details: 'MARQUEE Tag width is: ' +
+        node.offsetWidth + 'px'
+    });
+  };
+},
 
 function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
     return;
 
-  if (node.tagName == 'MARQUEE') {
-    var parentElement = node.parentElement;
-    var parentStyle = chrome_comp.getComputedStyle(parentElement);
-    var definedWidth = chrome_comp.getDefinedStylePropertyByName(
-        node, false, 'width');
-    definedWidth = definedWidth || parseInt(node.getAttribute('width'), 10) | 0;
-    if (parentStyle && parentStyle.display == 'table-cell' &&
-        parentStyle.tableLayout == 'auto' && !definedWidth) {
-      var oldParentClientRect = parentElement.getBoundingClientRect();
-      var oldBodyClientRect = document.body.getBoundingClientRect();
-      node.style.display = 'none';
-      if (oldBodyClientRect.width !=
-          document.body.getBoundingClientRect().width ||
-          oldParentClientRect.left !=
-          parentElement.getBoundingClientRect().left)
-        this.addProblem('BX1030', [node]);
-      node.style.display = '';
+  if (node.tagName != 'MARQUEE')
+    return;
+
+  var WARNING_THRESHOLD = 10;
+  var ERROR_THRESHOLD =
+      Math.max(WARNING_THRESHOLD, Math.floor(window.innerWidth / 10));
+  var isRelativeWidth = false;
+  var width = chrome_comp.getSpecifiedStyleValue(node, 'width');
+  var htmlAttributeWidth = node.getAttribute('width');
+  if (width == null && htmlAttributeWidth)
+    width = htmlAttributeWidth;
+  if (chrome_comp.isAutoOrNull(width) || width.indexOf('%') != -1)
+    isRelativeWidth = true;
+
+  // If a MARQUEE element's width is "auto" or a percentage length, and its
+  // ancestor elements in a TABLE element whose width are "auto" or percentage
+  // length too, and if the TABLE element's "table-layout" is "auto",
+  // the actual width of these ancestor elements may be stretched by
+  // the MARQUEE element in IE8(Q) Chrome, but not in IE6 IE7 IE8(Q).
+  var parentElement = node.parentElement;
+  if (this.canStretchAutoLayoutTable(parentElement) && isRelativeWidth) {
+    var originalParentWidth = parentElement.offsetWidth;
+    var oldDisplayStyle = node.style.display;
+    node.style.display = 'none !important;';
+    var changeWidth =
+        Math.abs(originalParentWidth - parentElement.offsetWidth);
+    node.style.display = null;
+    node.style.display = oldDisplayStyle;
+    if (changeWidth > ERROR_THRESHOLD) {
+      this.addCustomProblem(node, 8);
+    } else if (changeWidth > WARNING_THRESHOLD) {
+      this.addCustomProblem(node, 1);
     }
   }
 }
