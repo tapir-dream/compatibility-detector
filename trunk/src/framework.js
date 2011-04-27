@@ -603,11 +603,32 @@ window.chrome_comp = (function() {
       };
 
       var style = chrome_comp.getComputedStyle(element);
+
+      var marginLeft = chrome_comp.getSpecifiedStyleValue(element,
+          'margin-left');
+      var marginRight = chrome_comp.getSpecifiedStyleValue(element,
+          'margin-right');
+      var marginTop = chrome_comp.getSpecifiedStyleValue(element,
+          'margin-top');
+      var marginBottom = chrome_comp.getSpecifiedStyleValue(element,
+          'margin-bottom');
+
+      // Fix chrome 10- margin bug.
+      // if margin is null or auto, will full container, fix margin value to 0.
+      marginLeft = (chrome_comp.isAutoOrNull(marginLeft)) ?
+          '0px' : style.marginLeft;
+      marginRight = (chrome_comp.isAutoOrNull(marginRight)) ?
+          '0px' : style.marginRight;
+      marginTop = (chrome_comp.isAutoOrNull(marginTop)) ?
+          '0px' : style.marginTop;
+      marginBottom = (chrome_comp.isAutoOrNull(marginBottom)) ?
+          '0px' : style.marginBottom;
+
       var marginBox = {
-        left: borderBox.left - chrome_comp.toInt(style.marginLeft),
-        top: borderBox.top - chrome_comp.toInt(style.marginTop),
-        right: borderBox.right + chrome_comp.toInt(style.marginRight),
-        bottom: borderBox.bottom + chrome_comp.toInt(style.marginBottom)
+        left: borderBox.left - chrome_comp.toInt(marginLeft),
+        top: borderBox.top - chrome_comp.toInt(marginTop),
+        right: borderBox.right + chrome_comp.toInt(marginRight),
+        bottom: borderBox.bottom + chrome_comp.toInt(marginBottom)
       };
 
       // Use clientWidth/clientHeight to exclude the scroll bar.
