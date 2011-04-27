@@ -125,6 +125,10 @@
   "BT1038_suggestion": { "message": "Avoid using the lowsrc attribute." },
   "BX9055": {"message": "window.execScript is not supported by all browsers" },
   "BX9055_suggestion": { "message": "Please make sure your target browsers support window.execScript." },
+  "RM8002": {"message": "There will be different when an element can not be hasLayout and establish the new block formatting context at the same time." },
+  "RM8002_suggestion": { "message": "To avoid this problem, the element must be hasLayout and establish the new block formatting context, and vice versa." },
+  "RS8010": {"message": "IE6 IE7 IE8 (Q) does not support the ': before' and ': after' pseudo-elements." },
+  "RS8010_suggestion": { "message": "Use JavaScript dynamic insertion node, simulate CSS ': before' and ': after' pseudo-element." },
   "RE8015": { "message": "Changing the 'display' property default values for HTML table elements will not affect their behavior in IE" },
   "RE8015_suggestion": { "message": "Avoid to modify the 'display' property default values for HTML table elements. If need to hide the table like elements (display: none) and restore to visible, we can set an illegal value, e.g. TR.style.display = '';"},
   "lastLine": { "message": "lastLine" }

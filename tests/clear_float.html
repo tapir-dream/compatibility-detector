@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html chrome_comp_test="clear_float">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<style>
+div {
+  border:1px solid;
+  padding:5px;
+}
+.after:after {
+  content:'';
+  display:block;
+  clear:both;
+}
+.clear {
+  display:block;
+  clear:both;
+}
+</style>
+<script>
+function hasLayout(element) {
+  if (element.currentStyle)
+    return element.currentStyle.hasLayout;
+  return undefined;
+}
+
+function writelnHasLayout(id) {
+  document.writeln(id + ' hasLayout=' + hasLayout(document.getElementById(id)));
+}
+</script>
+</head>
+<body style="font-size:16px;">
+
+<h1>RM8002</h1>
+
+<p>hasLayout and BFC(Block Formatting Context)</p>
+
+<p>1. +hasLayout(IE6/7) and -BFC: zoom</p>
+<div id="div1" style="zoom:1;" expectedProblems="RM8002">
+  div1 zoom:1;
+  <div style="float:left;">div float:left;</div>
+  <div style="float:right;">div float:right;</div>
+</div>
+<script>writelnHasLayout('div1');</script>
+<br style="clear:both;" />
+
+<p>2. -hasLayout and +BFC: display:table</p>
+<div id="div2" style="display:table;" expectedProblems="RM8002">
+  div2 display:table;
+  <div style="float:left;">div float:left;</div>
+  <div style="float:right;">div float:right;</div>
+</div>
+<script>writelnHasLayout('div2');</script>
+<div class="clear"></div>
+
+<p>3. -hasLayout(IE6) and +BFC: overflow:auto</p>
+<div id="div3" style="overflow:auto;" expectedProblems="RM8002">
+  div3 overflow:auto;
+  <div style="float:left;">div float:left;</div>
+  <div style="float:right;">div float:right;</div>
+</div>
+<script>writelnHasLayout('div3');</script>
+<div class="clear"></div>
+
+<p>4. -hasLayout(IE6) and +BFC: overflow:hidden</p>
+<div id="div4" style="overflow:auto;" expectedProblems="RM8002">
+  div4 overflow:hidden;
+  <div style="float:left;">div float:left;</div>
+  <div style="float:right;">div float:right;</div>
+</div>
+<script>writelnHasLayout('div4');</script>
+<div class="clear"></div>
+
+<p>4.1 -hasLayout(IE6) and +BFC: overflow:hidden, clear float fail in IE6</p>
+<div style="overflow:hidden;" expectedProblems="RM8002">
+  1 div overflow:hidden;
+  <div style="float:left;">1.1 div float:left;</div>
+  1.2 br style="clear:both;"
+  <div class="clear"></div>
+  <div style="float:right;">1.3 div float:right;</div>
+</div>
+<div class="clear"></div>
+
+<p>5. +hasLayout and -BFC: height</p>
+<div id="div5" style="height:1em;" expectedProblems="RM8002">
+  div5 height:1em;
+  <div style="float:left;">div float:left;</div>
+  <div style="float:right;">div float:right;</div>
+</div>
+<script>writelnHasLayout('div5');</script>
+<p>text after div</p>
+<div class="clear"></div>
+
+<p>-5.1 +hasLayout and -BFC: container's height is big enough</p>
+<div style="height:3em;">
+  div height:3em;
+  <div style="float:left;">div float:left;</div>
+  <div style="float:right;">div float:right;</div>
+</div>
+<p>text after div</p>
+<div class="clear"></div>
+
+<p>5.2 +hasLayout and -BFC: height, clear float will expand container in IE6</p>
+<div style="height:1em;" expectedProblems="RM8002">
+  1 div height:1em;
+  <div style="float:left;">1.1 div float:left;</div>
+  1.2 br style="clear:both;"
+  <div class="clear"></div>
+  <div style="float:right;">1.3 div float:right;</div>
+</div>
+<p>text after div</p>
+<div class="clear"></div>
+
+<p>-5.3 +hasLayout and -BFC: height, clear float will expand container in IE6,
+  but container's height is big enough</p>
+<div style="height:7em;">
+  1. div height:7em;
+  <div style="float:left;">1.1 div float:left;</div>
+  1.2 br style="clear:both;"
+  <div class="clear"></div>
+  <div style="float:right;">1.3 div float:right;</div>
+</div>
+<p>text after div</p>
+<div class="clear"></div>
+
+<p>-5.4 +hasLayout and -BFC: height, floating overflow container border box,
+  but container's margin-bottom is big enough.</p>
+<div style="height:1em; margin-bottom:2em;">
+  div height:1em; margin-bottom:2em;
+  <div style="float:left;">div float:left;</div>
+  <div style="float:right;">div float:right;</div>
+</div>
+<p>text after div</p>
+<div class="clear"></div>
+<div class="clear"></div>
+
+<hr/>
+
+<h2>The followings don't have problems</h2>
+
+<p>A1. +hasLayout and -BFC: next sibling element clear both</p>
+<div style="zoom:1; border:0;">
+  div zoom:1; border:0;
+  <div style="float:left;">div float:left;</div>
+  <div style="float:right;">div float:right;</div>
+</div>
+<div style="clear:both;">div clear:both;</div>
+<p>text after div</p>
+<div class="clear"></div>
+
+<p>A1.1 +hasLayout and -BFC: next sibling element clear both 2</p>
+<div style="zoom:1; border:0;">
+  div zoom:1; border:0;
+  <div style="float:left;">div float:left;</div>
+  <div style="float:right;">div float:right;</div>
+</div>
+<script></script>
+<style></style>
+<div style="display:none;"></div>
+<span style="display:block;">
+  <div style="position:absolute;"></div>
+  <div style="display:none;"></div>
+</span>
+<div style="clear:both;">div clear:both;</div>
+<p>text after div</p>
+<div class="clear"></div>
+
+<hr/>
+
+<h1>RS8010</h1>
+
+<p>1.1 -hasLayout and -BFC(Block Formatting Context): after pseudo elment</p>
+
+<div id="div6" class="after" expectedProblems="RS8010">
+  <div style="float:left;">div float:left;</div>
+  <div style="float:right;">div float:right;</div>
+</div>
+<script>writelnHasLayout('div6');</script>
+<div class="clear"></div>
+
+<p>1.2 -hasLayout and +BFC(Block Formatting Context): after pseudo elment</p>
+
+<div id="div7" class="after" style="overflow:auto;" expectedProblems="RM8002 RS8010">
+  <div style="float:left;">div float:left;</div>
+  <div style="float:right;">div float:right;</div>
+</div>
+<script>writelnHasLayout('div7');</script>
+<div class="clear"></div>
+
+<hr/>
+
+<h2>The followings don't have problems</h2>
+
+<p>A1. +hasLayout and -BFC(Block Formatting Context): after pseudo elment</p>
+<div class="after" style="zoom:1;">
+  <div style="float:left;">div float:left;</div>
+  <div style="float:right;">div float:right;</div>
+</div>
+<div class="clear"></div>
+
+<p>(End of test)</p>
+
+</body>
+</html>
