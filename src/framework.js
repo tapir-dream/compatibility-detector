@@ -534,6 +534,19 @@ window.chrome_comp = (function() {
     },
 
     /**
+     * Determine if the element is in normal flow. In CSS 2.1, normal
+     * flow includes block formatting of block-level boxes, inline formatting
+     * of inline-level boxes, relative positioning of block-level and
+     * inline-level boxes, and formatting of run-in boxes.
+     * Refer to: http://www.w3.org/TR/CSS2/visuren.html#positioning-scheme
+     */
+    isInNormalFlow: function(element) {
+      var style = chrome_comp.getComputedStyle(element);
+      return style.float == 'none' && style.position != 'absolute' &&
+          style.position != 'fixed';
+    },
+
+    /**
      * Determines if a node affects normal flow.
      * @param {Node} node the DOM node to test
      * @param {boolean=} opt_ignoreFixedPosition if 'position: fixed' is ignored
