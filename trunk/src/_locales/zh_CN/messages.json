@@ -332,7 +332,7 @@
   "HE1001_suggestion": { "message": "1. 设置 TABLE 的 'table-layout' 特性值为 fixed，使用固定布局的表格元素可避免此问题。" },
   "HE8002_suggestion": { "message": "给 TABLE 元素设置宽度的时候，不要使用 HTML 属性 'width'，请使用 CSS 特性 'width'。" },
   "HE1003_suggestion": { "message": "nowrap 属性是被废弃的属性，使用 CSS 规则 white-space:nowrap 代替这个属性。" },
-  "HO8001_suggestion": { "message": "若不考虑 W3C 校验，可统一使用 EMBED 元素嵌入 Flash，这样可以避免因参数不统一导致的兼容性问题。" },
+  "HO8001_suggestion": { "message": "可统一使用 EMBED 元素嵌入 Flash，这样可以避免因参数不统一导致的兼容性问题。" },
   "HO1002_suggestion": { "message": "为了防止这种无 \"src\" 的 IMG 元素对页面产生布局影响，需要设置这种 IMG 的 ‘display’ 特性为 'none'。" },
   "HO3003_suggestion": { "message": "若用户需要显示提示框，则指定 title 属性；" },
   "HO3004_suggestion": { "message": "使用 IE 专有滤镜 AlphaImageLoader Filter 来修复 IE6 透明通道问题，详情请参考 MSDN 说明：  http://msdn.microsoft.com/en-us/library/ms532969(VS.85).aspx " },
