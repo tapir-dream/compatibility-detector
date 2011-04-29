@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+function $(id) { return document.getElementById(id); }
+window.onload = function() {
+  $('b').onclick = function() {
+    if ($('b').value == 'table-cell') {
+      $('b').value = 'block';
+      $('t').style.display = 'table-cell';
+      $('t').innerHTML = 'table-cell';
+    } else {
+      $('b').value = 'table-cell';
+      $('t').style.display = 'block';
+      $('t').innerHTML = 'block';
+    }
+  }
+}
+</script>
+</head>
+<body>
+<table border="1" cellspacing="5" cellpadding="5">
+  <tr>
+    <td id="t">table-cell</td>
+    <td>table-cell</td>
+  </tr>
+  <tr>
+    <td>table-cell</td>
+    <td>table-cell</td>
+  </tr>
+</table>
+<input type="button" id="b" value="block" />
+</body>
+</html>

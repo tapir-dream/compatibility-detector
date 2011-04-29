@@ -6,36 +6,57 @@
 <h1>RE8015</h1>
 
 <p>1.</p>
-<table style="width:240px; border:5px solid black; display:block;" expectedProblems="RE8015">
-	<tr>
-		<td>block TABLE</td>
-		<td>block TABLE</td>
-	</tr>
+<table border="1" style="width:240px; display:block;" expectedProblems="RE8015">
+  <tr>
+    <td>block TABLE</td>
+    <td>block TABLE</td>
+  </tr>
 </table>
 
 <p>2.</p>
-<table style="width:240px; border:5px solid black;">
-	<tr style="display:block;" expectedProblems="RE8015">
-		<td>block TR</td>
-		<td>block TR</td>
-	</tr>
+<table border="1" style="width:240px;">
+  <tr style="display:block;" expectedProblems="RE8015">
+    <td>block TR</td>
+    <td>block TR</td>
+  </tr>
 </table>
 
 <p>3.</p>
-<table style="width:240px; border:5px solid black;">
-	<tr>
-		<td style="display:block;" expectedProblems="RE8015">block TD</td>
-		<td style="display:block;" expectedProblems="RE8015">block TD</td>
-	</tr>
+<table border="1" style="width:240px;">
+ <tr>
+    <td style="display:block;" expectedProblems="RE8015">block TD</td>
+  </tr>
+</table>
+
+<p>4.</p>
+<table border="1" style="display:block; width:300px;" expectedProblems="RE8015">
+  <tr>
+    <td width="100">cell11</td>
+    <td width="50">cell12</td>
+  </tr>
+  <tr>
+    <td>cell21</td>
+    <td>cell22</td>
+  </tr>
 </table>
 
 <h2>The followings don't have problems</h2>
 <p>A1.<p>
-<table style="width:240px; border:5px solid black;">
-	<tr>
-		<td>native</td>
-		<td>native</td>
-	</tr>
+<table border="1" style="display:block; float:left;">
+  <tr>
+    <td width="200">cell</td>
+  </tr>
+  <tr>
+    <td>cell</td>
+  </tr>
+</table>
+<div style="clear:both;"></div>
+
+<p>A2.</p>
+<table border="1" cellpadding="0" cellspacing="0">
+  <tr style="display:block;">
+    <td width="240" style="border-color:#fefefe">block TR</td>
+  </tr>
 </table>
 
 </body>
