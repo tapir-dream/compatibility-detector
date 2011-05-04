@@ -60,6 +60,18 @@ function constructor() {
       return false;
   };
 
+  this.getAncestorTableElement = function(node) {
+    node = node.parentNode;
+    while(node) {
+      var computedStyle = chrome_comp.getComputedStyle(node);
+      if (computedStyle.display == 'table' ||
+          computedStyle.display == 'inline-table')
+        break;
+      node = node.parentNode;
+    }
+    return node;
+  };
+
   this.addCustomProblem = function(node, level) {
     this.addProblem('BX1030', {
       nodes: [node],
@@ -95,11 +107,14 @@ function checkNode(node, context) {
   // the MARQUEE element in IE8(Q) Chrome, but not in IE6 IE7 IE8(Q).
   var parentElement = node.parentElement;
   if (this.canStretchAutoLayoutTable(parentElement) && isRelativeWidth) {
-    var originalParentWidth = parentElement.offsetWidth;
+    var ancestor = this.getAncestorTableElement(node);
+    if (!ancestor)
+      return;
+    var originalParentWidth = ancestor.offsetWidth;
     var oldDisplayStyle = node.style.display;
     node.style.display = 'none !important;';
     var changeWidth =
-        Math.abs(originalParentWidth - parentElement.offsetWidth);
+        Math.abs(originalParentWidth - ancestor.offsetWidth);
     node.style.display = null;
     node.style.display = oldDisplayStyle;
     if (changeWidth > ERROR_THRESHOLD) {
