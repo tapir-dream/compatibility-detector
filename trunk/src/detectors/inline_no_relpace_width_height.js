@@ -38,26 +38,43 @@ chrome_comp.CompDetect.ScanDomBaseDetector,
 null, // constructor
 
 function checkNode(node, context) {
-
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
     return;
+
+  // Filter out some special tags, such as OPTION in:
+  // http://amuse.nen.com.cn/73749755317977088/20100906/2661446.shtml
+  if (node.tagName == 'OPTION')
+    return;
+  // And v:roundrect in:
+  // http://www.zhrtvu.net/
+  if (-1 != node.tagName.indexOf(':'))
+    return;
+
   var style = chrome_comp.getComputedStyle(node);
-  if (style.display == 'inline' &&
-      !chrome_comp.isReplacedElement(node)) {
-    var specifiedStyle = chrome_comp.getSpecifiedValue(node);
-    // If the inline non-replace element's width/height is specified, and it
-    // has background image but has no content or child elements, the layout
-    // will be very different in IE and Chrome, so in this case ,increase
-    // severity level to error.
-    if (specifiedStyle.width != 'auto' || specifiedStyle.height != 'auto') {
+  if (style.display == 'inline' && !chrome_comp.isReplacedElement(node)) {
+    var specifiedWidth = chrome_comp.getSpecifiedStyleValue(node, 'width');
+    var specifiedHeight = chrome_comp.getSpecifiedStyleValue(node, 'height');
+    if (!chrome_comp.isAutoOrNull(specifiedWidth) ||
+        !chrome_comp.isAutoOrNull(specifiedHeight)) {
+      var severityLevel = 1;
+      // If the inline non-replace element's width/height is specified, and it
+      // has background image but no content, the layout will be very different
+      // in IE and Chrome. Increase the severity level for this case.
       if (style.backgroundImage != 'none' &&
           (!node.hasChildNodes() || node.innerText.trim() == ""))
-        this.addProblem('RD1014', {nodes: [node], severityLevel: 9});
-      else
-        this.addProblem('RD1014', {nodes: [node]});
+        severityLevel = 9;
+
+      specifiedWidth = specifiedWidth || 'auto';
+      specifiedHeight = specifiedHeight || 'auto';
+      this.addProblem('RD1014', {
+        nodes: [node],
+        details: node.tagName + ' ' + specifiedWidth + ' * ' + specifiedHeight,
+        severityLevel: severityLevel
+      });
     }
   }
 }
+
 ); // declareDetector
 
 });
