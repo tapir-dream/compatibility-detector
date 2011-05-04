@@ -1,20 +1,39 @@
+<!-- This test must be run in quirks mode. -->
 <html chrome_comp_test="inline_no_relpace_width_height">
 <head>
 </head>
 <body>
-<span style="width:200px;height:50px;" expectedProblems="RD1014">non-replaced inline element</span>
-<br>
-<span style="width:200px;height:50px;background-image:url(img.png)" expectedProblems="RD1014">non-replaced inline element with background-image</span>
-<br>
-<span style="width:200px;height:50px;background-image:url(img.png)" expectedProblems="RD1014"></span>
-<br>
-<span style="width:200px;height:50px;background-image:url(img.png)" expectedProblems="RD1014"> </span>
-<br>
-<span>non-replaced inline element</span>
-<br>
-<BUTTON style="width:100px;height:50px">replaced inline element</BUTTON>
-<br>
-<BUTTON>replaced inline element</BUTTON>
-</body>
 
+<h1>RD1014</h1>
+
+<p>1. non-replaced inline element</p>
+<span style="width:500px; height:50px;" expectedProblems="RD1014">
+ span style="width:500px; height:50px;
+</span>
+
+<p>2. non-replaced inline element with background-image</p>
+<span style="width:500px; height:50px; background-image:url(img.png)" expectedProblems="RD1014">
+ span style="width:500px; height:50px; background-image:url(img.png)"
+</span>
+
+<p>3. non-replaced inline element with background-image, no content</p>
+<span style="width:500px; height:50px; background-image:url(img.png)" expectedProblems="RD1014">
+</span>
+
+<p>3.1 non-replaced inline element with background-image, no content</p>
+<span style="width:500px; height:50px; background-image:url(img.png)" expectedProblems="RD1014">
+  <a href="#"> </a>
+</span>
+
+<h2>The followings don't have problems</h2>
+
+<p>A1. replaced inline elements</p>
+<BUTTON style="width:100px; height:50px">BUTTON</BUTTON>
+
+<p>A2. invalid tags</p>
+<v:roundrect style="width:500px; height:50px;">
+ v:roundrect style="width:500px; height:50px;
+</v:roundrect>
+
+</body>
 </html>

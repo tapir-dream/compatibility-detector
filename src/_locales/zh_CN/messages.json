@@ -406,7 +406,7 @@
   "RD1011_suggestion": { "message": "针对不同的需求，可以采取如下方式来避免此问题：" },
   "RD1012_suggestion": { "message": "尽量避免使用 'line-height' 为 INPUT[type=text]、INPUT[type=password]、INPUT[type=button]、INPUT[type=file]、input[type=submit] 和 BUTTON 标记设置 ‘line-height’，而应改用规范内说明的 'height' 属性。 " },
   "RD1013_suggestion": { "message": "如果想让一个触发了 hasLayout 的块级非替换元素的高度为0，可以给这个空的块级非替换元素增加一个空的注释块：" },
-  "RD1014_suggestion": { "message": "在页面上添加<!DOCTYPE HTML>，使页面工作在标准模式下。" },
+  "RD1014_suggestion": { "message": "在页面开头添加<!DOCTYPE html>，使页面工作在标准模式下。" },
   "RD8015_suggestion": { "message": "使用 Javascript 实现 'min-height' 和 'max-height' 特性功能。" },
   "RD1016_suggestion": { "message": "出现这种情况时，应避免使用 'baseline' 对齐方式，需为元素指定 'vertical-align' 值非 'baseline'，推荐使用 'vertical-align:bottom' 或  'vertical-align:top'。" },
   "RD5017_suggestion": { "message": "为了取得正常布局，建议 'line-height' 计算值永远大于 'font-size' 计算值设置。" },
