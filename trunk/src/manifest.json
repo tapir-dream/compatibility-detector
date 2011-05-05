@@ -32,6 +32,7 @@
       "detectors/inline_no_relpace_width_height.js",        //RD1014: TODO: add details // bad for english 3/25
       "detectors/modifying_display_property_on_table_elements.js", //RE8015
       "detectors/nowrap_attribute.js",                      //HE1003
+      "detectors/flash_object_embed.js",
       // "detectors/right_floats_stretch_parent_elements.js",  //RD8006
       // "detectors/text_align.js",                            //RT8003
       // "detectors/doctype_checker.js",                       //HG8001
