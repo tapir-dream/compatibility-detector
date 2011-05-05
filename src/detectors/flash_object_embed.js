@@ -123,8 +123,12 @@ function checkNode(node, context) {
   var objectAttributes = this.getAllAttributes(node);
   this.getAttributesDefinedByParam(node, objectAttributes);
   var objectSrc = objectAttributes['movie'];
+  // Get object's source from movie/data/src attribute.
   if (!objectSrc)
     objectSrc = objectAttributes['data'];
+  if (!objectSrc)
+    objectSrc = objectAttributes['src']
+
   var embedSrc = embed.getAttribute('src') || '';
   // IE8 and other browsers support OBJECT's data attribute.
   // IE6/7 support PARAM element named 'movie'.
@@ -151,18 +155,6 @@ function checkNode(node, context) {
         + '"');
   }
 
-  var objectWmode = objectAttributes['wmode'] || '';
-  var embedWmode = embed.getAttribute('wmode') || '';
-  // The 'wmode' attribute's default value is 'window'.
-  if (!objectWmode)
-    objectWmode = 'window';
-  if (!embedWmode)
-    embedWmode = 'window';
-  if (objectWmode.toLowerCase() != embedWmode.toLowerCase()) {
-    details.push('OBJECT wmode="' + objectWmode + '", EMBED wmode="'
-        + embedWmode + '"');
-  }
-
   // Refer to:
   // http://kb2.adobe.com/cps/127/tn_12701.html
   // http://kb2.adobe.com/cps/403/kb403183.html
@@ -172,17 +164,46 @@ function checkNode(node, context) {
     base: true,
     bgcolor: true,
     flashvars: true,
+    loop: true,
     menu: true,
     play: true,
     quality: true,
     salign: true,
-    scale: true
+    scale: true,
+    wmode: true
   };
+
+  // Flash attribute default values table.
+  var DEFAULT_VALUES = {
+    // Allowscriptaccess default value is 'sameDomain' in Flash Player
+    // versions 9.0.115.0
+    allowscriptaccess: 'sameDomain',
+    loop: 'true',
+    play: 'true',
+    wmode: 'window'
+  }
 
   for (var name in OTHER_ATTRIBUTES) {
     var objectValue = objectAttributes[name] || '';
     var embedValue = embed.getAttribute(name) || '';
-    if (objectValue != embedValue) {
+
+    var defaultValue = DEFAULT_VALUES[name];
+    if (embedValue == '' && defaultValue)
+      embedValue = defaultValue;
+    if (objectValue == '' && defaultValue)
+      objectValue = defaultValue;
+
+    // -1 == false, 1 == true
+    if (embedValue == '-1')
+      embedValue = 'false';
+    if (embedValue == '1')
+      embedValue = 'true';
+    if (objectValue == '-1')
+      objectValue = 'false';
+    if (objectValue == '1')
+      objectValue = 'true';
+
+    if (objectValue.toLowerCase() != embedValue.toLowerCase()) {
       details.push('OBJECT ' + name + '="' + objectValue + '", EMBED ' + name
           + '="' + embedValue + '"');
     }
