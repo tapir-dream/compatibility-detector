@@ -36,12 +36,19 @@
 
 addScriptToInject(function() {
 
-function isPercentageString(str) {
-  return str.slice(-1) == '%';
+// TODO: put these into framework.js
+function endsWith(str, suffix) {
+  // Refer to:
+  // http://stackoverflow.com/questions/280634/endswith-in-javascript
+  return str.indexOf(suffix, str.length - suffix.length) != -1;
 }
 
-// TODO: put this into framework
+function startsWith(str, prefix) {
+  return str.lastIndexOf(prefix, 0) == 0;
+}
+
 function isCellStretchedByTable(cell) {
+  // This function may cause performance issue. It will cause table reflow.
   var table = cell.offsetParent;
   var oldInlineTableWidth = table.style.width;
   var oldCellOffsetWidth = cell.offsetWidth;
@@ -103,16 +110,23 @@ function checkNode(node, context) {
   if (node.tagName != 'TD' && node.tagName != 'TH')
     return;
 
-  var specifiedValue = chrome_comp.getSpecifiedValue(node);
-  var specifiedWidthStr = specifiedValue.width;
-  if (!specifiedWidthStr || specifiedWidthStr == 'auto' ||
-      isPercentageString(specifiedWidthStr))
+  // Check width attribute first, width style second.
+  var specifiedWidthStr = node.getAttribute('width');
+  if (!specifiedWidthStr)
+    specifiedWidthStr = chrome_comp.getSpecifiedStyleValue(node, 'width');
+  if (specifiedWidthStr && endsWith(specifiedWidthStr, 'px')) {
+    // Remove the 'px' suffix.
+    specifiedWidthStr = specifiedWidthStr.slice(0, -2);
+  }
+  // TODO: how about style:width: 800pt ? We just ignore it now.
+  if (!specifiedWidthStr || endsWith(specifiedWidthStr, '%') ||
+      isNaN(specifiedWidthStr))
     return;
 
   var computedWidth = parseInt(chrome_comp.getComputedStyle(node).width, 10);
-  var specifiedWidth = parseInt(specifiedWidthStr, 10);
+  var specifiedWidthPixel = parseInt(specifiedWidthStr, 10);
   // TODO: use SHRESHOLD here
-  if ((computedWidth <= specifiedWidth))
+  if ((computedWidth <= specifiedWidthPixel))
     return;
 
   var textAlign = chrome_comp.getComputedStyle(node).textAlign;
@@ -123,7 +137,7 @@ function checkNode(node, context) {
   if (!isCellStretchedByTable(node) && hasInflowContent(node)) {
     this.addProblem('RE8014', {
       nodes: [node],
-      details: 'specifiedWidth=' + specifiedWidth + ', computedWidth=' +
+      details: 'specifiedWidth=' + specifiedWidthPixel + ', computedWidth=' +
           computedWidth
     });
   }
