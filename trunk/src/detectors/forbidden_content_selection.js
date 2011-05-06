@@ -14,6 +14,20 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Checking unselectable attribute of IE.
+ * @bug https://code.google.com/p/compatibility-detector/issues/detail?id=47
+ *
+ * The 'unselectable' attribute can avoid the element's content being selected
+ * in IE and Opera.
+ * The detector check all nodes, and do the following treatment:
+ * 1. Filter text node and display none node.
+ * 2. Check HTML tag 'unselectable' attribute value is on, and not set css
+ *    '-web-user-select:none' property or not set js Event onselectstart.
+ * 3. IF it has no js Event onselectstart, report a problem.
+ */
+
+
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
@@ -22,29 +36,36 @@ chrome_comp.CompDetect.declareDetector(
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
-null, // constructor
-
-//can't detect '-moz-user-select : none' currently.
-function checkNode(node, context) {
-  if (Node.ELEMENT_NODE != node.nodeType)
-    return;
-
-  if ((isForbiddenByAttribute(node) ^
-      (isForbiddenByCssProperty(node) || isForbiddenByEvent(node))))
-    this.addProblem('BX2050', [node]);
-
-  function isForbiddenByEvent(element){
-    return element.onselectstart && element.onselectstart() == false;
+function constructor() {
+  this.isForbiddenByEvent = function(node) {
+    return node.onselectstart && node.onselectstart() == false;
   }
 
-  function isForbiddenByCssProperty(element){
+  this.isForbiddenByCssProperty = function(node) {
     return chrome_comp.getComputedStyle(node).webkitUserSelect == 'none';
   }
 
-  function isForbiddenByAttribute(element){
-    return element.hasAttribute('unselectable') &&
-        element.getAttribute('unselectable') == 'on';
+  this.isForbiddenByAttribute = function(node) {
+    return (node.getAttribute('unselectable') || '').toLowerCase() == 'on';
   }
+},
+
+function checkNode(node, context) {
+  if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
+    return;
+
+  if (this.isForbiddenByEvent(node))
+    return;
+
+  if (this.isForbiddenByAttribute(node) !=
+      this.isForbiddenByCssProperty(node))
+    this.addProblem('BX2050', {
+      nodes: [node],
+      details: 'unselectable = ' + node.getAttribute('unselectable') +
+          ', -webkit-user-select = ' +
+          chrome_comp.getComputedStyle(node).webkitUserSelect +
+          ', onselectstart = ' + node.onselectstart
+    });
 }
 ); // declareDetector
 

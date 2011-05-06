@@ -1,25 +1,38 @@
-<!doctype html>
-<html chrome_comp_test="forbidden_content_selection">	<head>
-		<style type="text/css">
-			div{
-				background:#CCC;
-			}
-		</style>
-	</head>	<body>
-		<div unselectable="on" style="-webkit-user-select:none; ">unselectable=on + -webkit-user-select:none;</div>
-		<br />
-		<div unselectable="on" onselectstart="return false;">unselectable=on + onselectstart attribute</div>
-		<br />
-		<div id="event1" unselectable="on">unselectable=on + onselectstart event</div>
-		<br />
-		<br />
-		<div expectedProblems="BX2050" onselectstart="return false;">only onselectstart="return false;"</div>
-		<br />
-		<div expectedProblems="BX2050" unselectable="on">only unselectable=on </div>
-		<br />
-		<div expectedProblems="BX2050" style="-webkit-user-select:none;">only -webkit-user-select:none; </div>
-		<script type="text/javascript">
-			var $ = function(id){return document.getElementById(id);};
-			$("event1").onselectstart = function(){return false;};
-		</script>
-	</body></html>
+<!DOCTYPE html>
+<html chrome_comp_test="forbidden_content_selection">
+<head>
+</head>
+<body>
+<h1>BX2050</h1>
+
+<p>1. unselectable="on"</p>
+<div unselectable="on" style="border:1px solid #000;" expectedProblems="BX2050">only unselectable=on </div>
+
+<p>2. -webkit-user-select:none; </p>
+<div style="-webkit-user-select:none; border:1px solid #000;" expectedProblems="BX2050">only -webkit-user-select:none; </div>
+
+<hr/>
+
+<h2>The followings don't have problems</h2>
+
+<p>A1. unselectable="on" and -webkit-user-select:none;</p>
+<div unselectable="on" style="-webkit-user-select:none; border:1px solid #000">unselectable=on + -webkit-user-select:none;</div>
+
+<p>A2. unselectable="on" and onselectstart="return false;"</p>
+<div unselectable="on" onselectstart="return false;" style="border:1px solid #000">unselectable=on + onselectstart attribute</div>
+
+<p>A3. unselectable="on" and javascript set onselectstart event return false </p>
+<div id="event1" unselectable="on" style="border:1px solid #000">unselectable=on + onselectstart event</div>
+
+<p>A4. onselectstart="return false;"</p>
+<div onselectstart="return false;" style="border:1px solid #000">only onselectstart="return false;"</div>
+
+<script type="text/javascript">
+  var $ = function(id){return document.getElementById(id);};
+  $("event1").onselectstart = function(){return false;};
+</script>
+
+<p>(End of test)</p>
+
+</body>
+</html>
