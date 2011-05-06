@@ -1,47 +1,108 @@
-<!DOCTYPE html> 
-<html> 
-<head> 
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/> 
-</head> 
+<!DOCTYPE html>
+<html chrome_comp_test="fieldset_width">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+</head>
 <body>
-<span>Text</span> 
+<p>1.</p>
+<span>Text</span>
+<div>
+  <fieldset style="width:300px; border:1px solid #000;" expectedProblems="HF1004">
+  &lt;div&gt;
+    &lt;fieldset&gt;
+    &lt;/fieldset&gt;
+    Text
+  &lt;/div&gt;
+  </fieldset>
+  Text
+</div>
+
+<p>2.</p>
+<div>
+  Text
+  <fieldset style="width:300px; border:1px solid #000;" expectedProblems="HF1004">
+  &lt;div&gt;
+    Text
+    &lt;fieldset&gt;
+    &lt;/fieldset&gt;
+  &lt;/div&gt;
+  </fieldset>
+</div>
+
+<p>3.</p>
 <span>
-<fieldset style="width:150px;"> 
-  FIELDSET ELement
-</fieldset>
-</span> 
-<span style="border:1px solid gray;padding:0 5px;background:gold;"> 
-  Span Element
+  <fieldset style="width:300px; border:1px solid #000;" expectedProblems="HF1004">
+  &lt;span&gt;
+    &lt;fieldset&gt;
+    &lt;/fieldset&gt;
+  &lt;/span&gt;
+  </fieldset>
 </span>
-<br />
+<span style="border:1px solid gray;padding:0 5px;">
+  SPAN tag
+</span>
+
+<hr/>
+
+<h2>The followings don't have problems</h2>
+
+<p>A1.</p>
 <div>
-<fieldset style="width:150px;"> 
-  FIELDSET ELement
-</fieldset>
+  <fieldset style="width:300px; border:1px solid #000;">
+  &lt;div&gt;
+    &lt;fieldset&gt;
+    &lt;/fieldset&gt;
+  &lt;/div&gt;
+  </fieldset>
+</div>
+
+<p>A2.</p>
 <div>
-<fieldset style="width:150px;"> 
-  FIELDSET ELement
-</fieldset><br>
-some text
-</div> 
+  <fieldset style="width:300px; border:1px solid #000;">
+  &lt;div&gt;
+    &lt;fieldset&gt;
+    &lt;/fieldset&gt;&lt;br&gt;
+    some text
+  &lt;/div&gt;
+  </fieldset><br>
+  some text
+</div>
+
+<p>A3.</p>
 <div style="white-space:pre">
-Text
-<fieldset style="width:150px;"> 
-  FIELDSET ELement
-</fieldset>
-Text
-</div> 
-<div>
-<fieldset style="width:150px;"> 
-  FIELDSET ELement
-</fieldset>
-Text
-</div> 
-<div>
-Text
-<fieldset style="width:150px;"> 
-  FIELDSET ELement
-</fieldset>
-</div> 
-</body> 
+  Text
+  <fieldset style="width:300px; border:1px solid #000;">
+  &lt;div style="white-space:pre" &gt;
+    Text
+    &lt;fieldset&gt;
+    &lt;/fieldset&gt;
+    Text
+  &lt;/div&gt;
+  </fieldset>
+  Text
+</div>
+
+<p>A4.</p>
+<table>
+  <tr>
+    <td>
+      <fieldset style="width:300px; border:1px solid #000;">
+      &lt;table&gt;
+        &lt;tr&gt;
+          &lt;td&gt;
+              &lt;fieldset&gt;
+              &lt;/fieldset&gt;
+          &lt;/td&gt;
+        &lt;/tr&gt;
+      &lt;/table&gt;
+     </fieldset>
+    </td>
+  </tr>
+</table>
+<span style="border:1px solid gray;padding:0 5px;">
+  SPAN tag
+</span>
+
+<p>(End of test)</p>
+</body>
 </html>
