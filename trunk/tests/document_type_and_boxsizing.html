@@ -1,49 +1,42 @@
-<!-- 123 -->
+<!-- comment -->
 <!DOCTYPE html>
 <html chrome_comp_test="document_type_and_boxsizing">
 <head>
 </head>
 <body>
-<h1>HG8001</h1>
-<p>1. document type</p>
-<div>
-<script>
-document.write('IE: ' + chrome_comp.documentMode.IE + '<br />WebKit: ' +
-    chrome_comp.documentMode.WebKit);
-</script>
-</div>
-
 <h1>RD8001</h1>
-<p>2. [H1] border:10px; padding:10px; width:100px; height:100px;</p>
-<h1 style="border:10px solid; padding:10px; margin:0; width:100px; height:100px;" expectedProblems="RD8001">H1</h1>
+<p>1. [DIV] border:10px; padding:10px; width:100px; height:100px;</p>
+<div style="width:200px; overflow:hidden;">
+<div style="border:10px solid; padding:1px; margin:0; width:100px; height:100px; float:left;" expectedProblems="RD8001">DIV</div>
+</div>
 <br />
 
-<p>3. [INPUT] border:10px solid; width:100px; height:100px; box-sizing:content-box;</p>
-<div>
+<p>2. [INPUT] border:10px solid; width:100px; height:100px; box-sizing:content-box;</p>
+<div style="text-align:center; width:110px;">
 <input type="reset" style="border:10px solid; width:100px; height:100px; box-sizing:content-box;" expectedProblems="RD8001" />
 </div>
 <br />
 
-<p>4. [HR] border:10px solid; width:100px; height:100px;</p>
+<p>3. [HR] border:10px solid; width:100px; height:100px;</p>
 <hr style="border:10px solid; width:100px; height:100px;" align="left" expectedProblems="RD8001" />
 <br />
 
-<p>5. [INPUT] border:10px solid black; width:100px; height:100px;</p>
+<p>4. [INPUT] border:10px solid black; width:100px; height:100px;</p>
 <div>
 <input type="text" style="border:10px solid black; width:100px; height:100px;" expectedProblems="RD8001" />
 </div>
 <br />
 
-<p>6. [OBJECT] border:30px solid; width:100px; height:100px;</p>
+<p>5. [OBJECT] border:30px solid; width:100px; height:100px;</p>
 <div>
-<object data="http://www.google.com/images/logo_sm.gif" style="width:100px; height:100px; border:30px solid;" expectedProblems="RD8001"></object>
+<object data="img.png" style="width:100px; height:100px; border:30px solid;" expectedProblems="RD8001"></object>
 </div>
 
 
 <h2>The followings don't have problems</h2>
 <p>A1. [IMG] border:10px; width:100px; height:100px;</p>
 <div>
-<img src="http://www.google.com/images/logo_sm.gif" style="border:10px; width:100px; height:100px;" />
+<img src="img.png" style="border:10px; width:100px; height:100px;" />
 </div>
 
 <p>A2. [DIV] border:10px; padding:10px; width:auto; height:auto;</p>
@@ -78,7 +71,7 @@ document.write('IE: ' + chrome_comp.documentMode.IE + '<br />WebKit: ' +
 
 <p>A8. [IMG] border:10px solid; width:100px; height:100px;</p>
 <div>
-<img style="border:10px solid; width:100px; height:100px;" src="http://www.google.com/images/logo_sm.gif" />
+<img style="border:10px solid; width:100px; height:100px;" src="img.png" />
 </div>
 <br />
 
@@ -90,12 +83,18 @@ document.write('IE: ' + chrome_comp.documentMode.IE + '<br />WebKit: ' +
 
 <p>A10. [IFRAME] border:10px solid; width:100px; height:100px;</p>
 <div>
-<iframe src="http://www.google.com" style="border:10px solid; width:100px; height:100px;"></iframe>
+<iframe src="about:blank" style="border:10px solid; width:100px; height:100px;"></iframe>
 </div>
 
 <p>A11. [EMBED] width:100px; height:100px;</p>
 <div>
-<embed src="clock.swf" type="application/x-shockwave-flash" quality="high" pluginspage="http://www.macromedia.com/go/getflashplayer" style="width:100px; height:100px;" />
+<embed src="flash_object_embed_1.swf" type="application/x-shockwave-flash" quality="high" pluginspage="http://www.macromedia.com/go/getflashplayer" style="width:100px; height:100px;" />
 </div>
+
+<p>A12. [DIV] border:1px; padding:3px; width:100px; height:100px;</p>
+<div style="width:200px; overflow:hidden;">
+<div style="border:1px solid; padding:3px; margin:0; width:100px; height:100px; float:left;">DIV</div>
+</div>
+
 </body>
 </html>
