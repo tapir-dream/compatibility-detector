@@ -1,24 +1,48 @@
+<!DOCTYPE html>
 <html chrome_comp_test="invalid_list_item">
-  <body>
-    <ol id='id' expectedProblemsChild8="HY1005">
-      aaaaa
-      <li>List A</li>
-      <li>List B</li>
-      <span style="background:gold; text-decoration:line-through;" expectedProblems="HY1005">CCC</span>
-      <li>List C</li>
-      Non blank Text
-    </ol>
-    <ul>
-    <li>li</li>
-    <li>li</li>
-    <li>li</li>
-    <div></div>
-    </ul>
-    <ul>
-    <li>li</li>
-    <li>li</li>
-    <li>li</li>
-    <br/>
-    </ul>
-  </body>
+<head>
+</head>
+<body>
+
+<h1>HY1005 invalid_list_item</h1>
+
+<p>1. SPAN after LI</p>
+<ol>
+  Text
+  <li>LI</li>
+  <li>LI</li>
+  <span expectedProblems="HY1005">SPAN</span>
+  <li>LI</li>
+</ol>
+
+<p>2. Empty TEXT_NODE after LI (TEXT_NODE's style 'white-space' is 'pre')</p>
+<ul style="white-space:pre;" expectedProblemsChild1="HY1005"><li>LI</li>
+<li>LI</li><li>LI</li></ul>
+
+<p>3. TEXT_NODE after LI</p>
+<ul expectedProblemsChild8="HY1005">
+<li>LI</li>
+<li>LI</li>
+<li>LI</li>
+<!-- comment -->
+Text
+</ul>
+
+<p>4. Empty DIV after LI (no visual different in this case)</p>
+<ul>
+<li>LI</li>
+<li>LI</li>
+<li>LI</li>
+<div expectedProblems="HY1005"></div>
+</ul>
+
+<p>5. BR after DD (no visual different in this case)</p>
+<dl>
+<dt>DT</dt>
+<dd>DD</dd>
+<dd>DD</dd>
+<br expectedProblems="HY1005">
+</dl>
+
+</body>
 </html>
