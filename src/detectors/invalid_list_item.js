@@ -15,66 +15,77 @@
  */
 
 /**
- * @fileoverview: One detector implementation for checking 'IE6 IE7 IE8 (Q)
- *  will ignore LI DD DT element end tag' problems
- *
+ * @fileoverview: Check problem of IE6 IE7 IE8(Q) will ignore LI DD DT element's
+ * end tag.
  * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=8
  *
- * Check each node, when the node is LI DT DD,
- * then check the next node, if the next node is a text node,
- * there may be a problem.
- * If the next node is not LI DT DD node and is a visible node,
- * there may be a problem.
+ * Find nodes whose name is one of LI DT DD, then check its next sibling node,
+ * if there is a text node, or the node has a invalid tag name, report problem.
+ * The DOM tree will be different between IE6 IE7 IE8(Q) and other browsers.
  */
 
 addScriptToInject(function() {
 
-  var VALID_LIST_NEXT_TAGS = {
+chrome_comp.CompDetect.declareDetector(
+
+'invalid_list_item',
+
+chrome_comp.CompDetect.ScanDomBaseDetector,
+
+function constructor() {
+  this.VALID_LIST_NEXT_TAGS = {
     LI: ['LI'],
     DT: ['DT', 'DD'],
     DD: ['DT', 'DD']
   };
+}, // constructor
 
-  chrome_comp.CompDetect.declareDetector(
+function checkNode(node, context) {
+  if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
+    return;
 
-    'invalid_list_item',
+  // Find list element.
+  var tagName = node.tagName;
+  if (!this.VALID_LIST_NEXT_TAGS.hasOwnProperty(tagName))
+    return;
 
-    chrome_comp.CompDetect.ScanDomBaseDetector,
+  var validNextTags = this.VALID_LIST_NEXT_TAGS[tagName];
+  var whiteSpaceIsPre =
+      chrome_comp.getComputedStyle(node.parentElement).whiteSpace == 'pre';
+  var details = null;
 
-    null, // constructor
-
-    function checkNode(node, context) {
-      if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
-        return;
-
-      var validNextTags = VALID_LIST_NEXT_TAGS[node.tagName];
-      var whiteSpacePre =
-          chrome_comp.getComputedStyle(node).whiteSpace == 'pre';
-      if (!(validNextTags instanceof Array))
-        return;
-      // Find first valid or invalid visible sibling.
-      for (var sibling = node.nextSibling; sibling;
-           sibling = sibling.nextSibling) {
-        switch (sibling.nodeType) {
-          case Node.TEXT_NODE:
-            var text = sibling.nodeValue;
-            if ((text && whiteSpacePre) || chrome_comp.trim(text)) {
-              this.addProblem('HY1005', [sibling]);
-              return;
-            }
-            break;
-          case Node.ELEMENT_NODE:
-            if (validNextTags.indexOf(sibling.tagName) != -1)
-              return;
-            if (chrome_comp.getComputedStyle(sibling).display != 'none' &&
-                sibling.innerText.trim()) {
-              this.addProblem('HY1005', [sibling]);
-              return;
-            }
-            break;
+  // Check the found list element's next visible sibling node.
+  for (var sibling = node.nextSibling; sibling; sibling = sibling.nextSibling) {
+    switch (sibling.nodeType) {
+      case Node.TEXT_NODE:
+        // If the text node is not blank, or the text node's style 'white-space'
+        // is 'pre', report problem.
+        var text = sibling.nodeValue;
+        if ((text && whiteSpaceIsPre) || chrome_comp.trim(text)) {
+          details = tagName + ' + TEXT_NODE';
         }
-      }
+        break;
+      case Node.ELEMENT_NODE:
+        // Met a valid list element, stop checking.
+        var siblingTagName = sibling.tagName;
+        if (validNextTags.indexOf(siblingTagName) != -1)
+          return;
+        // Met a visible element.
+        if (chrome_comp.getComputedStyle(sibling).display != 'none') {
+          details = tagName + ' + ' + siblingTagName;
+        }
+        break;
     }
-    ); // declareDetector
+    // Problem detected.
+    if (details) {
+      this.addProblem('HY1005', {
+        nodes: [sibling],
+        details: details
+      });
+      return;
+    }
+  }
+}
+); // declareDetector
 
 });
