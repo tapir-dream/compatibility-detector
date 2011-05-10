@@ -15,10 +15,10 @@
  */
 
 /**
- * @fileoverview: One detector implementation for checking 'Font tag set color
- * feature may affect text-decoration color of ancestor element' problems
- * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=25
-
+ * @fileoverview Check FONT element's color will be applied to its parent's
+ * decoration color in some situations.
+ * @bug https://code.google.com/p/compatibility-detector/issues/detail?id=25
+ *
  * First if the ancestor element has no feature of text-decoration ,
  * there will be no problem.
  * Otherwise , the color of node is not equal the color of it's ancestor while
@@ -46,11 +46,19 @@ function checkNode(node, context) {
   if (parentStyle.webkitTextDecorationsInEffect == 'none')
     return;
 
+  var nodeStyleColor = chrome_comp.getComputedStyle(node).color;
+  var quirksMode = chrome_comp.inQuirksMode();
+  var hasColor = node.hasAttribute('color');
   // In standard mode, color attribute causes problem in IE6 and IE7;
   // In quirks mode, color style causes problem in Chrome and Safari.
-  if (chrome_comp.getComputedStyle(node).color != parentStyle.color &&
-      chrome_comp.inQuirksMode() != node.hasAttribute('color'))
-    this.addProblem('RX3011', [node]);
+  if (nodeStyleColor != parentStyle.color &&
+      ((quirksMode == false && hasColor == true) ||
+          (quirksMode == true && hasColor == false)))
+    this.addProblem('RX3011',{
+      nodes: [node],
+      details: 'font color = ' + nodeStyleColor + '' +
+          ', parent node color =  ' + parentStyle.color
+    });
 }
 ); // declareDetector
 
