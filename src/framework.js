@@ -672,21 +672,39 @@ window.chrome_comp = (function() {
     },
 
     hasBorder: function(element) {
-      var computedStyle = chrome_comp.getComputedStyle(element);
-      if (chrome_comp.toInt(computedStyle.borderTopWidth) == 0 &&
-          chrome_comp.toInt(computedStyle.borderRightWidth) == 0 &&
-          chrome_comp.toInt(computedStyle.borderBottomWidth) == 0 &&
-          chrome_comp.toInt(computedStyle.borderLeftWidth) == 0)
+      var style = chrome_comp.getComputedStyle(element);
+      return chrome_comp.toInt(style.borderTopWidth) != 0 ||
+          chrome_comp.toInt(style.borderRightWidth) != 0 ||
+          chrome_comp.toInt(style.borderBottomWidth) != 0 ||
+          chrome_comp.toInt(style.borderLeftWidth) != 0;
+    },
+
+    hasBackground: function(element) {
+      var style = chrome_comp.getComputedStyle(element);
+      if (style.backgroundColor == 'rgba(0, 0, 0, 0)' &&
+          style.backgroundImage == 'none')
         return false;
       return true;
     },
 
-    hasBackground: function(element) {
-      var computedStyle = chrome_comp.getComputedStyle(element);
-      if (computedStyle.backgroundColor == 'rgba(0, 0, 0, 0)' &&
-          computedStyle.backgroundImage == 'none')
-        return false;
-      return true;
+    /**
+     * This function is only check the computed margin ,
+     * do not use it to detect user defined margin.
+     */
+    hasMargin: function(element) {
+      var style = chrome_comp.getComputedStyle(element);
+      return chrome_comp.toInt(style.marginLeft) != 0 ||
+          chrome_comp.toInt(style.marginTop) != 0 ||
+          chrome_comp.toInt(style.marginRight) != 0 ||
+          chrome_comp.toInt(style.marginBottom) != 0;
+    },
+
+    hasPadding: function(element) {
+      var style = chrome_comp.getComputedStyle(element);
+      return chrome_comp.toInt(style.paddingLeft) != 0 ||
+          chrome_comp.toInt(style.paddingTop) != 0 ||
+          chrome_comp.toInt(style.paddingRight) != 0 ||
+          chrome_comp.toInt(style.paddingBottom) != 0;
     },
 
     hasVisibleFloatingChild: function(element) {
