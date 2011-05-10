@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html chrome_comp_test="combination_of_visible_and_hidden_value_on_overflow">
+<head>
+</head>
+<body>
+
+<h1>combination_of_visible_and_hidden_value_on_overflow</h1>
+
+<h2>All container's size is 200 x 100, <span style="color:red;">RED</span> for problems and <span style="color:green;">GREEN</span> for no problems.</h2>
+
+<p>1. x = hidden, y = visible, overflow from X and Y direction.</p>
+<div style="width:200px; height:100px; background:silver; overflow-x:hidden;" expectedProblems="RV1001">
+  <div style="width:300px; height:200px; background:red;">300 x 200</div>
+</div>
+
+<p>2. x = hidden, y = visible, overflow from X direction.</p>
+<div style="width:200px; height:100px; background:silver; overflow-x:hidden;">
+  <div style="width:300px; height:50px; background:green;">300 x 50</div>
+</div>
+
+<p>3. x = hidden, y = visible, overflow from Y direction.</p>
+<div style="width:200px; height:100px; background:silver; overflow-x:hidden;" expectedProblems="RV1001">
+  <div style="width:150px; height:200px; background:red;">150 x 200</div>
+</div>
+
+<p>4. x = scroll, y = scroll, overflow from X and Y direction.</p>
+<div style="width:200px; height:100px; background:silver; overflow-x:scroll; overflow-y:scroll;">
+  <div style="width:300px; height:200px; background:green;">300 x 200</div>
+</div>
+
+<p>5. x = hidden, y = auto, overflow from X and Y direction.</p>
+<div style="width:200px; height:100px; background:silver; overflow-x:hidden; overflow-y:auto;">
+  <div style="width:300px; height:200px; background:green;">300 x 200</div>
+</div>
+
+<h2>Element is invisible.</h2>
+<p>6. Same as 1 but height set to 0.</p>
+<div style="width:200px; height:0; background:silver; overflow-x:hidden;">
+  <div style="width:300px; height:200px; background:green;">300 x 200</div>
+</div>
+
+</body>
+</html>
