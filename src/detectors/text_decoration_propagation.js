@@ -15,10 +15,9 @@
  */
 
 /**
- * @fileoverview: One detector implementation for checking that the
- * 'text-decoration' property which Text decorations visible difference in
- * browsers.
- * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=29
+ * @fileoverview Check that 'text-decoration' is not rendered in the same way
+ * for elements andtheir descendant in all browsers.
+ * @bug https://code.google.com/p/compatibility-detector/issues/detail?id=29
  *
  * In W3C CSS 2.1 specification, the description aboout the inheritence of the
  * 'text-decoration' property is not very clear.
@@ -49,12 +48,14 @@ null, // constructor
 function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
     return;
+
   if (!node.parentNode)
     return;
 
   var computedStyle = chrome_comp.getComputedStyle(node);
   var display = computedStyle.display;
-  var threshold = -100;
+
+  var THRESHOLD = -100;
 
   var position = computedStyle.position;
   // All browsers propagates decoration into absolute positioned block in
@@ -62,22 +63,30 @@ function checkNode(node, context) {
   if (position == 'absolute' || position == 'fixed') {
     if (chrome_comp.inQuirksMode())
       return;
-    if ((parseInt(computedStyle.top, 10) | 0) < threshold ||
-       (parseInt(computedStyle.left, 10) | 0) < threshold)
+    // Position style element content box left or right less than zero,
+    // text may not be visible.
+    var contentBox = chrome_comp.getLayoutBoxes(node).contentBox;
+    if (contentBox.right < 0 || contentBox.bottom < 0)
       return;
   } else if (display != 'inline-table' && display != 'inline-block') {
     return;
   }
 
-  if ((parseInt(computedStyle.textIndent, 10) | 0) < threshold)
+  // The text-indent style value is less than threshold value,
+  // text may not be visible.
+  if (chrome_comp.toInt(computedStyle.textIndent) < THRESHOLD)
     return;
 
   if (!node.innerText)
     return;
 
   var parentComputedStyle = chrome_comp.getComputedStyle(node.parentNode);
-  if (parentComputedStyle.WebkitTextDecorationsInEffect != 'none')
-    this.addProblem('RT3002', [node]);
+  var textDecoration = parentComputedStyle.WebkitTextDecorationsInEffect
+  if (textDecoration != 'none')
+    this.addProblem('RT3002', {
+      nodes: [node],
+      details: 'textDecoration = ' + textDecoration
+    });
 }
 ); // declareDetector
 
