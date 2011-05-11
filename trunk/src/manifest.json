@@ -1,6 +1,6 @@
 {
   "name": "__MSG_extensionName__",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "description": "__MSG_extensionDescription__",
   "background_page": "background.html",
   "default_locale": "en",
@@ -26,27 +26,23 @@
       "w3help_issues.js",
       "non_w3help_issues.js",
 
-
+      // Working issues: Release 0.9.8
       "detectors/text_decoration_propagation.js",           //RT3002: ok 3/18
       "detectors/decoration_font_color.js",                 //RX3011: ok, but the problem is hard to notice 3/18
 
-
-      // Working issues
-      //"detectors/child_overflow_container.js", //RD1002: no english translation
+      // Release 0.9.6
       "detectors/center_element.js",                        //HA8001
-      "detectors/inline_no_relpace_width_height.js",        //RD1014: TODO: add details // bad for english 3/25
+      "detectors/child_overflow_container.js",              //RD1002: TODO: no english translation
+      "detectors/clear_float.js",                           //RM8002 RS8010
+      "detectors/comment_before_doctype.js",                //HG8001
+      "detectors/document_type_and_boxsizing.js",           //RD8001
+      "detectors/flash_object_embed.js",                    //HO8001
+      "detectors/inline_no_relpace_width_height.js",        //RD1014: TODO: add details
+      "detectors/invalid_list_item.js",                     //HY1005
       "detectors/modifying_display_property_on_table_elements.js", //RE8015
       "detectors/nowrap_attribute.js",                      //HE1003
-      //"detectors/flash_object_embed.js",
-      // "detectors/right_floats_stretch_parent_elements.js",  //RD8006
-      // "detectors/text_align.js",                            //RT8003
-      // "detectors/doctype_checker.js",                       //HG8001
-      // "detectors/shrink_to_fit_percentage_child.js",        //RX8017
-      "detectors/stretched_cell_align.js",                  //RE8014: TODO: bad 3/16
-      "detectors/invalid_list_item.js",                     //HY1005: TODO: verify
-
-
-
+      "detectors/stretched_cell_align.js",                  //RE8014
+      "detectors/text_align.js",                            //RT8003
 
       // Release 0.9.4
       "detectors/createelement_argument.js",                //SD9010: TODO: stack and details
@@ -86,11 +82,12 @@
 
       // Do it later
       "detectors/align_nowrap.js",                          //RX8015: TODO: verify: visual difference?
-      "detectors/document_type_and_boxsizing.js",           //RD8001: too complex
       "detectors/empty_cell.js",                            //RE1013 RE1012: ok, but the problem is hard to notice 3/18
       "detectors/expression.js",                            //BT9010: TODO: to be verify
       "detectors/img_padding.js",                           //RX1010: ok 3/18
       "detectors/z_index_auto.js",                          //RM8015
+      "detectors/right_floats_stretch_parent_elements.js",  //RD8006: later
+      "detectors/shrink_to_fit_percentage_child.js",        //RX8017: later
 
       // Verified warnings
       "detectors/haslayout_full_shape_space.js",            //BT1025
