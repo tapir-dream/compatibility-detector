@@ -1,6 +1,6 @@
 {
   "name": "__MSG_extensionName__",
-  "version": "0.9.4",
+  "version": "0.9.6",
   "description": "__MSG_extensionDescription__",
   "background_page": "background.html",
   "default_locale": "en",
@@ -24,6 +24,20 @@
       "config.js",
       "w3help_issues.js",
       "non_w3help_issues.js",
+
+      "detectors/center_element.js",
+      "detectors/child_overflow_container.js",
+      "detectors/clear_float.js",
+      "detectors/comment_before_doctype.js",
+      "detectors/document_type_and_boxsizing.js",
+      "detectors/flash_object_embed.js",
+      "detectors/inline_no_relpace_width_height.js",
+      "detectors/invalid_list_item.js",
+      "detectors/modifying_display_property_on_table_elements.js",
+      "detectors/nowrap_attribute.js",
+      "detectors/stretched_cell_align.js",
+      "detectors/text_align.js",
+
       "detectors/createelement_argument.js",
       "detectors/disabled_attribute.js",
       "detectors/documentls.js",
@@ -34,6 +48,7 @@
       "detectors/scroll_top_left.js",
       "detectors/table_margin_affects_align_center.js",
       "detectors/text_overflow_ellipsis.js",
+
       "annotation.js"
     ],
     "run_at": "document_start"

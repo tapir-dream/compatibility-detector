@@ -114,6 +114,8 @@ function constructor(rootNode) {
     if (originalArguments.length == 0 || typeof result == 'undefined')
       return;
     var idOrName = originalArguments[0];
+    if (typeof idOrName != 'string')
+      return;
     // Ignore calling by JQurey, JQuery will create an element with a name
     // 'script' + new Date().getTime(), and try to call document.getElementById
     // by using that name.
@@ -162,8 +164,10 @@ function constructor(rootNode) {
     // Variable result will be undefined in an illegal invocation.
     if (originalArguments.length == 0 || typeof result == 'undefined')
       return;
-    // If get one wrong element, report problem.
     var name = originalArguments[0];
+    if (typeof name != 'string')
+      return;
+    // If get one wrong element, report problem.
     var elementsInIE = getElementsByNameInIE(name);
     // If result is not empty and elementsInIE is empty, it's another problem.
     // FF & Chrome can get <div name='foo'></div> by this method, but IE can't.

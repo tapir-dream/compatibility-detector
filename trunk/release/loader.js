@@ -19,8 +19,8 @@ function log(message) {
   // window.console.log(message);
 }
 
-const DETECTION_STATUS_NAME = 'chrome_comp_detection_status';
-const CHROME_COMP_LOAD = 'chrome_comp_load';
+var DETECTION_STATUS_NAME = 'chrome_comp_detection_status';
+var CHROME_COMP_LOAD = 'chrome_comp_load';
 
 var detectionEnabled =
     window.sessionStorage[DETECTION_STATUS_NAME] ==
@@ -33,9 +33,9 @@ if (detectionEnabled) {
 
 var docElement = document.documentElement;
 
-const INJECT_SCRIPT_EVENT_NAME = 'chrome_comp_injectScript';
-const INJECTED_SCRIPT_ATTR_NAME = 'chrome_comp_injectedScript';
-const PROBLEM_DETECTED_EVENT_NAME = 'chrome_comp_problemDetected';
+var INJECT_SCRIPT_EVENT_NAME = 'chrome_comp_injectScript';
+var INJECTED_SCRIPT_ATTR_NAME = 'chrome_comp_injectedScript';
+var PROBLEM_DETECTED_EVENT_NAME = 'chrome_comp_problemDetected';
 
 // Creates a script node on the page to inject arbitary script from content
 // script to the page.
@@ -110,20 +110,88 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
     case 'DetectProblems':
       detectProblems();
       break;
+    case 'getCrossOriginCSSFinished':
+      getCrossOriginCSSFinished(request.data);
+      break;
   }
 });
+
+/**
+ * @param {object} data maps url to css text
+ */
+function getCrossOriginCSSFinished(data) {
+  if (data) {
+    for (var url in data) {
+      log('Insert cross origin style sheet : ' + url);
+      insertStyleNodeAfter(crossOriginStyleSheets[url], data[url]);
+    }
+  }
+  var event = document.createEvent('Event');
+  event.initEvent(CHROME_COMP_LOAD, true, true);
+  window.dispatchEvent(event);
+}
+
+// Maps url to style sheet link nodes.
+var crossOriginStyleSheets = {};
+
+function initCrossOriginLinkMap() {
+  var styleSheets = document.styleSheets;
+  for (var i = 0, c = styleSheets.length; i < c; ++i) {
+    var styleSheet = styleSheets[i];
+    if (styleSheet.cssRules == null && styleSheet.ownerNode !== null) {
+      crossOriginStyleSheets[styleSheet.href] = styleSheet.ownerNode;
+    }
+  }
+}
+
+function getCrossOriginStyleSheetsURLMap() {
+  var urlMap = {};
+  for (var url in crossOriginStyleSheets)
+    urlMap[url] = true;
+  return urlMap;
+}
+
+var detectionStarted = false;
 
 function detectProblems() {
   if (!detectionEnabled) {
     window.sessionStorage[DETECTION_STATUS_NAME] =
         window.location.href;
     window.location.reload();
-  } else {
-    // Trigger page script's detection
-    var event = document.createEvent('Event');
-    event.initEvent(CHROME_COMP_LOAD, true, true);
-    window.dispatchEvent(event);
+    return;
   }
+
+  if ('complete' != document.readyState)
+    return;
+  if (detectionStarted)
+    return;
+  detectionStarted = true;
+  initCrossOriginLinkMap();
+  var keys = Object.keys(crossOriginStyleSheets);
+  if (keys.length) {
+    log('getCrossOriginCSS' + ' : ' + keys.length);
+    chrome.extension.sendRequest({
+      type: 'getCrossOriginCSS',
+      urlMap: getCrossOriginStyleSheetsURLMap()
+    });
+  } else {
+    getCrossOriginCSSFinished();
+  }
+}
+
+function insertStyleNodeAfter(node, cssText) {
+  var styleNode = document.createElement('style');
+  styleNode.appendChild(document.createTextNode(cssText));
+  inserAfter(node, styleNode);
+}
+
+function inserAfter(node, newNode) {
+  var parentNode = node.parentNode;
+  var nextSibling = node.nextSibling;
+  if (nextSibling)
+    parentNode.insertBefore(newNode, nextSibling);
+  else
+    parentNode.appendChild(newNode);
 }
 
 function addSourceToInject(source, debug) {
@@ -162,8 +230,10 @@ function addScriptToInjectAndExecuteInContentScript(scriptFunction) {
   scriptFunction();
 }
 
-// Send 'PageLoad' message to popup so that it will re-check this page.
 window.addEventListener('load', function() {
+  if (detectionEnabled)
+    detectProblems();
+  // Send 'PageLoad' message to popup so that it will re-check this page.
   chrome.extension.sendRequest({
     type: 'PageLoad'
   });

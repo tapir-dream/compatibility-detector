@@ -112,6 +112,10 @@ window.chrome_comp = (function() {
               .replace(chrome_comp.TRAILING_WHITESPACES, '');
     },
 
+    isAutoOrNull: function(value) {
+      return 'auto' == value || null == value;
+    },
+
     /**
      * Send a request to the content script. The content script uses
      * document.documentElement.addEventListener(name, function()...) to
@@ -268,32 +272,20 @@ window.chrome_comp = (function() {
       if (!ele)
         return;
       var computedStyle = ele.chrome_comp_computedStyleCache;
-      if (computedStyle)
+      if (computedStyle && !pseudo)
         return computedStyle;
       try {
         computedStyle = ele.ownerDocument.defaultView.getComputedStyle(ele,
             pseudo);
-        ele.chrome_comp_computedStyleCache = computedStyle;
+        // We cannot cache the style of the pseudo element on the current
+        // element here, or it will override the style of this element itself.
+        if (!pseudo)
+          ele.chrome_comp_computedStyleCache = computedStyle;
         return computedStyle;
       } catch (e) {
         chrome_comp.printError('getComputedStyle error: ', e);
         chrome_comp.trace(ele);
       }
-    },
-
-    /**
-     * The cacheSpecifiedValue function caches the specified value of margin,
-     * border, padding, width and height properties in the property of every
-     * element. So we retrieve these values here. If there is no cached value or
-     * there is no specified node, we just return the empty object.
-     * @param {object} ele the specified node.
-     * @return {object} return the specified value of the node or the empty
-     *     object.
-     */
-    getSpecifiedValue: function(ele) {
-      if (!ele || !ele[chrome_comp.SPECIFIED_VALUE])
-        return {};
-      return ele[chrome_comp.SPECIFIED_VALUE];
     },
 
     // Note: for scan dom detectors, please use context.isDisplayNone() in
@@ -396,8 +388,8 @@ window.chrome_comp = (function() {
       if (!node || Node.ELEMENT_NODE != node.nodeType)
         return false;
 
-      var specifiedWidth = chrome_comp.getSpecifiedValue(node).width;
-      if (specifiedWidth != 'auto')
+      var specifiedWidth = chrome_comp.getSpecifiedStyleValue(node, 'width');
+      if (!chrome_comp.isAutoOrNull(specifiedWidth))
         return false;
       // For the floating elements, the inline block elements and the absolutely
       // positioned elements, if 'width' is 'auto', the used value is the
@@ -416,44 +408,16 @@ window.chrome_comp = (function() {
     },
 
     /**
-     * Returns style information that is defined on specified node (including
-     * inline style).
-     * @param {object} node node to get prorotypes for.
-     * @param {boolean} authorOnly Determines whether only author styles need to
-     *     be added.
-     * @return {object} Style collection descriptor.
+     * Returns specified style property information that is defined on specified
+     * node (including inline style) by name.
+     * @param {object} node node to get prototypes for.
+     * @param {string} propertyName CSS property name.
+     * @return {object} value of specified style property information. Return
+     *     null if the specified property is not defined on the node.
      */
-    getNodeDefinedStyles: function(node, authorOnly) {
-      if (node.nodeType != this.Node.ELEMENT_NODE)
-        return [];
-      var macthedCSSStyles = [];
-      var stylesPerRule;
-      var matchedRules = node.ownerDocument.defaultView.getMatchedCSSRules(
-          node, '', authorOnly);
-      if (matchedRules) {
-        for (var i = 0, c = matchedRules.length; i < c; ++i) {
-          var rule = matchedRules[i];
-
-          var ruleStyle = rule.style;
-          stylesPerRule = {};
-          for (var j = 0, c1 = ruleStyle.length; j < c1; ++j) {
-            var name = ruleStyle[j];
-            stylesPerRule[name] = ruleStyle.getPropertyValue(name);
-          }
-          macthedCSSStyles.push(stylesPerRule);
-        }
-      }
-      // Get inline style
-      var inlineStyle = node.style;
-      if (inlineStyle && (inlineStyle instanceof CSSStyleDeclaration)) {
-        var inlineStyleColletion = {};
-        for (var j = 0, c = inlineStyle.length; j < c; ++j) {
-          var name = inlineStyle[j];
-          inlineStyleColletion[name] = inlineStyle.getPropertyValue(name);
-        }
-        macthedCSSStyles.push(inlineStyleColletion);
-      }
-      return macthedCSSStyles;
+    getSpecifiedStyleValue: function(node, propertyName) {
+      return chrome_comp.getDefinedStylePropertyByName(node, true,
+          propertyName);
     },
 
     /**
@@ -462,42 +426,42 @@ window.chrome_comp = (function() {
      * @param {object} node node to get prototypes for.
      * @param {boolean} authorOnly Determines whether only author styles need to
      *     be added.
+     * @param {string} propertyName CSS property name.
      * @return {object} value of specified style property information. Return
-     *     undefined if the specified property is not defined on the node.
+     *     null if the specified property is not defined on the node.
      */
+    // TODO: replace getDefinedStylePropertyByName with getSpecifiedStyleValue
+    // This name is too long and has useless authorOnly parameter.
     getDefinedStylePropertyByName: function(node, authorOnly, propertyName) {
-      var value;
-      if (node) {
-        if (node.style) {
-          value = node.style.getPropertyValue(propertyName);
-          if (node.style.getPropertyPriority(propertyName))
-            return value;
-        }
-        var styleRules = node.ownerDocument.defaultView.getMatchedCSSRules(
-            node, '', authorOnly);
-        if (styleRules) {
-          for (var i = styleRules.length - 1; i >= 0; i--) {
-            var style = styleRules[i].style;
-            if (style.getPropertyPriority(propertyName))
-              return style.getPropertyValue(propertyName);
-            if (!value)
-              value = style.getPropertyValue(propertyName);
-          }
-        }
+      // CSSStyleDeclaration.getPropertyValue returns null instead of
+      // empty string if the property has not been set in Webkit. So we
+      // initialize the return value as null here.
+      // http://www.w3.org/TR/DOM-Level-2-Style/css.html#CSS-CSSStyleDeclaration
+      var value = null;
+      if (!node || node.nodeType != Node.ELEMENT_NODE)
+        return value;
+
+      if (node.style) {
+        value = node.style.getPropertyValue(propertyName);
+        // The !important style takes precedence.
+        if (node.style.getPropertyPriority(propertyName))
+          return value;
+      }
+
+      var styleRules = node.ownerDocument.defaultView.getMatchedCSSRules(
+          node, '', authorOnly);
+      if (!styleRules)
+        return value;
+
+      for (var i = styleRules.length - 1; i >= 0; --i) {
+        var style = styleRules[i].style;
+        // The !important style may override inline style.
+        if (style.getPropertyPriority(propertyName))
+          return style.getPropertyValue(propertyName);
+        if (!value)
+          value = style.getPropertyValue(propertyName);
       }
       return value;
-    },
-
-    getDefinedStylePropertyByName2: function(node, authorOnly, propertyName) {
-      if (node) {
-        var macthedCSSStyles =
-            chrome_comp.getNodeDefinedStyles(node, authorOnly);
-        for (var i = 0, c = macthedCSSStyles.length; i < c; ++i) {
-          var styelsPerRule = macthedCSSStyles[i];
-          if (propertyName in styelsPerRule)
-            return styelsPerRule[propertyName];
-        }
-      }
     },
 
     isReplacedElement: function(element) {
@@ -557,15 +521,29 @@ window.chrome_comp = (function() {
       if (element.tagName in this.HASLAYOUT_TAG_NAME_LIST)
         return true;
       var style = chrome_comp.getComputedStyle(element);
+      var width = chrome_comp.getSpecifiedStyleValue(element, 'width');
+      var height = chrome_comp.getSpecifiedStyleValue(element, 'height');
       if (style.float != 'none' ||
           style.position == 'absolute' ||
           style.display == 'inline-block' ||
-          parseInt(chrome_comp.getSpecifiedValue(element).width) > 0 ||
-          parseInt(chrome_comp.getSpecifiedValue(element).height) > 0 ||
-          chrome_comp.getDefinedStylePropertyByName(element, false,
-              'zoom') != null)
+          !chrome_comp.isAutoOrNull(width) ||
+          !chrome_comp.isAutoOrNull(height) ||
+          chrome_comp.getSpecifiedStyleValue(element, 'zoom') != null)
         return true;
       return false;
+    },
+
+    /**
+     * Determine if the element is in normal flow. In CSS 2.1, normal
+     * flow includes block formatting of block-level boxes, inline formatting
+     * of inline-level boxes, relative positioning of block-level and
+     * inline-level boxes, and formatting of run-in boxes.
+     * Refer to: http://www.w3.org/TR/CSS2/visuren.html#positioning-scheme
+     */
+    isInNormalFlow: function(element) {
+      var style = chrome_comp.getComputedStyle(element);
+      return style.float == 'none' && style.position != 'absolute' &&
+          style.position != 'fixed';
     },
 
     /**
@@ -608,10 +586,298 @@ window.chrome_comp = (function() {
 
     inQuirksMode: function() {
       return document.compatMode != 'CSS1Compat';
+    },
+
+    toInt: function(value) {
+      if (!value)
+        return 0;
+      var result = parseInt(value, 10);
+      if (isNaN(result))
+        return 0;
+      return result;
+    },
+
+    /**
+     * Get an element's margin edge, border edge, padding edge and content
+     * edge's coordinates.
+     * @param {Element} element Target element.
+     * @return {object} Contains 4 rectangles: marginBox, borderBox, paddingBox,
+     *     contentBox, each rectangle has 4 members: left, top, right, bottom.
+     */
+    getLayoutBoxes: function(element) {
+      var boundingClientRect = element.getBoundingClientRect();
+
+      // Adjust the box to the page.
+      var borderBox = {
+        left: boundingClientRect.left + window.pageXOffset,
+        top: boundingClientRect.top + window.pageYOffset,
+        right: boundingClientRect.right + window.pageXOffset,
+        bottom: boundingClientRect.bottom + window.pageYOffset
+      };
+
+      var style = chrome_comp.getComputedStyle(element);
+
+      var marginLeft = chrome_comp.getSpecifiedStyleValue(element,
+          'margin-left');
+      var marginRight = chrome_comp.getSpecifiedStyleValue(element,
+          'margin-right');
+      var marginTop = chrome_comp.getSpecifiedStyleValue(element,
+          'margin-top');
+      var marginBottom = chrome_comp.getSpecifiedStyleValue(element,
+          'margin-bottom');
+
+      // Fix chrome 10- margin bug.
+      // if margin is null or auto, will full container, fix margin value to 0.
+      marginLeft = (chrome_comp.isAutoOrNull(marginLeft)) ?
+          '0px' : style.marginLeft;
+      marginRight = (chrome_comp.isAutoOrNull(marginRight)) ?
+          '0px' : style.marginRight;
+      marginTop = (chrome_comp.isAutoOrNull(marginTop)) ?
+          '0px' : style.marginTop;
+      marginBottom = (chrome_comp.isAutoOrNull(marginBottom)) ?
+          '0px' : style.marginBottom;
+
+      var marginBox = {
+        left: borderBox.left - chrome_comp.toInt(marginLeft),
+        top: borderBox.top - chrome_comp.toInt(marginTop),
+        right: borderBox.right + chrome_comp.toInt(marginRight),
+        bottom: borderBox.bottom + chrome_comp.toInt(marginBottom)
+      };
+
+      // Use clientWidth/clientHeight to exclude the scroll bar.
+      var paddingBoxLeft =
+          borderBox.left + chrome_comp.toInt(style.borderLeftWidth);
+      var paddingBoxTop =
+          borderBox.top + chrome_comp.toInt(style.borderTopWidth);
+      var paddingBox = {
+        left: paddingBoxLeft,
+        top: paddingBoxTop,
+        right: paddingBoxLeft + element.clientWidth,
+        bottom: paddingBoxTop + element.clientHeight
+      };
+
+      var contentBox = {
+        left: paddingBox.left + chrome_comp.toInt(style.paddingLeft),
+        top: paddingBox.top + chrome_comp.toInt(style.paddingTop),
+        right: paddingBox.right - chrome_comp.toInt(style.paddingRight),
+        bottom: paddingBox.bottom - chrome_comp.toInt(style.paddingBottom)
+      };
+
+      return {
+        marginBox: marginBox,
+        borderBox: borderBox,
+        paddingBox: paddingBox,
+        contentBox: contentBox
+      };
+    },
+
+    hasBorder: function(element) {
+      var computedStyle = chrome_comp.getComputedStyle(element);
+      if (chrome_comp.toInt(computedStyle.borderTopWidth) == 0 &&
+          chrome_comp.toInt(computedStyle.borderRightWidth) == 0 &&
+          chrome_comp.toInt(computedStyle.borderBottomWidth) == 0 &&
+          chrome_comp.toInt(computedStyle.borderLeftWidth) == 0)
+        return false;
+      return true;
+    },
+
+    hasBackground: function(element) {
+      var computedStyle = chrome_comp.getComputedStyle(element);
+      if (computedStyle.backgroundColor == 'rgba(0, 0, 0, 0)' &&
+          computedStyle.backgroundImage == 'none')
+        return false;
+      return true;
+    },
+
+    hasVisibleFloatingChild: function(element) {
+      var childNodes = Array.prototype.slice.call(element.children);
+      var nodes = [];
+      for (var i = 0, c = childNodes.length; i < c; ++i) {
+        var childNode = childNodes[i];
+        var computedStyle = chrome_comp.getComputedStyle(childNode);
+        if (computedStyle['float'] != 'none' &&
+            computedStyle.display != 'none' &&
+            childNode.offsetWidth > 0)
+          return true;
+      }
+      return false;
+    },
+
+    isMarginLeftAuto: function(element) {
+      return chrome_comp.getSpecifiedStyleValue(element,
+          'margin-left') == 'auto';
+    },
+
+    isMarginRightAuto: function(element) {
+      return chrome_comp.getSpecifiedStyleValue(element,
+          'margin-right') == 'auto';
+    },
+
+    /**
+     * If the node is set width value, marginLeft and marginRight
+     * value is 'auto', this box is align center.
+     */
+    isCenterAlignedByMarginAndWidth: function(element) {
+      var computedStyle = chrome_comp.getComputedStyle(element);
+      // Display is inline-table or table-row/table-cell/table-...
+      // all not auto center aligned.
+      if (computedStyle.display.indexOf('table-') == 0 ||
+          computedStyle.display == 'inline-talbe')
+        return false;
+      var width = chrome_comp.getSpecifiedStyleValue(element, 'width');
+      // Only display is table and not set style width, can use html attribute
+      // width value instead of style width value.
+      if (width == null && computedStyle.display == 'table')
+        width = element.getAttribute('width');
+      var marginLeft =
+          chrome_comp.getSpecifiedStyleValue(element, 'margin-left');
+      var marginRight =
+          chrome_comp.getSpecifiedStyleValue(element, 'margin-right');
+      if (!chrome_comp.isAutoOrNull(width) &&
+          marginLeft == 'auto' && marginRight == 'auto') {
+        return true;
+      }
+      return false;
+    },
+
+    /**
+     * containerRect.left
+     * ^
+     * |
+     * |<---   containerContentBoxWidth   --->|
+     * +--------------------------------------+
+     * |    *expect render position           |
+     * |    child marginLayoutBox left        |
+     * |    |<-- childMarginLayoutBox -->|    |
+     * |    +----------------------------+    |
+     * |    |         child node         |    |
+     * |    |                            |    |
+     * |    +----------------------------+    |
+     * +--------------------------------------+
+     *
+     * @param {Element} container
+     * @param {Element} child
+     * @param {number=} opt_threshold value to ignore small differences of the
+     *      layout, default is 1.
+     * @return {boolean}
+     */
+    isVisuallyCenterAligned: function(container, child, opt_threshold) {
+      if ("number" != typeof opt_threshold)
+        opt_threshold = 1;
+      var containerLayoutBoxes = chrome_comp.getLayoutBoxes(container);
+      var childLayoutBoxes = chrome_comp.getLayoutBoxes(child);
+      if (chrome_comp.util.width(childLayoutBoxes.marginBox) >
+          chrome_comp.util.width(containerLayoutBoxes.contentBox))
+        return true;
+      var leftGap = childLayoutBoxes.marginBox.left -
+          containerLayoutBoxes.contentBox.left;
+      var rightGap = containerLayoutBoxes.contentBox.right -
+          childLayoutBoxes.marginBox.right;
+      return Math.abs(leftGap - rightGap) <= opt_threshold;
+    },
+
+    /**
+     *          containerContentLayoutBox.right
+     *                                        ^
+     * |<-- containerContentLayoutBoxWidth -->|
+     * +--------------------------------------+
+     * |               expect render position*|
+     * |       containerContentLayoutBox.right|
+     * |         |<-- childMarginLayoutBox -->|
+     * |         +----------------------------+
+     * |         |        child node          |
+     * |         |                            |
+     * |         +----------------------------+
+     * +--------------------------------------+
+     *
+     * @param {Element} container
+     * @param {Element} child
+     * @param {number=} opt_threshold value to ignore small differences of the
+     *      layout, default is 1.
+     * @return {boolean}
+     */
+    isVisuallyRightAligned: function(container, child, opt_threshold) {
+      if ("number" != typeof opt_threshold)
+        opt_threshold = 1;
+      var containerLayoutBoxes = chrome_comp.getLayoutBoxes(container);
+      var childLayoutBoxes = chrome_comp.getLayoutBoxes(child);
+      var containerContentBoxRight = containerLayoutBoxes.contentBox.right;
+      var childMarginBoxRight = childLayoutBoxes.marginBox.right;
+      // If child margin box right greater than container contentBox right
+      // (child margin box right overflow container contentBox right),
+      // then the align layout will be invalid, not detecor.
+      if (childMarginBoxRight > containerContentBoxRight)
+        return true;
+      return containerContentBoxRight - childMarginBoxRight <= opt_threshold;
+    },
+
+    /**
+     * containerContentLayoutBox.left
+     * ^
+     * |<--containerContentLayoutBox.width -->|
+     * +--------------------------------------+
+     * |*expect render position               |
+     * |containerContentLayoutBox.left        |
+     * |<-- childMarginLayoutBox -->|         |
+     * +----------------------------+         |
+     * |         child node         |         |
+     * |                            |         |
+     * +----------------------------+         |
+     * +--------------------------------------+
+     *
+     * @param {Element} container
+     * @param {Element} child
+     * @param {number=} opt_threshold value to ignore small differences of the
+     *      layout, default is 1.
+     * @return {boolean}
+     */
+    isVisuallyLeftAligned: function(container, child, opt_threshold) {
+      if ("number" != typeof opt_threshold)
+        opt_threshold = 1;
+      var containerLayoutBoxes = chrome_comp.getLayoutBoxes(container);
+      var childLayoutBoxes = chrome_comp.getLayoutBoxes(child);
+      var containerContentBoxLeft = containerLayoutBoxes.contentBox.left;
+      var childMarginBoxLeft = childLayoutBoxes.marginBox.left;
+      // If child margin box left smaller than container contentBox left
+      // (child margin box left overflow container contentBox left),
+      // then the align layout will be invalid, not detecor.
+      if (childMarginBoxLeft < containerContentBoxLeft)
+        return true;
+      return containerContentBoxLeft - childMarginBoxLeft <= opt_threshold;
+    },
+
+    /**
+     * Get text node rect. If param is not text node, will return false.
+     * @param {TextNode} textNode
+     * @return {ClientRect} rect is a map, have keys
+     *     {top,bottom,left,right,width,height}, or null if not a text node.
+     */
+    getTextNodeRect: function(textNode) {
+      if (textNode.nodeType != Node.TEXT_NODE)
+        return null;
+      var range = document.createRange();
+      range.selectNode(textNode);
+      return range.getBoundingClientRect();
     }
 
   };  // return
 })();
+
+chrome_comp.util = {};
+
+/**
+ * @param {Object} rect A rectangle object, has left/right property.
+ */
+chrome_comp.util.width = function(rect) {
+  return rect.right - rect.left;
+};
+
+/**
+ * @param {Object} rect A rectangle object, has top/bottom property.
+ */
+chrome_comp.util.height = function(rect) {
+  return rect.bottom - rect.top;
+};
 
 chrome_comp.Rect = function(x, y, w, h) {
   this.left = x;
@@ -1116,8 +1382,6 @@ chrome_comp.CompDetect = (function() {
   // Array which contains all type detectors
   var detectors_ = [];
 
-  var detectionStarted = false;
-
   // All problems reported so far.
   // key: type id
   // value: serialized report data, which includes all the occurrences of the
@@ -1263,7 +1527,7 @@ chrome_comp.CompDetect = (function() {
       // element to add a listener for the root element, so we must ignore the
       // injected SCRIPT element for the processNode function.
       if (nodes[i].tagName == 'SCRIPT' &&
-          nodes[i].parentElement == document.documentElement)
+          nodes[i].parentNode == document.documentElement)
         continue;
       processNode(nodes[i], compDetectorArray);
     }
@@ -1283,6 +1547,16 @@ chrome_comp.CompDetect = (function() {
       popStack(hasLayoutStack_);
     if (displayNoneEndNode_ && currentNode == displayNoneEndNode_)
       displayNoneEndNode_ = null;
+    // If currentNode's display is none, set displayNoneEndNode_ here, so that
+    // scanDomContext_.isDisplayNone will work properly.
+    var endNode;
+    if (Node.ELEMENT_NODE == currentNode.nodeType) {
+      if (!displayNoneEndNode_ &&
+          chrome_comp.getComputedStyle(currentNode).display == 'none') {
+        endNode = endNode || chrome_comp.getNextNodeInDocument(currentNode);
+        displayNoneEndNode_ = endNode;
+      }
+    }
 
     // Check all detectors for this node.
     for (var i = 0, c = compDetectorArray.length; i < c; ++i) {
@@ -1298,20 +1572,14 @@ chrome_comp.CompDetect = (function() {
       }
     }
 
-    var endNode;
     if (Node.ELEMENT_NODE == currentNode.nodeType) {
       if (chrome_comp.startsBlockBox(currentNode)) {
-        endNode = chrome_comp.getNextNodeInDocument(currentNode);
+        endNode = endNode || chrome_comp.getNextNodeInDocument(currentNode);
         blockStack_.push({element: currentNode, endNode: endNode});
       }
       if (chrome_comp.hasLayoutInIE(currentNode)) {
         endNode = endNode || chrome_comp.getNextNodeInDocument(currentNode);
         hasLayoutStack_.push({element: currentNode, endNode: endNode});
-      }
-      if (chrome_comp.getComputedStyle(currentNode).display == 'none' &&
-          !displayNoneEndNode_) {
-        displayNoneEndNode_ = endNode ||
-            chrome_comp.getNextNodeInDocument(currentNode);
       }
     }
   }
@@ -1368,7 +1636,7 @@ chrome_comp.CompDetect = (function() {
       checkDetectionResultForNode(element,
           element.getAttribute('expectedproblems'));
       var childNodes = element.childNodes;
-      const CHILD_PREFIX = 'expectedproblemschild';
+      var CHILD_PREFIX = 'expectedproblemschild';
       for (var i = 0, c = element.attributes.length; i < c; i++) {
         var attr = element.attributes[i];
         var name = attr.name;
@@ -1418,70 +1686,6 @@ chrome_comp.CompDetect = (function() {
     } finally {
       chrome_comp.enableHooks(true);
     }
-  }
-
-  /**
-   * Hide the root element to get the specified value of margin, border,
-   * padding, width and height properties of the elements, and cache these
-   * values.
-   */
-  function cacheSpecifiedValue() {
-    // In this function, we can cache many information of each element.
-    // Because getting the truly state (show or hide) of the element need to
-    // refer to its ancestor, so we can cache this state passingly.
-    function getTrulyDisplayable(ele, style) {
-      if (style.display == 'none')
-        return 'none';
-      if (ele.parentElement[chrome_comp.SPECIFIED_VALUE] &&
-          ele.parentElement[chrome_comp.SPECIFIED_VALUE].display == 'none')
-        return 'none';
-      return style.display;
-    }
-
-    var root = document.documentElement;
-    if (!root) {
-      chrome_comp.printError('Error getting the specified value.');
-      return;
-    }
-    var allElements = root.getElementsByTagName('*');
-    var inlineDisplay = root.style.display;
-    root.style.display = 'none !important';
-    // We cache some properties' specified values when the root element is
-    // invisible. When we change the display style of the root node, the
-    // browser's rendering engine may do some optimization, and page layout
-    // will not be changed.
-    // To enforce the reflow, we get the value of offsetWidth here. Refer to
-    // http://www.stubbornella.org/content/2009/03/27/
-    // reflows-repaints-css-performance-making-your-javascript-slow/
-    // and
-    // http://www.mozilla.org/newlayout/doc/reflow.html.
-    root.offsetWidth;
-    for (var i = 0, len = allElements.length; i < len; ++i) {
-      var element = allElements[i];
-      var style = chrome_comp.getComputedStyle(element);
-      element[chrome_comp.SPECIFIED_VALUE] = {
-        width: style.width,
-        height: style.height,
-        marginLeft: style.marginLeft,
-        marginRight: style.marginRight,
-        marginTop: style.marginTop,
-        marginBottom: style.marginBottom,
-        borderLeftWidth: style.borderLeftWidth,
-        borderRightWidth: style.borderRightWidth,
-        borderTopWidth: style.borderTopWidth,
-        borderBottomWidth: style.borderBottomWidth,
-        paddingTop: style.paddingTop,
-        paddingBottom: style.paddingBottom,
-        paddingLeft: style.paddingLeft,
-        paddingRight: style.paddingRight,
-        display: getTrulyDisplayable(element, style)
-      };
-    }
-    root.style.display = null;
-    if (inlineDisplay)
-      root.style.display = inlineDisplay;
-    // To enforce the reflow, the same as the previous.
-    root.offsetWidth;
   }
 
   return {
@@ -1675,21 +1879,8 @@ chrome_comp.CompDetect = (function() {
       });
     },
 
-    diagnoseCompatibilityIssuesManually: function() {
-      if ('complete' != document.readyState)
-        return;
-      // Start detection immediately
-      chrome_comp.CompDetectorConfig.delayRunDetection = false;
-      chrome_comp.CompDetect.diagnoseCompatibilityIssues();
-    },
-
     // Diagnose  compatibility issues on current page
     diagnoseCompatibilityIssues: function() {
-      if (detectionStarted)
-        return;
-      detectionStarted = true;
-      cacheSpecifiedValue();
-
       var timer = chrome_comp.CompDetectorConfig.delayRunDetectionTimer;
       // Check whether we need to immediately call load handler of
       // CompDetector.
@@ -2054,10 +2245,10 @@ chrome_comp.CompDetect.ScanDomBaseDetector.prototype.canCheckNow = function() {
   return this.gatherAllProblemNodes_ || !this.hasProblem_;
 };
 
-window.addEventListener('load',
+var CHROME_COMP_LOAD = 'chrome_comp_load';
+
+window.addEventListener(CHROME_COMP_LOAD,
     chrome_comp.CompDetect.diagnoseCompatibilityIssues, false);
-window.addEventListener('chrome_comp_load',
-    chrome_comp.CompDetect.diagnoseCompatibilityIssuesManually, false);
 window.addEventListener('unload',
     chrome_comp.CompDetect.cleanUpDetectors, false);
 
