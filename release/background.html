@@ -5,21 +5,24 @@
 <title>Chrome Compatibility Detector</title>
 <script>
 
-// Each page's information. This is a tabId to DetectionResult map.
-var gDetectionResults = {};
+// Maps tabId to DetectionResult.
+var detectionResults = {};
 
-const ICON_PATH = {
-  'normal': 'icon_normal.png',
-  'ok': 'icon_ok.png',
-  'warning': 'icon_warning.png',
-  'error': 'icon_error.png'
+// Maps tabId to RequestInfo.
+var requestInfoMap = {};
+
+var ICON_PATH = {
+  normal: 'icon_normal.png',
+  ok: 'icon_ok.png',
+  warning: 'icon_warning.png',
+  error: 'icon_error.png'
 };
 
-const DETECTION_COMPAT_STATUS_OF_PRIORITY = {
-  'normal': 0,
-  'ok': 1,
-  'warning': 2,
-  'error': 3
+var DETECTION_COMPAT_STATUS_OF_PRIORITY = {
+  normal: 0,
+  ok: 1,
+  warning: 2,
+  error: 3
 };
 
 function setDetectionCompatStatus(tabId, status) {
@@ -103,10 +106,10 @@ Problem.prototype.setOccurrencesNumber = function(number) {
  * @return {DetectionResult} the detection result, will NOT be null
  */
 function getDetectionResult(tabId) {
-  var result = gDetectionResults[tabId];
+  var result = detectionResults[tabId];
   if (!result) {
     result = new DetectionResult(tabId);
-    gDetectionResults[tabId] = result;
+    detectionResults[tabId] = result;
   }
   return result;
 }
@@ -209,6 +212,133 @@ function annotate(reasons) {
   });
 }
 
+/**
+ * This class stores cross-origin CSS requests for a tab.
+ * It also stores other resources used by a tab, like the timer ID.
+ */
+function RequestInfo() {
+  this.requestResultMap = {};  // map url to RequestResult
+  this.timerId = null;
+}
+
+function RequestResult(xhr) {
+  this.xhr = xhr;  // the XMLHttpRequest object
+  this.cssText = null;
+  this.finished = false;
+}
+
+/**
+ * Fetch stylesheets from other sites. Page script is not allowed to do this,
+ * so we do it in extension's background page.
+ * @param tabId
+ * @param {object} urlMap contains urls of multiple stylesheets
+ */
+function getCrossOriginCSS(tabId, urlMap) {
+  // Aborts pending requests if any.
+  abortXHR(tabId);
+
+  var requestInfo = new RequestInfo();
+  requestInfoMap[tabId] = requestInfo;
+
+  // Fetch all stylesheets in parallel.
+  for (var url in urlMap) {
+    var xhr = new XMLHttpRequest();
+    requestInfo.requestResultMap[url] = new RequestResult(xhr);
+    xhr.open("GET", url, true);
+    xhr.setRequestHeader('Accept', 'text/css,*/*;q=0.1');
+    xhr.url_ = url;
+    xhr.tabId_ = tabId;
+    xhr.onreadystatechange = function() {
+      if (this.readyState == 4)
+        crossOriginCSSCallback(this);
+    };
+    xhr.send();
+  }
+
+  // Set a timeout limit for all requests.
+  // TODO: this might be too small when running on VM.
+  var AJAX_FETCH_TIMEOUT_MS = 10 * 1000;
+  requestInfo.timerId = setTimeout(function() {
+    crossOrginOperationFinished(tabId);
+  }, AJAX_FETCH_TIMEOUT_MS);
+}
+
+function crossOriginCSSCallback(xhr) {
+  var requestInfo = requestInfoMap[xhr.tabId_];
+  if (!requestInfo)
+    return;
+  var requestResult = requestInfo.requestResultMap[xhr.url_];
+  if (xhr.status == 200) {
+    // Check whether the Content-Type is 'text/css' or 'text/css;...'. If not,
+    // ignore the response to prevent cross-origin CSS attack. Refer to:
+    // Protecting Browsers from Cross-Origin CSS Attacks
+    // http://websec.sv.cmu.edu/css/css.pdf
+    var CONTENT_TYPE_CHECKER = /^text\/css\s*(;.*)?$/i;
+    var contentType = xhr.getResponseHeader('Content-Type');
+    if (contentType && CONTENT_TYPE_CHECKER.test(contentType)) {
+      requestResult.cssText = processCSSText(xhr.responseText);
+    }
+  }
+  requestResult.finished = true;
+  requestResult.xhr = null;
+  if (isAllRequestFinished(requestInfo.requestResultMap)) {
+    crossOrginOperationFinished(xhr.tabId_);
+  }
+}
+
+/**
+ * Process the cssText, to remove potential invalid items when used as an inline
+ * style sheet instead of a linked resources.
+ *
+ * Replace resources like url(image.png) with del_url(image.png),
+ * to avoid the relative path problem.
+ */
+function processCSSText(text) {
+  var URL_REGEXP = /\burl(\s*)?\(/gi;
+  text = text.replace(URL_REGEXP, 'del_url$1(');
+  return text;
+}
+
+function isAllRequestFinished(requestResultMap) {
+  for (var url in requestResultMap) {
+    if (!requestResultMap[url].finished)
+      return false;
+  }
+  return true;
+}
+
+function crossOrginOperationFinished(tabId) {
+  var data = {};
+  var requestInfo = requestInfoMap[tabId];
+  if (requestInfo) {
+    for (var url in requestInfo.requestResultMap) {
+      var requestResult = requestInfo.requestResultMap[url];
+      if (requestResult.finished && requestResult.cssText)
+         data[url] = requestResult.cssText;
+    }
+  }
+  // Removes the result immediately.
+  abortXHR(tabId);
+  chrome.tabs.sendRequest(tabId, {
+    type: 'getCrossOriginCSSFinished',
+    data: data
+  });
+}
+
+function abortXHR(tabId) {
+  var requestInfo = requestInfoMap[tabId];
+  if (!requestInfo)
+    return;
+  if (requestInfo.timerId)
+    clearTimeout(requestInfo.timerId);
+  for (var url in requestInfo.requestResultMap) {
+    var requestResult = requestInfo.requestResultMap[url];
+    if (requestResult.xhr)
+      requestResult.xhr.abort();
+  }
+  delete requestInfoMap[tabId];
+}
+
 chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
   log('onRequest, request.type=' + request.type);
   var tabId = sender.tab.id;
@@ -223,16 +353,22 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
       stopAddingDetectedProblem(tabId, request.totalProblems);
       break;
     case 'PageUnloaded':
-      delete gDetectionResults[tabId];
+      delete detectionResults[tabId];
+      abortXHR(tabId);
       setBrowserAction('normal', tabId);
+      break;
+    case 'getCrossOriginCSS':
+      getCrossOriginCSS(tabId, request.urlMap);
       break;
   }
 });
 
 // Delete tab's information when tab closed.
 chrome.tabs.onRemoved.addListener(function(tabId) {
-  delete gDetectionResults[tabId];
+  delete detectionResults[tabId];
+  abortXHR(tabId);
 });
+
 </script>
 </head>
 <body>
