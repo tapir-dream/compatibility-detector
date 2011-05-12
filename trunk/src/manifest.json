@@ -26,9 +26,14 @@
       "w3help_issues.js",
       "non_w3help_issues.js",
 
+      "detectors/expression.js",                            //BT9010: TODO: to be verify
+
       // Working issues: Release 0.9.8
       "detectors/text_decoration_propagation.js",           //RT3002: ok 3/18
       "detectors/decoration_font_color.js",                 //RX3011: ok, but the problem is hard to notice 3/18
+      "detectors/empty_cell.js",                            //RE1013 RE1012: ok, but the problem is hard to notice 3/18
+      "detectors/radio_name.js",                            //HF9009
+      "detectors/table_cellspacing_border_collapse.js",     //RE1020 RX1008
 
       // Release 0.9.6
       "detectors/center_element.js",                        //HA8001
@@ -82,8 +87,6 @@
 
       // Do it later
       "detectors/align_nowrap.js",                          //RX8015: TODO: verify: visual difference?
-      "detectors/empty_cell.js",                            //RE1013 RE1012: ok, but the problem is hard to notice 3/18
-      "detectors/expression.js",                            //BT9010: TODO: to be verify
       "detectors/img_padding.js",                           //RX1010: ok 3/18
       "detectors/z_index_auto.js",                          //RM8015
       "detectors/right_floats_stretch_parent_elements.js",  //RD8006: later
@@ -92,13 +95,12 @@
       // Verified warnings
       "detectors/haslayout_full_shape_space.js",            //BT1025
       "detectors/overflow.js",                              //RV1001: TODO: verify: many, no results? 3/18
-      "detectors/table_cellspacing_border_collapse.js",     //RE1020 RX1008
+
       "detectors/td_nowrap_inheritence.js",                 //RX1003: no visual difference? 3/18
 
       // Paused errors
       "detectors/percent_height_in_auto_height.js",         //RE8010 RD8026
       "detectors/element_click.js",                         //SD9025
-      "detectors/radio_name.js",                            //HF9009
 
       // Paused warnings
       "detectors/object_onerror.js",                        //BT2022 HO9006 HO1007
