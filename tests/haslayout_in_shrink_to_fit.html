@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html chrome_comp_test="haslayout_in_shrink_to_fit">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<body>
+
+<h1>RD8023 haslayout_in_shrink_to_fit</h1>
+
+<p style="clear:both;">1</p>
+<div style="float:left; background:silver;" expectedProblems="RD8023">
+    <div style="height:20px;">DIV DIV DIV height:20px;</div>
+    Text
+</div>
+
+<p style="clear:both;">2</p>
+<div style="float:left; background:silver;" expectedProblems="RD8023">
+  <div style="zoom:1;">DIV DIV zoom:1;</div>
+</div>
+<br>
+<br>
+<br>
+
+<h2>The followings have no problems</h2>
+
+<p style="clear:both;">A1.</p>
+<div style="width:100px;">
+  <div style="float:left; background:silver;">
+      <div style="height:50px;">DIV DIV DIV height:20px;</div>
+  </div>
+</div>
+
+<p style="clear:both;">A2.</p>
+<div style="float:left; background:silver;">
+  <div style="overflow:hidden;">DIV DIV overflow:hidden;</div>
+</div>
+
+<p style="clear:both;">A3.</p>
+<div style="float:left; background:silver;">
+  <div style="float:left;">DIV DIV float:left;</div>
+</div>
+
+<p style="clear:both;">A4.</p>
+<div style="float:left; background:silver;">
+  <div style="float:right;">DIV DIV float:right;</div>
+</div>
+
+<p style="clear:both;">A5.</p>
+<div style="float:left; background:silver;">
+  <button style="zoom:1;">DIV BUTTON zoom:1;</button>
+</div>
+
+<p style="clear:both;">A6.</p>
+<div style="float:left; background:silver;">
+  <span style="zoom:1;">DIV SPAN zoom:1;</span>
+</div>
+
+<p style="clear:both;">A7.</p>
+<div style="float:left; background:silver;">
+  <table style="zoom:1;"><tr><td>DIV TABLE zoom:1;</td></tr></table>
+</div>
+
+</body>
+</html>
