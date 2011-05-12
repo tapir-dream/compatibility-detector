@@ -77,6 +77,8 @@
   "HF3013_suggestion": { "message": "Use other ways to make OPTION and OPTGROUP disabled, such as removing those elements by script" },
   "HY1005": { "message": "IE6 IE7 IE8(Q) treat non list elments inside UL, OL, DL differently" },
   "HY1005_suggestion": { "message": "It is not recommended to use other elements inside LI, DD, DT" },
+  "RD8023": { "message": "IE6 IE7(Q) IE8(Q) a 'shrink-to-fit' element's width will be stretched by its descendant hasLayout elements." },
+  "RD8023_suggestion": { "message": "Specify a width on the hasLayout element." },
   "RE1012": { "message": "In IE6 IE7 IE8(Q) Firefox(Q) Opera(Q), empty table cells may not have borders in some situation" },
   "RE1012_suggestion": { "message": "Avoid empty table cells, fill them with &nbsp;" },
   "RE1013": { "message": "In IE6 IE7 IE8(Q), the 'padding' style for cells to the top and bottom of an empty cell is not effective" },
