@@ -43,13 +43,17 @@ chrome_comp.CompDetect.declareDetector(
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
 function constructor() {
-  this.propertyValueRegExp_ =
-      /^[A-Za-z][\w\-\:\.]*$/;
+  this.PROPERTY_VALUE_REGEXP = /^[A-Za-z][\w\-\:\.]*$/;
+  this.addCustomProblem = function(node, details) {
+    this.addProblem('HF9009', {
+      nodes: [this.node],
+      details: details
+    });
+  };
 },
 
 function checkNode(node, context) {
-
-  if (Node.ELEMENT_NODE != node.nodeType)
+  if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
     return;
 
   if (node.tagName != 'INPUT')
@@ -60,22 +64,23 @@ function checkNode(node, context) {
   if (inputTypeValue != 'radio')
     return;
 
+  this.node = node;
   // Check <input type='radio' /> format
   if (!node.hasAttribute('name')) {
-    this.addProblem('HF9009', [node]);
+    this.addCustomProblem(node, 'radio with no name');
     return;
   }
 
   // Check <input type='radio' name /> format
   var inputNameValue = node.getAttribute('name');
   if (inputNameValue == null) {
-    this.addProblem('HF9009', [node]);
+    this.addCustomProblem(node, 'radio name = null' );
     return;
   }
 
   // Check name value is not SGML basic types
-  if (!this.propertyValueRegExp_.test(inputNameValue))
-    this.addProblem('HF9009', [node]);
+  if (!this.PROPERTY_VALUE_REGEXP.test(inputNameValue))
+    this.addCustomProblem(node, 'radio name = "' + inputNameValue + '"');
 
 }
 ); // declareDetector
