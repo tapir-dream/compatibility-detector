@@ -15,9 +15,9 @@
  */
 
 /**
- * @fileoverview: One detector implementation for checking the empty cells.
- * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=11
- *       https://code.google.com/p/compatibility-detector/issues/detail?id=12
+ * @fileoverview Checking the empty cells.
+ * @bug https://code.google.com/p/compatibility-detector/issues/detail?id=11
+ *      https://code.google.com/p/compatibility-detector/issues/detail?id=12
  *
  * In the separated borders model, the border of the empty cell will disappear
  * in some cases. And the 'padding-top' and 'padding-bottom' of the empty cell
@@ -34,27 +34,11 @@
 
 addScriptToInject(function() {
 
-function hasMargin(style) {
-  return parseInt(style.marginLeft, 10) || parseInt(style.marginTop, 10) ||
-         parseInt(style.marginRight, 10) || parseInt(style.marginBottom, 10);
-}
-
-function hasPadding(style) {
-  return parseInt(style.paddingLeft, 10) || parseInt(style.paddingTop, 10) ||
-         parseInt(style.paddingRight, 10) || parseInt(style.paddingBottom, 10);
-}
-
-function hasBorder(style) {
-  return parseInt(style.borderLeftWidth, 10) ||
-         parseInt(style.borderTopWidth, 10) ||
-         parseInt(style.borderRightWidth, 10) ||
-         parseInt(style.borderBottomWidth, 10);
-}
-
 function isEmptyNode(node, cell) {
   switch (node.nodeType) {
     case Node.TEXT_NODE:
-      var whiteSpace = chrome_comp.getComputedStyle(node.parentNode).whiteSpace;
+      var whiteSpace =
+          chrome_comp.getComputedStyle(node.parentNode).whiteSpace;
       return !(whiteSpace == 'pre' ?
           node.nodeValue : chrome_comp.trim(node.nodeValue));
     case Node.ELEMENT_NODE:
@@ -67,11 +51,15 @@ function isEmptyNode(node, cell) {
         case 'inline':
           if (chrome_comp.isReplacedElement(node))
             return false;
-          if (hasMargin(style) || hasPadding(style) || hasBorder(style))
+          if (chrome_comp.hasMargin(node) ||
+              chrome_comp.hasPadding(node) ||
+              chrome_comp.hasBorder(node)) {
+              console.log(node)
             return false;
+            }
           break;
         case 'block':
-          if (hasPadding(style) || hasBorder(style)) {
+          if (chrome_comp.hasPadding(node) || chrome_comp.hasBorder(node)) {
             if (cell) {
               var lastChildOfCell = cell.lastChild;
               if (Node.TEXT_NODE == lastChildOfCell.nodeType)
@@ -88,7 +76,11 @@ function isEmptyNode(node, cell) {
       var position = style.position;
       if (position == 'absolute')
         return true;
-      if (style.position == 'relative' || chrome_comp.hasLayoutInIE(node))
+      if (style.position == 'relative' ||
+          chrome_comp.hasLayoutInIE(node) ||
+          node.tagName == 'IFRAME' ||
+          node.tagName == 'OBJECT' ||
+          node.tagName == 'EMBED')
         return false;
       for (var child = node.firstChild; child; child = child.nextSibling) {
         if (!isEmptyNode(child, null))
@@ -105,39 +97,10 @@ function isEmptyCell(cell) {
     if (!isEmptyNode(node, cell))
       return false;
   }
-  return true;
-}
-
-function isEmptyChild(node) {
-  var childElements =
-      Array.prototype.slice.call(node.getElementsByTagName('*'));
-  for (var i = 0, len = childElements.length; i < len; i++) {
-    if (chrome_comp.hasLayoutInIE(childElements[i]) ||
-        childElements[i].tagName == 'IFRAME' ||
-        childElements[i].tagName == 'OBJECT' ||
-        childElements[i].tagName == 'EMBED')
-      return false;
-  }
-  if (getFixedNodeTextContent(node) == '')
+  if (chrome_comp.trim(cell.innerText) == '')
     return true;
   return false;
 }
-
-// Match script and style element content fix textContent return text
-// Don't use 'node.cloneNode(true).innerText ' it will trigger RCA SD9029
-function getFixedNodeTextContent(node) {
-  var scriptElements =
-      Array.prototype.slice.call(node.getElementsByTagName('script'));
-  var styleElements =
-      Array.prototype.slice.call(node.getElementsByTagName('style'));
-  var nodeValue = node.textContent;
-  for (var i = 0, len = scriptElements.length; i < len; i++)
-    nodeValue = nodeValue.replace(scriptElements[i].textContent, '');
-  for (var i = 0, len = styleElements.length; i < len; i++)
-    nodeValue = nodeValue.replace(styleElements[i].textContent, '');
-  return nodeValue;
-}
-
 
 chrome_comp.CompDetect.declareDetector(
 
@@ -151,40 +114,47 @@ function checkNode(node, context) {
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
     return;
 
-  if (node.tagName == 'TD' || node.tagName == 'TH') {
-    var style = chrome_comp.getComputedStyle(node);
-    if (style.emptyCells == 'hide')
-      return;
+  if (!(node.tagName == 'TD' || node.tagName == 'TH'))
+    return;
 
-    var mayHaveRE1012 = style.borderCollapse != 'collapse' && hasBorder(style);
-    var mayHaveRE1013 = false;
-    var nodePaddingTop = parseInt(style.paddingTop, 10) | 0;
-    var nodePaddingBottom = parseInt(style.paddingBottom, 10) | 0;
+  var style = chrome_comp.getComputedStyle(node);
+  if (style.emptyCells == 'hide')
+    return;
 
-    // Fix empty cell padding is 1px
-    nodePaddingTop = (nodePaddingTop == 1) ? 0 : nodePaddingTop;
-    nodePaddingBottom = (nodePaddingBottom == 1) ? 0 : nodePaddingBottom;
+  var mayHaveRE1012 = style.borderCollapse != 'collapse' &&
+      chrome_comp.hasBorder(node);
+  var mayHaveRE1013 = false;
+  var nodePaddingTop = chrome_comp.toInt(style.paddingTop);
+  var nodePaddingBottom = chrome_comp.toInt(style.paddingBottom);
 
-    if (nodePaddingTop || nodePaddingBottom) {
-      var nodeHeight = parseInt(
-          chrome_comp.getDefinedStylePropertyByName(node, true, 'height'),
-          10) | 0;
-      // Fix cell getCompatStyle height is null
-      nodeHeight = nodeHeight ||
-          (parseInt(node.getAttribute('height'), 10) | 0);
-      var nodeClientHeight = node.clientHeight | 0;
-      var nodePaddingHeight = nodePaddingTop + nodePaddingBottom;
+  // Fix empty cell padding is 1px.
+  nodePaddingTop = (nodePaddingTop == 1) ? 0 : nodePaddingTop;
+  nodePaddingBottom = (nodePaddingBottom == 1) ? 0 : nodePaddingBottom;
 
-      if (nodeHeight < nodePaddingHeight &&
-          !(nodePaddingHeight < nodeClientHeight))
-        mayHaveRE1013 = true;
-    }
-    // Filter child nodes is haslayout and empty elements
-    if (mayHaveRE1012 && isEmptyChild(node))
-      this.addProblem('RE1012', [node]);
-    if (mayHaveRE1013 && isEmptyCell(node))
-      this.addProblem('RE1013', [node]);
+  if (nodePaddingTop || nodePaddingBottom) {
+    // Fix cell getComputStyle height is null.
+    var nodeHeight = chrome_comp.toInt(chrome_comp.getSpecifiedStyleValue(
+        node, 'height')) || chrome_comp.toInt(node.getAttribute('height'));
+
+    var nodeClientHeight = node.clientHeight;
+    var nodePaddingHeight = nodePaddingTop + nodePaddingBottom;
+
+    // Check set height and padding top to bottom height value,
+    // client height is table-cell actual render height.
+    // if empty cell, the cell set height value less the padding height value,
+    // then IE padding fail render cell hight will hava different.
+    // if the cell distraction by other cells, then IE has not render different.
+    if (nodeHeight < nodePaddingHeight &&
+        !(nodePaddingHeight < nodeClientHeight - nodeHeight))
+      mayHaveRE1013 = true;
   }
+
+  // Filter child nodes is haslayout and empty elements.
+  if (mayHaveRE1012 && isEmptyCell(node))
+    this.addProblem('RE1012', [node]);
+  if (mayHaveRE1013 && isEmptyCell(node))
+    this.addProblem('RE1013', [node]);
+
 }
 ); // declareDetector
 

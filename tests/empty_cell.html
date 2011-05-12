@@ -1,4 +1,15 @@
+<!DOCTYPE html>
 <html chrome_comp_test="empty_cell">
+<head>
+<style>
+table,td{border:1px solid #000;}
+</style>
+</head>
+<body>
+
+<h1>RE1012 RE1013</h1>
+
+<p>1.</p>
 <table border=1 cellpadding="0" cellspacing="5">
   <tr>
     <td>aaa</td>
@@ -11,7 +22,7 @@
   </tr>
 </table>
 
-<br><br>
+<p>2.</p>
 <table border=1 cellpadding="5" cellspacing="5">
   <tr>
     <td expectedProblems="RE1012 RE1013"></td>
@@ -21,7 +32,7 @@
   </tr>
 </table>
 
-<br><br>
+<p>3.</p>
 <table border=1 cellpadding="5" cellspacing="5">
   <tr>
     <td>&nbsp;</td>
@@ -33,8 +44,8 @@
   </tr>
 </table>
 
-<br><br>
-<table border="1" bordercolor="red" cellpadding="5" cellspacing="5">
+<p>2.</p>
+<table border="1" cellpadding="5" cellspacing="5">
   <tr>
     <td>empty cell</td>
     <td>empty element</td>
@@ -43,18 +54,18 @@
     <td>hasLayout</td>
     <td>relative</td>
     <td>absolute</td>
-    <td>margin 1</td>
-    <td>margin 2</td>
-    <td>margin 3</td>
-    <td>margin 4</td>
-    <td>padding 1</td>
-    <td>padding 2</td>
-    <td>padding 3</td>
-    <td>padding 4</td>
+    <td>h1 margin</td>
+    <td>span margin</td>
+    <td>empty elements margin</td>
+    <td>last empty child element margin</td>
+    <td>h1 padding</td>
+    <td>empty span padding</td>
+    <td>empty elements padding</td>
+    <td>last empty child element margin</td>
     <td>border 1</td>
-    <td>border 2</td>
-    <td>border 3</td>
-    <td>border 4</td>
+    <td>empty span border</td>
+    <td>empty elements border</td>
+    <td>last empty child element border</td>
   </tr>
   <tr>
     <td expectedProblems="RE1012">     </td>
@@ -71,7 +82,7 @@
     <td expectedProblems="RE1012"><h1 style="padding:5px;"></h1>  </td>
     <td><span style="padding:5px;"></span></td>
     <td><div><div></div><h1 style="padding:5px;"></h1></div></td>
-    <td expectedProblems="RE1012"><div><span></span></div><h1 style="padding:5px;"></h1></td> 
+    <td expectedProblems="RE1012"><div><span></span></div><h1 style="padding:5px;"></h1></td>
     <td expectedProblems="RE1012"><div></div><h1 style="border:5px solid blue;"></h1>  </td>
     <td><span style="border:5px solid blue;"></span></td>
     <td><div><div></div><h1 style="border:5px solid blue;"></h1></div></td>
@@ -79,8 +90,8 @@
   </tr>
 </table>
 
-<h1>Has specified height</h1>
-<table border="1" bordercolor="red" cellpadding="5" cellspacing="5">
+<p>3. Has specified height</p>
+<table border="1" cellpadding="5" cellspacing="5">
   <tr>
     <td style="padding:50px; height:50px;" expectedProblems="RE1012 RE1013"></td>
   </tr>
@@ -92,27 +103,35 @@
   </tr>
 </table>
 
-<h1>Higher cell in the same line</h1>
-<table border="1" bordercolor="red" cellpadding="5" cellspacing="5">
+<p>4. Higher cell in the same line</p>
+<table border="1" cellpadding="5" cellspacing="5">
   <tr>
     <td expectedProblems="RE1012"></td>
     <td>text</td>
   </tr>
 </table>
 
-<br><br>
-<span>No problem case:</span>
-<br><br>
+<hr />
+
+<h2>The followings don't have problems</h2>
+
+<p>A1.</p>
 <table cellpadding="0" cellspacing="5">
   <tr>
-    <td></td>
-    <td>aaa</td>
-  </tr>
-  <tr>
     <td>&nbsp;</td>
-    <td>bbb</td>
+    <td>text</td>
   </tr>
 </table>
 
-<div>div <span style='display: inline-block; width: 10px'>test span</span> div</div>
+<p>A2.</p>
+<table cellpadding="0" cellspacing="5">
+  <tr>
+    <td style="padding:10px; height:10px; border:0 none;"></td>
+    <td>text<br />text</td>
+  </tr>
+</table>
+
+<p>(End of test)</p>
+
+</body>
 </html>
