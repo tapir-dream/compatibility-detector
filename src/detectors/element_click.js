@@ -14,6 +14,20 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Check if the HTMLElementObjects attempt to call the 'click'
+ * method.
+ * @bug https://code.google.com/p/compatibility-detector/issues/detail?id=59
+ *
+ * The 'click' method for the INPUT elements whose type has one of the following
+ * value: "button", "checkbox", "radio", "reset", "submit" simulate a mouse
+ * click, this is the description in W3C DOM specification, and in reality,
+ * The BUTTON elements and all types of the INPUT elements have the 'click'
+ * method in all browsers. But the other elements do not have this method in
+ * Firefox, Chrome and Safari, so if these elements attempt to call the 'click'
+ * method, there will throw an error.
+ */
+
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
@@ -24,23 +38,18 @@ chrome_comp.CompDetect.NonScanDomBaseDetector,
 
 function constructor(rootNode) {
   var This = this;
-  this.click_ = function(result, originalArguments, callStack) {
-    var t = this;
-    if (t.tagName && (t.tagName != 'BUTTON') && (t.tagName != 'INPUT')) {
-      var cl = arguments.callee.caller;
-      This.addProblem('SD9025', [t]);
-    }
-  };
-},
-
-function setUp() {
-  chrome_comp.CompDetect.registerSimplePropertyHook(
-      HTMLElement.prototype, 'click', this.click_);
-},
-
-function cleanUp() {
-  chrome_comp.CompDetect.unregisterSimplePropertyHook(
-      HTMLElement.prototype, 'click', this.click_);
+  // Some JavaScript libraries may add the click method to the prototype of the
+  // DOM object of the HTML Element, to avoid the False-Positive, we hook the
+  // prototype of Node. If there is click method called and its constructor's
+  // prototype has not been added the click method (no Prototype library), the
+  // callback below will be triggered.
+  Node.prototype.click = function() {
+    This.addProblem('SD9025', {
+      nodes: [this],
+      details: 'No such method: ' + this.tagName + '.click().'
+    });
+    throw 'TypeError: Object # has no method \'click\'';
+  }
 }
 ); // declareDetector
 
