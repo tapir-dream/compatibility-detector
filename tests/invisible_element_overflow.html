@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html chrome_comp_test="invisible_element_overflow">
+<head>
+<style>
+div.container { width:100px; height:100px; overflow:auto; background:#ddd; position:relative; }
+div.container div.invisible { line-height:0; font-size:0; overflow:hidden; position:absolute; }
+</style>
+</head>
+<body>
+<h1>BX8037</h1>
+<p>1. overflow in horizontal direction by using margin</p>
+<div class="container">
+  <div class="invisible" style="margin-left:120px; width:0; height:0;" expectedProblems="BX8037"></div>
+</div>
+<br />
+
+<p>2. overflow in horizontal direction by using a wider width</p>
+<div class="container">
+  <div class="invisible" style="width:120px; height:0;" expectedProblems="BX8037"></div>
+</div>
+<br />
+
+<p>3. overflow in horizontal direction by using offset properties</p>
+<div class="container">
+  <div class="invisible" style="position:absolute; left:120px; width:0; height:0;" expectedProblems="BX8037"></div>
+</div>
+<br />
+
+<p>4. overflow in vertical direction by using margin</p>
+<div class="container">
+  <div class="invisible" style="margin-top:120px; width:0; height:0;" expectedProblems="BX8037"></div>
+</div>
+<br />
+
+<p>5. overflow in vertical direction by using a larger height</p>
+<div class="container">
+  <div class="invisible" style="width:0; height:120px;" expectedProblems="BX8037"></div>
+</div>
+<br />
+
+<p>6. overflow in vertical direction by using offset properties</p>
+<div class="container">
+  <div class="invisible" style="position:absolute; top:120px; width:0; height:0;" expectedProblems="BX8037"></div>
+</div>
+<br />
+
+<h2>The followings don't have problems</h2>
+<p>A1. with padding</p>
+<div class="container">
+  <div class="invisible" style="position:absolute; width:120px; height:0; padding:10px;"></div>
+</div>
+<br />
+
+<p>A2. with border</p>
+<div class="container">
+  <div class="invisible" style="position:absolute; width:120px; height:0; border:10px solid transparent;"></div>
+</div>
+<br />
+
+<p>A3. the descendant's containing block is different</p>
+<div style="position:relative;">
+  <div class="container" style="position:static;">
+    <div class="invisible" style="position:absolute; font-size:20px; width:120px; background:#eee; line-height:normal;">position</div>
+  </div>
+</div>
+</body>
+</html>

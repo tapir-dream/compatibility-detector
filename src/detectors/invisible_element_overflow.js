@@ -14,6 +14,25 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Check if there is invisbile absolutely positioned element
+ * overflowing the containing block which will establish the scroll bar.
+ * @bug https://code.google.com/p/compatibility-detector/issues/detail?id=70
+ *
+ * In CSS2.1 specification, the overflow property specifies whether content of a
+ * block container element is clipped when it overflows the element's box. It
+ * affects the clipping of all of the element's content except any descendant
+ * elements (and their respective content and descendants) whose containing
+ * block is the viewport or an ancestor of the element.
+ * But the specification does not describe if the descendants are invisble and
+ * overflow the containing block, does the browsers need to establish the scroll
+ * bar.
+ *
+ * So We check the invisible absolutely positioned elements and its containing
+ * block. Get and compare their position rects, if there is such element, we
+ * report the issue.
+ */
+
 addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
@@ -24,36 +43,34 @@ chrome_comp.CompDetect.ScanDomBaseDetector,
 
 null, // constructor
 
-function checkNode(node, additionalData) {
-  function isInvisible(nodeEl) {
-    var w = parseInt(window.chrome_comp.getComputedStyle(nodeEl).width);
-    var h = parseInt(window.chrome_comp.getComputedStyle(nodeEl).height);
-    return (w == 0) || (h == 0);
-  }
-
-  function isOverflowAutoOrScroll(nodeEl) {
-    return window.chrome_comp.getComputedStyle(nodeEl).overflow == 'auto' ||
-      window.chrome_comp.getComputedStyle(nodeEl).overflow == 'scroll';
-  }
-
-  if (Node.ELEMENT_NODE != node.nodeType)
+function checkNode(node, context) {
+  if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
     return;
 
-  if (!isInvisible(node))
+  // Only check the invisible elements.
+  if (node.offsetWidth > 0 && node.offsetHeight > 0)
+    return;
+  // Only check the absolutely positioned elements.
+  if (chrome_comp.getComputedStyle(node).position != 'absolute')
+    return;
+  var containingBlock = chrome_comp.getContainingBlock(node);
+  if (!containingBlock)
+    return;
+  var containingBlockOverflow =
+      chrome_comp.getComputedStyle(containingBlock).overflow;
+  // Only check the containing block which will establish the scroll bar.
+  if (containingBlockOverflow != 'auto' && containingBlockOverflow != 'scroll')
     return;
 
-  var cb = window.chrome_comp.getContainingBlock(node);
-  if (!cb)
-    return;
-
-  if (!isOverflowAutoOrScroll(cb))
-    return;
-
-  var nodeBound = node.getBoundingClientRect();
-  var cbBound = cb.getBoundingClientRect();
-  if (nodeBound.top < cbBound.top || nodeBound.right > cbBound.right ||
-      nodeBound.bottom > cbBound.bottom || nodeBound.left < cbBound.left)
-    this.addProblem('BX8037', [node]);
+  var nodeRect = node.getBoundingClientRect();
+  var containingBlockRect = containingBlock.getBoundingClientRect();
+  // Determine if the node overflows by comparing its position with the
+  // containing block's.
+  if (nodeRect.top < containingBlockRect.top ||
+      nodeRect.right > containingBlockRect.right ||
+      nodeRect.bottom > containingBlockRect.bottom ||
+      nodeRect.left < containingBlockRect.left)
+    this.addProblem('BX8037', [node, containingBlock]);
 }
 ); // declareDetector
 
