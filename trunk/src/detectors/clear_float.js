@@ -181,27 +181,24 @@ function constructor() {
   };
 
   /**
-   * Check next sibling element, if it is visual non-inline elment
-   * of normal flow.
+   * Get the next sibling element which is visible, non-inline and in normal
+   * flow.
    * @param {Element} node
-   * @return {Element} It is null or it is noraml flow or floats node.
+   * @return {Element} null if not found
    */
   this.getNextAffectFloatingLayoutElementByNode = function(node) {
-    do {
-      var nextElement = node.nextSibling;
-      if (!nextElement)
+    node = node.nextSibling;
+    for (; node; node = node.nextSibling) {
+      if (Node.ELEMENT_NODE != node.nodeType)
+        continue;
+      var style = chrome_comp.getComputedStyle(node);
+      if (style.display != 'none' &&
+          style.display.indexOf('inline') != 0 &&
+          (node.childElementCount == 0 ||
+              this.isAffectedByChildrenLayout(node)))
         return node;
-      // Find next element sibling.
-      while (Node.ELEMENT_NODE != nextElement.nodeType) {
-        nextElement = nextElement.nextSibling;
-      }
-      node = nextElement;
-      var computedStyle = chrome_comp.getComputedStyle(node);
-    } while(computedStyle.display == 'none' ||
-            computedStyle.display.indexOf('inline') == 0 ||
-            (node.childElementCount > 0 &&
-                !this.isAffectedByChildrenLayout(nextElement)))
-    return node;
+    }
+    return null;
   };
 
   /**
