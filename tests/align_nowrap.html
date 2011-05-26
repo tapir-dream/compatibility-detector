@@ -1,70 +1,100 @@
+<!DOCTYPE html>
 <html chrome_comp_test='align_nowrap'>
-<div style="width:200px; clear:both">
-  <div style="height:80px; background:#DDD; padding:5px; border:5px solid;">
-    <img align="left" src="img.png" style="width:100px; height:40px; border:1px solid black;"/>
-    <br>
-    <img align="left" src="img.png" style="width:100px; height:40px; border:1px solid black;" expectedProblems="RX8015"/>
-  </div>
+<head>
+<style>
+div.container { background:#ddd; border:3px solid black; margin-bottom:20px; zoom:1; }
+div.container:after { clear:both; content:''; display:block; }
+img, iframe { border:2px dashed blue; width:100px; }
+</style>
+</head>
+<body>
+<h1>RX8015</h1>
+
+<p>1. DIV - IMG/BR/IMG</p>
+<div class="container" style="width:200px;">
+  <img align="left" src="img.png" expectedProblems="RX8015" />
+  <br>
+  <img align="left" src="img.png" />
 </div>
 
-<div style="width:200px; clear:both">
-  <div style="height:80px; background:#DDD; padding:5px; border:5px solid;">
-    <img align="left" src="img.png" style="width:100px; height:40px; border:1px solid black;"/>
-    <br>
-    <img align="right" src="img.png" style="width:100px; height:40px; border:1px solid black;" expectedProblems="RX8015"/>
-  </div>
+<p>2. DIV - IMG/IMG</p>
+<div class="container" style="width:200px;">
+  <img align="left" src="img.png" expectedProblems="RX8015" />
+  <img align="right" src="img.png" />
 </div>
 
-<div style="width:200px; clear:both">
-  <div style="height:80px; background:#DDD; padding:5px; border:5px solid;">
-    <img align="right" src="img.png" style="width:100px; height:40px; border:1px solid black;"/>
-    <br>
-    <img align="left" src="img.png" style="width:100px; height:40px; border:1px solid black;" expectedProblems="RX8015"/>
-  </div>
+<p>3. DIV - IMG/SPAN</p>
+<div class="container" style="width:200px;">
+  <img align="right" src="img.png" expectedProblems="RX8015" />
+  <span>some_inline_text</span>
 </div>
 
-<div style="width:200px; clear:both">
-  <div style="height:80px; background:#DDD; padding:5px; border:5px solid;">
-    <img align="right" src="img.png" style="width:100px; height:40px; border:1px solid black;"/>
-    <br>
-    <img align="right" src="img.png" style="width:100px; height:40px; border:1px solid black;" expectedProblems="RX8015"/>
-  </div>
+<p>4. DIV - IMG/(FORM - INPUT/(P - STRONG))</p>
+<div class="container" style="width:200px;">
+  <img align="left" src="img.png" expectedProblems="RX8015" />
+  <!-- some comments -->
+  <form>
+    <input type="button" value="button" style="width:300px;" />
+    <p>paragraph: <strong>strong</strong></p>
+  </form>
 </div>
 
-<div style="width:300px; clear:both">
-  <div style="height:80px; background:#DDD; padding:5px; border:5px solid;">
-    <img align="left" src="img.png" style="width:100px; height:40px; border:1px solid black;"/>
-    <img align="left" src="img.png" style="width:100px; height:40px; border:1px solid black;"/>
-    <img align="right" src="img.png" style="width:100px; height:40px; border:1px solid black;" expectedProblems="RX8015"/>
-  </div>
+<p>5. DIV - IMG/(SPAN - IMG)</p>
+<div class="container" style="width:190px;">
+  <img src="img.png" align="right" style="width:150px; height:50px;" expectedProblems="RX8015" />
+  <span style="display:block;">
+    <img src="img.png" style="width:20px; float:right;" />
+    after after after after after after after after
+  </span>
 </div>
 
-<br>
-<br>
-<span>No problem cases</span>
-<br>
-<div style="width:200px; clear:both">
-  <div style="height:80px; background:#DDD; padding:5px; border:5px solid;">
-    <img align="left" src="img.png" style="width:100px; height:40px; border:1px solid black;"/>
-    <img align="left" src="img.png" style="clear:both;width:100px; height:40px; border:1px solid black;"/>
-  </div>
+<p>6. DIV - IMG/(DIV - DIV/STRONG)</p>
+<div class="container" style="width:170px;">
+  <img src="img.png" align="right" expectedProblems="RX8015" />
+  <div><div style="float:left">float</div><strong>strong_text</strong></div>
+</div>
+
+<p>7. DIV - IFRAME/IFRAME/IFRAME</p>
+<div class="container" style="width:300px;">
+  <iframe align="left" style="height:42px;"></iframe>
+  <iframe align="left" style="height:42px;" expectedProblems="RX8015"></iframe>
+  <iframe align="right" style="height:42px;"></iframe>
+</div>
+
+<hr />
+
+<h2>The followings don't have problems</h2>
+
+<p>A1. Clearance</p>
+<div class="container" style="width:200px;">
+  <img align="left" src="img.png"/>
+  <img align="left" src="img.png" style="clear:both;"/>
 </div>
 <br>
-<br>
-<div style="width:200px; clear:both">
-  <div style="height:80px; background:#DDD; padding:5px; border:5px solid;">
-    <img align="left" src="img.png" style="width:100px; height:40px; border:1px solid black;"/>
-    <br><br><br><br><br><br><br><br>
-    <img align="left" src="img.png" style="width:100px; height:40px; border:1px solid black;"/>
-  </div>
+
+<p>A2. Lots of BR</p>
+<div class="container" style="width:200px;">
+  <img align="left" src="img.png"/>
+  <br><br><br><br><br><br><br><br><br><br><br>
+  <img align="left" src="img.png"/>
 </div>
-<br>
-<br>
-<div style="width:200px; clear:both">
-  <div style="background:#DDD; height:80px; padding:5px; border:5px solid;">
-    <img align="left" src="img.png" style="width:100px; height:40px; border:1px solid black;"/>
-    <br clear='left'>
-    <img align="left" src="img.png" style="width:100px; height:40px; border:1px solid black;"/>
-  </div>
+
+<p>A3. BR clearance</p>
+<div class="container" style="width:200px;">
+  <img align="left" src="img.png"/>
+  <br clear='left'>
+  <img align="left" src="img.png"/>
 </div>
+
+<p>A4. Complex</p>
+<div class="container" style="width:200px;">
+  <img align="left" src="img.png"/>
+  <span>some text some text some text some text some text some text</span>
+  <img align="right" src="img.png"/>
+  <span>some text some text some text some text</span>
+</div>
+
+<p>(End of test)</p>
+
+</body>
 </html>
