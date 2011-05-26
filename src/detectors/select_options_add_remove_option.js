@@ -14,9 +14,17 @@
  * limitations under the License.
  */
 
-addScriptToInject(function() {
+/**
+ * @fileoverview Check the compatibility issues when adding or removing the
+ * OPTION elements from the SELECT element.
+ * @bug https://code.google.com/p/compatibility-detector/issues/detail?id=42
+ *
+ * We can add or remove the SELECT element's options by using select.add(),
+ * select.remove(), select.options.add() or select.options.remove(). And some
+ * methods have the compatibility issue, these may throw errors.
+ */
 
-var HTMLOptionsCollection;
+addScriptToInject(function() {
 
 chrome_comp.CompDetect.declareDetector(
 
@@ -25,94 +33,87 @@ chrome_comp.CompDetect.declareDetector(
 chrome_comp.CompDetect.NonScanDomBaseDetector,
 
 function constructor(rootNode) {
-  var that = this;
+  var This = this;
+
+  this.isHTMLOptionElement = function(element) {
+    return element instanceof HTMLOptionElement;
+  }
+
+  this.getSelectElementByOptionCollection = function(collection) {
+    var select = null;
+    if (collection.length < 1) {
+      var option = new Option('inserted', 'inserted');
+      collection.add(option);
+      select = collection[0].parentElement;
+      collection.remove(option);
+    } else {
+      select = collection[0].parentElement;
+    }
+    return select;
+  }
 
   /*
-   * hook select.add()
-   * select.add(option, null), select.add(option, option),
-   * select.add(option, index) and select.add(option) all
-   * have compatibility problem.
+   * Hook select.add() method, the followings situations will have the
+   * compatibility issue.;
+   * select.add(option, index)
+   * select.add(option)
    */
-  this.selectAdd_ = function(result, originalArguments, callStack) {
+  this.selectAddHandler = function(result, originalArguments, callStack) {
+    var arg0 = originalArguments[0];
     var arg1 = originalArguments[1];
-    if (originalArguments.length > 0 && _isOption(originalArguments[0])) {
-      var tmp = '';
-      if(arg1 !== undefined)
-        tmp = ', ' + (arg1 == null ? 'null' : _isOption(arg1) ?
-          'option' : 'index');
-      that.addProblem('SD9030', {
+    if (originalArguments.length < 1 || !This.isHTMLOptionElement(arg0))
+      return result;
+    // Some non-IE browsers do not support missing second argument or the
+    // second argument's value is a number.
+    if (arg1 == 0 || arg1 | 0 == arg1 || arg1 === undefined) {
+      This.addProblem('SD9030', {
         nodes: [this],
-        details: 'select.add(option' + tmp + ')',
         needsStack: true
       });
     }
   }
 
   /*
-   * hook options.add
-   * options.add(option, null) and options.add(option, option)
-   * have compatibility problem.
+   * Hook options.add() method, the following situations will have the
+   * compatibility issue:
+   * options.add(option, null)
+   * options.add(option, option)
    */
-
-  this.optionsAdd_ = function(result, originalArguments, callStack) {
-    if (originalArguments.length > 1 && _isOption(originalArguments[0])) {
-      var arg1 = originalArguments[1];
-      if (arg1 === null || _isOption(arg1) || _isTextNode(arg1))
-        that.addProblem('SD9030', {
-          nodes: [this],
-          details: 'options.add(option, ' + (arg1 === null ?
-            'null' : 'option') + ')',
-          needsStack: true
-        });
+  this.optionsAddHandler = function(result, originalArguments, callStack) {
+    var arg0 = originalArguments[0];
+    var arg1 = originalArguments[1];
+    if (originalArguments.length < 1 || !This.isHTMLOptionElement(arg0))
+      return result;
+    // Only in IE8(S) and Opera, the second argument can be an HTMLOptionElement
+    // object. In Firefox, Chrome and Safari, The new option will be inserted
+    // into the head of the list when the second argument is null.
+    if (arg1 === null || This.isHTMLOptionElement(arg1)) {
+      This.addProblem('SD9030', {
+        nodes: [This.getSelectElementByOptionCollection(this)],
+        needsStack: true
+      });
     }
-  }
-
-  /*
-   * hook options.remove()
-   * options.remove(index) and options.remove(option)
-   * have compatibility problem.
-   */
-  this.optionsRemove_ = function(result, originalArguments, callStack) {
-    if (originalArguments.length > 0) {
-      var arg0 = originalArguments[0];
-      if (parseInt(arg0) >= 0 || _isOption(arg0) || _isTextNode(arg0))
-        that.addProblem('SD9030', {
-          nodes: [this],
-          details: 'options.remove(' + (parseInt(arg0) >= 0 ?
-            'index' : 'option') + ')',
-          needsStack: true
-        });
-    }
-  }
-
-  function _isOption(option) {
-    return option instanceof HTMLOptionElement;
-  }
-
-  function _isTextNode(node) {
-    return node.nodeType === Node.TEXT_NODE;
   }
 },
 
 function setUp() {
-  var select = document.createElement("select");
-  HTMLOptionsCollection = select.options.constructor;
-
+  // We cannot get the HTMLOptionCollection directly, so we need to create an
+  // HTMLSelectElement object temporarily to cache it.
+  this.HTMLOptionsCollection =
+      document.createElement('select').options.constructor;
+  // Check the method called by the HTMLSelectElement object.
   chrome_comp.CompDetect.registerExistingMethodHook(
-      window.HTMLSelectElement.prototype, 'add', this.selectAdd_);
+      HTMLSelectElement.prototype, 'add', this.selectAddHandler);
+  // Check the method called by the HTMLOptionCollection object.
   chrome_comp.CompDetect.registerExistingMethodHook(
-      HTMLOptionsCollection.prototype, 'add', this.optionsAdd_);
-  chrome_comp.CompDetect.registerExistingMethodHook(
-      HTMLOptionsCollection.prototype, 'remove', this.optionsRemove_);
+      this.HTMLOptionsCollection.prototype, 'add', this.optionsAddHandler);
 },
 
 function cleanUp() {
   chrome_comp.CompDetect.unregisterExistingMethodHook(
-      window.HTMLSelectElement.prototype, 'add', this.selectAdd_);
+      HTMLSelectElement.prototype, 'add', this.selectAddHandler);
   chrome_comp.CompDetect.unregisterExistingMethodHook(
-      HTMLOptionsCollection.prototype, 'add', this.optionsAdd_);
-  chrome_comp.CompDetect.unregisterExistingMethodHook(
-      HTMLOptionsCollection.prototype, 'remove', this.optionsRemove_);
+      this.HTMLOptionsCollection.prototype, 'add', this.optionsAddHandler);
 }
 ); // declareDetector
 
