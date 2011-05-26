@@ -1,64 +1,135 @@
+<!DOCTYPE html>
 <html chrome_comp_test="shrink_to_fit_percentage_child">
+<head>
 <style>
-  * { margin:0; padding:0; font:16px Simsun; }
+  br { clear:both; }
 </style>
-<h1>50% div in auto width float left div</h1>
-<div style="float:left; background:green; word-wrap:break-word">
-  <div>YYYYYYYYYY</div>
-  <div style="width:50%; float:left" expectedProblems="RX8017">XXXXXXXXXX</div>
+</head>
+<body>
+<h1>RX8017</h1>
+
+<p>1. position:absolute --&gt; width:50%</p>
+<div style="position:absolute; border:1px dashed black;">
+  <div style="width:50%; height:50px; border:2px solid black;" expectedProblems="RX8017">
+    some text some text
+  </div>
 </div>
-<br clear="all">
-<h1>100% div in inline-block</h1>
-<span style="display:inline-block; background:silver;">
-  <div>LongTextLongTextLongTextLongTextLongText</div>
-  <div style="width:100%; height:100px; background:gold;" expectedProblems="RX8017">Text</div>
+<br />
+<br />
+<br />
+
+<p>2. display:inline-block --&gt; float:left; width:80%</p>
+<span style="display:inline-block; border:1px dashed black;">
+  <div style="width:80%; height:50px; float:left; border:2px solid black;" expectedProblems="RX8017">some text</div>
 </span>
-<br clear="all">
-<h1>100% div in absolute positioned div</h1>
-<div style="position:absolute; background:silver;">
-  <div>LongTextLongTextLongTextLongTextLongText</div>
-  <div>
-    <div style="width:100%; height:100px; background:gold;" expectedProblems="RX8017">Text</div>
+<br />
+<br />
+
+<p>3. float:left --&gt; float:left; width:20%, float:left; width:30%;</p>
+<div style="float:left; border:1px dashed black;">
+  <div style="width:20%; height:50px; float:left; border:2px solid black;" expectedProblems="RX8017">some text</div>
+  <div style="width:30%; height:50px; float:left; border:2px solid black;" expectedProblems="RX8017">some Text</div>
+</div>
+<br />
+<br />
+
+<p>4. Nested</p>
+ <div style="float:left; border:1px dashed black; padding:5px;">
+  <div style="width:20%; float:left; border:2px solid black;" expectedProblems="RX8017">
+    <div style="width:200px; height:100px; background:silver;">200 x 100</div>
   </div>
-</div>
-<br clear="all">
-<h1>100% div in auto width div in float left div</h1>
-<div style="float:left; background:silver;">
-  <div>LongTextLongTextLongTextLongTextLongText</div>
-  <div>
-    <div style="width:100%; height:100px; background:gold;" expectedProblems="RX8017">Text</div>
-  </div>
-</div>
-<br clear="all">
-<h1>No problem cases</h1>
-<h1>Child is absolute positioned</h1>
-<div style="float:left; background:blue; word-wrap:break-word">
-  <div>YYYYYYYYYY</div>
-  <div style="width:50%; position:absolute; background: red">XXXXXXXXXX</div>
-</div>
-<br clear="all">
-<h1>Width just fit (not actually shrunk)</h1>
-<div style="width:500px; background:red; height:50px">
-  <div style="float:left; background:silver;">
-    <div style="width:50%; height:100px; margin-left:250px; background:gold;">
-      <div style="width:250px;">text</div>
+  <div style="float:left; border:1px dashed black; padding:5px;">
+    <div style="width:40%; float:left; border:2px solid black;" expectedProblems="RX8017">
+      <div style="width:200px; height:100px; background:silver;">200 x 100</div>
     </div>
   </div>
 </div>
-<br clear="all"><br>
-<h1>Child is invisible</h1>
-<div style="width:100px;">
-  <div style="float:left; background:silver;">
-    <div style="float:left; width:100px; height:100px; background:red;">Float 1</div>
-    <div style="clear:left; width:100%; height:10px"></div>
-    <div style="float:left; width:100px; height:100px; background:blue;">Float 2</div>
+<br />
+<br />
+
+<p>5. float:left --&gt; block --&gt; width:100%</p>
+<div style="float:left; border:1px dashed black;">
+  <span>some inline text</span>
+  <div>
+    <div style="width:110%; height:50px; border:2px solid black;" expectedProblems="RX8017">some text</div>
   </div>
 </div>
-<br clear="all"><br>
-<h1>Not shrint-to-fit</h1>
-<div style="background:blue; word-wrap:break-word">
-  <div>YYYYYYYYYY</div>
-  <div style="width:50%; background: red">XXXXXXXXXX</div>
+<br />
+<br />
+
+<p>6. float:left --&gt; width:60% replaced element</p>
+<div style="float:left; border:1px dashed black;">
+  <textarea style="width:60%; height:50px; border:2px dashed black;" expectedProblems="RX8017">some text</textarea>
 </div>
+<br />
+<br />
+
+<p>7. float:left --&gt; width:0% with content</p>
+<div style="float:left; border:1px dashed black;">
+   <div style="width:0%; height:50px; border:2px solid black;" expectedProblems="RX8017">some text</div>
+</div>
+<br />
+<br />
+
+<p>8. Complicated layout</p>
+<div style="width:500px; background:#eee; height:50px">
+  <div style="float:left; border:1px dashed black;">
+    <div style="width:60%; height:70px; margin-left:200px; border:2px solid black;" expectedProblems="RX8017">
+      <div style="width:200px; background:#aaa">some text</div>
+    </div>
+  </div>
+</div>
+<br />
+<br />
+
+<hr />
+
+<h2>The followings don't have problems</h2>
+
+<p>A1. float:left --&gt; width:100%</p>
+<div style="float:left; border:1px dashed black;">
+   <div style="width:100%; height:50px; border:2px solid black;">some text</div>
+</div>
+<br />
+<br />
+
+<p>A2. float:left --&gt; width:0% without content</p>
+<div style="float:left; border:1px dashed black;">
+   <div style="width:0%; height:50px; border:2px solid black;"></div>
+</div>
+<br />
+<br />
+
+<p>A3. Width just fit (not actually shrunk)</p>
+<div style="width:506px; background:#eee; height:50px">
+  <div style="float:left; border:1px dashed black;">
+    <div style="width:60%; height:70px; margin-left:196px; border:2px solid black;">
+      <div style="width:300px; background:#aaa">some text</div>
+    </div>
+  </div>
+</div>
+<br />
+<br />
+
+<p>A4. Child is absolutely positioned</p>
+<div style="float:left; border:1px dashed black;">
+  <div>some text</div>
+  <div style="width:50%; position:absolute; border:2px solid black;">absolute</div>
+</div>
+<br />
+<br />
+
+<p>A5. Child is invisible</p>
+<div style="float:left; border:1px dashed black; background:#eee;">
+  <div style="float:left; width:100%; background:#ccc; margin-bottom:10px;">some text</div>
+  <div style="clear:left; width:50%; height:0; font-size:0; outline:2px solid black;"></div>
+  <div style="float:left; width:100%; background:#ccc;">some text</div>
+</div>
+<br />
+<br />
+
+<p>(End of test)</p>
+
+</body>
 </html>
 
