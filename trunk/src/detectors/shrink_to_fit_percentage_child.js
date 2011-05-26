@@ -15,9 +15,9 @@
  */
 
 /**
- * @fileoverview: One detector implementation for checking the elements of the
- * percentage width in the element using shrink-to-fit width.
- * @bug: https://code.google.com/p/compatibility-detector/issues/detail?id=6
+ * @fileoverview Check if there is percentage width's element in the
+ * containing block being using shrink-to-fit width.
+ * @bug https://code.google.com/p/compatibility-detector/issues/detail?id=6
  *
  * In CSS2.1 specification, a floating or absolutely positioned or the inline
  * block element will use the shrink-to-fit width if its 'width' is computed as
@@ -40,122 +40,148 @@
 
 addScriptToInject(function() {
 
-function getRealComputedWidth(element) {
-  var x = element.cloneNode(false);
-  x.style.display = 'none !important';
-  var p = element.parentElement;
-  if (!p)
-    return;
-  p.appendChild(x);
-  var width = chrome_comp.getComputedStyle(x).width;
-  p.removeChild(x);
-  x = null;
-  return width;
-}
-
-function isShrinkToFit(element, width) {
-  var style = chrome_comp.getComputedStyle(element);
-  if ((style.float == 'none') && (style.display != 'inline-block') &&
-      (style.position == 'static' || style.position == 'relative'))
-    return false;
-  if (width == 'auto')
-    return true;
-}
-
-function isPercentageWidth(width) {
-  return width.slice(-1) == '%' && width != '100%';
-}
-
-function getAllPercentageWidthDescendant(element) {
-  var ch = element.children;
-  var desceList = [];
-  for (var i = 0, j = ch.length; i < j; i++) {
-    if (!chrome_comp.isElementTrulyDisplayable(ch[i]))
-      continue;
-    var width = getRealComputedWidth(ch[i]);
-    if (width == undefined)
-      continue;
-    if (isPercentageWidth(width)) {
-      desceList.push(ch[i]);
-    }
-  }
-  return desceList;
-}
-
-function isUsingAvailableWidth(element) {
-  var width = element.offsetWidth;
-  var inlinePosition = element.style.position;
-  element.style.position = 'fixed !important';
-  var preferredWidth = element.offsetWidth;
-  element.style.position = null;
-  element.style.position = (inlinePosition) ? inlinePosition : null;
-  return preferredWidth > width;
-}
-
-function isVisible(element) {
-  return element.offsetWidth && element.offsetHeight;
-}
-
-function isTableElement(element) {
-  return chrome_comp.getComputedStyle(element).display.indexOf('table') != -1;
-}
-
-function isInlineElement(element) {
-  return chrome_comp.getComputedStyle(element).display == 'inline';
-}
-
 chrome_comp.CompDetect.declareDetector(
 
 'shrink_to_fit_percentage_child',
 
 chrome_comp.CompDetect.ScanDomBaseDetector,
 
-null, // constructor
+function constructor(rootNode) {
+  this.isInlineElement = function(element) {
+    return chrome_comp.getComputedStyle(element).display == 'inline';
+  }
+
+  /**
+   * Determine if an element whose width is shrink-to-fit is using the
+   * containing block's available width. About shrink-to-fit refer to
+   * http://www.w3.org/TR/CSS21/visudet.html#shrink-to-fit-float
+   * @param {Node} element the DOM node to test.
+   * @return {boolean} true if using available width.
+   */
+  this.isUsingAvailableWidth = function(element) {
+    // Cache the original width and the inline position style of the element.
+    var width = element.offsetWidth;
+    var inlinePositionValue = element.style.getPropertyValue('position');
+    var inlinePositionPriority = element.style.getPropertyPriority('position');
+    // The fixed positioned element's width is also shrink-to-fit, and its
+    // available width is the viewport's width. So offsetWidth looks like the
+    // preferred width now.
+    element.style.setProperty('position', 'fixed', 'important');
+    var preferredWidth = element.offsetWidth;
+    // Restore the inline position style of the element.
+    element.style.removeProperty('position');
+    if (inlinePositionValue) {
+      element.style.setProperty('position', inlinePositionValue,
+          inlinePositionPriority);
+    }
+    // width is the original width of the element in the layout.
+    // preferredWidth is the width of the element when there is no any other
+    // element to astrict it in the horizontal direction.
+    // So if preferredWidth is larger than width, it means that the element's
+    // shrink-to-fit width is using the containing block's available width.
+    return preferredWidth > width;
+  }
+
+  this.isPercentageWidthAndNotOneHundredPercent = function(width) {
+    return width.slice(-1) == '%' && width != '100%';
+  }
+
+  /**
+   * Get the visible children elements whose width are percentage unit.
+   * @param {Node} element the DOM node to test.
+   * @return {Array} the array including visible percentage width child element.
+   */
+  this.getAllPercentageWidthDescendant = function(element) {
+    var children = element.children;
+    var descendantList = [];
+    for (var i = 0, j = children.length; i < j; ++i) {
+      if (!chrome_comp.isElementTrulyDisplayable(children[i]))
+        continue;
+      var width = chrome_comp.getSpecifiedStyleValue(children[i], 'width');
+      if (chrome_comp.isAutoOrNull(width) &&
+          !chrome_comp.isShrinkToFit(children[i]) &&
+          chrome_comp.getComputedStyle(children[i]).display == 'block') {
+        descendantList = descendantList.concat(
+            this.getAllPercentageWidthDescendant(children[i]));
+      }
+      if (!width)
+        continue;
+      if (this.isPercentageWidthAndNotOneHundredPercent(width)) {
+        descendantList.push(children[i]);
+      }
+    }
+    return descendantList;
+  }
+
+},
 
 function checkNode(node, context) {
-
   if (Node.ELEMENT_NODE != node.nodeType || context.isDisplayNone())
     return;
 
-  if (node.tagName == 'SCRIPT')
+  var tagName = node.tagName;
+  var SKIPPING_ELEMENT_LIST = {
+    HTML: true,
+    BODY: true,
+    MARQUEE: true
+  };
+  if (tagName in SKIPPING_ELEMENT_LIST)
     return;
 
-  if (node.tagName == 'MARQUEE' || node.tagName == 'HTML')
-    return;
   if (chrome_comp.isReplacedElement(node))
     return;
-  if (isTableElement(node))
+  if (chrome_comp.isTableElement(node))
     return;
-  if (isInlineElement(node))
+  if (this.isInlineElement(node))
     return;
-  var realWidth = getRealComputedWidth(node);
-  if (realWidth == undefined)
+  if (!chrome_comp.isShrinkToFit(node))
     return;
-  if (!isShrinkToFit(node, realWidth))
-    return;
-  if (isUsingAvailableWidth(node))
+  if (this.isUsingAvailableWidth(node))
     return;
 
-  var descendantList = getAllPercentageWidthDescendant(node);
+  var descendantList = this.getAllPercentageWidthDescendant(node);
   if (descendantList.length < 1)
     return;
   for (var i = 0, j = descendantList.length; i < j; i++) {
     var style = chrome_comp.getComputedStyle(descendantList[i]);
-    var display = style.display;
-    var cFloat = style['float'];
-    var position = style.position;
-    if (position == 'fixed' || position == 'absolute')
+    // Do not check the absolutely positioned element.
+    if (style.position == 'fixed' || style.position == 'absolute')
       continue;
-    if (!isVisible(descendantList[i]))
+    // Do not check the invisible element.
+    if (descendantList[i].offsetWidth == 0 ||
+        descendantList[i].offsetHeight == 0)
       continue;
+    // Cache the original width of the current descendant child element and its
+    // inline width style.
     var oldWidth = descendantList[i].offsetWidth;
-    var inlineWidth = descendantList[i].style.width;
-    descendantList[i].style.width = 'auto !important';
+    var inlineWidthValue = descendantList[i].style.getPropertyValue('width');
+    var inlineWidthPriority =
+        descendantList[i].style.getPropertyPriority('width');
+    // In this case, IE8(S) and other non-IE browsers will treat the percentage
+    // width as 'auto' first, and after calculating the available width of its
+    // shrink-to-fit containing block, then calculating the computed width
+    // according to.its percentage width and the containing block's available
+    // width.
+    descendantList[i].style.setProperty('width', 'auto', 'important');
     var newWidth = descendantList[i].offsetWidth;
-    descendantList[i].style.width = null;
-    descendantList[i].style.width = (inlineWidth) ? inlineWidth : null;
-    if (oldWidth != newWidth && oldWidth && newWidth) {
-      this.addProblem('RX8017', [descendantList[i]]);
+    // Restore the inline width style.
+    descendantList[i].style.removeProperty('width');
+    if (inlineWidthValue)
+      descendantList[i].style.setProperty('width', inlineWidthValue,
+          inlineWidthPriority);
+    // If we set 'width' to 'auto' and there is no difference between the
+    // old offsetWidth and the new offsetWidth, we consider that there is no
+    // compatibility issue.
+    if (oldWidth != newWidth) {
+      var details = node.tagName +
+          ((node.id) ? '[id="' + node.id + '"]' : '') +
+          ((node.className) ? '[class="' + node.className + '"]' : '') +
+          ' ---> ' + descendantList[i].tagName + ' { width: ' +
+          chrome_comp.getSpecifiedStyleValue(descendantList[i], 'width') + ' }';
+      this.addProblem('RX8017', {
+        nodes: [descendantList[i], node],
+        details: details
+      });
     }
   }
 }
