@@ -1,94 +1,179 @@
-<html chrome_comp_test="select_options_add_remove_option">	<head></head><body>
-<style type="text/css">select {height:100px;}</style>
-<table>
-	<tbody>
-		<tr>
-			<td>
-				<select id="s1" multiple="multiple" expectedProblems="SD9030 SD9030 SD9030">
-					<option value="1">111</option>
-					<option value="2">222</option>
-				</select>
-			</td>
-			<td>
-				<select id="s2" multiple="multiple" expectedProblems="SD9030">
-					<option value="1">111</option>
-				</select>
-			</td>
-			<td>
-				<select id="s3" multiple="multiple">
-					<option value="1">111</option>
-					<option value="2">222</option>
-				</select>
-			</td>
-			<td>
-				<select id="s4" multiple="multiple">
-					<option value="1">111</option>
-				</select>
-			</td>
-			<td>
-				<select id="s5" multiple="multiple">
-					<option value="1">111</option>
-				</select>
-			</td>
-		</tr>
-	</tbody>
-</table>
+<!DOCTYPE html>
+<html chrome_comp_test="select_options_add_remove_option">
+<head>
+<style>
+select { height:100px; }
+</style>
+<script>
+function $(id) {
+  return document.getElementById(id);
+}
+function showInfo(obj, msg) {
+  obj.innerHTML += msg;
+}
+</script>
+</head>
+<body>
+<h1>SD9030</h1>
 
-<div style="border:2px solid;padding:3px;width:800px;" id="info"></div>
+<p>1. select.add(option, index)</p>
+<select id="select1" multiple="multiple" expectedProblems="SD9030">
+  <option id="originalOption1">original option</option>
+</select>
+<div id="info1">select.add(option, index): </div>
+<script>
+try {
+  var select = $('select1');
+  var option = new Option('select.add(option, index)', 1);
+  // Put chrome_comp.expectProblems and problematic statement in the same line!
+  chrome_comp.expectProblems('', 'SD9030'); select.add(option, 0);
+} catch(e) {
+  showInfo($('info1'), e);
+}
+</script>
+<br />
 
-<script type="text/javascript">
-	function $(id){return document.getElementById(id);}
-	function newOpt(text, val){return new Option(text, val);}
-	function info(method, msg){$("info").innerHTML += "<strong>" + method + "</strong> : " + msg + "<br />";}
-	
-	var opt1 = newOpt("select.add(option, null)", 2),
-		opt2 = newOpt("select.add(option)", 2),
-		opt3 = newOpt("options.add(option, null)", 2),
-		opt4 = newOpt("options.add(option)", 2),
-		opt5 = newOpt("options[index] = option", 2),
-		opt6 = newOpt("xselect.add(option, option)", 2),
-		opt7 = newOpt("select.add(option, index)", 2),
-		opt8 = newOpt("options.add(option, option)", 2),
-		opt9 = newOpt("options.add(option, index)", 2),
-		s1 = $("s1"),
-		s2 = $("s2"),
-		s3 = $("s3"),
-		s4 = $("s4"),
-		s5 = $("s5");
-	
-	try { chrome_comp.expectProblems(s1.add(opt1, null), "SD9030"); } catch(e) { info("select.add(option, null)", e) }
-	try { chrome_comp.expectProblems(s2.add(opt2), "SD9030"); } catch(e) { info("select.add(option)", e) }
-	try { chrome_comp.expectProblems(s3.options.add(opt3, null), "SD9030"); } catch(e) { info("options.add(option, null)", e) }
-	try { s4.options.add(opt4); } catch(e) { info("options.add(option)", e) }
-	try { s5.options[1] = opt5; } catch(e) { info("options[index] = option", e) }
-	
-	try { chrome_comp.expectProblems(s1.add(opt6, s1.lastChild), "SD9030"); } catch(e) { info("select.add(option, option)", e) }
-	try { chrome_comp.expectProblems(s1.add(opt7, 1), "SD9030"); } catch(e) { info("select.add(option, index)", e) }
-	try { chrome_comp.expectProblems(s3.options.add(opt8, s3.lastChild), "SD9030"); } catch(e) { info("options.add(option, option)", e) }
-	try { s3.options.add(opt9, 1); } catch(e) { info("options.add(option, index)", e) }
-	
-	function remove(type){
-		try {
-			switch (type) {
-				case 1:
-					s1.remove(0);
-					break;
-				case 2:
-					s2.remove(s2.firstChild);
-					break;
-				case 3:
-					chrome_comp.expectProblems(s3.options.remove(0), "SD9030");
-					break;
-				case 4:
-					chrome_comp.expectProblems(s4.options.remove(s4.firstChild), "SD9030");
-					break;
-				case 5:
-					s5.options[1] = null;
-					break;
-			}
-		} 
-		catch (e) {}
-	}
-	for(var i=1;i<6;i++)
-		remove(i);
-</script></body></html>
+<p>2. select.add(option)</p>
+<select id="select2" multiple="multiple" expectedProblems="SD9030">
+  <option id="originalOption2">original option</option>
+</select>
+<div id="info2">select.add(option): </div>
+<script>
+try {
+  var select = $('select2');
+  var option = new Option('select.add(option)', 1);
+  // Put chrome_comp.expectProblems and problematic statement in the same line!
+  chrome_comp.expectProblems('', 'SD9030'); select.add(option);
+} catch(e) {
+  showInfo($('info2'), e);
+}
+</script>
+<br />
+
+<p>3. options.add(option, null)</p>
+<select id="select3" multiple="multiple" expectedProblems="SD9030">
+  <option id="originalOption3">original option</option>
+</select>
+<div id="info3">options.add(option, null): </div>
+<script>
+try {
+  var select = $('select3');
+  var options = select.options;
+  var option = new Option('options.add(option, null)', 1);
+  // Put chrome_comp.expectProblems and problematic statement in the same line!
+  chrome_comp.expectProblems('', 'SD9030'); options.add(option, null);
+} catch(e) {
+  showInfo($('info3'), e);
+}
+</script>
+<br />
+
+<p>4. options.add(option, option)</p>
+<select id="select4" multiple="multiple" expectedProblems="SD9030">
+  <option id="originalOption4">original option</option>
+</select>
+<div id="info4">options.add(option, option): </div>
+<script>
+try {
+  var select = $('select4');
+  var options = select.options;
+  var originalOption = $('originalOption4');
+  var option = new Option('options.add(option, option)', 1);
+  // Put chrome_comp.expectProblems and problematic statement in the same line!
+  chrome_comp.expectProblems('', 'SD9030'); options.add(option, originalOption);
+} catch(e) {
+  showInfo($('info4'), e);
+}
+</script>
+<br />
+
+<hr />
+
+<h2>The followings don't have problems</h2>
+
+<p>A1. options.add(option, index)</p>
+<select id="selectA1" multiple="multiple">
+  <option id="originalOptionA1">original option</option>
+</select>
+<div id="infoA1">options.add(option, index): </div>
+<script>
+try {
+  var select = $('selectA1');
+  var options = select.options;
+  var option = new Option('options.add(option, index)', 1);
+  options.add(option, 0);
+} catch(e) {
+  showInfo($('infoA1'), e);
+}
+</script>
+<br />
+
+<p>A2. options.add(option)</p>
+<select id="selectA2" multiple="multiple">
+  <option id="originalOptionA2">original option</option>
+</select>
+<div id="infoA2">options.add(option): </div>
+<script>
+try {
+  var select = $('selectA2');
+  var options = select.options;
+  var option = new Option('options.add(option)', 1);
+  options.add(option);
+} catch(e) {
+  showInfo($('infoA2'), e);
+}
+</script>
+<br />
+
+<p>A3. select.remove(option)</p>
+<select id="selectA3" multiple="multiple">
+  <option id="originalOptionA3">original option</option>
+</select>
+<div id="infoA3">select.remove(option): </div>
+<script>
+try {
+  var select = $('selectA3');
+  var option = new Option('select.remove(option)', 1);
+  select.remove(option);
+} catch(e) {
+  showInfo($('infoA3'), e);
+}
+</script>
+<br />
+
+<p>A4. options.remove(option)</p>
+<select id="selectA4" multiple="multiple">
+  <option id="originalOptionA4">original option</option>
+</select>
+<div id="infoA4">options.remove(option): </div>
+<script>
+try {
+  var select = $('selectA4');
+  var options = select.options;
+  var option = new Option('options.remove(option)', 1);
+  options.remove(option);
+} catch(e) {
+  showInfo($('infoA4'), e);
+}
+</script>
+<br />
+
+<p>A5. select.remove(index)</p>
+<select id="selectA5" multiple="multiple">
+  <option id="originalOptionA5">original option</option>
+</select>
+<div id="infoA5">select.remove(index): </div>
+<script>
+try {
+  var select = $('selectA5');
+  var option = new Option('select.remove(index)', 1);
+  select.remove(0);
+} catch(e) {
+  showInfo($('infoA5'), e);
+}
+</script>
+
+<p>(End of test)</p>
+
+</body>
+</html>
