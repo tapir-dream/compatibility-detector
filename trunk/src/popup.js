@@ -2,6 +2,8 @@
  * @fileoverview This file is used by popup.html
  */
 
+// TODO: remove resources: popup_loading
+
 // TODO: put these status variables in background.html
 var DEFAULT_LOCALE = 'zh-cn'; // TODO: change to en when w3help ready.
 var W3HELP_LOCALES = {
@@ -59,27 +61,33 @@ var backgroundPage = chrome.extension.getBackgroundPage();
 
 function windowLoad() {
   log('windowLoad begin');
-  // HTMLView i18n
-  bulidHTMLView({
-    popup_cannotDetect: chrome.i18n.getMessage('popup_cannotDetect'),
-    popup_loading: chrome.i18n.getMessage('popup_loading'),
-    popup_baseDetection: chrome.i18n.getMessage('popup_baseDetection'),
-    popup_advancedDetection: chrome.i18n.getMessage(
-        'popup_advancedDetection'),
-    popup_detecting: chrome.i18n.getMessage('popup_detecting'),
-    popup_noProblem: chrome.i18n.getMessage('popup_noProblem'),
-    popup_issueDescription: chrome.i18n.getMessage('popup_issueDescription'),
-    popup_issueCount: chrome.i18n.getMessage('popup_issueCount'),
-    popup_detectionStatus: chrome.i18n.getMessage('popup_detectionStatus'),
-    popup_checkboxEffectTip: chrome.i18n.getMessage('popup_checkboxEffectTip')
-  }, $('warp'));
-
+  var RESOURCE_IDS = [
+    'extensionName',
+    'popup_advancedDetection',
+    'popup_baseDetection',
+    'popup_cannotDetect',
+    'popup_checkboxEffectTip',
+    'popup_detecting',
+    'popup_detectionStatus',
+    'popup_issueCount',
+    'popup_issueDescription',
+    'popup_noProblem'
+  ];
+  bulidHTMLView(getMessages(RESOURCE_IDS), document.body);
   chrome.tabs.getSelected(null, onGetSelectedTab);
+}
+
+function getMessages(ids) {
+  var result = {};
+  for (var i = 0, c = ids.length; i < c; ++i) {
+    var id = ids[i];
+    result[id] = chrome.i18n.getMessage(id);
+  }
+  return result;
 }
 
 function showBaseDetectionResult(data) {
   log('showBaseDetectionResult begin');
-  $('content').className = 'processing';
 
   var result = [];
   var dtdLink = '<a href="' + w3helpLocale + '/kb/001#common_dtd' +
@@ -191,8 +199,7 @@ function showBaseDetectionResult(data) {
   }
 
   // Show result.
-  $('base_detection').innerHTML = result.join('');
-  $('content').className = '';
+  $('baseDetectionResultList').innerHTML = result.join('');
 }
 
 /**
@@ -204,9 +211,6 @@ function setStatus(status) {
   switch (status) {
     case 'disabled':
       body.className = 'disabled';
-      break;
-    case 'loading':
-      body.className = 'loading';
       break;
     case STATUS_BASE:
       body.className = 'base';
@@ -295,17 +299,16 @@ function updateDetectionResult(senderTabId, typeId, problem) {
   var occurrencesNumber = problem.occurrencesNumber;
 
   var severity = problem.severity;
-  $('content').className = '';
   $('detectionResult').style.display = 'block';
   $(severity + 'Area').style.display = 'block';
-  var table = $(severity + 'Problems').firstElementChild;
+  var table = $(severity + 'Problems');
   var problemRow = $(typeId);
   if (problemRow) {
     problemRow.cells[2].innerText = occurrencesNumber;
   } else {
     var row = document.createElement('tr');
     row.setAttribute('id', typeId);
-    table.appendChild(row);
+    table.firstElementChild.appendChild(row);
     insertCell(row, problem.occurrencesNumber);
     insertCell(row, problem.description);
     var checkbox = insertCell(row, '<input type="checkbox" name="' +
@@ -322,7 +325,6 @@ function updateDetectionResult(senderTabId, typeId, problem) {
 
 function showNoProblemResult() {
   $('advancedRunning').style.display = 'none';
-  $('content').className = '';
   $('noProblemFoundInfo').style.display = 'block';
 }
 
@@ -374,11 +376,11 @@ function onGetSelectedTab(tab) {
   }
 
   // Change the tab panel.
-  log('$tab.addEventListener click');
-  $('tab').addEventListener('click', function(event) {
+  log('tabstrip.addEventListener click');
+  $('tabstrip').addEventListener('click', function(event) {
     var currentDetecionType = document.body.className;
     var status = event.target.className;
-    log('$tab click fired, status=' + status);
+    log('tabstrip click fired, status=' + status);
     if (status && currentDetecionType != status) {
       // TODO: modify this
       var detectionResult = getDetectionResult(selectedTabId);

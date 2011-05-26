@@ -5,211 +5,194 @@
 <title>Chrome Compatibility Detector</title>
 <style>
 * {
+  font: 14px/22px 'Microsoft YaHei', Simsun, Verdana, Geneva, sans-serif;
   margin: 0;
   padding: 0;
-  font: 14px/22px 'Microsoft YaHei', Simsun, Verdana, Geneva, sans-serif;
 }
+/**
+ * The body has 4 status:
+ * - default : initial state
+ * - disabled : hide all detection result
+ * - base : show base detection result
+ * - advanced : show advanced detection result
+ */
 body {
-  width:600px;
+  width: 600px;
 }
-div.disabled,
-div.loading {
-  display: none;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
+
+/* The cannotDetector message. */
+#cannotDetect {
   bottom: 0;
-  height: 100%;
-  text-align: center;
   cursor: default;
+  height: 100%;
+  left: 0;
+  position: absolute;
+  right: 0;
+  text-align: center;
+  top: 0;
 }
-div.disabled > span {
-  display: inline-block;
-  margin-top: 120px;
+#cannotDetect span {
   color: #900;
-}
-div.loading > span {
   display: inline-block;
   margin-top: 120px;
-  padding-left: 26px;
-  background: url(popup_loading.gif) no-repeat 0 3px;
-  color: #333;
 }
-section {
-  height: 35px;
-  border-bottom: #888 solid 1px;
+/* - body status related */
+#cannotDetect {
+  display: none;
+}
+.disabled #cannotDetect {
+  display: block;
+}
+
+/* The header and the tabstrip. */
+#header {
   background: url(popup_res.png) repeat-x 0 0;
+  border-bottom: #888 solid 1px;
   font-weight: normal;
+  height: 35px;
 }
-section > h1 {
-  padding-left: 35px;
+#header h1 {
   background: url(popup_res.png) no-repeat 5px -44px;
-  line-height: 34px;
   color: #ccc;
+  line-height: 34px;
+  padding-left: 35px;
 }
-section > nav {
+#tabstrip {
   float: right;
   margin-top: -30px;
   padding-right: 6px;
 }
-section > nav > span {
-  float: left;
-  margin: 0 3px;
-  width: 90px;
-  height: 30px;
+#tabstrip span {
   border: #888 solid 1px;
-  background: #d9d9d9;
+  cursor: pointer;
+  float: left;
+  height: 30px;
+  line-height: 28px;
+  margin: 0 3px;
+  text-align: center;
+  width: 90px;
   -webkit-border-top-left-radius: 6px;
   -webkit-border-top-right-radius: 6px;
   -webkit-transition: all 100ms ease-in-out;
-  text-align: center;
-  line-height: 28px;
-  color: #666;
-  cursor: pointer;
 }
-section > nav > span:hover {
+#tabstrip span {
+  background: #d9d9d9;
+  color: #666;
+}
+#tabstrip span:hover {
   background: #fff;
   color: #000;
 }
-article {
-  min-height: 200px;
-  max-height: 500px;
-  padding: 10px 5px;
-  overflow-y: auto;
-  background :#f8f8f8;
-}
-article > div {
+/* - body status related */
+.default #tabstrip,
+.disabled #tabstrip {
   display: none;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  height: 100%;
-  text-align: center;
-  cursor: default;
 }
-article > div > span {
-  display: inline-block;
-  margin-top: 120px;
-  padding-left: 26px;
+.base #tabstrip .base,
+.advanced #tabstrip .advanced {
+  background: #f8f8f8;
+  border: #888 solid 1px;
+  border-bottom-color: #f8f8f8;
   color: #333;
+  width: 90px;
 }
-article > ul {
+
+/* The main content. */
+#content {
+  background : #f8f8f8;
+  max-height: 500px;
+  min-height: 200px;
+  overflow-y: auto;
+  padding: 10px 5px;
+}
+/* - body status related */
+#content > div {
   display: none;
 }
-article > ul > li {
-  padding: 5px 5px 5px 20px;
+.base #baseDetectionPage,
+.advanced #advancedDetectionPage {
+  display: block;
+}
+
+/* The list in the base detection page. */
+.commonList li {
   background: url(popup_res.png) no-repeat 0 -79px;
   border-bottom: #ccc dashed 1px;
+  padding: 5px 5px 5px 20px;
   -webkit-border-radius: 6px;
   -webkit-transition: all 300ms ease-in-out;
 }
-
-article > ul > li:nth-child(even) {
+.commonList li:nth-child(even) {
   background-color: #F0F0F0;
 }
-
-article > ul > li:hover {
+.commonList li:hover {
   background-color: #FFFFCE;
 }
 
-strong, em {
-  font-weight: normal;
-  font-style: normal;
-}
+/* Text style used in base detection result list. */
+em,
 strong {
-  color: crimson;
+  font-style: normal;
+  font-weight: normal;
 }
 em {
   color: forestgreen;
 }
+strong {
+  color: crimson;
+}
 
-/**
- * Pop-up page's status:
- *   default
- *   disabled
- *   loading
- *   base
- *   advanced
- */
-body.default nav,
-body.disabled nav,
-body.loading nav {
+/* The advanced detection page. */
+#advancedDetectionPage > div {
   display: none;
 }
-body.disabled div.disabled,
-body.loading div.loading {
+#advancedDetectionPage #advancedRunning {
   display: block;
 }
-body.base span.base,
-body.advanced span.advanced {
-  width:90px;
-  color:#333;
-  background:#f8f8f8;
-  border:#888 solid 1px;
-  border-bottom:#f8f8f8 solid 1px;
-}
-body.base ul.base,
-body.advanced ul.advanced {
-  display: block;
-}
-article.processing > div {
-  display: block;
+#errorArea,
+#warningArea {
+  display: none;
+  margin-top: 5px;
 }
 
-
-
-
-#detectionResult table {
+/* The table in advanced detection page. */
+.commonTable {
   border-collapse: collapse;
-  width: 100%;
-  table-layout:fixed;
   margin: 5px 0;
+  table-layout: fixed;
+  width: 100%;
 }
-
-#detectionResult td, #detectionResult th {
-  padding: 3px 5px;
+.commonTable td,
+.commonTable th {
   border: 1px solid silver;
+  padding: 3px 5px;
   -webkit-transition: all 300ms ease-in-out;
 }
-
-#detectionResult th {
+.commonTable th {
   background: #E0E0E0;
   font-weight: normal;
   text-align: center;
 }
-
-tr > td:last-child, tr > th:last-child {
+.commonTable tr > td:last-child,
+.commonTable tr > th:last-child {
+  text-align: center;
   width: 70px;
-  text-align: center;
 }
-
-tr > td:first-child, tr > th:first-child {
+.commonTable tr > td:first-child,
+.commonTable tr > th:first-child {
+  text-align: center;
   width: 30px;
-  text-align: center;
 }
-
-tr:nth-child(odd) td {
+.commonTable tr:nth-child(odd) td {
   background-color: #F3F3F3;
 }
-
-tr:hover > td {
+.commonTable tr:hover > td {
   background-color: #FFFFCE;
 }
 
-
-#detectionResult, #noProblemFoundInfo, #errorArea, #warningArea {
-  display: none;
-}
-
-#detectionResult > div {
-  margin-top: 5px;
-}
-
-#detectionResult > p {
-  color:#999;
+/* Tips. */
+.tips {
+  color: #999;
   font-size: 12px;
 }
 </style>
@@ -217,55 +200,63 @@ tr:hover > td {
 </head>
 <body class="default">
 
-<div id="warp">
-  <div class="disabled"><span>${popup_cannotDetect}</span></div>
-  <div class="loading"><span>${popup_loading}</span></div>
-  <section>
-    <h1>Compatibility Detector</h1> <!-- TODO: translate this -->
-    <nav id="tab">
-      <span class="base">${popup_baseDetection}</span>
-      <span class="advanced">${popup_advancedDetection}</span>
-    </nav>
-  </section>
-  <article id="content">
-    <ul id="base_detection" class="base"></ul>
-    <ul id="advanced_detection" class="advanced">
-      <div id="advancedRunning">${popup_detecting}</div>
-      <div id="noProblemFoundInfo">${popup_noProblem}</div>
-      <div id="detectionResult">
-        <h2>
-          <span id="detectionStatus">${popup_detectionStatus}</span>
-          <span id="allProblemsSummary"></span>
-        </h2>
-        <div id="errorArea">
-          <h3 id="errorProblemsSummary"></h3>
-          <table id="errorProblems">
-          <tbody>
+<div id="cannotDetect"><span>${popup_cannotDetect}</span></div>
+
+<div id="header">
+  <h1>${extensionName}</h1>
+  <div id="tabstrip">
+    <span class="base">${popup_baseDetection}</span>
+    <span class="advanced">${popup_advancedDetection}</span>
+  </div>
+</div>
+
+<div id="content">
+
+  <div id="baseDetectionPage">
+    <ul id="baseDetectionResultList" class="commonList"></ul>
+  </div>
+
+  <div id="advancedDetectionPage">
+    <div id="advancedRunning">${popup_detecting}</div>
+    <div id="noProblemFoundInfo">${popup_noProblem}</div>
+
+    <div id="detectionResult">
+      <h2>
+        <span id="detectionStatus">${popup_detectionStatus}</span>
+        <span id="allProblemsSummary"></span>
+      </h2>
+
+      <div id="errorArea">
+        <h3 id="errorProblemsSummary"></h3>
+        <table id="errorProblems" class="commonTable">
           <tr>
             <th><input id="errorCheckAll" type="checkbox"></th>
             <th>${popup_issueDescription}</th>
             <th>${popup_issueCount}</th>
           </tr>
-          </tbody>
-          </table>
-        </div>
-        <div id="warningArea">
-          <h3 id="warningProblemsSummary"></h3>
-          <table id="warningProblems">
-          <tbody>
-          <tr>
-          <th><input id="warningCheckAll" type="checkbox"></th>
-          <th>${popup_issueDescription}</th>
-          <th>${popup_issueCount}</th>
-          </tr>
-          </tbody>
-          </table>
-        </div>
-        <p>${popup_checkboxEffectTip}</p>
+        </table>
       </div>
-    </ul>
-  </article>
+
+      <div id="warningArea">
+        <h3 id="warningProblemsSummary"></h3>
+        <table id="warningProblems" class="commonTable">
+          <tr>
+            <th><input id="warningCheckAll" type="checkbox"></th>
+            <th>${popup_issueDescription}</th>
+            <th>${popup_issueCount}</th>
+          </tr>
+        </table>
+      </div>
+
+      <p class="tips">${popup_checkboxEffectTip}</p>
+    </div>
+    <!-- end div #detectionResult -->
+
+  </div>
+  <!-- end div #advancedDetectionPage -->
+
 </div>
+<!-- end div #content -->
 
 </body>
 </html>
