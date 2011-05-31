@@ -23,29 +23,6 @@ if (!W3HELP_LOCALES.hasOwnProperty(w3helpLocale))
   w3helpLocale = DEFAULT_LOCALE;
 w3helpLocale = 'http://www.w3help.org/' + w3helpLocale;
 
-// ----
-// Helper functions
-
-function stringTemplate(param) {
-  return param.str.replace(param.regexp || /\${([^{}]*)}/g,
-      function(a,b) {
-        var r = param.obj[b];
-        return (typeof r == 'string') ? r : a ;
-      })
-}
-
-function $(id) {
-  return document.getElementById(id);
-}
-
-function bulidHTMLView(templateObject, element) {
-  var HTMTemplate = element.innerHTML;
-  element.innerHTML = stringTemplate({
-    str: HTMTemplate,
-    obj: templateObject
-  });
-}
-
 function log(message) {
   var backgroundPage = chrome.extension.getBackgroundPage();
   backgroundPage.log('(popup.js) ' + message);
@@ -59,8 +36,8 @@ var hasSelectedTabId = false;
 
 var backgroundPage = chrome.extension.getBackgroundPage();
 
-function windowLoad() {
-  log('windowLoad begin');
+function onDOMContentLoaded() {
+  log('DOMContentLoaded begin');
   var RESOURCE_IDS = [
     'extensionName',
     'popup_advancedDetection',
@@ -77,21 +54,12 @@ function windowLoad() {
   chrome.tabs.getSelected(null, onGetSelectedTab);
 }
 
-function getMessages(ids) {
-  var result = {};
-  for (var i = 0, c = ids.length; i < c; ++i) {
-    var id = ids[i];
-    result[id] = chrome.i18n.getMessage(id);
-  }
-  return result;
-}
-
 function showBaseDetectionResult(data) {
   log('showBaseDetectionResult begin');
 
   var result = [];
   var dtdLink = '<a href="' + w3helpLocale + '/kb/001#common_dtd' +
-      '" target="_blank">' + chrome.i18n.getMessage('bd_DTDTableTitle') + 
+      '" target="_blank">' + chrome.i18n.getMessage('bd_DTDTableTitle') +
       '</a>';
 
   var kb001 = chrome.i18n.getMessage('bd_aboutRCAorKB', ['<a href="' +
@@ -464,7 +432,7 @@ function updateCheckAllStatus(checkbox) {
   }
 }
 
-window.addEventListener('load', windowLoad, false);
+document.addEventListener('DOMContentLoaded', onDOMContentLoaded, false);
 
 chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
   log('onRequest, request.type=' + request.type);

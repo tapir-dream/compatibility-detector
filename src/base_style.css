@@ -1,0 +1,59 @@
+* {
+  font: 14px/22px 'Microsoft YaHei', Simsun, Verdana, Geneva, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+body {
+  cursor: default;
+  -webkit-user-select: none;
+}
+
+/* The header and the tabstrip. */
+#header {
+  background: url(popup_res.png) repeat-x 0 0;
+  border-bottom: #888 solid 1px;
+  font-weight: normal;
+  height: 35px;
+}
+#header h1 {
+  background: url(popup_res.png) no-repeat 5px -44px;
+  color: #ccc;
+  line-height: 34px;
+  padding-left: 35px;
+}
+
+#tabstrip {
+  float: right;
+  margin-top: -30px;
+  padding-right: 6px;
+}
+#tabstrip span {
+  border: #888 solid 1px;
+  cursor: pointer;
+  float: left;
+  height: 30px;
+  line-height: 28px;
+  margin: 0 3px;
+  text-align: center;
+  width: 90px;
+  -webkit-border-top-left-radius: 6px;
+  -webkit-border-top-right-radius: 6px;
+  -webkit-transition: all 100ms ease-in-out;
+}
+#tabstrip span {
+  background: #d9d9d9;
+  color: #666;
+}
+#tabstrip span:hover {
+  background: #fff;
+  color: #000;
+}
+
+/* Page list item base style. */
+.commonList > li {
+  background: url(popup_res.png) no-repeat 0 -79px;
+  border-bottom: #ccc dashed 1px;
+  padding: 7px 7px 7px 20px;
+  -webkit-border-radius: 6px;
+  -webkit-transition: all 300ms ease-in-out;
+}

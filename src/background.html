@@ -4,6 +4,8 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Chrome Compatibility Detector</title>
 <script>
+// LocalStorage data key name.
+var CHROME_COMP_SELECTED_DETECTORS = 'chrome_comp_selected_detectors';
 
 // Maps tabId to DetectionResult.
 var detectionResults = {};
@@ -24,6 +26,21 @@ var DETECTION_COMPAT_STATUS_OF_PRIORITY = {
   warning: 2,
   error: 3
 };
+
+function getLocale() {
+  var DEFAULT_LOCALE = 'en';
+  var LOCALES = {'zh-cn': true, 'en': true};
+  var locale = chrome.i18n.getMessage('@@ui_locale');
+  if (locale)
+    locale = locale.toLowerCase().replace('_', '-');
+  if (!LOCALES[locale])
+    locale = DEFAULT_LOCALE;
+  return locale;
+}
+
+function getDetectorOptions() {
+  return window.localStorage.getItem(CHROME_COMP_SELECTED_DETECTORS);
+}
 
 function setDetectionCompatStatus(tabId, status) {
   getDetectionResult(tabId).detectionCompatStatus = status;
@@ -359,6 +376,9 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
       break;
     case 'getCrossOriginCSS':
       getCrossOriginCSS(tabId, request.urlMap);
+      break;
+    case 'getDetectorOptions':
+      sendResponse(getDetectorOptions());
       break;
   }
 });

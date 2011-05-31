@@ -33,6 +33,10 @@ window.chrome_comp = (function() {
     'table-caption': true
   };
 
+  // Give up do not detection items.
+  var detectorOptions =
+      window.sessionStorage.getItem('chrome_comp_selected_detectors')
+
   return {
 
     COLOR_TRANSPARENT: 'rgba(0, 0, 0, 0)',
@@ -62,6 +66,8 @@ window.chrome_comp = (function() {
         console.log(msg);
       }
     },
+
+    detectorOptions: detectorOptions,
 
     // Uses it to implement inherit logic in JavaScript
     extend: function(subClass, superClass) {
@@ -1978,6 +1984,14 @@ chrome_comp.CompDetect = (function() {
 
     // See chrome_comp.CompDetect.BaseDetector.prototype.addProblem.
     addProblem: function(typeId, opt_information) {
+
+      // If run testcase page, then ignore user set detector options.
+      if (!chrome_comp.CompDetectorConfig.unitTestMode) {
+        if (typeof chrome_comp.detectorOptions != 'string' ||
+            chrome_comp.detectorOptions.indexOf(typeId) == -1)
+          return;
+      }
+
       if (inAddProblem_)
         return;
 
