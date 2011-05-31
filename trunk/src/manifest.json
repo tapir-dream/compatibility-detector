@@ -7,7 +7,7 @@
   "icons": {
     "128": "icon_128.png"
   },
-  // "options_page": "options.html",
+  "options_page": "options.html",
   "permissions": [ "tabs", "http://*/*", "https://*/*" ],
   "browser_action": {
     "popup": "popup.html",

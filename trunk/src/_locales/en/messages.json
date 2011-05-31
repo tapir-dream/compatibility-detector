@@ -1,5 +1,5 @@
 {
-  "extensionName": { "message": "Compatibility Detector" },
+  "extensionName": { "message": "Browser Compatibility Detector" },
   "extensionDescription": { "message": "Detects web page compatibility issues. Initiated by Google Chrome Team." },
   "previous": { "message": "Previous" },
   "next": { "message": "Next" },
@@ -25,6 +25,26 @@
   "popup_issueCount": { "message": "Count" },
   "popup_checkboxEffectTip": { "message": "Tips: click the checkbox to toggle corresponding annotations on the page." },
   "popup_detectionStatus": { "message": "Detection running... " },
+
+
+  "opt_title": {"message": "Option Page" },
+  "opt_support": {"message": "If you find this tool useful to you, please go to $1the Google App Store$2 vote for us." },
+  "opt_base": {"message": "Options" },
+  "opt_about": {"message": "About" },
+  "opt_aboutReference": {"message": "Related Reference" },
+  "opt_aboutFeedback": {"message": "Feedback" },
+
+  "opt_detectors": {"message": "Please select the compatibility issues to be reported in advanced detection." },
+  "opt_selectAll": {"message": "Select all" },
+  "opt_selectNone": {"message": "Select none" },
+  "opt_invertSelection": {"message": "Invert selection" },
+
+  "opt_shareTitle" : { "message": "#Browser Compatibility Detector Tool# Your suggestions?" },
+  "opt_shareOnWeibo": { "message": "Share on weibo.com" },
+  "opt_shareOnTencent": { "message": "Share on t.qq.com" },
+  "opt_shareOnTwitter": { "message": "Share on Twitter" },
+  "opt_email": { "message": "E-mail" },
+
 
   "bd_aboutRCAorKB": { "message": "For details, refer to: $1, " },
   "bd_hasDTD": { "message": "This page has a DTD ($1). " },

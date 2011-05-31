@@ -3,21 +3,10 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Chrome Compatibility Detector</title>
+<link href="base_style.css" type="text/css" rel="stylesheet">
 <style>
-* {
-  font: 14px/22px 'Microsoft YaHei', Simsun, Verdana, Geneva, sans-serif;
-  margin: 0;
-  padding: 0;
-}
-/**
- * The body has 4 status:
- * - default : initial state
- * - disabled : hide all detection result
- * - base : show base detection result
- * - advanced : show advanced detection result
- */
 body {
-  width: 600px;
+  width: 620px;
 }
 
 /* The cannotDetector message. */
@@ -44,46 +33,13 @@ body {
   display: block;
 }
 
-/* The header and the tabstrip. */
-#header {
-  background: url(popup_res.png) repeat-x 0 0;
-  border-bottom: #888 solid 1px;
-  font-weight: normal;
-  height: 35px;
-}
-#header h1 {
-  background: url(popup_res.png) no-repeat 5px -44px;
-  color: #ccc;
-  line-height: 34px;
-  padding-left: 35px;
-}
-#tabstrip {
-  float: right;
-  margin-top: -30px;
-  padding-right: 6px;
-}
-#tabstrip span {
-  border: #888 solid 1px;
-  cursor: pointer;
-  float: left;
-  height: 30px;
-  line-height: 28px;
-  margin: 0 3px;
-  text-align: center;
-  width: 90px;
-  -webkit-border-top-left-radius: 6px;
-  -webkit-border-top-right-radius: 6px;
-  -webkit-transition: all 100ms ease-in-out;
-}
-#tabstrip span {
-  background: #d9d9d9;
-  color: #666;
-}
-#tabstrip span:hover {
-  background: #fff;
-  color: #000;
-}
-/* - body status related */
+/**
+ * The body has 4 status:
+ * - default : initial state
+ * - disabled : hide all detection result
+ * - base : show base detection result
+ * - advanced : show advanced detection result
+ */
 .default #tabstrip,
 .disabled #tabstrip {
   display: none;
@@ -104,28 +60,24 @@ body {
   min-height: 200px;
   overflow-y: auto;
   padding: 10px 5px;
+  -webkit-user-select: text;
 }
-/* - body status related */
+
 #content > div {
   display: none;
 }
+
+/* body status related */
 .base #baseDetectionPage,
 .advanced #advancedDetectionPage {
   display: block;
 }
 
-/* The list in the base detection page. */
-.commonList li {
-  background: url(popup_res.png) no-repeat 0 -79px;
-  border-bottom: #ccc dashed 1px;
-  padding: 5px 5px 5px 20px;
-  -webkit-border-radius: 6px;
-  -webkit-transition: all 300ms ease-in-out;
-}
-.commonList li:nth-child(even) {
+/* Popup page list item style. */
+.commonList > li:nth-child(even) {
   background-color: #F0F0F0;
 }
-.commonList li:hover {
+.commonList > li:hover {
   background-color: #FFFFCE;
 }
 
@@ -196,6 +148,7 @@ strong {
   font-size: 12px;
 }
 </style>
+<script type="text/javascript" src="helper.js"></script>
 <script type="text/javascript" src="popup.js"></script>
 </head>
 <body class="default">
