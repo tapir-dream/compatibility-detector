@@ -69,8 +69,13 @@ function checkNode(node, context) {
   if (nodeRect.top < containingBlockRect.top ||
       nodeRect.right > containingBlockRect.right ||
       nodeRect.bottom > containingBlockRect.bottom ||
-      nodeRect.left < containingBlockRect.left)
+      nodeRect.left < containingBlockRect.left) {
+    // All browsers will optimize the scrollbar when element's offsetWidth and
+    // offsetHeight are zero.
+    if (nodeRect.width == 0 && nodeRect.height == 0)
+      return;
     this.addProblem('BX8037', [node, containingBlock]);
+  }
 }
 ); // declareDetector
 
