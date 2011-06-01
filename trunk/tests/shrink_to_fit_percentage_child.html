@@ -82,6 +82,23 @@
 <br />
 <br />
 
+<p>9. Has shrink-to-fit or hasLayout child</p>
+<div style="width:400px;">
+  <div style="float:left; border:1px dashed black; background:#eee;">
+    <div style="float:left; width:60%; background:#ccc;" expectedProblems="RX8017">
+      <div style="width:100px;">some text</div>
+    </div>
+    <span style="display:inline-block;">
+      <div style="width:30%; background:#aaa;" expectedProblems="RX8017">
+        <div style="width:50px;">child</div>
+      </div>
+    </span>
+  </div>
+</div>
+<br />
+<br />
+
+
 <hr />
 
 <h2>The followings don't have problems</h2>

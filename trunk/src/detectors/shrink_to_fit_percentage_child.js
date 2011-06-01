@@ -100,6 +100,7 @@ function constructor(rootNode) {
       var width = chrome_comp.getSpecifiedStyleValue(children[i], 'width');
       if (chrome_comp.isAutoOrNull(width) &&
           !chrome_comp.isShrinkToFit(children[i]) &&
+          !chrome_comp.hasLayoutInIE(children[i]) &&
           chrome_comp.getComputedStyle(children[i]).display == 'block') {
         descendantList = descendantList.concat(
             this.getAllPercentageWidthDescendant(children[i]));
