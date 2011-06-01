@@ -96,6 +96,37 @@ function constructor(rootNode) {
   }
 
   /**
+   * Determine if the previous sibling node is normal flow inline level, this
+   * node may the element node or text node, but it cannot be whitespace text
+   * node and the BR element, because they do not cause the compatibility issue.
+   * @param {Node} node the tested DOM element node.
+   * TODO: put this function into framework.
+   * @return {Node} the DOM node.
+   */
+  this.isPreviousNormalFlowSiblingNodeInline = function(element) {
+    var previousSibling = element.previousSibling;
+    if (element.nodeType == Node.TEXT_NODE && !previousSibling)
+      previousSibling = element.parentElement.previousSibling;
+    while (previousSibling &&
+        (previousSibling.nodeType != Node.ELEMENT_NODE) &&
+        (previousSibling.nodeType != Node.TEXT_NODE ||
+            (previousSibling.nodeValue &&
+                previousSibling.nodeValue.trim() == ''))) {
+      previousSibling = previousSibling.previousSibling;
+    }
+    if (!previousSibling)
+      return false;
+    if (previousSibling.nodeType == Node.TEXT_NODE)
+      return true;
+    if (!chrome_comp.isInNormalFlow(previousSibling))
+      return false;
+    if (previousSibling.tagName == 'BR')
+      return false;
+    return chrome_comp.getComputedStyle(previousSibling).display.indexOf(
+        'inline') != -1;
+  }
+
+  /**
    * Get the rect information including ClientRect and ClientRectList of the
    * specified node.
    * @param {Node} node the DOM element node or the DOM text node.
@@ -176,8 +207,9 @@ function constructor(rootNode) {
       var ele = allElement[i];
       // if innerHTML is equal to empty string, it means the element does not
       // contain any content, the element containing context has been detect
-      // when calling the getDescendantTextNode method.
-      if (ele.innerHTML == '')
+      // when calling the getDescendantTextNode method. The BR elements also do
+      // not cause the issue.
+      if (ele.innerHTML == '' && ele.tagName != 'BR')
         result.push(ele);
     }
     return result;
@@ -190,7 +222,7 @@ function constructor(rootNode) {
    * @return {Object} the object including rect object about the tested element
    *     and its relative nodes.
    */
-  this.getOldNodesRect = function(node, nextSibling) {
+  this.getOldNodesRect = function(node, nextSibling, containingBlock) {
     var result = {
       // The rect object about the tested element.
       node: null,
@@ -212,9 +244,15 @@ function constructor(rootNode) {
         });
       } else {
         for (var i = 0, j = descendantTextNode.length; i < j; ++i) {
+          var textNode = descendantTextNode[i];
+          if (this.isPreviousNormalFlowSiblingNodeInline(textNode))
+            continue;
           result.nextSibling.push({
-            node: descendantTextNode[i],
-            nodeRect: this.getRects(descendantTextNode[i], false)
+            node: textNode,
+            // We just get and check the first line box of the text node,
+            // because if the text node is divided into several line, we should
+            // just compare the position of the first line.
+            nodeRect: this.getRects(textNode, true)[0]
           });
         }
         for (var i = 0, j = descendantEmptyElement.length; i < j; ++i) {
@@ -228,7 +266,7 @@ function constructor(rootNode) {
       result.node = this.getRects(node, false);
       result.nextSibling.push({
         node: nextSibling,
-        nodeRect: this.getRects(nextSibling, false)
+        nodeRect: this.getRects(nextSibling, true)[0]
       });
     }
     return result;
@@ -277,9 +315,15 @@ function constructor(rootNode) {
         });
       } else {
         for (var i = 0, j = descendantTextNode.length; i < j; ++i) {
+          var textNode =descendantTextNode[i];
+          if (this.isPreviousNormalFlowSiblingNodeInline(textNode))
+            continue;
           result.nextSibling.push({
-            node: descendantTextNode[i],
-            nodeRect: this.getRects(descendantTextNode[i], false)
+            node: textNode,
+            // We just get and check the first line box of the text node,
+            // because if the text node is divided into several line, we should
+            // just compare the position of the first line.
+            nodeRect: this.getRects(textNode, true)[0]
           });
         }
         for (var i = 0, j = descendantEmptyElement.length; i < j; ++i) {
@@ -294,7 +338,7 @@ function constructor(rootNode) {
       result.containingBlock = this.getRects(containingBlock, false);
       result.nextSibling.push({
         node: nextSibling,
-        nodeRect: this.getRects(nextSibling, false)
+        nodeRect: this.getRects(nextSibling, true)[0]
       });
     }
     // Restore the original inline width style.
@@ -379,11 +423,18 @@ function checkNode(node, context) {
   // This issue happens when the align attribute is left or right.
   if (alignDirection != 'left' && alignDirection != 'right')
     return;
-  var containingBlock = chrome_comp.getContainingBlock(node);
-  var nextSibling = this.getNextUnpositionedSiblingNode(node);
+  // Do not check the absolutely positioned elements and the node in table.
+  var position = chrome_comp.getComputedStyle(node).position;
+  if (position == 'absolute' || position == 'fixed')
+    return;
+  // Do not check the invisible elements.
+  if (node.offsetWidth == 0 || node.offsetHeight == 0)
+    return;
   // The aligned tested element may only affect its next siblings in IE.
+  var nextSibling = this.getNextUnpositionedSiblingNode(node);
   if (!nextSibling)
     return;
+  var containingBlock = chrome_comp.getContainingBlock(node);
   var nodeList = this.getDifferentPositionNodeList(
       this.getOldNodesRect(node, nextSibling, containingBlock),
       this.getNewNodesRect(node, nextSibling, containingBlock), alignDirection);
