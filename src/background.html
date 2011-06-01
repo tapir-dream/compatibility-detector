@@ -3,9 +3,8 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Chrome Compatibility Detector</title>
+<script type="text/javascript" src="constants.js"></script>
 <script>
-// LocalStorage data key name.
-var CHROME_COMP_SELECTED_DETECTORS = 'chrome_comp_selected_detectors';
 
 // Maps tabId to DetectionResult.
 var detectionResults = {};
@@ -38,8 +37,28 @@ function getLocale() {
   return locale;
 }
 
-function getDetectorOptions() {
-  return window.localStorage.getItem(CHROME_COMP_SELECTED_DETECTORS);
+/**
+ * @return {Object} a detector ID map
+ */
+function getDisabledDetectors() {
+  var disabledDetectorsStr = window.localStorage.getItem(DISABLED_DETECTORS);
+  if (!disabledDetectorsStr)
+    disabledDetectorsStr = '';
+  var disabledDetectorList = disabledDetectorsStr.split(SEPARATOR);
+  var disabledDetectors = {};
+  for (var i = 0, c = disabledDetectorList.length; i < c; ++i) {
+    var id = disabledDetectorList[i];
+    disabledDetectors[id] = true;
+  }
+  return disabledDetectors;
+}
+
+/**
+ * @param {Object} disabledDetectors a detector ID map
+ */
+function setDisabledDetectors(disabledDetectors) {
+  var disabledDetectorsStr = Object.keys(disabledDetectors).join(SEPARATOR);
+  window.localStorage.setItem(DISABLED_DETECTORS, disabledDetectorsStr);
 }
 
 function setDetectionCompatStatus(tabId, status) {
@@ -248,7 +267,7 @@ function RequestResult(xhr) {
  * Fetch stylesheets from other sites. Page script is not allowed to do this,
  * so we do it in extension's background page.
  * @param tabId
- * @param {object} urlMap contains urls of multiple stylesheets
+ * @param {Object} urlMap contains urls of multiple stylesheets
  */
 function getCrossOriginCSS(tabId, urlMap) {
   // Aborts pending requests if any.
@@ -337,7 +356,7 @@ function crossOrginOperationFinished(tabId) {
   // Removes the result immediately.
   abortXHR(tabId);
   chrome.tabs.sendRequest(tabId, {
-    type: 'getCrossOriginCSSFinished',
+    type: REQUEST_GET_CROSS_ORIGIN_CSS_FINISHED,
     data: data
   });
 }
@@ -360,25 +379,25 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
   log('onRequest, request.type=' + request.type);
   var tabId = sender.tab.id;
   switch (request.type) {
-    case 'setStatus':
+    case REQUEST_SET_STATUS:
       setBrowserAction(request.status, tabId);
       break;
-    case 'CompatibilityResult':
+    case REQUEST_COMPATIBILITY_RESULT:
       addDetectedProblemToResult(tabId, request);
       break;
-    case 'EndOfDetection':
+    case REQUEST_END_OF_DETECTION:
       stopAddingDetectedProblem(tabId, request.totalProblems);
       break;
-    case 'PageUnloaded':
+    case REQUEST_PAGE_UNLOAD:
       delete detectionResults[tabId];
       abortXHR(tabId);
       setBrowserAction('normal', tabId);
       break;
-    case 'getCrossOriginCSS':
+    case REQUEST_GET_CROSS_ORIGIN_CSS:
       getCrossOriginCSS(tabId, request.urlMap);
       break;
-    case 'getDetectorOptions':
-      sendResponse(getDetectorOptions());
+    case REQUEST_GET_DISABLED_DETECTORS:
+      sendResponse(getDisabledDetectors());
       break;
   }
 });

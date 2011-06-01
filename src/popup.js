@@ -11,6 +11,7 @@ var W3HELP_LOCALES = {
   'zh-cn': true
 };
 
+var STATUS_DISABLED = 'disabled';
 var STATUS_BASE = 'base';
 var STATUS_ADVANCED = 'advanced';
 
@@ -171,20 +172,23 @@ function showBaseDetectionResult(data) {
 }
 
 /**
- * Change pop-up page's status.
+ * Change pop-up page's status. The body has 4 status:
+ * - default : initial state
+ * - disabled : hide all detection result
+ * - base : show base detection result
+ * - advanced : show advanced detection result
  */
 function setStatus(status) {
   log('setStatus: ' + status);
-  var body = document.body;
   switch (status) {
-    case 'disabled':
-      body.className = 'disabled';
+    case STATUS_DISABLED:
+      document.body.className = 'disabled';
       break;
     case STATUS_BASE:
-      body.className = 'base';
+      document.body.className = 'base';
       break;
     case STATUS_ADVANCED:
-      body.className = 'advanced';
+      document.body.className = 'advanced';
       break;
   }
 }
@@ -194,7 +198,7 @@ function getDetectionResult(tabId) {
 }
 
 function detectProblems(tabId) {
-  chrome.tabs.sendRequest(tabId, {type: 'DetectProblems'});
+  chrome.tabs.sendRequest(tabId, {type: REQUEST_DETECT_PROBLEMS});
 }
 
 function runBaseDetection() {
@@ -202,7 +206,7 @@ function runBaseDetection() {
     return;
 
   log('runBaseDetection begin');
-  chrome.tabs.sendRequest(selectedTabId, {type: 'runBaseDetection'},
+  chrome.tabs.sendRequest(selectedTabId, {type: REQUEST_RUN_BASE_DETECTION},
       showBaseDetectionResult);
 };
 
@@ -234,14 +238,19 @@ function setDetectionFinishedMessage() {
   $('detectionStatus').innerHTML = chrome.i18n.getMessage('detectionFinished');
 }
 
+var EXPECTED_TYPES = {error: true, warning: true};
+
 /**
  * @param {error | warning} type
+ * TODO: fix above comment
  */
 function updateSummary(type) {
   if (!hasSelectedTabId) {
     // TODO: cache the request and use it when hasSelectedTabId
     return;
   }
+  if (!(type in EXPECTED_TYPES))
+    return;
 
   var detectionResult = getDetectionResult(selectedTabId);
   var number = (type == 'warning')? 'totalWarnings' : 'totalErrors';
@@ -267,6 +276,9 @@ function updateDetectionResult(senderTabId, typeId, problem) {
   var occurrencesNumber = problem.occurrencesNumber;
 
   var severity = problem.severity;
+  if (!(severity in EXPECTED_TYPES))
+    return;
+
   $('detectionResult').style.display = 'block';
   $(severity + 'Area').style.display = 'block';
   var table = $(severity + 'Problems');
@@ -317,13 +329,10 @@ function restoreAnnotationCheck() {
   }
 }
 
-function stringStartsWith(s, prefix) {
-  return s.substring(0, prefix.length) == prefix;
-}
+var NO_CONTENT_SCRIPT_URL = 'https://chrome.google.com/';
 
 function onGetSelectedTab(tab) {
   var prefix = tab.url.substring(0, 4);
-  var NO_CONTENT_SCRIPT_URL = 'https://chrome.google.com/';
   if (stringStartsWith(tab.url, NO_CONTENT_SCRIPT_URL) ||
       prefix != 'http' && prefix != 'file') {
     // Show the cannot detect message
@@ -438,8 +447,8 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
   log('onRequest, request.type=' + request.type);
   var tabId = sender.tab.id;
   switch (request.type) {
-    case 'PageLoad':
-      // Re-run basic check
+    case REQUEST_PAGE_LOAD:
+      // Rerun base detection, for the page content is changed.
       runBaseDetection();
       break;
   }
