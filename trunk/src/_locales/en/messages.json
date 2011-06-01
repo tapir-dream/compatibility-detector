@@ -26,7 +26,6 @@
   "popup_checkboxEffectTip": { "message": "Tips: click the checkbox to toggle corresponding annotations on the page." },
   "popup_detectionStatus": { "message": "Detection running... " },
 
-
   "opt_title": {"message": " Options" },
   "opt_support": {"message": "If you find this tool helpful, please <a href=\"https://chrome.google.com/webstore/detail/fcillahbnhlpombgccogflhmgocfifma\" target=\"_blank\">vote</a> for us in the Chrome Web Store." },
   "opt_base": {"message": "Options" },

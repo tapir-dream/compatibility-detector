@@ -290,7 +290,9 @@ function updateDetectionResult(senderTabId, typeId, problem) {
     row.setAttribute('id', typeId);
     table.firstElementChild.appendChild(row);
     insertCell(row, problem.occurrencesNumber);
-    insertCell(row, problem.description);
+    insertCell(row, problem.description + ' <a href="' +
+        W3HELP_RCA_BASE_URL + typeId + '" target="_blank">['+
+        chrome.i18n.getMessage('moreInfo') + ']</a>');
     var checkbox = insertCell(row, '<input type="checkbox" name="' +
         severity + '" class="issue">').firstElementChild;
     checkbox.addEventListener('click', toggleCheckProblem, false);

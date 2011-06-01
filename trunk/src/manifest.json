@@ -27,8 +27,6 @@
       "w3help_issues.js",
       "non_w3help_issues.js",
 
-      "detectors/expression.js",                            //BT9010: TODO: to be verify
-
       // Working issues: Release 0.9.8
       "detectors/text_decoration_propagation.js",           //RT3002: ok 3/18
       "detectors/decoration_font_color.js",                 //RX3011: ok, but the problem is hard to notice 3/18
