@@ -1,0 +1,1029 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="keywords" content="兼容性问题,兼容性问题解决方案,常见兼容性问题,CSS兼容性,HTML标准,Javascript兼容性" />
+<meta name="description" content="详细分析页面代码在各浏览器中产生的兼容性问题的根本原因。在这些原因中，有的是开发者对某种技术的使用不当，有的是使用了某些浏览器的特性，有的是触碰了标准尚未明确定义的盲区。分析原因之后，还会针对该类问题给出建议和解决方案。" />
+<title>W3Help - 兼容性 - 根本原因</title>
+<link rel="stylesheet" type="text/css" href="/zh-cn/css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="/zh-cn/css/compatibility_index.css" media="all" />
+<script type="text/javascript" src="/zh-cn/js/global.js"></script>
+</head>
+<body>
+<div id="w3h_container">
+  <div id="w3h_header">
+    <div class="header_sidebar">
+      <h1 class="logo"><a href="/zh-cn/"><span>W3Help</span></a></h1>
+    </div>
+    <div class="header_content">
+      <ul class="navigation">
+        <li class="first_item"><a href="/zh-cn/">首页</a></li>
+        <li><a href="/zh-cn/home/events.html">活动</a></li>
+        <li><a href="/zh-cn/home/news.html">新闻</a></li>
+        <li><a href="/zh-cn/home/forum.html">论坛</a></li>
+        <li class="last_item"><a href="/zh-cn/home/about.html">关于我们</a></li>
+        <li class="search_item">
+          <form action="/zh-cn/home/search.html" method="get">
+            <p>
+              <input name="key" value="" onfocus="focusKey(this)" onblur="blurKey(this)" title="搜索" class="text" />
+            </p>
+            <p>
+              <input id="search_submit" type="image" src="/zh-cn/images/search_button.gif" alt="搜索" />
+            </p>
+          </form>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div id="w3h_body">
+    <div class="body_sidebar">
+      <div class="logo_shadow"></div>
+      <h2 class="category"><span><a href="/zh-cn/home/standards.html">标准</a></span></h2>
+      <ul class="theme">
+        <li><a href="/zh-cn/standards/">W3C 标准</a></li>
+        <li><a href="/zh-cn/home/glossary.html">词汇表</a></li>
+      </ul>
+      <h2 class="category"><span><a href="/zh-cn/home/compatibility.html">兼容性</a></span></h2>
+      <ul class="theme">
+        <li><a href="/zh-cn/causes/">根本原因</a></li>
+        <li><a href="/zh-cn/kb/">知识库</a></li>
+        <li><a href="/zh-cn/casestudies/">案例分析</a></li>
+      </ul>
+    </div>
+    <!-- body_content { -->
+    <div class="body_content">
+      <ul class="breadcrumbs">
+        <li><a href="/zh-cn/" name="top">首页</a> <span>»</span></li>
+        <li><a href="/zh-cn/home/compatibility.html">兼容性</a> <span>»</span></li>
+        <li class="current">更新记录</li>
+      </ul>
+      <h1 class="title">更新记录</h1>
+      <div id="changeLog">
+        <table class="log">
+        <tr>
+          <th>日期</th>
+          <th>操作</th>
+          <th>栏目</th>
+          <th>编号</th>
+          <th>详细说明</th>
+        </tr>
+        <tr class="change">
+          <td>2011-04-11</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>RD1002</td>
+          <td class="note">改正错误的条件限制，增加测试内容，修改结论和解决方案。</td>
+        </tr>
+        <tr class="change">
+          <td>2011-03-22</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>RD8006</td>
+          <td class="note">改正问题描述，增加限定条件。</td>
+        </tr>
+        <tr class="change">
+          <td>2011-03-03</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>HF9009</td>
+          <td class="note">改正一处翻译错误。</td>
+        </tr>
+        <tr class="change">
+          <td>2011-02-18</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>SJ5003</td>
+          <td class="note">修正文章标题，补充新内容，已更深入的分析。</td>
+        </tr>
+        <tr class="change">
+          <td>2010-12-30</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>SD9028</td>
+          <td class="note">增加 NodeList 差异说明，修改解决方案。</td>
+        </tr>
+        <tr class="change">
+          <td>2010-11-19</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>RC3001</td>
+          <td class="note">修改说明文字。</td>
+        </tr>
+        <tr class="new">
+          <td>2010-11-16</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>HE1005</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="change">
+          <td>2010-11-16</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>HE1001</td>
+          <td class="note">修改截图URL。</td>
+        </tr>
+        <tr class="change">
+          <td>2010-11-15</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>RM1010 </td>
+          <td class="note">修改第二个测试结果截图部分。</td>
+        </tr>
+        <tr class="change">
+          <td>2010-11-15</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>SD9001</td>
+          <td class="note">修改解决方案。</td>
+        </tr>
+        <tr class="change">
+          <td>2010-11-05</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>RD1021</td>
+          <td class="note">修改标题、内容、testcase。</td>
+        </tr>
+        <tr class="change">
+          <td>2010-11-04</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>RM1004</td>
+          <td class="note">添加一段注释。</td>
+        </tr>
+        <tr class="change">
+          <td>2010-11-02</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>BX1039</td>
+          <td class="note">调整语序，加入新内容说明。</td>
+        </tr>
+        <tr class="change">
+          <td>2010-10-28</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>SD9018</td>
+          <td class="note">修改文章标题，新增 offsetTop、offsetLeft 的内容。</td>
+        </tr>
+        <tr class="change">
+          <td>2010-10-25</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>RE5003</td>
+          <td class="note">修改文章标题，修正测试用例及截图。</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-22</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RE1011</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="change">
+          <td>2010-10-22</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>HF1004</td>
+          <td class="note">改正笔误。</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-22</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RE1011</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-21</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RE3021</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="change">
+          <td>2010-10-21</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>RA8001</td>
+          <td class="note">修正标题，正文内容加入对 'inherit' 支持缺陷的说明，重写测试用例。</td>
+        </tr>
+        <tr class="change">
+          <td>2010-10-21</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>RM8001</td>
+          <td class="note">修正标题，正文内容加入对 ' display' 各特性值支持缺陷的说明，重写测试用例。</td>
+        </tr>
+        <tr class="change">
+          <td>2010-10-21</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>RE1012 </td>
+          <td class="note">加入限定条件：分离边框模型。</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-21</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RT2013</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-21</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RT2009</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-20</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RT1012</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-20</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>HM8003</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-20</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RC3005</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="change">
+          <td>2010-10-19</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>RV1001</td>
+          <td class="note">修改标题为：<br />
+            《各浏览器中当 'overflow-x' 和 'overflow-y' 一个值为 'hidden' 另一个值为 'visible' 时的组合渲染结果存在差异》<br />
+            修改文章中心内容及测试用例。</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-19</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>HE1004</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-19</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RC3004</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-18</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RN8004</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-18</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RE1020</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-18</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RG1004</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-18</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>BW1013</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-18</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>SD9025</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-15</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>BX9054</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-15</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>BX9055</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-15</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RX1014</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-15</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RM8024</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="change">
+          <td>2010-10-15</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>RT1008</td>
+          <td class="note">修改标题，增加 Opera 测试结果，修改测试浏览器版本。</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-14</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>SD9031</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-14</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>SD9026</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-14</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RN8003</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-14</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RE8015</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-14</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>BX2051</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-14</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>BX1049</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-13</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>BX1053</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-13</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>HF2016</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-13</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RE9019</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-13</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>BX9052</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-13</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>BW5014</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-12</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RD9028</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-12</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>BX2047</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-12</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>BW5011</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-12</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>BX2050</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-12</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>HF9018</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-11</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>CH9004</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-11</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>HF1017</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-11</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RE1016</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-11</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>BT9023</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-11</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>SJ9012</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-09</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>HO2009</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-09</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td> RD3029</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-09</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>BW9012</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-09</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>SJ9011</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="change">
+          <td>2010-10-09</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>BX9046</td>
+          <td class="note">增加 IE6 中对 ABBR 元素怪异处理的内容。</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-08</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RS1006</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-08</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RV8003</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-08</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>CH3005</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-08</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>HJ2001</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-08</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>HM1002</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-08</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>BX9048</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-10-08</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>HF9015</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="change">
+          <td>2010-09-28</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>RD8026</td>
+          <td class="note">添加 inline-block 和 list-item 的情况说明，调整标题及名称。</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-28</td>
+          <td>新增</td>
+          <td>兼容性-知识库</td>
+          <td>KB013</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-28</td>
+          <td>新增</td>
+          <td>兼容性-知识库</td>
+          <td>KB012</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-28</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>BX9046</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-28</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>HO9008</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-27</td>
+          <td>新增</td>
+          <td>兼容性-知识库</td>
+          <td>KB011</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-26</td>
+          <td>新增</td>
+          <td>兼容性-知识库</td>
+          <td>KB010</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-26</td>
+          <td>新增</td>
+          <td>兼容性-知识库</td>
+          <td>KB009</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-26</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>HF1014</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-25</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RB1006</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="change">
+          <td>2010-09-25</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>RE1018</td>
+          <td class="note">修改测试结果 IE7 为 IE7(S)，并修改部分格式。</td>
+        </tr>
+        <tr class="change">
+          <td>2010-09-25</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>RE1012 </td>
+          <td class="note">补充 IE6 IE7 下触发 hasLayout 时的说明。</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-21</td>
+          <td>新增</td>
+          <td>兼容性-知识库</td>
+          <td>KB008</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-21</td>
+          <td>新增</td>
+          <td>兼容性-知识库</td>
+          <td>KB007</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-21</td>
+          <td>新增</td>
+          <td>兼容性-知识库</td>
+          <td>KB006</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-20</td>
+          <td>新增</td>
+          <td>兼容性-知识库</td>
+          <td> KB005</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-20</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RD8027</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-20</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RF2002</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="change">
+          <td>2010-09-20</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>BG9002</td>
+          <td class="note">修改标题，将问题扩展到对 type 和 language 属性的识别性问题层面上，整体内容翻新重写。</td>
+        </tr>
+        <tr class="change">
+          <td>2010-09-20</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>BT9006</td>
+          <td class="note">加入 VBScript.Encode 描述。</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-19</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RE8018</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-19</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RD8022</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="change">
+          <td>2010-09-17</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>RT3001</td>
+          <td class="note">增加问题触发条件“IMG元素必须为内联元素：inline、inline-block 或 inline-table”。</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-16</td>
+          <td>新增</td>
+          <td>兼容性-知识库</td>
+          <td> KB004</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-16</td>
+          <td>新增</td>
+          <td>兼容性-知识库</td>
+          <td> KB003</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="change">
+          <td>2010-09-16</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>RT3011</td>
+          <td class="note">修正部分不正确内容。</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-16</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RE2007</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-16</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RX8018 </td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-15</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>HF3013</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-15</td>
+          <td>新增</td>
+          <td>兼容性-知识库</td>
+          <td>KB002</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-15</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RD8025</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="change">
+          <td>2010-09-15</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>RM1020</td>
+          <td class="note">增加包含块是正值的情况说明。</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-15</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RD1024</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-14</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>SD9028</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-14</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RD8023</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-14</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>HF3012</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="change">
+          <td>2010-09-14</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>HY1005</td>
+          <td class="note">修改标题、内容和 testcase。</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-14</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>BW1010</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="change">
+          <td>2010-09-14</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>RX3005</td>
+          <td class="note">修改标题、问题分析、结论，更新 Chrome(Q) Safari(Q) 测试结果，将 IE7(S)的特殊情况修改为注释简单叙述。</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-14</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>BX8043</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-14</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>BX9044</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-14</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>BX9011</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-13</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>BX9044</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-13</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td> BX9015</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-13</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>BT1038</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-13</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>BX9038</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-13</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>BX8017</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-10</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>SD9030</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="change">
+          <td>2010-09-10</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>SD9012</td>
+          <td class="note">加入针对 'name' 属性生效的标签的一段注释。</td>
+        </tr>
+        <tr class="change">
+          <td>2010-09-10</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>SD9001</td>
+          <td class="note">加入 META 标签。</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-10</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RE8002</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-09</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>HF5011</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="change">
+          <td>2010-09-08</td>
+          <td>修改</td>
+          <td>兼容性-根本原因</td>
+          <td>HO3004</td>
+          <td class="note">去掉“解决方案”中多余的引号，修改截图。</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-08</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>HF1010</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-08</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>SD5029</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-08</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>HF9009</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-08</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>SD9024</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-08</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RM1019</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        <tr class="new">
+          <td>2010-09-08</td>
+          <td>新增</td>
+          <td>兼容性-根本原因</td>
+          <td>RC3003</td>
+          <td class="note">&nbsp;</td>
+        </tr>
+        </table>
+      </div>
+    </div>
+    <!-- } body_content -->
+  </div>
+</div>
+<div id="w3h_footer">
+  <div class="footer_content">
+    <ul>
+      <li><a href="http://www.google.com"><img src="/zh-cn/logo/google.gif" alt="Google" /></a></li>
+      <li><a href="http://www.chinaw3c.org"><img src="/zh-cn/logo/w3c-china.gif" alt="W3C-China" /></a></li>
+      <li><a href="http://www.mozillaonline.com"><img src="/zh-cn/logo/firefox.gif" alt="FireFox" /></a></li>
+      <li><a href="http://www.csdn.net"><img src="/zh-cn/logo/csdn.gif" alt="CSDN" /></a></li>
+      <li><a href="http://www.w3school.com.cn"><img src="/zh-cn/logo/w3school.gif" alt="W3School" /></a></li>
+      <li><a href="http://www.w3ctech.com"><img src="/zh-cn/logo/web-club.gif" alt="w3ctech" /></a></li>
+    </ul>
+    <p class="copyright">Copyright &copy; 2010&nbsp;&nbsp;&nbsp;<a href="http://www.miibeian.gov.cn/">京ICP备10208242号</a></p>
+    <p class="w3cIcon"><a href="http://validator.w3.org/check?uri=referer"><img src="/zh-cn/images/valid-xhtml10.gif" alt="Valid XHTML 1.0 Strict" height="31" width="88" /></a></p>
+  </div>
+</div>
+<!-- Google Analytics start -->
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-18304141-1']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+<!-- Google Analytics end -->
+</body>
+</html>
