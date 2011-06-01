@@ -9,6 +9,7 @@ function $(id) {
 </head>
 <body>
 <h1>SD9025</h1>
+
 <h3>The element's background color will be gray if its click method is called successfully.</h3>
 <p>1. The element which is not the INPUT or BUTTON element when using the click method in the native state.</p>
 <div><span id="test1" onclick="this.parentNode.style.backgroundColor='#ddd'" expectedProblems="SD9025">SPAN</span></div>
@@ -20,6 +21,9 @@ try {
 }
 </script>
 <br />
+
+<hr />
+
 
 <h2>The followings don't have problems</h2>
 <p>A1. The BUTTON element in the native state.</p>
@@ -58,5 +62,20 @@ try {
   $('test4').innerHTML += '<br />' + e;
 }
 </script>
+<br />
+
+<p>A4. The element which is not the INPUT or BUTTON element using the trigger method with jQuery library.</p>
+<div><div id="test5" onclick="this.parentNode.style.backgroundColor='#ddd'">DIV</div></div>
+<script src="jquery.js"></script>
+<script>
+try {
+  jQuery('#test5').eq(0).trigger('click');
+} catch(e) {
+  jQuery('#test5').get(0).innerHTML += '<br />' + e;
+}
+</script>
+
+<p>(End of test)</p>
+
 </body>
 </html>
