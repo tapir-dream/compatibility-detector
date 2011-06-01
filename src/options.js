@@ -92,7 +92,8 @@ function createDetectorCheckboxes() {
   for (var i = 0, c = DETECTORS.length; i < c; ++i) {
     var id = DETECTORS[i];
     html.push('<li><input type="checkbox" value="' + id + '" />' + id +
-        ': ${' + id + '}</li>');
+        ': ${' + id + '} <a href="'+ W3HELP_RCA_BASE_URL + id +
+        '" target="_blank">[${moreInfo}]</a></li>');
   }
   $('detectors').innerHTML = html.join('\n');
 }
@@ -108,6 +109,7 @@ function initDetectorCheckboxes() {
 function getTemplateData() {
   var VIEW_RESOURCE_IDS = [
     'extensionName',
+    'moreInfo',
     'opt_about',
     'opt_aboutFeedback',
     'opt_aboutReference',
@@ -130,7 +132,7 @@ function getTabElementMap() {
     tabList: [],
     selected: {tab: null, page: null}
   };
-  var tabs = document.querySelectorAll('#tabstrip > span');
+  var tabs = document.querySelectorAll('#tabstrip > div');
   var pages = document.querySelectorAll('#content > div');
   for (var i = 0, c = tabs.length; i < c; ++i) {
     if (tabs[i].className == SELECTED_TAB_CLASS_NAME) {
@@ -165,19 +167,20 @@ function addTabEvent() {
   }
 }
 
-function addDetectorSelectButtonEvent(){
+function addDetectorSelectButtonEvent() {
   var selectAll = document.querySelectorAll('.optSelectAll');
   var selectNone = document.querySelectorAll('.optSelectNone');
   var invertSeletion = document.querySelectorAll('.optInvertSelection');
-  // TODO: use getElementsByClassName and for loop
-  selectAll[0].addEventListener('click', onDetectorsSelectAll, false);
-  selectAll[1].addEventListener('click', onDetectorsSelectAll, false);
-  selectNone[0].addEventListener('click', onDetectorsSelectNone, false);
-  selectNone[1].addEventListener('click', onDetectorsSelectNone, false);
-  invertSeletion[0].addEventListener('click', onDetectorsInvertSelection,
-      false);
-  invertSeletion[1].addEventListener('click', onDetectorsInvertSelection,
-      false);
+  for (var i = 0, c = selectAll.length; i < c; ++i) {
+    selectAll[i].addEventListener('click', onDetectorsSelectAll, false);
+  }
+  for (var i = 0, c = selectNone.length; i < c; ++i) {
+    selectNone[i].addEventListener('click', onDetectorsSelectNone, false);
+  }
+  for (var i = 0, c = invertSeletion.length; i < c; ++i) {
+    invertSeletion[i].addEventListener('click', onDetectorsInvertSelection,
+        false);
+  }
 }
 
 function addDetectorCheckboxEvent() {

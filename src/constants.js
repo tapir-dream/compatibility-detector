@@ -53,3 +53,5 @@ var REQUEST_SET_STATUS = 'setStatus';
 var REQUEST_COMPATIBILITY_RESULT = 'CompatibilityResult';
 
 var REQUEST_END_OF_DETECTION = 'endOfDetection';
+
+var W3HELP_RCA_BASE_URL = 'http://www.w3help.org/zh-cn/causes/';

@@ -5,10 +5,10 @@
 }
 body {
   cursor: default;
-  -webkit-user-select: none;
+  min-width: 600px;
 }
 
-/* The header and the tabstrip. */
+/* The header */
 #header {
   background: url(popup_res.png) repeat-x 0 0;
   border-bottom: #888 solid 1px;
@@ -16,44 +16,33 @@ body {
   height: 35px;
 }
 #header h1 {
-  background: url(popup_res.png) no-repeat 5px -44px;
+  background: url(popup_res.png) no-repeat 3px -43px;
   color: #ccc;
   line-height: 34px;
   padding-left: 35px;
 }
-
-#tabstrip {
-  float: right;
-  margin-top: -30px;
-  padding-right: 6px;
-}
-#tabstrip span {
-  border: #888 solid 1px;
-  cursor: pointer;
-  float: left;
-  height: 30px;
-  line-height: 28px;
-  margin: 0 3px;
-  text-align: center;
-  width: 90px;
-  -webkit-border-top-left-radius: 6px;
-  -webkit-border-top-right-radius: 6px;
-  -webkit-transition: all 100ms ease-in-out;
-}
-#tabstrip span {
-  background: #d9d9d9;
-  color: #666;
-}
-#tabstrip span:hover {
-  background: #fff;
-  color: #000;
-}
-
 /* Page list item base style. */
 .commonList > li {
   background: url(popup_res.png) no-repeat 0 -79px;
   border-bottom: #ccc dashed 1px;
+  list-style: none;
   padding: 7px 7px 7px 20px;
   -webkit-border-radius: 6px;
   -webkit-transition: all 300ms ease-in-out;
+}
+.commonList a,
+.commonTable a {
+  text-decoration: none;
+}
+.commonList a:link,
+.commonList a:visited,
+.commonTable a:link,
+.commonTable a:visited {
+  color: #003ba6;
+}
+.commonList a:hover,
+.commonList a:active,
+.commonTable a:hover,
+.commonTable a:active {
+  color: #f6480b;
 }
