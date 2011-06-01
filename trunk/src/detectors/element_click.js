@@ -44,6 +44,22 @@ function constructor(rootNode) {
   // prototype has not been added the click method (no Prototype library), the
   // callback below will be triggered.
   Node.prototype.click = function() {
+    var callerString = arguments.callee.caller
+        ? arguments.callee.caller.toString()
+        : "";
+    // jQuery's trigger method may try to call the element's native event method
+    // if has, like
+    // try {
+    //     elem[ type ]();
+    // } catch (e) {}
+    // But there is a bug in old IE browsers, if we call the focus method on the
+    // hidden element, refer to http://bugs.jquery.com/ticket/1486, testcase:
+    // <input id="input" type="hidden" onfocus="alert('focus')" />
+    // <script> document.getElementById('input').focus(); </script>
+    // So the trigger method uses a try-catch statement to avoid the bug.
+    // So we must ignore this situation.
+    if (window.jQuery && callerString.indexOf('trigger') != -1)
+      return;
     This.addProblem('SD9025', {
       nodes: [this],
       details: 'No such method: ' + this.tagName + '.click().'
