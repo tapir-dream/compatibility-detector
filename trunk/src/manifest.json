@@ -1,6 +1,6 @@
 {
   "name": "__MSG_extensionName__",
-  "version": "0.9.6",
+  "version": "0.9.8",
   "description": "__MSG_extensionDescription__",
   "background_page": "background.html",
   "default_locale": "en",
@@ -18,6 +18,7 @@
   {
     "matches": [ "http://*/*", "https://*/*", "file://*" ],
     "js": [
+      "constants.js",
       "loader.js",
       "framework.js",
       "framework_shared.js",
@@ -34,6 +35,12 @@
       "detectors/empty_cell.js",                            //RE1013 RE1012: ok, but the problem is hard to notice 3/18
       "detectors/radio_name.js",                            //HF9009
       "detectors/table_cellspacing_border_collapse.js",     //RE1020 RX1008
+
+      "detectors/select_options_add_remove_option.js",      //SD9030
+      "detectors/invisible_element_overflow.js",            //BX8037
+      "detectors/align_nowrap.js",                          //RX8015
+      "detectors/shrink_to_fit_percentage_child.js",        //RX8017
+      "detectors/element_click.js",                         //SD9025
 
       // Release 0.9.6
       "detectors/center_element.js",                        //HA8001

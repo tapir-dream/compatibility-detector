@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 Google Inc.
+ * Copyright 2011 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,22 +33,13 @@ window.chrome_comp = (function() {
     'table-caption': true
   };
 
-  // Give up do not detection items.
-  var detectorOptions =
-      window.sessionStorage.getItem('chrome_comp_selected_detectors')
-
   return {
 
     COLOR_TRANSPARENT: 'rgba(0, 0, 0, 0)',
 
-    SPECIFIED_VALUE: 'chrome_comp_specified_value',
-
     WHITESPACE: /[ \t\r\n]/,
     LEADING_WHITESPACES: /^[ \t\r\n]+/,
     TRAILING_WHITESPACES: /[ \t\r\n]+$/,
-
-    // cache Node reference
-    Node: window.Node,
 
     enableHooks: function(enable) {
       hookDisabledCount_ += (enable ? 1 : -1);
@@ -66,8 +57,6 @@ window.chrome_comp = (function() {
         console.log(msg);
       }
     },
-
-    detectorOptions: detectorOptions,
 
     // Uses it to implement inherit logic in JavaScript
     extend: function(subClass, superClass) {
@@ -128,9 +117,9 @@ window.chrome_comp = (function() {
      * listen to the request. The parameters and result are passed with
      * attributes of document.documentElement.
      */
-    sendRequest: function(name, params, resultName) {
+    sendRequestToContentScript: function(eventName, params, resultName) {
       var event = document.createEvent('Event');
-      event.initEvent(name, true, true);
+      event.initEvent(eventName, true, true);
       if (params) {
         for (var i in params) {
           if (params[i] != undefined)
@@ -157,10 +146,11 @@ window.chrome_comp = (function() {
           return result;
       }
 
-      result = chrome_comp.sendRequest('chrome_comp_getMessage', {
-        chrome_comp_messageName: name,
-        chrome_comp_messageParams: JSON.stringify(params)
-      }, 'chrome_comp_messageResult');
+      result = chrome_comp.sendRequestToContentScript(
+          chrome_comp.EVENT_GET_MESSAGE, {
+            chrome_comp_messageName: name,
+            chrome_comp_messageParams: JSON.stringify(params)
+          }, chrome_comp.ATTR__MESSAGE_RESULT);
 
       if (!params)
         messageCache_[name] = result;
@@ -259,9 +249,9 @@ window.chrome_comp = (function() {
 
     nodeContents: function(node) {
       // TODO: avoid using outerHTML to improve performance.
-      if (this.Node.ELEMENT_NODE == node.nodeType)
+      if (Node.ELEMENT_NODE == node.nodeType)
         return node.outerHTML;
-      else if (this.Node.TEXT_NODE == node.nodeType)
+      else if (Node.TEXT_NODE == node.nodeType)
         return node.nodeValue;
       else
         return node.toString();
@@ -471,6 +461,7 @@ window.chrome_comp = (function() {
     },
 
     isReplacedElement: function(element) {
+      // TODO: put this out of the function
       var TAG_NAME_LIST = {
         APPLET: true,
         BUTTON: true,
@@ -887,6 +878,23 @@ window.chrome_comp = (function() {
   };  // return
 })();
 
+// Constants that must be written here.
+// Cannot reuse constants.js because they must be injected into the page.
+
+chrome_comp.EVENT_PROBLEM_DETECTED = 'chrome_comp_problemDetected';
+
+chrome_comp.DISABLED_DETECTORS = 'chrome_comp_disabled_detectors';
+chrome_comp.EVENT_CHROME_COMP_LOAD = 'chrome_comp_load';
+chrome_comp.EVENT_END_OF_DETECTION = 'chrome_comp_endOfDetection';
+chrome_comp.EVENT_GET_MESSAGE = 'chrome_comp_getMessage';
+chrome_comp.ATTR__MESSAGE_RESULT = 'chrome_comp_messageResult';
+
+/**
+ * The maximum time(ms) waiting for the asynchronized operations to finish.
+ */
+chrome_comp.MAX_TIME_WAITING_FINISH = 2000;
+chrome_comp.ASYNC_OPERATION_CHECK_INTERVAL = 100;
+
 chrome_comp.util = {};
 
 /**
@@ -902,6 +910,16 @@ chrome_comp.util.width = function(rect) {
 chrome_comp.util.height = function(rect) {
   return rect.bottom - rect.top;
 };
+
+chrome_comp.util.endsWith = function(str, suffix) {
+  // Refer to:
+  // http://stackoverflow.com/questions/280634/endswith-in-javascript
+  return str.indexOf(suffix, str.length - suffix.length) != -1;
+}
+
+chrome_comp.util.startsWith = function(str, prefix) {
+  return str.lastIndexOf(prefix, 0) == 0;
+}
 
 chrome_comp.Rect = function(x, y, w, h) {
   this.left = x;
@@ -1712,6 +1730,12 @@ chrome_comp.CompDetect = (function() {
     }
   }
 
+  // Initialize disabledDetectorsStr
+  var disabledDetectorsStr =
+      window.sessionStorage.getItem(chrome_comp.DISABLED_DETECTORS);
+  if (!disabledDetectorsStr)
+    disabledDetectorsStr = '';
+
   return {
     getAllProblems: function() {
       return problems_;
@@ -1885,29 +1909,31 @@ chrome_comp.CompDetect = (function() {
     },
 
     notifyProblemDetected: function(typeId, issue, occurrence) {
-      chrome_comp.sendRequest('chrome_comp_problemDetected', {
-          chrome_comp_reason: typeId,
-          chrome_comp_severity:
-              (occurrence.severityLevel || issue.severityLevel) >= 7 ?
-                  'error' : 'warning',
-          chrome_comp_description: issue.issueDescription,
-          chrome_comp_occurrencesNumber: issue.occurrences.length
-      });
+      chrome_comp.sendRequestToContentScript(
+          chrome_comp.EVENT_PROBLEM_DETECTED, {
+            chrome_comp_reason: typeId,
+            chrome_comp_severity:
+                (occurrence.severityLevel || issue.severityLevel) >= 7 ?
+                    'error' : 'warning',
+            chrome_comp_description: issue.issueDescription,
+            chrome_comp_occurrencesNumber: issue.occurrences.length
+          });
     },
 
     // Send the result of the compatibility detection for current page.
     sendDetectionResults: function() {
       var problems = chrome_comp.CompDetect.getAllProblems();
-      chrome_comp.sendRequest('chrome_comp_endOfDetection', {
-        totalProblems: Object.keys(problems).length
-      });
+      chrome_comp.sendRequestToContentScript(
+          chrome_comp.EVENT_END_OF_DETECTION, {
+            totalProblems: Object.keys(problems).length
+          });
     },
 
     // Diagnose  compatibility issues on current page
     diagnoseCompatibilityIssues: function() {
-      var timer = chrome_comp.CompDetectorConfig.delayRunDetectionTimer;
       // Check whether we need to immediately call load handler of
       // CompDetector.
+      var timer = chrome_comp.CompDetectorConfig.delayRunDetectionTimer;
       if (chrome_comp.CompDetectorConfig.delayRunDetection &&
           typeof timer == 'number') {
         window.setTimeout(loadHandlerForCompDetector, timer);
@@ -1939,23 +1965,19 @@ chrome_comp.CompDetect = (function() {
         for (var i = 0, c = detectors_.length; i < c; ++i)
           detectors_[i].postAnalyze();
 
-        var ASYNC_OPERATION_CHECK_INTERVAL = 100;
-        // The value if maximum time for waiting the asynchronized
-        // operation finsih.
-        var MAX_TIME_WAITINGFINISH = 2000;
         var startTimeForPolling = new Date().getTime();
         var timerId;
         if (isAllAsyncDetectionFinished()) {
           onAllAsyncDetectionFinished();
         } else {
           timerId = setInterval(waitForAsyncDetectionFinished,
-              ASYNC_OPERATION_CHECK_INTERVAL);
+              chrome_comp.ASYNC_OPERATION_CHECK_INTERVAL);
         }
 
         function waitForAsyncDetectionFinished() {
           var runningTime = new Date().getTime() - startTimeForPolling;
           if (isAllAsyncDetectionFinished() ||
-              runningTime > MAX_TIME_WAITINGFINISH) {
+              runningTime > chrome_comp.MAX_TIME_WAITING_FINISH) {
             onAllAsyncDetectionFinished();
           }
         }
@@ -1969,7 +1991,6 @@ chrome_comp.CompDetect = (function() {
         }
 
         function onAllAsyncDetectionFinished() {
-          // clear timeId
           if (timerId)
             clearInterval(timerId);
           var detectionTime = new Date().getTime() - startTime;
@@ -1987,8 +2008,8 @@ chrome_comp.CompDetect = (function() {
 
       // If run testcase page, then ignore user set detector options.
       if (!chrome_comp.CompDetectorConfig.unitTestMode) {
-        if (typeof chrome_comp.detectorOptions != 'string' ||
-            chrome_comp.detectorOptions.indexOf(typeId) == -1)
+        // TODO: use map
+        if (disabledDetectorsStr.indexOf(typeId) != -1)
           return;
       }
 
@@ -2277,9 +2298,7 @@ chrome_comp.CompDetect.ScanDomBaseDetector.prototype.canCheckNow = function() {
   return this.gatherAllProblemNodes_ || !this.hasProblem_;
 };
 
-var CHROME_COMP_LOAD = 'chrome_comp_load';
-
-window.addEventListener(CHROME_COMP_LOAD,
+window.addEventListener(chrome_comp.EVENT_CHROME_COMP_LOAD,
     chrome_comp.CompDetect.diagnoseCompatibilityIssues, false);
 window.addEventListener('unload',
     chrome_comp.CompDetect.cleanUpDetectors, false);

@@ -132,16 +132,20 @@ body {
 <script type="text/javascript" src="options.js"></script>
 </head>
 <body>
+
 <div id="wrap">
+
   <div id="header">
-    <h1>${extensionName} - ${opt_title}</h1>
+    <h1 id="title">${extensionName}${opt_title}</h1>
     <div id="tabstrip">
       <span class="selected">${opt_base}</span>
       <span>${opt_about}</span>
     </div>
   </div>
+
   <div id="content">
     <p class="support">${opt_support}</p>
+
     <div id="optionPage" class="selected">
       <h2>${opt_detectors}</h2>
       <div class="optSelectButtons">
@@ -149,13 +153,16 @@ body {
         <a class="optSelectNone">${opt_selectNone}</a>
         <a class="optInvertSelection">${opt_invertSelection}</a>
       </div>
-      <ul class="commonList"></ul>
+      <ul id="detectors" class="commonList">
+        <!-- This list will be filled in initialization. -->
+      </ul>
       <div class="optSelectButtons">
         <a class="optSelectAll">${opt_selectAll}</a>
-        <a class="optSelectNone">${opt_selecttNone}</a>
+        <a class="optSelectNone">${opt_selectNone}</a>
         <a class="optInvertSelection">${opt_invertSelection}</a>
       </div>
     </div>
+
     <div id="aboutPage">
       <h2>${opt_aboutReference}</h2>
       <ul class="commonList">
@@ -171,7 +178,10 @@ body {
         <li>${opt_email} : <span class="aboutEmail">compatibility-detector-discuss@googlegroups.com</span></li>
       </ul>
     </div>
+
   </div>
+
 </div>
+
 </body>
 </html>

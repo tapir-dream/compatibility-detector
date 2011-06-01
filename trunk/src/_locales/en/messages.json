@@ -27,14 +27,14 @@
   "popup_detectionStatus": { "message": "Detection running... " },
 
 
-  "opt_title": {"message": "Option Page" },
-  "opt_support": {"message": "If you find this tool useful to you, please go to $1the Google App Store$2 vote for us." },
+  "opt_title": {"message": " Options" },
+  "opt_support": {"message": "If you find this tool helpful, please <a href=\"https://chrome.google.com/webstore/detail/fcillahbnhlpombgccogflhmgocfifma\" target=\"_blank\">vote</a> for us in the Chrome Web Store." },
   "opt_base": {"message": "Options" },
   "opt_about": {"message": "About" },
   "opt_aboutReference": {"message": "Related Reference" },
   "opt_aboutFeedback": {"message": "Feedback" },
 
-  "opt_detectors": {"message": "Please select the compatibility issues to be reported in advanced detection." },
+  "opt_detectors": {"message": "Select the compatibility issues to be reported in advanced detection:" },
   "opt_selectAll": {"message": "Select all" },
   "opt_selectNone": {"message": "Select none" },
   "opt_invertSelection": {"message": "Invert selection" },
@@ -76,7 +76,7 @@
   "KB001": { "message": "Compatibility issues and browser's rendering engine and rendering mode" },
 
   "BT1025": { "message": "IE will ignore the trailing full shaped whitespaces in elements which trigger 'hasLayout'" },
-  "BT1025_suggestion": { "message": "Avoid using full shaped whitespaces, use '&nbsp;' instead." },
+  "BT1025_suggestion": { "message": "Avoid using full shaped whitespaces, use &nbsp; instead." },
   "BT9005": { "message": "VBScript is only supported by IE" },
   "BT9005_suggestion": { "message": "Don't use VBScript. Use JavaScript instead." },
   "BT9006": { "message": "JScript.Encode is only supported by IE" },

@@ -195,38 +195,25 @@ function getBaseDetectionStatus() {
   return status;
 }
 
-var CHROME_COMP_SELECTED_DETECTORS = 'chrome_comp_selected_detectors';
-
 function runBaseDetection() {
-
-  // Get user set detector options data.
-  chrome.extension.sendRequest({
-    type: 'getDetectorOptions'
-  }, function(detectorOptions) {
-    if (detectorOptions == undefined)
-      return;
-    window.sessionStorage.setItem(CHROME_COMP_SELECTED_DETECTORS,
-        detectorOptions);
-  });
-
   baseDetector.resetSummaryInformation();
   baseDetector.scanAllElements();
   baseDetector.init();
 
   chrome.extension.sendRequest({
-    type: 'setStatus',
+    type: REQUEST_SET_STATUS,
     status: getBaseDetectionStatus()
   });
 
   return baseDetector.summaryInformation;
 }
 
-chrome.extension.onRequest.addListener(function(request, sender, response) {
+chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
   log('(base_detection.js) onRequest, request.type=' + request.type);
   switch (request.type) {
-    case 'runBaseDetection':
+    case REQUEST_RUN_BASE_DETECTION:
       var summaryInformation = runBaseDetection();
-      response(summaryInformation);
+      sendResponse(summaryInformation);
       break;
   }
 });

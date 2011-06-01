@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
+var DETECTION_STATUS_NAME = 'chrome_comp_detection_status';
+
+var INJECT_SCRIPT_EVENT_NAME = 'chrome_comp_injectScript';
+var INJECTED_SCRIPT_ATTR_NAME = 'chrome_comp_injectedScript';
+
 function log(message) {
   // Uncomment this for debugging. Comment it before release:
   // window.console.log(message);
 }
-
-var DETECTION_STATUS_NAME = 'chrome_comp_detection_status';
-var CHROME_COMP_LOAD = 'chrome_comp_load';
 
 var detectionEnabled =
     window.sessionStorage[DETECTION_STATUS_NAME] ==
@@ -32,10 +34,6 @@ delete window.sessionStorage[DETECTION_STATUS_NAME];
 if (detectionEnabled) {
 
 var docElement = document.documentElement;
-
-var INJECT_SCRIPT_EVENT_NAME = 'chrome_comp_injectScript';
-var INJECTED_SCRIPT_ATTR_NAME = 'chrome_comp_injectedScript';
-var PROBLEM_DETECTED_EVENT_NAME = 'chrome_comp_problemDetected';
 
 // Creates a script node on the page to inject arbitary script from content
 // script to the page.
@@ -63,8 +61,8 @@ docElement.setAttribute('chrome_comp_injected', true);
 //   documentElement's attribute: chrome_comp_reason, chrome_comp_severity,
 //   chrome_comp_description, chrome_comp_occurrencesNumber
 // Request message format:
-//   type('CompatibilityResult'), reason, severity
-docElement.addEventListener(PROBLEM_DETECTED_EVENT_NAME, function() {
+//   type, reason, severity, description, occurrencesNumber
+docElement.addEventListener(EVENT_PROBLEM_DETECTED, function() {
   var reason = docElement.getAttribute('chrome_comp_reason');
   var severity = docElement.getAttribute('chrome_comp_severity');
   var description = docElement.getAttribute('chrome_comp_description');
@@ -72,7 +70,7 @@ docElement.addEventListener(PROBLEM_DETECTED_EVENT_NAME, function() {
       docElement.getAttribute('chrome_comp_occurrencesNumber');
 
   chrome.extension.sendRequest({
-    type: 'CompatibilityResult',
+    type: REQUEST_COMPATIBILITY_RESULT,
     reason: reason, // typeId, RCA Number
     severity: severity,
     description: description,
@@ -80,26 +78,22 @@ docElement.addEventListener(PROBLEM_DETECTED_EVENT_NAME, function() {
   }, function() { });
 });
 
-// Triggers endOfDetection event from the page to the extension background page.
-// Event name: 'chrome_comp_endOfDetection'
-// Request message format:
-//   type('EndOfDetection'), totalProblems
-docElement.addEventListener('chrome_comp_endOfDetection', function() {
+// Notify the background page that detection has ended.
+docElement.addEventListener(EVENT_END_OF_DETECTION, function() {
   chrome.extension.sendRequest({
-    type: 'EndOfDetection',
+    type: REQUEST_END_OF_DETECTION,
     totalProblems: docElement.getAttribute('totalProblems')
   });
 });
 
 // For the page to get language dependent message text from the extension.
-// Event name: 'chrome_comp_getMessage'
 // Depends on:
 //   documentElement's attribute: chrome_comp_messageName,
-//   chrome_comp_messageParams, chrome_comp_messageResult
-docElement.addEventListener('chrome_comp_getMessage', function() {
+//   chrome_comp_messageParams, ATTR__MESSAGE_RESULT
+docElement.addEventListener(EVENT_GET_MESSAGE, function() {
   var name = docElement.getAttribute('chrome_comp_messageName');
   var params = docElement.getAttribute('chrome_comp_messageParams');
-  docElement.setAttribute('chrome_comp_messageResult',
+  docElement.setAttribute(ATTR__MESSAGE_RESULT,
       chrome.i18n.getMessage(name, params ? JSON.parse(params) : undefined));
 });
 
@@ -107,10 +101,10 @@ docElement.addEventListener('chrome_comp_getMessage', function() {
 
 chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
   switch (request.type) {
-    case 'DetectProblems':
+    case REQUEST_DETECT_PROBLEMS:
       detectProblems();
       break;
-    case 'getCrossOriginCSSFinished':
+    case REQUEST_GET_CROSS_ORIGIN_CSS_FINISHED:
       getCrossOriginCSSFinished(request.data);
       break;
   }
@@ -126,15 +120,16 @@ function getCrossOriginCSSFinished(data) {
       insertStyleNodeAfter(crossOriginStyleSheets[url], data[url]);
     }
   }
+
   var event = document.createEvent('Event');
-  event.initEvent(CHROME_COMP_LOAD, true, true);
+  event.initEvent(EVENT_CHROME_COMP_LOAD, true, true);
   window.dispatchEvent(event);
 }
 
 // Maps url to style sheet link nodes.
 var crossOriginStyleSheets = {};
 
-function initCrossOriginLinkMap() {
+function initCrossOriginStyleSheets() {
   var styleSheets = document.styleSheets;
   for (var i = 0, c = styleSheets.length; i < c; ++i) {
     var styleSheet = styleSheets[i];
@@ -142,22 +137,45 @@ function initCrossOriginLinkMap() {
       crossOriginStyleSheets[styleSheet.href] = styleSheet.ownerNode;
     }
   }
+
+  var keys = Object.keys(crossOriginStyleSheets);
+  if (keys.length) {
+    log(REQUEST_GET_CROSS_ORIGIN_CSS + ' : ' + keys.length);
+    chrome.extension.sendRequest({
+      type: REQUEST_GET_CROSS_ORIGIN_CSS,
+      urlMap: getKeysMap(crossOriginStyleSheets)
+    });
+  } else {
+    getCrossOriginCSSFinished();
+  }
 }
 
-function getCrossOriginStyleSheetsURLMap() {
-  var urlMap = {};
-  for (var url in crossOriginStyleSheets)
-    urlMap[url] = true;
-  return urlMap;
+/**
+ * @return {Object} key to true map
+ */
+function getKeysMap(obj) {
+  var keys = {};
+  for (var key in obj)
+    keys[key] = true;
+  return keys;
 }
 
 var detectionStarted = false;
 
 function detectProblems() {
   if (!detectionEnabled) {
-    window.sessionStorage[DETECTION_STATUS_NAME] =
-        window.location.href;
-    window.location.reload();
+    // Get disabled detectors.
+    chrome.extension.sendRequest({
+      type: REQUEST_GET_DISABLED_DETECTORS
+    }, function(response) {
+      if (response) {
+        var disabledDetectorsStr = Object.keys(response).join(SEPARATOR);
+        window.sessionStorage.setItem(DISABLED_DETECTORS, disabledDetectorsStr);
+      }
+      window.sessionStorage[DETECTION_STATUS_NAME] = window.location.href;
+      window.location.reload();
+    });
+
     return;
   }
 
@@ -166,17 +184,7 @@ function detectProblems() {
   if (detectionStarted)
     return;
   detectionStarted = true;
-  initCrossOriginLinkMap();
-  var keys = Object.keys(crossOriginStyleSheets);
-  if (keys.length) {
-    log('getCrossOriginCSS' + ' : ' + keys.length);
-    chrome.extension.sendRequest({
-      type: 'getCrossOriginCSS',
-      urlMap: getCrossOriginStyleSheetsURLMap()
-    });
-  } else {
-    getCrossOriginCSSFinished();
-  }
+  initCrossOriginStyleSheets();
 }
 
 function insertStyleNodeAfter(node, cssText) {
@@ -235,13 +243,13 @@ window.addEventListener('load', function() {
     detectProblems();
   // Send 'PageLoad' message to popup so that it will re-check this page.
   chrome.extension.sendRequest({
-    type: 'PageLoad'
+    type: REQUEST_PAGE_LOAD
   });
 });
 
-// Send 'PageUnloaded' message to background for it to clean up result cache
 window.addEventListener('unload', function() {
+  // Send message to background for it to clean up result cache.
   chrome.extension.sendRequest({
-    type: 'PageUnloaded'
+    type: REQUEST_PAGE_UNLOAD
   });
 });
