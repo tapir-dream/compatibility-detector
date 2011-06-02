@@ -1,0 +1,37 @@
+<html>
+<head>
+</head>
+<body>
+<script>
+window.onload = function () {
+	var div1 = document.createElement('div');
+	div1.style.cssText = "width:300px; height:50px; background:coral;";
+	div1.innerHTML = "document.createElement('div')";
+	document.body.appendChild(div1);
+	
+	try {
+		var div2 = document.createElement('<div style="width:300px; height:50px; background:khaki;">');
+		div2.innerHTML = "document.createElement('&lt;div&gt;')";
+		document.body.appendChild(div2);
+	} catch (e) {
+		alert(e);
+	}
+	
+	var iframe = (document.all) ? document.createElement('<iframe name="iframe">') :document.createElement('iframe');
+	iframe.name = "iframe";
+	iframe.width = 100;
+	iframe.height = 100;
+	document.body.appendChild(iframe);
+	
+	var input = (document.all) ? document.createElement('<input name="input" checked />') : document.createElement('input');
+	input.name = "input";
+	input.type = "checkbox";
+	input.checked = true;
+	document.body.appendChild(input);
+	
+	alert(window.frames["iframe"]);
+	alert(document.getElementsByName("input").length);
+}
+</script>
+</body>
+</html>
