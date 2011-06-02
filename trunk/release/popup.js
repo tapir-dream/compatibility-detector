@@ -2,6 +2,8 @@
  * @fileoverview This file is used by popup.html
  */
 
+// TODO: remove resources: popup_loading
+
 // TODO: put these status variables in background.html
 var DEFAULT_LOCALE = 'zh-cn'; // TODO: change to en when w3help ready.
 var W3HELP_LOCALES = {
@@ -9,6 +11,7 @@ var W3HELP_LOCALES = {
   'zh-cn': true
 };
 
+var STATUS_DISABLED = 'disabled';
 var STATUS_BASE = 'base';
 var STATUS_ADVANCED = 'advanced';
 
@@ -20,29 +23,6 @@ if (w3helpLocale)
 if (!W3HELP_LOCALES.hasOwnProperty(w3helpLocale))
   w3helpLocale = DEFAULT_LOCALE;
 w3helpLocale = 'http://www.w3help.org/' + w3helpLocale;
-
-// ----
-// Helper functions
-
-function stringTemplate(param) {
-  return param.str.replace(param.regexp || /\${([^{}]*)}/g,
-      function(a,b) {
-        var r = param.obj[b];
-        return (typeof r == 'string') ? r : a ;
-      })
-}
-
-function $(id) {
-  return document.getElementById(id);
-}
-
-function bulidHTMLView(templateObject, element) {
-  var HTMTemplate = element.innerHTML;
-  element.innerHTML = stringTemplate({
-    str: HTMTemplate,
-    obj: templateObject
-  });
-}
 
 function log(message) {
   var backgroundPage = chrome.extension.getBackgroundPage();
@@ -57,33 +37,30 @@ var hasSelectedTabId = false;
 
 var backgroundPage = chrome.extension.getBackgroundPage();
 
-function windowLoad() {
-  log('windowLoad begin');
-  // HTMLView i18n
-  bulidHTMLView({
-    popup_cannotDetect: chrome.i18n.getMessage('popup_cannotDetect'),
-    popup_loading: chrome.i18n.getMessage('popup_loading'),
-    popup_baseDetection: chrome.i18n.getMessage('popup_baseDetection'),
-    popup_advancedDetection: chrome.i18n.getMessage(
-        'popup_advancedDetection'),
-    popup_detecting: chrome.i18n.getMessage('popup_detecting'),
-    popup_noProblem: chrome.i18n.getMessage('popup_noProblem'),
-    popup_issueDescription: chrome.i18n.getMessage('popup_issueDescription'),
-    popup_issueCount: chrome.i18n.getMessage('popup_issueCount'),
-    popup_detectionStatus: chrome.i18n.getMessage('popup_detectionStatus'),
-    popup_checkboxEffectTip: chrome.i18n.getMessage('popup_checkboxEffectTip')
-  }, $('warp'));
-
+function onDOMContentLoaded() {
+  log('DOMContentLoaded begin');
+  var RESOURCE_IDS = [
+    'extensionName',
+    'popup_advancedDetection',
+    'popup_baseDetection',
+    'popup_cannotDetect',
+    'popup_checkboxEffectTip',
+    'popup_detecting',
+    'popup_detectionStatus',
+    'popup_issueCount',
+    'popup_issueDescription',
+    'popup_noProblem'
+  ];
+  bulidHTMLView(getMessages(RESOURCE_IDS), document.body);
   chrome.tabs.getSelected(null, onGetSelectedTab);
 }
 
 function showBaseDetectionResult(data) {
   log('showBaseDetectionResult begin');
-  $('content').className = 'processing';
 
   var result = [];
   var dtdLink = '<a href="' + w3helpLocale + '/kb/001#common_dtd' +
-      '" target="_blank">' + chrome.i18n.getMessage('bd_DTDTableTitle') + 
+      '" target="_blank">' + chrome.i18n.getMessage('bd_DTDTableTitle') +
       '</a>';
 
   var kb001 = chrome.i18n.getMessage('bd_aboutRCAorKB', ['<a href="' +
@@ -191,28 +168,27 @@ function showBaseDetectionResult(data) {
   }
 
   // Show result.
-  $('base_detection').innerHTML = result.join('');
-  $('content').className = '';
+  $('baseDetectionResultList').innerHTML = result.join('');
 }
 
 /**
- * Change pop-up page's status.
+ * Change pop-up page's status. The body has 4 status:
+ * - default : initial state
+ * - disabled : hide all detection result
+ * - base : show base detection result
+ * - advanced : show advanced detection result
  */
 function setStatus(status) {
   log('setStatus: ' + status);
-  var body = document.body;
   switch (status) {
-    case 'disabled':
-      body.className = 'disabled';
-      break;
-    case 'loading':
-      body.className = 'loading';
+    case STATUS_DISABLED:
+      document.body.className = 'disabled';
       break;
     case STATUS_BASE:
-      body.className = 'base';
+      document.body.className = 'base';
       break;
     case STATUS_ADVANCED:
-      body.className = 'advanced';
+      document.body.className = 'advanced';
       break;
   }
 }
@@ -222,7 +198,7 @@ function getDetectionResult(tabId) {
 }
 
 function detectProblems(tabId) {
-  chrome.tabs.sendRequest(tabId, {type: 'DetectProblems'});
+  chrome.tabs.sendRequest(tabId, {type: REQUEST_DETECT_PROBLEMS});
 }
 
 function runBaseDetection() {
@@ -230,7 +206,7 @@ function runBaseDetection() {
     return;
 
   log('runBaseDetection begin');
-  chrome.tabs.sendRequest(selectedTabId, {type: 'runBaseDetection'},
+  chrome.tabs.sendRequest(selectedTabId, {type: REQUEST_RUN_BASE_DETECTION},
       showBaseDetectionResult);
 };
 
@@ -262,14 +238,19 @@ function setDetectionFinishedMessage() {
   $('detectionStatus').innerHTML = chrome.i18n.getMessage('detectionFinished');
 }
 
+var EXPECTED_TYPES = {error: true, warning: true};
+
 /**
  * @param {error | warning} type
+ * TODO: fix above comment
  */
 function updateSummary(type) {
   if (!hasSelectedTabId) {
     // TODO: cache the request and use it when hasSelectedTabId
     return;
   }
+  if (!(type in EXPECTED_TYPES))
+    return;
 
   var detectionResult = getDetectionResult(selectedTabId);
   var number = (type == 'warning')? 'totalWarnings' : 'totalErrors';
@@ -295,19 +276,23 @@ function updateDetectionResult(senderTabId, typeId, problem) {
   var occurrencesNumber = problem.occurrencesNumber;
 
   var severity = problem.severity;
-  $('content').className = '';
+  if (!(severity in EXPECTED_TYPES))
+    return;
+
   $('detectionResult').style.display = 'block';
   $(severity + 'Area').style.display = 'block';
-  var table = $(severity + 'Problems').firstElementChild;
+  var table = $(severity + 'Problems');
   var problemRow = $(typeId);
   if (problemRow) {
     problemRow.cells[2].innerText = occurrencesNumber;
   } else {
     var row = document.createElement('tr');
     row.setAttribute('id', typeId);
-    table.appendChild(row);
+    table.firstElementChild.appendChild(row);
     insertCell(row, problem.occurrencesNumber);
-    insertCell(row, problem.description);
+    insertCell(row, problem.description + ' <a href="' +
+        W3HELP_RCA_BASE_URL + typeId + '" target="_blank">['+
+        chrome.i18n.getMessage('moreInfo') + ']</a>');
     var checkbox = insertCell(row, '<input type="checkbox" name="' +
         severity + '" class="issue">').firstElementChild;
     checkbox.addEventListener('click', toggleCheckProblem, false);
@@ -322,7 +307,6 @@ function updateDetectionResult(senderTabId, typeId, problem) {
 
 function showNoProblemResult() {
   $('advancedRunning').style.display = 'none';
-  $('content').className = '';
   $('noProblemFoundInfo').style.display = 'block';
 }
 
@@ -347,13 +331,10 @@ function restoreAnnotationCheck() {
   }
 }
 
-function stringStartsWith(s, prefix) {
-  return s.substring(0, prefix.length) == prefix;
-}
+var NO_CONTENT_SCRIPT_URL = 'https://chrome.google.com/';
 
 function onGetSelectedTab(tab) {
   var prefix = tab.url.substring(0, 4);
-  var NO_CONTENT_SCRIPT_URL = 'https://chrome.google.com/';
   if (stringStartsWith(tab.url, NO_CONTENT_SCRIPT_URL) ||
       prefix != 'http' && prefix != 'file') {
     // Show the cannot detect message
@@ -374,11 +355,11 @@ function onGetSelectedTab(tab) {
   }
 
   // Change the tab panel.
-  log('$tab.addEventListener click');
-  $('tab').addEventListener('click', function(event) {
+  log('tabstrip.addEventListener click');
+  $('tabstrip').addEventListener('click', function(event) {
     var currentDetecionType = document.body.className;
     var status = event.target.className;
-    log('$tab click fired, status=' + status);
+    log('tabstrip click fired, status=' + status);
     if (status && currentDetecionType != status) {
       // TODO: modify this
       var detectionResult = getDetectionResult(selectedTabId);
@@ -462,14 +443,14 @@ function updateCheckAllStatus(checkbox) {
   }
 }
 
-window.addEventListener('load', windowLoad, false);
+document.addEventListener('DOMContentLoaded', onDOMContentLoaded, false);
 
 chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
   log('onRequest, request.type=' + request.type);
   var tabId = sender.tab.id;
   switch (request.type) {
-    case 'PageLoad':
-      // Re-run basic check
+    case REQUEST_PAGE_LOAD:
+      // Rerun base detection, for the page content is changed.
       runBaseDetection();
       break;
   }

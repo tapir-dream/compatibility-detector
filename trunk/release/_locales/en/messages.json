@@ -1,5 +1,5 @@
 {
-  "extensionName": { "message": "Compatibility Detector" },
+  "extensionName": { "message": "Browser Compatibility Detector" },
   "extensionDescription": { "message": "Detects web page compatibility issues. Initiated by Google Chrome Team." },
   "previous": { "message": "Previous" },
   "next": { "message": "Next" },
@@ -25,6 +25,25 @@
   "popup_issueCount": { "message": "Count" },
   "popup_checkboxEffectTip": { "message": "Tips: click the checkbox to toggle corresponding annotations on the page." },
   "popup_detectionStatus": { "message": "Detection running... " },
+
+  "opt_title": {"message": " Options" },
+  "opt_support": {"message": "If you find this tool helpful, please <a href=\"https://chrome.google.com/webstore/detail/fcillahbnhlpombgccogflhmgocfifma\" target=\"_blank\">vote</a> for us in the Chrome Web Store." },
+  "opt_base": {"message": "Options" },
+  "opt_about": {"message": "About" },
+  "opt_aboutReference": {"message": "Related Reference" },
+  "opt_aboutFeedback": {"message": "Feedback" },
+
+  "opt_detectors": {"message": "Select the compatibility issues to be reported in advanced detection:" },
+  "opt_selectAll": {"message": "Select all" },
+  "opt_selectNone": {"message": "Select none" },
+  "opt_invertSelection": {"message": "Invert selection" },
+
+  "opt_shareTitle" : { "message": "#Browser Compatibility Detector Tool# Your suggestions?" },
+  "opt_shareOnWeibo": { "message": "Share on weibo.com" },
+  "opt_shareOnTencent": { "message": "Share on t.qq.com" },
+  "opt_shareOnTwitter": { "message": "Share on Twitter" },
+  "opt_email": { "message": "E-mail" },
+
 
   "bd_aboutRCAorKB": { "message": "For details, refer to: $1, " },
   "bd_hasDTD": { "message": "This page has a DTD ($1). " },
@@ -56,7 +75,7 @@
   "KB001": { "message": "Compatibility issues and browser's rendering engine and rendering mode" },
 
   "BT1025": { "message": "IE will ignore the trailing full shaped whitespaces in elements which trigger 'hasLayout'" },
-  "BT1025_suggestion": { "message": "Avoid using full shaped whitespaces, use '&nbsp;' instead." },
+  "BT1025_suggestion": { "message": "Avoid using full shaped whitespaces, use &nbsp; instead." },
   "BT9005": { "message": "VBScript is only supported by IE" },
   "BT9005_suggestion": { "message": "Don't use VBScript. Use JavaScript instead." },
   "BT9006": { "message": "JScript.Encode is only supported by IE" },
@@ -77,6 +96,8 @@
   "HF3013_suggestion": { "message": "Use other ways to make OPTION and OPTGROUP disabled, such as removing those elements by script" },
   "HY1005": { "message": "IE6 IE7 IE8(Q) treat non list elments inside UL, OL, DL differently" },
   "HY1005_suggestion": { "message": "It is not recommended to use other elements inside LI, DD, DT" },
+  "RD8023": { "message": "IE6 IE7(Q) IE8(Q) a 'shrink-to-fit' element's width will be stretched by its descendant hasLayout elements." },
+  "RD8023_suggestion": { "message": "Specify a width on the hasLayout element." },
   "RE1012": { "message": "In IE6 IE7 IE8(Q) Firefox(Q) Opera(Q), empty table cells may not have borders in some situation" },
   "RE1012_suggestion": { "message": "Avoid empty table cells, fill them with &nbsp;" },
   "RE1013": { "message": "In IE6 IE7 IE8(Q), the 'padding' style for cells to the top and bottom of an empty cell is not effective" },
@@ -137,5 +158,21 @@
   "RD1002_suggestion": { "message": "Use a DTD that makes the page rendered in Standards Mode, so that only IE6(S) will be affected." },
   "RD1014": { "message": "The width and height style for inline non-replaced elements are only valid in IE quirks mode" },
   "RD1014_suggestion": { "message": "Put <!DOCTYPE html> in the beginning of the document to make it rendered in Stardards Mode." },
+
+  "BX8037": { "message": "For invisible elements that run out of the normal flow, their containing block's scroll bar is not the same" },
+  "BX8037_suggestion": { "message": "Avoid using invisible elements that run out of the normal flow and out of the containing block." },
+  "HE1003": { "message": "IE supports noWrap attribute for some elements other than TD and TH" },
+  "HE1003_suggestion": { "message": "The nowrap attribute is deprecated. Use CSS style white-space:nowrap instead." },
+  "HF9009": {"message": "For input type=\"radio\" elements, non-standard CDATA value of the name attribute is not treated the same across all browsers"},
+  "HF9009_suggestion": { "message": "The radio input's name attribute must start with alphabet([A-Za-z]) or digits, and followed by alphabets, digits, [-_:.]." },
+  "HG8001": { "message": "The non blank characters before the DTD declaration will invalidate the DTD in some situation" },
+  "HG8001_suggestion": { "message": "Make sure that there is no non blank characters before the DTD declaration." },
+  "RD8001": { "message": "The width / height style has different effect in IE quicks mode" },
+  "RD8001_suggestion": { "message": "Use a DTD that makes the page rendered in Standards Mode." },
+  "SD9025": { "message": "IE6 IE7 IE8 Opera support click method for elements other than INPUT and BUTTON" },
+  "SD9025_suggestion": { "message": "Avoid using the click method for elements other than INPUT and BUTTON" },
+  "SD9030": {"message": "There are some non-standard operations for manipulating options for  SELECT element in some browsers"},
+  "SD9030_suggestion": { "message": "Use options.add(option, index) to insert a new OPTION element." },
+
   "lastLine": { "message": "lastLine" }
 }

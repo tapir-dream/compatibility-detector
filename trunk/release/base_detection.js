@@ -134,7 +134,6 @@ baseDetector.initIECondComm = function(rootNode) {
   }
 };
 
-
 baseDetector.initLink= function() {
   var linkCount = document.querySelectorAll('link').length;
   baseDetector.summaryInformation.LINK.notInHeadCount =
@@ -202,19 +201,19 @@ function runBaseDetection() {
   baseDetector.init();
 
   chrome.extension.sendRequest({
-    type: 'setStatus',
+    type: REQUEST_SET_STATUS,
     status: getBaseDetectionStatus()
   });
 
   return baseDetector.summaryInformation;
 }
 
-chrome.extension.onRequest.addListener(function(request, sender, response) {
+chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
   log('(base_detection.js) onRequest, request.type=' + request.type);
   switch (request.type) {
-    case 'runBaseDetection':
+    case REQUEST_RUN_BASE_DETECTION:
       var summaryInformation = runBaseDetection();
-      response(summaryInformation);
+      sendResponse(summaryInformation);
       break;
   }
 });

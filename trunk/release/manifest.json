@@ -1,12 +1,13 @@
 {
   "name": "__MSG_extensionName__",
-  "version": "0.9.6",
+  "version": "0.9.8",
   "description": "__MSG_extensionDescription__",
   "background_page": "background.html",
   "default_locale": "en",
   "icons": {
     "128": "icon_128.png"
   },
+  "options_page": "options.html",
   "permissions": [ "tabs", "http://*/*", "https://*/*" ],
   "browser_action": {
     "popup": "popup.html",
@@ -17,6 +18,7 @@
   {
     "matches": [ "http://*/*", "https://*/*", "file://*" ],
     "js": [
+      "constants.js",
       "loader.js",
       "framework.js",
       "framework_shared.js",
@@ -24,6 +26,17 @@
       "config.js",
       "w3help_issues.js",
       "non_w3help_issues.js",
+
+      "detectors/align_nowrap.js",
+      "detectors/decoration_font_color.js",
+      "detectors/element_click.js",
+      "detectors/empty_cell.js",
+      "detectors/invisible_element_overflow.js",
+      "detectors/radio_name.js",
+      "detectors/select_options_add_remove_option.js",
+      "detectors/shrink_to_fit_percentage_child.js",
+      "detectors/table_cellspacing_border_collapse.js",
+      "detectors/text_decoration_propagation.js",
 
       "detectors/center_element.js",
       "detectors/child_overflow_container.js",
