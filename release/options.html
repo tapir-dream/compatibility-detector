@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Browser Compatibility Detector</title>
+<link href="base_style.css" type="text/css" rel="stylesheet">
+<style>
+body {
+  overflow-y: scroll;
+  padding: 10px;
+}
+#wrap {
+  background: -webkit-gradient(linear, left top, left bottom, from(#333), to(#e8e8e8));
+  border: #888 solid 1px;
+  -webkit-border-radius: 6px;
+  -webkit-box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.25);
+}
+
+/* The header */
+#header {
+  border: 0 none;
+}
+
+/* tabstrip item style. */
+#tabstrip {
+  float: left;
+  padding-top: 20px;
+  width: 150px;
+}
+#tabstrip > div {
+  border-right: 0 none;
+  box-sizing: border-box;
+  color: #FFF;
+  cursor: pointer;
+  height: 42px;
+  line-height: 40px;
+  margin: 8px 0 8px 10px;
+  text-align: center;
+  -webkit-border-bottom-left-radius: 6px;
+  -webkit-border-top-left-radius: 6px;
+  -webkit-transition: all 100ms ease-in-out;
+}
+#tabstrip > div:hover {
+  background: #fff;
+  color: #000;
+}
+#tabstrip > .selected {
+  background: #F8F8F8;
+  border: #F8F8F8 solid 1px;
+  color: #333;
+  margin-right: -2px;
+}
+
+/* The main content. */
+#content {
+  background: #f8f8f8;
+  border: 1px solid #ACACAC;
+  margin: 3px 3px 3px 0;
+  overflow-y: auto;
+  padding: 10px 25px;
+  -webkit-border-radius: 6px;
+}
+#content > div {
+  display: none;
+}
+#content h2 {
+  font-size: 16px;
+  font-weight: bold;
+  margin-top: 10px;
+  padding: 10px;
+}
+#content > .selected {
+  display: block;
+}
+
+/* Option page list item style. */
+.commonList > li:nth-child(odd) {
+  background-color: #F0F0F0;
+}
+.commonList > li:hover {
+  background-color: #e3ffbb;
+}
+
+/* The Google App Web Store link style. */
+.support {
+  background-color: #f9ffc2;
+  border: 1px solid #cdB37c;
+  font-size: 12px;
+  margin-top: 10px;
+  padding: 3px 20px;
+  -webkit-border-radius: 4px;
+  -webkit-box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.25);
+}
+.support > a {
+  font-weight: bold;
+}
+.support > a,
+#aboutPage a {
+  text-decoration: none;
+  -webkit-transition: all 300ms ease-in-out;
+}
+.support > a:link,
+.support > a:visited {
+  color: #f6480b;
+}
+.support > a:hover,
+.support > a:active {
+  color: #4d9b00;
+}
+
+/* The option page style. */
+#optionPage .optSelectButtons > a {
+  background: -webkit-gradient(linear, left top, left bottom, from(#fcfcfc), to(#e8e8e8));
+  border: solid 1px #c6c6c6;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 12px;
+  margin: 10px 3px;
+  padding: 0 26px;
+  text-align: center;
+  text-decoration: none;
+  -webkit-border-radius: 8px;
+  -webkit-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+#optionPage .optSelectButtons > a:link,
+#optionPage .optSelectButtons > a:visited {
+  background: -webkit-gradient(linear, left top, left bottom, from(#faa51a), to(#f47a20));
+  border: solid 1px #c6c6c6;
+  color: #fef4e9;
+}
+
+#optionPage .optSelectButtons > a:hover {
+  background: -webkit-gradient(linear, left top, left bottom, from(#faa51a), to(#f47a20));
+  border: solid 1px #da7c0c;
+  color: #fff;
+  -webkit-box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.3);
+}
+#optionPage .optSelectButtons > a:active {
+  background: -webkit-gradient(linear, left top, left bottom, from(#f47a20), to(#faa51a));
+  border: solid 1px #da7c0c;
+  color: #fcd3a5;
+}
+#optionPage > ul input[type=checkbox] {
+  margin: 0 10px 0 3px;
+}
+
+/* The about page style. */
+#aboutPage a:link,
+#aboutPage a:visited {
+  color: #003ba6;
+}
+#aboutPage a:hover,
+#aboutPage a:active {
+  color: #f6480b;
+}
+#aboutPage {
+  -webkit-user-select: text;
+}
+#aboutPage .aboutEmail {
+  color: #680000;
+}
+</style>
+<script type="text/javascript" src="constants.js"></script>
+<script type="text/javascript" src="helper.js"></script>
+<script type="text/javascript" src="options.js"></script>
+</head>
+<body>
+
+<div id="wrap">
+
+  <div id="header">
+    <h1 id="title">${extensionName}${opt_title}</h1>
+  </div>
+
+  <div id="tabstrip">
+    <div class="selected">${opt_base}</div>
+    <div>${opt_about}</div>
+  </div>
+
+  <div id="content">
+
+    <p class="support">${opt_support}</p>
+
+    <div id="optionPage" class="selected">
+      <h2>${opt_detectors}</h2>
+      <div class="optSelectButtons">
+        <a class="optSelectAll">${opt_selectAll}</a>
+        <a class="optSelectNone">${opt_selectNone}</a>
+        <a class="optInvertSelection">${opt_invertSelection}</a>
+      </div>
+      <ul id="detectors" class="commonList">
+        <!-- This list will be filled in initialization. -->
+      </ul>
+      <div class="optSelectButtons">
+        <a class="optSelectAll">${opt_selectAll}</a>
+        <a class="optSelectNone">${opt_selectNone}</a>
+        <a class="optInvertSelection">${opt_invertSelection}</a>
+      </div>
+    </div>
+
+    <div id="aboutPage">
+      <h2>${opt_aboutReference}</h2>
+      <ul class="commonList">
+        <li><a href="http://www.w3help.org" target="_blank">http://www.w3help.org/</a></li>
+        <li><a href="http://www.w3.org" target="_blank">http://www.w3.org/</a></li>
+        <li><a href="http://forum.csdn.net/SList/CrossBrowser/" target="_blank">http://forum.csdn.net/SList/CrossBrowser/</a></li>
+      </ul>
+      <h2>${opt_aboutFeedback}</h2>
+      <ul class="commonList">
+        <li><span id="shareOnWeibo"></span></li>
+        <li><span id="shareOnTencent"></span></li>
+        <li><span id="shareOnTwitter"></span></li>
+        <li>${opt_email} : <span class="aboutEmail">compatibility-detector-discuss@googlegroups.com</span></li>
+      </ul>
+    </div>
+
+  </div>
+
+</div>
+
+</body>
+</html>
