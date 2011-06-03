@@ -1,0 +1,505 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX9028: 各浏览器对使用 document.id 和 document.name 获取对象的支持存在差异</h1>
+  <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+
+      <p>无。</p>
+      <h2 id="description">问题描述</h2>
+      <p>各浏览器使用 document.id 和 document.name 方法获取对象引用的支持存在差异。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>某些浏览器中通过 document.id 和 document.name 可能无法获取元素，导致脚本异常，功能不可用。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>参考 W3C 规范中 HTML5 草案：<a href="http://dev.w3.org/html5/spec/Overview.html#documents-in-the-dom">3.1.1 Documents in the DOM</a></p>
+            <p>参考 W3C 规范中 HTML5 草案：<a href="http://dev.w3.org/html5/spec/Overview.html#dom-tree-accessors">3.1.4 DOM tree accessors</a></p>
+
+          <h3>1. DOM 树的访问</h3>
+      <h4>1.1. DOM 树中的 Document 对象及 HTMLDocument 接口</h4>
+      <p>浏览器中每一个 XML 和 HTML 文档都用一个 Document 对象来表示。</p>
+      <p>Document 继承了 HTMLDocument 接口。</p>
+      <p>HTMLDocument 接口定义了实现它的对象所拥有的方法和属性。其中包括资源元数据管理、DOM 树的访问、动态标记插入、用户交互和事件处理属性等。 </p>
+      <h4>1.2. 访问 DOM 树中节点的方法</h4>
+      <p>W3C 在 HTML5 草案中规定了一系列 DOM 树节点的访问方式，并不包括 document.id 或 document.name。</p>
+      <p>访问 DOM 树中某个节点的方法，W3C 中推荐的是使用 document.getElementById(id)，根据一个元素的 id 属性获取它的 DOM 节点对象。</p>
+      <p>还有很多其他的方式，也可以获取页面上的元素，但这些方式不是 W3C 标准中规定的，所以对这些方法的支持因浏览器而异。这其中，就有使用 document.id 或 document.name 获取元素的方式。 </p>
+      <h3>2. 使用document.id 和 document.name 访问 DOM 树中的节点</h3>
+
+      <p>使用 document.id 和 document.name 访问 DOM 树中节点的方法，可以访问 IMG 元素、IFRAME 元素和 FORM 元素。</p>
+      <p> 除了 Opera  IE 同时支持用 document.id 和 document.name 访问这 3 种元素的节点对象外，而其它浏览器对用其 name 和 id 的支持有所不同。 </p>
+      <p>分析以下代码：</p>
+<pre>
+&lt;script&gt;
+    window.onload = function(){
+        document.getElementById(&quot;info&quot;).innerHTML = &quot;document.id :&quot; + !!document.iframe_id+
+                                                    &quot;&lt;br/&gt;document.name : &quot; + !!document.iframe_name;
+    }
+&lt;/script&gt;
+&lt;iframe id=&quot;iframe_id&quot; name=&quot;iframe_name&quot;&gt;&lt;/iframe&gt;
+&lt;div id=&quot;info&quot;&gt;&lt;/div&gt;
+</pre>
+
+
+<ul>
+        <li>以上测试用例中使用 document.id 和 document.name 的方法获取 DOM 树中的 IFRAME 元素引用，如果存在则返回 true，否则返回 false 。</li>
+        <li>获取元素后的返回值将输出到 info 中</li>
+      </ul>
+      <p>
+      上面测试用例中，IE Opera 均全返回 true，Firefox 返回 false，而 Safari Chrome 中 document.id 是 false，document.name 是 true。</p>
+      <p> 用其他元素替换 IFRAME 元素，可以测试其它元素的情况。 如下表：</p>
+      <table class="compare">
+              <tr>
+                <th rowspan="2">获取方式</th>
+                <th colspan="2">IE6</th>
+                <th colspan="2">IE7</th>
+                <th colspan="2">IE8</th>
+                <th colspan="2">Firefox</th>
+                <th colspan="2">Chrome</th>
+                <th colspan="2">Safari</th>
+                <th colspan="2">Opera</th>
+              </tr>
+              <tr>
+                <th>Q</th>
+                <th>S</th>
+                <th>Q</th>
+                <th>S</th>
+                <th>Q</th>
+                <th>S</th>
+                <th>Q</th>
+                <th>S</th>
+                <th>Q</th>
+                <th>S</th>
+                <th>Q</th>
+                <th>S</th>
+                <th>Q</th>
+                <th>S</th>
+              </tr>
+              <tr>
+                <th>document.div_id</th>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+              </tr>
+              <tr>
+                <th>document.div_name</th>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+              </tr>
+              <tr>
+                <th>document.span_id</th>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+              </tr>
+              <tr>
+                <th>document.span_name</th>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+              </tr>
+              <tr>
+                <th>document.select_id</th>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+              </tr>
+              <tr>
+                <th>document.select_name</th>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+              </tr>
+              <tr>
+                <th>document.a_id</th>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+              </tr>
+              <tr>
+                <th>document.a_name</th>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+              </tr>
+              <tr>
+                <th>document.input_id</th>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+              </tr>
+              <tr>
+                <th>document.input_name</th>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+              </tr>
+              <tr>
+                <th>document.img_id</th>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+              </tr>
+              <tr>
+                <th>document.img_name</th>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+              </tr>
+              <tr>
+                <th>document.form_id</th>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+              </tr>
+              <tr>
+                <th>document.form_name</th>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+              </tr>
+              <tr>
+                <th>document.iframe_id</th>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+              </tr>
+              <tr>
+                <th>document.iframe_name</th>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+              </tr>
+              <tr>
+                <th>document.object_id</th>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+              </tr>
+              <tr>
+                <th>document.object_name</th>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+              </tr>
+              <tr>
+                <th>document.embed_id</th>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_1">N</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+              </tr>
+              <tr>
+                <th>document.embed_name</th>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+                <td class="hl_2">Y</td>
+              </tr>
+            </table>
+      <p>说明：</p>
+      <ul>
+              <li>此汇总表中 Q 代表 Quirks Mode，S 代表 Standards Mode；</li>
+        <li>以 document.element_id、document.element_name 表示获取方式，如 document.div_id 表示利用 id 属性获取 DIV 元素对象，而 document.span_name 表示使用 SPAN 元素的 name 属性来获取它的对象。</li>
+      </ul>
+      <h2 id="solutions">解决方案</h2>
+      <p>使用 W3C 标准中的 document.getElementById(id) 方法获取对象。</p>
+
+
+      <h2 id="see_also">参见</h2>
+
+      <h3>知识库</h3>
+      <ul class="see_also">
+              <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+              <li><a href="#">...</a></li>
+      </ul>
+    <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+                            Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-10</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>document.id document.name</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

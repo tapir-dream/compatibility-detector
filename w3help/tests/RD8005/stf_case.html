@@ -1,0 +1,45 @@
+<body style="font:14px/1.1 Arial;">
+<div style="position:absolute; left:10px; top:10px; width:150px; height:70px; background:#eee;">
+	<div id="cont1" style="position:absolute; background:khaki;">
+	    <div style="float:left; background:lightskyblue; width:100px;">FLOAT_BOX</div>
+	    <span>INLINE</span>
+	</div>
+</div>
+<div style="position:absolute; left:170px; top:10px; width:100px; height:70px; background:#eee;">
+	<div id="cont2" style="position:absolute; background:khaki;">
+	    <div style="float:left; background:lightskyblue; width:100px;">FLOAT_BOX</div>
+	    <span>INLINE</span>
+	</div>
+</div>
+<div style="position:absolute; left:10px; top:90px; width:150px; height:70px; background:#eee;">
+	<div id="cont3" style="position:absolute; background:khaki;">
+		<div style="background:coral; padding:5px;">SIBLING</div>
+	    <div style="float:left; background:lightskyblue; width:100px;">FLOAT_BOX</div>
+	    <span>INLINE</span>
+	</div>
+</div>
+<div style="position:absolute; left:170px; top:90px; width:100px; height:70px; background:#eee;">
+	<div id="cont4" style="position:absolute; background:khaki;">
+		<div style="background:coral; padding:5px;">SIBLING</div>
+	    <div style="float:left; background:lightskyblue; width:100px;">FLOAT_BOX</div>
+	    <span>INLINE</span>
+	</div>
+</div>
+
+<div style="position:absolute; left:10px; top:200px; width:150px; height:70px; background:#eee;">
+	<div id="cont3_g" style="position:absolute; background:khaki;">
+		<div id="sibling" style="background:coral; padding:5px; overflow:hidden;">SIBLING</div>
+	    <div style="float:left; background:lightskyblue; width:100px;">FLOAT_BOX</div>
+	    <span>INLINE</span>
+	</div>
+</div>
+<script>
+	function $(id) { return document.getElementById(id); }
+	var sibling = $('sibling');
+	var k = 0;
+	setInterval(function () {
+		sibling.style.width = k++ + "px";
+		(k > 200) && (k = 0);
+	}, 50);
+</script>
+</body>

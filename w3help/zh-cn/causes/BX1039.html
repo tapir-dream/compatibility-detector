@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX1039: IE8 标准模式及 Opera 不支持 WBR 元素</h1>
+
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE8 标准模式及 Opera 不支持 WBR 元素，在 HTML 中使用 WBR 元素在这两个浏览器中将不会产生任何效果。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>若在页面中使用了 WBR 元素试图加入软换行符，同时确实利用了这个元素的换行特征时，在 IE8(S) 及 Opera 中可能会发生布局异常。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE8(S) Opera</th>
+          <td>不支持 WBR 元素</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>WBR 元素不是现行 W3C HTML 4.01 规范中的元素。</p>
+      <p>他最初是由 IE 支持的非标准元素，IE6, IE7 支持 WBR 元素，但是在 IE8 的标准模式中，却不再支持这个元素。</p>
+      <p>WBR（<strong>W</strong>ord <strong>BR</strong>eak）元素会插入一个软换行符，软换行符的意思是，当有必要的时候允许在这里换行，在可以不换行的时候这个换行符不是必须的。</p>
+      <ul>
+        <li>WBR 元素不会被渲染。</li>
+        <li>WBR 元素不需要闭合。</li>
+      </ul>
+      <p>关于 WBR 元素 的更多信息，请参考 MSDN 规范 <a href="http://msdn.microsoft.com/en-us/library/ms535917(VS.85).aspx">WBR Element | wbr Object</a> 中的内容。</p>
+      <p>在最新的 HTML 5 草案规范中，已经加入 WBR 元素，其作用与 IE 内作用相同。相关内容可以参考 <a href="http://www.w3.org/TR/html5/text-level-semantics.html#the-wbr-element">HTML 5 4.6.25 The wbr element</a> </p>
+      <p>下面通过代码进行验证:</p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;div style="width:auto; background:#CCC;"&gt;
+    aaaaa&lt;wbr /&gt;bbbbb&lt;wbr /&gt;ccccc
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div style="width:50px; background:#CCC;"&gt;
+    aaaaa&lt;wbr /&gt;bbbbb&lt;wbr /&gt;ccccc
+&lt;/div&gt;</pre>
+      <p>上面代码有两个 DIV 容器，一个宽度为 auto，另一个宽度为 50px，两个 DIV 内部均包含一些连续的英文字符，但是通过 WBR 元素被隔开。</p>
+      <p>这段代码在各浏览器中运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE8(S) Opera</th>
+          <th>IE6 IE7 IE8(Q) Firefox Chrome Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BX1039/wbr_IE8_S.gif" alt="WBR in IE8(S), Opera" /></td>
+          <td><img src="../../tests/BX1039/wbr_IE67.gif" alt="WBR in IE6 IE7 IE8(Q) Firefox Chrome Safari" /></td>
+        </tr>
+      </table>
+      <ul>
+        <li>在 <em>IE8(S) Opera</em> 中，浏览器没有理会 WBR 元素，即使第二个 DIV 宽度不够也没有发生换行，可以认为浏览器不支持这个元素；</li>
+        <li>在 <em>其他浏览器</em> 中，当容器宽度不足以不换行显示连续的英文字符时，WBR 元素发挥它的作用，英文字符发生换行。</li>
+      </ul>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>1. 可以为WBR元素添加一个 :after 伪元素，强迫其后插入一个软换行符。</p>
+      <p>如：</p>
+      <pre>WBR:after { content:"<span class="hl_1">\00200B</span>"; }</pre>
+      <p>但这个方法仅能用于 Opera，IE8 对于WBR的 :after 伪元素不识别。</p>
+      <p>2. 将 WBR 元素全部用“<span class="hl_1">&amp;#8203;</span>”替换。达到相同的效果。</p>
+      <p>更多关于 WBR 元素的资料参见：<a href="http://www.quirksmode.org/oddsandends/wbr.html">http://www.quirksmode.org/oddsandends/wbr.html</a></p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.3<br />
+              Chrome 6.0.427.0 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.53
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BX1039/wbr.html">wbr.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-08</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>word break WBR 换行 软换行</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

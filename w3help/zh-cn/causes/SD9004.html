@@ -1,0 +1,331 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SD9004: 各浏览器中的 NodeList 接口存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+        <p>NodeList 接口是由 DOM Level-1-Core 引入的，它是一个有序的节点集合抽象，它提供了一个用来获取节点数量的属性 length 和一个用来获得集合中指定索引的节点的方法 item。</p>
+        <p>在有些浏览器中，一个 NodeList 对象也具备 HTMLCollection 接口提供的方法。</p>
+        <p>关于 NodeList 接口的更详细信息，请参考 DOM Level-1-Core <a href="http://www.w3.org/TR/REC-DOM-Level-1/level-one-core.html#ID-536297177">Interface NodeList</a> 中的内容。</p>
+        <p>关于 HTMLCollection 接口的详细信息，请参考 DOM Level-2-HTML <a href="http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-75708506">Interface HTMLCollection</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>各浏览器中的 NodeList 接口存的实现有差异。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>该问题在某些情况下将导致脚本异常。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <h3>1. 各浏览器中 NodeList 接口的实现</h3>
+      <p>在 Firefox Chrome Safari 中，对于 NodeList 的定义与 W3C 相同；而在 IE Opera 中，NodeList 实现(继承<sup>1</sup>)了 Collection 接口(类<sup>1</sup>)，所以 NodeList 也支持 Collection 接口中的方法。</p>
+      <p>关于各浏览器 NodeList 接口的说明，请参考 Mozilla 的 <a href="https://developer.mozilla.org/en/DOM/NodeList">NodeList</a>、Safari Webkit DOM 的 <a href="http://developer.apple.com/safari/library/documentation/AppleApplications/Reference/WebKitDOMRef/NodeList_idl/Classes/NodeList/index.html#//apple_ref/js/cl/NodeList">NodeList</a> 和 MSDN 的 <a href="http://msdn.microsoft.com/en-us/library/microsoft.speechserver.dom.collections.nodelist.aspx">NodeList Class</a> 中的信息。</p>
+      <p class="comment">【注】：Collection 在规范文档中被定义为接口，但在浏览器具体实现时并不一定按照接口设计他，因此他也有可能是个类。文中采用&quot;实现&quot;或&quot;继承&quot;名字来描述这个开发现象。</p>
+
+      <h3>2. 各浏览器中从 NodeList 中获取节点的方法支持差异</h3>
+      <h4>2.1. NodeList[index] 和 NodeList[name]</h4>
+      <p>以上两种方式各浏览器都支持。以下测试代码中分别用这两种方式获取节点，然后将这两个节点的 id 属性值输出：</p>
+<pre>
+&lt;script type="text/javascript"&gt;
+    window.onload = function() {
+        var spans = document.getElementsByTagName("span");
+        var span2 = spans[1];
+        var span3 = spans["span3"];
+        document.getElementById("info").innerHTML = "&lt;br/&gt;NodeList[index].id: " + span2.id + "&lt;br/&gt;NodeList[name].id: " + span3.id;
+    }
+&lt;/script&gt;
+&lt;span id="span1"&gt;&lt;/span&gt;
+&lt;span id="span2"&gt;&lt;/span&gt;
+&lt;span id="span3"&gt;&lt;/span&gt;
+
+&lt;div id="info"&gt;&lt;/div&gt;
+</pre>
+
+      <p>在各浏览器中表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>所有浏览器</th>
+          <td>NodeList[index].id: span2<br/>NodeList[name].id: span3</td>
+        </tr>
+      </table>
+      <p>&nbsp;</p>
+      <h4>2.2. NodeList(index)</h4>
+      <p>只有 Firefox 不支持 NodeList(index) 。以下测试代码中使用这种方式获取节点，然后输出 id 属性值；如果程序出错，则输出抛出异常：</p>
+<pre>
+&lt;script type="text/javascript"&gt;
+    window.onload = function() {
+        var spans = document.getElementsByTagName("span");
+        try {
+            var span2 = spans(1);
+            document.getElementById("info").innerHTML = "NodeList(index).id: " + span2.id;
+        } catch(err) {
+            document.getElementById("info").innerHTML = "NodeList(index): " + err;
+        }
+    }
+&lt;/script&gt;
+&lt;span id="span1"&gt;&lt;/span&gt;
+&lt;span id="span2"&gt;&lt;/span&gt;
+
+&lt;div id="info"&gt;&lt;/div&gt;
+</pre>
+
+      <p>各浏览器中表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE Chrome Safari Opera</th>
+          <td>NodeList(index).id: span2</td>
+        </tr>
+        <tr>
+          <th>Firefox</th>
+          <td>NodeList(index): TypeError: spans is not a function</td>
+        </tr>
+      </table>
+      <p>&nbsp;</p>
+      <h4>2.3. NodeList(name)</h4>
+      <p>Firefox 以及 Webkit 浏览器不支持这种方式从集合中获取元素。以下测试代码中用 NodeList(name) 的方式获取一个节点，并输出 id 属性值；如果程序出错，则输出异常：</p>
+<pre>
+&lt;script type="text/javascript"&gt;
+    window.onload = function() {
+        var spans = document.getElementsByTagName("span");
+        try {
+            var span2 = spans("span2");
+            document.getElementById("info").innerHTML = "NodeList(name).id: " + span2.id;
+        } catch(err) {
+            document.getElementById("info").innerHTML = "NodeList(name): " + err;
+        }
+    }
+&lt;/script&gt;
+&lt;span id="span1"&gt;&lt;/span&gt;
+&lt;span id="span2"&gt;&lt;/span&gt;
+
+&lt;div id="info"&gt;&lt;/div&gt;
+</pre>
+      <p>各浏览器中表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>Firefox</th>
+          <td>NodeList(name): TypeError: spans is not a function</td>
+        </tr>
+        <tr>
+          <th>Chrome</th>
+          <td>NodeList(name) : TypeError: Cannot read property 'id' of undefined</td>
+        </tr>
+        <tr>
+          <th>Safari</th>
+          <td>NodeList(name): TypeError: Result of expression 'span2' [undefined] is not an object.</td>
+        </tr>
+        <tr>
+          <th>IE Opera</th>
+          <td>NodeList(name).id: span2</td>
+        </tr>
+      </table>
+      <p>&nbsp;</p>
+      <h4>2.4. NodeList.item(index)</h4>
+      <p>所有浏览器都支持此方法。以下测试代码中使用该方法获取节点，并输出节点 id 属性值；如果程序出错，则输出异常：</p>
+<pre>
+&lt;script type="text/javascript"&gt;
+    window.onload = function() {
+        var spans = document.getElementsByTagName("span");
+        try {
+            var span2 = spans.item(1);
+            document.getElementById("info").innerHTML = "NodeList.item(index).id: " + span2.id;
+        } catch(err) {
+            document.getElementById("info").innerHTML = "NodeList.item(index): " + err;
+        }
+    }
+&lt;/script&gt;
+&lt;span id="span1"&gt;&lt;/span&gt;
+&lt;span id="span2"&gt;&lt;/span&gt;
+
+&lt;div id="info"&gt;&lt;/div&gt;
+</pre>
+      <p>各浏览器中表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>所有浏览器</th>
+          <td>NodeList.item(index).id: span2</td>
+        </tr>
+      </table>
+      <p>&nbsp;</p>
+      <h4>2.5. NodeList.namedItem(name)</h4>
+      <p>Webkit 浏览器不支持 NodeList.namedItem(name)。以下测试代码中使用该方法获取节点，并输出节点 id 属性值。如果程序出错，则输出异常：</p>
+<pre>
+&lt;script type="text/javascript"&gt;
+    window.onload = function() {
+        var spans = document.getElementsByTagName("span");
+        try {
+            var span2 = spans.namedItem("span2");
+            document.getElementById("info").innerHTML = "NodeList.namedItem(name).id: " + span2.id;
+        } catch(err) {
+            document.getElementById("info").innerHTML = "NodeList.namedItem(name): " + err;
+        }
+    }
+&lt;/script&gt;
+&lt;span id="span1"&gt;&lt;/span&gt;
+&lt;span id="span2"&gt;&lt;/span&gt;
+
+&lt;div id="info"&gt;&lt;/div&gt;
+</pre>
+      <p>各浏览器中表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>Chrome</th>
+          <td>NodeList.namedItem(name): TypeError: Object # has no method 'namedItem'</td>
+        </tr>
+        <tr>
+          <th>Safari</th>
+          <td>NodeList.namedItem(name): TypeError: Result of expression 'spans.namedItem' [undefined] is not a function.</td>
+        </tr>
+        <tr>
+          <th>IE Firefox Opera</th>
+          <td>NodeList.namedItem(name).id: span2</td>
+        </tr>
+      </table>
+      <p>&nbsp;</p>
+      <h3>3. 差异汇总</h3>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE</th>
+          <th>Firefox</th>
+          <th>Chrome</th>
+          <th>Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <th>NodeList[index]</th>
+          <td class="hl_2">支持</td>
+          <td class="hl_2">支持</td>
+          <td class="hl_2">支持</td>
+          <td class="hl_2">支持</td>
+          <td class="hl_2">支持</td>
+        </tr>
+        <tr>
+          <th>NodeList[name]</th>
+          <td class="hl_2">支持</td>
+          <td class="hl_2">支持</td>
+          <td class="hl_2">支持</td>
+          <td class="hl_2">支持</td>
+          <td class="hl_2">支持</td>
+        </tr>
+        <tr>
+          <th>NodeList.item(index)</th>
+          <td class="hl_2">支持</td>
+          <td class="hl_2">支持</td>
+          <td class="hl_2">支持</td>
+          <td class="hl_2">支持</td>
+          <td class="hl_2">支持</td>
+        </tr>
+        <tr>
+          <th>NodeList(index)</th>
+          <td class="hl_2">支持</td>
+          <td class="hl_1">不支持</td>
+          <td class="hl_2">支持</td>
+          <td class="hl_2">支持</td>
+          <td class="hl_2">支持</td>
+        </tr>
+        <tr>
+          <th>NodeList(name)</th>
+          <td class="hl_2">支持</td>
+          <td class="hl_1">不支持</td>
+          <td class="hl_1">不支持</td>
+          <td class="hl_1">不支持</td>
+          <td class="hl_2">支持</td>
+        </tr>
+        <tr>
+          <th>NodeList.namedItem(name)</th>
+          <td class="hl_2">支持</td>
+          <td class="hl_2">支持</td>
+          <td class="hl_1">不支持</td>
+          <td class="hl_1">不支持</td>
+          <td class="hl_2">支持</td>
+        </tr>
+      </table>
+      <p>可见：<br/>在 IE Opera 中，NodeList 也具备了 HTMLCollection 接口提供的方法，而在 Firefox 中，也不支持通过 NodeList(index) 来获取元素。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>要从 NodeList 中获取元素，请使用 NodeList[index]、NodeList[name] 或 NodeList.item(index)，以保证兼容各浏览器。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.8<br />
+              Chrome 6.0.472.0 dev<br />
+              Safari 5.0(7533.16)<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+              <a href="../../tests/SD9004/NodeList[index]_NodeList[name].html">NodeList[index]_NodeList[name].html</a> <br />
+              <a href="../../tests/SD9004/NodeList(index).html">NodeList(index).html</a> <br />
+              <a href="../../tests/SD9004/NodeList(name).html">NodeList(name).html</a> <br />
+              <a href="../../tests/SD9004/NodeList.item(index).html">NodeList.item(index).html</a> <br />
+              <a href="../../tests/SD9004/NodeList.namedItem(name).html">NodeList.namedItem(name).html</a> <br />
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-02</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>NodeList Collection item nameItem 集合对象</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	* { margin:0; padding:0; border:0 none; font:24px Consolas; }
+	h1 { font-weight:bold; }
+	textarea { width:200px; height:100px; background:wheat; overflow:auto; resize:none; word-wrap:break-word; word-break:break-all; }
+</style>
+<script>
+	function $(id) { return document.getElementById(id); }
+	window.onload = function () {
+		if (!window.getComputedStyle) {
+			window.getComputedStyle = function ($target) {
+				return $target.currentStyle;
+			};
+		}
+		document.forms[0].submit();
+		document.forms[1].submit();
+	}
+</script>
+</head>
+<body>
+<h1>wrap="soft"</h1>
+<form method="post" action="submit.php" target="submit1">
+	<textarea id="ta1" name="ta1" wrap="soft">ABCDEFGHIJKLMNOPQRSTUVWXYZ</textarea>
+</form>
+<br />
+<iframe name="submit1" style="width:200px; height:100px;" frameborder="0"></iframe>
+<br />
+<br />
+<h1>wrap="hard"</h1>
+<form method="post" action="submit.php" target="submit2">
+	<textarea id="ta2" name="ta2" wrap="hard" cols="10">ABCDEFGHIJKLMNOPQRSTUVWXYZ</textarea>
+</form>
+<br />
+<iframe name="submit2" style="width:200px; height:100px;" frameborder="0"></iframe>
+</body>
+</html>

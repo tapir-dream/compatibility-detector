@@ -1,0 +1,110 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BT9019: 只有 IE 的脚本引擎支持 CollectGarbage ScriptEngine 等 JScript 特有的方法</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE 的 JScript 引擎提供了其特有的 CollectGarbage ScriptEngine 等方法，其他浏览器的脚本引擎不支持。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>使用 IE 浏览器提供的私有脚本扩展与方法，有可能造成其他浏览器的脚本引擎报错。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p> 在微软 MSDN 对脚本技术的介绍中，主要提到了以下几个方面：</p>
+      <ol>
+        <li><a href="http://msdn.microsoft.com/en-us/library/hbxc2t98(v=VS.85).aspx">JScript</a>：Internet 上特定的强大的脚本语言。</li>
+        <li><a href="http://msdn.microsoft.com/en-us/library/t0aew7h6(v=VS.85).aspx">VBScript</a>：VBScript 支持宽泛的多样的环境，其中包括 Internet Explorer；</li>
+        <li><a href="http://msdn.microsoft.com/en-us/library/bstcxhf7(v=VS.85).aspx">Script Runtime</a></li>
+        <li><a href="http://msdn.microsoft.com/en-us/library/asxw6z3c(v=VS.85).aspx">Windows Script Components</a>：此组件可以使你简单的利用 JScript 或 VBScript 创建 COM 组件；</li>
+        <li><a href="http://msdn.microsoft.com/en-us/library/9bbdkx3k(v=VS.85).aspx">Windows Script Host</a>：使 JScript 和 VBScript 在基本操作系统 (base operating system) 中本地运行的工具；</li>
+        <li><a href="http://msdn.microsoft.com/en-us/library/fdee6589(v=VS.85).aspx">Windows Script Interfaces</a></li>
+      </ol>
+      <p>其中 <a href="http://msdn.microsoft.com/en-us/library/microsoft.jscript.globalobject.collectgarbage.aspx">CollectGarbage</a> 是 IE 的 JScript 引擎提供的方法，用于回收垃圾。<span class="hl_1">其他浏览器不支持</span>。</p>
+      <p>ScriptEngine、ScriptEngineBuildVersion、ScriptEngineMajorVersion 和 ScriptEngineMinorVersion 在 IE 的 JScript 和 VBScript 中用于获取当前运行库的信息，不同的是它们在 JScript 中则是方法（函数），而在 VBScript 中是属性。<span class="hl_1">其他浏览器不支持</span>。</p>
+      <p>更多信息，请参考 MSDN 中的 <a href="http://msdn.microsoft.com/en-us/library/6fw3zxcx(v=VS.85).aspx">JScript Functions</a> 和 <a href="http://msdn.microsoft.com/zh-cn/library/7af4wadh(v=VS.90).aspx">属性 (Visual Basic)</a>。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>避免使用此类由浏览器厂商提供的私有方法和扩展。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="#">...</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-16</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>SCRIPT CollectGarbage ScriptEngine ScriptEngineBuildVersion ScriptEngineMajorVersion ScriptEngineMinorVersion</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

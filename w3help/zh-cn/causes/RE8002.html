@@ -1,0 +1,230 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RE8002: 各浏览器对 table 级元素的 'width' 特性的作用位置存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 CSS2.1 规范的描述，可以通过给一个元素设置 'width' 特性以定义其<strong>内容尺寸</strong>，即这个尺寸是作用在该元素的 content box 上的。然而在表格中，这个特性的作用位置与普通块级元素有所不同。</p>
+      <p>在 CSS 中，当为表格的单元格设置边框时，存在着两种不同的边框模型。两种模型通过 'border-collapse' 特性来指定。不同的边框模型将会影响表格 'width' 特性的作用位置。<br />
+      其中一种为 &quot;分离的边框模型&quot; (separated borders model)，此模型下所有的单元格均是相互独立的，每个单元格拥有自己的边框。此时<strong>表格的宽度为从左侧 padding 的内沿至右侧 padding 的内沿 (包括边框间隙但不包括表格的 padding 和 border)。</strong>然而在 HTML 和 XHTML1 中 TABLE 元素的宽度为左边框边至右边框边之间的距离，即 TABLE 元素的 'width' 特性作用于 border box。<br />
+      下图展示表格设定了 'border-spacing' 特性，每个单元格都有自己的边框，而表格也有自己的边框示例：<br />
+      <img src="../../tests/RE8002/tbl-spacing.png" alt="" /></p>
+      <p>另一种为 &quot;重合的边框模型&quot; (collapsing border model)，此模型下有可能指定一个边框来环绕单元格、行、行组、列、列组的全部或部分。'border-spacing' 特性及 cellspacing 属性不再适用，表格不再拥有 padding (但是有 margin)。此时<strong>表格的宽度包含表格边框的一半</strong>。对于表格的每一行宽度的计算有如下公式：<br />
+      row-width = (0.5 * border-width<sub>0</sub>) + padding-left<sub>1</sub> + width<sub>1</sub> + padding-right<sub>1</sub> + border-width<sub>1</sub> + padding-left<sub>2</sub> +...+ padding-right<sub>n</sub> + (0.5 * border-width<sub>n</sub>)<br />
+      以上，n 代表行内单元格的数量，padding-left<sub>i</sub> 和 padding-right<sub>i</sub> 代表第 i 个单元格的左 / 右 padding，border-width<sub>i</sub> 代表单元格 i 和 i + 1 之间的边框。<br />
+      用户端必须通过检查表格第一行的第一个和最后一个单元格来为表格计算一个初始的左、右边框宽度。表格的左边框宽度为第一个单元格的左边框与表格左边框折叠 (即两者中的较大者) 后的一半，同样右边框宽度为最后一个单元格的右边框与表格右边框折叠后的一半。若之后出现了折叠后更大的左、右边框，则多余的部分溢出到表格的 margin 区域。对于表格的上边框与下边框也有类似的算法。<br />
+      溢出到表格 margin 区域的边框将由表格的 'overflow' 特性决定是否剪裁。<br />
+      下图展示显示单元格、border 以及单元格 padding 的示例：<br />
+      <img src="../../tests/RE8002/tbl-width.png" alt= /></p>
+      <p>以上提到的 content box 和 border box 是盒模型中的概念，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/box.html">8 Box model</a> 中的内容。</p>
+      <p>关于 'width' 特性的更多信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/visudet.html#the-width-property">10.2 Content width: the 'width' property</a> 中的内容。</p>
+      <p>关于 表格的边框模型 的更多信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/tables.html#borders">17.6 Borders</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 IE7 IE8(Q) 中，不支持 'display' 的替代值，'display:table' 会被当作不合法的值处理，元素根据其原始类型相当于使用的是其默认 'display' 值 'inline' 或 'block'。<br />
+      在 IE8(S) Firefox 中，对于 TABLE 元素，'width' 特性作用于表格第一行的 border box 上；对于 'display' 特性为 'table' 的非 TABLE 元素，&quot;分离的边框模型&quot; 中 'width' 特性作用于表格左侧 padding 的内沿至右侧 padding 的内沿，&quot;重合的边框模型&quot; 中 'width' 特性作用于表格边框的一半的位置。<br />
+      在 Chrome Safari 中，在 &quot;分离的边框模型&quot; 中 'width' 特性作用于 border box；在 &quot;重合的边框模型&quot; 中 'width' 特性作用于第一行的 border box。<br />
+      在 Opera 中，对于 TABLE 元素，'width' 特性会作用于表格中最宽的那行的 border box 上；对于 'display' 特性为 'table' 的非 TABLE 元素，表现得与 IE8(S) Firefox 相同。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>这个问题会造成设置了 'display:table' 的元素在不同浏览器中的宽度出现差异，可能导致布局混乱、文字重叠等兼容性问题。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>在具体分析 'display:table' 元素的 'width' 特性作用位置之前，先查看一下各浏览器对于 TABLE 元素的 'width' 特性的作用位置。根据 CSS2.1 规范附录中推荐的 <a href="http://www.w3.org/TR/CSS21/sample.html">HTML4 默认样式表</a>，TABLE 元素默认的 'display' 特性即为 'table'。</p>
+      <p>分析以下代码：</p>
+<pre>&lt;div&gt;border-collapse:separate;&lt;/div&gt;
+&lt;table id=&quot;table1&quot; cellspacing=&quot;10&quot; cellpadding=&quot;10&quot; style=&quot;width:200px; background:bisque; border-collapse:separate; border-right:5px solid black;&quot;&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border:10px solid gray; width:50px;&quot;&gt;
+      &lt;div style=&quot;background:maroon; color:white;&quot;&gt;A&lt;/div&gt;
+    &lt;/td&gt;
+    &lt;td style=&quot;border:10px solid gray;&quot;&gt;
+      &lt;div style=&quot;background:maroon; color:white;&quot;&gt;B&lt;/div&gt;
+    &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;br /&gt;
+&lt;div&gt;border-collapse:collapse;&lt;/div&gt;
+&lt;table id=&quot;table2&quot; cellspacing=&quot;0&quot; cellpadding=&quot;10&quot; style=&quot;width:200px; background:bisque; border-collapse:collapse; border-right:5px solid black;&quot;&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border:10px solid gray; width:50px;&quot;&gt;
+      &lt;div style=&quot;background:maroon; color:white;&quot;&gt;A&lt;/div&gt;
+    &lt;/td&gt;
+    &lt;td style=&quot;border:10px solid gray; border-right:20px solid black;&quot;&gt;
+      &lt;div style=&quot;background:maroon; color:white;&quot;&gt;B&lt;/div&gt;
+    &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border:10px solid gray; width:50px;&quot;&gt;
+      &lt;div style=&quot;background:maroon; color:white;&quot;&gt;A&lt;/div&gt;
+    &lt;/td&gt;
+    &lt;td style=&quot;border:10px solid gray; border-right:50px solid black;&quot;&gt;
+      &lt;div style=&quot;background:maroon; color:white;&quot;&gt;B&lt;/div&gt;
+    &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;</pre>
+      <p>上面代码分别测试了两种边框模式下的 TABLE 元素的 'width' 特性作用位置。TABLE 元素均设置了宽度 200px。在第二个 &quot;重合的边框模型&quot; 的 TABLE 元素上，表格自身的右边框宽度小于每行中最右的单元格的右边框宽度。</p>
+      <p>这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Chrome Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RE8002/table1.gif" alt="" /></td>
+          <td><img src="../../tests/RE8002/table2.gif" alt="" /><sup>1</sup></td>
+          <td><img src="../../tests/RE8002/table3.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>本例中，对于 &quot;分离的边框模型&quot;，各浏览器没有出现差异，TABLE 元素的 'width' 特性作用在 border box，虽然与 CSS 规范所描述的 padding 内沿不符，但符合 HTML 规范。</p>
+      <p>而第二个 &quot;重合的边框模型&quot; 的 TABLE 元素上：</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8(Q)</em> 中，浏览器不会比较表格边框和与之相邻的单元格边框的宽度大小以决定折叠后的边框宽度，而是直接将 TABLE 边框宽度作为最终的边框宽度，而此时 'width' 特性作用于 TABLE 元素的 border box，与 &quot;分离的边框模型&quot; 下的情况一致；</li>
+        <li>在 <em>IE8(S) Firefox Chrome Safari</em> 中，浏览器按照规范对表格的边框宽度进行了折叠计算，而 'width' 特性则是作用于第一行的 border box 上，这时有可能出现 TABLE 多余的边框溢出其宽度限制；</li>
+        <li>在 <em>Opera</em> 中，浏览器按照规范对表格的边框宽度进行了折叠计算，但 'width' 特性会作用于最宽的那行的 border box 上，即 TABLE 元素所有行的宽度不会超过其设定的宽度。</li>
+      </ul>
+      <p>可知，对于 TABLE 元素，所有浏览器均没有完全按 CSS 规范中的描述应用其 'width' 特性。</p>
+      <p class="comment">
+        注 1：各浏览器对于表格边框的颜色渲染会稍有差别，但不影响最终布局。
+      </p>
+      <br />
+      <p>下面重点分析各浏览器中 'display' 特性值为 'table' 的元素 'width' 特性的作用位置差异。由于 IE6 IE7 IE8(Q) 不支持 'display' 特性的替代值，所以下面的测试不再考虑这些浏览器。</p>
+      <p>分析以下代码：</p>
+      <pre>&lt;div&gt;border-collapse:separate;&lt;/div&gt;
+&lt;div id=&quot;table1&quot; style=&quot;display:table; width:200px; border-spacing:10px; background:bisque; border-collapse:separate; border-left:5px solid black; border-right:5px solid black;&quot;&gt;
+  &lt;div style=&quot;display:table-row;&quot;&gt;
+    &lt;div style=&quot;display:table-cell; padding:10px; border:10px solid gray; width:50px;&quot;&gt;
+      &lt;div style=&quot;background:maroon; color:white;&quot;&gt;A&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div style=&quot;display:table-cell; padding:10px; border:10px solid gray;&quot;&gt;
+      &lt;div style=&quot;background:maroon; color:white;&quot;&gt;B&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div&gt;border-collapse:collapse;&lt;/div&gt;
+&lt;div id=&quot;table2&quot; style=&quot;display:table; width:200px; background:bisque; border-collapse:collapse; border-right:5px solid black;&quot;&gt;
+  &lt;div style=&quot;display:table-row;&quot;&gt;
+    &lt;div style=&quot;display:table-cell; padding:10px; border:10px solid gray; width:50px;&quot;&gt;
+      &lt;div style=&quot;background:maroon; color:white;&quot;&gt;A&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div style=&quot;display:table-cell; padding:10px; border:10px solid gray; border-right:20px solid black;&quot;&gt;
+      &lt;div style=&quot;background:maroon; color:white;&quot;&gt;B&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div style=&quot;display:table-row;&quot;&gt;
+    &lt;div style=&quot;display:table-cell; padding:10px; border:10px solid gray; width:50px;&quot;&gt;
+      &lt;div style=&quot;background:maroon; color:white;&quot;&gt;A&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div style=&quot;display:table-cell; padding:10px; border:10px solid gray; border-right:50px solid black;&quot;&gt;
+      &lt;div style=&quot;background:maroon; color:white;&quot;&gt;B&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+      <p>这段代码结构与上一个测试样例的代码相似，将 TABLE、TR、TD 元素分别用 'display' 特性值为 'table'、'table-row'、'table-cell' 代替，同时用 'border-spacing' 特性代替 TABLE 元素的 cellspacing 属性，用给 TD 元素设置 'padding' 特性代替 TABLE 元素的 cellpadding 属性。</p>
+      <p>这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE8(S) Firefox Opera</th>
+          <th>Chrome Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RE8002/dis_table1.gif" alt="" /><sup>1</sup></td>
+          <td><img src="../../tests/RE8002/dis_table2.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>在使用 'display' 特性值代替 TABLE、TR、TD 元素后，在 <em>Chrome Safari</em> 中渲染的结果与真实的 TABLE 元素一样。在 &quot;分离的边框模型&quot; 中 'width' 特性作用于 border box；在 &quot;重合的边框模型&quot; 中 'width' 特性作用于第一行的 border box。<br />
+      在 <em>IE8(S) Firefox Opera</em> 中，此时 'display:table' 元素的 'width' 特性作用位置与 CSS2.1 规范中的描述一致，即对于 &quot;分离的边框模型&quot;，'width' 特性作用于表格左侧 padding 的内沿至右侧 padding 的内沿 (包括边框间隙但不包括表格的 padding 和 border)；对于 &quot;重合的边框模型&quot;，'width' 特性作用于表格边框的一半的位置。</p>
+      <p class="comment">
+        注 1：各浏览器对于表格边框的颜色渲染会稍有差别，但不影响最终布局。
+      </p>
+      
+      
+      
+
+      <h2 id="solutions">解决方案</h2>
+      <p>对于 'display:table' 应谨慎使用。若需要实现表格结构，应直接使用 TABLE 元素，此时在 &quot;分离的边框模型&quot; 中所有浏览器对于 TABLE 元素的 'width' 特性均是作用于 border box。<br />
+      若必须使用 'display:table'，则可以通过 CSS3 中的 'box-sizing' 特性统一各浏览器中 table 级元素的 'width' 特性作用位置，如为 IE8(S) 和 Opera 设置 'box-sizing:border-box'，以及为 Firefox 设置 '-moz-box-sizing:border-box' 可以使这些浏览器与 Chrome Safari 一样使 'display:table' 元素的 'width' 特性均作用于 border box。<br />
+      对于 &quot;分离的边框模型&quot; 则应避免出现折叠后的表格边框溢出至表格 margin 区域这种情况发生，结合上面针对 &quot;分离的边框模型&quot; 的方法也可以使各浏览器统一 table 级元素的 'width' 特性的作用位置。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="RD8001">RD8001: 各浏览器中 'width' 和 'height' 在某些元素上的作用位置有差异</a></li>
+        <li><a href="RM8001">RM8001: IE6 IE7 IE8(Q) 不支持 'display' 的替代值</a></li>
+        <li><a href="RX1008">RX1008: IE6 IE7 IE8(Q) 中 cellspacing 属性在重合的边框模型的表格中仍然有效</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td> IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.9<br />
+              Chrome 7.0.517.0 dev<br />
+              Safari 5.0.1<br />
+              Opera 10.61
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RE8002/table_elem.html">table_elem.html</a><br />
+            <a href="../../tests/RE8002/dis_table_elem.html">dis_table_elem.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-10</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>TABLE TD display 表格 border box content 盒模型 宽度 width</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

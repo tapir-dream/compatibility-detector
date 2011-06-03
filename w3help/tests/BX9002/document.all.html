@@ -1,0 +1,21 @@
+<html id="HTML1">
+<script type="text/javascript">
+    window.onload = function() {
+        var html = '<table border="1" style="font-size:12px;">';
+        function getElement(sec) {
+            html += "<tr><td>" + sec + "</td>" + "<td>" + eval(sec).id + "</td>";
+        }
+        getElement("document.all(0)");
+        getElement("document.all[0]");
+        getElement("document.all.item(0)");
+        getElement("document.all('SPAN1')");
+        getElement("document.all.SPAN1");
+        getElement("document.all['SPAN1']");
+        getElement("document.all.namedItem('SPAN1')");
+        html += "</table>";
+        document.getElementById("info").innerHTML = html;
+    }
+</script>
+<span id="SPAN1"></span>
+<div id="info"></div>
+</html>

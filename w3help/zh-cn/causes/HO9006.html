@@ -1,0 +1,139 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HO9006: Firefox Opera 不支持通过为 OBJECT 元素设置 classid 引入 Windows 下的 Media Player 或 Flash 插件</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 HTML4.01 规范中的描述，OBJECT 元素定义一个嵌入的对象。允许规定插入 HTML 文档中的对象的数据和参数，以及可用来显示和操作数据的代码。OBJECT 元素的初衷是为取代 IMG 和 APPLET 元素。不过由于漏洞以及缺乏浏览器支持，这一初衷并未实现。浏览器的对象支持有赖于对象类型。不幸的是，主流浏览器使用了各自不同的代码来加载相同的对象类型。</p>
+      <p>classid 属性会指定一个通过 URI 的对象执行的地址，这个属性会和一些 OBJECT 的其他属性配合。</p>
+      <p>关于 classid 属性的详细信息，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html401/struct/objects.html#h-13.3">13.3 Generic inclusion: the OBJECT element</a> 中的内容。</p>
+      <p>而 IE 对于 classid 属性有自己的解释方式：类标识符（class identifier）。格式形如：clsid:XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX，由 ActiveX 组件注册在 Windows 的系统注册表中。</p>
+      <p>更多信息，请参考 MSDN：<a href="http://msdn.microsoft.com/en-us/library/ms533559%28v=VS.85%29.aspx">CLASSID Attribute</a> 及 <a href="http://msdn.microsoft.com/en-us/library/aa378911%28VS.85%29.aspx">Class Identifier</a></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE Chrome Safari 支持通过为 OBJECT 元素设置 classid 引入 Windows 下的 Media Player 或 Flash 插件。而 Windows 版的 Firefox 与 Opera 无法支持这种形式引入这些插件。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>使用这种方式嵌入 Media Player 或 Flash 插件会导致在某些浏览器中无法生成插件，甚至 JavaScript 由于访问了插件的某些特殊属性而报错。</p>
+      <p>此外由于对于OBJECT 元素生成的 HTMLObjectElement 对象，classid 并不是其标准的 DOM 属性，所以仅仅 IE 支持通过 &quot;ObjectElement.classid&quot; 的方式获取及设置此属性的值，在 Chrome 和 Safari 中则必须使用 &quot;ObjectElement.setAttribute(&quot;classid&quot;, &quot;XXX&quot;)&quot; 。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Firefox Opera</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+<pre>&lt;style&gt;* { font:16px Arial; }&lt;/style&gt;
+
+&lt;div id="do" style="background:gray; width:100px; height:100px;"&gt;&lt;/div&gt;
+&lt;script&gt;
+    var oo = document.createElement("object");
+    oo.setAttribute("classid", "clsid:6BF52A52-394A-11d3-B153-00C04F79FAA6");
+    oo.style.width = "100%";
+    oo.style.height = "100%";
+    document.getElementById("do").appendChild(oo);
+    document.write("settings:" + typeof oo.settings);
+&lt;/script&gt;</pre>
+      <p>上面代码动态在一个 DIV 元素中创建并插入了一个 OBJECT 元素，OBJECT 元素通过 classid 定义其嵌入对象为 Windows下的 Media Player，并尝试输出这个元素的 DOM 属性 &quot;settings&quot; 的类型。</p>
+      <p>这段代码在不同的浏览器环境中的表现：</p>
+      <table class="compare">
+        <tr>
+          <th>IE, Chrome</th>
+          <th>Safari</th>
+          <th>Firefox, Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/HO9006/IE_object_mp.gif" alt="IE and Chrome Media player in object" /></td>
+          <td><img src="../../tests/HO9006/SF_object_mp.gif" alt="Safari Media player in object" /><sup>1</sup></td>
+          <td><img src="../../tests/HO9006/FF_object_mp.gif" alt="Firefox and Opera Media player in object" /></td>
+        </tr>
+      </table>
+      <p>可见：</p>
+      <ul>
+        <li>在 <em>IE Chrome Safari</em> 中支持通过为 OBJECT 元素设置正确的 classid 属性，来在页面中引入 Windows 系统中的 Media Player 插件；</li>
+        <li>在 <em>Firefox Opera</em> 中，则由于浏览器原生不支持这种 OBJECT 元素引入 Media Player 插件，则既无法创建插件，且对于 settings 属性返回 undefined。</li>
+      </ul>
+      <p class="comment">
+      【注】<br />
+      1. Safari 对于 OBJECT 元素的 DOM 属性 &quot;settings&quot; 返回的是 &quot;function&quot; 而不是 IE 中的 &quot;object&quot; ，且通过 alert 显示其 setttings 属性时打出来的是 &quot;NPObject 06B1386C, NPClass 6AA522EC&quot; 。
+      </p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>由于某些浏览器原生无法支持 OBJECT 元素使用 classid 属性引入 Media Player 插件，所以为保证最大的兼容性，应避免使用此方式在页面中播放媒体文件。</p>
+      <p>可以考虑使用 Flash，或者合理的利用 IE 对 Media Player 的支持及其其他浏览器对 HTML5 的新标签 &quot;VIDEO&quot; 与 &quot;AUDIO&quot; 的支持在不同浏览器中达到相类似的效果。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.3<br />
+              Chrome 6.0.422.0 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.53
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HO9006/object_mp.html">object_mp.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-11</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>OBJECT classid Media Player Flash 插件</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

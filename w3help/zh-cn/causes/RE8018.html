@@ -1,0 +1,429 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RE8018: 各浏览器中固定表格布局下对单位为 px 的 TD TH 元素的宽度作用位置有差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+    <h2 id="standard_reference">标准参考</h2>
+    <h3>固定布局算法概述</h3>
+      <p>CSS2.1 规范中对 'table-layout:fixed' 这种固定布局算法有更具体的描述，这种算法下，表格的宽度应显式的由 'width' 特性指定。如果其 'width' 为 'auto'，则代表将使用自动算法 ('table-layout:auto') 对表格布局。</p>
+      <p>在固定表格布局算法中，各列的宽度也有规定：</p>
+      <ol>
+        <li>若列元素的宽度不为 'auto'，则该列的宽度即为该指定值；</li>
+        <li>如果单元格扩展到若干个列 (rowspan 属性) ，宽度将在列内平分；</li>
+        <li>其它列平均分配剩下的表格水平空间 (减去边框或单元格间隔)。</li>
+      </ol>
+      <p>所以，表格的实际宽度是 TABLE 元素的 'width' 设定宽度和各列宽 (加上单元格间隔或边框) 之和的较大值。若表格比各列之和更宽，则多余的空间 (或宽度) 将被分配到所有列中。</p>
+      <p> 关于固定表格布局，请参照 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/tables.html#fixed-table-layout">17.5.2.1 Fixed table layout</a>。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>各浏览器中固定表格布局下对 TD TH 的宽度作用位置有差异，Firefox Opera IE7(S) IE8(S)<sup>1</sup> 中 TD TH 的宽度始终作用在 content box 上，而 Chrome Safari IE6 IE7(Q) IE8(Q) 作用在 border box。</p>
+      <p class="comment">注 1：IE 部分版本中从单元格溢出的内容会被自动剪裁，参见：<a href="RX1002">RX1002: IE6 IE7 IE8(Q) 中从单元格溢出的内容会被自动剪裁</a>，在本文中忽略此问题。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>各浏览器中固定表格布局下对 TD TH 元素的宽度作用位置有差异，在不同浏览器下页面布局出现混乱。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+        <th>所有浏览器</th>
+        <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>本文均以两列的布局为例，分四部分讨论分析差异。</p>
+      <h3>1. 一列设定宽度，另一列为 auto</h3>
+      <p>分析以下代码：<em>fixed_1_width_1_auto.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  body { font-family:consolas; }
+  table { table-layout:fixed; width:120px; }
+  td { background:wheat; padding:5px; }
+  td div { background:#eee; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;table cellspacing="0" cellpadding="0"&gt;
+  &lt;tr&gt;
+    &lt;td id="td1" style="border:5px solid plum;"&gt;
+      &lt;div id="d1"&gt;A&lt;/div&gt;
+    &lt;/td&gt;
+    &lt;td id="td2" style="width:70px; border:5px solid coral;"&gt;
+      &lt;div id="d2"&gt;B&lt;/div&gt;
+    &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;div id="info"&gt;&lt;/div&gt;
+&lt;script&gt;
+  function $(id) { return document.getElementById(id); }
+  $("info").innerHTML = "A:" + $("d1").offsetWidth + "...B:" + $("d2").offsetWidth;
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>以上代码 TABLE 元素采用固定表格布局，只给一列 TD 元素设置宽度，且该宽度未超过 TABLE 的宽度，另一列未设置宽度。</p>
+      <p>这段代码在各浏览器环境中的表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>Firefox Opera IE6(S) IE7(S) IE8(S)</th>
+          <th>Chrome Safari IE6(Q) IE7(Q) IE8(Q)</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RE8018/01.png" alt="运行效果截图" /></td>
+          <td><img src="../../tests/RE8018/02.png" alt="运行效果截图" /></td>
+        </tr>
+      </table>
+      <p>可见，</p>
+      <ul>
+        <li>在 <em>Firefox Opera IE6(S) IE7(S) IE8(S)</em> 中，固定表格布局下对 TD TH 元素的宽度作用在 content box 上。</li>
+        <li>在 <em>Chrome Safari IE6(Q) IE7(Q) IE8(Q)</em> 中，固定表格布局下对 TD TH 元素的宽度作用在 border box 上。</li>
+      </ul>
+      <br />
+      <h3>2. 两列均设定宽度</h3>
+      <p>分析以下代码：<em>fixed_2_width.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  body { font-family:consolas; }
+  table { table-layout:fixed; width:120px; }
+  td { background:wheat; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;table id="table1" cellspacing="0" cellpadding="0"&gt;
+  &lt;tr&gt;
+    &lt;td id="td11" style="width:30px; border:5px solid plum;"&gt;A&lt;/td&gt;
+    &lt;td id="td12" style="width:90px; border:5px solid coral;"&gt;B&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;div id="info1"&gt;&lt;/div&gt;
+&lt;br /&gt;
+&lt;table id="table2" cellspacing="0" cellpadding="0"&gt;
+  &lt;tr&gt;
+    &lt;td id="td21" style="width:30px; border:5px solid plum;"&gt;A&lt;/td&gt;
+    &lt;td id="td22" style="width:70px; border:5px solid coral;"&gt;B&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;div id="info2"&gt;&lt;/div&gt;
+&lt;br /&gt;
+&lt;table id="table3" cellspacing="0" cellpadding="0"&gt;
+  &lt;tr&gt;
+    &lt;td id="td31" style="width:30px; border:5px solid plum;"&gt;A&lt;/td&gt;
+    &lt;td id="td32" style="width:50px; border:5px solid coral;"&gt;B&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;div id="info3"&gt;&lt;/div&gt;
+&lt;script&gt;
+  function $(id) { return document.getElementById(id); }
+  var w11 = $("td11").clientWidth, 
+    w12 = $("td12").clientWidth, 
+    w21 = $("td21").clientWidth, 
+    w22 = $("td22").clientWidth, 
+    w31 = $("td31").clientWidth, 
+    w32 = $("td32").clientWidth, 
+    wt1 = $("table1").offsetWidth,
+    wt2 = $("table2").offsetWidth;
+    wt3 = $("table3").offsetWidth;
+  $("info1").innerHTML = "A:30/" + w11 + ", B:90/" + w12 + ", TABLE:120/" + wt1;
+  $("info2").innerHTML = "A:30/" + w21 + ", B:70/" + w22 + ", TABLE:120/" + wt2;
+  $("info3").innerHTML = "A:30/" + w31 + ", B:50/" + w32 + ", TABLE:120/" + wt3;
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+      <p>以上代码 TABLE 元素采用固定表格布局，同时为两列 TD 元素设置了宽度。<br />
+      第一组中 TD 元素的 'width' 特性值分别为 30px、90px，刚好等于 TABLE 元素设定的宽度；<br />
+      第二组中 TD 元素的 'width' 特性值分别为 30px、70px，刚好等于 TABLE 元素减去单元格边框后的宽度；<br />
+      第三组中 TD 元素的 'width' 特性值分别为 30px、50px，加上其 border 仍然小于 TABLE 元素设定的宽度。</p>
+      <p>这段代码在各浏览器环境中的表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>Firefox Opera IE6(S) IE7(S) IE8(S)</th>
+          <th>Chrome Safari IE6(Q) IE7(Q) IE8(Q)</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RE8018/03.png" alt="运行效果截图" /></td>
+          <td><img src="../../tests/RE8018/04.png" alt="运行效果截图" /></td>
+        </tr>
+      </table>
+      <p>本例中得到的结论和上一个测试样例相同。此外，</p>
+      <ul>
+        <li>在 <em>Firefox Opera IE6(S) IE7(S) IE8(S)</em> 中，当各列设定的宽度加上列的 border、padding，单元格间隙，以及表格的 border 之和大于表格设定的宽度时，表格会被撑大。</li>
+        <li>在 <em>Chrome Safari IE6(Q) IE7(Q) IE8(Q)</em> 中，当各列设定的宽度加上单元格间隙，以及表格的 border 之和大于表格设定的宽度时，表格会被撑大。</li>
+      </ul>
+      <p>出现小于表格设定的宽度的情况时，各浏览器均会尝试根据列设定的宽度按比例重新分配列的宽度，只不过仍然是因为各浏览器在固定表格布局下 TD、TH 元素的作用位置差异，会导致重新分配后的列的宽度在各浏览器中不同。</p>
+      <br />
+      <p>上述分析的均为原生 TD、TH 元素，下面分析 'display' 特性值为 'table-cell' 的元素在各浏览器中宽度作用位置差异。</p>
+      <h3>3. display: table-cell</h3>
+      <p>分析以下代码：<em>table-cell.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  body { font-family:consolas; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div style="display:table; table-layout:fixed; width:120px;"&gt;
+  &lt;div style="display:table-row;"&gt;
+    &lt;div style="display:table-cell; border:5px solid plum; padding:5px; background:wheat;"&gt;
+      &lt;div id="d1" style="background:#eee;"&gt;A&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div style="display:table-cell; width:70px; border:5px solid coral; padding:5px; background:wheat;"&gt;
+      &lt;div id="d2" style="background:#eee;"&gt;B&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div id="info"&gt;&lt;/div&gt;
+&lt;br /&gt;
+&lt;br /&gt;
+&lt;div style="display:table; table-layout:fixed; width:120px;" id="table1"&gt;
+  &lt;div style="display:table-row;"&gt;
+    &lt;div style="display:table-cell; width:30px; border:5px solid plum; background:wheat;" id="td11"&gt;A&lt;/div&gt;
+    &lt;div style="display:table-cell; width:90px; border:5px solid coral;background:wheat;" id="td12"&gt;B&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div id="info1"&gt;&lt;/div&gt;
+&lt;br /&gt;
+&lt;div style="display:table; table-layout:fixed; width:120px;" id="table2"&gt;
+  &lt;div style="display:table-row;"&gt;
+    &lt;div style="display:table-cell; width:30px; border:5px solid plum; background:wheat;" id="td21"&gt;A&lt;/div&gt;
+    &lt;div style="display:table-cell; width:70px; border:5px solid coral;background:wheat;" id="td22"&gt;B&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div id="info2"&gt;&lt;/div&gt;
+&lt;br /&gt;
+&lt;div style="display:table; table-layout:fixed; width:120px;" id="table3"&gt;
+  &lt;div style="display:table-row;"&gt;
+    &lt;div style="display:table-cell; width:30px; border:5px solid plum; background:wheat;" id="td31"&gt;A&lt;/div&gt;
+    &lt;div style="display:table-cell; width:50px; border:5px solid coral;background:wheat;" id="td32"&gt;B&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div id="info3"&gt;&lt;/div&gt;
+&lt;script&gt;
+  function $(id) { return document.getElementById(id); }
+  var w11 = $("td11").clientWidth, 
+    w12 = $("td12").clientWidth, 
+    w21 = $("td21").clientWidth, 
+    w22 = $("td22").clientWidth, 
+    w31 = $("td31").clientWidth, 
+    w32 = $("td32").clientWidth, 
+    wt1 = $("table1").offsetWidth,
+    wt2 = $("table2").offsetWidth;
+    wt3 = $("table3").offsetWidth;
+  $("info").innerHTML = "A:" + $("d1").offsetWidth + "...B:" + $("d2").offsetWidth;
+  $("info1").innerHTML = "A:30/" + w11 + ", B:90/" + w12 + ", TABLE:120/" + wt1;
+  $("info2").innerHTML = "A:30/" + w21 + ", B:70/" + w22 + ", TABLE:120/" + wt2;
+  $("info3").innerHTML = "A:30/" + w31 + ", B:50/" + w32 + ", TABLE:120/" + wt3;
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>这段代码模拟了上面两节中的测试样例，只是将 TABLE 元素用 'display' 特性值为 'table' 的 DIV 元素代替，将 TR 元素用 'display' 特性值为 'table-row' 的 DIV 元素代替，将 TH、TD 元素用 'display' 特性值为 'table-cell' 的 DIV 元素代替<sup>1</sup>。</p>
+      <p>这段代码在各浏览器环境中的表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>Firefox Opera IE8(S)<sup>2</sup></th>
+          <th>Chrome Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RE8018/05.png" alt="运行效果截图" /></td>
+          <td><img src="../../tests/RE8018/06.png" alt="运行效果截图" /></td>
+        </tr>
+      </table>
+      <p>通过截图可见，'display' 特性值为 'table-cell' 的元素对于宽度作用位置的差异与上两节中原生 TD、TH 元素的结论相同。即 <em>Chrome Safari</em> 固定表格布局下对 'display' 特性值为 'table-cell' 的元素的宽度作用在 border box 上。<em>IE8(S) Firefox Opera</em> 固定表格布局下对 'display' 特性值为 'table-cell' 的元素的宽度作用在 content box 上。</p>
+      <p class="comment">
+        注 1: 根据 CSS2.1 规范，TABLE 元素的 'display' 特性默认值为 'table'，TD、TH 元素的 'display' 特性默认值为 'table-cell'；<br />
+        注 2: 由于 IE6 IE7 IE8(Q) 不支持 display:table-cell，故下面的分析不再考虑这些浏览器。
+      </p>
+      <br />
+      <p>上述分析的测试代码中表格均为 &quot;分离的边框模型&quot;，即 'border-collapse' 特性值为默认的 'separate'。下面将分析 &quot;重合的边框模型&quot; (border-collapse: collapse) 下的表格。</p>
+      <h3>4. border-collapse: collapse</h3>
+      <p>分析以下代码：<em>collapse.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  body { font-family:Consolas; margin:0; }
+  table { table-layout:fixed; width:120px; border-collapse:collapse; }
+  td { background:wheat; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;
+&lt;table id=&quot;table1&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;
+  &lt;tr&gt;
+    &lt;td id=&quot;td11&quot; style=&quot;width:80px; border:20px solid plum;&quot;&gt;A&lt;/td&gt;
+    &lt;td id=&quot;td12&quot; style=&quot;width:120px; border:20px solid coral;&quot;&gt;B&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;div id=&quot;info1&quot;&gt;&lt;/div&gt;
+&lt;div style=&quot;background:brown; height:3px; overflow:hidden;&quot;&gt;&lt;/div&gt;
+&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;
+&lt;table id=&quot;table2&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;
+  &lt;tr&gt;
+    &lt;td id=&quot;td21&quot; style=&quot;width:40px; border:20px solid plum;&quot;&gt;A&lt;/td&gt;
+    &lt;td id=&quot;td22&quot; style=&quot;width:60px; border:20px solid coral;&quot;&gt;B&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;div id=&quot;info2&quot;&gt;&lt;/div&gt;
+&lt;div style=&quot;background:brown; height:3px; overflow:hidden;&quot;&gt;&lt;/div&gt;
+&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;
+&lt;table id=&quot;table3&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;
+  &lt;tr&gt;
+    &lt;td id=&quot;td31&quot; style=&quot;width:24px; border:20px solid plum;&quot;&gt;A&lt;/td&gt;
+    &lt;td id=&quot;td32&quot; style=&quot;width:36px; border:20px solid coral;&quot;&gt;B&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;div id=&quot;info3&quot;&gt;&lt;/div&gt;
+&lt;div style=&quot;background:brown; height:3px; overflow:hidden;&quot;&gt;&lt;/div&gt;
+&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;
+&lt;table id=&quot;table4&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;
+  &lt;tr&gt;
+    &lt;td id=&quot;td41&quot; style=&quot;width:40px; border:50px solid plum;&quot;&gt;A&lt;/td&gt;
+    &lt;td id=&quot;td42&quot; style=&quot;width:79px; border:50px solid coral;&quot;&gt;B&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;div id=&quot;info4&quot;&gt;&lt;/div&gt;
+&lt;div style=&quot;background:brown; height:3px; overflow:hidden;&quot;&gt;&lt;/div&gt;
+&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;
+&lt;table id=&quot;table5&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;
+  &lt;tr&gt;
+    &lt;td id=&quot;td51&quot; style=&quot;width:40px; border:50px solid plum;&quot;&gt;A&lt;/td&gt;
+    &lt;td id=&quot;td52&quot; style=&quot;width:81px; border:50px solid coral;&quot;&gt;B&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;div id=&quot;info5&quot;&gt;&lt;/div&gt;
+&lt;div style=&quot;background:brown; height:3px; overflow:hidden;&quot;&gt;&lt;/div&gt;
+&lt;script&gt;
+  function $(id) { return document.getElementById(id); }
+  var wt1 = $(&quot;table1&quot;).offsetWidth,
+    wt2 = $(&quot;table2&quot;).offsetWidth;
+    wt3 = $(&quot;table3&quot;).offsetWidth;
+    wt4 = $(&quot;table4&quot;).offsetWidth;
+    wt5 = $(&quot;table5&quot;).offsetWidth;
+  $(&quot;info1&quot;).innerHTML = &quot;TABLE:120/&quot; + wt1;
+  $(&quot;info2&quot;).innerHTML = &quot;TABLE:120/&quot; + wt2;
+  $(&quot;info3&quot;).innerHTML = &quot;TABLE:120/&quot; + wt3;
+  $(&quot;info4&quot;).innerHTML = &quot;TABLE:120/&quot; + wt4;
+  $(&quot;info5&quot;).innerHTML = &quot;TABLE:120/&quot; + wt5;
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>这段代码在各浏览器环境中的表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>Firefox Opera IE6(S) IE7(S) IE8(S)<sup>1</sup></th>
+          <th>Chrome Safari</th>
+          <th>IE6(Q) IE7(Q) IE8(Q)</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RE8018/07.png" alt="运行效果截图" /></td>
+          <td><img src="../../tests/RE8018/08.png" alt="运行效果截图" /></td>
+          <td><img src="../../tests/RE8018/09.png" alt="运行效果截图" /></td>
+        </tr>
+      </table>
+      <ul>
+        <li><em>Firefox Opera IE6(S) IE7(S) IE8(S)</em> 中在 &quot;重合的边框模型&quot; 中单元格的宽度仍然趋向于作用在 content box，<br />
+          第一个表格中，表格设定宽度为 120px，各列宽度之和为 10 + 10 + 80 + 10 + 10 + 120 + 10 + 10 = 260px &gt; 120px，则表格宽度为 260px。<br />
+          第二个表格中，表格设定宽度为 120px，各列宽度之和为 10 + 10 + 40 + 10 + 10 + 60 + 10 + 10 = 160px &gt; 120px，则表格宽度仍然为 160px。<br />
+          第三个表格中，表格设定宽度为 120px，各列宽度之和为 10 + 10 + 24 + 10 + 10 + 36 + 10 + 10 = 120px = 120px，两个值刚好相等，则表格宽度仍然为 120px。<br />
+          第四个表格中，表格设定宽度为 120px，各列宽度之和为 25 + 25 + 40 + 25 + 25 + 79 + 25 + 25 = 269px &gt; 120px，则表格宽度为 269px。<br />
+          第四个表格中，表格设定宽度为 120px，各列宽度之和为 25 + 25 + 40 + 25 + 25 + 81 + 25 + 25 = 271px &gt; 120px，则表格宽度为 271px。<br />
+          因此，在 Firefox Opera IE6(S) IE7(S) IE8(S) 中，&quot;重合的边框模型&quot; 下表格的宽度实际上为 各列的设定宽度 + 各边框宽度 与 表格设定宽度 (作用于 border box) 两者中的较大者。而表格内单元格的设定宽度也均作用于 content box。</li>
+        <li><em>Chrome Safari</em> 中在 &quot;重合的边框模型&quot; 中单元格的宽度仍然趋向于作用在 border box，在 &quot;重合的边框模型&quot; 中单元格实际边框宽度仅有最终计算出来该边宽度的一半，浏览器首先需要决定各列宽之和与表格宽度的较大者，<br />
+          第一个表格中，表格设定宽度为 120px，各列宽度之和为 10 + 80 + 120 + 10 = 220px &gt; 120px，则表格宽度为 220px。<br />
+          第二个表格中，表格设定宽度为 120px，各列宽度之和为 10 + 40 + 60 + 10 = 120px = 120px，两个值刚好相等，则表格宽度仍然为 120px。<br />
+          第三个表格中，表格设定宽度为 120px，各列宽度之和为 10 + 24 + 36 + 10 = 80px &lt; 120px，则表格宽度为较大的 120px。<br />
+          第四个表格中，表格设定宽度为 120px，各列宽度之和为 25 + 40 + 79 + 25 = 169px &gt; 120px，则表格宽度为 169px。<br />
+          第五个表格中，表格设定宽度为 120px，各列宽度之和为 25 + 40 + 81 + 25 = 171px &gt; 120px，则表格宽度为 171px。<br />
+          因此，在 Chrome Safari 中，&quot;重合的边框模型&quot; 下表格的宽度实际上为 表格最左侧边框的一半 + 各列的设定宽度 + 表格最右侧边框的一半 与 表格设定宽度 (作用于 border box) 两者中的较大者。而表格内单元格的设定宽度也均作用于 border box。</li>
+        <li><em>IE6(Q) IE7(Q) IE8(Q)</em> 中在 &quot;重合的边框模型&quot; 中，通过截图对比可知，单元格设定宽度的作用位置既不是 content box 也不是 border box，而且表格的实际宽度为 各列宽度之和 与 表格设定宽度的较大者。</li>
+      </ul>
+      <p>CSS2.1 规范中并没有明确说明固定表格布局 (table-layout: fixed) 下单元格的宽度作用位置以及具体算法，所以各浏览器出现了较大的差异。</p>
+      <p class="comment">注 1: 忽略各浏览器在某些位置的边框颜色渲染差异，具体请参见相关问题链接。</p>
+      
+      <h2 id="solutions">解决方案</h2>
+      <p>在 'table-layout:fixed' 这种固定布局算法下的表格中，可以为表格最后一列不设置宽度，尽量消除由算法差异带来的列的宽度差异，防止不同浏览器之间表格实际计算的宽度不同。<br />
+      此外，在使用表格时，应尽量避免恰恰以来单元格的某个特性宽度值进行布局，这很可能导致某些浏览器中由于单元格宽度算法差异导致的意外折行或者内容溢出等现象。</p>
+      
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="RE8001">RE8001: 固定表格布局下的各浏览器对与表格宽度计算算法不同</a></li>
+        <li><a href="RE8002">RE8002: 各浏览器对 table 级元素的 'width' 特性的作用位置存在差异</a></li>
+        <li><a href="RE2007">RE2007: 各浏览器解决表格边框冲突的方式存在差异</a></li>
+        <li><a href="RX1002">RX1002: IE6 IE7 IE8(Q) 中从单元格溢出的内容会被自动剪裁</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.517.17 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+            <a href="../../tests/RE8018/fixed_1_width_1_auto.html">fixed_1_width_1_auto.html</a><br />
+            <a href="../../tests/RE8018/fixed_2_width.html">fixed_2_width.html</a><br />
+            <a href="../../tests/RE8018/table-cell.html">table-cell.html</a><br />
+            <a href="../../tests/RE8018/collapse.html">collapse.html</a><br />
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-25</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>table-layout 表格 布局 fixed 固定 TD 宽度 </p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

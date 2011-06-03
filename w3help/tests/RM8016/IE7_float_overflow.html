@@ -1,0 +1,15 @@
+<style>
+    * { margin:0; padding:0; font:12px Verdana; }
+    .overflow { float:left; width:90px; height:40px; border:5px solid #555; color:#555; }
+    .sibling { border:5px solid #999; color:#999; width:100px; }
+</style>
+
+<div style="width:100px; height:20px; border:5px solid black">
+    <div class="overflow">OVERFLOW OVERFLOW</div>
+</div>
+<div class="sibling">SIBLING SIBLING</div>
+<br />
+<div style="width:100px; height:60px; border:5px solid black">
+    <div class="overflow" style="margin-top:30px;">OVERFLOW OVERFLOW</div>
+</div>
+<div class="sibling">SIBLING SIBLING</div>

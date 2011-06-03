@@ -1,0 +1,281 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RY8004: 各浏览器对不合法的类选择器名称的容错程度存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+            <p><strong>关于选择器的命名</strong></p>
+      <p>W3C CSS 2.1 的 4.1.3 节中提到：标识符（包括选择器中的元素名，类和 ID）只能包含字符 [a-zA-Z0-9] 和 ISO 10646 字符编码 U+00A1 及以上，再加连字号（-）和下划线（_）；它们不能以数字，或一个连字号后跟数字为开头。它们还可以包含转义字符加任何 ISO 10646 字符作为一个数字编码。</p>
+            <p>由于涉及到的字符很多，本文只针对字符 [a-zA-Z0-9] ，再加连字号（-）和下划线（_）进行讨论。</p>
+
+      <p>关于 CSS 中允许使用的字符和大小写的详细资料，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/syndata.html#characters">4.1.3</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>不合法的类选择器名称可能造成兼容性问题。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>严重情况下可能造成布局混乱，页面无法使用。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+            <p>在 W3C CSS 2.1 说明文档中，只提到选择器标识符不能以数字，或一个连字号后跟数字为开头。除此之外，没有相关的说明。那么各浏览器下的表现是否遵循这一规则呢？</p>
+      <p>分析以下代码：</p>
+<pre>&lt;style type=&quot;text/css&quot;&gt;
+div{width:160px;height:20px;font-size:12px;line-height:20px;background-color:yellow;}
+.t-1_t_{background-color:#d4d4d4;}
+.1{background-color:#A8A8A8;}
+.123456{background-color:#d4d4d4;}
+.2test{background-color:#A8A8A8;}
+.2-test{background-color:#d4d4d4;}
+.2_test{background-color:#A8A8A8;}
+.-test{background-color:#d4d4d4;}
+.-2test{background-color:#A8A8A8;}
+._test{background-color:#d4d4d4;}
+._2test{background-color:#A8A8A8;}
+.-{background-color:#d4d4d4;}
+.---{background-color:#A8A8A8;}
+._{background-color:#d4d4d4;}
+.___{background-color:#A8A8A8;}
+._-{background-color:#d4d4d4;}
+.-_{background-color:#A8A8A8;}
+.___-{background-color:#d4d4d4;}
+.---_{background-color:#A8A8A8;}
+.---123{background-color:#d4d4d4;}
+.___123{background-color:#A8A8A8;}
+&lt;/style&gt;
+
+&lt;div class=&quot;t-1_t_&quot;&gt;字母开头&lt;/div&gt;
+&lt;div class=&quot;1&quot;&gt;单个数字&lt;/div&gt;
+&lt;div class=&quot;123456&quot;&gt;多个数字&lt;/div&gt;
+&lt;div class=&quot;2test&quot;&gt;数字开头 + [a-z][A-Z]&lt;/div&gt;
+&lt;div class=&quot;2-test&quot;&gt;数字 + &quot;-&quot; 开头&lt;/div&gt;
+&lt;div class=&quot;2_test&quot;&gt;数字 + &quot;_&quot; 开头&lt;/div&gt;
+&lt;div class=&quot;-test&quot;&gt;连字符(-)开头 + [a-z][A-Z]&lt;/div&gt;
+&lt;div class=&quot;-2test&quot;&gt;连字符(-) + 数字 开头&lt;/div&gt;
+&lt;div class=&quot;_test&quot;&gt;下划线(_)开头 + [a-z][A-Z]&lt;/div&gt;
+&lt;div class=&quot;_2test&quot;&gt;下划线(_) + 数字 开头&lt;/div&gt;
+&lt;div class=&quot;-&quot;&gt;单个连字符(-)&lt;/div&gt;
+&lt;div class=&quot;---&quot;&gt;多个连字符(-)&lt;/div&gt;
+&lt;div class=&quot;_&quot;&gt;单个下划线(_)&lt;/div&gt;
+&lt;div class=&quot;___&quot;&gt;多个下划线(_)&lt;/div&gt;
+&lt;div class=&quot;_-&quot;&gt;下划线(_) + 连字符(-)&lt;/div&gt;
+&lt;div class=&quot;-_&quot;&gt;连字符(-) + 下划线(_)&lt;/div&gt;
+&lt;div class=&quot;___-&quot;&gt;多个下划线(_) + 连字符(-)&lt;/div&gt;
+&lt;div class=&quot;---_&quot;&gt;多个连字符(-) + 下划线(_)&lt;/div&gt;
+&lt;div class=&quot;---123&quot;&gt;多个连字符(-) + 数字&lt;/div&gt;
+&lt;div class=&quot;___123&quot;&gt;多个下划线(_) + 数字&lt;/div&gt;</pre>
+
+      <p>这段代码在不同的浏览器环境中表现如下：</p>
+      <table class="compare">
+                <tr>
+                    <th>IE6(S)</th>
+                    <th>IE6(Q)</th>
+                    <th>IE7(Q) IE8(Q)</th>
+                    <th>IE7(S) IE8(S) Firefox Safari Chrome Opera</th>
+                </tr>
+                <tr>
+                    <td><img src="../../tests/RY8004/RY8004-1.png" alt=""></td>
+                    <td><img src="../../tests/RY8004/RY8004-2.png" alt=""></td>
+                    <td><img src="../../tests/RY8004/RY8004-3.png" alt=""></td>
+                    <td><img src="../../tests/RY8004/RY8004-4.png" alt=""></td>
+                </tr>
+            </table>
+
+            <p>观察上表，分析各浏览器下的表现，总结如下：</p>
+            <table class="compare">
+                <tr>
+                    <th>选择器命名</th>
+                    <th>IE6(S)</th>
+                    <th>IE6(Q)</th>
+                    <th>IE7(Q)</th>
+                    <th>IE8(Q)</th>
+                    <th>IE7(S)</th>
+                    <th>IE8(S)</th>
+                    <th>Firefox</th>
+                    <th>Opera</th>
+                    <th>Safari</th>
+                    <th>Chrome</th>
+                </tr>
+                <tr>
+                    <td style="color:black;">字母开头</td>
+                    <td class="hl_2">Y</td>
+                    <td class="hl_2">Y</td>
+                    <td class="hl_2">Y</td>
+                    <td class="hl_2">Y</td>
+                    <td class="hl_2">Y</td>
+                    <td class="hl_2">Y</td>
+                    <td class="hl_2">Y</td>
+                    <td class="hl_2">Y</td>
+                    <td class="hl_2">Y</td>
+                    <td class="hl_2">Y</td>
+                </tr>
+                <tr>
+                    <td style="color:black;">数字/数字开头</td>
+                    <td class="hl_1">N</td>
+                    <td class="hl_2">Y</td>
+                    <td class="hl_2">Y</td>
+                    <td class="hl_2">Y</td>
+                    <td class="hl_1">N</td>
+                    <td class="hl_1">N</td>
+                    <td class="hl_1">N</td>
+                    <td class="hl_1">N</td>
+                    <td class="hl_1">N</td>
+                    <td class="hl_1">N</td>
+                </tr>
+                <tr>
+                    <td style="color:black;">&quot;-&quot;开头+数字</td>
+                    <td class="hl_1">N</td>
+                    <td class="hl_1">N</td>
+                    <td class="hl_2">Y</td>
+                    <td class="hl_2">Y</td>
+                    <td class="hl_1">N</td>
+                    <td class="hl_1">N</td>
+                    <td class="hl_1">N</td>
+                    <td class="hl_1">N</td>
+                    <td class="hl_1">N</td>
+                    <td class="hl_1">N</td>
+                </tr>
+                <tr>
+                    <td style="color:black;">&quot;-&quot;/多个&quot;-&quot;</td>
+                    <td class="hl_1">N</td>
+                    <td class="hl_1">N</td>
+                    <td class="hl_2">Y</td>
+                    <td class="hl_2">Y</td>
+                    <td class="hl_1">N</td>
+                    <td class="hl_1">N</td>
+                    <td class="hl_1">N</td>
+                    <td class="hl_1">N</td>
+                    <td class="hl_1">N</td>
+                    <td class="hl_1">N</td>
+                </tr>
+                <tr>
+                    <td style="color:black;">&quot;-&quot;开头+非数字</td>
+                    <td class="hl_1">N</td>
+                    <td class="hl_1">N</td>
+                    <td class="hl_2">Y</td>
+                    <td class="hl_2">Y</td>
+                    <td class="hl_2">Y</td>
+                    <td class="hl_2">Y</td>
+                    <td class="hl_2">Y</td>
+                    <td class="hl_2">Y</td>
+                    <td class="hl_2">Y</td>
+                    <td class="hl_2">Y</td>
+                </tr>
+                <tr>
+                    <td style="color:black;">&quot;_&quot;开头</td>
+                    <td class="hl_1">N</td>
+                    <td class="hl_1">N</td>
+                    <td class="hl_1">N</td>
+                    <td class="hl_1">N</td>
+                    <td class="hl_2">Y</td>
+                    <td class="hl_2">Y</td>
+                    <td class="hl_2">Y</td>
+                    <td class="hl_2">Y</td>
+                    <td class="hl_2">Y</td>
+                    <td class="hl_2">Y</td>
+                </tr>
+            </table>
+            <p>由上表，我们可以直观的了解到选择器的命名在各浏览器下的支持情况有所不同。因此，如果选择器的命名不规范，将影响各浏览器下，样式渲染不一致。比如如下代码：</p>
+<pre>&lt;style type=&quot;text/css&quot;&gt;
+div{font-size:12px;background-color:yellow;width:150px;height:30px;line-height:30px;}
+.18fontsize{font-size:18px;background-color:#d4d4d4;}
+&lt;/style&gt;
+
+&lt;div class=&quot;18fontsize&quot;&gt;以数字开头的类名&lt;/div&gt;</pre>
+
+            <p>这段代码在不同的浏览器环境中表现如下：</p>
+      <table class="compare">
+                <tr>
+                    <th>IE6(Q) IE7(Q) IE8(Q)</th>
+                    <th>IE6(S) IE7(S) IE8(S) Firefox Safari Chrome Opera</th>
+                </tr>
+                <tr>
+                    <td><img src="../../tests/RY8004/RY8004-5.png" alt=""></td>
+                    <td><img src="../../tests/RY8004/RY8004-6.png" alt=""></td>
+                </tr>
+            </table>
+
+            <p>以数字开始的类名仅在 <em>IE6(Q) IE7(Q) IE8(Q)</em> 下被识别，而其它浏览器下则不识别（忽略该规则）。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>坚持以字母开头命名选择器，这样可保证在所有浏览器下都能兼容。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.2<br />
+              Chrome 5.0.356.2 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.50
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RY8004/css_selector_name.html">css_selector_name.html</a>
+                            <br/><a href="../../tests/RY8004/css_selector_name_prefix_number.html">css_selector_name_prefix_number.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-06-29</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>selector rules 选择器 fault-tolerant 容错</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

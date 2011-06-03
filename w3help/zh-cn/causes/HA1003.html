@@ -1,0 +1,244 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HA1003: 各浏览器对 align='middle' 的理解有差异</h1>
+
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>HTML4.01 规范属性表中可以看到不同的 align 属性，作用在不同的元素上，align 属性的意义也不同。</p>
+      <ul>
+        <li><a href="http://www.w3.org/TR/html401/struct/objects.html#adef-align-IMG">Object、IMG、APPLET</a>：可能的取值为 &quot;bottom | middle | top| left | right&quot; ，这个属性指定了 IMG、OBJECT、APPLET 元素与其上下文文本的位置关系；</li>
+        <li><a href="http://www.w3.org/TR/html401/struct/tables.html#adef-align-TABLE">TABLE</a>：可能的取值为 &quot;left | center | right&quot; ，这个属性指定了 TABLE 元素在文档中的位置；</li>
+        <li><a href="http://www.w3.org/TR/html401/present/graphics.html#adef-align-HR">HR</a>：可能的取值为 &quot;left | center | right&quot; ，这个属性指定了水平线在其上下文之间的水平对齐方式，缺省值为 &quot;center&quot; ；</li>
+        <li><a href="http://www.w3.org/TR/html401/present/graphics.html#adef-align">DIV、H1、H2、H3、H4、H5、H6、P</a>：可能的取值为 &quot;left | center | right | justify&quot; ，这个属性指定了这些元素在其上下文环境内的水平对齐方式，缺省值为 &quot;left&quot; ；</li>
+        <li><a href="http://www.w3.org/TR/html401/struct/tables.html#adef-align-TD">COL、COLGROUP、TBODY、TD、TFOOT、TH、THEAD、TR</a>：可能的取值为： &quot;left | center | right | justify | char&quot; ，此属性指定了单元格中的数据及文本的对齐方式，对于TD元素缺省值为 &quot;left&quot; ，对于TH元素缺省值为 &quot;center&quot; 。</li>
+      </ul>
+      <p>可见，仅 Object IMG APPLET 元素的 align 属性拥有 &quot;middle&quot; 这个值。</p>
+      <p>关于 HTML4.01 的所有属性的更多信息，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html401/index/attributes.html">属性表</a>。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>Firefox Chrome Safari 会将 DIV H1~H6 P 元素的 align=&quot;middle&quot; 解释为 align=&quot;center&quot;，从而使这些元素能够居中对齐。<br />
+      Firefox 混杂模式会将 TABLE 元素 align=&quot;middle&quot; 解释为 align=&quot;center&quot;，使 TABLE 元素居中对齐。<br />
+      IE6 IE7 Chrome Safari Opera 及 IE8 Firefox 的混杂模式下，均将 TD TH 元素的 align=&quot;middle&quot; 理解为 align=&quot;center&quot;。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>不正确的使用 align 属性的 &quot;middle&quot; 属性值会在各浏览器中对应用元素的对齐方式产生差异，从而造成布局上的兼容性问题。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>下面根据 &quot;标准参考&quot; 中列出的不同种类的标签分析各浏览器对 align=&quot;middle&quot; 理解的差异。</p>
+      <h3>IMG 的 align 属性</h3>
+      <p>分析以下代码：</p>
+      <pre>&lt;style&gt;
+    div { width:300px; background:#AAA; }
+    img { background:#DDD; }
+&lt;/style&gt;
+&lt;div&gt;
+    IMG&lt;img <span class="hl_1">align=&quot;middle&quot;</span> src=&quot;google.gif&quot; /&gt;
+&lt;/div&gt;</pre>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>所有浏览器</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/HA1003/align_IMG.gif" alt="所以浏览器" /></td>
+        </tr>
+      </table>
+      <p>对于 IMG 元素的 align 属性， &quot;middle&quot; 本身是合法的属性值， 各浏览器均是遵照 W3C 规范进行解释。</p>
+      <br />
+      <h3>HR 的 align 属性</h3>
+      <p>分析以下代码：</p>
+      <pre>&lt;style&gt;
+    div { width:200px; height:40px; background:#ddd; }
+&lt;/style&gt;
+&lt;div&gt;
+    HR&lt;hr <span class="hl_1">align=&quot;middle&quot;</span> style=&quot;width:100px;&quot; size=&quot;5&quot; noshade /&gt;
+&lt;/div&gt;</pre>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>所有浏览器</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/HA1003/align_HR.gif" alt="所以浏览器" /></td>
+        </tr>
+      </table>
+      <p>对于 HR 元素的 align 属性，没有 &quot;middle&quot; 值，但是由于 其 align 属性的缺省值为 &quot;center&quot; ，这里我们无法得知浏览器是将 &quot;middle&quot; 当做 &quot;center&quot; 处理，还是将 &quot;middle&quot; 当做错误属 性值处理，从而应用了缺省值 &quot;center&quot; 。但各浏览器的效果均相同，即 HR 元素居中对齐。</p>
+      <br />
+      <h3>DIV H1~H6 P的 align 属性</h3>
+      <p>分析以下代码：</p>
+      <pre>&lt;style&gt;
+    div, h3, p { width:200px; background:#DDD; margin:5px 0; }
+&lt;/style&gt;
+&lt;p <span class="hl_1">align=&quot;middle&quot;</span>&gt;P&lt;/p&gt;
+&lt;div <span class="hl_1">align=&quot;middle&quot;</span>&gt;DIV&lt;div style=&quot;background:#EEE; width:80px;&quot;&gt;in DIV&lt;/div&gt;&lt;/div&gt;
+&lt;h3 <span class="hl_1">align=&quot;middle&quot;</span>&gt;H3&lt;/h3&gt;</pre>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Opera</th>
+          <th>Firefox Chrome Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/HA1003/align_P_1.gif" alt="IE6 IE7 IE8 Opera" /></td>
+          <td><img src="../../tests/HA1003/align_P_2.gif" alt="Firefox Chrome Safari" /></td>
+        </tr>
+      </table>
+      <ul>
+        <li>在 IE、Opera 中，浏览器认为 align=&quot;middle&quot; 是非法属性值，按照缺省值 &quot;left&quot; 解析，所以 P、DIV、H3 元素均居左对齐；</li>
+        <li>在 Firefox、Chrome、Safari 中，浏览器将 align=&quot;middle&quot; 当做 align=&quot;center&quot; 解析，导致 P、DIV、H3 元素居中对齐。</li>
+      </ul>
+      <br />
+      <h3>TABLE 的 align 属性</h3>
+      <p>分析以下代码：</p>
+      <pre>&lt;style&gt;
+    table { width:100px; }
+    div { width:200px; background:#DDD; }
+&lt;/style&gt;
+&lt;div&gt;
+    TABLE
+    &lt;table <span class="hl_1">align=&quot;middle&quot;</span> border=&quot;1&quot;&gt;&lt;tr&gt;&lt;td&gt;TD&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;</pre>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Chrome Safari Opera Firefox(S)</th>
+          <th>Firefox(Q)</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/HA1003/align_TABLE_1.gif" alt="IE6 IE7 IE8 Chrome Safari Opera Firefox(S)" /></td>
+          <td><img src="../../tests/HA1003/align_TABLE_2.gif" alt="Firefox(Q)" /></td>
+        </tr>
+      </table>
+      <ul>
+        <li>在 Firefox(Q) 中，浏览器将 align=&quot;middle&quot; 当做 align=&quot;center&quot; 解析，导致 TABLE 元素居中对齐；</li>
+        <li>在 其他浏览器 中，浏览器认为 align=&quot;middle&quot; 是非法属性值。</li>
+      </ul>
+      <br />
+      <h3>单元格元素的 align 属性</h3>
+      <p>分析以下代码：</p>
+      <pre>&lt;style&gt;
+    table { width:100px; background:#888; border:1px solid black; }
+    td, th { height:50px; background:#EEE; }
+&lt;/style&gt;
+&lt;div&gt;
+    &lt;table&gt;
+        &lt;tr&gt;
+            &lt;th id=&quot;h&quot; <span class="hl_1">align=&quot;middle&quot;</span>&gt;
+                &lt;div style=&quot;width:50px;&quot;&gt;TH&lt;/div&gt;
+            &lt;/th&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;td id=&quot;d&quot; <span class="hl_1">align=&quot;middle&quot;</span>&gt;
+                &lt;div style=&quot;width:50px;&quot;&gt;TD&lt;/div&gt;
+            &lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/table&gt;
+&lt;/div&gt;</pre>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 Chrome Safari Opera IE8(Q) Firefox(Q)</th>
+          <th>IE8(S)</th>
+          <th>Firefox(S)</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/HA1003/align_TD_1.gif" alt="IE6 IE7 Chrome Safari Opera IE8(Q) Firefox(Q)" /></td>
+          <td><img src="../../tests/HA1003/align_TD_2.gif" alt="IE8(S)" /></td>
+          <td><img src="../../tests/HA1003/align_TD_3.gif" alt="Firefox(S)" /></td>
+        </tr>
+      </table>
+      <ul>
+        <li>在 <em>Chrome Safari Opera Firefox(Q)</em> 中，浏览器将 TD、TH 元素的 align=&quot;middle&quot; 理解为 align=&quot;center&quot;，使得单元格内居中对齐，此时 TD、TH 元素的计算后 text-align 为浏览器的私有值（如 Chrome 和 Safari 中为 &quot;-webkit-center&quot; ，Firefox(Q) 中为 &quot;-moz-center&quot; ），这个私有值可以使单元格内的块级元素及行内元素均居中对齐；</li>
+        <li>在 <em>IE6 IE7 IE8(Q)</em> 中，浏览器将 align=&quot;middle&quot; 理解为 align=&quot;center&quot;，与 Chrome 中效果相同；</li>
+        <li>在 <em>IE8(S)</em> 中，将 TD 元素的 align=&quot;middle&quot; 理解为 align=&quot;center&quot; 后能够居中对齐，但是对于 TH 元素即使将其 align=&quot;center&quot; 也无法使其内的块级元素也居中，所以这里 align=&quot;middle&quot; 无法使 TH 元素内的块级元素居中；</li>
+        <li>在 <em>Firefox(S)</em> 中，浏览器将 align=&quot;middle&quot; 当做了非法值处理。</li>
+      </ul>
+
+
+      <h2 id="solutions">解决方案</h2>
+      <p>align=&quot;middle&quot; 仅在 IMG、OBJECT、APPLET 元素上的 align 属性中是合法值，对于其他元素的 align 属性均为非法。各浏览器在上述三个元素之外的元素上遇到 align=&quot;middle&quot; 均按照自己的理解方式解释。同时除单元格元素的 align 属性之外，其他的 align 属性均被 W3C 官方废弃（Deprecated.），所以应避免使用此属性。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="RX8004">RX8004: 非 IE 浏览器中 'margin' 特性对 TABLE 元素的 align 属性会有影响</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.2<br />
+              Chrome 5.0.360.0 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HA1003/align_IMG.html">align_IMG.html</a><br />
+            <a href="../../tests/HA1003/align_HR.html">align_HR.html</a><br />
+            <a href="../../tests/HA1003/align_P.html">align_P.html</a><br />
+            <a href="../../tests/HA1003/align_TABLE.html">align_TABLE.html</a><br />
+            <a href="../../tests/HA1003/align_TD.html">align_TD.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-19</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>align middle center td block 单元格 块级 居中</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

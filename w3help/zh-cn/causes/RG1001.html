@@ -1,0 +1,215 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RG1001: IE6 IE7 IE8(Q) 中 UL 和 OL 标记为实现放置 LI 元素标记框 'outside' 设置时所使用的样式设定不同于其他浏览器</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>关于 'list-style-position' 属性说明请参照 W3C CSS 2.1 规范： <a href="http://www.w3.org/TR/CSS21/generate.html#propdef-list-style-position">http://www.w3.org/TR/CSS21/generate.html#propdef-list-style-position</a></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE6 IE7 IE8(Q) 中 UL 标记为实现放置 LI 元素标记框 'outside' 设置时所使用的样式设定不同于其他浏览器。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>IE6 IE7 IE8(Q) 内 LI 元素样式内设置了 ‘list-style-position:outside’ 后其溢出容器的标记框会被裁切。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>'list-style-position' 特性的主要说明标记框 (marker box) 在主块框 (LI) 的位置，他的默认值是 'outside'。在 CSS 2.1 规范中没有明确说明标记框的位置，但是说明在 'outside' 特性值设置情况下，如果 'direction' 特性值为 'ltr' 时，标记框应该存在于内容左侧，当 'direction' 特性值为 'rtl' 时，标记框应该存在于内容右侧。</p>
+      <p>正是由于规范中存在定义模糊，各个浏览器对此情况实现均有不同。通常情况下，LI 标记由 UL 标记和 OL 标记包裹，分析以下代码：</p>
+<pre>
+&lt;ul style=&quot;background:#CCC;&quot;&gt;
+  &lt;li style=&quot;background:#AAA;&quot;&gt;A&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;ol style=&quot;background:#CCC;&quot;&gt;
+  &lt;li style=&quot;background:#AAA;&quot;&gt;B&lt;/li&gt;
+&lt;/ol&gt;
+</pre>
+      <p>实际运行结果：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Safari Chrome Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RG1001/02.gif" alt="运行效果截图" /></td>
+          <td><img src="../../tests/RG1001/01.gif" alt="运行效果截图" /></td>
+        </tr>
+      </table>
+      <p>可以明显看出，不同浏览器中 UL 和 OL 元素的背景显示不同。在 IE6 IE7 IE8(Q) 中没有显示出背景颜色。根据盒模型分析，他们的默认 margin 和 padding 值不同。</p>
+      <p>继续加入样式检测代码，来验证这个假想：</p>
+<pre>
+  if(!window.getComputedStyle){
+    window.getComputedStyle=function($target){
+      return $target.currentStyle;
+    };
+  }
+  var ul = document.getElementsByTagName(&quot;ul&quot;)[0];
+  var ol = document.getElementsByTagName(&quot;ol&quot;)[0];
+  alert('UL default display value:'
+    + getComputedStyle(ul,null).display
+    + &quot;\n&quot;
+    + 'OL default display value:'
+    + getComputedStyle(ol,null).display
+    + &quot;\n&quot;
+    + 'UL margin-left value:'
+    + getComputedStyle(ul,null).marginLeft
+    + &quot;\n&quot;
+    + 'UL padding-left value:'
+    + getComputedStyle(ul,null).paddingLeft
+    + &quot;\n&quot;
+    + 'OL margin-left value:'
+    + getComputedStyle(ol,null).marginLeft
+    + &quot;\n&quot;
+    + 'OL padding-left value:'
+    + getComputedStyle(ol,null).paddingLeft
+    + &quot;\n&quot;
+  )
+</pre>
+
+      <p>运行结果汇总如下：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Safari Chrome Opera</th>
+        </tr>
+        <tr>
+          <th>UL default display value:</th>
+          <td>block</td>
+          <td>block<br /></td>
+        </tr>
+        <tr>
+          <th>OL default display value:</th>
+          <td>block</td>
+          <td>block</td>
+        </tr>
+        <tr>
+          <th>UL margin-left value:</th>
+          <td class="hl_1">30pt</td>
+          <td class="hl_2">0px</td>
+        </tr>
+        <tr>
+          <th>UL padding-left value:</th>
+          <td class="hl_1">0px</td>
+          <td class="hl_2">40px</td>
+        </tr>
+        <tr>
+          <th>OL margin-left value:</th>
+          <td class="hl_3">30pt</td>
+          <td class="hl_4">0px</td>
+        </tr>
+        <tr>
+          <th>OL padding-left value:</th>
+          <td class="hl_3">0px</td>
+          <td class="hl_4">40px</td>
+        </tr>
+      </table>
+      <p>从实际运行结果可以看出 IE6 IE7 IE8(Q) 内实现 UL OL 标记样式时使用的 'margin' 值设定，而其他浏览器则用 'padding' 值设定。</p>
+      <p>现将 UL OL 标记的 'margin:0' 样式设置加入，分析以下代码效果：</p>
+<pre>
+&lt;ul style=&quot;<span class="hl_4">margin:0</span>;background:#CCC;&quot;&gt;
+  &lt;li style=&quot;background:#AAA;&quot;&gt;C&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;ol style=&quot;<span class="hl_4">margin:0</span>;background:#CCC;&quot;&gt;
+  &lt;li style=&quot;background:#AAA;&quot;&gt;D&lt;/li&gt;
+&lt;/ol&gt;
+</pre>
+      <p>显示效果如下表：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Safari Chrome Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RG1001/04.gif" alt="运行效果截图" /></td>
+          <td><img src="../../tests/RG1001/03.gif" alt="运行效果截图" /></td>
+        </tr>
+      </table>
+      <p>明显的，由于其 margin 值被设置为0，导致 IE6 IE7 IE8(Q) 中 UL OL 标记内的 LI 元素，标记框 ( marker box ) 从左侧溢出标记容器而没有被显示。</p>
+      <p>同理，在 IE8(S) Firefox Safari Chrome Opera 浏览器中，标记框可以显示是因为，他们中 UL OL 标记都是用 'padding' 值定位内部元素位置。如果将 'padding' 值设置为 0，同样会出现 IE6 IE7 IE8(Q) 中的情况。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>可以将 IE6 IE7 IE8(Q) 浏览器的 UL OL 标记 'margin-left' 和 'padding-left' 特性值更改为与其他浏览器样式一致。</p>
+            <p>例如：</p>
+<pre>
+ul,ol{margin-left:0;padding-left:40px;}
+</pre>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.5.6<br />
+              Chrome 4.0.266.0 dev<br />
+              Safari 4.0.4
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RG1001/ul_and_ol_tag_margin_and_padding_value.html">ul_and_ol_tag_margin_and_padding_value.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-21</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>UL list-style list-style-type marker box margin padding 列表 </p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

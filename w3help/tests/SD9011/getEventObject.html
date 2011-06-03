@@ -1,0 +1,26 @@
+<button type="button" id="attach">attachEvent</button>
+<button type="button" id="addE">addEventListener</button>
+<button type="button" id="byclick">onClick</button>
+<br />
+INFO : 
+<div id="info"></div>
+
+<script type="text/javascript">
+	function $(id){return document.getElementById(id);}
+	var attach = $("attach"),
+		addE = $("addE"),
+		byClick = $("byclick");
+
+	attach.attachEvent && attach.attachEvent("onclick", handler);
+	addE.addEventListener && addE.addEventListener("click", handler, false);
+	byClick.onclick = handler;
+
+	function handler(){
+		var src = window === this ? window.event.srcElement : this, type = src.innerHTML;
+		window.event && showMsg(window.event.type, type + " + window.event");
+		arguments[0] && showMsg(arguments[0].type, type + " + arguments[0]");
+	}
+	function showMsg(type, msg){
+		document.getElementById("info").innerHTML += (msg + "(type : " + type + ")<br />");
+	}
+</script>

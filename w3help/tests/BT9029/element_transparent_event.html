@@ -1,0 +1,41 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<style type="text/css">
+	body{margin:0;}
+	a{color:blue;}
+	a:hover{color:red;}
+</style>
+</head>
+<body>
+<div>
+    <a href="javascript:void(0);"
+            onmouseover="this.style.backgroundColor='yellow'"
+            onmouseout="this.style.backgroundColor='transparent'">
+            please put your mouse on
+    </a>
+    <div style="height:20px; width:190px; margin-top:10px; background-color:blue;"
+            onmouseover="this.style.backgroundColor='red'"
+            onmouseout="this.style.backgroundColor='blue'"></div>
+    <div style="background-color:transparent;position:absolute;left:10%;top:-23px;
+                    border:10px solid green;width:100px;height:80px;"></div>
+</div>
+
+
+<div style="position:relative;margin:50px;width:300px;">
+    <a href="javascript:void(0);"
+            onmouseover="this.style.backgroundColor='yellow'"
+            onmouseout="this.style.backgroundColor='transparent'">
+            please put your mouse on
+    </a>
+    <div style="height:20px; width:190px; margin-top:10px; background-color:blue;"
+            onmouseover="this.style.backgroundColor='red'"
+            onmouseout="this.style.backgroundColor='blue'"></div>
+    <div style="opacity:0;filter:alpha(opacity=0);background-color:green;
+                    position:absolute;left:10%;top:-23px;
+                    border:10px solid green;width:100px;height:80px;"></div>
+</div>
+
+</body>
+</html>

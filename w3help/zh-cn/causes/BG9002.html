@@ -1,0 +1,327 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BG9002: 各浏览器对 SCRIPT 标签内 type 和 language 属性值识别程度不同</h1>
+<ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>脚本使用的语言由 SCRIPT 标签的 “type” 属性指定，该属性大小写不敏感，在 HTML 4.01 规范中，该属性没有默认值，而在 HTML 5 草案中，该属性的默认值为 <span class="hl_4"> &quot;text/javascript&quot; </span>&quot; 。</p>
+      <p>SCRIPT 标签的 &quot;language&quot; 属性，用来指定 SCRIPT 标记内的脚本语言类型。该属性已被废弃，HTML 4.01 规范中推荐使用 &quot;type&quot; 来代替。</p>
+      <p>关于 SCRIPT 标签的更多信息，请参考 HTML 4.01 规范 <a href="http://www.w3.org/TR/html401/interact/scripts.html#edef-SCRIPT">18.2.1</a> 及 HTML5 草案 <a href="http://dev.w3.org/html5/spec/scripting-1.html#script">4.3.1</a> 中的内容。</p>
+      <p>“type” 和 &quot;language&quot; 这两个属性在现有浏览器中均支持。</p>
+      <h2 id="description">问题描述</h2>
+      <p>当一个 SCRIPT 标签设置了非 &quot;type=text/javascript&quot; 或 ”language=javascript&quot; 时，如：&quot;type=&quot;text/JScript<sup>1</sup>&quot;&quot;  或  &quot;language=&quot;JScript&quot;&quot;  情况，各浏览器对 SCRIPT 标签识别情况不一致。</p>
+      <p class="comment">注1：JScript 是 ECMAScript 的微软实现版，类似其他浏览器的 JavaScript，但有些细节上有差异。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>该问题将导致部分脚本在各浏览器中识别程度不一，导致某些标示的脚本不能被解析和运行。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>SCRIPT 标签的 “type” 属性用来指定嵌入脚本代码的语言类型，它是一个 MIME 类型的值，关于 MIME 请参考 <a href="http://www.ietf.org/rfc/rfc2045.txt">RFC2045</a> 和 <a href="http://www.ietf.org/rfc/rfc2046.txt">RFC2046</a> 中的说明。</p>
+      <p>“type” 属性值的大小写不敏感。 同样 &quot;language&quot; 属性也是用来指定嵌入脚本代码语言类型的，属性值也不区分大小写。</p>
+      <p>我们构造一些系列常见 “type” 和 &quot;language&quot; 属性值，观察各浏览器对他们的支持情况。</p>
+      <p>分析以下代码：</p>
+<pre style="overflow-y:auto;height:300px;">
+Script Type:
+text/javascript: &lt;script type='text/javascript'&gt;document.write('OK');&lt;/script&gt;
+text/ecmascript: &lt;script type='text/ecmascript'&gt;document.write('OK');&lt;/script&gt;
+text/livescript: &lt;script type='text/livescript'&gt;document.write('OK');&lt;/script&gt;
+text/javascript1.0: &lt;script type='text/javascript1.0'&gt;document.write('OK')&lt;/script&gt;
+text/javascript1.1: &lt;script type='text/javascript1.1'&gt;document.write('OK')&lt;/script&gt;
+text/javascript1.2: &lt;script type='text/javascript1.2'&gt;document.write('OK')&lt;/script&gt;
+text/javascript1.3: &lt;script type='text/javascript1.3'&gt;document.write('OK')&lt;/script&gt;
+text/javascript1.4: &lt;script type='text/javascript1.4'&gt;document.write('OK')&lt;/script&gt;
+text/javascript1.5: &lt;script type='text/javascript1.5'&gt;document.write('OK')&lt;/script&gt;
+text/javascript1.6: &lt;script type='text/javascript1.6'&gt;document.write('OK')&lt;/script&gt;
+text/javascript1.7: &lt;script type='text/javascript1.7'&gt;document.write('OK')&lt;/script&gt;
+text/jscript: &lt;script type='text/jscript'&gt;document.write('OK')&lt;/script&gt;
+text/vbscript: &lt;script type='text/vbscript'&gt;document.write("OK")&lt;/script&gt;
+text/vbs: &lt;script type='text/vbs'&gt;document.write("OK")&lt;/script&gt;
+application/javascript: &lt;script type='application/javascript'&gt;document.write('OK')&lt;/script&gt;
+text/javascript &amp;&amp; language=vbs: &lt;script type='text/javascript' language='vbs'&gt;document.write('OK');&lt;/script&gt;
+
+Language:
+javascript: &lt;script language="javascript"&gt;document.write('OK')&lt;/script&gt;
+ecmascript: &lt;script language="ecmascript"&gt;document.write('OK')&lt;/script&gt;
+livescript: &lt;script language="livescript"&gt;document.write('OK')&lt;/script&gt;
+javascript1.0: &lt;script language="javascript1.0"&gt;document.write('OK')&lt;/script&gt;
+javascript1.1: &lt;script language="javascript1.1"&gt;document.write('OK')&lt;/script&gt;
+javascript1.2: &lt;script language="javascript1.2"&gt;document.write('OK')&lt;/script&gt;
+javascript1.3: &lt;script language="javascript1.3"&gt;document.write('OK')&lt;/script&gt;
+javascript1.4: &lt;script language="javascript1.4"&gt;document.write('OK')&lt;/script&gt;
+javascript1.5: &lt;script language="javascript1.5"&gt;document.write('OK')&lt;/script&gt;
+javascript1.6: &lt;script language="javascript1.6"&gt;document.write('OK')&lt;/script&gt;
+javascript1.7: &lt;script language="javascript1.7"&gt;document.write('OK')&lt;/script&gt;
+jscript: &lt;script language="jscript"&gt;document.write('OK')&lt;/script&gt;
+vbscript: &lt;script language="vbscript"&gt;document.write("OK")&lt;/script&gt;
+vbs: &lt;script language="vbs"&gt;document.write("OK")&lt;/script&gt;
+
+Language Encode:
+javascript.encode: &lt;script language="javascript.encode"&gt;document.write('OK')&lt;/script&gt;
+ecmascript.encode: &lt;script language="ecmascript.encode"&gt;document.write('OK')&lt;/script&gt;
+livescript.encode: &lt;script language="livescript.encode"&gt;document.write('OK')&lt;/script&gt;
+javascript1.1.encode: &lt;script language="javascript1.1.encode"&gt;document.write('OK')&lt;/script&gt;
+javascript1.7.encode: &lt;script language="javascript1.7.encode"&gt;document.write('OK')&lt;/script&gt;
+jscript.encode: &lt;script language="jscript.encode"&gt;document.write('OK')&lt;/script&gt;
+vbscript.encode: &lt;script language="vbscript.encode"&gt;document.write("OK")&lt;/script&gt;
+vbs.encode: &lt;script language="vbs.encode"&gt;document.write("OK")&lt;/script&gt;
+</pre>
+      <p>这段代码在不同浏览器中的结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8</th>
+            <th>Firefox</th>
+            <th>Chrome Safari</th>
+            <th>Opera</th>
+        </tr>
+        <tr>
+          <th>Script Type</th>
+          <td>text/javascript: OK<br />
+            text/ecmascript: OK<br />
+            text/livescript: OK<br />
+            <span class="hl_1">text/javascript1.0: </span><br />
+            text/javascript1.1: OK<br />
+            text/javascript1.2: OK<br />
+            text/javascript1.3: OK<br />
+            <span class="hl_1">text/javascript1.4: </span><br />
+            <span class="hl_1">text/javascript1.5: </span><br />
+            <span class="hl_1">text/javascript1.6: </span><br />
+            <span class="hl_1">text/javascript1.7: </span><br />
+            text/jscript:OK<br />
+            text/vbscript: OK<br />
+            text/vbs: OK<br />
+            <span class="hl_1">application/javascript: </span><br />
+            text/javascript &amp;&amp; language=vbs: OK<br /></td>
+            <td>text/javascript: OK<br />
+              text/ecmascript: OK<br />
+              <span class="hl_1">text/livescript: </span><br />
+              <span class="hl_1">text/javascript1.0: </span><br />
+              <span class="hl_1">text/javascript1.1: </span><br />
+              <span class="hl_1">text/javascript1.2: </span><br />
+              <span class="hl_1">text/javascript1.3: </span><br />
+              <span class="hl_1">text/javascript1.4: </span><br />
+                      <span class="hl_1">text/javascript1.5: </span><br />
+                      <span class="hl_1">text/javascript1.6: </span><br />
+                      <span class="hl_1">text/javascript1.7: </span><br />
+              <span class="hl_1">text/jscript</span><br />
+              <span class="hl_1">text/vbscript: </span><br />
+              <span class="hl_1">text/vbs: </span><br />
+              application/javascript: OK<br />
+              text/javascript &amp;&amp; language=vbs: OK</td>
+            <td>text/javascript: OK<br />
+text/ecmascript: OK<br />
+text/livescript: OK<br />
+text/javascript1.0: OK<br />
+text/javascript1.1: OK<br />
+text/javascript1.2: OK<br />
+text/javascript1.3: OK<br />
+<span class="hl_1">text/javascript1.4: </span><br />
+<span class="hl_1">text/javascript1.5: </span><br />
+<span class="hl_1">text/javascript1.6: </span><br />
+<span class="hl_1">text/javascript1.7:</span><br />
+text/jscript:OK<br />
+<span class="hl_1">text/vbscript: </span><br />
+<span class="hl_1">text/vbs: </span><br />
+application/javascript: OK<br />
+text/javascript &amp;&amp; language=vbs: OK</td>
+            <td>text/javascript: OK<br />
+text/ecmascript: OK<br />
+<span class="hl_1">text/livescript: </span><br />
+<span class="hl_1">text/javascript1.0: </span><br />
+<span class="hl_1">text/javascript1.1: </span><br />
+<span class="hl_1">text/javascript1.2: </span><br />
+<span class="hl_1">text/javascript1.3: </span><br />
+<span class="hl_1">text/javascript1.4: </span><br />
+<span class="hl_1">text/javascript1.5: </span><br />
+<span class="hl_1">text/javascript1.6: </span><br />
+<span class="hl_1">text/javascript1.7: </span><br />
+text/jscript:OK<br />
+<span class="hl_1">text/vbscript: </span><br />
+<span class="hl_1">text/vbs: </span><br />
+application/javascript: OK<br />
+text/javascript &amp;&amp; language=vbs: OK</td>
+        </tr>
+        <tr>
+          <th>Language</th>
+          <td>javascript: OK<br />
+            ecmascript: OK<br />
+            livescript: OK<br />
+            <span class="hl_1">javascript1.0: </span><br />
+            javascript1.1: OK<br />
+            javascript1.2: OK<br />
+            javascript1.3: OK<br />
+            <span class="hl_1">javascript1.4: </span><br />
+            <span class="hl_1">javascript1.5: </span><br />
+            <span class="hl_1">javascript1.6: </span><br />
+            <span class="hl_1">javascript1.7: </span><br />
+            jscript: OK<br />
+            vbscript: OK<br />
+            vbs: OK<br /></td>
+          <td>javascript: OK<br />
+            <span class="hl_1">ecmascript: </span><br />
+            livescript: OK<br />
+            javascript1.0: OK<br />
+            javascript1.1: OK<br />
+            javascript1.2: OK<br />
+            javascript1.3: OK<br />
+            javascript1.4: OK<br />
+            javascript1.5: OK<br />
+            javascript1.6: OK<br />
+            javascript1.7: OK<br />
+            <span class="hl_1">jscript: </span><br />
+            <span class="hl_1">vbscript: </span><br />
+              <span class="hl_1">vbs: </span></td>
+          <td>javascript: OK<br />
+            ecmascript: OK<br />
+livescript: OK<br />
+javascript1.0: OK<br />
+javascript1.1: OK<br />
+javascript1.2: OK<br />
+javascript1.3: OK<br />
+javascript1.4: OK<br />
+javascript1.5: OK<br />
+javascript1.6: OK<br />
+javascript1.7: OK<br />
+jscript: OK<br />
+<span class="hl_1">vbscript: </span><br />
+<span class="hl_1">vbs: </span></td>
+          <td>javascript: OK<br />
+            ecmascript: OK<br />
+livescript: OK<br />
+javascript1.0: OK<br />
+javascript1.1: OK<br />
+javascript1.2: OK<br />
+javascript1.3: OK<br />
+javascript1.4: OK<br />
+javascript1.5: OK<br />
+<span class="hl_1">javascript1.6: </span><br />
+<span class="hl_1">javascript1.7: </span><br />
+jscript: OK<br />
+<span class="hl_1">vbscript: </span><br />
+<span class="hl_1">vbs: </span></td>
+        </tr>
+        <tr>
+          <th>Language Encode <sup>1</sup></th>
+          <td><span class="hl_1">javascript.encode: </span><br />
+            <span class="hl_1">ecmascript.encode: </span><br />
+            <span class="hl_1">livescript.encode: </span><br />
+            <span class="hl_1">javascript1.1.encode: </span><br />
+            <span class="hl_1">javascript1.7.encode: </span><br />
+            jscript.encode: OK<br />
+            vbscript.encode: OK<br />
+              <span class="hl_1">vbs.encode: </span></td>
+          <td><span class="hl_1">javascript.encode: </span><br />
+                    <span class="hl_1">ecmascript.encode: </span><br />
+                    <span class="hl_1">livescript.encode: </span><br />
+                    <span class="hl_1">javascript1.1.encode: </span><br />
+                    <span class="hl_1">javascript1.7.encode: </span><br />
+                    <span class="hl_1">jscript.encode: </span><br />
+                    <span class="hl_1">vbscript.encode: </span><br />
+<span class="hl_1">vbs.encode: </span></td>
+          <td><span class="hl_1">javascript.encode: </span><br />
+                    <span class="hl_1">ecmascript.encode: </span><br />
+                    <span class="hl_1">livescript.encode: </span><br />
+                    <span class="hl_1">javascript1.1.encode: </span><br />
+                    <span class="hl_1">javascript1.7.encode: </span><br />
+                    <span class="hl_1">jscript.encode: </span><br />
+                    <span class="hl_1">vbscript.encode: </span><br />
+                    <span class="hl_1">vbs.encode: </span></td>
+          <td>javascript.encode: ok<br />
+                    <span class="hl_1">ecmascript.encode: </span><br />                    livescript.encode: ok<br />
+                    <span class="hl_1">javascript1.1.encode: </span><br />
+                    <span class="hl_1">javascript1.7.encode: </span><br />
+                    <span class="hl_1">jscript.encode: </span><br />
+                    <span class="hl_1">vbscript.encode: </span><br />
+                    <span class="hl_1">vbs.encode: </span></td>
+        </tr>
+      </table>
+            <p class="comment">【注】：Encode 关键字代表了 Microsoft 提供的脚本加密（Script Encoder）机制，可以对脚本进行加密，包括 JScript 和 VBScript。经过加密的脚本，仅在 IE 下能正常运行，其它浏览器下不识别。这里的 Language Encode 仅代表对类似脚本类声明的支持程度，并不代表可以执行的浏览器就一定支持 Microsoft 的脚本加密（Script Encoder）机制。<br />
+            更详细信息可以参考：<a href="BT9006">BT9006: 只有 IE 的脚本引擎支持 JScript.Encode 和 VBScript.Encode</a></p>
+            <p>根据上表可以看出，各浏览器对于 &quot;type&quot; 和 &quot;language&quot; 属性本身均支持，但是对于其中设置的脚本语言类型识别与支持各异：</p>
+            <ul>
+                <li>&quot;type&quot; 和 &quot;language&quot; 同时存在时，所有浏览器均优先识别 &quot;type&quot; 属性内的脚本类型；</li>
+                <li>其中 IE 浏览器实际支持 JScript 和 VBScript 脚本语言标示以及 Script Encoder 加密；</li>
+                <li>Firefox Chrome Safari Opera 对 &quot;type&quot; 属性值的具体识别宽容度不一致，相对 Chrome Safari 对属性值正确性校验更加宽松，Firefox 的校验最为严格；</li>
+                <li>在 &quot;Language&quot; 属性值识别宽容度比较中，各浏览器中 Chrome Safari 依然最为宽松，IE 最为严格，Firefox 与 Opera 持平；</li>
+                <li>Language Encode 比较中，只有 IE 支持 JScript.Encoder 以及 VBScript.Encoder 类型设置，Firefox Chrome Safari均不支持，Opera 中则是该属性值被修复为默认的 Javascript 脚本语言后才有输出值。</li>
+      </ul>
+          <h2 id="solutions">解决方案</h2>
+            <p>为了保证脚本程序可以正常执行，除非特意使用仅 IE 支持的 VBScript 和 Script Encoder 机制外，应当将 SCRIPT 标记的 &quot;type&quot; 属性设置为 &quot;javascript&quot;，并且不要设置已经废弃的 &quot;Languange&quot; 属性。</p>
+            <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="BT9006">BT9006: 只有 IE 的脚本引擎支持 JScript.Encode 和 VBScript.Encode</a><a href="#"></a></li>
+      </ul>
+
+    <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.517.8 dev<br />
+              Safari 5.0.2<br />
+                            Opera 10.62</td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BG9002/script_language_type.html">script_language_type.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-20</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>SCRIPT JScript VBScript Encoder type language 识别程度</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

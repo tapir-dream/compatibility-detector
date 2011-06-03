@@ -1,0 +1,202 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RE5003: IE6 IE7 IE8(Q) Chrome Safari Opera 中某些条件下 empty cell 的宽度和高度为 0</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>TD 元素定义了一个包含数据的单元格，单元格可能为空（不包含数据）。</p>
+      <p>除非一个单元格中包含以下内容，否则即为空单元格 (empty cell)：</p>
+      <ul >
+        <li>浮动内容（包括空浮动元素）；</li>
+        <li>普通流内容（包括空元素），可以被 'white-space' 特性合并处理的空白符除外。</li>
+      </ul>
+      <p>即便一个单元格是空的，当其 'empty-cells' 特性未明确声明时（默认值为 'show'），应用于其上的 'border' 及 'background' 也能起作用。</p>
+      <p>关于 'empty cells' 特性的详细信息，请参考 CSS 2.1 规范 <a href="http://www.w3.org/TR/CSS2/tables.html#empty-cells">17.6.1.1 Borders and Backgrounds around empty cells: the 'empty-cells' property</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 WebKit 内核的浏览器中，当一个单元格为空（empty cell），且不存在 'padding' 及 'border' 时，该单元格的宽度和高度将为 0，即该单元格不可见。<br />
+      而在 IE6 IE7 IE8(Q) Opera 中空的单元格在某些情况下其宽度也会为 0，从而影响其他单元格的计算后的宽度。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>这个问题将造成表格的布局与预期不符。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q) Opera</th>
+          <td></td>
+        </tr>
+        <tr>
+          <th>Chrome Safari</th>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：<em>1.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  body { margin:0; }
+  * { font:20px 'Trebuchet MS'; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+TD:
+&lt;table cellpadding=&quot;0&quot; style=&quot;width:100px; border:1px solid black;&quot;&gt;
+  &lt;tr&gt;
+    &lt;td id=&quot;td&quot; style=&quot;background:gray; height:20px;&quot;&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;br /&gt;
+TH:
+&lt;table cellpadding=&quot;0&quot; style=&quot;width:100px; border:1px solid black;&quot;&gt;
+  &lt;tr&gt;
+    &lt;th id=&quot;th&quot; style=&quot;background:gray; height:20px;&quot;&gt;&lt;/th&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <ul>
+        <li>一个宽度 100px 表格元素，单元格边白为 0，表格最外层有 1px 的黑色边框，其内单元格无边框，高度为 20px，背景为灰色。</li>
+        <li>TABLE 元素宽 100px，边框宽度 1px，cellspacing 为默认的2，则 TD 或 TH 的可用的宽度为 100 - 2 * 1 - 2 * 2 = 94px。</li>
+      </ul>
+      <p>这段代码在各浏览器中运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>Chrome Safari</th>
+          <th>IE6 IE7 IE8 Firefox Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RE5003/1.gif" alt="snapshot" /></td>
+          <td><img src="../../tests/RE5003/2.gif" alt="snapshot" /></td>
+        </tr>
+      </table>
+      <p>可见，在 <em>Chrome Safari</em> 中，以上空单元格 TD 和 TH 均不可见，通过调试工具可以看到，他们的宽、高度均为 0。</li>
+      </ul>
+      <p>这是一个 Bug，触发条件是：</p>
+      <ol>
+        <li>TABLE 元素处于分离边框模型下，即 'border-collapse:separate' 特性值设置情况下。</li>
+        <li>TABLE 元素的 'table-layout' 特性的值为 'auto'。</li>
+        <li>TABLE 元素指定了宽度、</li>
+        <li>TABLE 元素的 border 属性没有设置或设置为 0。</li>
+        <li>TABLE 元素的 cellpadding 属性为 0。</li>
+        <li>TD、TH 元素为空单元格 (empty cell)。</li>
+        <li>TD、TH 元素没有设置宽度；</li>
+        <li>TD、TH 元素的 'padding' 为 0。</li>
+        <li>TD、TH 元素的边框宽度为 0。</li>
+        <li>与此 TD、TH 元素同一“列”中不再有其他的不会触发此 Bug 的单元格（TH 或 TD）。</li>
+      </ol>
+      <p>该 Bug 还将影响包含空单元格的表格中其他单元格尺寸的计算，同时在 IE6 IE7 IE8(Q) Opera 中，此时也会出现问题。如：<em>2.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  body { margin:0; }
+  * { font:20px 'Trebuchet MS'; }
+&lt;/style&gt;
+&lt;script&gt;
+  function $(id) { return document.getElementById(id); }
+  window.onload = function () {
+    $('info').appendChild(document.createTextNode('TD width: ' + $('td').offsetWidth));
+  }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;10&quot; style=&quot;width:200px; border:10px solid black;&quot;&gt;
+  &lt;tr&gt;
+    &lt;td id=&quot;td&quot; style=&quot;background:gold; width:50%;&quot;&gt;Some text&lt;/td&gt;
+    &lt;td style=&quot;background:gray;&quot;&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;div id=&quot;info&quot;&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>这段代码在各浏览器中运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q) Opera Chrome Safari</th>
+          <th>IE8(S) Firefox</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RE5003/3.gif" alt="snapshot" /></td>
+          <td><img src="../../tests/RE5003/4.gif" alt="snapshot" /></td>
+        </tr>
+      </table>
+      <p> 在 <em>IE6 IE7 IE8(Q) Opera Chrome Safari</em> 中，第一个单元格的宽度并不是表格中单元格可用宽度的一半，而是几乎布满整个表格行，这是由于第二个单元格触发此 Bug 导致其宽度为 0 导致的。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <ul>
+        <li>在空的 TD、TH 元素内添加 '&amp;nbsp;'；</li>
+        <li>为空的 TD、TH 元素显式设置一个宽度；</li>
+        <li>给 TABLE 设置样式 'table-layout:fixed'。</li>
+      </ul>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.11<br />
+              Chrome 8.0.522.11 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.63</td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RE5003/1.html">1.html</a><br /><a href="../../tests/RE5003/2.html">2.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-25</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>TD TH empty cell WebKit 空 单元格</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

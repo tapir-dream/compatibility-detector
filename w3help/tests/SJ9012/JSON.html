@@ -1,0 +1,17 @@
+<script type="text/javascript">
+	window.onload = function(){
+		var info = document.getElementById("info");
+		if(window.JSON){
+			var	jsonStr = '{"name": "w3help", "url": "www.w3help.org", "tech": ["js", "HTML", "CSS", 5, 4.01, 2.1],'
+					+ '"online": true, "category": {"RCA": "Root Cause Artical", "KB":"Knowledge Base"},'
+					+ '"version": 1}', p, w3help;
+					
+			w3help = JSON.parse(jsonStr);
+			for(p in w3help)
+				info.innerHTML += p + " : " + w3help[p] + "<br/>";
+			info.innerHTML += JSON.stringify(w3help);
+		} else 
+			info.innerHTML = "Not support JSON object.";
+	}
+</script>
+<div id="info" style="width:350px;"></div>

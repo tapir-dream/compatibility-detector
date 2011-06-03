@@ -1,0 +1,149 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HT1002: IE Opera 对 OBJECT 元素之前的 'non-breaking space' 处理有误</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>&quot;non-breaking space&quot; 即常见的 &quot;&amp;nbsp;&quot; 或 &quot;&amp;#160;&quot;  实体，它生成一个类似空格的间隔，但如其名字所示，浏览器不会以这个实体引发换行。</p>
+      <p>关于  &quot;&amp;nbsp;&quot;  的详细信息，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html401/struct/text.html#h-9.3.2.2">9.3.2</a> 中的内容。</p>
+      <p>关于 HTML的实体字符 的详细信息，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html401/sgml/entities.html">24.2.1</a> 中的内容。</p>
+      <p></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE6 IE7 IE8(Q) 中当 OBJECT 元素之前的行内文本由 &quot;&amp;nbsp;&quot;  构成，且 &quot;&amp;nbsp;&quot; 宽度之和小于容器宽度时，OBJECT 元素不发生折行；而 &quot;&amp;nbsp;&quot; 宽度之和超过容器时，OBJECT 元素会折行显示。而在 IE8(S) Opera 中，出现上述情况时，OBJECT 元素始终不会发生折行。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>OBJECT 元素常用于显示 Flash 及一些特殊组件，而 IE Opera 对 OBJECT 元素之前的行内文本为 &quot;&amp;nbsp;&quot; 时的怪异处理会造成 OBJECT 位置显示差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8 Opera</th>
+          <td>对 OBJECT 元素之前的 'non-breaking space' 处理有误。</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>当 OBJECT 元素之前的行内文本由 &quot;&amp;nbsp;&quot; 构成时，在 IE Opera 中，OBJECT 元素的位置可能会出现异常。</p>
+
+      <p>分析以下代码：</p>
+<pre>&lt;div style=&quot;width:60px; border:5px solid black; background:#DDD;&quot;&gt;
+    &lt;div style=&quot;width:30px; background:#AAA;&quot;&gt;
+        &lt;span style=&quot;background:#666;&quot;&gt;<span class="hl_3">123</span>&lt;/span&gt;&lt;object type=&quot;application/x-shockwave-flash&quot; style=&quot;width:30px; height:30px;&quot;&gt;&lt;/object&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div style=&quot;width:60px; border:5px solid black; background:#DDD;&quot;&gt;
+    &lt;div style=&quot;width:30px; background:#AAA;&quot;&gt;
+        &lt;span style=&quot;background:#666;&quot;&gt;<span class="hl_4">&amp;nbsp;&amp;nbsp;</span>&lt;/span&gt;&lt;object type=&quot;application/x-shockwave-flash&quot; style=&quot;width:30px; height:30px;&quot;&gt;&lt;/object&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div style=&quot;width:60px; border:5px solid black; background:#DDD;&quot;&gt;
+    &lt;div style=&quot;width:30px; background:#AAA;&quot;&gt;
+        &lt;span style=&quot;background:#666;&quot;&gt;<span class="hl_4">&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;</span>&lt;/span&gt;&lt;object type=&quot;application/x-shockwave-flash&quot; style=&quot;width:30px; height:30px;&quot;&gt;&lt;/object&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</pre>
+      <p>上面代码分为三组，每组均为 DIV 容器内包含一个行内 SPAN 及一个 OBJECT，容器的宽度设置为刚好不够在一行上容纳 SPAN 及 OBJECT 。每组代码的区别为 SPAN 元素的内容，</p>
+      <ul>
+        <li>第一组为普通文本；</li>
+        <li>第二组为两个 &quot;&amp;nbsp;&quot; ；</li>
+        <li>第三组为四个 &quot;&amp;nbsp;&quot; 。</li>
+      </ul>
+      <p>其中第三组中的4个 &quot;&amp;nbsp;&quot; 构成的 SPAN 元素的宽度就已经超出了容器 DIV 的宽度设定。</p>
+      <p>这段代码在不同浏览器中运行结果如下（ 忽略 IE6 IE7 IE8(Q) 中 width/height 的设定值可能被其内容撑大的问题 ）：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Opera</th>
+          <th>Firefox Chrome Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/HT1002/screenshot1.gif" alt="screen shot 1" /></td>
+          <td><img src="../../tests/HT1002/screenshot2.gif" alt="screen shot 2" /></td>
+          <td><img src="../../tests/HT1002/screenshot3.gif" alt="screen shot 3" /></td>
+        </tr>
+      </table>
+      <p>可见，当 OBJECT 元素与其之前的行内文本的宽度之和超过其容器时，</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8(Q)</em> 中，当 OBJECT 之前的行内文本由 &quot;<strong>&amp;nbsp;</strong>&quot; 构成，且 &quot;<strong>&amp;nbsp;</strong>&quot;  宽度之和小于容器宽度时，OBJECT元素不发生折行；而 &quot;<strong>&amp;nbsp;</strong>&quot;  宽度之和超过容器时，OBJECT元素会折行显示；</li>
+        <li>在 <em>IE8(S) Opera</em> 中，当OBJECT之前的行内文本由 &quot;<strong>&amp;nbsp;</strong>&quot; 构成，且 &quot;<strong>&amp;nbsp;</strong>&quot;   宽度之和小于容器宽度时，OBJECT元素不发生折行；而 &quot;<strong>&amp;nbsp;</strong>&quot;   宽度之和超过容器时，OBJECT 元素仍然不会折行显示；</li>
+        <li>在 <em>Firefox Chrome Safari</em> 中，不管 OBJECT 元素之前为何种文本，在宽度不够时 OBJECT 均会按照W3C规范的要求而折行。</li>
+      </ul>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>合理的设置容器及 OBJECT 元素的宽度。</p>
+      <ul>
+        <li>若需要 OBJECT 元素不发生折行，则为容器设置  &quot;white-space:nowrap&quot; ；</li>
+        <li>若需要 OBJECT 元素折行，则在 OBJECT 元素之前加入明确的换行符 &quot;&lt;br /&gt;&quot; 。</li>
+      </ul>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.3<br />
+              Chrome 5.0.396.0 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.53
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HT1002/objectnbsp.html">objectnbsp.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-09</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>OBJECT nbsp non-breaking space inline 空格</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HF1014: 各浏览器对 TEXTAREA 元素的换行处理存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 HTML4.01 规范中的描述，TEXTAREA 元素创建一个多行的<a href="http://www.w3.org/TR/html401/interact/forms.html#text-input">文本输入</a>控件，用户端使用 TEXTAREA 元素的内容作为控件的<a href="http://www.w3.org/TR/html401/interact/forms.html#initial-value">初始值</a>。</p>
+      <p>在 HTML5 草案中，TEXTAREA 元素加入了新的属性，wrap 属性是一个枚举类型属性，其拥有两种值：soft (缺省值)——浏览器会自动通过软回车 (CR+LF) 换行，软回车换行符不会提交到服务端；hard——浏览器会自动插入硬回车换行，插入的换行符会提交到服务端。</p>
+      <p>关于 TEXTAREA 元素的更多信息，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html401/interact/forms.html#h-17.7">17.7 The TEXTAREA element</a> 和 HTML5 草案 <a href="http://www.w3.org/TR/html5/the-button-element.html#attr-textarea-wrap">4.10.13 The textarea element</a> 中的内容。</p>
+      <p></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>Opera 中 TEXTAREA 元素默认的 'word-wrap' 特性值为 'normal'，所以其 TEXTAREA 元素默认对于连续单词不会自动折行。<br />
+      Firefox 中 TEXTAREA 元素的 wrap 属性设置为 hard 后，并不会按照 HTML5 草案中所述，将插入的换行符发送到服务端。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题会导致默认状态下的 TEXTAREA 元素内字符的换行处理在不同浏览器中存在差异。同时若 TEXTAREA 元素的 wrap 属性设置为 hard，则提交到服务端的 TEXTAREA 元素的数据也会在不同浏览器出现差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>HTML4.01 规范中并没有明确说明 TEXTAREA 元素在换行问题上究竟应如何处理，下面先观察各浏览器在默认状态下 TEXTAREA 元素的换行情况。</p>
+      <p>分析以下代码：<em>textarea.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  * { margin:0; padding:0; border:0 none; font:24px Consolas; }
+  textarea { width:200px; height:100px; background:wheat; overflow:auto; resize:none; }
+&lt;/style&gt;
+&lt;script&gt;
+  function $(id) { return document.getElementById(id); }
+  window.onload = function () {
+    if (!window.getComputedStyle) {
+      window.getComputedStyle = function ($target) {
+        return $target.currentStyle;
+      };
+    }
+    $('info').innerHTML = 'word-wrap: ' + getComputedStyle($('ta'), null).wordWrap;
+    document.forms[0].submit();
+  }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;form method=&quot;post&quot; action=&quot;submit.php&quot; target=&quot;submit&quot;&gt;
+  &lt;textarea id=&quot;ta&quot; name=&quot;ta&quot;&gt; <span class="hl_1">ABCDEFGHIJKLMNOPQRSTUVWXYZ</span>&lt;/textarea&gt;
+&lt;/form&gt;
+&lt;div id=&quot;info&quot; style=&quot;font-size:16px;&quot;&gt;&lt;/div&gt;
+&lt;br /&gt;
+&lt;iframe name=&quot;submit&quot; style=&quot;width:200px; height:100px;&quot; frameborder=&quot;0&quot;&gt;&lt;/iframe&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>服务端：<em>submit.php</em></p>
+      <pre>&lt;style&gt;
+  * { margin:0; padding:0; font:16px Consolas; }
+  body { background:lightgreen; }
+&lt;/style&gt;
+&lt;pre id=&quot;p&quot;&gt;
+&lt;?php
+  if (isset($_POST['ta'])) {
+    echo $_POST['ta'];
+  } else if (isset($_POST['ta1'])) {
+    echo $_POST['ta1'];
+  } else if (isset($_POST['ta2'])) {
+    echo $_POST['ta2'];
+  }
+?&gt;
+&lt;/pre&gt;</pre>
+      <p>TEXTAREA 元素内包含了连续的英文字符，则在通常情况下，这 26 个字符之间无法断开。通过脚本获取到 TEXTAREA 元素 'word-wrap' 特性计算后的样式值。然后将 TEXTAREA 元素所在表单提交至服务端 submit.php，服务端原样返回接收到的参数内的数据。</p>
+      <p>这段代码在各浏览器中运行效果为：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox Chrome Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/HF1014/textarea_1.gif" alt="" /></td>
+          <td><img src="../../tests/HF1014/textarea_2.gif" alt="" /></td>
+          <td><img src="../../tests/HF1014/textarea_3.gif" alt="" /></td>
+        </tr>
+      </table>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8</em> 中，虽然无法通过脚本检测到默认状态下 TEXTAREA 元素的 'word-wrap' 特性的值，但现象上 TEXTAREA 元素对于连续单词默认会自动折行；</li>
+        <li>在 <em>Firefox Chrome Safari</em> 中，TEXTAREA 元素默认的 'word-wrap'<sup>1</sup> 特性值为 'break-word'，即当遇到一个一般情况下不可截断的字符串时，浏览器会在必要时截断并在新行显示被截断内容。所以 TEXTAREA 元素对于连续单词默认会自动折行；</li>
+        <li>在 <em>Opera</em> 中，TEXTAREA 元素默认的 'word-wrap' 特性值为默认值 'normal'，即遵循默认的换行规则。所以对于连续的英文字符组成的单词，浏览器无法对其折行。<br />
+        <strong>将 TEXTAREA 元素的 'word-wrap' 特性值设置为 'break-word' 即可在 Opera 中使 TEXTAREA 元素对于连续单词实现自动折行。</strong></li>
+      </ul>
+      <p>通过 IFRAME 内的返回的文字可以看到各浏览器默认情况下均不会将回车换行符提交到服务端，即 TEXTAREA 元素 wrap 属性默认值为 soft。</p>
+      <p class="comment">注 1: 关于 CSS3 草案中的 'word-wrap' 特性，请参见相关报告链接。</p>
+      <br />
+      <p>下面分析 TEXTAREA 元素的 wrap 属性对提交到服务端的数据的影响。</p>
+      <p>分析以下代码：<em>textarea_wrap.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  * { margin:0; padding:0; border:0 none; font:24px Consolas; }
+  h1 { font-weight:bold; }
+  textarea { width:200px; height:100px; background:wheat; overflow:auto; resize:none; <span class="hl_2">word-wrap:break-word;</span> }
+&lt;/style&gt;
+&lt;script&gt;
+  function $(id) { return document.getElementById(id); }
+  window.onload = function () {
+    if (!window.getComputedStyle) {
+      window.getComputedStyle = function ($target) {
+        return $target.currentStyle;
+      };
+    }
+    document.forms[0].submit();
+    document.forms[1].submit();
+  }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;h1&gt;wrap=&quot;soft&quot;&lt;/h1&gt;
+&lt;form method=&quot;post&quot; action=&quot;submit.php&quot; target=&quot;submit1&quot;&gt;
+  &lt;textarea id=&quot;ta1&quot; name=&quot;ta1&quot; <span class="hl_4">wrap=&quot;soft&quot;</span>&gt;ABCDEFGHIJKLMNOPQRSTUVWXYZ&lt;/textarea&gt;
+&lt;/form&gt;
+&lt;br /&gt;
+&lt;iframe name=&quot;submit1&quot; style=&quot;width:200px; height:100px;&quot; frameborder=&quot;0&quot;&gt;&lt;/iframe&gt;
+&lt;br /&gt;
+&lt;br /&gt;
+&lt;h1&gt;wrap=&quot;hard&quot;&lt;/h1&gt;
+&lt;form method=&quot;post&quot; action=&quot;submit.php&quot; target=&quot;submit2&quot;&gt;
+  &lt;textarea id=&quot;ta2&quot; name=&quot;ta2&quot; <span class="hl_4">wrap=&quot;hard&quot;</span> cols=&quot;10&quot;&gt;ABCDEFGHIJKLMNOPQRSTUVWXYZ&lt;/textarea&gt;
+&lt;/form&gt;
+&lt;br /&gt;
+&lt;iframe name=&quot;submit2&quot; style=&quot;width:200px; height:100px;&quot; frameborder=&quot;0&quot;&gt;&lt;/iframe&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>两个 TEXTAREA 元素均设定了 <span class="hl_2">word-wrap:break-word;</span> 以保证在所有浏览器在均可以实现连续单词自动折行。它们的 wrap 属性分别为 soft 及 hard，将服务端返回的数据放置到 PRE 元素内以便查看其原始空白符结构。</p>
+      <p>这段代码在各浏览器中运行效果为：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Chrome Safari Opera</th>
+          <th>Firefox</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/HF1014/textarea_wrap_1.gif" alt="" /></td>
+          <td><img src="../../tests/HF1014/textarea_wrap_2.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>可见，</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8 Chrome Safari Opera</em> 中，若 TEXTAREA 元素设定了 <span class="hl_4">wrap=&quot;hard&quot;</span>，则浏览器按照 HTML5 草案中所述，将插入的换行符发送到了服务端；</li>
+        <li>在 <em>Firefox</em> 中，即使 TEXTAREA 元素设定了 <span class="hl_4">wrap=&quot;hard&quot;</span>，而服务端返回的内容中却不包括换行符。</li>
+      </ul>
+
+
+      <h2 id="solutions">解决方案</h2>
+      <p>若需要 TEXTAREA 元素对于连续单词实现自动折行，需要为 TEXTAREA 元素设定 <span class="hl_2">word-wrap:break-word;</span> 以消除各浏览器默认样式表的差异。</p>
+      <p>若不需要 TEXTAREA 元素对于连续单词实现自动折行，针对非 IE 浏览器，将 'word-wrap' 特性设置为 'normal' 即可。通过所有浏览器均支持通过为 TEXTAREA 元素设置 <span class="hl_4">wrap=&quot;off&quot;</span> 达到相同的效果。off 值的含义参见 MSDN <a href="http://msdn.microsoft.com/en-us/library/ms535152(VS.85).aspx">WRAP Attribute | wrap Property</a>。</p>
+      <p>如：<em>ta_res.html</em><br /><img src="../../tests/HF1014/res.gif" alt="" style="float:left; margin-right:20px;" /></p><pre style="overflow:hidden;">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  * { margin:0; padding:0; border:0 none; font:24px Consolas; }
+  textarea { width:200px; height:100px; background:wheat; overflow:auto; resize:none; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+Need wordwrapping:&lt;br /&gt;
+&lt;textarea style=&quot;word-wrap:break-word;&quot;&gt;ABCDEFGHIJKLMNOPQRSTUVWXYZ&lt;/textarea&gt;
+&lt;br /&gt;
+Do not need wordwrapping:&lt;br /&gt;
+&lt;textarea wrap=&quot;off&quot;&gt;ABCDEFGHIJKLMNOPQRSTUVWXYZ&lt;/textarea&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>Firefox 针对 <span class="hl_4">wrap=&quot;hard&quot;</span> 无法将硬回车换行符发送到服务端的问题需要等待厂商修复。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="RT1008">RT1008: 'word-wrap:break-word' 导致在 IE6, IE7 及 IE8(Q) 中空格不被忽略</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.517.17 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HF1014/textarea.html">textarea.html</a><br />
+            <a href="../../tests/HF1014/textarea_wrap.html">textarea_wrap.html</a><br />
+            <a href="../../tests/HF1014/ta_res.html">ta_res.html</a>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-26</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>TEXTAREA wrap hard soft off word-wrap break-word break 折行 文本框</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

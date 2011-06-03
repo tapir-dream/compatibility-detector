@@ -1,0 +1,368 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SD9026: 各浏览器对 onunload 事件的支持与触发条件实现有差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>在 HTML 4.01 规范中关于 onunload 事件的描述是：当 document 从 window 中移除时，触发 onunload 事件。</p>
+      <p>关于 HTML 4.01 规范中 onunload 内在事件说明：<a href="http://www.w3.org/TR/html401/interact/scripts.html#adef-onunload">http://www.w3.org/TR/html401/interact/scripts.html#adef-onunload</a> 。</p>
+      <p>MSDN 中关于 onunload 事件的描述：<a href="http://msdn.microsoft.com/en-us/library/ms536973(VS.85).aspx
+">http://msdn.microsoft.com/en-us/library/ms536973(VS.85).aspx
+</a> 。</p>
+      <p>Mozilla developer center 中关于 onunload 事件的描述：<a href="https://developer.mozilla.org/en/DOM/window.onunload
+">https://developer.mozilla.org/en/DOM/window.onunload
+</a> 。</p>
+      <h2 id="description">问题描述</h2>
+      <p>当 document 从 window 中移除，将触发 onunload 事件，各浏览器对 onunload 事件的支持与触发条件实现有差异。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>各浏览器对 onunload 事件的支持与触发条件实现有差异，所以在 onunload 事件中书写的方法可能在一些浏览器中没有被执行。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>根据 MSDN 中描述，IE 的 onunload 事件可由以下这些条件触发：</p>
+      <ul>
+        <li>关闭当前浏览器窗口。</li>
+        <li>导航到另一个进入一个新的地址或选择一个喜欢的位置。</li>
+        <li>单击后退，前进，刷新，或主页按钮。</li>
+        <li>点击一个链接到新页面。</li>
+        <li>调用 anchor.click方法。</li>
+        <li>调用 document.write方法。</li>
+        <li>调用 document.open方法。</li>
+        <li>调用 document.close方法。</li>
+        <li>调用 window.close方法。</li>
+        <li>调用 window.open方法，窗口名称设置值为 _self。</li>
+        <li>调用 window.navigate 或 NavigateAndFind方法。</li>
+        <li>调用 location.replace 方法。</li>
+        <li>调用 location.reload 方法。</li>
+        <li>指定一个 location.href 属性的新值。</li>
+        <li>使用 submit 按键提交表单，或调用 form.submit 方法。 </li>
+      </ul>
+      <p>在这些触发条件中绝大多数都始页面产生了跳转，但还缺少一些一种常见情况说明，即页面 URL 可能发生了变化但没有产生跳转。比如 "javascipt:" "mailto:" 等常见的浏览器内置伪协议，以及由第三方或用户自定义的为协议时，页面并不跳转，而是根据伪协议执行指定的行为。这个情况应加入到触发条件中。</p>
+      <p>根据以上所有这些触发条件，我们构建如下代码来检测各浏览器对 onunload 事件的支持程度与触发条件：</p>
+<pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta content="text/html; charset=utf-8" http-equiv="Content-Type" /&gt;
+&lt;/head&gt;
+&lt;body onunload="alert('执行 onunload');"&gt;
+请手工关闭当前浏览器窗口。&lt;br/&gt;
+请手工在地址栏输入其他页面地址或从收藏夹、历史记录中将页面导航其他站点。&lt;br/&gt;
+请手工单击后退，前进，刷新，或主页按钮。&lt;br/&gt;
+&lt;a href="http://www.google.com" id="A"&gt;点击一个链接到新页面&lt;/a&gt;&lt;br /&gt;
+&lt;button onclick="document.getElementById('A').click()"&gt;调用 anchor.click 方法&lt;/button&gt;&lt;br /&gt;
+&lt;button onclick="document.write('A')"&gt;调用 document.write 方法&lt;/button&gt;&lt;br /&gt;
+&lt;button onclick="document.open()"&gt;调用 document.open 方法&lt;/button&gt;&lt;br /&gt;
+&lt;button onclick="document.close()"&gt;调用 document.close 方法&lt;/button&gt;&lt;br /&gt;
+&lt;button onclick="window.open('http://www.google.com','_self')"&gt;调用 window.open方法，窗口名称设置值为 _self&lt;/button&gt;&lt;br /&gt;
+&lt;button onclick="try{window.navigate('http://www.google.com')}catch(e){alert('不支持此方法')}"&gt;调用 window.navigate 方法&lt;/button&gt;&lt;br /&gt;
+&lt;button onclick="try{window.external.NavigateAndFind('http://www.google.com','','')}catch(e){alert('不支持此方法')}"&gt;调用 NavigateAndFind 方法&lt;/button&gt;&lt;br /&gt;
+&lt;button onclick="location.replace('http://www.google.com')"&gt;调用 location.replace 方法&lt;/button&gt;&lt;br /&gt;
+&lt;button onclick="location.reload()"&gt;调用 location.reload 方法&lt;/button&gt;&lt;br /&gt;
+&lt;button onclick="location.href='http://www.google.com'"&gt;指定一个 location.href 属性的新值&lt;/button&gt;&lt;br /&gt;
+&lt;form action="http://www.google.com" id="B"&gt;
+&lt;input type="submit" value="提交具有 action 属性的一个表单"&gt;
+&lt;/form&gt;
+&lt;button onclick="document.getElementById('B').submit()"&gt;调用 form.submit 方法&lt;/button&gt;&lt;br /&gt;
+&lt;a href="javascript:"&gt;调用 javascipt: 伪协议&lt;/a&gt;&lt;br /&gt;
+&lt;a href="mailto:"&gt;调用 mailto: 伪协议&lt;/a&gt;&lt;br /&gt;
+&lt;a href="custom:"&gt;调用自定义伪协议&lt;/a&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+
+</pre>
+      <p>执行结果汇总入表：</p>
+      <table class="compare">
+              <tr>
+                <th>&nbsp;</th>
+                <th>IE6</th>
+                <th>IE7</th>
+                <th>IE8</th>
+                <th>Firefox</th>
+                <th>Chrome</th>
+                <th>Safari</th>
+                <th>Opera</th>
+              </tr>
+              <tr>
+                <th>关闭当前浏览器窗口</th>
+                <td><span class="hl_4">事件被触发</span></td>
+                <td><span class="hl_2">事件未触发</span></td>
+                <td><span class="hl_2">事件未触发</span></td>
+                <td><span class="hl_4">事件被触发</span></td>
+                <td><span class="hl_4">事件被触发</span></td>
+                <td><span class="hl_2">事件未触发</span></td>
+                <td><span class="hl_2">事件未触发</span></td>
+              </tr>
+              <tr>
+                <th>导航到另一个进入一个新的地址或选择一个喜欢的位置</th>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_2"> 事件未触发</span></td>
+              </tr>
+              <tr>
+                <th>单击后退，前进，刷新，或主页按钮</th>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_2"> 事件未触发</span></td>
+              </tr>
+              <tr>
+                <th>点击一个链接到新页面</th>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+              </tr>
+              <tr>
+                <th>调用 anchor.click方法</th>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_5">不支持此方法</span><sup>1</sup></td>
+                <td><span class="hl_5">不支持此方法</span><sup>1</sup></td>
+                <td><span class="hl_5">不支持此方法</span><sup>1</sup></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+              </tr>
+              <tr>
+                <th>调用 document.write方法</th>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_2"> 事件未触发</span></td>
+                <td><span class="hl_2"> 事件未触发</span></td>
+                <td><span class="hl_2"> 事件未触发</span></td>
+                <td><span class="hl_2"> 事件未触发</span></td>
+              </tr>
+              <tr>
+                <th>调用 document.open方法</th>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_2"> 事件未触发</span></td>
+                <td><span class="hl_2"> 事件未触发</span></td>
+                <td><span class="hl_2"> 事件未触发</span></td>
+                <td><span class="hl_2"> 事件未触发</span></td>
+              </tr>
+              <tr>
+                <th>调用 document.close方法</th>
+                <td><span class="hl_2"> 事件未触发</span></td>
+                <td><span class="hl_2"> 事件未触发</span></td>
+                <td><span class="hl_2"> 事件未触发</span></td>
+                <td><span class="hl_2"> 事件未触发</span></td>
+                <td><span class="hl_2"> 事件未触发</span></td>
+                <td><span class="hl_2"> 事件未触发</span></td>
+                <td><span class="hl_2"> 事件未触发</span></td>
+              </tr>
+              <tr>
+                <th>调用 window.open方法，窗口名称设置值为 _self</th>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+              </tr>
+              <tr>
+                <th>调用 window.navigate </th>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_5">不支持此方法</span><sup>2</sup></td>
+                <td><span class="hl_5">不支持此方法</span><sup>2</sup></td>
+                <td><span class="hl_5">不支持此方法</span><sup>2</sup></td>
+                <td><span class="hl_2">事件未触发</span></td>
+              </tr>
+              <tr>
+                <th>调用  NavigateAndFind方法</th>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_5">不支持此方法</span><sup>3</sup></td>
+                <td><span class="hl_5">不支持此方法</span><sup>3</sup></td>
+                <td><span class="hl_5">不支持此方法</span><sup>3</sup></td>
+                <td><span class="hl_5">不支持此方法</span><sup>3</sup></td>
+              </tr>
+              <tr>
+                <th>调用 location.replace 方法</th>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_2"> 事件未触发</span></td>
+              </tr>
+              <tr>
+                <th>调用 location.reload 方法</th>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_2"> 事件未触发</span></td>
+              </tr>
+              <tr>
+                <th>指定一个 location.href 属性的新值</th>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+              </tr>
+              <tr>
+                <th>使用 submit 按键提交表单</th>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+              </tr>
+              <tr>
+                <th>调用 form.submit 方法</th>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+                <td><span class="hl_4"> 事件被触发</span></td>
+              </tr>
+              <tr>
+                <th>调用 javascipt: 伪协议</th>
+                <td><span class="hl_2">事件未触发</span></td>
+                <td><span class="hl_2">事件未触发</span></td>
+                <td><span class="hl_2">事件未触发</span></td>
+                <td><span class="hl_2">事件未触发</span></td>
+                <td><span class="hl_2">事件未触发</span></td>
+                <td><span class="hl_2">事件未触发</span></td>
+                <td><span class="hl_2">事件未触发</span></td>
+              </tr>
+              <tr>
+                <th>调用 mailto: 伪协议</th>
+                <td><span class="hl_2">事件未触发</span></td>
+                <td><span class="hl_2">事件未触发</span></td>
+                <td><span class="hl_2">事件未触发</span></td>
+                <td><span class="hl_2">事件未触发</span></td>
+                <td><span class="hl_2">事件未触发</span></td>
+                <td><span class="hl_2">事件未触发</span></td>
+                <td><span class="hl_2">事件未触发</span></td>
+              </tr>
+              <tr>
+                <th>调用自定义伪协议</th>
+                <td><span class="hl_4">事件被触发</span></td>
+                <td><span class="hl_2">事件未触发</span></td>
+                <td><span class="hl_2">事件未触发</span></td>
+                <td><span class="hl_2">事件未触发</span></td>
+                <td><span class="hl_2">事件未触发</span></td>
+                <td><span class="hl_4">事件被触发</span></td>
+                <td><span class="hl_2">事件未触发</span></td>
+              </tr>
+            </table>
+      <p class="comment">【注1】：直接调用链接元素的 click 方法模拟鼠标点击事件，只有 IE 和 Opera 支持。</p>
+        <p class="comment">【注2】：使用 window.navigate 方法导航网页仅被 IE Opera 支持，可参考 MSDN 原文：<a href="http://msdn.microsoft.com/en-us/library/ms536638(v=VS.85).aspx">navigate Method</a>。</p>
+        <p class="comment">【注3】： NavigateAndFind 方法处于 window.external 对象中，external 对象也仅 IE 支持，可参考 MSDN 原文：<a href="http://msdn.microsoft.com/en-us/library/ms536641(v=VS.85).aspx">NavigateAndFind Method</a> 和本站文章   <a href="BT9012">BT9012: IE 的 external 对象提供的方法是 IE 特有的</a> 。</p>
+
+      <p>结合汇总表可以看出：</p>
+      <ul>
+        <li>点击一个链接到新页面、调用 window.open方法窗口名称设置值为 _self、指定一个 location.href 属性的新值、使用 submit 按键提交表单、调用 form.submit 方法在各浏览器下 onunload 事件都会被触发。</li>
+        <li>其他情况各个浏览器都有所不同。</li>
+      </ul>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>各浏览器的支持以及事件触发条件差异较多，需谨慎使用。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="SD9022">SD9022: 各浏览器对页面 onload 事件处理方式不一致</a></li>
+        <li><a href="BX2047">BX2047: 各浏览器对 onbeforeunload 事件的支持与触发条件实现有差异</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.552.0 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.63
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/SD9026/onunload.html">onunload.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-14</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>onunload</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

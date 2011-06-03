@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RF2002: IE6 IE7 IE8 Opera 在某些情况下中文字符的最终字号不是设定值</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 CSS2.1 规范中的描述，'font-size' 特性指定了文字的方块尺寸，其值与 em 单位一致。某些情况下的文字可能会溢出其所指定的方块区域。<br />
+      规范中提到，'font-size' 特性的值不能是负数值。</p>
+      <p>关于 'font-size' 特性的更多信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/fonts.html#font-size-props">15.7 Font size: the 'font-size' property</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE 中若中文字符的 'font-family' 特性设定的字体为某些英文字体，则在比 12px 小的字号下，中文字符最终使用的字号可能与设定的 'font-size' 特性的字号不符；Opera 中也有类似的情况。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>若针对中文字符使用了小于 12px 的字号，则中文字符实际使用的字号在各浏览器中将会产生差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <th>IE8(S)</th>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <th>Opera</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>Chrome Safari Opera 中均有最小字号限制，本文为了测试，调整了 Safari Opera 的相关选项，Chrome 的浏览器语言改为“英语”。</p>
+      <p>根据问题描述，构建如下测试代码：</p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta charset="gbk" /&gt;
+&lt;script&gt;
+  function $(id) { return document.getElementById(id); }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div style="float:left; border:1px solid black; font-family:'Arial'; line-height:1.5;"&gt;
+&lt;script&gt;
+for (var i = 3; i &lt; 15; i++) {
+  document.write('&lt;div style="overflow:hidden; zoom:1;"&gt;&lt;span style="float:left;background:gold;font-size:' + i + 'px"&gt;&lt;span id="d' + i + '"&gt;永&lt;/span&gt;&lt;/span&gt;\
+    &lt;span id="e' + i + '" style="float:left;"&gt;&lt;/span&gt;&lt;/div&gt;');
+  $("e" + i).innerHTML = i + "-" + $("d" + i).offsetWidth;
+}
+&lt;/script&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上述代码中，'font-family' 特性值为 'Arial'，为英文字体，所以若遇到中文字符，则浏览器会启用各自的默认字体渲染中文。代码动态生成了若干“永”字，'font-size' 特性的值由 3px 至 14px 依次递增。通过脚本检测每一个“永”字所在 SPAN 元素的 offsetWidth。</p>
+      <p>这段代码在各浏览器中运行效果为：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox Chrome Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RF2002/fontsize1.gif" alt="" /><sup>1</sup></td>
+          <td><img src="../../tests/RF2002/fontsize2.gif" alt="" /></td>
+          <td><img src="../../tests/RF2002/fontsize3.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>根据截图可知，</p>
+      <ul>
+        <li>在 <em>Firefox Chrome Safari</em> 中，中文字符“永”的最终使用值与为其设定的 'font-size' 特性指定的值相符；</li>
+        <li>在 <em>IE6 IE7 IE8</em> 中，中文字符在设定的 'font-size' 特性值为 9px 至 11px 区间内时，其最终使用值与设定值不符，其中 9px 最终使用为 11px，而 10px、11px 则最终使用为 12px；</li>
+        <li>在 <em>Opera</em> 中，同样是 9px 至 11px 区间内，'font-size' 特性使用值与设定值不符，最终使用值均为 12px。</li>
+      </ul>
+      <p class="comment">注 1: IE 中当 'font-family' 中指定的英文字体不同时，这个最终使用值也会不同。</p>
+      <br />
+      <p>下面查看 'font-family' 特性设定中文字体时：</p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta charset="gbk" /&gt;
+&lt;script&gt;
+  function $(id) { return document.getElementById(id); }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div style="float:left; border:1px solid black; font-family:'宋体'; line-height:1.5;"&gt;
+&lt;script&gt;
+for (var i = 3; i &lt; 15; i++) {
+  document.write('&lt;div style="overflow:hidden; zoom:1;"&gt;&lt;span style="float:left;background:gold;font-size:' + i + 'px"&gt;&lt;span id="m' + i + '"&gt;永&lt;/span&gt;&lt;/span&gt;\
+    &lt;span id="n' + i + '" style="float:left;"&gt;&lt;/span&gt;&lt;/div&gt;');
+  $("n" + i).innerHTML = i + "-" + $("m" + i).offsetWidth;
+}
+&lt;/script&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>这段代码在各浏览器中运行效果为：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Firefox Chrome Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RF2002/fontsize4.gif" alt="" /></td>
+          <td><img src="../../tests/RF2002/fontsize5.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>根据截图可知，</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8 Firefox Chrome Safari</em> 中，中文字符“永”的最终使用值与为其设定的 'font-size' 特性指定的值相符；</li>
+        <li>在 <em>Opera</em> 中，与上一个测试样例中一样，9px 至 11px 区间内，'font-size' 特性使用值与设定值不符，最终使用值均为 12px。</li>
+      </ul>
+      <br />
+      <p>由于中文字符的特殊性，其在 12px 以下的字号时，阅读将会变得非常困难，浏览器为了保持可读性，可能针对中文字符采取了某种做法以保证其在 12px 以下字号时仍然清晰可读。可以看到 IE Opera 均不约而同的选择了对 'font-size' 为 9px 至 11px 时的中文字符的字号进行修正。除此之外，Chrome 当浏览器语言选择为“中文”是，直接限制了最小字号为 12px，也是为了保证中文字符的可读性。</p>
+
+
+      <h2 id="solutions">解决方案</h2>
+      <p>针对包含中文字符的页面，应避免为中文字符设定小于 12px 的字号，这既是保证了中文字符的可读性，也解决了各浏览器针对这个问题所产生的差异。</p>
+
+      <h2 id="see_also">参见</h2>
+
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br/>
+              IE7<br/>
+              IE8<br/>
+              Firefox 3.6.10<br/>
+              Chrome 7.0.517.8 dev (英文版)<br/>
+              Safari 5.0.2<br />
+              Opera 10.62
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RF2002/fontsize.html">fontsize.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-20</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>font-size 字号 chinese 中文</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

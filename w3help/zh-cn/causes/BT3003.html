@@ -1,0 +1,132 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BT3003: 只有 IE 支持 TABLE 元素的 'bordercolordark' 和 'bordercolorlight' 属性</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>只有 IE 支持 'bordercolordark' 属性和 'bordercolorlight' 属性</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>非 IE 浏览器使用 'bordercolordark' 属性和 'bordercolorlight' 属性页面没有相应效果</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>在 IE 下允许在一个 TABLE 中设置两种不同的边框颜色，'bordercolordark' 设置外边框的 'right' 和 'bottom' 颜色及内边框的 'top' 和 'left' 颜色, 'bordercolorlight' 设置外边框的 'top' 和 'left' 颜色及内边框的 'right' 和 'bottom' 颜色。（参考 <a href="http://www.steelwebsolutions.com/classroom/html_tables_tutorial/tablebordercolorlight.html">这篇文章</a>）。</p>
+      <p>TABLE 元素的 '<a href="http://www.w3.org/TR/CSS21/tables.html#borders">border-collapse</a>' 属性，默认值是 'separate'。当 border="1" 时，在页面看起来就像有两个边框，一个外边框，一个内边框。</p>
+      <p>
+        更多参考：<br/>
+        在 MSDN 中，'bordercolordark' 说明参见：<a href="http://msdn.microsoft.com/en-us/library/ms533514(v=VS.85).aspx">http://msdn.microsoft.com/en-us/library/ms533514(v=VS.85).aspx</a>。<br/>
+        在 MSDN 中，'bordercolorlight' 说明参见：<a href="http://msdn.microsoft.com/en-us/library/ms533515(VS.85).aspx">http://msdn.microsoft.com/en-us/library/ms533515(VS.85).aspx</a>。<br/>
+        在 HTML4.01 中，TABLE 中 'border' 说明参见：<a href="http://www.w3.org/TR/html401/struct/tables.html#h-11.3.1">http://www.w3.org/TR/html401/struct/tables.html#h-11.3.1</a>。
+      </p>
+      <p>测试代码：</p>
+<pre>
+&lt;table border=&quot;1&quot;
+bordercolorlight=&quot;red&quot;
+bordercolordark=&quot;blue&quot;&gt;
+   &lt;tr&gt;
+      &lt;td&gt;Cell #1&lt;/td&gt;
+      &lt;td&gt;Cell #2&lt;/td&gt;
+   &lt;/tr&gt;
+   &lt;tr&gt;
+      &lt;td&gt;Cell #3&lt;/td&gt;
+      &lt;td&gt;Cell #4&lt;/td&gt;
+   &lt;/tr&gt;
+&lt;/table&gt;
+</pre>
+      <p>以上代码在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox Safari Chrome Opera&nbsp;</td>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BT3003/ie.png" alt="" /></td>
+          <td><img src="../../tests/BT3003/noie.png" alt="" /></td>
+        </tr>
+      </table>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>这两个属性为 IE 私有属性，并且 MSDN 官方文档上也不再推荐使用它们。所以，若要达到这两个属性的效果,可以在 TABLE 和  TD 元素上使用 &quot;border-color&quot; 。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BT3003/table_border.html">table_border.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-15</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>TABLE bordercolorlight bordercolordark</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RD8005: Chrome Safari 中浮动元素之前的非 inline 级元素会对包含块的 shrink-to-fit 宽度计算有影响</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>shrink-to-fit 可以理解为“收缩至合适”，代表了浏览器对于计算后宽度为 auto 时的非替换浮动元素宽度计算所要遵循的标准。此外除了非替换浮动元素，对非替换绝对定位元素、非替换行内块元素的宽度为 auto 时也遵循此计算方式。</p>
+      <p>根据 W3C CSS2.1 规范中的描述，shrink-to-fit 的宽度计算方法与 'table-layout' 特性为 auto（即自动表格布局）时对于单元格的宽度计算方法类似。大致为：</p>
+      <ul>
+        <li>计算格式化内容时除了发生明确的换行外不发生换行的时<span class="hl_4">首选宽度（preferred width）</span>，以及<span class="hl_2">首选最小宽度（preferred minimum width）</span>，比如，尝试所有可能的换行。而 CSS2.1 没有定义精确的算法。</li>
+        <li>其次，在这种情况下，找出<span class="hl_3">可用宽度（available width）</span>，这个宽度为包含块减去 'margin-left'、'border-left-width'、'padding-left'、'padding-right'、'border-right-width'、'margin-right'以及所有相关滚动条的宽度。</li>
+      </ul>
+      <p>综上所述：</p>
+      <pre>shrink-to-fit 的宽度 = min ( max (<span class="hl_2">首选最小宽度</span>, <span class="hl_3">可用宽度</span>) , <span class="hl_4">首选宽度</span>)</pre>
+      <p>关于 shrink-to-fit 的更多资料，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/visudet.html#float-width">10.3.5 Floating, non-replaced elements</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 Chrome Safari 中，若浮动元素之前存在一个非 inline 级元素（包括 block、table 等），且它们的包含块 'width' 特性计算值为 auto，则包含块的 shrink-to-fit 宽度计算会出现错误。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题可能导致未明确设置宽度的遵循 shrink-to-fit 算法的包含块的宽度计算错误，导致布局发生异常。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Chrome Safari</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+<pre>&lt;body style="font:14px/1.1 Arial;"&gt;
+&lt;div style="position:absolute; left:10px; top:10px; width:150px; height:70px; background:#eee;"&gt;
+    &lt;div id="cont1" style="position:absolute; background:khaki;"&gt;
+        &lt;div style="float:left; background:lightskyblue; width:100px;"&gt;FLOAT_BOX&lt;/div&gt;
+        &lt;span&gt;INLINE&lt;/span&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;div style="position:absolute; left:170px; top:10px; width:100px; height:70px; background:#eee;"&gt;
+    &lt;div id="cont2" style="position:absolute; background:khaki;"&gt;
+        &lt;div style="float:left; background:lightskyblue; width:100px;"&gt;FLOAT_BOX&lt;/div&gt;
+        &lt;span&gt;INLINE&lt;/span&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;div style="position:absolute; left:10px; top:90px; width:150px; height:70px; background:#eee;"&gt;
+    &lt;div id="cont3" style="position:absolute; background:khaki;"&gt;
+        &lt;div style="background:coral; padding:5px;"&gt;SIBLING&lt;/div&gt;
+        &lt;div style="float:left; background:lightskyblue; width:100px;"&gt;FLOAT_BOX&lt;/div&gt;
+        &lt;span&gt;INLINE&lt;/span&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;div style="position:absolute; left:170px; top:90px; width:100px; height:70px; background:#eee;"&gt;
+    &lt;div id="cont4" style="position:absolute; background:khaki;"&gt;
+        &lt;div style="background:coral; padding:5px;"&gt;SIBLING&lt;/div&gt;
+        &lt;div style="float:left; background:lightskyblue; width:100px;"&gt;FLOAT_BOX&lt;/div&gt;
+        &lt;span&gt;INLINE&lt;/span&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;/body&gt;</pre>
+      <p>上面代码分为 4 组，左上角、右上角、左下角、右下角分别对应第 1、2、3、4 组。</p>
+      <ul>
+        <li>第一组【cont1】：【cont1】为绝对定位元素<sup>1</sup>，且没有明确设定宽度，则其 'width' 特性的计算值为 auto。此时【cont1】的宽度计算遵循 shrink-to-fit 算法。【cont1】的包含块宽度为 150px。【cont1】内含有一个宽度为 100px 的浮动元素及一个行内元素。</li>
+        <li>第二组【cont2】：【cont2】同样为绝对定位元素，宽度计算也遵循 shrink-to-fit 算法。【cont2】的包含块宽度为 100px。【cont1】内含有一个宽度为 100px 的浮动元素及一个行内元素。</li>
+        <li>第三组【cont3】：【cont3】同样为绝对定位元素，宽度计算也遵循 shrink-to-fit 算法。【cont3】的包含块宽度为 150px。与上面两组不同，【cont3】在浮动元素前面还多了一个没有设定宽度的块级元素 “SIBLING”。</li>
+        <li>第四组【cont4】：【cont4】同样为绝对定位元素，宽度计算也遵循 shrink-to-fit 算法。【cont4】的包含块宽度为 100px。【cont4】内的结构与第三组相同。</li>
+      </ul>
+      <p>在各浏览器中的运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6<sup>2</sup> IE7 IE8 Firefox Opera</th>
+          <th>Chrome Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RD8005/stf1.gif" alt="IE6 IE7 IE8 Firefox Opera" /></td>
+          <td><img src="../../tests/RD8005/stf2.gif" alt="Chrome Safari" /></td>
+        </tr>
+      </table>
+      <p class="comment">
+        注 1. 对于浮动元素（float:left|right）及行内块元素（display:inline-block）有相类似的现象。<br />
+        注 2. 这里忽略了 IE6、IE7(Q)、IE8(Q) 中浮动元素后面会多出 3px 的 Bug。
+      </p>
+      <p>从截图可以看出第 1、2 组在各浏览器中没有任何差异，这里各浏览器对【cont1】及【cont2】的 shrink-to-fit 宽度计算均符合 W3C 规范。</p>
+      <p>下面重点看第 3、4 组中的差异：<p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8 Firefox Opera</em> 中，【cont3】的 <span class="hl_2">首选最小宽度</span>、<span class="hl_3">可用宽度</span>、<span class="hl_4">首选宽度</span> 分别为：100px、150px、141px。则【cont3】的 shrink-to-fit 宽度为：min ( max ( 100, 150 ), 141 ) = 141px。<br />
+        【cont4】的 <span class="hl_2">首选最小宽度</span>、<span class="hl_3">可用宽度</span>、<span class="hl_4">首选宽度</span> 分别为：100px、100px、141px。则【cont3】的 shrink-to-fit 宽度为：min ( max ( 100, 100 ), 141 ) = 100px。<br />
+        可以看到这几种浏览器此时对【cont3】与【cont4】的 shrink-to-fit 宽度计算正确。</li>
+        <li>在 <em>Chrome Safari</em> 中，【cont3】的 shrink-to-fit 宽度也被计算为了 100px。</li>
+      </ul>
+      <p>下面尝试为浮动元素之前的块级元素“SIBLING”明确地设置一个宽度：</p>
+      <pre>&lt;div style="position:absolute; left:10px; top:200px; width:150px; height:70px; background:#eee;"&gt;
+    &lt;div id="cont3" style="position:absolute; background:khaki;"&gt;
+        &lt;div id="sibling" style="background:coral; padding:5px; overflow:hidden;"&gt;SIBLING&lt;/div&gt;
+        &lt;div style="float:left; background:lightskyblue; width:100px;"&gt;FLOAT_BOX&lt;/div&gt;
+        &lt;span&gt;INLINE&lt;/span&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;script&gt;
+    function $(id) { return document.getElementById(id); }
+    var sibling = $(“SIBLING”);
+    var k = 0;
+    setInterval(function () {
+        sibling.style.width = k++ + "px";
+        (k &gt; 200) &amp;&amp; (k = 0);
+    }, 50);
+&lt;/script&gt;</pre>
+      <p>上面代码与第三组相同，通过一段脚本控制 “SIBLING” 的宽度，从 0 至 200px 变化，观看【cont3】的宽度变化：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Firefox Opera</th>
+          <th>Chrome Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RD8005/stf_ani1.gif" alt="IE6 IE7 IE8 Firefox Opera" /></td>
+          <td><img src="../../tests/RD8005/stf_ani2.gif" alt="Chrome Safari" /></td>
+        </tr>
+      </table>
+      <p>从动画中可以看出，当块元素“SIBLING”的宽度比【cont3】的 <span class="hl_4">首选宽度</span> 小的时候，Chrome 和 Safari 中其容器 shrink-to-fit 宽度会出现计算错误。<br />
+      当块元素“SIBLING”的宽度比【cont3】的 <span class="hl_4">首选宽度</span> 大时，表现的则与其他浏览器相同。</p>
+      <p>此外，将“SIBLING”的 'display' 特性改为其他非 inline 级别的值，如 table、table-cell 等也会出现类似的现象。即使是替换元素，在其 'display' 特性值为 'block' 时也可能出现此现象。</p>
+
+
+      <h2 id="solutions">解决方案</h2>
+      <p>在容器为绝对定位、浮动或行内块元素且没有明确设定宽度时，若浮动元素之前出现非 inline 级元素，则要小心这个元素对容器 shrink-to-fit 宽度的影响。可以为容器明确的设定一个宽度。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.8<br />
+              Chrome 5.0.472.0 dev<br />
+              Safari 5.0<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RD8005/stf_case.html">stf_case.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-28</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>width float shrink-to-fit 宽度</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

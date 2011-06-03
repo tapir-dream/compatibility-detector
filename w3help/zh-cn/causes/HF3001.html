@@ -1,0 +1,230 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HF3001: 不同内核的浏览器中文件选择控件的外观也不相同</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 W3C HTML4.01 规范中的描述，type 属性为 &quot;file&quot; 的 INPUT 元素在浏览器中将被渲染为一个文件选择控件（file select），这种控件允许用户在其本地选择文件，通常由一个用于显示文件名的只读文本框及一个用于触发选择文件对话框的按钮组成。而规范中对文件选择控件只描述了其应具有功能，并没有限制其呈现方式。所以各浏览器按照自己的方式渲染该控件。</p>
+      <p>关于文本选择控件 &quot;INPUT[type=file]&quot; 的详细信息，请参考 HTML 4.01 规范 <a href="http://www.w3.org/TR/html401/interact/forms.html#file-select">17.2.1</a> 中的内容。</p>
+      <p>另请参考 WiKiPEDiA：<a href="http://en.wikipedia.org/wiki/File_select">http://en.wikipedia.org/wiki/File_select</a></p>
+      <h2 id="description">问题描述</h2>
+      <p>对于文本选择控件 &quot;INPUT[type=file]&quot; ，各浏览器对其有不同形式的渲染，并且某些 CSS 特性也有着不同的表现。其中 Chrome Safari中对文件选择控件的渲染样式与其他浏览器有较大区别，这是由于浏览器所用的 WebKit 内核设计所致。</p>
+      <h2 id="influence">造成的影响</h2>
+      <p>浏览器之间不同的渲染方式将造成某些视觉上的差异，但并不影响功能的使用。</p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <pre>&lt;input type=&quot;file&quot; /&gt;</pre>
+      <p>上面代码在浏览器中将被渲染为一个文件选择控件。这个控件在各浏览器的呈现方式如下：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>未选择文件</th>
+          <th>已选择文件</th>
+        </tr>
+        <tr>
+          <th>IE</th>
+          <td><img src="../../tests/HF3001/IE_unselected.gif" alt="IE unseleted" /></td>
+          <td><img src="../../tests/HF3001/IE_selected.gif" alt="IE seleted" /></td>
+        </tr>
+        <tr>
+          <th>Firefox</th>
+          <td><img src="../../tests/HF3001/FF_unselected.gif" alt="Firefox unseleted" /></td>
+          <td><img src="../../tests/HF3001/FF_selected.gif" alt="Firefox seleted" /></td>
+        </tr>
+        <tr>
+          <th>Chrome</th>
+          <td><img src="../../tests/HF3001/CR_unselected.gif" alt="Chrome unseleted" /></td>
+          <td><img src="../../tests/HF3001/CR_selected.gif" alt="Chrome seleted" /></td>
+        </tr>
+        <tr>
+          <th>Safari</th>
+          <td><img src="../../tests/HF3001/SF_unselected.gif" alt="Safari unseleted" /></td>
+          <td><img src="../../tests/HF3001/SF_selected.gif" alt="Safari seleted" /></td>
+        </tr>
+        <tr>
+          <th>Opera</th>
+          <td><img src="../../tests/HF3001/OP_unselected.gif" alt="Opera unseleted" /></td>
+          <td><img src="../../tests/HF3001/OP_selected.gif" alt="Opera seleted" /></td>
+        </tr>
+      </table>
+      <p>可以看到 <em>IE Firefox Opera</em> 会渲染一个文本框用于显示选择的全路径文件名，一个按钮用于触发文件选择对话框；<em>Chrome Safari</em> 则会渲染一个按钮用于触发文件选择对话框，其右侧直接显示文本，当未选择文件时为  &quot;未选择文件&quot; ，选择文件后为选择的文件名（不包含路径）。</p>
+      <p>下面为文件选择控件设置一些 CSS 特性，看看各浏览器的渲染差异：</p>
+      <pre>&lt;div style=&quot;float:left; background:#AAA; padding:5px; border:1px dashed black;&quot;&gt;
+    &lt;input type=&quot;file&quot; style=&quot;width:200px; height:50px; background:#DDD; border:5px solid black;&quot; /&gt;
+&lt;/div&gt;</pre>
+      <p>这段代码在不同的浏览器环境中的表现：</p>
+      <table class="compare">
+        <tr>
+          <th>IE</th>
+          <td><img src="../../tests/HF3001/IE_styled.gif" alt="IE styled" /></td>
+        </tr>
+        <tr>
+          <th>Firefox</th>
+          <td><img src="../../tests/HF3001/FF_styled.gif" alt="Firefox styled" /></td>
+        </tr>
+        <tr>
+          <th>Chrome, Safari</th>
+          <td><img src="../../tests/HF3001/CR_styled.gif" alt="Chrome styled" /></td>
+        </tr>
+        <tr>
+          <th>Opera</th>
+          <td><img src="../../tests/HF3001/OP_styled.gif" alt="Opera styled" /></td>
+        </tr>
+      </table>
+      <p>更多更详细的渲染差异请参考：<a href="http://www.456bereastreet.com/lab/form_controls/file/">http://www.456bereastreet.com/lab/form_controls/file/</a>。</p>
+      <h2 id="solutions">解决方案</h2>
+      <p>在 Chrome  Safari 中对于文件选择控件的特殊呈现方式为 WebKit 内核特有，且其渲染方式也符合 W3C 对文件选择控件的规定。一般来说这种差异不会带来严重的兼容性问题。</p>
+      <p>若需要强制在所有浏览器中呈现一样的效果，即文本框+按钮方式，则需要一些处理，参见：<a href="http://www.quirksmode.org/dom/inputfile.html">http://www.quirksmode.org/dom/inputfile.html</a>。</p>
+      <pre>&lt;html&gt;
+&lt;head&gt;
+&lt;style type=&quot;text/css&quot;&gt;
+form.example input {
+    background: url('input_boxes.gif') no-repeat 0 -58px;
+    border: none;
+    width: 241px;
+    height: 20px;
+    padding-left: 3px;
+    padding-top: 3px;
+}
+form.example input:focus {
+    background-color: transparent;
+}
+form.example div.fileinputs {
+    position: relative;
+    height: 30px;
+    width: 300px;
+}
+form.example input.file {
+    width: 300px;
+    margin: 0;
+}
+form.example input.file.hidden {
+    position: relative;
+    text-align: right;
+    -moz-opacity:0 ;
+    filter:alpha(opacity: 0);
+    opacity: 0;
+    z-index: 2;
+}
+form.example div.fakefile {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 350px;
+    padding: 0;
+    margin: 0;
+    z-index: 1;
+    line-height: 90%;
+}
+form.example div.fakefile input {
+    margin-bottom: 5px;
+    margin-left: 0;
+}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;form action=&quot;#&quot; class=&quot;example&quot;&gt;
+&lt;div class=&quot;fileinputs&quot;&gt;
+    &lt;input type=&quot;file&quot; /&gt;
+&lt;/div&gt;
+&lt;/form&gt;
+&lt;script&gt;
+    var W3CDOM = (document.createElement &amp;&amp; document.getElementsByTagName);
+
+    function initFileUploads() {
+        if (!W3CDOM) return;
+        var fakeFileUpload = document.createElement('div');
+        fakeFileUpload.className = 'fakefile';
+        fakeFileUpload.appendChild(document.createElement('input'));
+        var image = document.createElement('img');
+        image.src='button_select.gif';
+        fakeFileUpload.appendChild(image);
+        var x = document.getElementsByTagName('input');
+        for (var i=0;i&lt;x.length;i++) {
+            if (x[i].type != 'file') continue;
+            if (x[i].parentNode.className != 'fileinputs') continue;
+            x[i].className = 'file hidden';
+            var clone = fakeFileUpload.cloneNode(true);
+            x[i].parentNode.appendChild(clone);
+            x[i].relatedElement = clone.getElementsByTagName('input')[0];
+            x[i].onchange = x[i].onmouseout = function () {
+                this.relatedElement.value = this.value;
+            }
+        }
+    }
+    initFileUploads();
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td> IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 5.0.342.2 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.50 </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>&nbsp;</td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-03</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>input file 文件 浏览 上传</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

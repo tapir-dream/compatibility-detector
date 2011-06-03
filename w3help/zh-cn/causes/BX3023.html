@@ -1,0 +1,379 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX3023: 在 IE 中一些特殊字符的最终呈现字体不是设定值</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 IE7 IE8(Q) 中，一些特殊字符（如西里尔文字母、中间点（U+00B7）、某些中文字符后的空格（U+0020）、版权所有标记（U+00A9）等等）的最终呈现出来的字体风格不是 'font-family' 特性中所设定的字体。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>这些差异会造成文本的宽度在 IE 中与其他浏览器不同。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>在 IE6 IE7 IE8(Q) 中，浏览器可能对某些字体下的特殊字符的最终呈现字体做调整，这导致这些特殊字符的实际字体不是 'font-family' 特性中所设定的字体。</p>
+      <p>由于情况复杂，本文仅针对一些常见现象举例说明。</p>
+      <h3>1. 西里尔文字母</h3>
+      <p>分析以下代码：</p>
+      <pre>&lt;style&gt;
+  * { line-height:1.5; }
+  body { font:12px Arial; margin:20px; }
+  table { border-collapse:collapse; }
+  th, td { border:1px solid gray; }
+  th { background:#ddd; font-size:12px; font-weight:normal; }
+  td span { font-size:24px; background:orange; }
+&lt;/style&gt;
+&lt;script&gt;
+  Array.prototype.psh = function (str) {
+    this.push(str);
+    return this;
+  }
+  window.onload = function () {
+    var fontNameList = [
+      &quot;宋体&quot;,
+      &quot;Times New Roman&quot;,
+      &quot;Arial&quot;,
+      &quot;Arial Narrow&quot;,
+      &quot;Comic Sans MS&quot;,
+      &quot;Courier New&quot;,
+      &quot;Georgia&quot;
+    ];
+    var info = document.getElementById(&quot;info&quot;);
+    var html = [];
+    var text = 'Привет';
+    html.psh('&lt;table cellpadding=&quot;1&quot; cellspacing=&quot;0&quot;&gt;');
+    for (var i = 0, j = fontNameList.length; i &lt; j; i++) {
+      html.psh('&lt;tr style=&quot;font-family:')
+        .psh(fontNameList[i])
+        .psh('&quot;&gt;&lt;th&gt;')
+        .psh(fontNameList[i])
+        .psh('&lt;/th&gt;&lt;td&gt;&lt;span&gt;')
+        .psh(text)
+        .psh('&lt;/span&gt;&lt;/td&gt;&lt;td id=&quot;n')
+        .psh(i)
+        .psh('&quot;&gt;&lt;/td&gt;&lt;/tr&gt;');
+    }
+    html.psh('&lt;/table&gt;');
+    info.innerHTML = html.join(&quot;&quot;);
+    for (var i = 0, j = fontNameList.length; i &lt; j; i++) {
+      document.getElementById(&quot;n&quot; + i).innerHTML = document.getElementById(&quot;n&quot; + i).previousSibling.children[0].offsetWidth;
+    }
+  }
+&lt;/script&gt;
+&lt;body&gt;
+  &lt;div id=&quot;info&quot;&gt;&lt;/div&gt;
+&lt;/body&gt;</pre>
+      <p>上面创建了表格来测试西里尔文字母（Привет）在 &quot;宋体&quot; 、 &quot;Times New Roman&quot; 、 &quot;Arial&quot; 、 &quot;Arial Narrow&quot; 、 &quot;Comic Sans MS&quot; 、 &quot;Courier New&quot; 、 &quot;Georgia&quot;  这些字体下的最终呈现效果，并检测橘黄色 SPAN 元素的 offsetWidth。</p>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BX3023/rus1.gif" alt="IE6 IE7 IE8(Q)" /></td>
+          <td><img src="../../tests/BX3023/rus2.gif" alt="IE8(S) Firefox Chrome Safari Opera" /></td>
+        </tr>
+      </table>
+      <p>可以很明显的看到，</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8(Q)</em> 中，'font-family' 为 &quot;Times New Roman&quot; 与 &quot;宋体&quot; 时西里尔文字母（Привет）的字符完全相同，即浏览器使用 &quot;Times New Roman&quot; 字体渲染西里尔文字母，而并没有使用 'font-family' 特性设置的 &quot;宋体&quot; ；</li>
+        <li>在 <em>其他浏览器</em> 中，浏览器按照 'font-family' 特性设置的字体渲染字符。</li>
+      </ul>
+      <br />
+      <h3>2. 中间点符号 &quot;·&quot; （U+00B7）</h3>
+      <p>分析以下代码：</p>
+      <pre>&lt;style&gt;
+  * { line-height:1.5; }
+  body { font:12px Arial; margin:20px; }
+  table { border-collapse:collapse; }
+  th, td { border:1px solid gray; }
+  th { background:#ddd; font-size:12px; font-weight:normal; }
+  td span { font-size:24px; background:orange; }
+&lt;/style&gt;
+&lt;script&gt;
+  Array.prototype.psh = function (str) {
+    this.push(str);
+    return this;
+  }
+  window.onload = function () {
+    var fontNameList = [
+      &quot;宋体&quot;,
+      &quot;Times New Roman&quot;,
+      &quot;Arial&quot;,
+      &quot;Arial Narrow&quot;,
+      &quot;Comic Sans MS&quot;,
+      &quot;Courier New&quot;,
+      &quot;Georgia&quot;
+    ];
+    var info = document.getElementById(&quot;info&quot;);
+    var html = [];
+    var text = '&lt;span style=&quot;background:orange;&quot;&gt;·····&lt;/span&gt;';
+    html.psh('&lt;table cellpadding=&quot;1&quot; cellspacing=&quot;0&quot;&gt;');
+    for (var i = 0, j = fontNameList.length; i &lt; j; i++) {
+      html.psh('&lt;tr style=&quot;font-family:')
+        .psh(fontNameList[i])
+        .psh('&quot;&gt;&lt;th&gt;')
+        .psh(fontNameList[i])
+        .psh('&lt;/th&gt;&lt;td&gt;&lt;span&gt;')
+        .psh(text)
+        .psh('&lt;/span&gt;&lt;/td&gt;&lt;td id=&quot;n')
+        .psh(i)
+        .psh('&quot;&gt;&lt;/td&gt;&lt;/tr&gt;');
+    }
+    html.psh('&lt;/table&gt;');
+    info.innerHTML = html.join(&quot;&quot;);
+    for (var i = 0, j = fontNameList.length; i &lt; j; i++) {
+      document.getElementById(&quot;n&quot; + i).innerHTML = document.getElementById(&quot;n&quot; + i).previousSibling.children[0].offsetWidth;
+    }
+  }
+&lt;/script&gt;
+&lt;body&gt;
+  &lt;div id=&quot;info&quot;&gt;&lt;/div&gt;
+&lt;/body&gt;</pre>
+      <p>上面创建了表格来测试中间点符号 &quot;·&quot; （U+00B7）在 &quot;宋体&quot; 、 &quot;Times New Roman&quot; 、 &quot;Arial&quot; 、 &quot;Arial Narrow&quot; 、 &quot;Comic Sans MS&quot; 、 &quot;Courier New&quot; 、 &quot;Georgia&quot; 这些字体下的最终呈现效果，并检测橘黄色 SPAN 元素的 offsetWidth。</p>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6</th>
+          <th>IE7 IE8 Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BX3023/UB71.gif" alt="IE6" /></td>
+          <td><img src="../../tests/BX3023/UB72.gif" alt="IE7 IE8 Firefox Chrome Safari Opera" /></td>
+        </tr>
+      </table>
+      <p>可以很明显的看到，</p>
+      <ul>
+        <li>在 <em>IE6</em> 中，对于 'font-family' 特性为被测的非中文字体的情况，浏览器将以 &quot;宋体&quot; 对中间点符号 &quot;·&quot; （U+00B7）进行渲染；</li>
+        <li>在 <em>其他浏览器</em> 中，浏览器按照 'font-family' 特性设置的字体渲染字符。</li>
+      </ul>
+      <br />
+      <h3>3. 中文字符后的空格（U+0020）</h3>
+      <p>分析以下代码：</p>
+      <pre>&lt;style&gt;
+  * { line-height:1.5; }
+  body { font:12px Arial; margin:20px; }
+  table { border-collapse:collapse; }
+  th, td { border:1px solid gray; }
+  th { background:#ddd; font-size:12px; font-weight:normal; }
+  td pre { font-size:24px; display:inline; background:orange; }
+&lt;/style&gt;
+&lt;script&gt;
+  Array.prototype.psh = function (str) {
+    this.push(str);
+    return this;
+  }
+  window.onload = function () {
+    var fontNameList = [
+      &quot;宋体&quot;,
+      &quot;Times New Roman&quot;,
+      &quot;Arial&quot;,
+      &quot;Arial Narrow&quot;,
+      &quot;Comic Sans MS&quot;,
+      &quot;Courier New&quot;,
+      &quot;Georgia&quot;
+    ];
+    var info = document.getElementById(&quot;info&quot;);
+    var html = [];
+    var text = '你好     ';
+    html.psh('&lt;table cellpadding=&quot;1&quot; cellspacing=&quot;0&quot;&gt;');
+    for (var i = 0, j = fontNameList.length; i &lt; j; i++) {
+      html.psh('&lt;tr style=&quot;font-family:')
+      .psh(fontNameList[i])
+      .psh('&quot;&gt;&lt;th&gt;')
+      .psh(fontNameList[i])
+      .psh('&lt;/th&gt;&lt;td&gt;&lt;pre style=&quot;font-family:')
+      .psh(fontNameList[i])
+      .psh('&quot;&gt;')
+      .psh(text)
+      .psh('&lt;/pre&gt;&lt;/td&gt;&lt;td id=&quot;n')
+      .psh(i)
+      .psh('&quot;&gt;&lt;/td&gt;&lt;/tr&gt;');
+    }
+    html.psh('&lt;/table&gt;');
+    info.innerHTML = html.join(&quot;&quot;);
+    for (var i = 0, j = fontNameList.length; i &lt; j; i++) {
+      document.getElementById(&quot;n&quot; + i).innerHTML = document.getElementById(&quot;n&quot; + i).previousSibling.children[0].offsetWidth;
+    }
+  }
+&lt;/script&gt;
+&lt;body&gt;
+  &lt;div id=&quot;info&quot;&gt;&lt;/div&gt;
+&lt;/body&gt;</pre>
+      <p>上面创建了表格来测试中文字符后的空格（U+0020）在 &quot;宋体&quot; 、 &quot;Times New Roman&quot; 、 &quot;Arial&quot; 、 &quot;Arial Narrow&quot; 、 &quot;Comic Sans MS&quot; 、 &quot;Courier New&quot; 、 &quot;Georgia&quot; 这些字体下的最终呈现效果，并检测橘黄色 SPAN 元素的 offsetWidth。</p>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BX3023/sac1.gif" alt="IE6 IE7 IE8(Q)" /></td>
+          <td><img src="../../tests/BX3023/sac2.gif" alt="IE8(S) Firefox Chrome Safari Opera" /></td>
+        </tr>
+      </table>
+      <p>可以很明显的看到，</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8(Q)</em> 中，位于中文汉字后的 &quot;空格&quot; （U+0020），不论当前元素计算后的 'font-family' 特性值为何种字体，浏览器均以 &quot;宋体&quot; 对 &quot;空格&quot; 进行渲染。而位于英文字符后的 &quot;空格&quot; 则没有此现象；</li>
+        <li>在 <em>其他浏览器</em> 中，浏览器按照 'font-family' 特性设置的字体渲染字符。</li>
+      </ul>
+      <br />
+      <h3>4. 版权所有符号 &quot;&amp;copy;&quot; （©，U+00A9）</h3>
+      <p>分析以下代码：</p>
+      <pre>&lt;style&gt;
+  * { line-height:1.5; }
+  body { font:12px Arial; margin:20px; }
+  table { border-collapse:collapse; }
+  th, td { border:1px solid gray; }
+  th { background:#ddd; font-size:12px; font-weight:normal; }
+  td span { font-size:24px; background:orange; }
+&lt;/style&gt;
+&lt;script&gt;
+  Array.prototype.psh = function (str) {
+    this.push(str);
+    return this;
+  }
+  window.onload = function () {
+    var fontNameList = [
+      &quot;宋体&quot;,
+      &quot;Times New Roman&quot;,
+      &quot;Arial&quot;,
+      &quot;Arial Narrow&quot;,
+      &quot;Comic Sans MS&quot;,
+      &quot;Courier New&quot;,
+      &quot;Georgia&quot;
+    ];
+    var info = document.getElementById(&quot;info&quot;);
+    var html = [];
+    var text = '&amp;copy;&amp;copy;&amp;copy;&amp;copy;&amp;copy;&amp;copy;&amp;copy;&amp;copy;&amp;copy;&amp;copy;';
+    html.psh('&lt;table cellpadding=&quot;1&quot; cellspacing=&quot;0&quot;&gt;');
+    for (var i = 0, j = fontNameList.length; i &lt; j; i++) {
+      html.psh('&lt;tr style=&quot;font-family:')
+        .psh(fontNameList[i])
+        .psh('&quot;&gt;&lt;th&gt;')
+        .psh(fontNameList[i])
+        .psh('&lt;/th&gt;&lt;td&gt;&lt;span&gt;')
+        .psh(text)
+        .psh('&lt;/span&gt;&lt;/td&gt;&lt;td id=&quot;n')
+        .psh(i)
+        .psh('&quot;&gt;&lt;/td&gt;&lt;/tr&gt;');
+    }
+    html.psh('&lt;/table&gt;');
+    info.innerHTML = html.join(&quot;&quot;);
+    for (var i = 0, j = fontNameList.length; i &lt; j; i++) {
+      document.getElementById(&quot;n&quot; + i).innerHTML = document.getElementById(&quot;n&quot; + i).previousSibling.children[0].offsetWidth;
+    }
+  }
+&lt;/script&gt;
+&lt;body&gt;
+  &lt;div id=&quot;info&quot;&gt;&lt;/div&gt;
+&lt;/body&gt;</pre>
+      <p>上面创建了表格来测试中版权所有符号 &quot;&amp;copy;&quot; （©，U+00A9）在 &quot;宋体&quot; 、 &quot;Times New Roman&quot; 、 &quot;Arial&quot; 、 &quot;Arial Narrow&quot; 、 &quot;Comic Sans MS&quot; 、 &quot;Courier New&quot; 、 &quot;Georgia&quot; 这些字体下的最终呈现效果，并检测橘黄色 SPAN 元素的 offsetWidth。</p>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6</th>
+          <th>IE7 IE8 Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BX3023/cpy1.gif" alt="IE6" /></td>
+          <td><img src="../../tests/BX3023/cpy2.gif" alt="IE7 IE8 Firefox Chrome Safari Opera" /></td>
+        </tr>
+      </table>
+      <p>可以很明显的看到，</p>
+      <ul>
+        <li>在 <em>IE6</em> 中， &quot;&amp;copy;&quot; 在宋体下显示出来的字符同 Times New Roman 相同。此现象存在于页面为 &quot;简体中文&quot; 、 &quot;繁体中文&quot; 、 &quot;日文&quot; 、 &quot;朝鲜语&quot; 等多种编码格式时；</li>
+        <li>在 <em>其他浏览器</em> 中，浏览器按照 'font-family' 特性设置的字体渲染字符。</li>
+      </ul>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>针对问题 1，避免使用可以触发这种特殊现象的字体，如 &quot;宋体&quot; ，为特殊字符设置其他字体。<br />
+      针对问题 2，若需要其他浏览器均呈现 IE6 的效果，只需为 &quot;·&quot; 设置宋体即可。若需要 IE6 呈现其他浏览器中的效果，最好使用其他符号或者图片代替。<br />
+      针对问题 3，若需要其他浏览器均呈现 IE6 IE7 的效果， 只需为 &quot;空格&quot; 设置宋体即可。若需要 IE6 IE7 呈现其他浏览器中的效果，可以在 &quot;空格&quot; 之前加入一个不显示的行内元素，如 &quot;&lt;span style=&quot;display:none&quot;&gt;1&lt;/span&gt;&quot; 。<br />
+      针对问题 4，若需要其他浏览器均呈现 IE6 的效果，只需为中文字符设置 font-family:'Times New Roman' 即可。若需要 IE6 呈现其他浏览器中的效果，则可以只在 IE6 中适当的缩小 &quot;&amp;copy;&quot; 的字号。</p>
+
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.8<br />
+              Chrome 6.0.472.22 dev<br />
+              Safari 5.0.1<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BX3023/Russian.html">Russian.html</a><br />
+            <a href="../../tests/BX3023/U+00B7.html">U+00B7.html</a><br />
+            <a href="../../tests/BX3023/space_after_CJK.html">space_after_CJK.html</a><br />
+            <a href="../../tests/BX3023/copy.html">copy.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-06</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>字体 font font-family 字符 character dot space 空格 点 版权 copy</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

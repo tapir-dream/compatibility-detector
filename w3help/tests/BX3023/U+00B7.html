@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" /> 
+<style>
+	* { line-height:1.5; }
+	body { font:12px Arial; margin:20px; }
+	table { border-collapse:collapse; }
+	th, td { border:1px solid gray; }
+	th { background:#ddd; font-size:12px; font-weight:normal; }
+	td span { font-size:24px; background:orange; }
+</style>
+<script>
+	Array.prototype.psh = function (str) {
+		this.push(str);
+		return this;
+	}
+	window.onload = function () {
+		var fontNameList = [
+			"宋体",
+			"Times New Roman",
+			"Arial",
+			"Arial Narrow",
+			"Comic Sans MS",
+			"Courier New",
+			"Georgia"
+		];
+		var info = document.getElementById("info");
+		var html = [];
+		var text = '<span style="background:orange;">·····</span>';
+		html.psh('<table cellpadding="1" cellspacing="0">');
+		for (var i = 0, j = fontNameList.length; i < j; i++) {
+			html.psh('<tr style="font-family:')
+				.psh(fontNameList[i])
+				.psh('"><th>')
+				.psh(fontNameList[i])
+				.psh('</th><td><span>')
+				.psh(text)
+				.psh('</span></td><td id="n')
+				.psh(i)
+				.psh('"></td></tr>');
+		}
+		html.psh('</table>');
+		info.innerHTML = html.join("");
+		for (var i = 0, j = fontNameList.length; i < j; i++) {
+			document.getElementById("n" + i).innerHTML = document.getElementById("n" + i).previousSibling.children[0].offsetWidth;
+		}
+	}
+</script>
+</head>
+<body>
+	<div id="info"></div>
+</body>
+</html>

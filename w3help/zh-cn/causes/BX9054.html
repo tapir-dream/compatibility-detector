@@ -1,0 +1,1505 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX9054: 各浏览器对 document.execCommand 方法的首参数可选值范围存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+      <h2 id="description">问题描述</h2>
+      <p>execCommand 方法通常用于控制可编辑的 IFRAME 内容，制作富文本编辑器。 但他现在为止还是非标准的，方法的首参数 Commmands 的可选值由各个浏览器厂商制定，支持程度并不统一。</p>
+      <h2 id="influence">造成的影响</h2>
+      <p>使用仅有某个浏览器支持的 Commmands 参数会造成其他浏览器运行时脚本出错，从而影响其他浏览器内正常脚本继续执行。</p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>document.execCommand 方法提供了对浏览器内置命令调用的接口，他暂时不属于任何现行规范定义范围，由浏览器各自实现。 </p>
+      <p>在现有 HTML5 规范草案中，已经加入对 execCommand 方法的描述，他被安置在 HTMLDocument 接口定义中。该方法执行参数： <code>document.execCommand(commandId [, showUI [, value ] ] )</code></p>
+      <p>通常 document.execCommand 方法可以使脚本程序执行在当前选择或在当前插入符位置进行一系列操作。</span><span title="">一般来说，这些命令主要都是是用来实现富文本编辑器的核心功能。</span> </p>
+      <p>execCommand 方法的参数 commandId 可选值以及作用，在 HTML5 规范草案中有部分描述，并定义了核心的可选参数列表，以及最后说明的自定义其他参数 vendorID-customCommandID 可由厂商自行扩展。详细内容可以参考 ：<a href="http://www.w3.org/TR/html5/dnd.html#ready-for-editing-host-commands">7.11 Editing APIs</a></p>
+      <p>另外在各浏览器对应的开发者站点 msdn.microsoft.com (MSDN)、developer.mozilla.org (Mozilla Developer Network)、developer.apple.com (Apple Developer)、dev.opera.com (Opera Developer Community) 中，MSDN 与 Mozilla Developer Network 均有详细的 execCommand 方法的首参数可选值描述，Opera Developer Community 有简要说明， Apple Developer 无任何可查资料。</p>
+      <p>其中详细内容可参考开发者站点：</p>
+      <p>MSDN：<a href="http://msdn.microsoft.com/en-us/library/ms536419(v=VS.85).aspx">execCommand Method</a>、<a href="http://msdn.microsoft.com/en-us/library/ms533049(v=VS.85).aspx">Command Identifiers</a>。</p>
+      <p>MDC：<a href="https://developer.mozilla.org/en/Rich-Text_Editing_in_Mozilla#Executing_Commands">Rich-Text Editing in Mozilla</a>。</p>
+      <p>dev.opera.com ：<a href="http://dev.opera.com/articles/view/rich-html-editing-in-the-browser-part-1/">Rich HTML editing in the browser: part 1</a>、<a href="http://dev.opera.com/articles/view/rich-html-editing-in-the-browser-part-2/">Rich HTML editing in the browser: part 2</a>。</p>
+      <p>这里需要注意，由于 HTML5 规范草案与各浏览器具体开发文档中对，execCommand 方法的首形参数的形参名称规定不相同，为了避免混淆，本文以后均采用 sCommands 来表示。</p>
+      <p>MSDN MDC HTML5 草案中提出的全部 sCommands 参数，如下表：</p>
+      <table class="compare">
+        <tr>
+          <th>MSDN</th>
+          <th>MDC</th>
+          <th>HTML5 草案 <sup>2</sup></th>
+        </tr>
+        <tr>
+          <td>2D-Position</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>AbsolutePosition</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>BackColor</td>
+          <td> backColor </td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>BlockDirLTR<sup>1</sup></td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>BlockDirRTL<sup>1</sup></td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>Bold</td>
+          <td>bold </td>
+          <td>bold</td>
+        </tr>
+        <tr>
+          <td>BrowseMode<sup>1</sup></td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>ClearAuthenticationCache</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>&nbsp;</td>
+          <td> contentReadOnly </td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>Copy</td>
+          <td>copy </td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>CreateBookmark</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>CreateLink</td>
+          <td>createLink </td>
+          <td>createLink</td>
+        </tr>
+        <tr>
+          <td>Cut</td>
+          <td>cut </td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>&nbsp;</td>
+          <td> decreaseFontSize </td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>Delete</td>
+          <td> delete </td>
+          <td>delete</td>
+        </tr>
+        <tr>
+          <td>DirLTR<sup>1</sup></td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>DirRTL<sup>1</sup></td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>EditMode<sup>1</sup></td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>FontName</td>
+          <td> fontName </td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>FontSize</td>
+          <td> fontSize </td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>ForeColor</td>
+          <td> foreColor </td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>FormatBlock</td>
+          <td>formatBlock </td>
+          <td>formatBlock</td>
+        </tr>
+        <tr>
+          <td>&nbsp;</td>
+          <td> enableInlineTableEditing </td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>&nbsp;</td>
+          <td> enableObjectResizing </td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>forwardDelete</td>
+        </tr>
+        <tr>
+          <td>&nbsp;</td>
+          <td> heading </td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>&nbsp;</td>
+          <td> hiliteColor </td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>&nbsp;</td>
+          <td> increaseFontSize </td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>Indent </td>
+          <td>indent </td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>InlineDirLTR<sup>1</sup></td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>InlineDirRTL<sup>1</sup></td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>InsertButton</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>InsertFieldset</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>InsertIFrame</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>InsertInputButton</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>InsertInputCheckbox</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>InsertInputFileUpload</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>InsertInputHidden</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>InsertInputImage</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>InsertInputPassword</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>InsertInputRadio</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>InsertInputReset</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>InsertInputSubmit</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>InsertInputText</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>InsertMarquee</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>&nbsp;</td>
+          <td> insertBrOnReturn </td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>InsertHorizontalRule </td>
+          <td>insertHorizontalRule </td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>InsertImage</td>
+          <td>insertImage</td>
+          <td>insertImage</td>
+        </tr>
+        <tr>
+          <td>&nbsp;</td>
+          <td> insertHTML </td>
+          <td>insertHTML</td>
+        </tr>
+        <tr>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>insertLineBreak</td>
+        </tr>
+        <tr>
+          <td>&nbsp;</td>
+          <td> insertOrderedList </td>
+          <td>insertOrderedList</td>
+        </tr>
+        <tr>
+          <td>InsertUnorderedList</td>
+          <td>insertUnorderedList </td>
+          <td>insertUnorderedList</td>
+        </tr>
+        <tr>
+          <td>InsertParagraph</td>
+          <td>insertParagraph </td>
+          <td>insertParagraph</td>
+        </tr>
+        <tr>
+          <td>InsertSelectDropdown</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>InsertSelectListbox</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>InsertTextArea</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>insertText</td>
+        </tr>
+        <tr>
+          <td>Italic</td>
+          <td>italic</td>
+          <td>italic</td>
+        </tr>
+        <tr>
+          <td>JustifyCenter</td>
+          <td>justifyCenter </td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>JustifyLeft</td>
+          <td>justifyLeft </td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>JustifyRight</td>
+          <td>justifyRight</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>JustifyFull<sup>1</sup></td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>JustifyNone<sup>1</sup></td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>LiveResize</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>MultipleSelection</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>Open<sup>1</sup></td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>OverWrite</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>Outdent</td>
+          <td> outdent </td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>Paste</td>
+          <td>paste</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>PlayImage<sup>1</sup></td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>Print</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>Redo<sup>1</sup></td>
+          <td>redo</td>
+          <td>redo</td>
+        </tr>
+        <tr>
+          <td>RemoveFormat</td>
+          <td>removeFormat </td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>Refresh</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>RemoveParaFormat<sup>1</sup></td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>SelectAll</td>
+          <td>selectAll</td>
+          <td>selectAll</td>
+        </tr>
+        <tr>
+          <td>SaveAs</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>SizeToControl<sup>1</sup></td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>SizeToControlHeight<sup>1</sup></td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>SizeToControlWidth<sup>1</sup></td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>Stop<sup>1</sup></td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>StopImage<sup>1</sup></td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>StrikeThrough<sup>1</sup></td>
+          <td>strikeThrough</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>Subscript<sup>1</sup></td>
+          <td> subscript </td>
+          <td>subscript</td>
+        </tr>
+        <tr>
+          <td>Superscript<sup>1</sup></td>
+          <td> superscript </td>
+          <td>superscript</td>
+        </tr>
+        <tr>
+          <td>UnBookmark</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>Underline</td>
+          <td>underline</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>Undo</td>
+          <td>undo</td>
+          <td>undo</td>
+        </tr>
+        <tr>
+          <td>Unlink</td>
+          <td>unlink</td>
+          <td>unlink</td>
+        </tr>
+        <tr>
+          <td>&nbsp;</td>
+          <td>useCSS</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td>Unselect</td>
+          <td>&nbsp;</td>
+          <td>unselect</td>
+        </tr>
+        <tr>
+          <td>&nbsp;</td>
+          <td>styleWithCSS  </td>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <p class="comment">【注1】：MSDN 中标注为不支持的 sCommands 参数。</p>
+      <p class="comment">【注2】：仅为文章写作时期 HTML5 草案中存在的  sCommands 参数，不含说明中由厂商具体指定部分。</p>
+      <p>将所有 sCommands 参数汇集起来，构建测试用例，检查他们被支持程度。由于本例代码较多，故不在文中贴出，您可以直接观看下方的 <a href="../../tests/BX9054/execCommand_sCommands_Parameters.html">测试页面</a>。</p>
+      <p>根据测试页，得出实际 sCommands 可选参数支持度对照表：</p>
+      <table class="compare">
+        <tbody>
+          <tr>
+            <th>sCommands</th>
+            <th>IE6</th>
+            <th>IE7</th>
+            <th>  IE8</th>
+            <th>Firefox</th>
+            <th>Chrome</th>
+            <th>Safari</th>
+            <th>Opera</th>
+          </tr>
+          <tr>
+            <td>2D-Position</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>absolutePosition</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr style="background:#FFFFBB">
+            <td>backColor</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr>
+            <td>blockDirLTR</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>blockDirRTL</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr style="background:#FFFFBB">
+            <td>bold</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr>
+            <td>browseMode</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>clearAuthenticationCache</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>contentReadOnly</td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr>
+            <td>copy</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>createBookmark</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr style="background:#FFFFBB">
+            <td>createLink</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr>
+            <td>cut</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>decreaseFontSize</td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr style="background:#FFFFBB">
+            <td>delete</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr>
+            <td>dirLTR</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>dirRTL</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>editMode</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>fontName</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr style="background:#FFFFBB">
+            <td>fontSize</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr style="background:#FFFFBB">
+            <td>foreColor</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr style="background:#FFFFBB">
+            <td>formatBlock<sup>1</sup></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr>
+            <td>enableInlineTableEditing</td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>enableObjectResizing</td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>forwardDelete</td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>heading</td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>increaseFontSize</td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr style="background:#FFFFBB">
+            <td>indent</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr>
+            <td>inlineDirLTR</td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>inlineDirRTL</td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>insertButton</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>insertFieldset</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>insertIFrame</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>insertInputButton</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>insertInputCheckbox</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>insertInputFileUpload</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>insertInputHidden</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>insertInputImage</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>insertInputPassword</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>insertInputRadio</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>insertInputReset</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>insertInputSubmit</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>insertInputText</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>insertMarquee</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>insertBrOnReturn</td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr style="background:#FFFFBB">
+            <td>insertHorizontalRule</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr style="background:#FFFFBB">
+            <td>insertImage</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr>
+            <td>insertHTML</td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr>
+            <td>insertLineBreak</td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr style="background:#FFFFBB">
+            <td>insertOrderedList</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr style="background:#FFFFBB">
+            <td>insertUnorderedList</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr style="background:#FFFFBB">
+            <td>insertParagraph</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr>
+            <td>insertSelectDropdown</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>insertSelectListbox</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>insertTextArea</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>insertText</td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr style="background:#FFFFBB">
+            <td>italic</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr style="background:#FFFFBB">
+            <td>justifyCenter</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr style="background:#FFFFBB">
+            <td>justifyLeft</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr style="background:#FFFFBB">
+            <td>justifyRight</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr style="background:#FFFFBB">
+            <td>justifyFull</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr>
+            <td>justifyNone</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>liveResize</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>multipleSelection<sup>1</sup></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>open</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>overWrite</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr style="background:#FFFFBB">
+            <td>outdent</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr>
+            <td>paste</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>playImage</td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>print</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>redo</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr style="background:#FFFFBB">
+            <td>removeFormat</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr>
+            <td>refresh</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>removeParaFormat</td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr style="background:#FFFFBB">
+            <td>selectAll</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr>
+            <td>saveAs</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>sizeToControl</td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>sizeToControlHeight</td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>sizeToControlWidth</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>stop</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr>
+            <td>stopImage</td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr style="background:#FFFFBB">
+            <td>strikeThrough</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr style="background:#FFFFBB">
+            <td>subscript</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr style="background:#FFFFBB">
+            <td>superscript</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr>
+            <td>unBookmark</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+          </tr>
+          <tr style="background:#FFFFBB">
+            <td>underline</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr>
+            <td>undo</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr style="background:#FFFFBB">
+            <td>unlink</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr>
+            <td>useCSS</td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr>
+            <td>hiliteColor</td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr>
+            <td>unselect</td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+          <tr>
+            <td>styleWithCSS</td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_2">Y</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_1">N</span></td>
+            <td><span class="hl_2">Y</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="comment">【注】：formatBlock 指令可接收的 vValue 值不同，IE 中需要 vValue 值为目标块标记名，而其他浏览器可以接收空字符串。<br />
+      multipleSelection 指令在 Windows XP sp3 中可构建出多选列表，Windows 7 中指令只会返回 TRUE，对代码结构不会有任何改变。</p>
+      <h2 id="solutions">解决方案</h2>
+      <p>在调用 execCommand 方法时建议仅从 &quot;backColor&quot; &quot;bold&quot; &quot;createLink&quot; &quot;delete&quot; &quot;fontSize&quot; &quot;foreColor&quot; &quot;formatBlock&quot; &quot;indent&quot; &quot;insertHorizontalRule&quot; &quot;insertImage&quot; &quot;insertOrderedList&quot; &quot;insertUnorderedList&quot; &quot;insertParagraph&quot; &quot;italic&quot; &quot;justifyCenter&quot; &quot;justifyLeft&quot; &quot;justifyRight&quot; &quot;justifyFull&quot; &quot;outdent&quot; &quot;removeFormat&quot; &quot;selectAll&quot; &quot;strikeThrough&quot; &quot;subscript&quot; &quot;superscript&quot; &quot;underline&quot; &quot;unlink&quot; 参数中选择其一作为首参数传入，他们均被所有浏览器支持。</p>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td> IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 8.0.552.0 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.63</td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BX9054/execCommand_sCommands_Parameters.html">execCommand_sCommands_Parameters.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-15</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>document execCommand Commands Identifiers HTML5 MSDN MDC</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

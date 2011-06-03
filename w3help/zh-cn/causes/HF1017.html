@@ -1,0 +1,126 @@
+ <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HF1017: Firefox 中 OPTION 元素可以应用其设定的宽度并撑大其所在 SELECT 元素</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 HTML4.01 规范中的描述，SELECT 元素创建一个下拉菜单 (<a href="http://www.w3.org/TR/html401/interact/forms.html#menu">menu</a>)，其内的选项由 OPTION 元素呈现，一个 SELECT 元素必须至少包含一个 OPTION 元素。</p>
+      <p>关于 OPTION 元素的更多信息，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html401/interact/forms.html#edef-OPTION">17.6 The SELECT, OPTGROUP, and OPTION elements</a> 中的内容。</p>
+      <p></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 Firefox 中，OPTION 元素默认的 'display' 特性值为 'block'，即块级元素，故其可以设定宽度，且其设定的宽度可能会撑大其所在的 SELECT 元素。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题会导致 SELECT 元素的宽度在 Firefox 与其他浏览器之间产生差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Firefox</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>HTML4.01 及 CSS2.1 规范中并没有明确说明 OPTION 元素是否可以设定宽度。</p>
+      <p>分析以下代码：<em>option.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;select&gt;
+  &lt;option style=&quot;width:200px;&quot;&gt;aaa&lt;/option&gt;
+&lt;/select&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码中 OPTION 元素设定了宽度 200px。SELECT 元素没有明确设定宽度。</p>
+      <p>这段代码在各浏览器中运行效果为：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Chrome Safari Opera</th>
+          <th>Firefox</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/HF1017/1.gif" alt="" /></td>
+          <td><img src="../../tests/HF1017/2.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>可以看到 Firefox 中设定的 200px 宽度的 OPTION 元素将 SELECT 元素撑大。</p>
+      <p>若明确的为 SELECT 元素设定一个宽度，则在 Firefox 中 OPTION 元素不再能够撑大其所在 SELECT 元素。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>若 SELECT 元素没有明确设定宽度，则应避免为其 OPTION 元素设定一个可能撑大它的宽度。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.544.0 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HF1017/option.html">option.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-11</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>option width select</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

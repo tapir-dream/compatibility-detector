@@ -1,0 +1,218 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HF9009: 各浏览器对表单元素单选按钮组设置非 CDATA 标准的 name 属性值解析不同</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 W3C HTML4.01 规范中的描述，&quot;name&quot; 属性值必须以字母 ([A-Za-z]) 开头 ，其后由任何字母、数字 ([0-9])、连字符 (&quot;-&quot;)、下划线 (&quot;_&quot;)、冒号 (&quot;:&quot;) 和句号 (&quot;.&quot;) 组成。</p>
+      <p>更详细内容可以参考 HTML 4.01 规范 <a href="http://www.w3.org/TR/html4/types.html#type-name">6.2 SGML basic types - ID and NAME tokens</a>。</p>
+      <p>单选按钮多个单选按钮共享相同控件名称 (name)，如果这个 name 值是合法的，那么同值单选按钮将组成一组，它们是互斥的，只有一个单选按钮是选中状态，其余的所有具有相同控件名称的单选按钮是未选中状态。</p>
+      <p>关于单选按钮 (radio buttons) 的详细信息，请参考 HTML 4.01 规范 <a href="http://www.w3.org/TR/html401/interact/forms.html#h-17.2.1">17.2.1</a> 中的内容。</p>
+      <h2 id="description">问题描述</h2>
+      <p>单选按钮的 &quot;name&quot; 属性是用来为多个单选按钮分组的，&quot;name&quot; 属性值相同的按钮为同组，同组按钮中同一时刻仅可以有一个按钮呈现选中状态。</p>
+      <p>如果 &quot;name&quot; 属性内值不符合 CDATA 规范范围，则不同浏览器对此非法值采取的处理方式不同。</p>
+      <h2 id="influence">造成的影响</h2>
+      <p>当给多个单选按钮设置 name=&quot;&quot; 时：</p>
+      <ul>
+        <li>IE6 IE7 IE8 Chrome Safari 会认为多个单选按钮没有设置 &quot;name&quot; 属性。此时，IE6 IE7 IE8(Q) 的具体处理策略为，单选框不可被选中；而 IE8(S) Chrome Safari 的具体处理策略为，任意单选框均可被选中。</li>
+        <li>Firefox Opera 会认为多个单选按钮有相同的 &quot;name&quot; 属性值——空字符串，单选按钮会被正常分组，选择状态良好。</li>
+      </ul>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>根据规范中对 name 属性的 CDATA 约定描述，我们构造以下六组实例，第一组为无 &quot;name&quot; 属性组，其余五组为非法 &quot;name&quot; 值代码：</p>
+<pre>
+&lt;form&gt;
+  &lt;input type="radio"/&gt;无 NAME 组
+  &lt;input type="radio"/&gt;无 NAME 组
+  &lt;input type="radio"/&gt;无 NAME 组
+  &lt;input type="radio"/&gt;无 NAME 组
+&lt;/form&gt;
+&lt;br /&gt;
+&lt;form&gt;
+  &lt;input type="radio" name="" /&gt;空字符单选组
+  &lt;input type="radio" name="" /&gt;空字符单选组
+  &lt;input type="radio" name="" /&gt;空字符单选组
+  &lt;input type="radio" name="" /&gt;空字符单选组
+&lt;/form&gt;
+&lt;br /&gt;
+&lt;form&gt;
+  &lt;input type="radio" name=":" /&gt;冒号字符单选组
+  &lt;input type="radio" name=":" /&gt;冒号字符单选组
+  &lt;input type="radio" name=":" /&gt;冒号字符单选组
+  &lt;input type="radio" name=":" /&gt;冒号字符单选组
+&lt;/form&gt;
+&lt;br /&gt;
+&lt;form&gt;
+  &lt;input type="radio" name="." /&gt;点字符单选组
+  &lt;input type="radio" name="." /&gt;点字符单选组
+  &lt;input type="radio" name="." /&gt;点字符单选组
+  &lt;input type="radio" name="." /&gt;点字符单选组
+&lt;/form&gt;
+&lt;br /&gt;
+&lt;form&gt;
+  &lt;input type="radio" name="-" /&gt;减号字符单选组
+  &lt;input type="radio" name="-" /&gt;减号字符单选组
+  &lt;input type="radio" name="-" /&gt;减号字符单选组
+  &lt;input type="radio" name="-" /&gt;减号字符单选组
+&lt;/form&gt;
+&lt;br /&gt;
+&lt;form&gt;
+  &lt;input type="radio" name="囧" /&gt;中文字符单选组
+  &lt;input type="radio" name="囧" /&gt;中文字符单选组
+  &lt;input type="radio" name="囧" /&gt;中文字符单选组
+  &lt;input type="radio" name="囧" /&gt;中文字符单选组
+&lt;/form&gt;
+</pre>
+
+      <p>上面代码在各浏览器中点击单选按钮结果汇总如下：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Chrome Safari</th>
+          <th>Firefox Opera</th>
+        </tr>
+        <tr>
+          <th>无 NAME 组</th>
+          <td><span class="hl_1">无法选中任意一项</span></td>
+          <td colspan="2"><span class="hl_4">可以选中任意项</span></td>
+        </tr>
+        <tr>
+          <th>空字符单选组</th>
+          <td><span class="hl_1">无法选中任意一项</span></td>
+          <td><span class="hl_4">可以选中任意项</span></td>
+          <td><span class="hl_2">单选</span></td>
+        </tr>
+        <tr>
+          <th>冒号字符单选组</th>
+          <td colspan="3"><span class="hl_2">单选</span></td>
+        </tr>
+        <tr>
+          <th>点字符单选组</th>
+          <td colspan="3"><span class="hl_2">单选</span></td>
+        </tr>
+        <tr>
+          <th>减号字符单选组</th>
+          <td colspan="3"><span class="hl_2">单选</span></td>
+        </tr>
+        <tr>
+          <th>中文字符单选组</th>
+          <td colspan="3"><span class="hl_2">单选</span></td>
+        </tr>
+      </table>
+      <p>各浏览器对 &quot;name&quot; 属性值解析如下：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th> Chrome Safari</th>
+          <th>IE6 IE7 IE8 Firefox Opera</th>
+        </tr>
+        <tr>
+          <th>无 NAME 组</th>
+          <td colspan="2">&lt;input type=&quot;radio&quot;/&gt;</td>
+        </tr>
+        <tr>
+          <th>空字符单选组</th>
+          <td>&lt;input type=&quot;radio&quot; <span class="hl_4">name</span>  /&gt;</td>
+          <td>&lt;input type=&quot;radio&quot; <span class="hl_4">name=&quot;&quot;</span>  /&gt;</td>
+        </tr>
+        <tr>
+          <th>冒号字符单选组</th>
+          <td colspan="2">&lt;input type=&quot;radio&quot; name=&quot;:&quot;  /&gt;</td>
+        </tr>
+        <tr>
+          <th>点字符单选组</th>
+          <td colspan="2">&lt;input type=&quot;radio&quot; name=&quot;.&quot;  /&gt;</td>
+        </tr>
+        <tr>
+          <th>减号字符单选组</th>
+          <td colspan="2">&lt;input type=&quot;radio&quot; name=&quot;-&quot;  /&gt;</td>
+        </tr>
+        <tr>
+          <th>中文字符单选组</th>
+          <td colspan="2">&lt;input type=&quot;radio&quot; name=&quot;囧&quot;  /&gt;</td>
+        </tr>
+      </table>
+      <p>根据以上两表可见：</p>
+      <ul>
+        <li><em>IE6 IE7 IE8(Q)</em> 中，多个单选按钮没有设置 &quot;name&quot; 属性和属性值为空字符串时表现一致，这说明浏览器会将两种情况等同为无 &quot;name&quot; 属性<sup>1</sup>处理，具体处理策略为没有设置 &quot;name&quot; 属性的单选按钮都不可点击。</li>
+        <li><em>IE8(S) Chrome Safari</em> 中，多个单选按钮没有设置 &quot;name&quot; 属性和属性值为空字符串时表现一致，这说明浏览器会将两种情况等同为无 &quot;name&quot; 属性<sup>1</sup>处理，具体处理策略为没有设置 &quot;name&quot; 属性的单选按钮都可随意点击，不受分组限制。另外，从浏览器解析的源码可以看出，<em>Chrome Safari</em> 解析后  &quot;name&quot; 属性的空字符串值已经被去掉，此时 &quot;name&quot; 属性语法已经并不符合规范约定，因而整个单选按钮等同无 &quot;name&quot; 属性设置情况。</li>
+        <li><em>Firefox Opera</em> 中，多个单选按钮没有设置 &quot;name&quot; 属性时，浏览器具体处理策略为单选按钮都可随意点击，不受分组限制。但是，在多个单选按钮的 &quot;name&quot; 属性为空字符串是，浏览器会识别它是个有效值 &quot;name&quot; 值，并根据此值进行单选按钮分组。</li>
+        <li>对于其他非法 &quot;name&quot; 属性值，<em>所有浏览器</em>均可以正常识别，并执行单选分组，这部分的客户端具体实现与 HTML 4.01 规范相关描述不符。</li>
+      </ul>
+      <p class="comment">【注】：HTML 4.01 规范中没有明确说明单选按钮无 &quot;name&quot; 属性时应如何处理，这由客户端负责具体实现。</p>
+      <h2 id="solutions">解决方案</h2>
+      <p>不要忘记书写单选按钮的 &quot;name&quot; 属性。</p>
+      <p>虽然各浏览器都很宽容的处理了非空字符串值 &quot;name&quot; 属性的情况，仅在  &quot;name&quot; 属性值为空字符串时存在处理差异，但还是建议正确书写代码 —— &quot;name&quot; 属性值必须以字母 ([A-Za-z]) 开头 ，其后由任何字母、数字 ([0-9])、连字符 (&quot;-&quot;)、下划线 (&quot;_&quot;)、冒号 (&quot;:&quot;) 和句号 (&quot;.&quot;) 组成。</p>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td> IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.9<br />
+              Chrome 7.0.517.8 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62 </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HF9009/radiobuttons.html">radiobuttons.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-17</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>radio name CDATA </p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

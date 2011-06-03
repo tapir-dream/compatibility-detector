@@ -1,0 +1,121 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HG1002: Chrome 和 Safari 中标签紧密相邻的行内元素在折行显示时存在错误</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>关于 'display:inline' 的详细信息，请参考 W3C CSS 2.1 规范 <a href="http://www.w3.org/TR/CSS21/visuren.html#display-prop">9.2.4 The 'display' property</a>。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>Chrome 和 Safari 中标签紧密相邻的行内元素在折行显示时存在错误。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>可能造成不同浏览器中标签紧密相邻的行内元素显示效果不一致。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Chrome Safari</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>这个问题是 WebKit 引擎在处理紧密相连的内联元素时存在自动换行计算上的 Bug 。</p>
+      <p>针对此问题，我们使用以下测试样例来说明，分析以下代码：</p>
+<pre>
+&lt;body&gt;
+    &lt;a&gt;[a]&lt;/a&gt;&lt;span&gt;[span]&lt;/span&gt;&lt;strong&gt;[strong]&lt;/strong&gt;&lt;i&gt;[i]&lt;/i&gt;&lt;b&gt;[b]&lt;/b&gt;&lt;big&gt;[big]&lt;/big&gt;&lt;small&gt;[small]&lt;/small&gt;&lt;em&gt;[em]&lt;/em&gt;&lt;dfn&gt;[dfn]&lt;/dfn&gt;&lt;code&gt;[code]&lt;/code&gt;&lt;samp&gt;[samp]&lt;/samp&gt;&lt;kbd&gt;[kbd]&lt;/kbd&gt;&lt;var&gt;[var]&lt;/var&gt;&lt;cite&gt;[cite]&lt;/cite&gt;&lt;abbr&gt;[abbr]&lt;/abbr&gt;&lt;acronym&gt;[acronym]&lt;/acronym&gt;&lt;sub&gt;[sub]&lt;/sub&gt;&lt;sup&gt;[sup]&lt;/sup&gt;&lt;bdo&gt;[bdo]&lt;/bdo&gt;
+&lt;/body&gt;
+</pre>
+      <p>减小浏览器窗口尺寸后，在各浏览器中表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>Chrome Safari</th>
+          <th>IE6 IE7 IE8 Firefox Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/HG1002/HG1002-1.png" alt="运行效果截图" /></td>
+          <td><img src="../../tests/HG1002/HG1002-2.png" alt="运行效果截图" /></td>
+        </tr>
+      </table>
+
+      <p>
+        通过上图比较可以发现，在非 WebKit 引擎的浏览器内，不管元素排列如何紧密，都可以随着布局大小自动换行显示；
+        而在 WebKit 引擎的浏览器中所有紧密相连的内联元素都在同一行显示，并且与文档模式无关。
+      </p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>避免出现紧密连接的内联元素标签，可以在每个标记之间加入空格或者换行符来避免这个问题。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.8<br />
+              Opera 10.60<br />
+              Chrome 6.0.472.0 dev<br />
+              Safari 5.0(7533.16)
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HG1002/webkit_inline.html">webkit_inline.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-28</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>inline auto-inline-feed 标签紧密相邻 行内元素 换行</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

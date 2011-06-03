@@ -1,0 +1,28 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<style>
+    table { width:200px; border:1px solid black; }
+    td { padding:2px; line-height:20px; }
+</style>
+</head>
+<body>
+
+<table cellpadding="0" cellspacing="0">
+<script>
+for (var i = 0; i < 8; i++) {
+    document.write('<tr>');
+    document.write('<td id="td' + i + '" style="height:' + (i * 2 + 16) + 'px; background:rgb(' + (224 - i * 16) + ',' + (224 - i * 16) + ',' + (224 - i * 16) + ');">set:' + (i * 2 + 16) + '</td>');
+    document.write('</tr>');
+}
+</script>
+</table>
+<script>
+    function $(id) { return document.getElementById(id); }
+    for (var i = 0; i < 8; i++) {
+        $("td" + i).innerHTML += ", computed:" + $("td" + i).offsetHeight;
+    }
+</script>
+</body>
+</html>

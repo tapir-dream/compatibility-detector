@@ -1,0 +1,23 @@
+<script type="text/javascript">
+    window.onload = function() {
+        var info = document.getElementById("info");
+        var tests = document.getElementById("test");
+        try {
+            info.innerHTML = "object.all : " + tests.all;
+        } catch(err) {
+            info.innerHTML += "tests.all : " + err;
+        }
+
+        try {
+            info.innerHTML += "<br/>object.all[name] : " + tests.all['SPAN1'];
+        } catch(err) {
+            info.innerHTML += "<br/>object.all[name] : " + err;
+        }
+    }
+</script>
+<div id="test">
+    <span id="SPAN1"></span>
+    <span id="SPAN2"></span>
+</div>
+
+<div id="info" style="font-size:12px;"></div>

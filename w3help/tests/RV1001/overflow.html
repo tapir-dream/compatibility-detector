@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+	<head>
+		<script type="text/javascript">
+			if(!window.getComputedStyle)
+				window.getComputedStyle = function(target){
+					return target.currentStyle;
+				}
+			function $(id){return document.getElementById(id);}
+			window.onload = function(){
+				for(var i = 1;i<7;i++){
+					$("info" + i).innerHTML = getComputedStyle($("cont" + i), null).overflowY;
+				
+				}
+			}
+		</script>
+		<style type="text/css">
+			#cont1 div, #cont3 div, #cont5 div {
+				width:150px;
+				height:100px;
+			}
+			#cont2 div, #cont4 div, #cont6 div {
+				width:50px;
+				height:25px;
+			}
+			.cont {
+				overflow-y : visible;
+				padding:10px;
+				width:100px;
+				height:50px;
+			}
+			.cont, .cont div {
+				border : 3px solid;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="cont1" class="cont" style="overflow-x:scroll; ">
+			<div></div>
+		</div>
+		<div id="info1"></div>
+		
+		<div id="cont2" class="cont" style="overflow-x:scroll; ">
+			<div></div>
+		</div>
+		<div id="info2"></div>
+		
+		<div id="cont3" class="cont" style="overflow-x:auto; ">
+			<div></div>
+		</div>
+		<div id="info3"></div>
+		
+		<div id="cont4" class="cont" style="overflow-x:auto; ">
+			<div></div>
+		</div>
+		<div id="info4"></div>
+		
+		<div id="cont5" class="cont" style="overflow-x:hidden; ">
+			<div></div>
+		</div>
+		<div id="info5"></div>
+		
+		<div id="cont6" class="cont" style="overflow-x:hidden; ">
+			<div></div>
+		</div>
+		<div id="info6"></div>
+		
+	</body>
+</html>

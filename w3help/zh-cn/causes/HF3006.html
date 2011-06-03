@@ -1,0 +1,375 @@
+ <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HF3006: Chrome Safari Opera 中 INPUT、TEXTAREA 元素的 disabled 属性值为 true 时其前景颜色会发生变化，但在 Chrome Safari 中某些情况下 disabled 属性值由 true 转为 false 后，其前景颜色不会更新至最初的设定色</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>W3C HTML4.01 规范关于失效的控件（<strong>Disabled</strong> controls）的描述中对 <strong>disabled</strong> 属性进行了详细介绍：被设置 <strong>disabled</strong> 属性的表单控件将不再允许用户输入。而 <strong>disabled</strong> 属性使一个元素出现如下特征：</p>
+      <ul>
+        <li>无法再获得<a href="http://www.w3.org/TR/html401/interact/forms.html#focus">输入焦点</a>；</li>
+        <li>被跳过 <a href="http://www.w3.org/TR/html401/interact/forms.html#tabbing-navigation">TAB键导航</a>（即通过TAB键在控件直接跳转输入焦点时，此元素将被忽略）；</li>
+        <li>不是 <a href="http://www.w3.org/TR/html401/interact/forms.html#successful-controls">successful controls</a>。</li>
+      </ul>
+      <p><strong>被设置了 disabled 后的渲染由用户端决定，如将元素 &quot;置灰&quot; 。</strong></p>
+
+      <p>关于 <strong>disabled</strong> 属性 的详细信息，请参考 HTML4 规范 <a href="http://www.w3.org/TR/html401/interact/forms.html#adef-disabled">17.12.1</a> 中的内容。</p>
+      <p></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>各浏览器对于 INPUT、TEXTAREA 元素设置了 disabled 之后的效果处理不尽相同。IE 中会为文字设置一个阴影；Firefox 则保持文字前景色不变；Chrome Safari 会根据元素的背景色自动调整一个前景色；Opera 会将前景色变为 '#6D6D6D'。<br />
+      但是在 Chrome  Safari 中 disabled 属性由 true 转为 false 后，其前景颜色不会更新至最初的设定色，需要使元素重新获得焦点后浏览器才会对前景色进行更新。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>Chrome  Safari 中的这个现象可能造成被设置 disabled 的 INPUT、TEXTAREA 元素在使其重新可用后，其被浏览器自动调整的前景色不会更新为最初的设定颜色。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Chrome Safari</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>W3C 规范中没有明确说明在表单元素设置了 disabled 之后该如何渲染 &quot;失效&quot; 的元素，所以各浏览器之间出现了差异。</p>
+      <p>首先看看各浏览器对于 &quot;失效&quot; 的 INPUT 元素的渲染差异。</p>
+      <p>请看以下代码：<em>disabled_input.html</em></p>
+      <pre>&lt;style&gt;
+  * { font:12px/1 Arial; }
+  input {  width:12px; height:12px; padding:0; margin:0; border:0 none; color:#aaa; float:left; outline:none;}
+&lt;/style&gt;
+&lt;div style=&quot;width:192px; overflow:hidden;&quot;&gt;
+&lt;script&gt;
+  for (var i = 255; i &gt;= 0; i--) {
+    document.write('&lt;input type=&quot;text&quot; value=&quot;W&quot; style=&quot;background:rgb(' + i + ',' + i + ',' + i + ');&quot; disabled /&gt;');
+  }
+&lt;/script&gt;
+&lt;/div&gt;</pre>
+      <p>代码中创建了 16x16 共 256 个 INPUT 元素，其背景色分别为由白至黑共 256 级灰度颜色。所有的 INPUT 元素设置为 disabled。</p>
+      <p>这段代码在各浏览器中运行效果为：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox</th>
+          <th>Chrome Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/HF3006/disabled_input_1.gif" alt="IE6 IE7 IE8" /></td>
+          <td><img src="../../tests/HF3006/disabled_input_2.gif" alt="Firefox" /></td>
+          <td><img src="../../tests/HF3006/disabled_input_3.gif" alt="Chrome Safari" /></td>
+          <td><img src="../../tests/HF3006/disabled_input_4.gif" alt="Opera" /></td>
+        </tr>
+      </table>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8</em> 中，INPUT 元素内的文字颜色并没有变化，仍然为 &quot;#AAA&quot;，但其下方出现了白色阴影用于区分前景色和背景色；</li>
+        <li>在 <em>Firefox</em> 中，INPUT 元素内的文字颜色也没有变化，仍然为 &quot;#AAA&quot;，所以当前景色与背景色比较靠近时，几乎无法看清楚文字；</li>
+        <li>在 <em>Chrome Safari</em> 中，浏览器根据 INPUT 元素的背景色自动调整 &quot;失效&quot; 的前景色（调整的计算方法参见本文最后一段），调整后的前景色均为灰度系颜色，这使得当前景色与背景色比较靠近时，仍然可以看到文字内容；</li>
+        <li>在 <em>Opera</em> 中，INPUT 元素的前景色变为了 &quot;#6D6D6D&quot;，但仍然存在前景色与背景色混淆无法识别的情况。</li>
+      </ul>
+      <br />
+      <p>下面继续分析当通过脚本将 INPUT 元素的 disabled 属性重新设置为 false 使其 &quot;可用&quot; 后各浏览器之间的差异。</p>
+      <p>分析以下代码：<em>disabled_input_and_textarea.html</em></p>
+      <pre>&lt;style&gt;
+  * { font:12px/1 Arial; }
+  input.i, textarea.t {  width:12px; height:12px; padding:0; margin:0; border:0 none; color:#aaa; float:left; overflow:hidden; resize:none; outline:none;}
+&lt;/style&gt;
+&lt;select id=&quot;aaa&quot;&gt;&lt;option&gt;11&lt;/option&gt;&lt;/select&gt;&lt;input id=&quot;&quot; type=&quot;text&quot; value=&quot;W&quot; style=&quot;color:#aaa;background:#eaeaea&quot; disabled /&gt;
+&lt;div style=&quot;width:192px; overflow:hidden; margin-bottom:5px;&quot;&gt;
+  &lt;script&gt;
+    function enableInput(dis) {
+      for (var i = 255; i &gt;= 0; i--) {
+        document.getElementById('i' + i).disabled = dis;
+      }
+    }
+    for (var i = 255; i &gt;= 0; i--) {
+      document.write('&lt;input id=&quot;i' + i + '&quot; class=&quot;i&quot; type=&quot;text&quot; value=&quot;W&quot; style=&quot;background:rgb(' + i + ',' + i + ',' + i + ');&quot; disabled /&gt;');
+    }
+  &lt;/script&gt;
+  &lt;div style=&quot;float:left; width:100%; height:20px; line-height:1.2;&quot;&gt;
+    INPUT: &lt;input type=&quot;checkbox&quot; id=&quot;i&quot; onclick=&quot;enableInput(this.checked);&quot; checked /&gt;&lt;label for=&quot;i&quot;&gt;disabled&lt;/label&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div style=&quot;width:192px; overflow:hidden;&quot;&gt;
+  &lt;script&gt;
+    function enableTextarea(dis) {
+      for (var i = 255; i &gt;= 0; i--) {
+        document.getElementById('t' + i).disabled = dis;
+      }
+    }
+
+    for (var i = 255; i &gt;= 0; i--) {
+      document.write('&lt;textarea id=&quot;t' + i + '&quot; class=&quot;t&quot; type=&quot;text&quot; style=&quot;background:rgb(' + (255 - parseInt(i / 2)) + ',' + (255 - i * 2) + ',' + (128 + parseInt(i / 2)) + ');&quot; disabled&gt;W&lt;/textarea&gt;');
+    }
+  &lt;/script&gt;
+  &lt;div style=&quot;float:left; width:100%; height:20px; line-height:1.2;&quot;&gt;
+    TEXTAREA: &lt;input type=&quot;checkbox&quot; id=&quot;t&quot; onclick=&quot;enableTextarea(this.checked);&quot; checked /&gt;&lt;label for=&quot;t&quot;&gt;disabled&lt;/label&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+      <p>上面代码总体结构与之前的相同，新增了对 TEXTAREA 元素的测试。点击 disabled 复选框可以设置 disabled 属性的值。</p>
+      <p>取消选中 disabled 复选框后，各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Firefox Opera</th>
+          <th>Chrome Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/HF3006/disabled_input_and_textarea_1.gif" alt="IE6 IE7 IE8 Firefox Opera" /></td>
+          <td><img src="../../tests/HF3006/disabled_input_and_textarea_2.gif" alt="Chrome Safari" /></td>
+        </tr>
+      </table>
+      <p>从截图中可以很清楚的看到 <em>Chrome  Safari</em> 中对于初始状态下设置了 disabled 的 INPUT 及 TEXTAREA 元素，在通过脚本使其 disabled 属性为 false 变为 &quot;可用&quot; 后，其因为 disabled 状态而改变的文字前景色无法随即更新回原始设定的颜色。</p>
+      <p>这时候若使 INPUT、TEXTAREA 元素获得焦点，则前景色会更新：<br />
+      <img src="../../tests/HF3006/update_fore.gif" alt="update fore" /></p>
+      <br />
+      <p>下面分析在何种情况下 Chrome 和 Safari 中 disabled 的 INPUT、TEXTAREA 元素恢复 &quot;可用&quot; 后其前景色不会更新：</p>
+      <p>分析以下代码：<em>input_disabling.html</em></p>
+      <pre>&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  table { font:12px Arial; border-collapse:collapse; }
+  table td, table th { border:1px solid #999; }
+  th { background:#ddd; }
+  input { width:100px; color:#aaa; background:#eaeaea; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;table&gt;
+  &lt;tr&gt;
+    &lt;th&gt;&amp;nbsp;&lt;/th&gt;
+    &lt;th&gt;createElement&lt;/th&gt;
+    &lt;th&gt;cloneNode&lt;/th&gt;
+    &lt;th&gt;innerHTML&lt;/th&gt;
+    &lt;th&gt;document.write&lt;/th&gt;
+    &lt;th&gt;页面&lt;/th&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;初始 disabled&lt;/th&gt;
+    &lt;td id=&quot;a1&quot;&gt;&lt;/td&gt;
+    &lt;td id=&quot;c1&quot;&gt;&lt;/td&gt;
+    &lt;td id=&quot;i1&quot;&gt;&lt;/td&gt;
+    &lt;td id=&quot;r1&quot;&gt;
+      &lt;script&gt;
+        document.write('&lt;input id=&quot;r1i&quot; type=&quot;text&quot; disabled value=&quot;W&quot; /&gt;');
+      &lt;/script&gt;
+    &lt;/td&gt;
+    &lt;td id=&quot;d1&quot;&gt;&lt;input id=&quot;d1i&quot; type=&quot;text&quot; disabled value=&quot;W&quot; /&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;后设置 disabled&lt;/th&gt;
+    &lt;td id=&quot;a2&quot;&gt;&lt;/td&gt;
+    &lt;td id=&quot;c2&quot;&gt;&lt;/td&gt;
+    &lt;td id=&quot;i2&quot;&gt;&lt;/td&gt;
+    &lt;td id=&quot;r2&quot;&gt;
+      &lt;script&gt;
+        document.write('&lt;input id=&quot;r2i&quot; type=&quot;text&quot; value=&quot;W&quot; /&gt;');
+      &lt;/script&gt;
+    &lt;/td&gt;
+    &lt;td id=&quot;d2&quot;&gt;&lt;input id=&quot;d2i&quot; type=&quot;text&quot; value=&quot;W&quot; /&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th colspan=&quot;6&quot;&gt;disabled 之后恢复 &quot;可用&quot; &lt;/th&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;初始 disabled&lt;/th&gt;
+    &lt;td id=&quot;a3&quot;&gt;&lt;/td&gt;
+    &lt;td id=&quot;c3&quot;&gt;&lt;/td&gt;
+    &lt;td id=&quot;i3&quot;&gt;&lt;/td&gt;
+    &lt;td id=&quot;r3&quot;&gt;
+      &lt;script&gt;
+        document.write('&lt;input id=&quot;r3i&quot; type=&quot;text&quot; disabled value=&quot;W&quot; /&gt;');
+      &lt;/script&gt;
+    &lt;/td&gt;
+    &lt;td id=&quot;d3&quot;&gt;&lt;input id=&quot;d3i&quot; type=&quot;text&quot; disabled value=&quot;W&quot; /&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;th&gt;后设置 disabled&lt;/th&gt;
+    &lt;td id=&quot;a4&quot;&gt;&lt;/td&gt;
+    &lt;td id=&quot;c4&quot;&gt;&lt;/td&gt;
+    &lt;td id=&quot;i4&quot;&gt;&lt;/td&gt;
+    &lt;td id=&quot;r4&quot;&gt;
+      &lt;script&gt;
+        document.write('&lt;input id=&quot;r4i&quot; type=&quot;text&quot; value=&quot;W&quot; /&gt;');
+      &lt;/script&gt;
+    &lt;/td&gt;
+    &lt;td id=&quot;d4&quot;&gt;&lt;input id=&quot;d4i&quot; type=&quot;text&quot; value=&quot;W&quot; /&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;script&gt;
+  function $(id) { return document.getElementById(id); }
+
+  //---------------------------------------
+  var input = document.createElement('input');
+  input.type = 'text';
+  input.value = 'W';
+  input.disabled = true;
+  $('a1').appendChild(input);
+
+  $('i1').innerHTML = '&lt;input id=&quot;i1i&quot; type=&quot;text&quot; disabled value=&quot;W&quot; /&gt;';
+
+  var input_copy = input.cloneNode(true);
+  input_copy.disabled = true;
+  $('c1').appendChild(input_copy);
+
+
+  //----------------------------------------
+  var input2 = document.createElement('input');
+  input2.type = 'text';
+  input2.value = 'W';
+  $('a2').appendChild(input2);
+  input2.disabled = true;
+
+  $('i2').innerHTML = '&lt;input id=&quot;i2i&quot; type=&quot;text&quot; value=&quot;W&quot; /&gt;';
+  $('i2i').disabled = true;
+
+  $('r2i').disabled = true;
+
+  var input2_copy = input2.cloneNode(true);
+  $('c2').appendChild(input2_copy);
+  input2_copy.disabled = true;
+
+  $('d2i').disabled = true;
+
+  //---------------------------------------
+  var input3 = document.createElement('input');
+  input3.type = 'text';
+  input3.value = 'W';
+  input3.disabled = true;
+  $('a3').appendChild(input3);
+  input3.disabled = false;
+
+  $('i3').innerHTML = '&lt;input id=&quot;i3i&quot; type=&quot;text&quot; disabled value=&quot;W&quot; /&gt;';
+  $('i3i').disabled = false;
+
+  $('r3i').disabled = false;
+
+  var input_copy3 = input3.cloneNode(true);
+  input_copy3.disabled = true;
+  $('c3').appendChild(input_copy3);
+  input_copy3.disabled = false;
+
+  $('d3i').disabled = false;
+
+  //----------------------------------------
+  var input4 = document.createElement('input');
+  input4.type = 'text';
+  input4.value = 'W';
+  $('a4').appendChild(input4);
+  input4.disabled = true;
+  input4.disabled = false;
+
+  $('i4').innerHTML = '&lt;input id=&quot;i4i&quot; type=&quot;text&quot; value=&quot;W&quot; /&gt;';
+  $('i4i').disabled = true;
+  $('i4i').disabled = false;
+
+  $('r4i').disabled = true;
+  $('r4i').disabled = false;
+
+  var input4_copy = input4.cloneNode(true);
+  $('c4').appendChild(input4_copy);
+  input4_copy.disabled = true;
+  input4_copy.disabled = false;
+
+  $('d4i').disabled = true;
+  $('d4i').disabled = false;
+
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>这段代码在 Chrome Safari 中运行效果如下：<br />
+      <img src="../../tests/HF3006/update.gif" alt="update" /></p>
+      <p>可见对于通过 createElement、cloneNode 这类标准 DOM 方式创建并插入的 INPUT 元素，在 Chrome Safari 中不存在任何问题。</p>
+      <p>而通过诸如 innerHTML、document.write 还有页面原始加载时存在于 HTML 文档代码中的 INPUT 元素，在 disabled 前后均不会更新前景色。</p>
+      <br />
+
+
+      <h2 id="solutions">解决方案</h2>
+      <p>避免为 INPUT、TEXTAREA 元素设置比较深的背景色，或者在需要使一个文本框在 &quot;disabled=true&quot; 及 &quot;disabled=false&quot; 之间切换时，尽量通过标准的 DOM 方式创建此元素。</p>
+      <p>或者在设置 &quot;disabled=false&quot; 之后迫使文本框获得焦点，但应注意恢复之前获得焦点的元素。如：</p>
+      <pre>&lt;input type=&quot;text&quot; id=&quot;a&quot; /&gt;
+&lt;input type=&quot;text&quot; id=&quot;i&quot; value=&quot;www&quot; disabled style=&quot;color:#aaa; background:#eaeaea;&quot; /&gt;
+&lt;script&gt;
+  function $(id) { return document.getElementById(id); }
+  var a = $('a');
+  var i = $('i');
+  a.focus();
+  var f = document.activeElement;
+  i.disabled = false;
+  i.focus();
+  f.focus();
+&lt;/script&gt;</pre>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.8<br />
+              Chrome 6.0.472.11 dev<br />
+              Safari 5.0<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HF3006/disabled_input_and_textarea.html">disabled_input_and_textarea.html</a><br />
+            <a href="../../tests/HF3006/input_disabling.html">input_disabling.html</a><br />
+            <a href="../../tests/HF3006/disabled_sol.html">disabled_sol.html</a>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-02</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>INPUT TEXTAREA disabled color 更新 失效 颜色</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

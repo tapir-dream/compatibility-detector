@@ -1,0 +1,20 @@
+<style>
+    iframe { width:450px; height:1800px; }
+</style>
+after window.onload, innerHTML
+<div id="div1">
+    <iframe id="ifr1" name="ifr1" src="sub.html"></iframe>
+    <iframe id="ifr2" name="ifr2" src="0.html"></iframe>
+</div>
+<div id="div2">
+</div>
+<script>
+    function $(id) {
+        return document.getElementById(id);
+    }
+
+	window.onload = function () {
+	    $("div2").innerHTML = $("div1").innerHTML;
+	    $("div1").innerHTML = "";
+	}
+</script>

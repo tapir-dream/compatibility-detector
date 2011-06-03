@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RE1006: 单元格的高度计算受其 'padding' 和 'line-height' 的影响  </h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>关于W3C CSS 2.1 中表格高度计算规范请参考：<a href="http://www.w3.org/TR/CSS21/tables.html#height-layout">http://www.w3.org/TR/CSS21/tables.html#height-layout</a> </p>
+
+      <h2 id="description">问题描述</h2>
+      <p>单元格的高度计算受其 'padding' 和 'line-height' 的影响。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p> 这个现象将造成表格单元格高度的计算差异，若单元格行数较多，可能最终造成表格的总高度在不同浏览器中出现很大的区别。 </p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <h3>1. 单元格的高度计算受其 'padding' 样式的影响</h3>
+      <p>分析以下代码：</p>
+<pre>
+&lt;style&gt;
+    table { width:200px; border:1px solid black; }
+    td { padding:2px; line-height:20px; }
+&lt;/style&gt;
+&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;
+&lt;script&gt;
+for (var i = 0; i &lt; 8; i++) {
+    document.write('&lt;tr&gt;');
+    document.write('&lt;td id=&quot;td' + i + '&quot; style=&quot;height:' + (i * 2 + 16) + 'px; background:rgb(' + (224 - i * 16) + ',' + (224 - i * 16) + ',' + (224 - i * 16) + ');&quot;&gt;set:' + (i * 2 + 16) + '&lt;/td&gt;');
+    document.write('&lt;/tr&gt;');
+}
+&lt;/script&gt;
+&lt;/table&gt;
+&lt;script&gt;
+    function $(id) { return document.getElementById(id); }
+    for (var i = 0; i &lt; 8; i++) {
+        $(&quot;td&quot; + i).innerHTML += &quot;, computed:&quot; + $(&quot;td&quot; + i).offsetHeight;
+    }
+&lt;/script&gt;
+</pre>
+
+      <p> 上面代码动态创建了若干 TD 元素，TD 元素的设定高度由 16px 至 30px 以 2px 为单位递增（set），之后通过脚本计算出 TD 元素的实际高度（computed）。<br />
+        这段代码在不同浏览器中运行结果如下： </p>
+      <table class="compare">
+        <tbody>
+          <tr>
+            <th>IE6(S) IE7(S) IE8(S) Chrome(S) Safari(S)</th>
+            <th>IE6(Q) IE7(Q) IE8(Q)  Firefox Opera Chrome(Q) Safari(Q)</th>
+            </tr>
+          <tr>
+            <td><img src="../../tests/RE1006/01.gif" alt="运行效果截图" /></td>
+            <td><img src="../../tests/RE1006/02.gif" alt="运行效果截图" /></td>
+            </tr>
+          </tbody>
+      </table>
+      <p>各 TD 元素的 'padding-top' 及 'padding-bottom' 均为 2px，'line-height' 均为 20px。<br />
+        可见：</p>
+      <ul>
+          <li>在<em><strong> IE(Q) Chrome(Q) Safari(Q) Firefox Opera </strong></em>中，其的高度计算遵从如下规律：</li>
+        </ul>
+        <ol>
+          <li>TD 的 height 值小于等于line-height + padding-top + padding-bottom 值时：<br />
+            TD 的 offsetHeight = TD 内行框数 x line-height + padding-top + padding-bottom；</li>
+          <li>TD 的 height 值大于等于line-height + padding-top + padding-bottom 值时：<br />
+            TD 的 offsetHeight = height(此 height 为最小高度，当内容高度大于height时，offsetHeight等于实际高度)。</li>
+        </ol>
+        <ul>
+          <li>在 <em><strong>IE(S) Chrome(S) Safari(S)</strong></em> 中，其的高度计算遵从如下规律：</li>
+        </ul>
+          <ol>
+            <li>TD 的 height 值小于等于 line-height 值时：<br />
+              TD 的 offsetHeight = TD 内行框数 x line-height + padding-top + padding-bottom；</li>
+            <li>TD 的 height 值大于等于 line-height 值时：<br />
+              TD 的 offsetHeight = height + padding-top + padding-bottom。(此 height 为最小高度，当内容高度大于height时，offsetHeight等于实际高度)</li>
+            </ol>
+        <p>TABLE 元素的 cellpadding 属性不为0时，情况与上面类似，因为 TABLE[cellpadding=&quot;2&quot;] 相当于每一个 TD 元素的 'padding-top' 'padding-bottom' 均为 2px。</p>
+        <p>&nbsp;</p>
+        <h3>2. 'line-height' 样式对单元格的高度计算的影响</h3>
+        <p>分析以下代码：</p>
+<pre>
+&lt;style&gt;
+    table { width:200px; border:1px solid black; }
+    td { height:20px; }
+&lt;/style&gt;
+&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot;&gt;
+&lt;script&gt;
+for (var i = 0; i &lt; 8; i++) {
+    document.write('&lt;tr&gt;');
+    document.write('&lt;td id=&quot;td' + i + '&quot; style=&quot;line-height:' + (i * 2 + 16) + 'px; background:rgb(' + (224 - i * 16) + ',' + (224 - i * 16) + ',' + (224 - i * 16) + ');&quot;&gt;set:' + (i * 2 + 16) + '&lt;/td&gt;');
+    document.write('&lt;/tr&gt;');
+}
+&lt;/script&gt;
+&lt;/table&gt;
+&lt;script&gt;
+    function $(id) { return document.getElementById(id); }
+    for (var i = 0; i &lt; 8; i++) {
+        $(&quot;td&quot; + i).innerHTML += &quot;, computed:&quot; + $(&quot;td&quot; + i).offsetHeight;
+    }
+&lt;/script&gt;
+</pre>
+
+            <p> 上面代码与第一节中的代码类似，但是单元格 TD 元素的 'height' 属性均设定为 20px，不同的为每个 TD 元素的 'line-height'样式，则所有浏览器中运行效果均相同：</p>
+          <table class="compare">
+              <tbody>
+                <tr>
+                  <th>所有浏览器</th>
+                </tr>
+                <tr>
+                  <td><img src="../../tests/RE1006/03.gif" alt="运行效果截图" /></td>
+                </tr>
+              </tbody>
+            </table>
+          <p>各浏览器对TD元素的实际高度计算均为：Max(height, ling-height) 。</p>
+          <h2 id="solutions">解决方案</h2>
+      <ul>
+      <li>避免为 TD 元素设置 'padding-top' 'padding-bottom' 特性</li>
+      <li>避免为 TABLE 元素的 cellpadding 属性值。 </li>
+      </ul>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.3<br />
+              Opera 10.53<br />
+              Chrome 6.0.401.1 dev<br />
+              Safari 4.0.5
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RE1006/td_padding.html">td_padding.html</a> <br /> <a href="../../tests/RE1006/td_line_height.html">td_line_height.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-20</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>padding TD height line-height 边白 单元格 高度 行高</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

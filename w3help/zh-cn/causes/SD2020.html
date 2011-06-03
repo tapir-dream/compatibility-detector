@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SD2020: 仅 IE 和 Firefox 支持 window 对象的 onerror 事件</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE 和 Firefox 提供了对 window.onerror 事件的支持，当页面内的 JavaScript 脚本出现错误时，window.onerror 被触发。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>若希望通过 window.onerror 事件屏蔽页面中的脚本错误，或者获取页面脚本错误的信息，则在不同浏览器中会产生差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8 Firefox</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>W3C HTML4.01 规范第 <a href="http://www.w3.org/TR/html401/interact/scripts.html#h-18.2.3">18.2.3</a> 节介绍了 HTML 中的固有事件（Intrinsic events），其中并没有 onerror 事件。</p>
+      <p>在 HTML5 规范草案中描述了 window 对象的事件处理程序，其中有 onerror 事件存在，详细情况请参照草案说明：<a href="http://www.w3.org/TR/html5/webappapis.html#handler-window-onerror">6.1.6.2 Event handlers on elements</a>。</p>
+      <p>根据 <a href="http://msdn.microsoft.com/en-us/library/cc197053(VS.85).aspx">MSDN</a> 及 <a href="https://developer.mozilla.org/en/DOM/window.onerror">Mozilla Developer Center</a> 中的描述，当页面中的脚本出错的时候就会触发 window.onerror 事件，这个事件的监听器（event handler）拥有三个参数：msg（错误消息内容）、url（发生错误的页面的 URL）、line（发生错误的代码所在行行号）。</p>
+      <p>而浏览器是否按照其默认方式显示错误消息，取决于 onerror 事件的返回值。若返回 false，则在浏览器控制台（若有）中显示错误消息。反之则不再显示错误消息。<p>
+      <p>分析以下代码：</p>
+      <pre>&lt;script&gt;
+  window.onerror = function (msg, url, line) {
+    alert(url + ":\nline:" + line + "\n" + msg);
+    return true;
+  }
+  asd
+&lt;/script&gt;</pre>
+      <p>上面代码为 window.onerror 事件绑定了一个监听器，并试图在脚本出错的时候显示出脚本出错时显示出错页面 URL、行号及错误信息。</p>
+      <p>在各浏览器中运行结果为：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox</th>
+          <th>Chrome</th>
+          <th>Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <td>window.onerror.html:<br />
+line:6<br />
+'asd' 未定义</td>
+          <td>window.onerror.html:<br />
+line:6<br />
+asd is not defined</td>
+          <td colspan="3">无</td>
+        </tr>
+        <tr>
+          <th colspan="5">控制台提示：</th>
+        </tr>
+        <tr>
+          <td colspan="2">无</td>
+          <td>Uncaught ReferenceError: asd is not defined</td>
+          <td>ReferenceError: Can't find variable: asd</td>
+          <td>Uncaught exception: ReferenceError: Undefined variable: asd</td>
+        </tr>
+      </table>
+      <p>可见，window.onerror 事件仅 IE、Firefox 可以被触发，返回了需要的信息，并屏蔽了控制台的错误提示。</p>
+
+
+
+
+      <h2 id="solutions">解决方案</h2>
+      <p>放弃使用 window.onerror，通过合理使用 try-catch 来达到近似的效果。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.7<br />
+              Chrome 4.0.472.0 dev<br />
+              Safari 5.0<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/SD2020/window.onerror.html">window.onerror.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-22</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>window onerror 错误 event</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

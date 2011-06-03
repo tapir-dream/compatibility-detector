@@ -1,0 +1,650 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">CM2001: 不能保证带有 name 属性的 BUTTON / INPUT [ type = submit / button / image ] 元素的 value 属性值在所有浏览器中都可以被提交到服务端</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>表单元素是 HTML 文档中最常用的元素，根据 W3C HTML4.01 规范中的描述，表单（FORM）元素是文档（Document）的一部分，它可以包含常规文本内容、其他 HTML 标记、控件及 LABEL 元素。用户通常在对表单内的空间进行填写或修改之后提交给某一个代理（agent，如 Web 服务器、Mail 服务器）进行处理。</p>
+      <p>表单的提交过程主要分为以下四步：</p>
+      <ol>
+        <li>确定可以被提交的 <a href="http://www.w3.org/TR/html401/interact/forms.html#successful-controls">successful controls</a>；</li>
+        <li>建立表单数据集（<a href="http://www.w3.org/TR/html401/interact/forms.html#form-data-set">form data set</a>），表单数据集是一组根据 successful controls 建立的键值对（控件名“key”/控件当前值“value”）序列；</li>
+        <li>对 form data set 进行编码，编码依据为 FORM 元素的 <a href="http://www.w3.org/TR/html401/interact/forms.html#adef-enctype">enctype</a> 属性中所指定的 <a href="http://www.w3.org/TR/html401/interact/forms.html#form-content-type">content type</a>；</li>
+        <li>提交编码后的 form data set，最终编码后的数据根据表单元素的 <a href="http://www.w3.org/TR/html401/interact/forms.html#adef-method">method</a> 属性指定的协议发送到 <a href="http://www.w3.org/TR/html401/interact/forms.html#adef-action">action</a> 属性所指的目标处理代理（processing agent）。</li>
+      </ol>
+      <p>successful controls 是指可以<strong>有效</strong>的提交的控件。每一个 successful controls 均具备由其 name 属性（<a href="http://www.w3.org/TR/html401/interact/forms.html#control-name">control name</a>）及当前 value 属性（<a href="http://www.w3.org/TR/html401/interact/forms.html#current-value">current value</a>）所组成的“name/value”键值对，这些 successful controls 的键值对组成了 form data set。而 W3C 规定，定义在 FORM 元素内的 successful controls 必须拥有 name 属性。</p>
+      <p>规范还做出了如下规定：</p>
+      <ul>
+        <li>被设置为失效（<a href="http://www.w3.org/TR/html401/interact/forms.html#disabled">disabled</a> 属性）的控件<em>不是</em> <strong>successful controls</strong>；</li>
+        <li>如果一个表单内包含多个提交按钮（<a href="http://www.w3.org/TR/html401/interact/forms.html#buttons">submit button</a>），则只有当前被激活的提交按钮<em>是</em> <strong>successful controls</strong>；</li>
+        <li>所有被选中（on）的复选框（<a href="http://www.w3.org/TR/html401/interact/forms.html#checkbox">checkbox</a>）<em>是</em> <strong>successful controls</strong>；</li>
+        <li>对于共享同一个 name 属性的单选框（<a href="http://www.w3.org/TR/html401/interact/forms.html#radio">radio</a>），只有被选中（on）的<em>是</em> <strong>successful controls</strong>；</li>
+        <li>对于下拉列表菜单（<a href="http://www.w3.org/TR/html401/interact/forms.html#edef-SELECT">SELECT</a> 元素），在其有 <a href="http://www.w3.org/TR/html401/interact/forms.html#edef-OPTION">OPTION</a> 被选中时<em>是</em> <strong>successful controls</strong>，否则<em>不是</em> <strong>successful controls</strong>；</li>
+        <li>文件选择（<a href="http://www.w3.org/TR/html401/interact/forms.html#file-select">file select</a>）组件的当前 value 属性是一个或多个文件名组成的列表，当表单提交时，文件内容与其他表单数据一同被提交，文件内容的编码方式由 FORM 元素的 content type 决定。</li>
+      </ul>
+      <p>若一个控件在表单提交时没有当前 value 属性，<em>不要求</em>用户端一定将其视为 <strong>successful controls</strong>。</p>
+      <p>同时规范中特别提到重置按钮（<a href="http://www.w3.org/TR/html401/interact/forms.html#reset-button">reset button</a>）<em>不应该</em>被认作 <strong>successful controls</strong>。而隐藏域（<a href="http://www.w3.org/TR/html401/interact/forms.html#hidden-control">hidden</a>）及被隐藏的符合 <strong>successful controls</strong> 条件的控件虽然不会被渲染，但仍然<em>应被认为是</em> <strong>successful controls</strong>。</p>
+
+      <p>关于 表单 的详细信息，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html401/interact/forms.html">17 Forms</a> 中的内容。</p>
+      <p></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE Firefox Opera 在自定义提交方式下不会提交普通按钮及提交按钮的键值对信息；而 Chrome Safari 会将这些信息也提交给服务器端。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>通常情况下，不同浏览器在表单提交时 form data set 中键值对的差异不会造成太大问题，但若服务器端程序对浏览器端提交来的 form data set 进行较严格的判断时，可能会造成在某些浏览器中表单提交异常。如：</p>
+      <p>一般在登录表单中，我们都会使用自定义 onsubmit 事件的方式，此方式通过 JavaScript 为用户输入的表单信息作初步的验证，且提交方式多数为 POST 方式，当提交按钮有 name 属性时，IE、Firefox、Opera 均不会将提交按钮自身的“name/value”添加到 form data set 中，Chrome 和 Safari 则会将提交按钮自身的信息加入 form data set。这时候服务器端收到的 request header 就会不同，若目的地址的服务端程序对提交来的 form data set 进行了严格的判断，这时 Chrome 和 Safari 提交的信息中比其他浏览器多出的提交按钮的键值对就有可能造成登录失败。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Chrome Safari</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>在本地创建一个 Web 服务器，编写四个静态页面：</p>
+      <pre>&lt;form action="submit.php" method="<span class="hl_4"><em>METHOD</em></span>"  onsubmit="<span class="hl_3"><em>ONSUBMIT</em></span>" target="iframe1" enctype="multipart/form-data"&gt;
+    &lt;iframe name="iframe1"&gt;&lt;/iframe&gt;
+    &lt;input type="submit" name="<strong><em>I0</em></strong>" value="提交" /&gt;
+    &lt;input type="text" name="I1" value="input_text" /&gt;
+    &lt;input type="password" name="I2" value="input_password" /&gt;
+    &lt;input type="checkbox" name="I3" checked /&gt;
+    &lt;input type="radio" name="I4" checked /&gt;
+    &lt;input type="hidden" name="I5" value="input_hidden" /&gt;
+    &lt;input type="image" name="<strong><em>I6</em></strong>" src="google.gif" value="input_image" /&gt;
+    &lt;input type="button" name="I7" value="input_button" /&gt;
+    &lt;input type="file" name="I8" value="input_file" /&gt;
+    &lt;input type="reset" name="I9" value="input_reset" /&gt;
+    &lt;input type="text" name="I10" /&gt;
+    &lt;input type="file" name="I11" /&gt;
+    &lt;input type="radio" name="I12" /&gt;
+    &lt;input type="checkbox" name="I13" /&gt;
+    &lt;select name="S1"&gt;&lt;option&gt;select&lt;/option&gt;&lt;/select&gt;
+    &lt;select name="S2"&gt;&lt;/select&gt;
+    &lt;button name="B1" type="button"&gt;button&lt;/button&gt;
+    &lt;textarea name="T1"&gt;textarea&lt;/textarea&gt;
+&lt;/form&gt;</pre>
+      <p>静态页面实际为四组 FORM 元素，区别为 <span class="hl_4"><em>method</em></span> 属性及 <span class="hl_3"><em>onsubmit</em></span> 事件：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>onsubmit=""</th>
+          <th>onsubmit="this.submit(); return false;"</th>
+        </tr>
+        <tr>
+          <th>method="get"</th>
+          <td>第一组“form1.html”</td>
+          <td>第二组“form2.html”</td>
+        </tr>
+        <tr>
+          <th>method="post"</th>
+          <td>第三组“form3.html”</td>
+          <td>第四组“form4.html”</td>
+        </tr>
+      </table>
+      <p>各组中均是由一个 FORM 元素，将其内部一系列表单控件元素的 form data set 提交到“submit.php”，并在 IFRAME 元素中显示提交后的结果页面。</p>
+      <p>服务器端动态页面“submit.php”代码如下：</p>
+      <pre>&lt;?php
+  $gp = $_REQUEST;
+  foreach ($gp as $k=&gt;$v) {
+    echo $k . "/" . $v . "&lt;br /&gt;";
+  }
+  $fp = $_FILES;
+  foreach ($fp as $kf=&gt;$kv) {
+    echo $kf . "/" . $kv["name"] . "&lt;br /&gt;";
+  }
+?&gt;</pre>
+      <p>“submit.php”的作用是将客户端表单提交来的 form data set 遍历打印出来。</p>
+      <p>这段代码在不同的浏览器环境中的表现如下（<span class="hl_2">绿色背景文字</span>代表服务器端返回的有效数据，<span class="hl_1">红色背景文字</span>代表服务器端未返回的数据）：</p>
+      <table class="compare">
+        <tr>
+          <th>第一组、第三组<br />点击“<strong><em>I0</em></strong>”提交</th>
+          <th>IE6/7, IE8(Q)</th>
+          <th>IE8(S), Firefox, Opera</th>
+          <th>Chrome, Safari</th>
+        </tr>
+        <tr>
+          <th><strong><em>提交按钮</em></strong></th>
+          <td><span class="hl_2"><strong><em>提交</em></strong></span></td>
+          <td><span class="hl_2"><strong><em>提交</em></strong></span></td>
+          <td><span class="hl_2"><strong><em>提交</em></strong></span></td>
+        </tr>
+        <tr>
+          <th>带内容的文本框</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>带内容的密码框</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>选中的复选框</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>选中的单选框</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>带内容的隐藏域</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>提交图片</th>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+        </tr>
+        <tr>
+          <th>INPUT普通按钮</th>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+        </tr>
+        <tr>
+          <th>已选文件的文件组件</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>重置按钮</th>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+        </tr>
+        <tr>
+          <th>空的文本框</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>未选文件的文件组件</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>未选中的复选框</th>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+        </tr>
+        <tr>
+          <th>未选中的单选框</th>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+        </tr>
+        <tr>
+          <th>有选中的下拉框</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>未选中的下拉框</th>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+        </tr>
+        <tr>
+          <th>BUTTON普通按钮</th>
+          <td><span class="hl_2">提交</span><sup>1</sup></td>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+        </tr>
+        <tr>
+          <th>多行文本框</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+      </table>
+      <br />
+      <table class="compare">
+        <tr>
+          <th>第一组、第三组<br />点击“<strong><em>I6</em></strong>”提交</th>
+          <th>IE6/7, IE8(Q)</th>
+          <th>IE8(S), Opera</th>
+          <th>Firefox, Chrome, Safari</th>
+        </tr>
+        <tr>
+          <th>提交按钮</th>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+        </tr>
+        <tr>
+          <th>带内容的文本框</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>带内容的密码框</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>选中的复选框</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>选中的单选框</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>带内容的隐藏域</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th><strong><em>提交图片</em></strong></th>
+          <td><span class="hl_2"><strong><em>提交</em></strong></span><sup>2</sup></td>
+          <td><span class="hl_2"><strong><em>提交</em></strong></span><sup>2</sup></td>
+          <td><span class="hl_2"><strong><em>提交</em></strong></span></td>
+        </tr>
+        <tr>
+          <th>INPUT普通按钮</th>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+        </tr>
+        <tr>
+          <th>已选文件的文件组件</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>重置按钮</th>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+        </tr>
+        <tr>
+          <th>空的文本框</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>未选文件的文件组件</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>未选中的复选框</th>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+        </tr>
+        <tr>
+          <th>未选中的单选框</th>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+        </tr>
+        <tr>
+          <th>有选中的下拉框</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>未选中的下拉框</th>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+        </tr>
+        <tr>
+          <th>BUTTON普通按钮</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+        </tr>
+        <tr>
+          <th>多行文本框</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+      </table>
+      <br />
+      <table class="compare">
+        <tr>
+          <th>第二组、第四组<br />点击“<strong><em>I0</em></strong>”提交</th>
+          <th>IE6/7, IE8(Q)</th>
+          <th>IE8(S), Firefox, Opera</th>
+          <th>Chrome, Safari</th>
+        </tr>
+        <tr>
+          <th><strong><em>提交按钮</em></strong><sup>3</sup></th>
+          <td><span class="hl_1"><strong><em>不提交</em></strong></span></td>
+          <td><span class="hl_1"><strong><em>不提交</em></strong></span></td>
+          <td><span class="hl_2"><strong><em>提交</em></strong></span></td>
+        </tr>
+        <tr>
+          <th>带内容的文本框</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>带内容的密码框</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>选中的复选框</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>选中的单选框</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>带内容的隐藏域</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>提交图片</th>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+        </tr>
+        <tr>
+          <th>INPUT普通按钮</th>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+        </tr>
+        <tr>
+          <th>已选文件的文件组件</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>重置按钮</th>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+        </tr>
+        <tr>
+          <th>空的文本框</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>未选文件的文件组件</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>未选中的复选框</th>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+        </tr>
+        <tr>
+          <th>未选中的单选框</th>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+        </tr>
+        <tr>
+          <th>有选中的下拉框</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>未选中的下拉框</th>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+        </tr>
+        <tr>
+          <th>BUTTON普通按钮</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+        </tr>
+        <tr>
+          <th>多行文本框</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+      </table>
+      <br />
+      <table class="compare">
+        <tr>
+          <th>第二组、第四组<br />点击“<strong><em>I6</em></strong>”提交</th>
+          <th>IE6/7, IE8(Q)</th>
+          <th>IE8(S), Firefox, Opera</th>
+          <th>Chrome, Safari</th>
+        </tr>
+        <tr>
+          <th>提交按钮</th>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+        </tr>
+        <tr>
+          <th>带内容的文本框</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>带内容的密码框</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>选中的复选框</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>选中的单选框</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>带内容的隐藏域</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th><strong><em>提交图片</em></strong><sup>3</sup></th>
+          <td><span class="hl_1"><strong><em>不提交</em></strong></span></td>
+          <td><span class="hl_1"><strong><em>不提交</em></strong></span></td>
+          <td><span class="hl_2"><strong><em>提交</em></strong></span></td>
+        </tr>
+        <tr>
+          <th>INPUT普通按钮</th>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+        </tr>
+        <tr>
+          <th>已选文件的文件组件</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>重置按钮</th>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+        </tr>
+        <tr>
+          <th>空的文本框</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>未选文件的文件组件</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>未选中的复选框</th>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+        </tr>
+        <tr>
+          <th>未选中的单选框</th>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+        </tr>
+        <tr>
+          <th>有选中的下拉框</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+        <tr>
+          <th>未选中的下拉框</th>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+        </tr>
+        <tr>
+          <th>BUTTON普通按钮</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+          <td><span class="hl_1">不提交</span></td>
+        </tr>
+        <tr>
+          <th>多行文本框</th>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+          <td><span class="hl_2">提交</span></td>
+        </tr>
+      </table>
+      <p class="comment">
+      【注】<br />
+      1. 在 <em>IE6、IE7、IE8(Q)</em> 下，始终认为 BUTTON 元素的普通按钮<em>是</em> <strong>successful control</strong>，<em>其他浏览器</em>始终认为 BUTTON 元素的普通按钮<em>不是</em> <strong>successful control</strong>；。<br />
+      2. 在 <em>IE、Opera</em> 下，始终<em>不提交</em> INPUT 图片的 value 属性；<br />
+      3. 在 <em>IE、Firefox、Opera</em> 下，使用“form.submit()”方法自定义提交时（第二组、第四组），浏览器认为提交按钮或图片<em>不是</em> <strong>successful control</strong>，<span class="hl_4">在 <em>Chrome、Safari</em> 下，始终认为提交按钮或图片<em>是</em> <strong>successful control</strong>，且会同时将其 value 属性的值也放入 form data set。</span><br />
+      </p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>通常情况下，服务器端不需要按钮的 key/value 信息，建议删除按钮的 name 属性，不使其成为 <strong>successful control</strong>。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 5.0.342.2 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.50
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/CM2001/form1.html">form1.html</a>
+            <br /><a href="../../tests/CM2001/form2.html">form2.html</a>
+            <br /><a href="../../tests/CM2001/form3.html">form3.html</a>
+            <br /><a href="../../tests/CM2001/form4.html">form4.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-02</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>form submit 表单 key value 键值 提交 按钮 input name</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

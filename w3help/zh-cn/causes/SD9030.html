@@ -1,0 +1,371 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SD9030: 为 SELECT 对象增加或删除选项的方法在各浏览器中的支持情况不同</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>DOM 2 HTML 中分别定义了 HTMLSelectElement、HTMLOptionsCollection 和 HTMLOptionElement 接口，它们分别定义了若干属性和方法来获知或操作 SELECT 及 OPTION 元素。</p>
+      <p>HTMLSelectElement 接口定义了以下属性及方法：</p>
+      <ul>
+        <li>length: 获取 SELECT 元素中 OPTION 的数量；</li>
+        <li>options: 获取 SELECT 包含的 OPTION 元素集合，其返回值类型为 HTMLOptionsCollection；</li>
+        <li>add(element, before): 向 SELECT 中添加一个 OPTION，参数 element 指定要添加的 OPTION 对象，before 指定了插入到哪个 OPTION 之前，如果值为 'null'，则插入 SELECT 尾部；</li>
+        <li>remove(index): 从 SELECT 中删除一个 OPTION，参数 index 指定了要删除的 OPTION 索引。</li>
+      </ul>
+
+      <p>HTMLOptionsCollection 接口是一个 OPTION 节点列表，可以通过索引或某个 OPTION 节点的 name 或 id 属性访问该 OPTION。
+      它定义了 'length' 属性，用来获取当前 OPTION 节点列表的长度，作用同 HTMLSelectElement 的 'length' 属性。</p>
+
+      <p>关于 HTMLSelectElement、HTMLOptionsCollection 和 HTMLOptionElement 接口的详细信息，请参考 DOM 2 HTML：
+        <a href="http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-94282980">Interface HTMLSelectElement</a>、
+        <a href="http://www.w3.org/TR/DOM-Level-2-HTML/html.html#HTMLOptionsCollection">Interface HTMLOptionsCollection (introduced in DOM Level 2)</a> 和
+        <a href="http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-70901257">Interface HTMLOptionElement</a>。
+      </p>
+
+      <h2 id="description">问题描述</h2>
+      <p>各浏览器对标准的支持有差异，并且他们实现了非标准的添加和删除 OPTION 元素的方法，在使用这些方法时，可能造成兼容性问题。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>如果使用了存在兼容性问题的添加或删除 OPTION 元素的方法，将可能导致脚本异常，功能不可用。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>除了标准提到的方法外，各浏览还实现了另外几种添加、删除 OPTION 元素的方法，各浏览器对这些方法的支持程度不一致。</p>
+      <p>非标准的添加 OPTION 的方法：</p>
+      <ul>
+        <li>select.add(option)：SELECT 对象的方法，直接插入参数 option 到尾部；</li>
+        <li>select.add(option, index)：在指定的 OPTION 列表索引 index 之前插入参数 option；</li>
+        <li>options.add(option, before)：OPTION 节点列表（实现 HTMLOptionsCollection）的方法，效果同 HTMLSelectElement.add；</li>
+        <li>options.add(option)：同第一个方法；</li>
+        <li>options.add(option, index)：同第二个方法；</li>
+        <li>options[index] = option：直接在 OPTION 节点列表上添加元素。</li>
+      </ul>
+
+      <p>非标准的删除 OPTION 的方法：</p>
+      <ul>
+        <li>select.remove(option)：SELECT 对象的方法，删除参数指定的 OPTION 对象；</li>
+        <li>options.remove(index)：OPTION 节点列表的方法，同 HTMLSelectElement.remove；</li>
+        <li>options.remove(option)：同第一个方法；</li>
+        <li>options[index] = null：直接在 OPTION 节点列表上设置元素为 null。</li>
+      </ul>
+
+      <p>分析以下代码：</p>
+<pre>
+&lt;style type="text/css"&gt;select {height:100px;}&lt;/style&gt;
+&lt;table&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;
+        &lt;select id="s1" multiple="multiple"&gt;
+          &lt;option value="1"&gt;111&lt;/option&gt;
+          &lt;option value="2"&gt;222&lt;/option&gt;
+        &lt;/select&gt;
+      &lt;/td&gt;
+      &lt;td&gt;
+        &lt;select id="s2" multiple="multiple"&gt;
+          &lt;option value="1"&gt;111&lt;/option&gt;
+        &lt;/select&gt;
+      &lt;/td&gt;
+      &lt;td&gt;
+        &lt;select id="s3" multiple="multiple"&gt;
+          &lt;option value="1"&gt;111&lt;/option&gt;
+          &lt;option value="2"&gt;222&lt;/option&gt;
+        &lt;/select&gt;
+      &lt;/td&gt;
+      &lt;td&gt;
+        &lt;select id="s4" multiple="multiple"&gt;
+          &lt;option value="1"&gt;111&lt;/option&gt;
+        &lt;/select&gt;
+      &lt;/td&gt;
+      &lt;td&gt;
+        &lt;select id="s5" multiple="multiple"&gt;
+          &lt;option value="1"&gt;111&lt;/option&gt;
+        &lt;/select&gt;
+      &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;&lt;button type="button" onclick="remove(1);"&gt;select.remove(index)&lt;/button&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;button type="button" onclick="remove(2);"&gt;select.remove(option)&lt;/button&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;button type="button" onclick="remove(3);"&gt;options.remove(index)&lt;/button&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;button type="button" onclick="remove(4);"&gt;options.remove(option)&lt;/button&gt;&lt;/td&gt;
+      &lt;td&gt;&lt;button type="button" onclick="remove(5);"&gt;options[index] = null&lt;/button&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;div style="border:2px solid;padding:3px;width:800px;" id="info"&gt;&lt;/div&gt;
+
+&lt;script type="text/javascript"&gt;
+  function $(id){return document.getElementById(id);}
+  function newOpt(text, val){return new Option(text, val);} <sup>1</sup>
+  function info(method, msg){$("info").innerHTML += "&lt;strong&gt;" + method + "&lt;/strong&gt; : " + msg + "&lt;br /&gt;";}
+
+  //创建n个 OPTION 对象
+  var opt1 = newOpt("select.add(option, null)", 2),
+    opt2 = newOpt("select.add(option)", 2),
+    opt3 = newOpt("options.add(option, null)", 2),
+    opt4 = newOpt("options.add(option)", 2),
+    opt5 = newOpt("options[index] = option", 2),
+    opt6 = newOpt("select.add(option, option)", 2),
+    opt7 = newOpt("select.add(option, index)", 2),
+    opt8 = newOpt("options.add(option, option)", 2),
+    opt9 = newOpt("options.add(option, index)", 2),
+    s1 = $("s1"),
+    s2 = $("s2"),
+    s3 = $("s3"),
+    s4 = $("s4"),
+    s5 = $("s5");
+
+  //使用n种方法添加 OPTION 到 SELECT 中
+  try { s1.add(opt1, null); } catch(e) { info("select.add(option, null)", e) }
+  try { s2.add(opt2); } catch(e) { info("select.add(option)", e) }
+  try { s3.options.add(opt3, null); } catch(e) { info("options.add(option, null)", e) }
+  try { s4.options.add(opt4); } catch(e) { info("options.add(option)", e) }
+  try { s5.options[1] = opt5; } catch(e) { info("options[index] = option", e) }
+
+  try { s1.add(opt6, s1.lastChild); } catch(e) { info("select.add(option, option)", e) }
+  try { s1.add(opt7, 1); } catch(e) { info("select.add(option, index)", e) }
+  try { s3.options.add(opt8, s3.lastChild); } catch(e) { info("options.add(option, option)", e) }
+  try { s3.options.add(opt9, 1); } catch(e) { info("options.add(option, index)", e) }
+
+  function remove(type){
+    var method = "";
+    try {
+      switch(type) {
+        case 1 :
+          method = "s1.remove(0)";
+          break;
+        case 2 :
+          method = "s2.remove(s2.firstChild)";
+          break;
+        case 3 :
+          method = "s3.options.remove(0)";
+          break;
+        case 4 :
+          method = "s4.options.remove(s4.firstChild)";
+          break;
+        case 5 :
+          method = "s5.options[1] = null";
+          break;
+      }
+      eval(method);
+    } catch (e) {
+      info(method, e);
+    }
+  }
+&lt;/script&gt;
+</pre>
+
+      <p>上述代码首先使用了标准及非标准方法向各 SELECT 元素中添加了 OPTION，然后点击各按钮使用各种删除方法删除 OPTION，
+        根据抛出的异常信息，我们可以辨别出哪些方法在浏览器中不支持，汇总测试结果如下表：<sup>2</sup></p>
+
+      <table class="compare">
+        <tbody>
+        <tr>
+          <th>type</th>
+          <th>method</th>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Opera</th>
+          <th>Firefox</th>
+          <th>Chrome Safari</th>
+        </tr>
+        <tr>
+          <th rowspan="9">add OPTION</th>
+          <th>select.add(option, null)</th>
+          <td><span class="hl_1">N</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+        </tr>
+        <tr>
+          <th>select.add(option, option)</th>
+          <td><span class="hl_1">N</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+        </tr>
+        <tr>
+          <th>select.add(option, index)</th>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_1">N</span></td>
+          <td><span class="hl_1">N</span><sup>3</sup></td>
+        </tr>
+        <tr>
+          <th>select.add(option)</th>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_1">N</span></td>
+          <td><span class="hl_2">Y</span></td>
+        </tr>
+        <tr>
+          <th>options.add(option, null)</th>
+          <td><span class="hl_1">N</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_1">N</span><sup>4</sup></td>
+          <td><span class="hl_1">N</span><sup>4</sup></td>
+        </tr>
+        <tr>
+          <th>options.add(option, option)</th>
+          <td><span class="hl_1">N</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_1">N</span></td>
+          <td><span class="hl_1">N</span></td>
+        </tr>
+        <tr>
+          <th>options.add(option, index)</th>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+        </tr>
+        <tr>
+          <th>options.add(option)</th>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+        </tr>
+        <tr>
+          <th>options[index] = option</th>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+        </tr>
+        <tr>
+          <th rowspan="5">remove OPTION</th>
+          <th>select.remove(index)</th>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+        </tr>
+        <tr>
+          <th>select.remove(option)</th>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+        </tr>
+        <tr>
+          <th>options.remove(index)</th>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td class="hl_1">N</td>
+          <td><span class="hl_2">Y</span></td>
+        </tr>
+        <tr>
+          <th>options.remove(option)</th>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td class="hl_1">N</td>
+          <td><span class="hl_2">Y</span></td>
+        </tr>
+        <tr>
+          <th>options[index] = null</th>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+        </tr>
+      </tbody></table>
+
+      <p class="comment">注1：这里使用 new Option(text, value) 的方式创建新的 OPTION 对象，也可以使用 new Option([text[, value[, defaultSelected[, selected]]]]) 或 document.createElement("option") 创建。创建 OPTION 对象的方法于本文测试结果无影响。</p>
+      <p class="comment">注2：Y 表示支持该方法，N 表示不支持。</p>
+      <p class="comment">注3：并没有实现在指定索引前插入 OPTION 的功能，只是实现了向 SELECT 元素尾部插入元素。</p>
+      <p class="comment">注4：并不是向 SELECT 元素的尾部插入 OPTION，而是插入到 SELECT 的首部。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <h3>1. 在添加 OPTION 元素时</h3>
+      <ul>
+        <li>如果需要向指定索引前插入 OPTION，可以使用 options.add(option, index)；</li>
+        <li>如果需要向 SELECT 尾部添加 OPTION，可以使用 options.add(option)；</li>
+        <li>如果需要向指定索引处添加（或更改） OPTION，可以使用 options[index] = option。</li>
+      </ul>
+
+      <h3>2. 在删除 OPTION 元素时</h3>
+      <ul>
+        <li>如果想删除指定索引处的 OPTION 元素，可以使用 select.remove(index) 或 options[index] = null；</li>
+        <li>如果想删除某个指定的 OPTION 元素，可以使用 select.remove(option)；</li>
+          <li>如果想删除 SELECT 中所有 OPTION，可以使用 select.length = 0 或 options.length = 0。</li>
+      </ul>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.9<br />
+              Chrome 7.0.517.0 dev<br />
+              Safari 5.0.1(7533.17.8) <br />
+                            Opera 10.62
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/SD9030/add_remove_option.html">add_remove_option.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-08</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>SELECT OPTION options add remove</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

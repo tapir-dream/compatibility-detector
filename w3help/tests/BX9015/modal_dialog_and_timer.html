@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<script>
+window.onload = function(){
+	var timerID,
+	msg = document.getElementsByTagName("div")[0],
+	sleep = 300;
+
+	function Run(type){
+		timerID && clearTimerID(),msg.innerHTML = "";
+		type
+		? timeout()
+		: timerID = setInterval(function(){echo()},sleep);
+	}
+	function clearTimerID(){
+		clearTimeout(timerID);
+		clearInterval(timerID);
+		timerID = null;
+	}
+	function timeout(){
+		echo();
+		timerID = setTimeout(arguments.callee,sleep);
+	}
+	function echo(){
+		msg.innerHTML += "|";
+		try{
+			console.log(t);
+		}catch(e){}
+	}
+
+	window["timeTest"] = {run: Run,stop:clearTimerID};
+}
+
+</script>
+</head>
+<body>
+<h2>选择运行 setTimeout 或 setInterval </h2>
+<button onclick="timeTest.run(1)">运行 setTimeout</button>
+<button onclick="timeTest.run()">运行 setInterval</button>
+<button onclick="timeTest.stop()">终止运行</button>
+<h2>选择弹出的对话框类型</h2>
+<button onclick="alert('alert 对话框')">alert</button>
+<button onclick="confirm('confirm 对话框')">confirm</button>
+<button onclick="prompt('prompt 对话框')">prompt</button>
+<input type="file" />
+<h2>内容输出区域：</h2>
+<div></div>
+
+</body>
+</html>

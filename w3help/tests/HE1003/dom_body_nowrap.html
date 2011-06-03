@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	.nr { background:#ddd; }
+</style>
+</head>
+<body>
+    <p id="p" style="width:120px;" class="nr"></p>
+    <script>
+    	window.onload = function() {
+    		function $(id) { return document.getElementById(id); }
+		    var html = typeof document.body.noWrap != "undefined" ? "Yes" : "No";
+		    $("p").innerHTML = "BODY: DOM noWrap:" + html;
+		    document.body.noWrap = true;
+	    }
+    </script>
+</body>
+</html>

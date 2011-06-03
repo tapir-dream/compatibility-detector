@@ -1,0 +1,153 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HO1002: IMG 元素的 src 属性为空时其尺寸在各浏览器中不一致</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>&quot;src&quot; 属值为空的 IMG 元素，其渲染的尺寸在各浏览器中将有很大差异。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>该问题将造成局部的布局混乱。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <h3>一、IMG 元素与其 “src” 属性</h3>
+      <p>
+        IMG 元素一般用来嵌入图片
+      </p>
+      <p>
+      The IMG element embeds an image in the current document at the location of the element's definition. The IMG element has no content; it is usually replaced inline by the image designated by the src attribute, the exception being for left or right-aligned images that are "floated"  out of line.
+      </p>
+      <h3>二、IMG 指定无效的 ”src“ 属性在不同浏览器下占用空间不同</h3>
+      <p>
+      W3C 相关规范中无明确说明 IMG 不指定有效 ”src“ 的占位情况，这需要实际来测试一下：      </p>
+<pre>
+var imgElment = document.getElementsByTagName('img')[0];
+try{
+  document.write('offsetHeight:',imgElment.offsetHeight,'px;');
+}catch(e){
+  document.write('offsetHeight: 0px;');
+}
+try{
+  document.write(' offsetWidth:',imgElment.offsetWidth,"px");
+}catch(e){
+  document.write(' offsetWidth: 0px');
+}
+</pre>
+
+
+      <p>
+      各浏览器对于 IMG 元素宽与高的值分别为：
+      </p>
+      <table class="compare">
+              <tr>
+                <th>&nbsp;</th>
+                <th>IE</th>
+                <th>Firefox(Q)</th>
+                <th>Firefox(S)</th>
+                <th>Opera</th>
+                <th>Safari Chrome</th>
+              </tr>
+              <tr>
+                <th>offsetHeight</th>
+                <td>30px</td>
+                <td>24px</td>
+                <td>19px</td>
+                <td>16px</td>
+                <td>0px</td>
+              </tr>
+              <tr>
+                <th>offsetWidth</th>
+                <td>28px</td>
+                <td>24px</td>
+                <td>0px</td>
+                <td>34px</td>
+                <td>0px</td>
+              </tr>
+            </table>
+          <p>由上表可见，各浏览器对于 IMG 指定了无效的 &quot;src&quot; 时，采用不同的显示失败提示图，他们的渲染尺寸个不相同。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>为了防止这种无 &quot;src&quot; 的 IMG 元素对页面产生布局影响，需要设置这种 IMG 的 ‘display’ 特性为 'none'。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+                            Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HO1002/null_img_with_and_height.html">null_img_with_and_height.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-04</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>IMG src  width height 尺寸</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+</head>
+<body>
+<script>
+function iframeLoad(){
+	alert("IFRAME 标记的 onload 事件触发:");
+}
+function addEvent(eventName,element,fn){
+	if (element.attachEvent) element.attachEvent("on"+eventName,fn);
+	else element.addEventListener(eventName,fn,false);
+}
+window.onload = function (){
+	var iframe = document.createElement('iframe');
+	addEvent("load",iframe,iframeLoad);
+	document.body.appendChild(iframe);
+}
+</script>
+</body>
+</html>

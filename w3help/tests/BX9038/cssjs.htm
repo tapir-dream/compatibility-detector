@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<script>
+	var t1 = new Date().getTime();
+</script>
+<html>
+<head>
+<style>
+	body { font-family:Consolas; }
+	#test { font-size:48px; }
+</style>
+<link id="css" href="css.php" rel="stylesheet" type="text/css" />
+</head> 
+<body> 
+<div id="test" style="line-height:2; border:10px solid black; float:left;">Test</div> 
+<div id="info" style="clear:left;"></div>
+</body>
+<script>
+	function $(id) { return document.getElementById(id); }
+
+	if (!window.getComputedStyle) {
+		window.getComputedStyle = function($target){
+			return $target.currentStyle;
+		};
+	}
+	
+	window.onload=function () {
+		var t3 = new Date().getTime();
+		var c = getComputedStyle($("test"), null).fontSize;
+		$("info").innerHTML += '<br />window.onload: <span style="font-size:' + c + '">' + c + '</span> [' + parseInt((t3 - t1) / 1000) + 's]';
+		
+	}
+	
+	var t2 = new Date().getTime();
+	var c = getComputedStyle($("test"), null).fontSize;
+	$("info").innerHTML += '<br />DOMContentLoaded: <span style="font-size:' + c + '">' + c + '</span> [' + parseInt((t2 - t1) / 1000) + 's]';
+</script>
+</html>

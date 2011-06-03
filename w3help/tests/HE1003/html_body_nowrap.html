@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	.nr { background:#ddd; }
+</style>
+</head>
+<body style="width:120px;" nowrap>
+	<span>BODY: </span>
+	<h4 id="h4" class="nr" style="width:120px;">H4: </h4>
+	<p id="p" class="nr" style="width:120px;">P: </p>
+    <script>
+    	window.onload = function() {
+    		function $(id) { return document.getElementById(id); }
+		    function getComputedStyle($target, styleName) {
+		        return document.defaultView ? document.defaultView.getComputedStyle($target, null).getPropertyValue(styleName)
+		                : $target.currentStyle[styleName.replace(/-[a-z]/g, function() {
+		            return arguments[0].charAt(1).toUpperCase();
+		        })];
+		    }
+		    document.body.children(0).innerHTML += "white-space:" + getComputedStyle(document.body, "white-space");
+		    $("h4").innerHTML += "white-space:" + getComputedStyle($("h4"), "white-space");
+		    $("p").innerHTML += "white-space:" + getComputedStyle($("p"), "white-space");
+	    }
+    </script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RV1001: 各浏览器中当 'overflow-x' 和 'overflow-y' 一个值为 'hidden' 另一个值为 'visible' 时的组合渲染结果存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+            <h3>1. 'overflow'、'overflow-x' 和 'overflow-y'</h3>
+      <p>'overflow' 是 CSS 2.1 规范中的特性，而 'overflow-x' 和 'overflow-y' 则是 CSS basic box model 草案中新加入的特性。</p>
+      <p>
+        'overflow' 特性指定当一个块级元素的内容溢出了元素的框（它作为内容的包含块）时，是否剪切；
+        'overflow-x' 决定了对左右边(水平方向)的剪切，而 'overflow-y' 决定了对上下边(垂直方向)的剪切。
+      </p>
+
+            <h3>2. 'overflow'、'overflow-x' 和 'overflow-y' 的默认值</h3>
+            <p> 'overflow' 、 'overflow-x' 和 'overflow-y' 的默认值都是 'visible'。</p>
+
+            <h3>3. 'overflow-x' 和 'overflow-y' 的计算值对</h3>
+            <p>
+        CSS basic box model 草案中规定，'overflow-x' 和 'overflow-y' 的计算值与所设置的值相等，除非这一对值不合理。
+        <strong>如果其中一个特性值被设置成了 'scroll' 或 'auto'，而另一个特性指定值为 'visible'，那么 'visible' 会被设置成 'auto'。</strong>
+      </p>
+            <p>
+        如果 'overflow-x' 及 'overflow-y' 的值相同，则 'overflow' 的计算值与前两者的指定值相同；
+        否则，它的值是一个 'overflow-x' 和 'overflow-y' 的计算值对。
+      </p>
+
+      <p>关于 'overflow' 的详细资料，请参考 CSS 2.1 规范 <a href="http://www.w3.org/TR/CSS2/visufx.html#overflow">11.1.1 Overflow: the 'overflow' property</a> 中的内容。</p>
+      <p>关于 'overflow-x' 和 'overflow-y' 的详细资料，请参考 CSS basic box model 草案 <a href="http://www.w3.org/TR/css3-box/#overflow">11.1. The 'overflow', 'overflow-x' and 'overflow-y' properties</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>当一个元素的 'overflow-x' 或 'overflow-y' 指定值为 'hidden'，另一个特性的指定值为 'visible' 时，
+      该元素最终渲染使用的 'overflow-y' 或 'overflow-x' 值不同。IE6 IE7 IE8 使用 'hidden'，其它浏览器使用 'auto'。</p>
+      
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题可能造成页面内容显示不完全，或在不同浏览器下最终显示效果不一致。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+            <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>CSS basic box model 草案中并没有说明当 'overflow-x' 和 'overflow-y' 其中一个值为 'hidden' 另一个值为 'visible' 时，
+      该 'visible' 值应该设置为什么，各浏览器有自己的实现。</p>
+            <p>我们通过以下的测试用例来说明问题，分析以下代码：</p>
+<pre>
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;script type="text/javascript"&gt;
+      if(!window.getComputedStyle)
+        window.getComputedStyle = function(target){
+          return target.currentStyle;
+        }
+      function $(id){return document.getElementById(id);}
+      window.onload = function(){
+        for(var i = 1;i&lt;7;i++){
+          $("info" + i).innerHTML = getComputedStyle($("cont" + i), null).overflowY;
+        
+        }
+      }
+    &lt;/script&gt;
+    &lt;style type="text/css"&gt;
+      #cont1 div, #cont3 div, #cont5 div {
+        width:150px;
+        height:100px;
+      }
+      #cont2 div, #cont4 div, #cont6 div {
+        width:50px;
+        height:25px;
+      }
+      .cont {
+        overflow-y : visible;
+        padding:10px;
+        width:100px;
+        height:50px;
+      }
+      .cont, .cont div {
+        border : 3px solid;
+      }
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id="cont1" class="cont" style="<strong>overflow-x:scroll;</strong> "&gt;
+      &lt;div&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div id="info1"&gt;&lt;/div&gt;
+    
+    &lt;div id="cont2" class="cont" style="<strong>overflow-x:scroll;</strong> "&gt;
+      &lt;div&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div id="info2"&gt;&lt;/div&gt;
+    
+    &lt;div id="cont3" class="cont" style="<strong>overflow-x:auto;</strong> "&gt;
+      &lt;div&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div id="info3"&gt;&lt;/div&gt;
+    
+    &lt;div id="cont4" class="cont" style="<strong>overflow-x:auto;</strong> "&gt;
+      &lt;div&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div id="info4"&gt;&lt;/div&gt;
+    
+    &lt;div id="cont5" class="cont" style="<strong>overflow-x:hidden;</strong> "&gt;
+      &lt;div&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div id="info5"&gt;&lt;/div&gt;
+    
+    &lt;div id="cont6" class="cont" style="<strong>overflow-x:hidden;</strong> "&gt;
+      &lt;div&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div id="info6"&gt;&lt;/div&gt;
+    
+  &lt;/body&gt;
+&lt;/html&gt;
+</pre>
+
+      <p>以上代码组合测试了在子元素宽高大于及小于容器、容器 'overflow-x' 值分别为 'scroll'、'auto' 和 'hidden' 的情况下 'overflow-y' 的渲染结果及计算值。
+      设置 'overflow-y' 为 'scroll'、'auto' 或 'hidden'，'overflow : visible' 不影响测试结果。</p>
+      
+            <p>这段代码在各浏览器中表现如下：</p>
+      <table class="compare">
+                <tr>
+          <th>IE6 IE7(Q) IE8(Q)</th>
+                    <th>IE7(S) IE8(S)</th>
+                    <th>Firefox Chrome Safari Opera</th>
+                </tr>
+                <tr>
+                    <td><img src="../../tests/RV1001/ieq6.png" alt="IE6 IE7(Q) IE8(Q)"></td>
+                    <td><img src="../../tests/RV1001/ie7s8s.png" alt="IE7(S) IE8(S"></td>
+                    <td><img src="../../tests/RV1001/others.png" alt="Firefox Chrome Safari Opera"></td>
+                </tr>
+            </table>
+      <p>从测试结果中我们能得到以下结论：</p>
+      <ol>
+        <li>对于 'overflow-x' 和 'overflow-y' 的组合渲染，所有浏览器均依照规范处理；</li>
+        <li>当 'overflow-x : hidden' 且 'overflow-y : visible' 时，IE6 IE7 IE8 中将 'overflow-y' 渲染为 'hidden'，其它浏览器则渲染为 'auto'；</li>
+        <li>在 IE6 IE7 IE8 中所有容器的 'overflow-y' 计算值都为 'visible'，而其他浏览器中其值都为 'auto'。</li>
+      </ol>
+      
+      <p>由于 IE6 IE7(Q) IE8(Q) 中存在容器 'width' 或 'height' 的设定值在不足以容纳其内容时将被撑大的问题，导致渲染结果与 IE7(S) IE8(S) 的差异，
+      而从视觉效果上我们也无法判定容器在渲染时 'overflow-y' 使用的是哪个值，这里猜测情况同 IE7(S) IE8(S)。</p>
+      
+      <p>对于 'overflow-y' 的计算值与渲染效果不一致，有可能是 IE6 IE7 IE8 对 'overflow-x' 和 'overflow-y' 的实现有问题，
+      也有可能是 currentStyle 实现的问题，这里不做过多分析。</p>
+
+      <h2 id="solutions">解决方案</h2>
+            <p>
+      1.同时设置 'overflow-x' 和 'overflow-y' 的值，不要出现其中之一为 'hidden' 时，而另一个是 'visible' 的情况；<br />
+      2.避免编写依赖指定值为 'visible' 的 'overflow-x' 和 'overflow-y' 特性的计算值的代码。
+      </p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="RV8003">RV8003：IE 中同一条规则下的后定义的 overflow 特性值不会覆盖之前设定的 overflow-x 和 overflow-y 特性值</a></li>
+        <li><a href="RD1002">RD1002：IE6 IE7(Q) IE8(Q) 中 'width' 或 'height' 的设定值在不足以容纳其内容时将被撑大</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 8.0.552.0 dev<br />
+              Safari 5.0.2(7533.18.5)<br />
+              Opera 10.63
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RV1001/overflow.html">overflow.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-19</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>overflow overflow-x overflow-y hidden visible auto</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

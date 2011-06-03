@@ -1,0 +1,21 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<body>
+<form id="formid">
+    <input type="text" value="text0" name="txt0" />
+    <input type="text" value="text1" id="txt1" />
+</form>
+
+<script language="javascript">
+	var oForm= document.getElementById("formid");
+	oForm.item
+	? alert("HTMLFormElement 的 item 方法被支持。")
+	: alert("HTMLFormElement 的 item 方法没有发现。");
+	oForm.elements.item
+	? alert("HTMLFormElement.elements 的 item 方法被支持。")
+	: alert("HTMLFormElement.elements 的 item 方法没有发现。");
+</script>
+</body>
+</html>

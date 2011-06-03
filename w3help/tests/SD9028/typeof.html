@@ -1,0 +1,29 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<title>无标题文档</title>
+</head>
+<body>
+     <div id="info"></div>
+<script>
+window.onload = function(){
+	var a;
+	document.getElementById("info").innerHTML = "typeof undefined === " + (typeof undefined) +
+	"<br/> typeof a === " + (typeof a)+
+	"<br/> typeof 1 === " + (typeof 1) +
+	"<br/> typeof \"hello\" === " + (typeof "hello") +
+	"<br/> typeof true === " + (typeof true) +
+	"<br/> typeof null === " + (typeof null) +
+	"<br/> typeof new Date() === " + (typeof new Date()) +
+	"<br/> typeof document === " + (typeof document) +
+	"<br/> typeof (new Date()).getDate === " + (typeof (new Date()).getDate) +
+	"<br/> typeof parseInt === " + (typeof parseInt) +
+	"<br/><span style=\"color:red\"> typeof NodeList === " + (typeof document.getElementsByTagName("*")) +"</span>" +
+	"<br/><span style=\"color:red\"> typeof RegExp() === " + (typeof new RegExp())+"</span>" +
+	"<br/><span style=\"color:red\"> typeof window.open === " + (typeof window.open)+"</span>" +
+	"<br/><span style=\"color:red\"> typeof document.write === " + (typeof document.write)+"<span>"+
+	"<br/><span style=\"color:red\"> typeof document.getElementById === " + (typeof document.getElementById)+"</span>";
+}
+</script>
+</body>
+</html>

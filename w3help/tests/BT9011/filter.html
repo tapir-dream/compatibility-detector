@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title></title>
+</head>
+<body style="margin:20px;">
+<div style="background:gold; width:200px; display:table; font:18px 'Trebuchet MS';">
+	<div style="background:gray; filter:alpha(opacity=50); margin:10px -10px; position:relative; zoom:1;">filter:alpha(opacity=50);</div>
+</div>
+<br />
+<div style="background:gold; width:200px; display:table; font:18px 'Trebuchet MS';">
+	<div style="background:gray; opacity:0.5; margin:10px -10px; position:relative; zoom:1;">opacity:0.5;</div>
+</div>
+<br />
+<div style="background:gold; width:200px; display:table; font:18px 'Trebuchet MS';">
+	<div style="background:gray;  filter:alpha(opacity=50);  opacity:0.5; margin:10px -10px; position:relative; zoom:1;">filter:alpha(opacity=50); opacity:0.5;</div>
+</div>
+<br />
+<div style="font:bold 24px 'Trebuchet MS'; position:relative; height:30px; background:#ddd;">
+	<span style="position:absolute; z-index:1; color:#666; filter:shadow(color=#666666, direction=135, strength=1) progid:DXImageTransform.Microsoft.Blur(pixelRadius=2, direction=135);">filter:shadow(...);</span>
+	<span style="position:absolute; z-index:2;">filter:shadow(...);</span>
+</div>
+<br />
+<div style="font:bold 24px 'Trebuchet MS'; position:relative; text-shadow: #666 3px 3px 3px; height:30px; background:#ddd;">
+	text-shadow:...;
+</div>
+<br />
+<div style="font:bold 24px 'Trebuchet MS'; position:relative; text-shadow: #666 3px 3px 3px; height:30px; background:#ddd;">
+	<span style="position:absolute; z-index:1; color:#666; display:none; display:block\9; filter:shadow(color=#666666, direction=135, strength=1) progid:DXImageTransform.Microsoft.Blur(pixelRadius=2, direction=135);">text-shadow:...; filter:shadow(...);</span>
+	<span style="position:absolute; z-index:2;">text-shadow:...; filter:shadow(...);</span>
+</div>
+<br />
+<div style="font:bold 14px/100% 'Trebuchet MS'; width:100px; height:100px; background:#ddd; filter:progid:DXImageTransform.Microsoft.BasicImage(rotation=3);">filter:<br />...BasicImage<br />(rotation=3);</div>
+<br />
+<div style="font:bold 14px/100% 'Trebuchet MS'; width:100px; height:100px; background:#ddd; -webkit-transform:rotate(-90deg); -moz-transform:rotate(-90deg); -o-transform:rotate(-90deg);">transform:<br />rotate<br />(-90deg);</div>
+<br />
+<div style="font:bold 14px/100% 'Trebuchet MS'; width:100px; height:100px; background:#ddd; filter:progid:DXImageTransform.Microsoft.BasicImage(rotation=3); -webkit-transform:rotate(-90deg); -moz-transform:rotate(-90deg); -o-transform:rotate(-90deg);">filter:<br />...BasicImage<br />(rotation=3);<br />transform:<br />rotate<br />(-90deg);</div>
+
+</body>
+</html>

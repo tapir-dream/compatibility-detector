@@ -1,0 +1,372 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HR9001: 各浏览器对于字符编码别名支持的宽泛程度存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 HTML4.01 规范中的描述，服务端应该提供给用户端文档的字符编码（character encoding）信息，最直接的方式为通过 HTTP 协议（<a href="http://www.ietf.org/rfc/rfc2616.txt">[RFC2616]</a>, 3.4 及 14.17） &quot;Content-Type&quot; 头字段的 &quot;charset&quot; 将文档的字符编码告诉用户端。例如以下 HTTP 头声明了字符编码为 ISO-8859-1：</p>
+      <pre>Content-Type: text/html; charset=ISO-8859-1</pre>
+      <p>处于某种情况无法访问服务器时，HTML 文档可以包含有关文档的字符编码的明确信息，<a href="http://www.w3.org/TR/html4/struct/global.html#edef-META">META</a> 元素可以用来为用户端提供这些信息。例如指定当前文档的字符编码为 ISO-8859-1，文档中应包含如下 META 声明：</p>
+      <pre>&lt;META http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=ISO-8859-1&quot;&gt;</pre>
+      <p>当 HTTP 协议与 META 元素均没有提供有关一个文档的字符编码信息时，HTML 还为一些元素提供了 <a href="http://www.w3.org/TR/html4/struct/links.html#adef-charset">charset</a> 属性。结合这些机制，作者可以在很大程度上提高当用户获取资源时用户端识别字符编码的机会。</p>
+      <p>针对如何确定一个文档的字符编码，用户代码必须遵守下面的优先级顺序（优先级由高至低）：</p>
+      <ol>
+        <li>HTTP &quot;Content-Type&quot; 字段中的 &quot;charset&quot; 参数。</li>
+        <li>META 声明中 &quot;http-equiv&quot; 为 &quot;Content-Type&quot; 对应的值中的 &quot;charset&quot; 的值。</li>
+        <li>元素的 charset 属性。</li>
+      </ol>
+      <p>关于 字符编码 的详细信息，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html4/charset.html#h-5.2">5.2 Character encodings</a> 以及 W3C Internationalization 关于 <a href="http://www.w3.org/International/O-charset">Character encodings</a> 中的内容。</p>
+      
+
+      <h2 id="description">问题描述</h2>
+      <p>各浏览器对于字符编码别名支持的宽泛程度有差异，当指定了浏览器无法识别的字符编码别名时，浏览器会以确定编码的优先级顺序采用设置的更低优先级的字符编码，以此类推。<br />
+      而 Chrome Safari Opera 中对字符编码别名有着比其他浏览器更宽泛的支持。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>若字符编码别名设置不当，则会造成页面在某些浏览器中出现文字编码错误，导致页面无法阅读。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>我们通常情况下为页面设定的字符编码信息所指对应到浏览器内部大多是字符编码别名，如 ISO-8859-1。</p>
+      <p>首先分析当 HTTP &quot;Content-Type&quot; 头字段的 &quot;charset&quot; 参数与页面中 META 元素声明中 &quot;http-equiv&quot; 为 &quot;Content-Type&quot; 对应的值中的 &quot;charset&quot; 的值不同时各浏览器所采用的字符编码。</p>
+      <p>分析以下代码：<em>charset.php</em></p>
+      <pre>&lt;?php
+  <em>header(&quot;Content-Type: text/html; charset=<span class="hl_4">BIG5</span>&quot;);</em>
+?&gt;
+&lt;!DOCTYPE HTML&gt;
+&lt;html&gt;
+&lt;head&gt;
+<em>&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=<span class="hl_2">UTF-8</span>&quot;/&gt;</em>
+&lt;/head&gt;
+&lt;body&gt;
+&lt;script&gt;
+  document.write((document.charset || document.characterSet).toUpperCase());
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面是一段 PHP 代码，HTTP &quot;Content-Type&quot; 头字段设置了字符编码为 <span class="hl_4">BIG5</span>，页面中的 META 元素设置了字符编码为 <span class="hl_2">UTF-8</span>，页面本身的编码类型为 <span class="hl_1">GB2312</span>。页面执行时，通过脚本输出了当前浏览器所采用的字符编码类型。</p>
+      <p>这个动态页面在各浏览器中运行时均显示出了 <span class="hl_4">BIG5</span>，可见此时所有浏览器均遵照 HTML4.01 规范所述，以更高优先级的 HTTP &quot;Content-Type&quot; 头字段的 &quot;charset&quot; 参数的值作为字符编码类型。</p>
+      <p>关于 document.charset 和 document.characterSet 的详细信息，请参考 MSDN <a href="http://msdn.microsoft.com/en-us/library/ms533553(v=VS.85).aspx">charset Property</a> 与 MDC <a href="https://developer.mozilla.org/en/DOM/document.characterSet">document.characterSet</a> 中的内容。</p>
+      <br />
+      <p>在继续接下来的分析之前，先统计一下各浏览器对于没有任何字符编码设定的页面所采用的编码类型：<em>default_charset.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;script&gt;
+  document.write((document.charset || document.characterSet).toUpperCase());
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面页面中没有设定任何的字符编码信息，则各浏览器对于这个页面将使用各自的默认编码<sup>1</sup>。页面自身的编码为 <span class="hl_1">GB2312</span>。</p>
+      <p>各浏览器中运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Firefox</th>
+          <th>Chrome Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <td>字符编码 --- GB2312</td>
+          <td>×Ö·û±àÂë --- ISO-8859-1</td>
+          <td>字符编码 --- GBK</td>
+        </tr>
+      </table>
+      <p>可以看到各浏览器对页面的默认字符编码不尽相同。</p>
+      <p>当页面没有设置任何字符编码信息或者浏览器无法识别 HTTP 头字段以及 META 元素中所声明的字符编码信息时，所有浏览器均会以各自在当前语言版本下的默认字符编码显示页面。<br />
+      本例中，因为页面自身的编码为 <span class="hl_1">GB2312</span>，则 Windows 平台下 <em>IE Firefox Opera</em> 简体中文版的默认字符编码刚好为 <span class="hl_1">GB2312</span>，所以页面中的字符显示正常。</p>
+      <p class="comment">注 1：操作系统及浏览器语言均为简体中文。</p>
+      <br />
+      <p>下面看一组特殊的例子：<em>charset-x.php</em></p>
+      <pre>&lt;?php
+  header("Content-Type: text/html; charset=maccyrillic");
+?&gt;
+&lt;!DOCTYPE HTML&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="Content-Type" content="text/html; charset=b.i.g+5"/&gt;
+&lt;/head&gt;
+&lt;body style="font:24px Tahoma;"&gt;
+字符編碼 --- 
+&lt;script&gt;
+  document.write((document.charset || document.characterSet).toUpperCase());
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面的动态页面自身的编码为 <span class="hl_1">BIG5</span>，HTTP &quot;Content-Type&quot; 头字段设置了字符编码为 <span class="hl_4">maccyrillic</span>，页面中的 META 元素设置了字符编码为 <span class="hl_2">b.i.g+5</span>。</p>
+      <p>各浏览器中运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Firefox</th>
+          <th>Chrome Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <td>才絪絏 --- GB2312</td>
+          <td>¶r≤≈љsљX --- X-MAC-CYRILLIC</td>
+          <td>字符編碼 --- BIG5</td>
+        </tr>
+      </table>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8 Firefox</em> 中，浏览器无法识别 <span class="hl_4">maccyrillic</span> 这种字符编码别名，所以寻找更低优先级的 META 元素声明的字符编码，但发现也无法识别 <span class="hl_2">b.i.g+5</span> 这种字符编码别名，继而采用了当前语言版本的默认编码 GB2312，与页面自身的字符编码 <span class="hl_1">BIG5</span> 不相符，导致页面中的文字显示异常。</li>
+        <li>在 <em>Chrome Safari</em> 中，浏览器将 <span class="hl_4">maccyrillic</span> 识别为合法的 <span class="hl_4">X-MAC-CYRILLIC</span>，则不再理会更低优先级的编码设置，页面采用 <span class="hl_4">X-MAC-CYRILLIC</span> 作为字符的编码，与页面自身的 <span class="hl_1">BIG5</span> 编码不符，导致页面中的文字显示异常。</li>
+        <li>在 <em>Opera</em> 中，浏览器无法识别 <span class="hl_4">maccyrillic</span> 这种字符编码别名，所以寻找更低优先级的 META 元素声明的字符编码，将 <span class="hl_2">b.i.g+5</span> 这种字符编码别名识别为 <span class="hl_2">BIG5</span>，刚好与页面自身的 <span class="hl_1">BIG5</span> 字符编码相符，所以页面中的文字显示正常。</li>
+      </ul>
+      <br />
+      <p>出现上述现象的原因主要有三点：</p>
+      <ol>
+        <li>各浏览器的字符编码别名表不尽相同，对同一种编码下的各种别名支持的宽泛程度不一样。像 maccyrillic 这种别名在 Chrome Safari 可以识别为通用的 X-MAC-CYRILLIC<sup>1</sup>，但其他浏览器则会将其视作错误的字符编码信息处理。</li>
+        <li>各浏览器在匹配页面的字符编码与别名表中的字符编码时，匹配的方式不同。Chrome Safari Opera 会将编码类型的字符串做一个转换，过滤了除英文大小写字符、数字字符之外的字符（isASCIIAlphanumeric）。如 ISO8859_5 会以转换后的 ISO88595 与别名表中的 ISO-8859-5 转换后的 ISO88595 做比较，b.i.g+5 也会转换为 big5 与别名表中的做比较，所以浏览器可以正确识别这些设置的字符编码为浏览器内部的别名。</li>
+        <li>各浏览器的默认字符编码不同。</li>
+      </ol>
+      <p class="comment">
+        注 1：各浏览器均可以识别 X-MAC-CYRILLIC 这种通用的字符编码别名。<br />
+      </p>
+      
+      
+
+      <h2 id="solutions">解决方案</h2>
+      <p>首先，对于动态页面必须确保 HTTP &quot;Content-Type&quot; 头字段的 &quot;charset&quot; 参数与页面自身编码相符，且务必在页面的 META 元素中也声明相符的字符编码信息。对于静态页面，必须保证页面中 META 元素声明中 &quot;http-equiv&quot; 为 &quot;Content-Type&quot; 对应的值中的 &quot;charset&quot; 的值与页面自身编码相符。<br />
+      其次，在设置字符编码别名时，最好使用最通用的、各浏览器均可识别的编码别名。</p>
+      <p>下面列出了部分的字符编码及其推荐的通用的别名在各浏览器中的支持情况：</p>
+      <table class="compare">
+        <colgroup span="5"></colgroup>
+        <colgroup span="5" style="background:azure;"></colgroup>
+        <tr>
+          <th colspan="5">标准字符编码名</th>
+          <th colspan="5">推荐的字符编码别名</th>
+        </tr>
+        <tr>
+          <th rowspan="2">名称</th>
+          <th colspan="4">各浏览器测试</th>
+          <th rowspan="2">名称</th>
+          <th colspan="4">各浏览器测试</th>
+        </tr>
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox</th>
+          <th>Chrome Safari</th>
+          <th>Opera</th>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox</th>
+          <th>Chrome Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <th>ANSI_X3.4-1968</th>
+          <td>US-ASCII</td>
+          <td>US-ASCII</td>
+          <td>US-ASCII</td>
+          <td>WINDOWS-1252</td>
+          <th>US-ASCII</th>
+          <td>US-ASCII</td>
+          <td>US-ASCII</td>
+          <td>US-ASCII</td>
+          <td>WINDOWS-1252</td>
+        </tr>
+        <tr>
+          <th>ISO_8859-1:1987</th>
+          <td>ISO-8859-1</td>
+          <td>不识别</td>
+          <td>ISO-8859-1</td>
+          <td>WINDOWS-1252</td>
+          <th>ISO-8859-1</th>
+          <td>ISO-8859-1</td>
+          <td>ISO-8859-1</td>
+          <td>ISO-8859-1</td>
+          <td>WINDOWS-1252</td>
+        </tr>
+        <tr>
+          <th>ISO_8859-2:1987</th>
+          <td>ISO-8859-2</td>
+          <td>不识别</td>
+          <td>ISO-8859-2</td>
+          <td>ISO-8859-2</td>
+          <th>ISO-8859-2</th>
+          <td>ISO-8859-2</td>
+          <td>ISO-8859-2</td>
+          <td>ISO-8859-2</td>
+          <td>ISO-8859-2</td>
+        </tr>
+        <tr>
+          <th>ISO_8859-3:1988</th>
+          <td>ISO-8859-3</td>
+          <td>不识别</td>
+          <td>ISO-8859-3</td>
+          <td>ISO-8859-3</td>
+          <th>ISO-8859-3</th>
+          <td>ISO-8859-3</td>
+          <td>ISO-8859-3</td>
+          <td>ISO-8859-3</td>
+          <td>ISO-8859-3</td>
+        </tr>
+        <tr>
+          <th>ISO_8859-4:1988</th>
+          <td>ISO-8859-4</td>
+          <td>不识别</td>
+          <td>ISO-8859-4</td>
+          <td>ISO-8859-4</td>
+          <th>ISO-8859-4</th>
+          <td>ISO-8859-4</td>
+          <td>ISO-8859-4</td>
+          <td>ISO-8859-4</td>
+          <td>ISO-8859-4</td>
+        </tr>
+        <tr>
+          <th>ISO_8859-5:1988</th>
+          <td>ISO-8859-5</td>
+          <td>不识别</td>
+          <td>ISO-8859-5</td>
+          <td>ISO-8859-5</td>
+          <th>ISO-8859-5</th>
+          <td>ISO-8859-5</td>
+          <td>ISO-8859-5</td>
+          <td>ISO-8859-5</td>
+          <td>ISO-8859-5</td>
+        </tr>
+        <tr>
+          <th>ISO_8859-6:1987</th>
+          <td>ISO-8859-6</td>
+          <td>不识别</td>
+          <td>ISO-8859-6</td>
+          <td>ISO-8859-6</td>
+          <th>ISO-8859-6</th>
+          <td>ISO-8859-6</td>
+          <td>ISO-8859-6</td>
+          <td>ISO-8859-6</td>
+          <td>ISO-8859-6</td>
+        </tr>
+        <tr>
+          <th>ISO_8859-7:1987</th>
+          <td>ISO-8859-7</td>
+          <td>不识别</td>
+          <td>ISO-8859-7</td>
+          <td>ISO-8859-7</td>
+          <th>ISO-8859-7</th>
+          <td>ISO-8859-7</td>
+          <td>ISO-8859-7</td>
+          <td>ISO-8859-7</td>
+          <td>ISO-8859-7</td>
+        </tr>
+        <tr>
+          <th>ISO_8859-8:1988</th>
+          <td>ISO-8859-8</td>
+          <td>不识别</td>
+          <td>ISO-8859-8</td>
+          <td>ISO-8859-8</td>
+          <th>ISO-8859-8</th>
+          <td>ISO-8859-8</td>
+          <td>ISO-8859-8</td>
+          <td>ISO-8859-8</td>
+          <td>ISO-8859-8</td>
+        </tr>
+        <tr>
+          <th>ISO_8859-9:1989</th>
+          <td>ISO-8859-9</td>
+          <td>不识别</td>
+          <td>WINDOWS-1254</td>
+          <td>ISO-8859-9</td>
+          <th>ISO-8859-9</th>
+          <td>ISO-8859-9</td>
+          <td>ISO-8859-9</td>
+          <td>WINDOWS-1254</td>
+          <td>ISO-8859-9</td>
+        </tr>
+        <tr>
+          <th>ISO-8859-10</th>
+          <td>不识别</td>
+          <td>ISO-8859-10</td>
+          <td>ISO-8859-10</td>
+          <td>ISO-8859-10</td>
+          <th>ISO-8859-10</th>
+          <td>不识别</td>
+          <td>ISO-8859-10</td>
+          <td>ISO-8859-10</td>
+          <td>ISO-8859-10</td>
+        </tr>
+      </table>
+      <p>更多请参见 <a href="http://www.iana.org/assignments/character-sets">IANA CHARACTER SETS</a> 及 <a href="http://tools.ietf.org/html/rfc1345">RFC1345</a>。</p>
+      
+      
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.8<br />
+              Chrome 6.0.472.25 dev<br />
+              Safari 5.0.1<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HR9001/charset.php">charset.php</a><br />
+            <a href="../../tests/HR9001/default_charset.html">default_charset.html</a><br />
+            <a href="../../tests/HR9001/charset-x.php">charset-x.php</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-12</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>content-type meta charset 字符集 元数据 编码</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

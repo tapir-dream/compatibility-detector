@@ -1,0 +1,73 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>无标题文档</title>
+<style>
+#test {
+	width:50px;
+	height:50px;
+	margin-left:5px;
+	padding:5px;
+	border:5px solid black;
+	position:absolute;
+	left:5px;
+	top:5px;
+	background:gold;
+	zoom:0.5;
+}
+</style>
+</head>
+<body  style="font:10px/2 'Trebuchet MS';">
+<div style="float:left; border:1px #000000 solid;" id="info">
+  <span style="color:#FF0000"><b>zoom:<span id="zValue">0.5</span></b></span><br />
+  <span style=" color:#0000CC">
+  top:<span id="top" /></span><br />
+  left:<span id="left"/></span><br />
+  width:<span id="width"/></span><br />
+  height:<span id="height"/></span><br />
+  margin-left:<span id="margin-left"/></span><br />
+  padding-left:<span id="padding-left"/></span><br />
+  border-left-width:<span id="border-left-width"/></span><br />
+  </span>
+  <input type="button" value="增加zoom" id="add" onClick="addZoom()">
+</div>
+<div style="position:relative; float:left; ">
+  <div id="test">zoom</div>
+</div>
+<script>
+window.onload=function(){
+	void function(){
+		if(!window.getComputedStyle){
+			window.getComputedStyle=function($target){
+			return $target.currentStyle;
+			};
+		}
+		var $test=document.getElementById("test");
+		var cs=getComputedStyle($test,null);
+		document.getElementById("top").innerHTML=cs.top;
+		document.getElementById("left").innerHTML=cs.left;
+		document.getElementById("width").innerHTML=cs.width;
+		document.getElementById("height").innerHTML=cs.height;
+		document.getElementById("margin-left").innerHTML=cs.marginLeft;
+		document.getElementById("padding-left").innerHTML=cs.paddingLeft;
+		document.getElementById("border-left-width").innerHTML=cs.borderLeftWidth;
+	}();
+
+	window["addZoom"] = function (){
+		var $test=document.getElementById("test");
+		var z=document.getElementById("zValue").innerHTML;
+		$test.style.zoom=document.getElementById("zValue").innerHTML=parseFloat(z)+1;
+		var cs=getComputedStyle($test,null);
+		document.getElementById("top").innerHTML=cs.top;
+		document.getElementById("left").innerHTML=cs.left;
+		document.getElementById("width").innerHTML=cs.width;
+		document.getElementById("height").innerHTML=cs.height;
+		document.getElementById("margin-left").innerHTML=cs.marginLeft;
+		document.getElementById("padding-left").innerHTML=cs.paddingLeft;
+		document.getElementById("border-left-width").innerHTML=cs.borderLeftWidth;
+	}
+}
+</script>
+</body>
+</html>

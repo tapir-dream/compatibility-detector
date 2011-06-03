@@ -1,0 +1,190 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RE1020: IE6 IE7 IE8(Q) 不支持 border-spacing 特性</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p> TABLE 的 'border-collapse' 定义了 TD 边框两种模式，当 'border-collapse' 取值是 'collapse' 时， TD 的边框合并，取值是 'separate' 时， TD 边框分离。</p>
+      <p>'border-spacing' 是在 TABLE 在 TD 边框分离模式下的一个特性。该特性表示 TD 边框之间的距离，如果只设置一个长度值，则表示水平和垂直方向的空间。如果设置两个长度值，第一个值是水平方向的空间，第二个是垂直方向的空间。长度值不能是负值。</p>
+      <p>'cellspacing' 作为 TABLE 标签的属性，也可以指定单元间距离。</p>
+      <p>CSS2.1 规范中 TABLE 边框模式的详细说明：<a href="http://www.w3.org/TR/CSS21/tables.html#borders">17.6 Borders</a> 。</p>
+      <p>CSS2.1 规范中关于 'border-spacing' 特性的详细说明：<a href="http://www.w3.org/TR/CSS21/tables.html#separated-borders">17.6.1 border-spacing</a> 。</p>
+      <p>HTML 4.01 规范中关于 'cellspacing' 的详细说明：<a href="http://www.w3.org/TR/html401/struct/tables.html#adef-cellspacing">11.3.3 cellspacing</a> 。</p>
+      <h2 id="description">问题描述</h2>
+      <p>在 TABLE 中 TD 边框模式是分离模式下，定义 'border-spacing' 时，IE6 IE7 IE8(Q) 不支持该属性，其他浏览器符合规范。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>当设置该属性时，由于 IE6 IE7 IE8(Q) 中不支持该属性，导致页面布局差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>在 TABLE 中 TD 边框模式是分离模式下，定义 'border-spacing' 代码如下：</p>
+<pre>&lt;html&gt;
+&lt;head&gt;
+&lt;style type="text/css"&gt;
+table{
+  <span class="hl_1">border-collapse: separate;</span>
+  border: 1px solid red;
+  <span class="hl_1">border-spacing:10px 20px;</span>
+}
+td{
+  border: 1px dotted blue;
+}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;table&gt;
+&lt;tr&gt;
+  &lt;td&gt;aa&lt;/td&gt;
+  &lt;td&gt;bb&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+  &lt;td&gt;cc&lt;/td&gt;
+  &lt;td&gt;dd&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+      <p>在各浏览器中的运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RE1020/IE6IE7IE8.png"  alt="IE6IE7IE8(Q)" title="IE6IE7IE8(Q)"/></td>
+          <td><img src="../../tests/RE1020/IE8FirefoxChromeSafariOpera.png" alt="IE8(S)FirefoxChromeSafariOpera" title="IE8(S)FirefoxChromeSafariOpera"/></td>
+        </tr>
+      </table>
+
+      <p>可见，</p>
+      <ul>
+        <li><em>IE6 IE7 IE8(Q)</em> 不支持该属性。</li>
+        <li><em>IE8(S) Firefox Chrome Safari Opera</em> 支持该属性，并符合规范。</li>
+      </ul>
+      <p>那么 cellspacing 与 border-spacing 在布局方面有什么差别呢？再分析如下代码：</p>
+<pre>
+&lt;!DOCTYPE HTML&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style type="text/css"&gt;
+table{
+  border: 1px solid red;
+}
+td{
+  border: 1px dotted blue;
+}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;table <span class="hl_1">cellspacing=20</span>&gt;
+&lt;tr&gt;
+  &lt;td&gt;aa&lt;/td&gt;
+  &lt;td&gt;bb&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+  &lt;td&gt;cc&lt;/td&gt;
+  &lt;td&gt;dd&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+      <p>各浏览器表现一致：</p>
+      <table class="compare">
+        <tr>
+          <th>所有浏览器</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RE1020/all.png"  alt="IE6IE7IE8(Q)" title="IE6IE7IE8(Q)"/></td>
+        </tr>
+      </table>
+      <p>可见，cellspacing 相当于 border-spacing 在水平方向和垂直方向设置相同的值。</p>
+
+
+      <h2 id="solutions">解决方案</h2>
+      <p>'border-spacing' 不是所有浏览器都能很好的支持，若水平和垂直方向的空间相等，可以用 TABLE 的 cellspacing 属性代替  'border-spacing' 特性。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.552.0 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.63
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+            <a href="../../tests/RE1020/border-spacing.html">border-spacing.html</a><br/>
+            <a href="../../tests/RE1020/cellspacing.html">cellspacing.html</a><br/>
+            
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-18</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>border-spacing cellspacing</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

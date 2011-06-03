@@ -1,0 +1,160 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BT9010: 只有 IE 支持 CSS Expression</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>CSS Expression 是微软的专有技术，只有 Windows 下的 IE 浏览器支持，其他浏览器均对 expression 表达式不识别。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>若在 CSS 中使用了 Expression，并仅考虑了 IE 浏览器，则可能造成其他浏览器中出现各种兼容性差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>CSS Expression（CSS 表达式）也没称作  &quot;Dynamic Properties（动态特性）&quot; ，最初由 IE5.0 引入。它允许开发人员通过 CSS 选择器动态地为页面绑定脚本。其格式为：</p>
+      <pre>selector { property: <span class="hl_1">expression</span><sup>1</sup> }</pre>
+      <p class="comment">注1：JavaScript 表达式。</p>
+      <p>下面举一个例子，</p>
+      <pre>div.title { <span style="color:blue;">background-color</span>: <span class="hl_1">expression</span>( (new Date()).getHours()%2 ? &quot;#B8D4FF&quot; : &quot;#F08A00&quot; ); }</pre>
+      <p>每隔一个小时，DIV[class=&quot;title] 就会改变其背景颜色。</p>
+      <p>然而在 IE8 标准模式中，不再支持 CSS Expression。官方提供了以下几点原因：</p>
+      <ol>
+        <li>为了更好的遵循标准<br />
+          <ul>
+            <li>CSS Expression 为 IE 专有，不具备通用性；</li>
+            <li>CSS Expression 常常用来修复或模拟某些 IE 不支持的 CSS 特性，如 'min-height'、'max-width'。这些均已被 IE8 所支持。</li>
+          </ul>
+        </li>
+        <li>为了提高性能<br />
+        表达式的计算需要耗费巨大的系统资源，Web 性能专家 Steve Sounders：<a href="http://developer.yahoo.net/blog/archives/2007/07/high_performanc_6.html">recommend avoiding them to improve front-end performance</a>。</li>
+        <li>为了降低浏览器被攻击的可能<br />
+        由于它们暴露出了一个脚本执行环境，CSS Expression 就构成了一个可能的脚本注入攻击方向。</li>
+      </ol>
+      <p>关于 动态属性 的更多内容，请参见 MSDN：<a href="http://msdn.microsoft.com/en-us/library/ms537634(VS.85).aspx">About Dynamic Properties</a>。</p>
+      <p>关于 微软官方结束对 CSS Expression 的支持 的更多内容，请参见 MSDN：<a href="http://blogs.msdn.com/b/ie/archive/2008/10/16/ending-expressions.aspx">Ending Expressions</a>。</p>
+      <br />
+      <p>上文提到在 IE 中使用 CSS Expression 多数情况下是为了修复或模拟某些 IE 不支持的 CSS 特性，下面就举两个例子说明：</p>
+      <h3>1. 'min-height' 特性：</h3>
+      <p><em>IE6 IE7(Q) IE8(Q)</em> 对 'min-height'、'max-height'、'min-width'、'max-width' 没有提供很好的支持，本例以 'min-height' 特性举例。</p>
+      <pre>&lt;div style=&quot;<span class="hl_4">min-height:50px;</span> background:#ddd;&quot;&gt;min-height:50px;&lt;/div&gt;</pre>
+      <p>这段代码在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7(Q) IE8(Q)</th>
+          <th>IE7(S) IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BT9010/minHeight_IE6.gif" alt="IE6 IE7(Q) IE8(Q)" /></td>
+          <td><img src="../../tests/BT9010/minHeight_non_IE6.gif" alt="IE7(S) IE8(S) Firefox Chrome Safari Opera" /></td>
+        </tr>
+      </table>
+      <p><em>IE6 IE7(Q) IE8(Q)</em> 此时不支持 'min-height' 特性，且 DIV 元素没有设定高度，则 'height' 特性为默认的 auto。</p>
+      <p>可以通过 CSS Expression 来弥补：</p>
+      <pre>&lt;div style=&quot;<span class="hl_4">min-height:50px;</span> background:#ddd; width:150px; <span class="hl_2">_height:expression((parseInt(this.currentStyle.height) &lt; 50) ? 50 : this.clientHeight)</span>&quot;&gt;min-height:50px;&lt;/div&gt;</pre>
+      <p>借助 CSS hack，仅在 IE6 以及所有 IE 的混杂模式下这个表达式会执行。</p>
+      <h3>2. position:fixed：</h3>
+      <pre>&lt;div id=&quot;d&quot; style=&quot;<span class="hl_4">position:fixed;</span> top:0; left:0; background:#ddd; width:200px; height:100px;&quot;&gt;position:fixed;&lt;/div&gt;
+&lt;div style=&quot;width:10000px; height:10000px;&quot;&gt;&lt;/div&gt;</pre>
+      <p>这段代码在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7(Q) IE8(Q)</th>
+          <th>IE7(S) IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BT9010/fixed_IE6.gif" alt="IE6 IE7(Q) IE8(Q)" /></td>
+          <td><img src="../../tests/BT9010/fixed_non_IE6.gif" alt="IE7(S) IE8(S) Firefox Chrome Safari Opera" /></td>
+        </tr>
+      </table>
+      <p><em>IE6 IE7(Q) IE8(Q)</em> 不支持 position:fixed，会将 'position' 特性的值计算为 static。无法达到固定定位的效果。</p>
+      <p>可以通过 CSS Expression 来弥补：</p>
+      <pre>&lt;div id=&quot;d&quot; style=&quot;<span class="hl_4">position:fixed;</span> top:100px; left:100px; <span class="hl_2">_position:absolute; _top:expression(offsetParent.scrollTop + 010); _left:expression(offsetParent.scrollLeft + 100);</span> background:#ddd; width:200px; height:100px;&quot;&gt;position:fixed;&lt;/div&gt;
+&lt;div style=&quot;width:10000px; height:10000px;&quot;&gt;&lt;/div&gt;</pre>
+      <p>同样是借助 CSS hack，仅在 IE6 以及所有 IE 的混杂模式下这个表达式会执行。</p>
+
+
+
+      <h2 id="solutions">解决方案</h2>
+      <p>CSS Expression 是一个已经过时的技术，微软官方日后可能不会再对其进行开发及支持。 除非为了利用 CSS hack 去弥补某些 IE 中不支持的 CSS 特性，否则应尽量避免使用 CSS Expression。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.2<br />
+              Chrome 5.0.356.2 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BT9010/expression.html">expression.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-16</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>CSS Expression hack 表达式 min-width max-width min-height max-height fixed</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

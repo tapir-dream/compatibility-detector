@@ -1,0 +1,164 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BG2001: Firefox 中块级元素高度或宽度过小会导致滚动条消失</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 Firefox 中，当元素设置有滚动条，其尺寸小于迫使其滚动条的两个箭头按钮相碰的临界值时，滚动条可能会消失。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>这个现象仅在 Firefox 中出现，会造成设置的滚动条在 Firefox 中消失。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Firefox</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>请看以下测试用例。</p>
+
+      <p>分析以下代码：<em>scrollbar.html</em></p>
+<pre>
+&lt;style&gt;
+    div { background:gray; overflow:scroll; float:left; margin-right:5px; }
+&lt;/style&gt;
+&lt;div style=&quot;width:31px; height:31px;&quot;&gt;
+    ABC ABC ABC ABC ABC
+&lt;/div&gt;
+&lt;div style=&quot;width:32px; height:32px;&quot;&gt;
+    ABC ABC ABC ABC ABC
+&lt;/div&gt;
+&lt;div style=&quot;width:47px; height:47px;&quot;&gt;
+    ABC ABC ABC ABC ABC
+&lt;/div&gt;
+&lt;div style=&quot;width:48px; height:48px;&quot;&gt;
+    ABC ABC ABC ABC ABC
+&lt;/div&gt;
+</pre>
+      <p>上面代码中的 4 个 DIV 元素宽度和高度分别为 31px、32px、47px、48px，通过 overflow:scroll 为其设置了垂直与水平滚动条。<br />
+      <strong>确定当前 Windows 的系统主题为“Windows 经典”，并且没有单独调整滚动条的大小，为默认的 16px。</strong></p>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Chrome Safari Opera</th>
+          <th>Firefox</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BG2001/scrollbar_non_FF.gif" alt="IE6 IE7 IE8 Chrome Safari Opera"></td>
+          <td><img src="../../tests/BG2001/scrollbar_FF.gif" alt="Firefox"></td>
+        </tr>
+      </table>
+      <ul>
+        <li>在 <em>IE Chrome Safari Opera</em> 中，当元素的尺寸较小时，浏览器会尽可能地缩小垂直滚动条的上下箭头按钮、以及水平滚动条的左右箭头按钮以适应元素的设定宽度及高度。</li>
+        <li>在 Firefox 中，当元素的尺寸缩小至迫使滚动条上的两个箭头按钮相碰后，整个滚动条会消失。如上面的测试代码中，由于 Windows 经典主题默认的滚动条大小为 16px，则当 DIV 的高度缩小至 32px（两个箭头按钮宽高之和）以下时，滚动条消失。</li>
+      </ul>
+      <p>下面的动画更能展现Firefox中的这个特点：</p>
+      <p><img src="../../tests/BG2001/ani_FF.gif" alt="Ani Firefox"></p>
+      <br />
+      <p>此现象与操作系统设置的滚动条尺寸有关，如将系统的滚动条设置为 50px：</p>
+      <p><img src="../../tests/BG2001/windows_display_prop.gif" alt="windows display prop"></p>
+      <p>在修改测试代码：</p>
+<pre>
+&lt;style&gt;
+    div { background:gray; overflow-y:scroll; float:left; margin-right:5px; }
+&lt;/style&gt;
+&lt;div style=&quot;width:100px; height:99px;&quot;&gt;
+    ABC ABC ABC ABC ABC
+&lt;/div&gt;
+&lt;div style=&quot;width:100px; height:100px;&quot;&gt;
+    ABC ABC ABC ABC ABC
+&lt;/div&gt;
+</pre>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Chrome Safari Opera</th>
+          <th>Firefox</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BG2001/scrollbar2_non_FF.gif" alt="IE6 IE7 IE8 Chrome Safari Opera"></td>
+          <td><img src="../../tests/BG2001/scrollbar2_FF.gif" alt="Firefox"></td>
+        </tr>
+      </table>
+      <p>可见，Firefox 这里依然在元素高度小于“操作系统设置的滚动条大小”的 2 倍时，即滚动条的两个箭头按钮相碰后，整个滚动条消失。</p>
+      <p>而对于 Windows 7 及 Vista 的 Aero 主题，这个迫使滚动条消失的临界值为 34px。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>针对 Firefox 中的这种特有现象，在确定不需要滚动条时为元素设置 'overflow:hidden'，并且合理地为需要携带滚动条元素设置其宽度及高度。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.2<br />
+              Chrome 5.0.360.0 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BG2001/scrollbar.html">scrollbar.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-14</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>scrollbar scroll Firefox overflow 滚动条</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

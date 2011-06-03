@@ -1,0 +1,361 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SD9022: 各浏览器对页面 onload 事件处理方式不一致</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>关于 HTML 4.01 规范中 BODY 标记的 onload 属性说明：  <a href="http://www.w3.org/TR/html401/struct/global.html#h-7.5.1">http://www.w3.org/TR/html401/struct/global.html#h-7.5.1</a> </p>
+      <p>关于 HTML 4.01 规范中 onload 内在事件说明：<a href="http://www.w3.org/TR/html401/interact/scripts.html#adef-onload">http://www.w3.org/TR/html401/interact/scripts.html#adef-onload</a></p>
+      <p>关于 DOM Level2 Events 规范中 load 事件说明：<a href="http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-eventgroupings-htmlevents">http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-eventgroupings-htmlevents</a> </p>
+      <h2 id="description">问题描述</h2>
+      <p>页面加载完成后会触发 onload 事件，通常下会使用 window.onload 、 document.body.onload、 HTMLIFrame.onload 方法来处理他；但是各浏览器对页面 onload 事件处理方式并不一致，这些方法可能会导致页面加载完成后无法触事件处理函数。</p>
+      <h2 id="influence">造成的影响</h2>
+      <p>window.onload 与 document.body.onload 事件相互关系不明确。</p>
+      <p>IE6 IE7 IE8 中无法通过为属性赋值方式为 IFRAME 元素绑定 load 事件处理函数。</p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+              <tr>
+                <th>IE6 IE7 IE8 Firefox</th>
+                <td></td>
+              </tr>
+            </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <h3>一、window.onload 与 document.body.onload 事件以及 BODY 标签内的内联 onload 事件，三者相互关系不明确</h3>
+      <p>有关这两个事件在 W3C 指定的规范中并没有说明其区别，由于 window 对象属于 BOM 范畴没有统一规范可依，各浏览器对其在此处的实现存有差异。</p>
+      <p>在微软的 <a href="http://msdn.microsoft.com/en-us/library/cc197055(v=VS.85).aspx">MSDN</a> 中说明 document.body.onload 属性是 window 的 onload 事件处理程序。其它浏览器厂商并没有对此属性做更细致解释。 </p>
+      <p>分析以下代码：</p>
+<pre>
+&lt;button onclick=&quot;alert(document.body.onload);&quot;&gt;查看本页 document.body.onload 事件&lt;/button&gt;
+&lt;button onclick=&quot;alert(window.onload);&quot;&gt;查看本页 window.onload 事件&lt;/button&gt;
+&lt;button onclick=&quot;alert(window.onload===document.body.onload);&quot;&gt;查看document.body.onload 事件与 window.onload 事件是否为同一事件&lt;/button&gt;
+&lt;br /&gt;
+&lt;script&gt;
+document.body.onload = function (){ <span class="hl_4">// 函数 A</span>
+  document.getElementById(&quot;A&quot;).innerHTML = &quot;document.body.onload 被触发&quot;;
+}
+window.onload = function (){ <span class="hl_4">// 函数 B</span>
+  document.getElementById(&quot;B&quot;).innerHTML = &quot;window.onload 被触发&quot;;
+}
+&lt;/script&gt;
+&lt;span id=&quot;A&quot; style=&quot;background:gold&quot;&gt;&lt;/span&gt;
+&lt;span id=&quot;B&quot; style=&quot;background:gray&quot;&gt;&lt;/span&gt;
+</pre>
+      <p>代码中分别对两种 onload 属性赋值了不同的事件处理函数。其中 window.onload 先于 document.body.onload 被定义。如果他们两者使用的是同一事件处理源，则会发生 window 对象中 onload 事件定义被 body 的事件处理函数所覆盖。</p>
+      <p>实际上个浏览器运行结果如下：</p>
+      <table class="compare">
+              <tr>
+                <th>&nbsp;</th>
+                <th>IE6 IE7 IE8</th>
+                <th>Firefox</th>
+                <th>Chrome Safari Opera</th>
+              </tr>
+              <tr>
+                <th>实际运行</th>
+                <td colspan="3">window.onload 被触发</td>
+              </tr>
+              <tr>
+                <th>document.body.onload 事件函数</th>
+                <td>函数 B</td>
+                <td class="hl_1">函数 A</td>
+                <td>函数 B</td>
+              </tr>
+              <tr>
+                <th>window.onload 事件函数</th>
+                <td class="hl_1">null</td>
+                <td colspan="2"> 函数 B</td>
+              </tr>
+              <tr>
+                <th>两者事件处理函数是否一致</th>
+                <td class="hl_1">Flase</td>
+                 <td class="hl_1">Flase</td>
+                <td>true</td>
+              </tr>
+            </table>
+      <p>初步可以看出：
+            <ul>
+              <li>在 IE 中 window.onload 事件函数即使定义了，也会是 null ，它的事件处理函数始终是为 document.body.onload 提供的；</li>
+                <li>在 Firefox 中 document.body.onload 事件不与 window.onload 事件相同，后者事件函数不会覆盖前者；</li>
+                 <li>在 Chrome Safari Opera 中 document.body.onload 事件处理函数被后声明的 window.onload 事件处理函数覆盖。 </li>
+          </ul>
+      <p>为了更明确以上猜测，我们将两个事件处理函数位置对调后再来观察实际效果：</p>
+<pre>
+window.onload = function () <span class="hl_4">// 函数 B</span>{
+  document.getElementById(&quot;B&quot;).innerHTML = &quot;window.onload 被触发&quot;;
+}
+
+document.body.onload = function (){ <span class="hl_4">// 函数 A</span>
+  document.getElementById(&quot;A&quot;).innerHTML = &quot;document.body.onload 被触发&quot;;
+}
+</pre>
+
+      <p>这次试图使用 document.body.onload 事件处理函数来覆盖 window.onload，实际运行结果如下：</p>
+      <table class="compare">
+            <tr>
+              <th>&nbsp;</th>
+              <th>IE6 IE7 IE8</th>
+              <th>Firefox</th>
+              <th>Chrome Safari Opera</th>
+            </tr>
+            <tr>
+              <th>实际运行</th>
+              <td> document.body.onload 被触发</td>
+              <td class="hl_4">window.onload .onload 被触发</td>
+              <td>document.body.onload 被触发</td>
+            </tr>
+            <tr>
+              <th>document.body.onload 事件函数</th>
+              <td> 函数 A</td>
+              <td class="hl_1">函数 A</td>
+              <td>函数 A</td>
+            </tr>
+            <tr>
+              <th>window.onload 事件函数</th>
+              <td class="hl_1">null</td>
+              <td colspan="2"> 函数 B</td>
+            </tr>
+            <tr>
+              <th>两者事件处理函数是否一致</th>
+              <td class="hl_1">Flase</td>
+              <td class="hl_1">Flase</td>
+              <td>true</td>
+            </tr>
+          </table>
+      <p>可以看出： </p>
+      <ul>
+            <li>无论如何在 IE 中 window.onload 事件函数即使定义了，也会是 null ，它的事件处理函数始终是为 document.body.onload 提供的。</li>
+        <li>在 Firefox 中 只有 window.onload 事件会触发页面加载完成事件，document.body.onload 只是个由用户扩展的方法，并不触发相应事件处理函数。这也说明了为什么仅在 Firefox 浏览器中，两者&quot;事件&quot;函数均被保留。</li>
+        <li>在 Chrome Safari Opera 中页面加载完成事件由 document.body.onload 和 window.onload 两者的事件处理函数定义顺序有关，后定义的覆盖之前定义的，两者最终会使用同一事件源函数处理事件内容。</li>
+        </ul>
+      <p>在实际应用中 onload 事件还可能被写在 BODY 标签的属性内，而不在脚本标签中定义他的处理函数。此时代码如下：</p>
+<pre>
+&lt;script&gt;
+window.onload=function(){
+  alert("window onload");
+}
+&lt;/script&gt;
+&lt;body onload="alert('overridden window onload')"&gt;
+</pre>
+
+      <p>此用例中首先在脚本标签内为 window.onload 事件附加了处理函数，然后有在 BODY 标签内写入 onload 事件处理代码。如果  BODY 标签内的 onload 事件处理与 window.onload 事件处理不同，就会弹出两次对话框，并且可以根据对话框出现的顺序判断哪个 onload 事件处理在前。反之则只会弹出一个对话框，如果仅出现 &quot;window onload&quot; 字样提示就说明 BODY 标签内 onload 属性无效，如果出现 “overridden window onload” 提示就说明  BODY 标签内 onload 事件与  window.onload 事件为同一事件处理机制，后者覆盖了前者。</p>
+      <p>各浏览器运行结果如下：</p>
+      <table class="compare">
+            <tr>
+              <th>&nbsp;</th>
+              <th>IE6 IE7 IE8 Firefox Chrome Safari Opera</th>
+            </tr>
+            <tr>
+              <th>实际运行</th>
+              <td>”overridden window onload“</td>
+            </tr>
+
+            <tr>
+              <th>两者均代表 window onload 事件</th>
+              <td>true</td>
+            </tr>
+          </table>
+      <p>可见，在所有浏览器中均将，BODY 标签内的内联 onload 事件处理等同与 window.onload 事件处理。</p>
+      <p>结合上文说明可知， Firefox 中 BODY 标签内的 onload 事件属性与脚本标记内写入的 document.body.onload 事件并不一致。</p>
+      <p>&nbsp;</p>
+      <h3>二、IE6 IE7 IE8  中无法通过为属性赋值方式为 IFRAME 元素绑定 load 事件处理函数</h3>
+      <p>某些情况下可能需要为 IFRAME 标记动态添加 onload 监听事件，其实现方法有通常有三种：</p>
+      <ol>
+            <li>直接为 HTMLIFrameElement.onload 属性为 IFRAME 标记赋值事件处理函数</li>
+            <li>使用 HTMLIFrameElement.setAttribute 方法为 IFRAME 标记赋值事件处理函数</li>
+            <li>使用事件监听方式为 IFRAME 的 onload 事件绑定处理函数</li>
+          </ol>
+      <p>根据 DOM 规范推荐使用第三种处理方式，但是由于规范在不断修正添加中，浏览器开发时可能相应的标准规范并未出现或者并不完善，这导致了各个版本浏览对此问题的实现差异。</p>
+      <p>以下将依次分析这三种方式在各浏览器内的处理情况。</p>
+      <p>&nbsp;</p>
+      <p>1.直接为 HTMLIFrameElement.onload 属性为 IFRAME 标记赋值事件处理函数</p>
+      <p>分析以下代码：</p>
+<pre>
+&lt;body&gt;
+&lt;div id=&quot;msgA&quot;&gt;通过 HTMLIFrameElement.onload 属性动态加入事件处理函数的 IFRAME 没有触发 onload 事件。&lt;/div&gt;
+&lt;div id=&quot;msgB&quot;&gt;静态 IFRAME 没有触发 onload 事件。&lt;/div&gt;
+&lt;br /&gt;
+&lt;script&gt;
+
+function iframeLoadA(){
+  document.getElementById(&quot;msgA&quot;).innerHTML = &quot;通过 HTMLIFrameElement.onload 属性动态加入事件处理函数的 IFRAME 已经触发 onload 事件。&quot;;
+}
+function iframeLoadB(){
+  document.getElementById(&quot;msgB&quot;).innerHTML = &quot;静态 IFRAME 已经触发 onload 事件。&quot;;
+}
+
+window.onload = function (){
+  var iframeB = document.getElementById(&quot;ifarmeB&quot;);
+  var iframeA = document.createElement('iframe');
+  <span class="hl_4">iframeA.onload = iframeLoadA;</span>
+  document.body.appendChild(iframeA);
+}
+
+&lt;/script&gt;
+&lt;iframe id=&quot;ifarmeB&quot; onload=&quot;iframeLoadB()&quot;&gt;&lt;/iframe&gt;
+&lt;/body&gt;
+</pre>
+    <p>页面中存在两个 IFRAME 标记，ifrmaeA 标记为动态生成，并且动态为其 onload 属性赋值了加载完成后的处理函数。而 iframeB 标记则是在页面中静态存在的，其 onload 属性对应的事件处理函数已经被固定写入。</p>
+    <p>运行此代码，在各个浏览器中效果如下：</p>
+    <table class="compare">
+          <tr>
+            <th>&nbsp;</th>
+            <th>IE6 IE7 IE8</th>
+            <th>Firefox Chrome Safari Opera</th>
+          </tr>
+          <tr>
+            <th>HTMLIFrameElement.onload = Function </th>
+            <td class="hl_1"> 没有触发 onload 事件</td>
+            <td>触发 onload 事件</td>
+          </tr>
+          <tr>
+            <th>静态 onload 属性定义</th>
+            <td colspan="2">触发 onload 事件</td>
+          </tr>
+        </table>
+    <p>可见，在 IE 浏览器中通过 HTMLIFrameElement.onload 属性赋值方式无法响应 IFRAME 标记的 onload 事件。而其他浏览器均支持此写法。</p>
+    <p>&nbsp;</p>
+    <p>2.使用 HTMLIFrameElement.setAttribute 方法为 IFRAME 标记赋值事件处理函数</p>
+    <p>将以上代码稍作修改，将 HTMLIFrameElement.onload 赋值语句部分修改为 HTMLIFrameElement.setAttribute方法：</p>
+    <pre>
+window.onload = function (){
+  var iframeB = document.getElementById(&quot;ifarmeB&quot;);
+  var iframeA = document.createElement('iframe');
+  <span class="hl_4">iframeA.setAttribute(&quot;onload&quot;,&quot;iframeLoadA()&quot;);</span>
+  document.body.appendChild(iframeA);
+}
+</pre>
+        <p>此时 ifrmaeA 标记的 onload 属性以及事件处理函数被 DOM 标准方法 setAttribute 写入。</p>
+        <p>运行此代码，在各个浏览器中效果如下：</p>
+        <table class="compare">
+          <tr>
+            <th>&nbsp;</th>
+            <th>IE6 IE7 IE8(Q)</th>
+            <th>IE8(S) Firefox Chrome Safari Opera</th>
+          </tr>
+          <tr>
+            <th>HTMLIFrameElement.setAttribute</th>
+            <td class="hl_1"> 没有触发 onload 事件</td>
+            <td>触发 onload 事件</td>
+          </tr>
+          <tr>
+            <th>静态 onload 属性定义</th>
+            <td colspan="2">触发 onload 事件</td>
+          </tr>
+        </table>
+        <p>可见，在 IE 系列浏览器中仅有 IE8(S) 支持通过 setAttribute 方法为 IFRAME 标记写入 onload 属性以及其事件处理函数。而其他浏览器均支持此写法。</p>
+        <p>&nbsp;</p>
+        <p>3.使用事件监听方式为 IFRAME 的 onload 事件绑定处理函数</p>
+    <p>再将以上代码稍作修改，使用 DOM 规范中推荐的事件监听绑定方法为 IFRAME 动态加入 onload 事件处理函数：</p>
+<pre>
+function addEvent(eventName,element,fn){
+  if (element.attachEvent) element.attachEvent(&quot;on&quot;+eventName,fn);
+  else element.addEventListener(eventName,fn,false);
+}
+window.onload = function (){
+  var iframeB = document.getElementById(&quot;ifarmeB&quot;);
+  var iframeA = document.createElement('iframe');
+  <span class="hl_4">addEvent(&quot;load&quot;,iframeA,iframeLoadA);</span>
+  document.body.appendChild(iframeA);
+}
+</pre>
+
+        <p>代码中为了兼容 IE 私有的事件绑定方式，封装了名为 addEvent 的处理函数，他为 IE 和其他浏览器提供不同的事件绑定方法，以达到兼容效果。 </p>
+        <p>运行此代码，在各个浏览器中效果如下：</p>
+        <table class="compare">
+          <tr>
+            <th>&nbsp;</th>
+            <th>IE6 IE7 IE8(Q)</th>
+            <th>IE8(S) Firefox Chrome Safari Opera</th>
+          </tr>
+          <tr>
+            <th>onload 事件监听绑定</th>
+            <td colspan="2" rowspan="2">触发 onload 事件</td>
+          </tr>
+          <tr>
+            <th>静态 onload 属性定义</th>
+          </tr>
+        </table>
+        <p>此时所有浏览器中为 IFRAME 标记动态绑定的 onload 事件处理方法均生效。</p>
+        <p>&nbsp;</p>
+        <p>综合以上三种常见情况可以得出结论，除 IE 以外的浏览器均支持对以上三种动态定义 onload 事件处理函数的方法，而所有 IE 系列浏览器对 HTMLIFrameElement.onload 属性的赋值不被支持，他们可以通过 DOM 标准方法 setAttribute 来为 HTMLIFrameElement 类型元素设置 onload 属性，但是由于 IE8 以下版本对 setAttribute 方法支持有限，导致仅 IE8(S) 下生效。最终 IE 浏览器只能通过事件监听方式为 HTMLIFrameElement 类型元素绑定 onload 事件处理函数。</p>
+        <p>&nbsp;</p>
+        <h2 id="solutions">解决方案</h2>
+          <ol>
+      <li>统一为 window 对象的 onload 事件绑定函数，避免在 Firefox 中产生 document.body.onload 事件理解歧义。</li>
+      <li>统一使用 DOM 规范的事件监听方法（或 IE 专有事件绑定方法）为 IFRAME 标记绑定 onload 事件处理函数。</li>
+          </ol>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4 <br />
+                            Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/SD9022/window_onload_test1.html">window_onload_test1.html</a> <br />
+                          <a href="../../tests/SD9022/window_onload_test2.html">window_onload_test2.html</a> <br />
+                            <a href="../../tests/SD9022/iframe_onload_test1.html">iframe_onload_test1.html</a> <br />
+                            <a href="../../tests/SD9022/iframe_onload_test2.html">iframe_onload_test2.html</a> <br />
+                            <a href="../../tests/SD9022/iframe_onload_test3.html">window_onload_test3.html</a>
+                        </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-27</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>IFRAME URL src load 加载</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

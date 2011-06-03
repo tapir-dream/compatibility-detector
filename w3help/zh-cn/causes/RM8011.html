@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RM8011: Firefox 浏览器对 TABLE 中绝对定位元素包含块的判定有错误，某些情况下会导致绝对定位元素位置跟其他浏览器中有差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+            <h3>元素的包含块</h3>
+            <p>W3C CSS2.1 规范中规定，绝对定位元素的包含块(containing block)，由离它最近的 position 特性值是 &quot;absolute&quot;、&quot;fixed&quot;、&quot;relative&quot; 之一的祖先元素组成；如果这个祖先元素不存在，则包含块由根元素组成。</p>
+            <p><strong>绝对定位元素的定位</strong></p>
+            <p>绝对定位元素的定位，依赖于其包含块。也就是说，当绝对定位元素的 &quot;top&quot;、&quot;left&quot; 值被设置之后，绝对定位元素会根据这两个值，相对于包含块产生位移。</p>
+            <p><strong>根元素</strong></p>
+            <p>在文档树中，每一个节点都会有唯一的一个父节点，而根元素例外，它处于文档树的最顶端，没有父节点。</p>
+
+      <p>关于根元素的详细资料，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS2/conform.html#root">http://www.w3.org/TR/CSS2/conform.html#root</a> 中的内容。</p>
+      <p>关于包含块的详细资料，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS2/visudet.html#containing-block-details">10.1 Definition of &quot;containing block&quot;</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p> Firefox 浏览器对 TABLE 中绝对定位元素包含块的判定有错误，可能会导致绝对定位元素位置跟其他浏览器中有差异。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p><strong>1.  绝对定位元素的位置</strong></p>
+            <p>根据 W3C 标准，绝对定位元素的位置跟它的包含块有关。所以，当它处于一个非 static 定位的 TABLE 元素中时，Firefox 和其他浏览器对元素包含块判定不同，因此，对于相同的 top 和 left 值，Firefox 与其他浏览器中绝对元素的位置可能会不同。</p>
+            <p><strong>2.  绝对定位元素的宽度计算规则</strong></p>
+            <p>根据 W3C 标准，如果绝对定位元素的宽度没有设置或被设置为 &quot;auto&quot;，那么此元素的宽度计算应该采用 shrink-to-fit 的算法，在算法中，需要计算元素的 available width，而 available width 就是元素包含块的宽度，所以，Firefox 中，在这种情况下，会导致绝对定位元素宽度与其他浏览器中不同。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Firefox</th>
+          <td>对 TABLE 中绝对定位元素包含块的判定有错误。</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+            <p>在 Firefox 中，绝对定位元素的包含块的 'display' 特性是 'table' 且是绝对定位，则绝对定位元素对包含块判断的有错误。</p>
+      <p>分析以下代码：</p>
+<pre>&lt;div id=&quot;<strong>Container</strong>&quot; style=&quot;width:200px; height:200px; <span class="hl_1">position:absolute;</span> background-color:silver;&quot;&gt;Container
+    &lt;div id=&quot;<strong>A</strong>&quot; style=&quot;display:table; <span class="hl_2">position:absolute;</span> width:100px; height:100px; top:100px; left:100px;  background-color:green;&quot;&gt;TABLE
+        &lt;div id=&quot;<strong>AP</strong>&quot; style=&quot; <span class="hl_1">position:absolute;</span> width:50px; height:50px; top:50px; left:50px; background-color: gold;&quot;&gt;
+            TEXT
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</pre>
+      <ul>
+        <li><strong>Container</strong> 是 200px*200px 的绝对定位元素。</li>
+        <li><strong>A</strong> 是一个绝对定位的 DIV 元素( 'display:table' )，top 和 left 都是 100px。</li>
+        <li><strong>AP</strong> 是一个绝对定位的 DIV 元素，它的 top 和 left 都是 50px。</li>
+      </ul>
+      <p>根据 W3C 标准， <strong>A</strong> 应该相对于 <strong>Container</strong> 向下向右位移 100px，<strong>A</strong> 本身的尺寸是100px*100px，所以 <strong>A</strong> 应该位于 <strong>Container</strong> 的右下角；同理，<strong>AP</strong> 应该相对于 <strong>A</strong> 向下向右位50px，位于 <strong>A</strong> 的右下角。</p>
+
+            <p>这段代码在不同的浏览器环境中表现如下：</p>
+      <table class="compare">
+                <tr>
+                    <th>Firefox </th>
+                    <th>IE Opera Safari Chrome</th>
+                </tr>
+                <tr>
+                    <td><img src="../../tests/RM8011/RM8011-1.jpg" alt=""></td>
+                    <td><img src="../../tests/RM8011/RM8011-2.jpg" alt=""></td>
+                </tr>
+            </table>
+
+
+      <p>将 <strong>DIV</strong> 换成一个 TABLE 元素，或者，把 <strong>DIV</strong> 的 ’display' 属性设置成 'inline-table'， 效果相同。</p>
+            <p>可见，在 Firefox 中，<strong>AP</strong> 并没有依赖 <strong>A</strong> 来定位，而是依赖的 <strong>Container</strong>。因此，可以得知 <strong>AP</strong> 的包含块不是 <strong>A</strong>，而是 <strong>Container</strong>，Firefox 在这种情况下，并没有遵循标准，导致包含块判断错误。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>
+            这是 Firefox 的一个 bug，绝对定位元素无法根据 'display' 特性是 'table' 且是绝对定位的祖先元素定位。为达到相同的效果可以改变元素的  containing block 或者改变元素的定位方式。
+            </p>
+            <p>为达到相同的效果，可以采用如下方式替代：</p>
+            <ul>
+                <li>改变元素的 containing block：让绝对定位元素相对于 TABLE 元素的单元格定位，即，在 TD 上设置 'position:absolute' ；</li>
+                <li>改变元素的定位方式：把绝对定位元素的 'absolute' 改为 'relative' ，用相对定位。</li>
+            </ul>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.6<br />
+              Chrome 6.0.447.0 dev<br />
+              Safari 5.0
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RM8011/table_absolutly_positioned_element.html">table_absolutly_positioned_element.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-09</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>table position absolute containing block 包含块 绝对定位</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

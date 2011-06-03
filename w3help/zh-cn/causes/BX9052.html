@@ -1,0 +1,114 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX9052: IE Opera 支持使用 window.navigate 方法控制页面跳转</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+      <h2 id="description">问题描述</h2>
+      <p>使用脚本程序控制页面导航有很多种方法，其中通过执行 window.navigate(sURL) 方法控制页面跳转的方式，并非所有浏览器支持。</p>
+      <h2 id="influence">造成的影响</h2>
+      <p>非 IE Opera 中执行 window.navigate(sURL) 方法会导致脚本报错，可能影响其他程序执行；并且页面无法根据期望被导向目标地址。</p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE Opera</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>navigate 方法属于 window 对象， window 对象又隶属 BOM (Browser Object Model) 范畴。到现在为止 BOM 还没有被标准化，它由各个浏览器厂商制定，因此会有实现差异。</p>
+      <p>该方法最初是由 IE 浏览器提供，存在于 window 对象之中，参数为目标 URL 的字符串，可用于控制当前页面导航。</p>
+      <p>详细说明请参看 MSDN ：<a href="http://msdn.microsoft.com/en-us/library/ms536638(v=VS.85).aspx">navigate Method</a></p>
+      <p>时至今日，HTML5 规范草案中已经开始标准化 BOM，window 对象也在草案之中，可惜其中没有提到 navigate 方法。</p>
+      <p>可参考 HTML5 规范草案：<a href="http://www.w3.org/TR/html5/browsers.html#the-window-object">5.2 The Window object</a></p>
+      <p>我们构建如下代码来测试 navigate 方法在各浏览器中的支持程度：</p>
+<pre>
+&lt;button onclick="try{
+      window.navigate('http://www.google.com')
+    }catch(e){
+      alert('不支持此方法')
+    }"&gt;
+调用 window.navigate 方法跳转页面
+&lt;/button&gt;
+</pre>
+      <p>运行代码，得出各浏览器支持程度表：</p>
+      <table class="compare">
+        <tr>
+          <th>IE Opera</th>
+          <th>Firefox Chrome Safari</th>
+        </tr>
+        <tr>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_1">不支持</span></td>
+        </tr>
+      </table>
+      <p>可以明确看出，现阶段仅 IE Opera 支持 window.navigate 方法。</p>
+      <h2 id="solutions">解决方案</h2>
+      <p>应避免使用 navigate 方法进行页面跳转，可以使用所有浏览器都支持的 &quot;location.href = sURL&quot; 语句进行页面定位。</p>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td> IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 8.0.552.0 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.63</td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BX9052/navigate.html">navigate.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-13</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>IE Opera navigate URL jump</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

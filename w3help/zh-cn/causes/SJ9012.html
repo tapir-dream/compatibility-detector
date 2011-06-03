@@ -1,0 +1,175 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SJ9012: IE6 IE7 IE8(Q) 不支持 JSON 对象</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>JSON 是一种数据交换格式，RFC 4627 对 JSON 进行了详细描述。</p>
+      <p>根据 ECMA-262（ECMAScript）第 5 版中描述，JSON 是一个包含了函数 parse 和 stringify 的简单对象。
+      parse 函数用来解析一个 JSON 文本（一个 JSON 格式的字符串）到一个 ECMAScript 值（例如 JSON 对象被解析为 ECMAScript 对象，
+      JSON 数组被解析为 ECMAScript 数组，其它类型以此类推）；stringify 则相反，它是将一个 ECMAScript 值解析为一个 JSON 格式的字符串，
+      比如将一个 ECMAScript 对象解析为一个 JSON 对象的字符串。</p>
+
+      <p>关于 JSON 的详细信息，请参考 <a href="http://www.ietf.org/rfc/rfc4627.txt">RFC 4627</a> 和 <a href="http://json.org">http://json.org</a>。</p>
+      <p>关于 JSON 对象的更多信息，请参考 <a href="http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-262.pdf">ECMA-262 5th Edition</a> 中 15.12 The JSON Object。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE6 IE7 IE8(Q) 不支持 JSON 对象。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>使用了 JSON 对象的脚本代码在 IE6 IE7 IE8(Q) 中运行的时候可能会抛出异常，导致功能失效。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>JSON 对象是在 ECMAScript 第 5 版中实现的，此版于 2009 年 12 月发布；IE6 IE7 与 IE8(Q) (IE8(Q) 相当于 IE 5.5) 发布时间比较早，没有在其 Javascript 引擎中实现该对象。</p>
+      <p>分析以下代码：</p>
+<pre>
+&lt;script type="text/javascript"&gt;
+  window.onload = function(){
+    var info = document.getElementById("info");
+    if(window.JSON){
+      var jsonStr = '{"name": "w3help", "url": "www.w3help.org", "tech": ["js", "HTML", "CSS", 5, 4.01, 2.1],'
+          + '"online": true, "category": {"RCA": "Root Cause Artical", "KB":"Knowledge Base"},'
+          + '"version": 1}', p, w3help;
+
+      w3help = JSON.parse(jsonStr);
+      for(p in w3help)
+        info.innerHTML += p + " : " + w3help[p] + "&lt;br/&gt;";
+      info.innerHTML += JSON.stringify(w3help);
+    } else
+      info.innerHTML = "Not support JSON object.";
+  }
+&lt;/script&gt;
+&lt;div id="info" style="width:350px;"&gt;&lt;/div&gt;
+</pre>
+      <p>以上代码首先探测是否在 window 下存在 JSON 对象，然后简单测试了 JSON 对象的 parse 和 stringify 函数并输出（反）解析结果。执行代码，各浏览器中表现如下：</p>
+
+      <table class="compare">
+        <tr>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+          <th>IE6 IE7 IE8(Q)</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/SJ9012/others.png" alt="result in other browsers" /></td>
+          <td><img src="../../tests/SJ9012/ie67q.png" alt="result in IE6 IE7 and IE8(Q)" /></td>
+        </tr>
+      </table>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>可以使用 window.eval() 或 new Function(){} 的方式解析 JSON 格式字符串。如：</p>
+<pre>
+&lt;script type="text/javascript"&gt;
+  window.onload = function(){
+    var info = document.getElementById("info"),
+      jsonStr = '{"name": "w3help", "url": "www.w3help.org", "tech": ["js", "HTML", "CSS", 5, 4.01, 2.1],'
+          + '"online": true, "category": {"RCA": "Root Cause Artical", "KB":"Knowledge Base"},'
+          + '"version": 1}', p, w3help;
+
+    //使用两种简单的方式解析 JSON 格式字符串
+    json1 = eval("(" + jsonStr + ")"),
+    json2 = (new Function("return " + jsonStr))();
+
+    for(p in json1)
+      info.innerHTML += p + " : " + json1[p] + "&lt;br/&gt;";
+    info.innerHTML += "-----------------------&lt;br /&gt;";
+    for(p in json2)
+      info.innerHTML += p + " : " + json2[p] + "&lt;br/&gt;";
+  }
+&lt;/script&gt;
+&lt;div id="info" style="width:350px;"&gt;&lt;/div&gt;
+</pre>
+
+      <p>各浏览器中表现如下：</p>
+      <table class="compare">
+        <tbody>
+          <tr>
+            <th>所有浏览器</th>
+            <td><img src="../../tests/SJ9012/solution.png" alt="solution" /></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>可见，以上代码可以作为 JSON.parse() 跨浏览器的简单替换方案。同样 JSON.stringify() 可以通过判断类型加算法实现，这里不再赘述。</p>
+      <p>需要注意的是，这种解析 JSON 格式字符串的简单实现存在安全问题，被插入的恶意 JSON 字符串（比如获取用户的 cookie 信息）可能被解析并执行。
+      可以使用一些经过验证的安全成熟的的解决方案，例如 <a href="http://www.json.org/json2.js">json2.js</a> 中的 JSON.parse() 或 <a href="http://api.jquery.com/jQuery.parseJSON/">jQuery.parseJSON()</a>。</p>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="SJ9006">SJ9006: 在 IE6 IE7 IE8(Q) 中不能在 JSON 直接量的最后一个键值对后加 ','</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.544.0 dev<br />
+              Safari 5.0.2(7533.18.5)<br />
+              Opera 10.62
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+              <a href="../../tests/SJ9012/JSON.html">JSON.html</a><br />
+              <a href="../../tests/SJ9012/JSON_solution.html">JSON_solution.html</a>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-11</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>JSON parse stringify</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,46 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<style type="text/css">
+option, optgroup, select {
+	font-family:Arial;
+	font-size:12px;
+}
+optgroup{padding:0,margin:0;}
+</style>
+<script>
+window.onload=function(){
+  $("info").innerHTML="selecter1："+$("selecter1").offsetWidth+"px<br/>"
+					  +"selecter2："+$("selecter2").offsetWidth+"px<br/>"
+					  +"缩进值："+($("selecter2").offsetWidth-$("selecter1").offsetWidth)+"px;";
+}
+function $(id){return document.getElementById(id);}
+</script>
+</head>
+<body style="font-family:Arial, Helvetica, sans-serif;font-size:12px;">
+<select    id="selecter1">
+        <option>H2SO4</option>
+        <option>盐酸</option>
+        <option>硝酸</option>
+        <option>H2S</option>
+        <option>碳酸</option>
+        <option>硼酸</option>
+</select>
+<select    id="selecter2">
+    <optgroup  label="强酸">
+        <option>H2SO4</option>
+        <option>盐酸</option>
+        <option>硝酸</option>
+    </optgroup>
+    <optgroup  label="弱酸">
+        <option>H2S</option>
+        <option>碳酸</option>
+        <option>硼酸</option>
+    </optgroup>
+</select>
+<div id="info"></div>
+</body>
+</html>
+

@@ -1,0 +1,938 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RE2007: 各浏览器解决表格边框冲突的方式存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 CSS2.1 规范的描述，在重合的边框模型 (<a href="http://www.w3.org/TR/CSS21/tables.html#collapsing-borders">collapsing border model</a>) 中，每一个单元格的每一条边框都可能与各种元素 (单元格、行、行组、列、列祖、表格自身) 的边框相遇，这些边框的宽度 (border width)、式样 (border style)、颜色 (border color) 都可能不尽相同。一般来说<sup>1</sup>，会选择每条边上最 &quot;醒目&quot; 的边框样式，除非出现了任何一个 'hidden' 样式导致边框被无条件的取消。</p>
+      <p class="comment">【注】：官方文档上原文为“根据经验来说”，此处恐怕出现理解歧义，故将描述稍微修正。</p>
+      <p>下列规则说明了当出现边框冲突时应该优先选择哪一种边框样式：</p>
+      <ol>
+        <li>'border-style' 特性值为 'hidden' 的边框拥有最高的优先级，任何一个边框有这个值将抑制其所在位置的所有边框；</li>
+        <li>'border-style' 特性值为 'none' 的边框的优先级最低，只有当一条边上所有元素的边框特性都为 'none' 时，这个边框才会被省略 (值得注意的是，'none' 是 'border-style' 的缺省值)；</li>
+        <li>若一条边上没有 'border-style' 为 'hidden' 同时至少它们之中至少有一个不是 'none'，则较宽的边框具有更高的优先级，较窄的会被忽略。如果 'border-width' 特性制定的边框宽度相同，则遵循下面这个边框样式的优先级循序，从高到低分别为 'double'、'solid'、'dashed'、'dotted'、'ridge'、'outset'、'groove'、'inset'；</li>
+        <li>若边框仅在颜色上有区别，则单元格 (cell) 的优先级最高，之后依次是行 (row)、行组 (row group)、列 (column)、列组 (column group)，最后是表格。若此时两个元素仍然会出现相同类型的边框冲突，则更左 (若表格的 'direction' 特性值为 'ltr'，若为 'rtl' 则更右) 与更高的具有较高的优先级。</li>
+      </ol>
+      <p>关于 解决边框冲突 的更多信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/tables.html#border-conflict-resolution">17.6.2.1 Border conflict resolution</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE6 IE7 IE8(Q) 中 'border-style' 特性各值的优先级顺序与 CSS2.1 规范中的描述不符。IE6 IE7 IE8(Q) Opera 中更右更低的边具有较大的优先级，这点与 CSS2.1 中要求的更左与更高描述相反。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题会导致表格的边框样式出现差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>根据 CSS2.1 规范中 &quot;解决边框冲突&quot; 的规则，可以构造如下流程图：<br />
+      <img src="../../tests/RE2007/graph.png" alt="" /></p>
+      <p>下面针对图中的某几个关键点分析各浏览器在解决表格边框冲突时的差异。</p>
+      <br />
+      <h3>1. border-style:hidden 与不同值的 'border-width'</h3>
+      <p>分析以下代码：</p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  table { font:12px Consolas; }
+  strong { font-size:18px; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;table style=&quot;border-collapse:collapse;&quot;&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border:1px solid blue;&quot;&gt;1px blue&lt;/td&gt;
+    &lt;td style=&quot;border:2px solid teal;&quot;&gt;2px teal&lt;/td&gt;
+    &lt;td style=&quot;border:3px solid chocolate;&quot;&gt;3px chocolate&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border:4px solid red;&quot;&gt;4px red&lt;/td&gt;
+    &lt;td style=&quot;border:5px hidden orange;&quot;&gt;5px orange&lt;br /&gt;&lt;strong&gt;hidden&lt;/strong&gt;&lt;/td&gt;
+    &lt;td style=&quot;border:6px solid limegreen;&quot;&gt;6px limegreen&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border:7px solid wheat;&quot;&gt;7px wheat&lt;/td&gt;
+    &lt;td style=&quot;border:8px solid sienna;&quot;&gt;8px sienna&lt;/td&gt;
+    &lt;td style=&quot;border:9px solid hotpink;&quot;&gt;9px hotpink&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;br /&gt;
+&lt;table style=&quot;border-collapse:collapse;&quot;&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border:1px solid blue;&quot;&gt;1px blue&lt;/td&gt;
+    &lt;td style=&quot;border:2px solid teal;&quot;&gt;2px teal&lt;/td&gt;
+    &lt;td style=&quot;border:3px solid chocolate;&quot;&gt;3px chocolate&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border:4px solid red;&quot;&gt;4px red&lt;/td&gt;
+    &lt;td style=&quot;border:5px none orange;&quot;&gt;5px orange&lt;br /&gt;&lt;strong&gt;none&lt;/strong&gt;&lt;/td&gt;
+    &lt;td style=&quot;border:6px solid limegreen;&quot;&gt;6px limegreen&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border:7px solid wheat;&quot;&gt;7px wheat&lt;/td&gt;
+    &lt;td style=&quot;border:8px solid sienna;&quot;&gt;8px sienna&lt;/td&gt;
+    &lt;td style=&quot;border:9px solid hotpink;&quot;&gt;9px hotpink&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码中，有一个 3x3 的表格，由左至右、由上至下单元格的宽度依次递增，其中第五个单元格设定了 border-style:hidden。</p>
+      <p>这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RE2007/hidden_border-width_1.gif" alt="" /><sup>1</sup></td>
+          <td><img src="../../tests/RE2007/hidden_border-width_2.gif" alt="" /><sup>2</sup></td>
+        </tr>
+      </table>
+      <p class="comment">
+        注 1: 对表格边缘边框的细节渲染差异，本文中不在讨论，参见相关 &quot;相关问题&quot; 所指文章。<br />
+        注 2: 不同浏览器中单元格边框交界处的渲染风格可能会有区别，本文中忽略这种差异。
+      </p>
+      <p>根据 CSS2.1 规范，在解决边框冲突的规则上 border-style:hidden 拥有最高的优先级，而 <em>IE6 IE7 IE8(Q)</em> 中，设置了 border-style:hidden 的边的优先级低于其他的边框样式，此时的表现与 'border-style' 特性值为 'none' 时类似。</p>
+      <p>所有浏览器中均遵从 'border-style' 特性值不为 'hidden' 及 'none' 时，较宽的边框具有更高的优先级。</p>
+      <br />
+      <h3>2. 'border-style' 特性各值</h3>
+      <p>分析以下代码：</p>
+      <pre style="height:300px; overflow-y:scroll;">&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  * { font:10px Consolas; letter-spacing:-1px; }
+  h1 { font-size:12px; background:wheat; margin:0; }
+  table.bStyle { border-collapse:collapse; }
+  table.bStyle td { border-width:2px; }
+  .hl { background:tan; border-width:3px; border-color:tomato; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;h1&gt;border-style:hidden;&lt;/h1&gt;
+&lt;table class=&quot;bStyle&quot;&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot; class=&quot;hl&quot;&gt;double&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot; class=&quot;hl&quot;&gt;solid&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot; class=&quot;hl&quot;&gt;dashed&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot; class=&quot;hl&quot;&gt;dotted&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot; class=&quot;hl&quot;&gt;ridge&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot; class=&quot;hl&quot;&gt;outset&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot; class=&quot;hl&quot;&gt;groove&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot; class=&quot;hl&quot;&gt;inset&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot; class=&quot;hl&quot;&gt;none&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot;&gt;A&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;br /&gt;
+&lt;h1&gt;border-style:double;&lt;/h1&gt;
+&lt;table class=&quot;bStyle&quot;&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot; class=&quot;hl&quot;&gt;hidden&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot; class=&quot;hl&quot;&gt;solid&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot; class=&quot;hl&quot;&gt;dashed&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot; class=&quot;hl&quot;&gt;dotted&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot; class=&quot;hl&quot;&gt;ridge&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot; class=&quot;hl&quot;&gt;outset&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot; class=&quot;hl&quot;&gt;groove&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot; class=&quot;hl&quot;&gt;inset&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot; class=&quot;hl&quot;&gt;none&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot;&gt;A&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;br /&gt;
+&lt;h1&gt;border-style:solid;&lt;/h1&gt;
+&lt;table class=&quot;bStyle&quot;&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot; class=&quot;hl&quot;&gt;hidden&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot; class=&quot;hl&quot;&gt;double&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot; class=&quot;hl&quot;&gt;dashed&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot; class=&quot;hl&quot;&gt;dotted&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot; class=&quot;hl&quot;&gt;ridge&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot; class=&quot;hl&quot;&gt;outset&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot; class=&quot;hl&quot;&gt;groove&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot; class=&quot;hl&quot;&gt;inset&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot; class=&quot;hl&quot;&gt;none&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot;&gt;A&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;br /&gt;
+&lt;h1&gt;border-style:dashed;&lt;/h1&gt;
+&lt;table class=&quot;bStyle&quot;&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot; class=&quot;hl&quot;&gt;hidden&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot; class=&quot;hl&quot;&gt;double&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot; class=&quot;hl&quot;&gt;solid&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot; class=&quot;hl&quot;&gt;dotted&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot; class=&quot;hl&quot;&gt;ridge&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot; class=&quot;hl&quot;&gt;outset&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot; class=&quot;hl&quot;&gt;groove&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot; class=&quot;hl&quot;&gt;inset&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot; class=&quot;hl&quot;&gt;none&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot;&gt;A&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;br /&gt;
+&lt;h1&gt;border-style:dotted;&lt;/h1&gt;
+&lt;table class=&quot;bStyle&quot;&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot; class=&quot;hl&quot;&gt;hidden&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot; class=&quot;hl&quot;&gt;double&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot; class=&quot;hl&quot;&gt;solid&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot; class=&quot;hl&quot;&gt;dashed&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot; class=&quot;hl&quot;&gt;ridge&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot; class=&quot;hl&quot;&gt;outset&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot; class=&quot;hl&quot;&gt;groove&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot; class=&quot;hl&quot;&gt;inset&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot; class=&quot;hl&quot;&gt;none&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot;&gt;A&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;br /&gt;
+&lt;h1&gt;border-style:ridge;&lt;/h1&gt;
+&lt;table class=&quot;bStyle&quot;&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot; class=&quot;hl&quot;&gt;hidden&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot; class=&quot;hl&quot;&gt;double&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot; class=&quot;hl&quot;&gt;solid&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot; class=&quot;hl&quot;&gt;dashed&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot; class=&quot;hl&quot;&gt;dotted&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot; class=&quot;hl&quot;&gt;outset&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot; class=&quot;hl&quot;&gt;groove&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot; class=&quot;hl&quot;&gt;inset&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot; class=&quot;hl&quot;&gt;none&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot;&gt;A&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;br /&gt;
+&lt;h1&gt;border-style:outset;&lt;/h1&gt;
+&lt;table class=&quot;bStyle&quot;&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot; class=&quot;hl&quot;&gt;hidden&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot; class=&quot;hl&quot;&gt;double&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot; class=&quot;hl&quot;&gt;solid&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot; class=&quot;hl&quot;&gt;dashed&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot; class=&quot;hl&quot;&gt;dotted&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot; class=&quot;hl&quot;&gt;ridge&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot; class=&quot;hl&quot;&gt;groove&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot; class=&quot;hl&quot;&gt;inset&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot; class=&quot;hl&quot;&gt;none&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot;&gt;A&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;br /&gt;
+&lt;h1&gt;border-style:groove;&lt;/h1&gt;
+&lt;table class=&quot;bStyle&quot;&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot; class=&quot;hl&quot;&gt;hidden&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot; class=&quot;hl&quot;&gt;double&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot; class=&quot;hl&quot;&gt;solid&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot; class=&quot;hl&quot;&gt;dashed&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot; class=&quot;hl&quot;&gt;dotted&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot; class=&quot;hl&quot;&gt;ridge&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot; class=&quot;hl&quot;&gt;outset&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot; class=&quot;hl&quot;&gt;inset&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot; class=&quot;hl&quot;&gt;none&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot;&gt;A&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;br /&gt;
+&lt;h1&gt;border-style:inset;&lt;/h1&gt;
+&lt;table class=&quot;bStyle&quot;&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot; class=&quot;hl&quot;&gt;hidden&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot; class=&quot;hl&quot;&gt;double&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot; class=&quot;hl&quot;&gt;solid&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot; class=&quot;hl&quot;&gt;dashed&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot; class=&quot;hl&quot;&gt;dotted&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot; class=&quot;hl&quot;&gt;ridge&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot; class=&quot;hl&quot;&gt;outset&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot; class=&quot;hl&quot;&gt;groove&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot; class=&quot;hl&quot;&gt;none&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot;&gt;A&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+
+&lt;br /&gt;
+&lt;h1&gt;border-style:none;&lt;/h1&gt;
+&lt;table class=&quot;bStyle&quot;&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:hidden;&quot; class=&quot;hl&quot;&gt;hidden&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:double;&quot; class=&quot;hl&quot;&gt;double&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:solid;&quot; class=&quot;hl&quot;&gt;solid&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dashed;&quot; class=&quot;hl&quot;&gt;dashed&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:dotted;&quot; class=&quot;hl&quot;&gt;dotted&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:ridge;&quot; class=&quot;hl&quot;&gt;ridge&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:outset;&quot; class=&quot;hl&quot;&gt;outset&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:groove;&quot; class=&quot;hl&quot;&gt;groove&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:inset;&quot; class=&quot;hl&quot;&gt;inset&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+    &lt;td style=&quot;border-style:none;&quot;&gt;A&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码试图测试 'border-style' 特性所有取值的优先级顺序，每一个边框的宽度均相同，则根据 CSS2.1 规范应该遵照 'hidden'、'double'、'solid'、'dashed'、'dotted'、'ridge'、'outset'、'groove'、'inset'、'none' 的优先级顺序。</p>
+      <p>这段代码在不同浏览器中运行结果如下：(点击图片打开全图)</p>
+      <table class="compare" style="width:96%;">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Opera</th>
+          <th>Chrome Safari</th>
+        </tr>
+        <tr>
+          <td><a href="../../tests/RE2007/border-style_1.gif"><img src="../../tests/RE2007/border-style_1.gif" alt="" style="width:100%;" /></a></td>
+          <td><a href="../../tests/RE2007/border-style_2.gif"><img src="../../tests/RE2007/border-style_2.gif" alt="" style="width:100%;" /></a></td>
+          <td><a href="../../tests/RE2007/border-style_3.gif"><img src="../../tests/RE2007/border-style_3.gif" alt="" style="width:100%;" /></a></td>
+        </tr>
+      </table>
+      <p>可见，</p>
+      <ul>
+        <li>在 <em>IE8(S) Firefox Opera</em> 中，'border-style' 特性各值的优先级顺序与 CSS2.1 规范中的描述相同；</li>
+        <li>在 <em>Chrome Safari</em> 中，'border-style:ridge' 的优先级小于 'border-style:outset'，这一点与规范不符，其他的均与规范相符；</li>
+        <li>在 <em>IE6 IE7 IE8(Q)</em> 中，明显看到 'border-style' 特性各值的优先级顺序与 CSS2.1 规范中的描述不符，无法探知其规律。从现象看，只有 'border-style:none' 的渲染正常，而其他的取值没有体现出任何优先级。</li>
+      </ul>
+      <br />
+      <h3>3. 完全相同的冲突</h3>
+      <p>分析以下代码：</p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  * { font:16px Consolas; }
+  table { border-collapse:collapse; }
+  table td { border-width:10px; width:20px; height:20px; border-style:solid; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;table&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-color:blue;&quot;&gt;1&lt;/td&gt;
+    &lt;td style=&quot;border-color:teal;&quot;&gt;2&lt;/td&gt;
+    &lt;td style=&quot;border-color:chocolate;&quot;&gt;3&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-color:red;&quot;&gt;4&lt;/td&gt;
+    &lt;td style=&quot;border-color:orange;&quot;&gt;5&lt;/td&gt;
+    &lt;td style=&quot;border-color:limegreen;&quot;&gt;6&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;border-color:wheat;&quot;&gt;7&lt;/td&gt;
+    &lt;td style=&quot;border-color:sienna;&quot;&gt;8&lt;/td&gt;
+    &lt;td style=&quot;border-color:hotpink;&quot;&gt;9&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码中，边框的 'border-width'、'border-style' 特性以及边框所属元素类型均相同，唯一区别是颜色，根据 CSS2.1 规范，此时更左与更高的具有较高的优先级。</p>
+      <p>这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q) Opera</th>
+          <th>IE8(S)</th>
+          <th>Firefox</th>
+          <th>Chrome Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RE2007/left_top_1.gif" alt="" /></td>
+          <td><img src="../../tests/RE2007/left_top_2.gif" alt="" /></td>
+          <td><img src="../../tests/RE2007/left_top_3.gif" alt="" /></td>
+          <td><img src="../../tests/RE2007/left_top_4.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>没有设定 'direction' 特性，则默认为 'ltr'。忽略位于边框转角交界处的颜色差异，</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8(Q) Opera</em> 中，更右更低的边具有较大的优先级，这点与 CSS2.1 中要求的更左与更高相反；</li>
+        <li>在 <em>IE8(S) Firefox Chrome Safari</em> 中，可以看出更左与更高的边具有较高的优先级，这点符合规范的定义。</li>
+      </ul>
+      
+
+      <h2 id="solutions">解决方案</h2>
+      <p>在使用重合的边框模型时，尽量避免边框冲突的发生。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="RE8002">RE8002: 各浏览器对 table 级元素的 'width' 特性的作用位置存在差异</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.517.8 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RE2007/hidden_border-width.html">hidden_border-width.html</a><br />
+            <a href="../../tests/RE2007/border-style.html">border-style.html</a><br />
+            <a href="../../tests/RE2007/further_top_left.html">further_top_left.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-17</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>TABLE TD conflict 冲突 border collapsing 重合 边框</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

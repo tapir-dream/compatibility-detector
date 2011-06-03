@@ -1,0 +1,142 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HT1001: IE6 IE7 IE8(Q) 会忽略 OBJECT 和 IFRAME 标签之后的空白符</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>W3C规定“ASCII空格”、“ASCII制表符”、“ASCII换行符”等属于空白符（white space），对于多个连续的空白符，浏览器将对他们进行合并。而位于一个行内格式化环境中的换行符会被作为一个空格渲染。</p>
+      <p>关于 空白符 的详细信息，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html401/struct/text.html#h-9.1">9.1 White space</a> 中的内容。</p>
+      <p></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE6/7 及 IE8 混杂模式(Q) 会忽略同一行内 OBJECT、IFRAME 元素之后的空白符。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>这种现象可能导致 OBJECT、IFRAME 元素在其他非 IE 浏览器之间出现间隙。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+<pre>&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+    object, iframe, embed { width:40px; height:40px; border:1px solid black; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div&gt;
+&lt;embed src="clock.swf" type="application/x-shockwave-flash" quality="high"&gt;&lt;/embed&gt;
+&lt;iframe style="background:#888;" allowtransparency="true" frameborder="0" scrolling="no" src="sub.html"&gt;&lt;/iframe&gt;
+&lt;iframe style="background:#999;" allowtransparency="true" frameborder="0" scrolling="no" src="sub.html"&gt;&lt;/iframe&gt;
+&lt;object type="application/x-shockwave-flash" data="clock.swf"&gt;
+  &lt;param name="src" value="clock.swf" /&gt;
+  &lt;param name="quality" value="high" /&gt;
+&lt;/object&gt;
+&lt;object type="application/x-shockwave-flash" data="clock.swf"&gt;
+  &lt;param name="src" value="clock.swf" /&gt;
+  &lt;param name="quality" value="high" /&gt;
+&lt;/object&gt;
+&lt;iframe style="background:#AAA;" allowtransparency="true" frameborder="0" scrolling="no" src="sub.html"&gt;&lt;/iframe&gt;
+&lt;iframe style="background:#BBB;" allowtransparency="true" frameborder="0" scrolling="no" src="sub.html"&gt;&lt;/iframe&gt;
+&lt;embed src="clock.swf" type="application/x-shockwave-flash" quality="high"&gt;&lt;/embed&gt;
+&lt;embed src="clock.swf" type="application/x-shockwave-flash" quality="high"&gt;&lt;/embed&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码中，创建了若干个 OBJECT 元素、EMBED 元素及 IFRAME 元素，每个元素之间包含有空白符。</p>
+      <p>在各浏览器中的运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/HT1001/screenshot1.gif" alt="screen shot 1" /></td>
+          <td><img src="../../tests/HT1001/screenshot2.gif" alt="screen shot 2" /></td>
+        </tr>
+      </table>
+
+      <p>IFRAME 元素与 OBJECT 元素均为行内元素，且位于同一个容器的同一行中，则它们之间的空白符不应该被忽略，连续的空白符应该合并为一个空格空白符渲染。</p>
+      <p>而 <em>IE6、IE7 及 IE8(Q)</em> 中，浏览器完全忽略了 IFRAME 与 OBJECT 标签之后的空白符，违背了 W3C 规范。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>若不希望出现空格，可以将 IFRAME OBJECT 元素设置为块级元素。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.3<br />
+              Chrome 5.0.375.9 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HT1001/objectws.html">objectws.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-02</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>OBJECT IFRAME white-space 空白符 空格</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

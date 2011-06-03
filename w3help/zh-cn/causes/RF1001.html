@@ -1,0 +1,342 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RF1001: 各浏览器对 '@font-face' 规则支持的字体格式不同，IE 支持 EOT 字体，Firefox Safari Opera 支持 TrueType 等字体</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 CSS3 草案中的描述，'@font-face' 规则允许使用链接到需要时自动激活的字体。这使得用户可以使用在线的字体，而不仅仅拘泥于使用用户端系统内的字体。一套对字体的描述定义了字体资源的位置，可以是本地也可以是其他地方，以及自定义个性化字体风格。</p>
+      <p>规则定义格式：</p>
+            <pre>@font-face {
+    descriptor: value;
+    descriptor: value;
+    [...]
+    descriptor: value;
+}</pre>
+      <p>如：</p>
+            <pre>@font-face {
+    font-family: Gentium;
+    src: url(<em>http://site/fonts/Gentium.ttf</em>);
+}
+
+p { font-family: Gentium, serif; }</pre>
+      <br />
+            <p><strong>字体引用：src 描述</strong></p>
+            <p>
+              <dl>
+                    <dt>名称</dt>
+                    <dd><em><strong>src</strong></em></dd>
+                    <dt>值</dt>
+                    <dd>[ &lt;uri&gt; [format(&lt;string&gt; [, &lt;string&gt;]*)] | &lt;font-face-name&gt; ] [, &lt;uri&gt; [format(&lt;string&gt; [, &lt;string&gt;]*)] | &lt;font-face-name&gt; ]* </dd>
+                    <dt>初始值</dt>
+                    <dd>N/A</dd>
+                </dl>
+            </p>
+            <p>此描述指定了资源中包含的字体数据。无论字体是下载的或者是本地安装的，这个描述都是必需的，以逗号作为分隔的外部引用或本地安装的字体名称的列表中各值的优先级依次递减。当遇到不合理的数据则被当作未找到字体处理。<br />
+            外部引用包含一个 URI，后面有一个可选的 format 参数可以提示该资源 URI 所引用的字体格式，format 与 URI 之间通过逗号分隔。<br />如：<code>src: url(../fonts/LateefRegAAT.ttf) format("truetype-aat"), url(../fonts/LateefRegOT.ttf) format("opentype");</code><br />初步定义的格式字符串列表：</p>
+            <table class="compare">
+                <tr>
+                    <th>String</th>
+                    <th>Font Format</th>
+                    <th>Common extensions</th>
+                </tr>
+                <tr>
+                  <th>truetype</th>
+                    <td>TrueType</td>
+                    <td>.ttf</td>
+                </tr>
+                <tr>
+                  <th>opentype</th>
+                    <td>OpenType</td>
+                    <td>.ttf, .oft</td>
+                </tr>
+                <tr>
+                  <th>truetype-aat</th>
+                    <td>TrueType with Apple Advanced Typography extensions</td>
+                    <td>.ttf</td>
+                </tr>
+                <tr>
+                  <th>embedded-opentype</th>
+                    <td>Embedded OpenType</td>
+                    <td>.eot</td>
+                </tr>
+                <tr>
+                  <th>svg</th>
+                    <td>SVG Font</td>
+                    <td>.svg, .svgz</td>
+                </tr>
+            </table>
+      <p>关于 @font-face rule 的详细资料，请参考 CSS Fonts Module Level 3 草案 <a href="http://www.w3.org/TR/css3-fonts/#the-font-face-rule">4.1 The @font-face rule</a> 中的内容。</p>
+            <p>关于 src descriptor 的详细资料，请参考 CSS Fonts Module Level 3 草案 <a href="http://www.w3.org/TR/css3-fonts/#font-reference-the-src-descriptor">4.3 Font reference: the 'src' descriptor</a> 中的内容。</p>
+
+            <h2 id="description">问题描述</h2>
+
+            <p>各浏览器对 '@font-face' 规则支持的字体格式不同，IE 仅支持 Embedded OpenType，Firefox 支持 TrueType、OpenType 及 WOFF，Chrome、Safari、Opera 则支持 TrueType、OpenType、SVG Font。</p>
+
+            <h2 id="influence">造成的影响</h2>
+
+            <p>若在使用 '@font-face' 规则时仅仅考虑一种字体格式，则可能在某些浏览器中无法应用规则所引入的字体。</p>
+
+            <h2 id="impacted_browsers">受影响的浏览器</h2>
+            <table class="list">
+                <tr>
+                    <th>IE6</th>
+                    <td>仅支持 Embedded OpenType(.eot) 格式。</td>
+                </tr>
+                <tr>
+                    <th>IE7</th>
+                    <td>仅支持 Embedded OpenType(.eot) 格式。</td>
+                </tr>
+                <tr>
+                    <th>IE8</th>
+                    <td>仅支持 Embedded OpenType(.eot) 格式。</td>
+                </tr>
+                <tr>
+                    <th>Firefox 3.5</th>
+                    <td>支持 TrueType、OpenType(.ttf, .otf) 格式。</td>
+                </tr>
+                <tr>
+                    <th>Firefox 3.6</th>
+                    <td>支持 TrueType、OpenType(.ttf, .otf) 及 WOFF 格式。</td>
+                </tr>
+                <tr>
+                    <th>Chrome</th>
+                    <td>支持 TrueType、OpenType(.ttf, .otf) 及 SVG Font(.svg) 格式。</td>
+                </tr>
+                <tr>
+                    <th>Safari</th>
+                    <td>支持 TrueType、OpenType(.ttf, .otf) 及 SVG Font(.svg) 格式。</td>
+                </tr>
+                <tr>
+                    <th>Opera</th>
+                    <td>支持 TrueType、OpenType(.ttf, .otf) 及 SVG Font(.svg) 格式。</td>
+                </tr>
+            </table>
+            <h2 id="analysis_of_issues">问题分析</h2>
+
+            <p>'@font-face' 规则首先定义在 CSS2 规范中，但是在 CSS2.1 中被删除，目前又被纳入到 CSS3 推荐草案中。at-rule（@）包含一条或多条被称作 font descriptor （字体描述）的特性声明，与那些在常规的 CSS 规则中的类似。由于 '@font-face' 规则没有被纳入到目前应用最广泛的 CSS2.1 规范中，各浏览器虽然对此规则均支持，但支持的细节有所区别。</p>
+
+            <p>IE 从 4.0 开始支持 '@font-face' ，使用了 Embedded OpenType (EOT) 格式。借助微软官方提供的字体压缩工具 'Microsoft WEFT(Web Embedding Fonts Tool)' 可以将 OpenType TT(.ttf) 格式的字体压缩至较小的体积，压缩后的类型即 .eot 格式。.eot 格式的字体仅被 IE 所支持。而到目前正式发布的最新版本的 IE8 也仍然仅支持 .eot 格式的字体。</p>
+            <p>IE 同样不支持 '@font-face' 规则中 src 描述中使用 format 提示所引用字体文件的格式。这将导致 '@font-face' 规则认为 src 描述定义错误而失效。</p>
+            <p>在互联网上随机找到一个 TrueType 字体 'Cherl'，通过 '<a href="http://www.microsoft.com/typography/web/embedding/weft3/download.aspx">Microsoft WEFT</a>' 将 'Cherl' 字体文件转换为 .eot 格式。或者通过开源的转换工具 '<a href="http://code.google.com/p/ttf2eot/">ttf2eot</a>' 进行字体格式转换。</p>
+            <p>接下来就可以在 IE 中以类似 CSS3 草案中提到的格式定义 '@font-face' 规则。如：</p>
+            <pre>&lt;style&gt;
+    @font-face {
+        font-family: <strong>Cherl</strong>;
+        src: url(<em>cherl.eot</em>);
+    }
+&lt;/style&gt;</pre>
+      <p>这时就可以通过为声明设定 <code>font-family: <strong>Cherl</strong></code> 来应用自定义的字体。</p>
+            <p>更多资料参考：<br />
+              <ul>
+                  <li><a href="http://www.w3.org/Submission/EOT/">http://www.w3.org/Submission/EOT/</a></li>
+                    <li><a href="http://en.wikipedia.org/wiki/Embedded_OpenType">http://en.wikipedia.org/wiki/Embedded_OpenType</a></li>
+                    <li><a href="http://msdn.microsoft.com/en-us/library/ms530757(VS.85).aspx">http://msdn.microsoft.com/en-us/library/ms530757(VS.85).aspx</a></li>
+                </ul>
+            </p>
+
+            <p>从 <em>Firefox 3.5 Chrome 3.0 Safari 3.1 Opera 10</em> 开始，其他非 IE 的主流浏览器均提供了对 '@font-face' 规则的支持。相比 IE 中所支持的微软私有的 .eot 格式，这些浏览器则提供了对使用范围更广泛、更常见的 TrueType 与 OpenType 格式的支持。</p>
+            <p>'@font-face' 规则的定义格式与 IE 中类似，但是支持 CSS3 草案中所描述的 format 提示参数等。</p>
+            <pre>&lt;style&gt;
+    @font-face {
+        font-family: <strong>Cherl</strong>;
+        src: url(<em>cherl.ttf</em>);
+    }
+&lt;/style&gt;</pre>
+            <p>更多资料参考：</p>
+            <ul>
+              <li><a href="https://developer.mozilla.org/en/css/@font-face">https://developer.mozilla.org/en/css/@font-face</a></li>
+                <li><a href="http://developer.apple.com/safari/library/documentation/appleapplications/reference/SafariCSSRef/Articles/OtherStandardCSS3Features.html#//apple_ref/doc/uid/TP40007601-SW2">http://developer.apple.com/safari/library/documentation/appleapplications/reference/SafariCSSRef/Articles/OtherStandardCSS3Features.html#//apple_ref/doc/uid/TP40007601-SW2</a></li>
+                <li><a href="http://my.opera.com/ODIN/blog/font-face-web-fonts-resources">http://my.opera.com/ODIN/blog/font-face-web-fonts-resources</a></li>
+            </ul>
+
+            <p><strong>非 IE 浏览器对其他一些字体格式的支持</strong></p>
+            <p><em>Chrome Safari  Opera</em> 在 TrueType 与 OpenType 字体格式之外，还支持 SVG 字体。通过 SVG 中的 FONT 元素及其他相关元素可以在 SVG 文件中定义字体。如：</p>
+            <pre>&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  @font-face {
+    font-family: ubuntu;
+    src: url(UbuntuTitleBold.svg#UbuntuTitleBold) format("svg");
+  }
+  #webfont {
+    font: 24px/150% ubuntu;
+    width: 300px;
+  }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div id="webfont"&gt;The quick brown jumps over the lazy dog. 1234567890&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>SVG 字体范例：<a href="../../tests/RF1001/UbuntuTitleBold.svg">UbuntuTitleBold.svg</a></p>
+            <p>目前 IE 和 Firefox 尚不支持此格式，在 <em>Chrome Safari Opera</em> 中效果如下：<br />
+            <img src="../../tests/RF1001/fontface2.gif" alt="@font-face SVG font" /></p>
+            <p>SVG 字体转换：<a href="http://xmlgraphics.apache.org/batik/tools/font-converter.html">http://xmlgraphics.apache.org/batik/tools/font-converter.html</a></p>
+            <p>更多资料参考：</p>
+            <ul>
+              <li><a href="http://www.w3.org/TR/2010/WD-SVG11-20100622/fonts.html">http://www.w3.org/TR/2010/WD-SVG11-20100622/fonts.html</a></li>
+            </ul>
+
+            <p>此外，Firefox 3.6 开始，又增加了一种字体格式支持 —— WOFF（Web Open Font Format，开放式字体规范）。WOFF 由字体设计师 Erik van Blockland、Tal Leming 和 Mozilla 的 Jonathan Kew 主持设计，可以看作是 TrueType、OpenType 字体数据的简单重新封装，不过内建了压缩功能，因而体积更小、方便下载和传播。另外还支持元数据，所以厂商可以在他们的字体中加入相关识别信息。</p>
+            <p>WOFF 字体转换：<a href="http://people.mozilla.com/~jkew/woff/">http://people.mozilla.com/~jkew/woff/</a></p>
+            <p>更多资料参考：</p>
+            <ul>
+              <li><a href="https://developer.mozilla.org/en/About_WOFF">https://developer.mozilla.org/en/About_WOFF</a></li>
+                <li><a href="http://people.mozilla.com/~jkew/woff/woff-spec-latest.html">http://people.mozilla.com/~jkew/woff/woff-spec-latest.html</a></li>
+            </ul>
+
+            <p>多种字体格式转换：<a href="http://www.fontsquirrel.com/fontface/generator">http://www.fontsquirrel.com/fontface/generator</a></p>
+
+            <p>下面列表查看各浏览器对各种 Web 字体的支持情况：</p>
+            <table class="compare">
+                <tr>
+                  <th>&nbsp;</th>
+                    <th>IE6 IE7 IE8</th>
+                    <th>Firefox 3.5+</th>
+                    <th>Firefox 3.6+</th>
+                    <th>Chrome</th>
+                    <th>Safari</th>
+                    <th>Opera</th>
+                </tr>
+                <tr>
+                    <th>TrueType, OpenType</th>
+                    <td><span class="hl_1">不支持</span></td>
+                    <td><span class="hl_2">支持</span></td>
+                    <td><span class="hl_2">支持</span></td>
+                    <td><span class="hl_2">支持</span></td>
+                    <td><span class="hl_2">支持</span></td>
+                    <td><span class="hl_2">支持</span></td>
+                </tr>
+                <tr>
+                    <th>Embedded OpenType</th>
+                    <td><span class="hl_2">支持</span></td>
+                    <td><span class="hl_1">不支持</span></td>
+                    <td><span class="hl_1">不支持</span></td>
+                    <td><span class="hl_1">不支持</span></td>
+                    <td><span class="hl_1">不支持</span></td>
+                    <td><span class="hl_1">不支持</span></td>
+                </tr>
+                <tr>
+                    <th>SVG Font</th>
+                    <td><span class="hl_1">不支持</span></td>
+                    <td><span class="hl_1">不支持</span></td>
+                    <td><span class="hl_1">不支持</span></td>
+                    <td><span class="hl_2">支持</span></td>
+                    <td><span class="hl_2">支持</span></td>
+                    <td><span class="hl_2">支持</span></td>
+                </tr>
+                <tr>
+                    <th>WOFF</th>
+                    <td><span class="hl_1">不支持</span></td>
+                    <td><span class="hl_1">不支持</span></td>
+                    <td><span class="hl_2">支持</span></td>
+                    <td><span class="hl_1">不支持</span></td>
+                    <td><span class="hl_1">不支持</span></td>
+                    <td><span class="hl_1">不支持</span></td>
+                </tr>
+            </table>
+
+
+            <h2 id="solutions">解决方案</h2>
+
+            <p>由于各浏览器对 '@font-face' 规则字体格式支持存在差异，若仅通过定义一个 '@font-face' 规则，可以通过 CSS hack 的方式在 <em>IE、Firefox、Chrome、Safari、Opera</em> 中得到相同的字体效果。</p>
+            <p>参考代码如下：</p>
+            <pre>&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  @font-face {
+    font-family: Cherl;
+    src: url(cherl.ttf);
+    src: url(cherl.eot)\9;
+  }
+  #webfont {
+    font: 24px/150% Cherl;
+    width: 300px;
+  }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div id="webfont"&gt;The quick brown jumps over the lazy dog. 1234567890&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码在各浏览器中的效果均为：<br />
+            <img src="../../tests/RF1001/fontface.gif" alt="@font-face" /></p>
+            <br />
+            <p><img src="http://code.google.com/images/code_labs_logo.gif" alt="google labs" style="float:left; margin-right:10px;" />同时，Google 提供了一种创建在线字体（WebFont）的方式：<a href="http://code.google.com/intl/zh-CN/apis/webfonts/">http://code.google.com/intl/zh-CN/apis/webfonts/</a><br />
+            利用 Google 提供的 API，可以在任何页面中加入 WebFont，同时支持各种主流浏览器。</p>
+
+
+            <h2 id="see_also">参见</h2>
+
+            <h3>知识库</h3>
+            <ul class="see_also">
+                <li><a href="#">...</a></li>
+            </ul>
+
+            <h3>相关问题</h3>
+            <ul class="see_also">
+                <li><a href="#">...</a></li>
+            </ul>
+
+            <div class="appendix">
+                <h2>测试环境</h2>
+                <table class="list">
+                    <tr>
+                        <th>操作系统版本:</th>
+                        <td>Windows 7 Ultimate build 7600</td>
+                    </tr>
+                    <tr>
+                        <th>浏览器版本:</th>
+                        <td>
+                            IE6<br/>
+                            IE7<br/>
+                            IE8<br/>
+                            Firefox 3.6.6<br/>
+                            Chrome 6.0.477.0 dev<br/>
+                            Safari 5.0<br />
+                            Opera 10.10
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>测试页面:</th>
+                        <td><a href="../../tests/RF1001/fontface.html">fontface.html</a><br /><a href="../../tests/RF1001/svgfont.html">svgfont.html</a></td>
+                    </tr>
+                    <tr>
+                        <th>本文更新时间:</th>
+                        <td>2010-07-08</td>
+                    </tr>
+                </table>
+
+                <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>font-face CSS 字体 自定义 font SVG TrueType OpenType WOFF EOT</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

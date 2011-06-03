@@ -1,0 +1,132 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HF1008: Firefox Opera 中 BUTTON 元素的子元素可以溢出按钮渲染</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>在 HTML 4.01 中，BUTTON 元素使浏览器渲染出一个与 &quot;type=button/submit/reset&quot; 的 INPUT 元素类似的按钮控件。但不同的是，BUTTON 元素可以包含内容，我们可以在按钮上添加更丰富的信息，如图片等。</p>
+      <p>同时这也引出了一个问题，对于 BUTTON 元素的子元素的尺寸溢出 BUTTON 本身时该如何处理。这一点，W3C 规范并没有很明确的说明，所以各浏览器产生了不同的渲染效果。</p>
+      <p>关于 BUTTON 元素的详细信息，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html4/interact/forms.html#h-17.5">17.5</a> 中的内容。</p>
+      <p></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>由于 BUTTON 标记内部可以嵌套其他 HTML 标记，相关规范中没有对其子元素内容溢出 BUTTON 时的情况做明确说明。这导致在 Firefox  Opera 中，若 BUTTON 元素的子元素溢出 BUTTON 容器本身时，子元素溢出部分可以在按钮外被渲染。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>在使用 BUTTON 元素做按钮时，若对其以及其内子元素的宽高尺寸设置不当，迫使其子元素尺寸超过 BUTTON 本身时，在各浏览器中的渲染效果会有差异。</p>
+      <p>而且若 BUTTON 元素的容器设置有 &quot;overflow:auto&quot;，则在 Firefox 及 Opera 中可能出现多余的滚动条。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Firefox Opera</th>
+          <td></td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+
+      <p>分析以下代码：</p>
+<pre>&lt;div style=&quot;width:65px; height:65px; background:#DDD;&quot;&gt;
+    &lt;button style=&quot;width:60px; height:60px; background:#AAA; padding:0;&quot;&gt;
+        &lt;div style=&quot;width:70px; height:70px; border:5px solid;&quot;&gt;&lt;/div&gt;
+    &lt;/button&gt;
+&lt;/div&gt;</pre>
+      <p>上面代码中按钮的尺寸为 60x60，其内部包含了一个 70x70 的 DIV 元素。</p>
+      <p>这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6　IE7 IE8  Chrome Safari</th>
+          <th>Firefox Opera(S)<sup>1</sup></th>
+          <th>Opera(Q)<sup>1</sup></th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/HF1008/IE_button_overflow.gif" alt="运行效果截图" /></td>
+          <td><img src="../../tests/HF1008/FF_button_overflow.gif" alt="运行效果截图" /></td>
+          <td><img src="../../tests/HF1008/OPQ_button_overflow.gif" alt="运行效果截图" /></td>
+        </tr>
+      </table>
+      <p>可见：</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8 Chrome Safari</em> 中，BUTTON 元素拥有了类似 &quot;overflow:hidden&quot; 的特性，溢出其的元素被剪裁；</li>
+        <li>在 <em>Firefox Opera(S)</em> 中，BUTTON 元素内溢出其的元素被完整渲染；</li>
+        <li>在 <em>Opera(Q)</em> 中，在垂直方向 BUTTON 元素被其溢出的子元素撑大，而水平方向则溢出。</li>
+      </ul>
+      <p class="comment">
+      【注】<br />
+      1. Firefox 中 BUTTON 元素的点击事件仍只能在其尺寸之内响应；在 Opera 中点击其子元素溢出区域也可以响应 BUTTON 的点击事件。
+      </p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>合理的设置 BUTTON 及其子元素的宽度及高度，避免出现子元素溢出 BUTTON 的情况。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.3<br />
+              Chrome 5.0.396.0 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.53
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HF1008/button_overflow.html">button_overflow.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-06-22</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>BUTTON overflow 按钮 溢出</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

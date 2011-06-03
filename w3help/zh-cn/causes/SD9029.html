@@ -1,0 +1,310 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SD9029: 各浏览器下在向文档树中插入通过 cloneNode(true) 创建的节点时，其内的 SCRIPT 元素中的脚本执行有差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>在 DOM-Level-2-Core 中定义复制节点的方法是 cloneNode ，该方法会复制当前节点，cloneNode 方法有一个布尔型参数，当参数为 false 时，仅复制当前节点以及属性，当参数为 true 时，将递归复制当前节点的所有子节点 (在本文中简称：<strong>深度复制</strong>)。概念请参见 DOM-Level-2-Core 规范：<a href="http://www.w3.org/TR/DOM-Level-2-Core/core.html#i-Document">1.2. Fundamental Interfaces Document</a>。</p>
+      
+      <h2 id="description">问题描述</h2>
+      <p>各浏览器下在向文档树中插入通过 cloneNode(true) 创建的节点时，其内的 SCRIPT 元素中的脚本在 Chrome 和 Safari 中会执行，在 IE Firefox Opera 中没有执行。</p>
+      <p class="comment">注：本文中所提脚本，若没有特别指明则该脚本不包括 document.write 或 document.writeln。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>该问题导致代码功能在部分浏览器中失效。若脚本中包含 document.write 或者 document.writeln，则在 Chrome Safari 中可能使原页面内容被清除。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+      <pre>&lt;!DOCTYPE HTML&gt;
+&lt;HTML&gt;
+&lt;HEAD&gt;
+&lt;/HEAD&gt;
+&lt;BODY&gt;
+&lt;div id="C" style="width:200px;height:40px;background: pink;"&gt;&lt;/div&gt;
+&lt;div id="A" style="width:200px;height:100px;background: gold;"&gt;
+&lt;/div&gt;
+&lt;div id="B" style="width:120px;height:40px;background: silver;"&gt;
+  &lt;script language="JavaScript"&gt;
+    <span class="hl_1">document.getElementById("C").innerHTML+="content ";</span>
+  &lt;/script&gt;
+&lt;/div&gt;
+&lt;button onclick="copy()"&gt;copy&lt;/button&gt;
+&lt;/BODY&gt;
+&lt;/HTML&gt;
+&lt;script language="JavaScript"&gt;
+function copy(){
+  var A=document.getElementById('A');
+  A.appendChild(document.getElementById('B').cloneNode(true));
+}
+&lt;/script&gt;</pre>
+
+      <p>上述代码中，深度复制 id='B' 的 DIV ，并把深度复制后的节点使用 appendChild 方法插入到文档树中，添加到  id='A' 的 DIV 中, id='B' 的 DIV 中包括一段脚本，该脚本给 id='C' 的 DIV 中增加内容。</p>
+      <p>点击 copy 按钮时，以上代码在不同浏览器中表现如下：</p>
+
+      <table class="compare">
+        <tr>
+          <th>IE Firefox Opera</th>
+          <th>Chrome Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/SD9029/iefirefoxopera.png" alt="" /></td>
+          <td><img src="../../tests/SD9029/chromesafari.png" alt="" /></td>
+        </tr>
+      </table>
+      <p>可见，</p>
+      <ul>
+      <li><em>IE Firefox Opera</em> 没有执行被深度复制节点中的脚本。</li>
+      <li><em>Chrome Safari</em> 执行了被深度复制节点中的脚本。</li>
+      </ul>
+
+      <p>被深度复制的节点本身就是脚本，且该脚本由外部文件引入，那么在各浏览器又会是如何表现？</p>
+      <p>分析以下代码：</p>
+      <pre>&lt;!DOCTYPE HTML&gt;
+&lt;HTML&gt;
+&lt;HEAD&gt;
+&lt;/HEAD&gt;
+&lt;BODY&gt;
+&lt;div id="A" style="width:200px;height:200px;background: gold;"&gt;
+&lt;/div&gt;
+&lt;script id="B" language="JavaScript" src="test.js"&gt;
+&lt;/script&gt;
+&lt;button onclick="copy()"&gt;copy&lt;/button&gt;
+&lt;/BODY&gt;
+&lt;/HTML&gt;
+&lt;script language="JavaScript"&gt;
+function copy(){
+  var A=document.getElementById('A');
+  A.appendChild(document.getElementById('B').cloneNode(true));
+}
+&lt;/script&gt;
+      </pre>
+      <p>test.js 文件中仅有一行代码，即：alert(1);</p>
+      <p>点击 copy 按钮时，以上代码在不同浏览器中表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE Chrome Safari</th>
+          <th>Firefox Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/SD9029/iechromesafari.png" alt="" /></td>
+          <td><img src="../../tests/SD9029/firefoxopera.png" alt="" /></td>
+        </tr>
+      </table>
+      <p>可见，每次深度复制节点，如果脚本以外引方式引入时， </p>
+      <ul>
+      <li><em>IE Chrome Safari</em> 会执行外引脚本代码。</li>
+      <li><em>Firefox Opera</em> 不会执行外引脚本代码。</li>
+      </ul>
+
+      <p>当被深度复制节点中使用 SCRIPT 元素引入的脚本中包含 document.write 或 document.writeln 时， 那么在各浏览器又会是如何表现？分析以下代码：</p>
+      <pre>&lt;!DOCTYPE HTML&gt;
+&lt;HTML&gt;
+&lt;HEAD&gt;
+&lt;/HEAD&gt;
+&lt;BODY&gt;
+&lt;div id="A" style="width:200px;height:100px;background: gold;"&gt;
+&lt;/div&gt;
+&lt;div id="B" style="width:120px;height:40px;background: silver;"&gt;
+  &lt;script language="JavaScript"&gt;
+    <span class="hl_1">document.write("content");</span>
+  &lt;/script&gt;
+&lt;/div&gt;
+&lt;button onclick="copy()"&gt;copy&lt;/button&gt;
+&lt;/BODY&gt;
+&lt;/HTML&gt;
+&lt;script language="JavaScript"&gt;
+function copy(){
+  var A=document.getElementById('A');
+  A.appendChild(document.getElementById('B').cloneNode(true));
+}
+&lt;/script&gt;
+      </pre>
+      <p>点击 copy 按钮时，Chrome 和 Safari 的表现会明显的和其他浏览器不一样：</p>
+
+      <table class="compare">
+        <tr>
+          <th>IE Firefox Opera</th>
+          <th>Chrome</th>
+          <th>Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/SD9029/writeiefirefoxopera.png" alt="" /></td>
+          <td><img src="../../tests/SD9029/writechrome.png" alt="" /></td>
+          <td><img src="../../tests/SD9029/writesafari.png" alt="" /></td>
+        </tr>
+      </table>
+      <p>根据现象可见：</p>
+      <ul>
+        <li>Safari 中页面原内容消失。</li>
+        <li>Chrome 中页面原内容消失，同时把 document.write 或 document.writeln 中的内容输出到页面。</li>
+        <li>IE Firefox Opera 中把深度复制后的节点加入到文档树中。<sup>1</sup></li>
+      </ul>
+      <p class="comment">注 1：首次加载页面时， id='B' 的 DIV 中 SCRIPT 会执行，B 中包括 document.write 的内容，所以每次复制时，页面会有 content。</p>
+
+      <p>关于此问题的汇总表如下：(<span class="hl_2">yes</span> 表示脚本正常执行，<span class="hl_1">no</span> 表示脚本未执行，<span class="hl_4">error</span> 表示脚本抛出异常)</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE</th>
+          <th>Firefox</th>
+          <th>Opera</th>
+          <th>Chrome</th>
+          <th>Safari</th>
+        </tr>
+        <tr>
+          <td>被深度复制节点内包含 SCRIPT 元素中的脚本</td>
+          <td><span class="hl_1">no</span></td>
+          <td><span class="hl_1">no</span></td>
+          <td><span class="hl_1">no</span></td>
+          <td><span class="hl_2">yes</span></td>
+          <td><span class="hl_2">yes</span></td>
+        </tr>
+        <tr>
+          <td>被深度复制节点内包含外部引入脚本</td>
+          <td><span class="hl_1">no</span></td>
+          <td><span class="hl_1">no</span></td>
+          <td><span class="hl_1">no</span></td>
+          <td><span class="hl_2">yes</span></td>
+          <td><span class="hl_2">yes</span></td>
+        </tr>
+        <tr>
+          <td>被深度复制节点内包含 SCRIPT 元素中的脚本中有 document.write 或 document.writeln</td>
+          <td><span class="hl_1">no</span></td>
+          <td><span class="hl_1">no</span></td>
+          <td><span class="hl_1">no</span></td>
+          <td><span class="hl_2">yes</span></td>
+          <td><span class="hl_4">error</span></td>
+        </tr>
+        <tr>
+          <td>被深度复制节点内包含外部引入脚本中有 document.write 或 document.writeln</td>
+          <td><span class="hl_1">no</span></td>
+          <td><span class="hl_1">no</span></td>
+          <td><span class="hl_1">no</span></td>
+          <td><span class="hl_2">yes</span></td>
+          <td><span class="hl_4">error</span></td>
+        </tr>
+        <tr>
+          <td>被深度复制的节点本身就是脚本</td>
+          <td><span class="hl_1">no</span></td>
+          <td><span class="hl_1">no</span></td>
+          <td><span class="hl_1">no</span></td>
+          <td><span class="hl_2">yes</span></td>
+          <td><span class="hl_2">yes</span></td>
+        </tr>
+        <tr>
+          <td>被深度复制的节点本身就是脚本，且该脚本由外部文件引入</td>
+          <td><span class="hl_2">yes</span></td>
+          <td><span class="hl_1">no</span></td>
+          <td><span class="hl_1">no</span></td>
+          <td><span class="hl_2">yes</span></td>
+          <td><span class="hl_2">yes</span></td>
+        </tr>
+        <tr>
+          <td>被深度复制的节点本身就是脚本，脚本中有 document.write 或 document.writeln</td>
+          <td><span class="hl_1">no</span></td>
+          <td><span class="hl_1">no</span></td>
+          <td><span class="hl_1">no</span></td>
+          <td><span class="hl_2">yes</span></td>
+          <td><span class="hl_4">error</span></td>
+        </tr>
+        <tr>
+          <td>被深度复制的节点本身就是脚本，且该脚本由外部文件引入，外部脚本中有 document.write 或 document.writeln</td>
+          <td><span class="hl_1">no</span></td>
+          <td><span class="hl_1">no</span></td>
+          <td><span class="hl_1">no</span></td>
+          <td><span class="hl_2">yes</span></td>
+          <td><span class="hl_4">error</span></td>
+        </tr>
+      </table>
+      <p>根据上表可做如下总结：</p>
+      <ul>
+        <li>在向文档树中插入通过 cloneNode(true) 创建的节点，其内的 SCRIPT 元素中的脚本在 Chrome 和 Safari中会执行，在 IE Firefox Opera中没有执行；</li>
+        <li>在向文档树中插入通过 cloneNode(true) 创建的节点，其内的该脚本由外部文件引入时，Chrome、Safari、IE 会执行，Firefox Opera中没有执行；</li>
+        <li>在向文档树中插入通过 cloneNode(true) 创建的节点，其内的该脚本包括 document.write 或 document.writeln 时，在 IE Firefox Opera中没有执行，Chrome 和 Safari 均有异常表现。</li>
+      </ul>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>避免深度复制 &quot;cloneNode(true)&quot; 包含 SCRIPT 元素的节点。</p>
+      
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.517.8 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/SD9029/cloneNode.html">cloneNode.html</a><br />
+                          <a href="../../tests/SD9029/writecloneNode.html">writecloneNode.html</a><br />
+                          <a href="../../tests/SD9029/cloneNodescript.html">cloneNodescript.html</a>
+                        </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-17</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>cloneNode true SCRIPT 复制节点 克隆</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

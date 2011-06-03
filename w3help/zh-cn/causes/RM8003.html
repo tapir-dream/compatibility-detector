@@ -1,0 +1,274 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RM8003: 各浏览器中浮动元素与相邻的 Block Formatting Context 之间的关系有差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 W3C CSS2.1 关于浮动的叙述中对 float 与 block formatting context<sup>1</sup><sup>2</sup> 之间的关系的描述：<br />
+      表格的 border-box、块级的替换元素、或是在普通流中创建了新的 block formatting context（如元素的 'overflow' 特性不为 'visible' 时）的元素不可以与位于相同的 block formatting context 中的浮动元素相重叠。如果有必要，布局实现中应清除上述元素而将其放置在之前的所有浮动元素之下的一行，但也可能在有足够剩余空间的情况下与浮动元素相邻。它们甚至可能会使上述元素的 border-box 比根据普通流中的非替换块级元素宽度算法计算而来的更窄。CSS2 并没有定义用户端何时将上述元素紧邻浮动元素放置或是变窄。</p>
+      <p>此外，CSS 规范在其他章节中说明了何种情况下会创建新的 block formatting context ：</p>
+      <ul>
+        <li>浮动元素（float: left | right）；</li>
+        <li>绝对定位元素（position: absolute | fixed）；</li>
+        <li>行内块元素（display: inline-block）；</li>
+        <li>表格的单元格（display: table-cells，TD、TH）；</li>
+        <li>表格的标题（display: table-captions，CAPTION）；</li>
+        <li>'overflow' 特性不为 visible 的元素（除非该值已经传播到视口）；</li>
+        <li>表格元素创建的 "匿名框&quot; 。</li>
+      </ul>
+      <p>CSS 规范中仅提到了 block formatting context 与浮动元素之间 "不可重叠&quot; ，并没有详细描述如何处理它们之间的布局关系。</p>
+      <p>关于 block formatting context 及其相关的详细信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/visuren.html#block-formatting">9.4.1 Block formatting contexts</a>、<a href="http://www.w3.org/TR/CSS21/tables.html#model">17.4 Tables in the visual formatting model</a>、<a href="http://www.w3.org/TR/CSS21/visuren.html#floats">9.5 Floats</a> 中的内容。</p>
+      <p class="comment">
+        注1. 由于 <em>IE6 IE7 IE8(Q)</em> 中没有 block formatting context 的概念，取而代之的是 hasLayout 特性。关于 hasLayout 与 block formatting context 之间的关系参见： "不能在 IE6 IE7 IE8(Q) 中触发 hasLayout 并在其他浏览器中创建 block formatting context 的元素的表现在某些情况下会有差异&quot; 。<br />
+        注2. <strong>为方便描述，以下段落将 <em>block formatting context</em> 以 <span class="hl_4">BFC</span> 代替。</strong>
+      </p>
+
+
+      <h2 id="description">问题描述</h2>
+      <ol>
+        <li>当容器有足够的剩余空间容纳 <span class="hl_4">BFC</span> 的宽度时，所有浏览器都会将 <span class="hl_4">BFC</span> 放置在浮动元素所在行的剩余空间内。</li>
+        <li>在 <em>IE6 IE7 IE8 Chrome Opera</em> 中，当 <span class="hl_4">BFC</span> 的宽度介于 "容器剩余宽度&quot; 与 "容器宽度&quot; 之间时，<span class="hl_4">BFC</span> 会显示在浮动元素的下一行；在 <em>Safari</em> 中，<span class="hl_4">BFC</span> 则仍然保持显示在浮动元素所在行，并且 <span class="hl_4">BFC</span> 溢出容器；在 <em>Firefox</em> 中，当容器本身也创建了 <span class="hl_4">BFC</span> 或者容器的 'padding-top'、'border-top-width' 这些特性不都为 0 时表现与 IE8(S)、Chrome 类似，否则表现与 Safari 类似。</li>
+        <li>在 <em>IE6 IE7 IE8 Opera</em> 中，当 <span class="hl_4">BFC</span> 的宽度大于 "容器宽度&quot; 时，<span class="hl_4">BFC</span> 会显示在浮动元素的下一行；在 <em>Chrome Safari</em> 中，<span class="hl_4">BFC</span> 则仍然保持显示在浮动元素所在行，并且 <span class="hl_4">BFC</span> 溢出容器；在 <em>Firefox</em> 中，当容器本身也创建了 <span class="hl_4">BFC</span> 或者容器的 'padding- top'、'border-top-width' 这些特性不都为 0 时表现与 IE8(S) 类似，否则表现与 Chrome 类似。</li>
+      </ol>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>若容器的宽度、浮动元素的宽度、<span class="hl_4">BFC</span> 的宽度的值设置不当，导致 <span class="hl_4">BFC</span> 的宽度大于 "容器的剩余空间宽度&quot; 时，在各浏览器之间可能会触发兼容性问题，最终造成布局上的极大的差异，如内容丢失、错位等。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+                <tr>
+                    <th>所有浏览器</th>
+                    <td>&nbsp;</td>
+                </tr>
+            </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>由于可以创建 <span class="hl_4">BFC</span> 的条件很多，这里以最常见的利用 'overflow:hidden' 创建 <span class="hl_4">BFC</span> 为例，在 IE6 IE7 IE8(Q) 中则靠为元素设置宽度触发其 hasLayout 特性。</p>
+
+      <h3>容器的剩余宽度大于 BFC 的宽度</h3>
+      <p>分析以下代码：<em>bfc_lesser.html</em></p>
+      <pre>&lt;style&gt;
+    * { font:12px Arial; }
+    .container { background:silver; width:150px; height:30px; }
+    .float { background:darkgray; float:left; width:80px; }
+    .bfc { background:dimgray; overflow:hidden; color:white; }
+&lt;/style&gt;
+&lt;div class="container"&gt;
+    &lt;div class="float"&gt;FLOAT(80)&lt;/div&gt;
+    &lt;div class="bfc" style="width:60px;"&gt;BFC(60)&lt;/div&gt;
+&lt;/div&gt;</pre>
+      <p>测试代码中容器 【container】 的宽度为 150px，内部包含一个左浮动宽度为 80px 的元素 【float】，及一个设置了 overflow:hidden 的宽度60px的元素 【bfc】 ，则 【bfc】 由于 'overflow' 特性不为 visible 而创建了新的 <span class="hl_4">BFC</span>。</p>
+      <p>各浏览器中效果如下：</p>
+      <table class="compare">
+                <tr>
+                    <th>所有浏览器</th>
+                </tr>
+                <tr>
+                    <td><img src="../../tests/RM8003/bfc_lesser.gif" alt="所有浏览器" /><sup>1</sup></td>
+                </tr>
+            </table>
+            <p>可见，当容器的剩余宽度足够容纳 <span class="hl_4">BFC</span> 的宽度时，各浏览器的处理相同，<span class="hl_4">BFC</span> 被放置到了浮动元素所在行的剩余空间内。</p>
+      <p class="comment">
+        注1. IE6 IE7(Q) IE8(Q) 出现的 "3px Bug&quot; 不是本文讨论的重点，由于这个 Bug 触发的差异在本文中将被忽略。
+      </p>
+      <br />
+
+      <h3>容器的剩余宽度小于 BFC 的宽度，BFC 的宽度小于容器的宽度</h3>
+      <p>分析以下代码：<em>bfc_median.html</em></p>
+      <pre>&lt;style&gt;
+    * { font:12px Arial; }
+    .container { background:silver; width:150px; height:30px; }
+    .float { background:darkgray; float:left; width:80px; }
+    .bfc { background:dimgray; overflow:hidden; color:white; }
+&lt;/style&gt;
+&lt;div class="container"&gt;
+    &lt;div class="float"&gt;FLOAT(80)&lt;/div&gt;
+    &lt;div class="bfc" style="width:90px;"&gt;BFC(90)&lt;/div&gt;
+&lt;/div&gt;</pre>
+      <p>测试代码中容器 【container】 的宽度为 150px，内部包含一个左浮动宽度为 80px 的元素 【float】，及一个设置了 overflow:hidden 的宽度 90px 的元素 【bfc】，则 【bfc】 由于 'overflow' 特性不为 visible 而创建了新的 <span class="hl_4">BFC</span>。</p>
+      <p>各浏览器中效果如下：</p>
+      <table class="compare">
+                <tr>
+                    <th>IE6 IE7 IE8 Chrome Safari Opera</th>
+                    <th>Firefox</th>
+                </tr>
+                <tr>
+                    <td><img src="../../tests/RM8003/bfc_median_1.gif" alt="IE6 IE7 IE8 Chrome Safari Opera" /></td>
+                    <td><img src="../../tests/RM8003/bfc_median_2.gif" alt="Firefox" /></td>
+                </tr>
+            </table>
+      <p>可见，当容器的剩余宽度不够容纳 <span class="hl_4">BFC</span> 的宽度，但 <span class="hl_4">BFC</span> 的宽度小于容器的宽度时，各浏览器的处理产生差异：</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8 Chrome Safari Opera</em> 中，虽然 <span class="hl_4">BFC</span> 的宽度不足以使其显示在浮动元素所在那行，但其宽度小于容器宽度，所以显示到了浮动元素的下一行；</li>
+        <li>在 <em>Firefox</em> 中，浏览器仍然将 <span class="hl_4">BFC</span> 显示在浮动元素所在行，同时 <span class="hl_4">BFC</span> 溢出容器。</li>
+      </ul>
+      <br />
+      <p>下面继续测试在 Firefox 中的一种影响布局的现象：<em>bfc_median_firefox.html</em></p>
+      <pre>&lt;style&gt;
+    * { font:12px Arial; }
+    .container { background:silver; width:150px; height:30px; }
+    .float { background:darkgray; float:left; width:80px; }
+    .bfc { background:dimgray; overflow:hidden; color:white; }
+&lt;/style&gt;
+&lt;div class="container"&gt;
+    &lt;div class="float"&gt;FLOAT(80)&lt;/div&gt;
+    &lt;div class="bfc" style="width:90px;"&gt;BFC(90)&lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div class="container" style="padding-top:5px;"&gt;
+    &lt;div class="float"&gt;FLOAT(80)&lt;/div&gt;
+    &lt;div class="bfc" style="width:90px;"&gt;BFC(90)&lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div class="container" style="border-top:5px solid black;"&gt;
+    &lt;div class="float"&gt;FLOAT(80)&lt;/div&gt;
+    &lt;div class="bfc" style="width:90px;"&gt;BFC(90)&lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div class="container" style="display:inline-block;"&gt;
+    &lt;div class="float"&gt;FLOAT(80)&lt;/div&gt;
+    &lt;div class="bfc" style="width:90px;"&gt;BFC(90)&lt;/div&gt;
+&lt;/div&gt;</pre>
+      <p>测试代码分为 4 组，第一组与上一段中的代码相同，第二组为【container】添加了 padding-top:5px，第三组为【container】添加了 border-top:5px solid black，第四组为【container】添加了 'display:inline-block'。</p>
+      <p>各浏览器中效果如下：</p>
+      <table class="compare">
+                <tr>
+                    <th>IE6 IE7 IE8 Chrome Safari Opera</th>
+                    <th>Firefox</th>
+                </tr>
+                <tr>
+                    <td><img src="../../tests/RM8003/bfc_median_firefox_1.gif" alt="IE6 IE7 IE8 Chrome Safari Opera" /></td>
+                    <td><img src="../../tests/RM8003/bfc_median_firefox_2.gif" alt="Firefox" /></td>
+                </tr>
+            </table>
+            <p>可见，容器的 'padding-top' 不为 0、'border-top-width' 不为 0、以及容器本身也创建了 <span class="hl_4">BFC</span> 后，<em>Firefox</em> 中对于【BFC】宽度介于 "容器剩余宽度&quot; 与 "容器宽度&quot; 之间的情况下，【BFC】会显示到浮动元素的下一行。</p>
+      <br />
+
+      <h3>BFC 的宽度大于容器的宽度</h3>
+      <p>分析以下代码：<em>bfc_greater.html</em></p>
+      <pre>&lt;style&gt;
+    * { font:12px Arial; }
+    .container { background:silver; width:150px; height:30px; }
+    .float { background:darkgray; float:left; width:80px; }
+    .bfc { background:dimgray; overflow:hidden; color:white; }
+&lt;/style&gt;
+&lt;div class="container"&gt;
+    &lt;div class="float"&gt;FLOAT(80)&lt;/div&gt;
+    &lt;div class="bfc" style="width:151px;"&gt;BFC(151)&lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div class="container" style="padding-top:5px;"&gt;
+    &lt;div class="float"&gt;FLOAT(80)&lt;/div&gt;
+    &lt;div class="bfc" style="width:151px;"&gt;BFC(151)&lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div class="container" style="border-top:5px solid black;"&gt;
+    &lt;div class="float"&gt;FLOAT(80)&lt;/div&gt;
+    &lt;div class="bfc" style="width:151px;"&gt;BFC(151)&lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div class="container" style="display:inline-block;"&gt;
+    &lt;div class="float"&gt;FLOAT(80)&lt;/div&gt;
+    &lt;div class="bfc" style="width:151px;"&gt;BFC(151)&lt;/div&gt;
+&lt;/div&gt;</pre>
+      <p>测试代码分为 4 组，与上一段中的区别为【BFC】的宽度变为了 151px。</p>
+      <p>各浏览器中效果如下：</p>
+      <table class="compare">
+                <tr>
+                    <th>IE6 IE7 IE8 Opera</th>
+                    <th>Firefox</th>
+                    <th>Chrome Safari</th>
+                </tr>
+                <tr>
+                    <td><img src="../../tests/RM8003/bfc_greater_1.gif" alt="IE6 IE7 IE8 Opera" /><sup>1</sup></td>
+                    <td><img src="../../tests/RM8003/bfc_greater_2.gif" alt="Firefox" /></td>
+                    <td><img src="../../tests/RM8003/bfc_greater_3.gif" alt="Chrome Safari" /></td>
+                </tr>
+            </table>
+      <ul>
+        <li>在 <em>IE8(S) Opera</em> 中，【BFC】的宽度超出了容器剩余宽度，同时也超出了容器的宽度，浏览器将【BFC】显示到了浮动元素的下一行，并且【BFC】溢出容器；</li>
+        <li>在 <em>Chrome Safari</em> 中，浏览器发现无论将【BFC】放置在浮动元素所在行还是浮动元素的下一行均会出现【BFC】溢出容器现象，最终将【BFC】显示在浮动元素所在行的剩余空间内，同时溢出容器；</li>
+        <li>在 <em>Firefox</em> 中，与上一节类似，容器的 'padding-top' 不为 0、'border-top-width' 不为 0、以及容器本身也创建了 BFC 后，浏览器将【BFC】显示到了浮动元素的下一行，否则显示到浮动元素所在行。</li>
+      </ul>
+      <p class="comment">
+        注1. IE6 IE7(Q) IE8(Q) 出现的 "width/height的设定值可能被其内容撑大&quot; 不是本文讨论的重点，由于这个 Bug 触发的差异在本文中将被忽略。</p>
+
+
+      <h2 id="solutions">解决方案</h2>
+      <p>合理地设置容器的宽度、浮动元素的宽度、BFC 的宽度的值，尽量保证 BFC 的宽度小于 "容器的剩余空间宽度&quot; 。若需要 BFC 折行显示在新的一行上，可以通过 BFC 设置 'clear' 特性等手段使其换行。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="RM8002">RM8002: 不能在 IE6 IE7 IE8(Q) 中触发 hasLayout 并在其他浏览器中创建 block formatting context 的元素的表现在某些情况下会有差异</a></li>
+        <li><a href="RD8001">RD8001: 'width' 和 'height' 的作用位置在不同浏览器中可能有差异</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.6<br />
+              Chrome 6.0.466.0 dev<br />
+              Safari 5.0<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RM8003/bfc_lesser.html">bfc_lesser.html</a><br />
+            <a href="../../tests/RM8003/bfc_median.html">bfc_median.html</a><br />
+            <a href="../../tests/RM8003/bfc_median_firefox.html">bfc_median_firefox.html</a><br />
+            <a href="../../tests/RM8003/bfc_greater.html">bfc_greater.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-21</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>Block formatting context float 浮动</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

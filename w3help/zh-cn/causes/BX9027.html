@@ -1,0 +1,220 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX9027:  IE 浏览器中 MouseDown 事件中取消浏览器默认行为后 Focus 事件依然被触发</h1>
+<ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>事件处理函数中的 return false 方法最初由 Netscape 制定，当时还没有事件监听注册方法，浏览器只支持为一个标记绑定一个事件处理函数，由此 Netscape 规定如果事件处理函数返回 false ，将就要阻止浏览器的默认事件行为继续执行，这个事实规范在所有浏览器中都被支持，它用于单一事件绑定函数中。</p>
+      <p>在现行 DOM-Events 规范中已定义了 preventDefault 标准方法来阻止浏览器默认行为，该方法用来在事件监听处理程序中阻止浏览器默认事件触发。而 return false 语句只针对事件绑定函授处理方式生效，在事件监听处理程序中将不会阻止浏览器默认事件触发。</p>
+      <p>关于浏览器默认行为我们通常可以理解为某此用户操作后浏览器可以自动执行的行为动作，这个行为可能会触发某些固有事件，从而使得事件处理程序可以被执行。比较常见的为：用户点击超链接后浏览器会自动下载目标页面，或者在可输入区域点击鼠标后浏览器自动将输入光标调整到可输入区域内。</p>
+      <p>关于取消事件的详细描述请参考 DOM-Level-2-Events 规范 <a href="http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-flow-cancelation">1.2.4. Event cancelation</a> </p>
+      <p>关于 preventDefault 方法的描述请参考 DOM-Level-2-Events 规范 <a href="http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-Event">1.4. Event interface</a></p>
+      <p>Click 事件发生时，会触发一系列相关的事件消息，他们的执行顺序为 MouseDown、MouseUp、Click，相关说明请参照 DOM-Level-2-Events 规范 <a href="http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-eventgroupings-mouseevents">1.6.2. Mouse event types</a> 中的 Click 部分。</p>
+      <h2 id="description">问题描述</h2>
+      <p>当用户通过鼠标操作触发 click 事件时，基本的事件触发流程为：MouseDown 事件 --&gt;  MouseUp 事件 --&gt; Click 事件。若被点击的元素可以获得焦点，并且当前还没有获得焦点时，会在 MouseDown 事件之后默认触发 Focus 事件，再依次触发其后的 MouseUp 和 Click 事件。</p>
+        <p> 如果浏览器将 Focus  作为默认行为处理，那么在MouseDown 事件处理函数内取消浏览器默认行为后，被点击的<strong>可以获得焦点的元素</strong>，需要阻止其后的 Focus 默认事件行为被触发，并且该元素不能获得焦点。</p>
+        <h2 id="influence">造成的影响</h2>
+      <p>在 IE 浏览器中，在 MouseDown 事件的处理函数中，取消浏览器默认行为执行后，如果点击的是可获得焦点的元素 (如 INPUT) ，那么他依然会获得焦点并触发 Focus 事件。</p>
+      <p>而在非 IE 浏览器中，此情况下元素无法获得焦点，也不会触发 Focus 事件。</p>
+      <p>这个差异可能会导致某些具体操作性质的应用功能在非 IE 浏览器中执行异常。</p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+              <tr>
+                <th>IE</th>
+                <td></td>
+              </tr>
+            </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>在具体分析此问题之前，需要理解与这个问题有关的两个知识点：</p>
+      <ol>
+                <li>各浏览器对默认可以通过 Click 事件获得焦点的元素之间的差异：<br />
+                <a href="http://www.w3help.org/zh-cn/causes/SD9027">SD9027: 各浏览中某些标记通过鼠标触发 click 事件后不会获得焦点并触发 focus 事件</a>                </li>
+              <li>两种取消浏览器默认行为执行方法的差异和兼容性问题：<br />
+                <a href="http://www.w3help.org/zh-cn/causes/BX9026">BX9026: 在 IE 的事件监听处理函数中使用 return false 语句依然可以阻止浏览器默认行为执行</a>              </li>
+        </ol>
+        <p>现在进入正题，分析以下代码：</p>
+<pre>
+&lt;script&gt;
+  window.onload = function (){
+    function stopDefault(e){
+      e = e || window.event;
+      (e.preventDefault)
+      ?e.preventDefault()
+      :e.returnValue = false;
+    }
+    function addEvent(el, type, fn){
+      (el.addEventListener)
+      ? el.addEventListener(type, fn, false)
+      :(function () {
+        el.attachEvent("on" + type, function(e){
+          fn.call(el,e);
+         });
+      })();
+    }
+    function setEvents(elment){
+      addEvent(elment,"mousedown",function (e){
+        this.value+=' mousedown 事件被触发';
+        stopDefault(e);
+      });
+      addEvent(elment,"focus",function (e){
+        this.value+=' focus 事件被触发';
+      });
+      addEvent(elment,"mouseup",function (e){
+        this.value+=' mouseup 事件被触发';
+      });
+      addEvent(elment,"click",function (e){
+        this.value+=' click 事件被触发';
+      });
+    }
+    setEvents(document.getElementsByTagName("input")[2]);
+  }
+&lt;/script&gt;
+&lt;ol&gt;
+&lt;li&gt;
+  &lt;h2&gt; 鼠标默认行为触发顺序  &lt;/h2&gt;
+  &lt;input style="width:100%;" onmousedown="this.value+=' mousedown 事件被触发 ';" onfocus="this.value+=' focus 事件被触发 '" onclick="this.value+=' click 事件被触发 '" onmouseup="this.value+=' mouseUp 事件被触发 '"&gt;
+  &lt;p&gt;点击文本域后显示 click 事件相关联的各个事件触发顺序。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+  &lt;h2&gt; 使用 return false 语句阻止 MouseDown 后续默认行为触发  &lt;/h2&gt;
+  &lt;input style="width:100%;" onmousedown="this.value+=' mousedown 事件被触发 ';return false;" onfocus="this.value+=' focus 事件被触发 '" onclick="this.value+=' click 事件被触发 '" onmouseup="this.value+=' mouseUp 事件被触发 '"&gt;
+  &lt;p&gt;点击文本域后没有继续执行 focuse 事件内程序，则说明成功阻止了默认行为。&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+  &lt;h2&gt;使用 preventDefault 方法阻止 MouseDown 后续默认行为触发 &lt;/h2&gt;
+  &lt;input style="width:100%;"&gt;
+  &lt;p&gt;点击文本域后没有继续执行 focuse 事件内程序，则说明成功阻止了默认行为。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+</pre>
+
+    <p>上例中，首先验证鼠标点击 INPUT 元素后默认触发的事件执行顺序：</p>
+    <table class="compare">
+          <tr>
+            <th>事件触发顺序</th>
+            <th>1</th>
+            <th>2</th>
+            <th>3</th>
+            <th>4</th>
+          </tr>
+          <tr>
+            <th>所有浏览器</th>
+            <td>MouseDown 事件</td>
+            <td>Focus 事件</td>
+            <td>MouseUp 事件</td>
+            <td>Click 事件</td>
+          </tr>
+        </table>
+    <p>在所有浏览器中均为 MouseDown  --&gt; Focus  --&gt; MouseUp  --&gt; Click ，这与规范描述一致。</p>
+    <p>确定了 MouseDown 事件之后将要触发的事件消息后，在 INPUT 元素 (该元素在所有浏览器中均可获得焦点) 的 MouseDown 事件内，分别使用单一事件绑定方法和事件监听方法取消浏览器默认行为。</p>
+    <p>各浏览器中执行效果如下：</p>
+    <table class="compare">
+          <tr>
+            <th>&nbsp;</th>
+            <th>IE</th>
+            <th>Firefox Safari Chrome Opera</th>
+          </tr>
+          <tr>
+            <th>MouseDown</th>
+            <td><span class="hl_2">触发</span></td>
+            <td><span class="hl_2">触发</span></td>
+          </tr>
+          <tr>
+            <th>Focus</th>
+            <td><span class="hl_2">触发</span></td>
+            <td><span class="hl_1">未触发</span></td>
+          </tr>
+          <tr>
+            <th>MouseUp</th>
+            <td><span class="hl_2">触发</span></td>
+            <td><span class="hl_2">触发</span></td>
+          </tr>
+          <tr>
+            <th> Click</th>
+            <td><span class="hl_2">触发</span></td>
+            <td><span class="hl_2">触发</span></td>
+          </tr>
+        </table>
+    <p>实验结果表明：</p>
+        <ul>
+    <li>在 Firefox Safari Chrome Opera 中 MouseDown 后 Focus 事件没有被触发，其后的 MouseUp Click 事件函数均被执行，说明 Focus 行为没有被浏览器自动执行。由此可以断定 Focus 行为是这些浏览器的默认行为之一，可以被取消执行。</li>
+    <li>但是，在 IE 浏览器中，无法阻止 MouseDown 后的默认 Focus 事件行为，元素依然获得了焦点，并触发了 Focus 事件处理函数。这个差异明显说明 IE 并不将 Focus 作为浏览器行为处理，因此不能阻止其事件触发 。</li>
+        </ul>
+    <h2 id="solutions">解决方案</h2>
+        <p>如果被点击元素可以获得焦点，并且需要在 Focus 事件处理函数内执行具体业务逻辑，那么：</p>
+        <ul>
+      <li>请在元素的 MouseDown 单一事件绑定处理函数或内联事件处理函数中，<strong>避免使用 return false </strong>语句阻止 Focus 默认行为；</li>
+      <li>请在元素的 MouseDown 事件监听处理函数中，<strong>避免使用 preventDefault 方法</strong>  阻止 Focus 默认行为。</li>
+      </ul>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+              <li><a href="http://www.w3help.org/zh-cn/causes/SD9027">SD9027: 各浏览中某些标记通过鼠标触发 click 事件后不会获得焦点并触发 focus 事件</a></li>
+        <li><a href="http://www.w3help.org/zh-cn/causes/BX9026">BX9026: 在 IE 的事件监听处理函数中使用 return false 语句依然可以阻止浏览器默认行为执行</a></li>
+      </ul>
+
+<div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.9<br />
+              Chrome 7.0.503.0 dev<br />
+              Safari 5.0.1 <br />
+                            Opera 10.61
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BX9027/mousedown_focus.html">mousedown_focus.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-09</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>preventDefault returnValue Browser Befault Behavior mousedown mouseup click focus event</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

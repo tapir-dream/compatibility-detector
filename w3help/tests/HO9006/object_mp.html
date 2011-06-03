@@ -1,0 +1,12 @@
+<style>* { font:16px Arial; }</style>
+<body>
+<div id="do" style="background:gray; width:100px; height:100px;"></div>
+<script>
+    var oo = document.createElement("object");
+    oo.setAttribute("classid", "clsid:6BF52A52-394A-11d3-B153-00C04F79FAA6");
+    oo.style.width = "100%";
+    oo.style.height = "100%";
+    document.getElementById("do").appendChild(oo);
+    document.write("settings:" + typeof oo.settings);
+</script>
+</body>

@@ -1,0 +1,33 @@
+﻿<!DOCTYPE html>
+<head>
+<title>display:run-in</title>
+</head>
+
+<body>
+<p>CSS2 中对解析 'display:run-in' 的规则描述如下：</p>
+<pre> 
+1.如果一个设置 Display 属性值为 run-in 的元素 A 包含一个块级元素，那么元素 A 将成为一个块级元素；
+2.在同一层中，如果一个设置 'display' 属性值为 'run-in' 的元素 A( A 中不包含块级元素，即 A 此时不符合规则 1 中的描述) 之后紧随一个块级元素 
+  B (没有设置浮动并且没有设置绝对定位)，那么元素 A 将成为其后的块级元素 B 的第一个行内元素。需要注意的是如果 B 中的第一个行内元素已经是一个
+  由外部进入的 'run-in' 元素或者 B 本身就是一个由 'run-in' 元素转换成的块级元素，那么 B 之前的 A 将不能进入 B 中；
+3.除以上两种情况以外时设置 Display 属性值为 run-in 的元素将被视为块级元素。
+</pre>
+<p>规则一：</p>
+<div style=" border:#FF0000 solid 2px; display:run-in; vertical-align:middle; width:80px;">A<p style="border:#000099 solid 2px;width:40px;">B</p></div>
+<span  style="border:#FF00FF solid 2px;">C</span>
+<p>规则二：</p>
+<div style=" border:#FF0000 solid 2px; display:run-in;height:40px;width:40px;">A<span style="border:#000099  dashed 2px;">B</span> </div>
+<div style="border:#000099 solid 2px; height:80px; padding:5px;width:80px;"><span>&nbsp;</span><span style="border:#FF00FF solid 2px;">C</span></div>
+<br />
+<div style=" border:#FF0000 solid 2px; display:run-in;height:40px;width:40px;">A1<span style="border:#000099  dashed 2px;">B</span> </div>
+<div style=" border:#FF0000 solid 2px; display:run-in;height:40px;width:40px;">A2<span style="border:#000099  dashed 2px;">B</span> </div>
+<div style="border:#000099 solid 2px; height:80px; padding:5px;width:80px;"><div style="border:#FF00FF solid 2px; ">C</div></div>
+<br />
+<div style=" border:#FF0000 solid 2px; display:run-in;height:40px;width:40px;">A<span style="border:#000099  dashed 2px;">B</span> </div>
+<div style="border:#000099 solid 2px; height:80px; padding:5px;width:80px;display:run-in;"><div style="border:#FF00FF solid 2px; ">C</div></div>
+<p>规则三:</p>
+<div style=" border:#FF0000 solid 2px; display:run-in; height:80px;width:80px;">A</div>
+<span style="border:#000099 solid 2px; ">B</span>
+
+</body>
+</html>

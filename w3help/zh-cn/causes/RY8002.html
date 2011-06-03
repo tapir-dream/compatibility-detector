@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RY8002: 各浏览器对 CSS 代码及 CSS 相关 DOM 操作中长度 &lt;length&gt; 类型的值缺失单位的容错程度存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>在W3C <a href="http://www.w3.org/TR/CSS2/syndata.html#value-def-length">CSS2.1规范第4.3.2节</a>中定义了CSS中描述长度的单位，其中相对单位中的 &quot;px&quot; 描述了它是相对于显示设备的像素单位。
+      而长度类型还有其他的单位，如相对单位中的  &quot;em&quot; ，绝对单位中的 &quot;in&quot; 、 &quot;pt&quot;  等。</p>
+      <h2 id="description">问题描述</h2>
+      <p>各浏览器对 CSS 代码及 CSS 相关 DOM 操作中长度 &quot;&lt;length&gt;&quot; 类型的值缺失单位的容错程度存在差异。</p>
+      <h2 id="influence">造成的影响</h2>
+      <p>如果，在进行样式编写或进行 DOM 操作时，对有单位的样式赋值没有声明具体使用单位字符，那么各个浏览器均会采用不同的容错处理，一般情况下 IE 将用 &quot;px&quot; 作为默认单位来修复这个声明或赋值，其他浏览器将会认为这是个错误的设置而忽略他。</p>
+      <p></p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>所有浏览器的混杂模式均将缺少单位类型的长度类型 CSS 特性理解为以 &quot;px&quot; 为单位。<br />
+        请看测试代码： </p>
+      <pre>&lt;div style=&quot;background:#DDD; width:200px; border:5px solid black;&quot;&gt;
+    &lt;div id=&quot;dd&quot; style=&quot;width:100; height:100; background:#888;&quot;&gt;123&lt;/div&gt;
+&lt;/div&gt;</pre>
+      <p>上面代码中创建了一个灰色背景的DIV元素，但是其 'width' 与 'height' 特性的值均没有标明采用何种单位。在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>所有浏览器(Q)</th>
+          <th>所有浏览器(S)</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RY8002/dfp5h4pg_1523g9fp3khj_b.gif" alt="" /></td>
+          <td><img src="../../tests/RY8002/dfp5h4pg_1524fmf5hdgg_b.gif" alt="" /></td>
+        </tr>
+        <tr>
+          <td>document.getElementById(&quot;dd&quot;).style.width=&quot;100px;&quot;<br />
+            document.getElementById(&quot;dd&quot;).style.height=&quot;100px;&quot;</td>
+          <td>document.getElementById(&quot;dd&quot;).style.width=&quot;&quot;<br />
+            document.getElementById(&quot;dd&quot;).style.height=&quot;&quot;</td>
+        </tr>
+      </table>
+      <p>可见，所有浏览器的混杂模式均将此缺少单位类型的长度类型 CSS 特性理解为以 &quot;px&quot; 为单位；而所有浏览器的标准模式均将此认为是错误的 CSS 代码而忽略。</p>
+      <p>使用 DOM 动态设置长度类型的CSS特性中缺少单位</p>
+      <p>请看测试代码：</p>
+      <pre>&lt;div style=&quot;background:#DDD; width:200px; border:5px solid black;&quot;&gt;
+    &lt;div id=&quot;dd&quot; style=&quot;background:#888;&quot;&gt;123&lt;/div&gt;
+&lt;/div&gt;
+&lt;script&gt;
+    document.getElementById(&quot;dd&quot;).style.width = 100;
+    document.getElementById(&quot;dd&quot;).style.height = 100;
+&lt;/script&gt;</pre>
+      <p>上面代码中，通过 DOM 动态设置了【dd】的宽度与高度，但是代码中均没有指明单位类型。在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Opera Firefox(Q) Chrome(Q) Safari(Q)</th>
+          <th>Firefox(S) Chrome(S) Safari(S)</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RY8002/dfp5h4pg_1523g9fp3khj_b.gif" alt="" /></td>
+          <td><img src="../../tests/RY8002/dfp5h4pg_1524fmf5hdgg_b.gif" alt="" /></td>
+        </tr>
+        <tr>
+          <td>document.getElementById(&quot;dd&quot;).style.width=&quot;100px;&quot;<br />
+            document.getElementById(&quot;dd&quot;).style.height=&quot;100px;&quot;</td>
+          <td>document.getElementById(&quot;dd&quot;).style.width=&quot;&quot;<br />
+            document.getElementById(&quot;dd&quot;).style.height=&quot;&quot;</td>
+        </tr>
+      </table>
+      <p>可见，</p>
+      <ul>
+        <li> 在 IE Opera Firefox Chrome Safari(Q) 中，使用 DOM 动态设置长度类型的 CSS 特性时，若设置的值没有单位，浏览器会自动为其添加 &quot;px&quot; 单位；</li>
+        <li>在 Firefox Chrome Safari(S) 中，浏览器会将缺失单位的属性值忽略。</li>
+      </ul>
+      <p>而 Element.style.width 及 Element.style.height 的返回值类型均为 &quot;String&quot; ，因为其中包含有单位。更多参见：<a href="http://www.w3.org/TR/DOM-Level-2-Style/css.html#CSS-CSS2Properties">http://www.w3.org/TR/DOM-Level-2-Style/css.html#CSS-CSS2Properties</a>。</p>
+      <h2 id="solutions">解决方案</h2>
+      <p>对于那些长度类型的 CSS 特性，在 CSS 代码及使用 DOM 操作相关样式时，应明确为其标注单位字符。 <br />
+      在上述少写了单位却仍能 &quot;正常&quot; 显示的浏览器中，是浏览器对这种 &quot;错误&quot; 做了修复，对于要明确指定单位的 CSS 特性，不要漏掉单位，而依赖浏览器的容错机制来达到目的。 </p>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+              <li><a href="#">...</a></li>
+      </ul>
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td> IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4 <br />
+                            Opera 10.51
+                            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-06-21</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>CSS unit property px 缺少 style DOM</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

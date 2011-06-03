@@ -1,0 +1,1 @@
+document.write('&lt;script src="a.js"&gt; is interpreted.<br />');

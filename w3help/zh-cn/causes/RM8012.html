@@ -1,0 +1,339 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RM8012: IE6 IE7 IE8(Q) Firefox Opera 中绝对定位元素的静态位置计算某些情况下会出错</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>当一个元素的 'position' 特性不是 'static' 时，这个元素被称为 &quot;定位的&quot; ，此时定位元素生成的定位框由 'top' 、 'right' 、 'bottom' 、 'left' 特性决定。当 'top' 、 'right' 、 'bottom' 、 'left' 特性没有设置，为默认的 'auto' 时，绝对定位的元素可能会被放置在其 &quot;静态位置&quot; 上。 &quot;静态位置&quot; 粗略地说是指元素如果在正常流中的位置。具体来说： &quot;静态位置&quot; 的包含块是若一个元素的 'position' 为 'static' 、 'float' 为 'none' 时生成元素的第一个框的假想框。</p>
+      <p>相关资料：</p>
+      <p>CSS Level 2 Revision 1, <a href="http://www.w3.org/TR/CSS2/visuren.html#positioning-scheme">9.3 Positioning schemes；</a></p>
+      <p>CSS Level 2 Revision 1, <a href="http://www.w3.org/TR/CSS2/visuren.html#dis-pos-flo">9.7 Relationships between 'display', 'position', and 'float'；</a></p>
+      <p>CSS Level 2 Revision 1, <a href="http://www.w3.org/TR/CSS2/visudet.html#abs-non-replaced-width">10.3.7 Absolutely positioned, non-replaced elements (Width)；</a></p>
+      <p>CSS Level 2 Revision 1, <a href="http://www.w3.org/TR/CSS2/visudet.html#abs-non-replaced-height">10.6.4 Absolutely positioned, non-replaced elements (Height)。</a></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>若绝对定位元素没有设置其 'top' 、 'right' 、 'bottom' 、 'left' 特性，则这四个特性的值为默认的 'auto' ，由于各浏览器对规范理解的差异，会导致页面布局差异。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>严重的情况下会破坏整体布局。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q) Firefox Opera</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <h3>1.inline元素对 &quot;静态位置&quot; 的影响：</h3>
+      <p>对于没有设置 'top'、'right'、'bottom'、'left' 偏移量的绝对定位元素，当其前一个兄弟元素是行内元素时。</p>
+      <p>分析以下代码：</p>
+<pre>
+&lt;style&gt;
+    * { margin:0; padding:0; font:12px Tahoma; line-height:110%; }
+    h3 { font-size:12px; font-weight:bold; margin-bottom:5px; }
+    .container { background:#DDD; width:95px; height:70px; margin-bottom:3px; }
+    .in { display:inline; }
+    .bl { display:block; width:45px; }
+    .ib { display:inline-block; width:45px; }
+    .prev { background:#BBB; }
+    .pos { position:absolute; width:45px; height:45px; }
+    .next { background:#777; }
+    html* .ib { display:inline; }
+&lt;/style&gt;
+
+&lt;div style='float:left; display:inline; margin-right:3px;'&gt;
+
+    &lt;h3&gt;POSITIONED&lt;/h3&gt;
+    &lt;div class='container'&gt;
+        &lt;span class='prev in'&gt;INLINE&lt;/span&gt;&lt;span class='pos next in'&gt;INLINE POS&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;div class='container'&gt;
+        &lt;span class='prev in'&gt;INLINE&lt;/span&gt;&lt;div class='pos next bl'&gt;BLOCK POS&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class='container'&gt;
+        &lt;span class='prev in'&gt;INLINE&lt;/span&gt;&lt;div class='pos next ib'&gt;INLINE BLOCK POS&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;div style='float:left; display:inline;'&gt;
+    &lt;h3&gt;STATIC&lt;/h3&gt;
+    &lt;div class='container'&gt;
+        &lt;span class='prev in'&gt;INLINE&lt;/span&gt;&lt;span class='next in'&gt;INLINE STATIC&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;div class='container'&gt;
+        &lt;span class='prev in'&gt;INLINE&lt;/span&gt;&lt;div class='next bl'&gt;BLOCK STATIC&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class='container'&gt;
+        &lt;span class='prev in'&gt;INLINE&lt;/span&gt;&lt;div class='next ib'&gt;INLINE BLOCK STATIC&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</pre>
+      <p>上面一组代码中，均是第一个左浮动 DIV 里均是一个行内元素之后包含一个没有设置偏移位置的绝对定位元素，分别测试绝对定位元素是行内、块、行内块时的情形。第二组则是去除了绝对定位特性，为默认的 'position:static' ，即 &quot;静态位置&quot; 。</p>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Chrome Safari</th>
+          <th>Firefox Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RM8012/RM8012-1.png" alt=""></td>
+          <td><img src="../../tests/RM8012/RM8012-2.png" alt=""></td>
+          <td><img src="../../tests/RM8012/RM8012-3.png" alt=""></td>
+        </tr>
+      </table>
+      <p>可见，各浏览器对于右侧 'position:static' 是显示效果一致，而对于绝对定位元素：</p>
+      <ul>
+        <li>在 IE6 IE7 IE8(Q) 中，浏览器并没有根据绝对定位元素的 &quot;静态位置&quot; 为其定位，而是由于绝对定位元素之前是一个行内元素，就将绝对定位元素直接放置在该行内元素同一行之后的位置上；</li>
+        <li>在 Firefox Opera 中，对于绝对定位元素是行内及块元素时，其位置与其 &quot;静态位置&quot; 相符，但是当绝对定位元素是  'display:inline-block' 时，它被放置在了行内元素的下一行上；</li>
+        <li>在 IE8(S) Chrome Safari 中，绝对定位元素的位置与其 &quot;静态位置&quot; 相符，符合 W3C 对绝对定位元素的规定。</li>
+      </ul>
+      <h3>2.block元素对 &quot;静态位置&quot; 的影响：</h3>
+      <p>对于没有设置 'top'、'right'、'bottom'、'left' 偏移量的绝对定位元素，当其前一个兄弟元素是块元素时，所有浏览器均会将绝对定位元素显示在该块元素下方新的一行上。</p>
+      <p>分析以下代码：</p>
+<pre>
+&lt;style&gt;
+    * { margin:0; padding:0; font:12px Tahoma; line-height:110%; }
+    h3 { font-size:12px; font-weight:bold; margin-bottom:5px; }
+    .container { background:#DDD; width:95px; height:70px; margin-bottom:3px; }
+    .in { display:inline; }
+    .bl { display:block; width:45px; }
+    .ib { display:inline-block; width:45px; }
+    .prev { background:#BBB; }
+    .pos { position:absolute; width:45px; height:45px; }
+    .next { background:#777; }
+    html* .ib { display:inline; }
+&lt;/style&gt;
+
+&lt;div style='float:left; display:inline; margin-right:3px;'&gt;
+
+    &lt;h3&gt;POSITIONED&lt;/h3&gt;
+    &lt;div class='container'&gt;
+        &lt;span class='prev bl'&gt;BLOCK&lt;/span&gt;&lt;span class='pos next in'&gt;INLINE POS&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;div class='container'&gt;
+        &lt;span class='prev bl'&gt;BLOCK&lt;/span&gt;&lt;div class='pos next bl'&gt;BLOCK POS&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class='container'&gt;
+        &lt;span class='prev bl'&gt;BLOCK&lt;/span&gt;&lt;div class='pos next ib'&gt;INLINE BLOCK POS&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;div style='float:left; display:inline;'&gt;
+    &lt;h3&gt;STATIC&lt;/h3&gt;
+    &lt;div class='container'&gt;
+        &lt;span class='prev bl'&gt;BLOCK&lt;/span&gt;&lt;span class='next in'&gt;INLINE STATIC&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;div class='container'&gt;
+        &lt;span class='prev bl'&gt;BLOCK&lt;/span&gt;&lt;div class='next bl'&gt;BLOCK STATIC&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class='container'&gt;
+        &lt;span class='prev bl'&gt;BLOCK&lt;/span&gt;&lt;div class='next ib'&gt;INLINE BLOCK STATIC&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</pre>
+      <p>上面一组代码中仅仅是将上一节中每个【container】中的第一个 inline 元素换为了 block 元素，其他保持不变。</p>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>All Browsers</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RM8012/RM8012-4.png" alt=""></td>
+        </tr>
+      </table>
+      <p>可见，此时所有浏览器对于绝对定位元素的位置判断均相同，且符合 &quot;静态位置&quot; 。这是由于绝对定位元素之前的兄弟元素已经为块级元素，产生了换行。无论上节中浏览器如何判断位置，绝对定位的元素都将显示在新的一行上。</p>
+      <h3>3.inline-block元素对 &quot;静态位置&quot; 的影响：</h3>
+      <p>对于没有设置 'top'、'right'、'bottom'、'left' 偏移量的 绝对定位元素，当其前一个兄弟元素是行内块元素时，在 IE6 IE7 IE8(Q) 中会将其的位置放置在行内元素同一行；在 IE8(S) Chrome Safari 中会参照其 &quot;静态位置&quot; 放置；在 Firefox Opera 中当绝对定位元素的 'display' 特性为 'inline-block' 时，将换行显示。</p>
+      <p>分析以下代码：</p>
+<pre>
+&lt;style&gt;
+    * { margin:0; padding:0; font:12px Tahoma; line-height:110%; }
+    h3 { font-size:12px; font-weight:bold; margin-bottom:5px; }
+    .container { background:#DDD; width:95px; height:70px; margin-bottom:3px; }
+    .in { display:inline; }
+    .bl { display:block; width:45px; }
+    .ib { display:inline-block; width:45px; }
+    .prev { background:#BBB; }
+    .pos { position:absolute; width:45px; height:45px; }
+    .next { background:#777; }
+    html* .ib { display:inline; }
+&lt;/style&gt;
+
+
+&lt;div style='float:left; display:inline; margin-right:3px;'&gt;
+    &lt;h3&gt;POSITIONED&lt;/h3&gt;
+    &lt;div class='container'&gt;
+        &lt;span class='prev ib'&gt;INLINE-BLOCK&lt;/span&gt;&lt;span class='pos next in'&gt;INLINE POS&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;div class='container'&gt;
+        &lt;span class='prev ib'&gt;INLINE-BLOCK&lt;/span&gt;&lt;div class='pos next bl'&gt;BLOCK POS&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class='container'&gt;
+        &lt;span class='prev ib'&gt;INLINE-BLOCK&lt;/span&gt;&lt;div class='pos next ib'&gt;INLINE BLOCK POS&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;div style='float:left; display:inline;'&gt;
+    &lt;h3&gt;STATIC&lt;/h3&gt;
+    &lt;div class='container'&gt;
+        &lt;span class='prev ib'&gt;INLINE-BLOCK&lt;/span&gt;&lt;span class='next in'&gt;INLINE STATIC&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;div class='container'&gt;
+        &lt;span class='prev ib'&gt;INLINE-BLOCK&lt;/span&gt;&lt;div class='next bl'&gt;BLOCK STATIC&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class='container'&gt;
+        &lt;span class='prev ib'&gt;INLINE-BLOCK&lt;/span&gt;&lt;div class='next ib'&gt;INLINE BLOCK STATIC&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</pre>
+      <p>上面一组代码中仅仅是将上一节中每个【container】中的第一个 'inline' 元素换为了 'inline-block' 元素，其他保持不变。</p>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Chrome Safari</th>
+          <th>Firefox Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RM8012/RM8012-5.png" alt=""></td>
+          <td><img src="../../tests/RM8012/RM8012-6.png" alt=""></td>
+          <td><img src="../../tests/RM8012/RM8012-7.png" alt=""></td>
+        </tr>
+      </table>
+      <p>可见，对于绝对定位元素之前的兄弟元素为 'display:inline-block' 时的情况与 'display:inline' 时类似。</p>
+      <h3>4.float元素对 &quot;静态位置&quot; 的影响：</h3>
+      <p>分析以下代码：</p>
+<pre>
+&lt;style&gt;
+    * { margin:0; padding:0; font:12px Tahoma; line-height:110%; }
+    h3 { font-size:12px; font-weight:bold; margin-bottom:5px; }
+    .container { background:#DDD; width:95px; height:70px; margin-bottom:3px; }
+    .in { display:inline; }
+    .bl { display:block; }
+    .ib { display:inline-block; width:45px; }
+    .prev { float:left; }
+    .pos { position:absolute; width:45px; height:45px; }
+    .opa { opacity:0.5; filter:alpha(opacity=50); }
+    .next { background:#777; }
+    html* .ib { display:inline; }
+&lt;/style&gt;
+
+
+&lt;div style='float:left; display:inline; margin-right:3px;'&gt;
+    &lt;h3&gt;POSITIONED&lt;/h3&gt;
+    &lt;div class='container'&gt;
+        &lt;span class='prev'&gt;FLOAT&lt;/span&gt;&lt;span class='pos next in opa'&gt;INLINE POS&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;div class='container'&gt;
+        &lt;span class='prev'&gt;FLOAT&lt;/span&gt;&lt;div class='pos next bl opa'&gt;BLOCK POS&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class='container'&gt;
+        &lt;span class='prev'&gt;FLOAT&lt;/span&gt;&lt;div class='pos next ib opa'&gt;INLINE BLOCK POS&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</pre>
+      <p>上面代码中，浮动元素后的兄弟元素为没有设置偏移位置的绝对定位元素，分别测试绝对定位元素是行内、块、行内块时的情形。</p>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Chrome Safari</th>
+          <th>Firefox</th>
+          <th>Opera</th>
+          <th>静态位置</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RM8012/RM8012-8.png" alt=""></td>
+          <td><img src="../../tests/RM8012/RM8012-9.png" alt=""></td>
+          <td><img src="../../tests/RM8012/RM8012-10.png" alt=""></td>
+          <td><img src="../../tests/RM8012/RM8012-11.png" alt=""></td>
+          <td><img src="../../tests/RM8012/RM8012-12.png" alt=""></td>
+        </tr>
+      </table>
+      <p>可见，当绝对定位元素之前的兄弟元素为浮动元素时：</p>
+      <ul>
+      <li>在 IE8(S) Chrome Safari 中，绝对定位元素的 &quot;静态位置&quot; 与其在 'position:static' 时最为符合；</li>
+      <li>在 IE6 IE7 IE8(Q) 中，无论绝对定位元素的 'display' 特性为何值，均不会覆盖浮动元素；</li>
+      <li>在 Firefox 中，仅当绝对定位元素的 'display' 特性为 'inline' 时，不会覆盖浮动元素；</li>
+      <li>在 Opera 中，无论绝对定位元素的 'display' 特性为何值，均会覆盖浮动元素。</li>
+      </ul>
+
+      <h2 id="solutions">解决方案</h2>
+      <p> 首先对于绝对定位元素，应尽可能避免使其 'top'、'right'、'bottom'、'left' 特性的值均为 'auto'。若必须这么做，则尽可能的保证绝对定位元素之前的兄弟元素为非浮动的块级元素。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li>...</li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RM8012/RM8012-1.html">RM8012-1.html</a>
+            <br/>
+            <a href="../../tests/RM8012/RM8012-2.html">RM8012-2.html</a>
+            <br/>
+            <a href="../../tests/RM8012/RM8012-3.html">RM8012-3.html</a>
+            <br/>
+            <a href="../../tests/RM8012/RM8012-4.html">RM8012-4.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-19</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>position absolute left top right bottom auto 绝对 定位</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

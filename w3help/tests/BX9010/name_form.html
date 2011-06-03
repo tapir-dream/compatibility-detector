@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+	function $(id) { return document.getElementById(id); }
+	window.onload = function () {
+		var els = $("form").getElementsByTagName("*");
+		var n_res1 = [], n_res2 = [], a, b, c;
+		for (var i = 0, j = els.length; i < j; i++) {
+			a = els[i];
+			b = a.tagName.toUpperCase();
+			c = function () { try { return eval("n_" + b); } catch(e) { return false } }();
+			(c) ? n_res1.push(b + "[" + c + ":" + c.length + "]") : n_res2.push(b);
+		}
+		$("mode").innerHTML = (document.compatMode.toLowerCase().indexOf("css1") < 0) ? "Quirks Mode" : "Standards Mode";
+		$("name_ok").innerHTML = n_res1.join("<br>");
+		$("name_fail").innerHTML = n_res2.join("<br>");
+	}
+</script>
+</head>
+<body style="font:16px/1.5 Arial;">
+	<form id="form" style="display:none;">
+		<input type="text" name="n_INPUT" />
+		<input type="text" name="n_INPUT" />
+		<select name="n_SELECT"></select>
+		<select name="n_SELECT"></select>
+		<textarea name="n_TEXTAREA"></textarea>
+		<textarea name="n_TEXTAREA"></textarea>
+		<object name="n_OBJECT"></object>
+		<object name="n_OBJECT"></object>
+		<button name="n_BUTTON"></button>
+		<button name="n_BUTTON"></button>
+	</form>
+	<div>
+		<h3 id="mode"></h3>
+		<h1>by name, OK</h1>
+		<div id="name_ok"></div>
+		<h1>by name, Fail</h1>
+		<div id="name_fail"></div>
+	</div>
+</body>
+</html>

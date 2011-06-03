@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX1018: 非 IE 浏览器中为 MARQUEE 元素设置某些 CSS 特性会导致其失去滚动效果</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>MARQUEE 元素用来创建一个文字滚动区域，并提供了一些特有的属性、方法及事件。</p>
+      <p>MARQUEE 元素不是 W3C 规范中的元素，它最初由 IE2.0 引入，然而目前所有主流浏览器均支持 MARQUEE 元素。</p>
+      <p>关于 MARQUEE 元素的详细信息，请参考：<a href="http://msdn.microsoft.com/en-us/library/ms535851%28VS.85%29.aspx">MSDN</a>、<a href="https://developer.mozilla.org/en/HTML/Element/marquee">Mozilla Developer Center</a>、<a href="http://developer.apple.com/safari/library/documentation/AppleApplications/Reference/SafariHTMLRef/Articles/HTMLTags.html#//apple_ref/doc/uid/30001262-marquee">Safari Reference Library</a>。</p>
+      <p></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>默认情况下，</p>
+            <ul>
+              <li>WebKit 内核浏览器会将 MARQUEE 元素设置一个 overflow:-webkit-marquee，使其可以实现滚动特效，若用户定义了其他 'overflow' 特性的值，则会导致 MARQUEE 元素的滚动效果消失。</li>
+                <li>Opera 会将 MARQUEE 元素设置一个 'display:-wap-marquee'，使其可以实现滚动特效，若用户定义了其他 'display' 特性的值，则会导致 MARQUEE 元素的滚动效果消失。</li>
+                <li>Firefox 会将 MARQUEE 元素设置一个 '-moz-binding:url(&quot;chrome://xbl-marquee/content/xbl-marquee.xml#marquee-horizontal&quot;)'，使其可以实现滚动特效，若用户定义了其他 '-moz-binding' 特性的值，则会导致 MARQUEE 元素的滚动效果消失。</li>
+            </ul>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>在非 IE 浏览器中为 MARQUEE 元素覆盖了上面所描述的 CSS 特性的默认值，则会导致 MARQUEE 元素失去滚动效果。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Firefox</th>
+          <td>若用户定义了其他 '-moz-binding' 特性的值，则会导致 MARQUEE 元素的滚动效果消失。</td>
+        </tr>
+        <tr>
+          <th>Chrome Safari</th>
+          <td>若用户定义了其他 'overflow' 特性的值，则会导致 MARQUEE 元素的滚动效果消失。</td>
+        </tr>
+        <tr>
+          <th>Opera</th>
+          <td>若用户定义了其他 'display' 特性的值，则会导致 MARQUEE 元素的滚动效果消失。</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>各浏览器可以影响 MARQUEE 元素滚动效果的 CSS 特性不同，下面分情况进行讨论，首先分析 WebKit 内核的浏览器——Chrome 和 Safari 与 'overflow' 特性的关系：</p>
+
+      <p>默认情况下 WebKit 内核的浏览器会将 MARQUEE 元素设置一个 'overflow:-webkit-marquee'，使其可以实现滚动特效，若用户定义了其他 'overflow' 特性的值，则会导致 MARQUEE 元素的滚动效果消失。</p>
+      <p>分析以下代码：</p>
+      <pre>&lt;marquee style=&quot;width:100px; height:20px; background:#CCC; <span class="hl_1">overflow:hidden;</span>&quot;&gt;
+123
+&lt;/marquee&gt;</pre>
+      <p>上面 MARQUEE 元素被设置了 <span class="hl_1">overflow:hidden;</span>。在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Firefox Opera</th>
+          <th>Chrome Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BX1018/marquee_effective.gif" alt="IE6, IE7, IE8, Firefox, Opera" /></td>
+          <td><img src="../../tests/BX1018/marquee_ineffective.gif" alt="Chrome, Safari" /></td>
+        </tr>
+      </table>
+      <p>可见，在 <em>Chrome Safari</em> 中，由于 <span class="hl_1">overflow:hidden;</span> 导致 MARQUEE 元素原有的滚动效果消失。<br />
+      这是因为在 WebKit 内核中，浏览器通过为 MARQUEE 元素设置一个值为 '-webkit-marquee' 的 'overflow' 特性使其具备滚动效果：</p>
+      <p><img src="../../tests/BX1018/webkit_trans.gif" alt="WebKit" /></p>
+      <p>而当我们为 MARQUEE 元素设置了一个其他的 'overflow' 特性值后，如测试样例中，则在 WebKit 内核浏览器中就会使 MARQUEE 元素失去滚动效果：</p>
+      <p><img src="../../tests/BX1018/webkit_trans2.gif" alt="WebKit" /></p>
+      <br />
+      <p>接下来再分析 Opera 浏览器与 'display' 特性的关系：</p>
+      <p>默认情况下 Opera 会将 MARQUEE 元素设置一个 'display:-wap-marquee'，使其可以实现滚动特效，若 用户定义了其他 'display' 特性的值，则会导致 MARQUEE 元素的滚动效果消失。</p>
+      <p>分析以下代码：</p>
+      <pre>&lt;marquee style=&quot;width:100px; height:20px; background:#CCC; <span class="hl_1">display:inline-block;</span>&quot;&gt;
+123
+&lt;/marquee&gt;</pre>
+      <p>上面 MARQUEE 元素被设置了 <span class="hl_1">display:inline-block;</span>。在各 浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Firefox Chrome Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BX1018/marquee_effective.gif" alt="IE6, IE7, IE8, Firefox, Chrome, Safari" /></td>
+          <td><img src="../../tests/BX1018/marquee_ineffective.gif" alt="Opera" /></td>
+        </tr>
+      </table>
+      <p>可见在 Opera 中，由于 <span class="hl_1">'display:inline-block;'</span> 导致 MARQUEE 元素原有的滚动效果消失。<br />
+      这是因为在 Opera 中，浏览器通过为 MARQUEE 元素设置一个值为 '-wap-marquee' 的 'display' 特性使其具备滚动效果：</p>
+      <p><img src="../../tests/BX1018/opera_trans.gif" alt="Opera" /></p>
+      <p>而当我们为 MARQUEE 元素设置了一个其他的 'display' 特性值后，如测试样例中，则在 Opera 中就会使 MARQUEE 元素失去滚动效果：</p>
+      <p><img src="../../tests/BX1018/opera_trans2.gif" alt="Opera" /></p>
+      <br />
+      <p>最后看看 Firefox 浏览器与 '-moz-bind' 特性的关系：</p>
+      <p>默认情况下 Firefox 会将 MARQUEE 元素设置一个 '-moz-binding:url(&quot;chrome://xbl-marquee/content/xbl-marquee.xml#marquee-horizontal&quot;)'，使其可以实现滚动特效，若用户定义了其他 '-moz-binding' 特性的值，则会导致 MARQUEE 元素的滚动效果消失。</p>
+      <p>分析以下代码：</p>
+      <pre>&lt;marquee style=&quot;width:100px; height:20px; background:#CCC; <span class="hl_1">-moz-binding:none;</span>&quot;&gt;
+123
+&lt;/marquee&gt;</pre>
+      <p>上面 MARQUEE 元素被设置了 <span class="hl_1">-moz-binding:none;</span>。 在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Chrome Safari Opera</th>
+          <th>Firefox</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BX1018/marquee_effective.gif" alt="IE6, IE7, IE8, Chrome, Safari, Opera" /></td>
+          <td><img src="../../tests/BX1018/marquee_ineffective.gif" alt="Firefox" /></td>
+        </tr>
+      </table>
+      <p>可见在 Firefox 中，由于 <span class="hl_1">'-moz-binding:none;'</span> 导致 MARQUEE 元素原有的滚动效果消失。<br />
+      这是因为在 Firefox 中，浏览器通过为 MARQUEE 元素设置一个值为 'url(&quot;chrome://xbl-marquee/content /xbl-marquee.xml#marquee-horizontal&quot;)' 的 '-moz-binding' 特性使其具备滚动效果：</p>
+      <p><img src="../../tests/BX1018/firefox_trans.gif" alt="Firefox" /></p>
+      <p>这是由于 MARQUEE 元素在 Firefox 中使用 DIV 元素模拟。在 Mozilla Developer Center 中关于 MARQUEE 元素叙述中特别提到：<br />
+      MARQUEE 元素在 Firefox 中是以 XBL 插件的形式实现的其功能。这个插件地址为：<a href="http://mxr.mozilla.org/firefox/source/layout/style/xbl-marquee/xbl-marquee.xml">http://mxr.mozilla.org/firefox/source/layout/style/xbl-marquee/xbl-marquee.xml</a>。</p>
+      <p>所以假设我们为 MARQUEE 元素设置了一个其他的 '-moz-binding' 特性值后，如测试样例中，则在 Firefox 中就会使 MARQUEE 元素失去滚动效果：</p>
+      <p><img src="../../tests/BX1018/firefox_trans.gif" alt="Firefox" /></p>
+      <br />
+      <p>而 IE 中，MARQUEE 元素则不受到任何 CSS 特性的影响。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p> 首先 MARQUEE 元素为非 W3C 标准元素，应尽量避免使用。若必须使用，则应尽量避免为 MARQUEE 元素设置其默认值之外的 'overflow'、 'display'、'-moz-bind' 特性值。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.3<br />
+              Chrome 6.0.408.1 dev<br />
+              Safari 4.0.5<br />
+                            Opera 10.53
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BX1018/marquee_ineffective.html">marquee_ineffective.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-10</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>MARQUEE overflow -webkit 溢出 跑马灯 display -moz</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

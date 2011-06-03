@@ -1,0 +1,269 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RX1006: IE(Q) Firefox(Q) Opera 中 BR 元素的 'line-height' 特性的计算值在某些情况下会小于其继承值</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 W3C HTML4.01 规范中的描述，BR 元素会在当前行强制插入一个换行符，这个换行符也是空白符的一种。</p>
+      <p>根据 W3C CSS2.1 规范中的描述，'line-height' 特性是一个具备继承性、可作用于任何元素。<br />
+      对于内容由 inline 级元素构成的块级元素，'line-height' 特性指定了其内行框的最小高度。<br />
+      对于行内元素，'line-height' 特性指定了行框的高度（行内替换元素除外，因为它的高度由 'height' 特性指定）。<br />
+      而百分比的 'line-height' 特性的计算值则是有设定值与文字字号（'font-size'）相乘得来。</p>
+      <p>关于 BR 元素的详细信息，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html401/struct/text.html#h-9.3.2.1">9.3.2 Controlling line breaks</a> 中的内容。</p>
+      <p>关于 'line-height' 特性的详细信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS2/visudet.html#propdef-line-height">10.8.1 Leading and half-leading</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>当为 BR 元素设置 'line-height' 特性时，在 IE8(S) Firefox(S) Chrome Safari 中 BR 元素的 'line-height' 特性的计算值不会小于其继承值。在 IE6 IE7 IE8(Q) Firefox(Q) Opera 中计算后则可能会小于其继承来的 'line-height' 特性的计算值。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>为 BR 元素设置过小的 'line-height' 特性的值，在不同浏览器中 BR 元素会产生不同高度的空白。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE(Q) Firefox(Q) Opera</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：<em>br_line-height.html</em></p>
+      <pre>&lt;style&gt;
+  body { font-family:Arial; }
+  .cont { width:100px; background:sienna; line-height:200%; }
+  .cont br.lh { line-height:2px; }
+  .sibling { background:wheat; }
+  .info { font-size:12px; line-height:120%; }
+  .hl { background:gold; }
+&lt;/style&gt;
+&lt;script&gt;
+  window.onload = function() {
+    function $(id) { return document.getElementById(id); }
+      if (!window.getComputedStyle) {
+        window.getComputedStyle = function($target) {
+          return $target.currentStyle;
+        };
+      }
+    }
+
+    function ptToPx (pt) {
+      return (/pt/gi.test(pt)) ? (parseInt(pt) / 0.75) + "px" : pt;
+    }
+
+    for (var i = 1; i &lt;= 6; i++) {
+      $('info' + i).innerHTML = 'Container:&lt;span class="hl"&gt;'
+        + $('d' + i).offsetHeight
+        + 'px&lt;/span&gt;&lt;br /&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;line-height:'
+        + ptToPx(getComputedStyle($('d' + i)).lineHeight)
+        + '&lt;br /&gt;BR:&lt;span class="hl"&gt;'
+        + ($('d' + i).offsetHeight - $('d' + i + 's1').offsetHeight - $('d' + i + 's2').offsetHeight)
+        + 'px&lt;/span&gt;&lt;br /&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;line-height:'
+        + ptToPx(getComputedStyle($('br' + i)).lineHeight);
+    }
+  }
+&lt;/script&gt;
+
+&lt;div style="float:left; width:120px;"&gt;
+  &lt;div id="d4" class="cont" style="font-size:12px;"&gt;
+    &lt;div id="d4s1" class="sibling"&gt;12px&lt;/div&gt;
+    &lt;br id="br4" /&gt;
+    &lt;div id="d4s2" class="sibling"&gt;12px&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div id="info4" class="info"&gt;&lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div id="d5" class="cont" style="font-size:16px;"&gt;
+    &lt;div id="d5s1" class="sibling"&gt;16px&lt;/div&gt;
+    &lt;br id="br5" /&gt;
+    &lt;div id="d5s2" class="sibling"&gt;16px&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div id="info5" class="info"&gt;&lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div id="d6" class="cont" style="font-size:20px;"&gt;
+    &lt;div id="d6s1" class="sibling"&gt;20px&lt;/div&gt;
+    &lt;br id="br6" /&gt;
+    &lt;div id="d6s2" class="sibling"&gt;20px&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div id="info6" class="info"&gt;&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div style="float:left; width:120px;"&gt;
+  &lt;div id="d1" class="cont" style="font-size:12px;"&gt;
+    &lt;div id="d1s1" class="sibling"&gt;12px&lt;/div&gt;
+    &lt;br id="br1" class="lh" /&gt;
+    &lt;div id="d1s2" class="sibling"&gt;12px&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div id="info1" class="info"&gt;&lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div id="d2" class="cont" style="font-size:16px;"&gt;
+    &lt;div id="d2s1" class="sibling"&gt;16px&lt;/div&gt;
+    &lt;br id="br2" class="lh" /&gt;
+    &lt;div id="d2s2" class="sibling"&gt;16px&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div id="info2" class="info"&gt;&lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div id="d3" class="cont" style="font-size:20px;"&gt;
+    &lt;div id="d3s1" class="sibling"&gt;20px&lt;/div&gt;
+    &lt;br id="br3" class="lh" /&gt;
+    &lt;div id="d3s2" class="sibling"&gt;20px&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div id="info3" class="info"&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+      <p>上面代码中设定了【.cont】的 'line-height' 特性值为 200%。其内所有行内元素的高度为其字号乘以 200%。<br />
+      代码分为两组，区别为第一组的 【.cont】内的 BR 元素没有设定 'line-height' 特性，则使用继承值，即【.cont】的 'line-height' 特性的值；第二组的 BR 元素明确设定了 'line-height' 特性，值为 1px。<br />
+      每组代码中分别以 12px、16px、20px 的字号做测试。并将渲染后的【.cont】的高度、【.cont】减去两个 wheat 色的 DIV 元素的高度（理解为 BR 元素带来的空行的高度）以及【.cont】和 BR 的 'line-height' 特性计算值显示出来。</p>
+      <p>这段代码在各浏览器中运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q) Firefox(Q) Opera</th>
+          <th>IE8(S) Firefox(S) Chrome Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RX1006/br1.gif" alt="IE6 IE7 IE8(Q) Firefox(Q) Opera" /></td>
+          <td><img src="../../tests/RX1006/br2.gif" alt="IE8(S) Firefox(S) Chrome Safari" /></td>
+        </tr>
+      </table>
+      <p>可以看到对于没有设定 'line-height' 特性的 BR 元素，各浏览器的处理均相同。BR 继承了其父元素的【.cont】的 'line-height' 特性，在两个 wheat 色的 DIV 元素之间出现了以行高作为高度的空白区域。</p>
+      <p>对于设定了 'line-height' 特性的 BR 元素，则出现了差异：</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8(Q) Firefox(Q) Opera</em> 中，浏览器最终使用了设定在 BR 元素上的 line-height:2px，从而 BR 元素形成的那个行框的高度为 2px。</li>
+        <li>在 <em>IE8(S) Firefox(S) Chrome Safari</em> 中，浏览器没有使用 BR 元素上的 line-height:2px，而是仍然使用 BR 继承自父元素的 line-height:200% 的计算值。</li>
+      </ul>
+      <p>下面进一步分析 BR 元素上设定 'line-height' 特性的值与其继承值的关系。</p>
+      <p>分析以下代码：<em>br_line-height_ani.html</em></p>
+      <pre>&lt;style&gt;
+  body { font-family:Arial; }
+  .cont { width:100px; background:sienna; line-height:200%; }
+  .cont br.lh { line-height:2px; }
+  .sibling { background:wheat; overflow:hidden; }
+  .info { font-size:12px; line-height:120%; }
+  .hl { background:gold; }
+&lt;/style&gt;
+&lt;script&gt;
+  window.onload = function() {
+    function $(id) { return document.getElementById(id); }
+      if (!window.getComputedStyle) {
+        window.getComputedStyle = function($target) {
+          return $target.currentStyle;
+        };
+      }
+    }
+
+    function ptToPx (pt) {
+      return (/pt/gi.test(pt)) ? (parseInt(pt) / 0.75) + "px" : pt;
+    }
+
+    function showInfo () {
+      $('info').innerHTML = 'Container:&lt;span class="hl"&gt;'
+        + $('d').offsetHeight
+        + 'px&lt;/span&gt;&lt;br /&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;line-height:'
+        + ptToPx(getComputedStyle($('d')).lineHeight)
+        + '&lt;br /&gt;BR:&lt;span class="hl"&gt;'
+        + ($('d').offsetHeight - $('ds1').offsetHeight - $('ds2').offsetHeight)
+        + 'px&lt;/span&gt;&lt;br /&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;line-height:'
+        + ptToPx(getComputedStyle($('br')).lineHeight);
+    }
+
+    var k = 60;
+    setInterval(function () {
+      $('br').style.lineHeight = --k + "px";
+      showInfo();
+      (k == 0) &amp;&amp; (k = 60);
+    }, 50);
+  }
+&lt;/script&gt;
+&lt;div id="d" class="cont" style="font-size:12px;"&gt;
+  &lt;div id="ds1" class="sibling"&gt;12px&lt;/div&gt;
+  &lt;br id="br" class="lh" /&gt;
+  &lt;div id="ds2" class="sibling"&gt;12px&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id="info" class="info"&gt;&lt;/div&gt;</pre>
+      <p>上面代码结构与上一段测试样例类似，通过脚本不算调整 BR 元素的 'line-height' 特性的值在 50px 至 0 之间变化。</p>
+      <p>这段代码在各浏览器中运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q) Firefox(Q) Opera</th>
+          <th>IE8(S) Firefox(S) Chrome Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RX1006/br_ani1.gif" alt="IE6 IE7 IE8(Q) Firefox(Q) Opera" /></td>
+          <td><img src="../../tests/RX1006/br_ani2.gif" alt="IE8(S) Firefox(S) Chrome Safari" /></td>
+        </tr>
+      </table>
+      <p>通过上面的动画对比很明显的看出，在 <em>IE8(S) Firefox(S) Chrome Safari</em> 中 BR 元素的 'line-height' 特性的计算值不会小于其继承值。</p>
+
+
+      <h2 id="solutions">解决方案</h2>
+      <p>尽可能不为 BR 元素设定一个可能小于其继承值的值。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.8<br />
+              Chrome 6.0.472.11 dev<br />
+              Safari 5.0.1<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RX1006/br_line-height.html">br_line-height.html</a><br />
+            <a href="../../tests/RX1006/br_line-height_ani.html">br_line-height_ani.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-10</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>BR height line-height 换行 break 高度 行高</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

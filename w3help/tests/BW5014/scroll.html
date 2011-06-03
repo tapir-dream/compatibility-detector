@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+<select style="width:200px; font:12px Arial;">
+	<option>OPTION</option>
+</select>
+<br /><br />
+<iframe name="ifr" frameborder="0" style="width:200px; height:100px;"></iframe>
+<script>
+window.onload = function () {
+	var x = 0, y = 0, ifr = frames['ifr'];
+	ifr.document.write('<body style="background:wheat;"><div style="width:2000px;height:1000px;"></div></body>');
+	setInterval(function () {
+		(x >= 2000 && y >= 1000) && (x = 0, y = 0);
+		ifr.scroll(x+=20, y+=10);
+	}, 50);
+}
+</script>
+</body>
+</html>

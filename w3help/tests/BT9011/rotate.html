@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	body { margin: 0; }
+	.container { background: gold; width: 100px; height: 100px; }
+	.rorate {
+		position: absolute;
+		left: 100px;
+		top: 100px;
+		left: 80px\9;
+		top: 80px\9;
+		width: 100px;
+		height: 100px;
+		background: red;
+		filter:progid:DXImageTransform.Microsoft.Matrix(M11=0.7,M12=-0.7,M21=0.7,M22=0.7,SizingMethod="auto expand");
+		-moz-transform: rotate(45deg);
+		-webkit-transform: rotate(45deg);
+		-o-transform: rotate(45deg);
+	}
+</style>
+</head>
+<body>
+	<div class="container"><div class="rorate">123</div></div>
+</body>
+</html>

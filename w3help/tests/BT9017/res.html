@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+	window.onload = function (){
+		var ua = navigator.userAgent;
+		Test = {
+			version: (ua.match(/.+(?:rv|it|ra|ie|me)[\/: ]([\d.]+)/i)||[])[1],
+			ie: /msie/i.test(ua) && !/opera/i.test(ua),
+			op: /opera/i.test(ua),
+			sa: /version.*safari/i.test(ua),
+			ch: /chrome/.test(ua),
+			ff: /gecko/i.test(ua) && !/webkit/i.test(ua),
+			wk: /webkit/i.test(ua),
+			mz: /mozilla/i.test(ua)&&!/(compatible|webkit)/i.test(ua)
+		}
+		
+		function $(id) { return document.getElementById(id); }
+		
+		function addEvent(el, type, fn){
+			(el.attachEvent) ? (el.attachEvent("on" + type, fn)) : (el.addEventListener(type, fn, false));
+		};
+
+		var contains = document.compareDocumentPosition
+			? function (parent, child) {
+				return !!(parent.compareDocumentPosition(child) & 16);
+			}
+			: function (parent, child) {
+				return child !== child && (parent.contains ? parent.contains(child) : true);
+			}
+
+		function fixMouseLeave (elem, fn){
+			var mouseleave = Test.ie ? "mouseleave" : "mouseout";
+			(elem == null || elem == window ) && (elem = document);
+			return {
+				type: mouseleave,
+				elem: elem,
+				fn: Test.ie ? fn : function(e) {
+					(contains(e.relatedTarget,this)) && (fn.call(this, e));
+				}
+			}
+		}
+		
+		function fixMouseEnter (elem, fn){
+			var mouseenter = Test.ie ? "mouseenter" : "mouseover";
+			(elem==null || elem==window ) && (elem = document);
+			return {
+				type: mouseenter,
+				elem: elem,
+				fn: Test.ie ? fn : function(e) {
+					(contains(e.relatedTarget,this)) && (fn.call(this ,e));
+				}
+			}
+		}
+		
+		var me = fixMouseEnter($("a"), function (e) {
+			$("b").value += "enter\n";
+		});
+		var ml = fixMouseLeave($("a"), function (e) {
+			$("b").value += "leave\n";
+		});
+		
+		addEvent(me.elem, me.type, me.fn);
+		addEvent(ml.elem, ml.type, ml.fn);
+	}
+</script>
+</head>
+<body>
+	<div id="a" style="background:gold; width:100px; height:100px; padding:30px">
+		<div style="background:gray; height:100%;"></div>
+	</div>
+	<textarea id="b" style="width:100px; height:100px;"></textarea>
+</body>
+</html>

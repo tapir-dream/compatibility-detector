@@ -1,0 +1,69 @@
+<html>
+<head>
+<meta charset="gbk" />
+<style>
+	body, table { font:12px Arial; }
+	table { border-collapse:collapse; }
+	th, td { border:1px solid #666; }
+	th { background:#ddd; text-align:right; }
+</style>
+<script>
+	function $(id) { return document.getElementById(id); }
+	
+	window.onload = function () {
+		$("info1").innerHTML = $("im").src.replace(/.+\/(.+\.[^\?]+)(?:\?.+)?/g, '$1');
+		$("info2").innerHTML = decodeURI($("im").src.replace(/.+\/(.+\.[^\?]+)(?:\?.+)?/g, '$1'));
+		$("info3").innerHTML = $("ii").src.replace(/.+\/(.+\.[^\?]+)(?:\?.+)?/g, '$1');
+		$("info4").innerHTML = decodeURI($("ii").src.replace(/.+\/(.+\.[^\?]+)(?:\?.+)?/g, '$1'));
+		$("info5").innerHTML = $("sc").src.replace(/.+\/(.+\.[^\?]+)(?:\?.+)?/g, '$1');
+		$("info6").innerHTML = decodeURI($("sc").src.replace(/.+\/(.+\.[^\?]+)(?:\?.+)?/g, '$1'));
+	}
+</script>
+</head>
+<body>
+<div>
+	<h3>IMG</h3>
+	<img id="im" src="谷歌.gif" />
+	<table>
+		<tr>
+			<th>src</th>
+			<td id="info1"></td>
+		</tr>
+		<tr>
+			<th>decodeURI src</th>
+			<td id="info2"></td>
+		</tr>
+	</table>
+</div>
+<br />
+<div>
+	<h3>INPUT[type="image"]</h3>
+	<input id="ii" type="image" src="谷歌.gif" />
+	<table>
+		<tr>
+			<th>src</th>
+			<td id="info3"></td>
+		</tr>
+		<tr>
+			<th>decodeURI src</th>
+			<td id="info4"></td>
+		</tr>
+	</table>
+</div>
+<br />
+<div>
+	<h3>SCRIPT</h3>
+	<script id="sc" src="谷歌.js"></script>
+	<table>
+		<tr>
+			<th>src</th>
+			<td id="info5"></td>
+		</tr>
+		<tr>
+			<th>decodeURI src</th>
+			<td id="info6"></td>
+		</tr>
+	</table>
+</div>
+</body>
+</html>

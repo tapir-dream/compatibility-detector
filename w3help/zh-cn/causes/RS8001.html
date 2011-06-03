@@ -1,0 +1,155 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RS8001: IE6 IE7(Q) IE8(Q) 不支持子选择器</h1>
+    <ul class="toc">
+      <li><a href="../../tests/RS8001.html#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="../../tests/RS8001.html#description">问题描述</a> <span>•</span></li>
+      <li><a href="../../tests/RS8001.html#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="../../tests/RS8001.html#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="../../tests/RS8001.html#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="../../tests/RS8001.html#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="../../tests/RS8001.html#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p><strong>关于子选择器</strong></p>
+      <p>选择一个特定父级元素的所有直接子级元素。子选择器由两个或两个以上的选择器组成，中间用 '>' 隔开。</p>
+      <p>例如： </p>
+      <pre>div>span</pre>
+      <p>
+        它匹配 DIV 元素下所有的 SPAN 元素。
+      </p>
+      <p>关于子选择器的详细信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/selector.html#child-selectors">5.6 Child selectors</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>CSS 2.1 规范中描述的若干种选择器，在 CSS 1 历史规范中均无规定，这导致早期版本的浏览器，如： IE6 IE7(Q) IE8(Q) 浏览器不支持子选择器。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>子选择器无效，可能会导致 <em>IE6 IE7(Q) IE8(Q)</em> 中的样式跟其他浏览器不同。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7(Q) IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>对于此问题，我们通过以下的测试用例来说明。</p>
+      <p>分析以下代码：</p>
+<pre>
+&lt;style type="text/css"&gt;
+  <span class="hl_1">div&gt;p</span> {
+    color: red;
+  }
+&lt;/style&gt;
+&lt;div&gt;
+  &lt;p&gt;Aloha!&lt;/p&gt;
+&lt;/div&gt;
+</pre>
+      <ul>
+        <li>根据子选择器的概念，所有 DIV 元素下的 P 都会被选中</li>
+      </ul>
+      <p>根据 CSS2.1 规范中的描述可知， P 中的文本颜色会变成<strong style="color:red;">红色</strong>。</p>
+      <p>这段代码在不同的浏览器环境中的表现：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7(Q) IE8(Q)</th>
+          <th>IE7(S) IE8(S) Firefox Opera Safari Chrome</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RS8001/RS8001-1.jpg" alt=""></td>
+          <td><img src="../../tests/RS8001/RS8001-2.jpg" alt=""></td>
+        </tr>
+      </table>
+      <p>所以对于子选择器的支持情况，如下表：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6(S)(Q)</th>
+          <th>IE7(Q)</th>
+          <th>IE7(S)</th>
+          <th>IE8(Q)</th>
+          <th>IE8(S)</th>
+          <th>Firefox</th>
+          <th>Safari</th>
+          <th>Opera</th>
+          <th>Chrome</th>
+        </tr>
+        <tr>
+          <td class="hl_1">N</td>
+          <td class="hl_1">N</td>
+          <td class="hl_2">Y</td>
+          <td class="hl_1">N</td>
+          <td class="hl_2">Y</td>
+          <td class="hl_2">Y</td>
+          <td class="hl_2">Y</td>
+          <td class="hl_2">Y</td>
+          <td class="hl_2">Y</td>
+        </tr>
+      </table>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>避免在 IE6 IE7(Q) IE8(Q) 中使用子选择器。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br/>
+              IE7<br/>
+              IE8<br/>
+              Firefox 3.6.3<br/>
+              Chrome 6.0.437.3 dev<br/>
+              Safari 5.0<br/>
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RS8001/child_selector.html">child_selector.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-27</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>selector IE 子选择器</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

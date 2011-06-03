@@ -1,0 +1,181 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RE3021: IE6 IE7 IE8(Q) 不支持 'empty-cells' 特性</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>'empty-cells' 特性应用于表格的单元格，用来控制空单元格的边框和其周围的背景色，规范中对其描述如下：</p>
+      <ul>
+        <li>可选值：<em>show | hide | inherit</em></li>
+        <li>初始值：show</li>
+        <li>可应用的元素：表格单元格</li>
+        <li>继承性：可以继承</li>
+        <li>百分比数值：不可用/不适用</li>
+      </ul>
+      <p> <strong><em>在分离边框模型中</em></strong>，该特性用来控制<span class="hl_4">没有可视内容的单元格</span><sup>1</sup>的边框和周围背景色的渲染。空单元格中如果出现下面的一种或几种情况将不视为空单元格：</p>
+      <ul >
+        <li>浮动内容(包括空浮动元素)；</li>
+        <li>普通流内容(包括空元素)，可以被 'white-space' 特性合并处理的空白符除外。</li>
+      </ul>
+      <p>如果该特性取值为: &quot;show&quot;，那么空白单元格的边框和背景色将正常显示(和普通的单元格一样)。<br/>
+        如果该特性取值为: &quot;hide&quot;，那么空白单元格的边框和背景色将不会显示。 </p>
+      <p>关于 'empty cells' 特性请参考 CSS 2.1 规范的<a href="http://www.w3.org/TR/CSS21/tables.html#empty-cells">17.6.1.1 Borders and Backgrounds around empty cells: the 'empty-cells' property</a> 和 <a href="http://www.w3.org/TR/CSS21/tables.html#table-layers">17.5.1 Table layers and transparency</a> 中的描述。</p>
+      <p class="comment">注【1】：空单元格以及 'visibility' 特性值为 'hidden' 的单元格都被认为是没有可视内容的。</p>
+      <h2 id="description">问题描述</h2>
+      <p>在表格的分离边框模型中，如果设置 'empty-cells' 特性，IE6 IE7 IE8(Q) 中将无法达到作者预期显示结果。</p>
+      <h2 id="influence">造成的影响</h2>
+      <p>该问题将导致在不同浏览器中表格空单元格的最终渲染效果存在差异。</p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td></td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析并运行以下代码：</p>
+      <pre>
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+  &lt;meta charset="utf-8"/&gt;
+    &lt;style type="text/css"&gt;
+      body{font-size:12px;font-family:Arial, Helvetica, sans-serif;}
+      table{background:yellow;border:solid black 2px;<span class="hl_4">border-collapse:separate;</span>}
+      td,th{border:solid black 2px;width:10px;<span class="hl_4">empty-cells:show;</span>}
+      td{background:green;}
+      th{ background:gray;}
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;table&gt;
+      &lt;tr&gt;
+        &lt;th&gt;&lt;/th&gt;
+        &lt;th&gt;一&lt;/th&gt;
+        &lt;th&gt;二&lt;/th&gt;
+        &lt;th&gt;三&lt;/th&gt;
+        &lt;th&gt;四&lt;/th&gt;
+        &lt;th&gt;五&lt;/th&gt;
+      &lt;/tr&gt;
+      &lt;tr &gt;
+        &lt;th&gt;上午&lt;/th&gt;
+        &lt;td&gt;&lt;/td&gt;
+        &lt;td&gt;XX&lt;/td&gt;
+        &lt;td&gt;XX&lt;/td&gt;
+        &lt;td&gt;XX&lt;/td&gt;
+        &lt;td&gt;XX&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+       &lt;th&gt;下午&lt;/th&gt;
+        &lt;td&gt;XX&lt;/td&gt;
+        &lt;td&gt;XX&lt;/td&gt;
+        &lt;td&gt;XX&lt;/td&gt;
+        &lt;td&gt;XX&lt;/td&gt;
+        &lt;td&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+    &lt;/table&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</pre>
+      <p>以上代码中建立了一个 3 X 6 的表格，其中 'border-collapse:separate' 的设置表明这是一个使用分离边框模型的表格，'empty-cells:show' 的设置表明该表格中的空单元格将显示周围的背景色和边框，根据规范中的描述<span class="hl_4">这两个特性的设置</span><sup>2</sup>正是触发该篇文章要说明的问题的关键，另外 TD TH 元素的边框和背景色的设置是为了方便从运行结果中看出各浏览器间的差异。 </p>
+      <p class="comment">注【2】：在 <em>IE8(S) FireFox Opera Safari Chrome</em> 中也为表格元素的默认值，这里只为了强调该问题的触发条件。</p>
+      <p>以上代码在各浏览器中运行结果截图如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE8(S) FireFox Opera Safari Chrome</th>
+          <th>IE6 IE7 IE8(Q)</th>
+        </tr>
+        <tr style="text-align:center">
+          <td><img src="../../tests/RE3021/IE8(S) FireFox Opera Safari Chrome.png" alt="" /></td>
+          <td><img src="../../tests/RE3021/IE6 IE7 IE8(Q).png" alt="" /></td>
+        </tr>
+      </table>
+      <p> 从运行结果截图中可以看到在 <em>IE6 IE7 IE8(Q)</em> 中<sup>3</sup>，空白单元格的边框没有显示出来，可见在 <em>IE6 IE7 IE8(Q)</em> 代码中所设置的 'empty-cells:show' 并没有起到作用。 </p>
+      <p>下面修改上述代码中的 'empty-cells:show' 为 <span class="hl_4">'empty-cells:hide'</span>，在各浏览器中的运行结果截图如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE8(S) FireFox Opera Safari Chrome</th>
+          <th>IE6 IE7 IE8(Q)</th>
+        </tr>
+        <tr style="text-align:center">
+          <td><img src="../../tests/RE3021/hide-IE8(S) FireFox Opera Safari Chrome.png" alt="" /></td>
+          <td><img src="../../tests/RE3021/hide-IE6 IE7 IE8(Q).png" alt="" /></td>
+        </tr>
+      </table>
+      <p> 从运行结果截图中可以看到在 <em>IE6 IE7 IE8(Q)</em> 中<sup>3</sup>，空白单元格的背景色并没有消失，可见在 <em>IE6 IE7 IE8(Q)</em> 代码中所设置的 'empty-cells:hide' 并没有起到作用。 </p>
+      <p class="comment">注【3】： IE6 IE7 IE8(Q) 在此例中触发了分离边框模型时，单元格边框消失的 Bug，详情可参考站内文章：<a href="RE1012">RE1012: IE6 IE7 IE8(Q) Firefox(Q) Opera(Q) 中在分离边框模型中空单元格的边框某些情况下会消失</a><br />
+        另外， IE6 IE7 IE8(Q) 的开发升级时间过长，跨越了 CSS 1 至 CSS 2.0 规范定义时期。实质上他们开发初期遵循的是最初 CSS 1 标准，而 'empty-cells' 特性是由 CSS 2.0 标准时期提出的。因此可以说  IE6 IE7 IE8(Q) 无法预知未来，为  'empty-cells' 特性提供足够支持。</p>
+      <p>综上所述可以得出结论：IE6 IE7 IE8(Q) 不支持 <span class="hl_4">'empty-cells'</span> 特性。</p>
+      <h2 id="solutions">解决方案</h2>
+      <ul>
+        <li>如希望在各浏览器中都实现 'empty-cells:show' 的效果，可以在空的单元格内添加 '&amp;nbsp;'；</li>
+        <li>如希望在各浏览器中都实现 'empty-cells:hide' 的效果可以将空白单元格的背景色与表格背景色设置为同一颜色。</li>
+      </ul>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="RE1012">RE1012: IE6 IE7 IE8(Q) Firefox(Q) Opera(Q) 中在分离边框模型中空单元格的边框某些情况下会消失</a></li>
+        <li><a href="RE5003">RE5003: WebKit 中某些条件下 empty cell 的宽度和高度为 0</a></li>
+      </ul>
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td> IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.11<br />
+              Opera 10.63<br />
+              Chrome 8.0.552.5 dev<br />
+              Safari 5.0.2</td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RE3021/empty-cells(show).html">empty-cells(show).html</a><br/>
+              <a href="../../tests/RE3021/empty-cells(hide).html">empty-cells(hide).html</a> </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-21</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>TD TH empty cell  空 单元格</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

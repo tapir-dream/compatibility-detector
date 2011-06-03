@@ -1,0 +1,150 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX2040: 各浏览器对 navigator 对象中几个与语言相关的属性的返回值存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>各浏览器对 navigator 对象中几个与语言相关的属性（language、userLanguage、browserLanguage、 systemLanguage）的返回值存在很大的差异。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>由于不同浏览器对这几个属性的返回值有很大差异，同时返回的有效值的大小写也有差异。若在获取当前浏览器语言的时候没有考虑到这些差异则可能造成兼容性问题。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>首先查看一下 navigator 对象中的这几个与 language 相关的属性。</p>
+      <p>navigator 对象包含有关浏览器的信息。没有应用于 navigator 对象的公开标准，不过所有浏览器都支持该对象。但是其内部一些属性及其返回值在各浏览器并不统一。</p>
+      <ul>
+        <li>language：返回当前的浏览器语言（来自 Mozilla Developer Center）</li>
+        <li>userLanguage：返回操作系统设定的自然语言（来自 MSDN）</li>
+        <li>browserLanguage：返回当前的浏览器语言（来自 MSDN）</li>
+        <li>systemLanguage：返回当前操作系统的缺省语言（来自 MSDN）</li>
+      </ul>
+      <p>关于 navigator 对象的更多资料，请参见：<a href="http://msdn.microsoft.com/en-us/library/ms535867(VS.85).aspx">MSDN</a>、<a href="https://developer.mozilla.org/en/DOM/window.navigator">Mozilla Developer Center</a>。</p>
+      <p>对于浏览器，Mozilla Developer Center 中的 language 属性与 MSDN 中的 browserLanguage 属性描述很像。</p>
+
+      <p>分析以下代码：</p>
+      <pre>&lt;script&gt;
+document.write('navigator.language:'+navigator.language);
+document.write('&lt;br&gt;navigator.userLanguage:'+navigator.userLanguage);
+document.write('&lt;br&gt;navigator.browserLanguage:'+navigator.browserLanguage);
+document.write('&lt;br&gt;navigator.systemLanguage:'+navigator.systemLanguage);
+&lt;/script&gt;</pre>
+      <p>代码中打印出了各浏览器对于这 4 个属性返回值的情况：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox Chrome Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <th>navigator.language</th>
+          <td>undefined</td>
+          <td>zh-CN</td>
+          <td>zh-CN</td>
+        </tr>
+        <tr>
+          <th>navigator.userLanguage</th>
+          <td>zh-cn</td>
+          <td>undefined</td>
+          <td>zh-cn</td>
+        </tr>
+        <tr>
+          <th>navigator.browserLanguage</th>
+          <td>zh-cn</td>
+          <td>undefined</td>
+          <td>zh-cn</td>
+        </tr>
+        <tr>
+          <th>navigator.systemLanguage</th>
+          <td>zh-cn</td>
+          <td>undefined</td>
+          <td>undefined</td>
+        </tr>
+      </table>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>可以使用下面的代码获取当前浏览器语言：</p>
+      <pre>(navigator.language || navigator.browserLanguage).toLowerCase()</pre>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.3<br />
+              Chrome 6.0.422.0 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.53
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BX2040/nav_lang.html">nav_lang.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-15</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>navigator language userLanguage browserLanguage systemLanguage 语言</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

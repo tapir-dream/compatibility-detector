@@ -1,0 +1,177 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">CH9002: IE6 IE7 IE8 未按预期方式处理 content-type 为 text/plain 的内容</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p><strong>content-type</strong> 用于定义用户的浏览器或相关设备如何显示将要加载的数据，或者如何处理将要加载的数据，此属性的值可以查看 MIME 类型。</p>
+      <p>MIME (Multipurpose Internet Mail Extensions，多用途互联网邮件扩展) 是描述消息内容类型的因特网标准。MIME 消息能包含文本、图像、音频、视频以及其他应用程序专用的数据。</p>
+      <p><strong>content-type</strong> 一般以下面的形式出现：</p>
+      <p><code>Content-Type: [<em>type</em>]/[<em>subtype</em>]; parameter</code></p>
+      <p><em>type</em> 有下面的形式：</p>
+      <ul>
+        <li>Text：用于标准化地表示的文本信息，文本消息可以是多种字符集和或者多种格式的；</li>
+        <li>Multipart：用于连接消息体的多个部分构成一个消息，这些部分可以是不同类型的数据；</li>
+        <li>Application：用于传输应用程序数据或者二进制数据；</li>
+        <li>Message：用于包装一个E-mail消息；</li>
+        <li>Image：用于传输静态图片数据；</li>
+        <li>Audio：用于传输音频或者音声数据；</li>
+        <li>Video：用于传输动态影像数据，可以是与音频编辑在一起的视频数据格式。</li>
+      </ul>
+      <p><strong>subtype</strong> 用于指定 type 的详细形式。“type/subtype”配对的集合和与此相关的参数。下面是最经常用到的一些 MIME 类型：</p>
+      <ul>
+        <li>text/html（HTML 文档）；</li>
+        <li>text/plain（纯文本）；</li>
+        <li>text/css（CSS 样式表）；</li>
+        <li>image/gif（GIF 图像）；</li>
+        <li>image/jpeg（JPG 图像）；</li>
+        <li>application/x-javascript（JavaScript 脚本）；</li>
+        <li>application/x-shockwave-flash（Flash）；</li>
+        <li>application/x- www-form-urlencoded（使用 HTTP 的 POST 方法提交的表单）；</li>
+        <li>multipart/form-data（同上，但主要用于表单提交时伴随文件上传的场合）。</li>
+      </ul>
+      <p>关于 <strong>content-type</strong> 的详细信息，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html4/types.html#h-6.7">6.7 Content types (MIME types)</a> 中的内容。</p>
+      <p>关于 MIME 的详细信息，请参考 <a href="http://www.ietf.org/">IETF</a> 的 <a href="http://tools.ietf.org/html/rfc2045">[RFC2045]</a> 及 <a href="http://tools.ietf.org/html/rfc2046">[RFC2046]</a> 规范。</p>
+      <p>更多的 MIME 类型参见：<a href="http://www.utoronto.ca/webdocs/HTMLdocs/Book/Book-3ed/appb/mimetype.html">http://www.utoronto.ca/webdocs/HTMLdocs/Book/Book-3ed/appb/mimetype.html</a>。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 IE7 IE8 中，若一个页面被打开时接收到的响应头的 <strong>content-type</strong> 为 text/plain，浏览器会尝试嗅探页面文件内实际内容来判断是否可能为一个 HTML 文档，若是则会以 text/html 的方式将页面作为 HTML 文档解释，而不是将其作为纯文本内容处理。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>这将导致 <strong>content-type</strong> 为 text/plain 的页面在 IE6 IE7 IE8 中仍作为 text/html 去解释，导致代码以 HTML 被渲染，而不是预期的文本格式。</p>
+      <p>若由于设置不当，将一个 <strong>content-type</strong> 本应该为 text/html 的 HTML 页面误设置为 text/plain，且此页面仅在 IE6 IE7 IE8 中调试，则其他浏览器中均无法看到渲染后的页面，而是页面的源代码。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>创建一个 Web 服务器，如 Apache。在服务器上编写一段动态代码，如：<em>ct_plain.php</em></p>
+<pre>&lt;?php
+    header('Content-Type: <span class="hl_4">text/plain</span>');
+?&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;h1&gt;This is a test page!&lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>PHP 的“header()”函数向客户端发送原始的 HTTP 报头，即通知浏览器这是一个纯文本（text/plain）类型。</p>
+      <p>这段代码在不同的浏览器环境中的表现：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><div style="font-size:24px;">This is a test page!</div></td>
+          <td><div style="font-size:12px;"><pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;h1&gt;This is a test page!&lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre></div></td>
+        </tr>
+      </table>
+      <p>可见：</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8</em> 中，对于 <strong>content-type</strong> 为“text/plain”的 HTTP 响应头，浏览器仍然会尝试以“text/html”的方式将其解析为 HTML 页面，而不是以纯文本的方式显示。<br />
+        <strong>其解析的具体规则为：</strong>嗅探文件内实际内容，如果从文件内容起开始计算的 200 个 ASCII 字符内，存在可明显被识别的 HTML、BODY、HEAD、TITLE 标记则，将该文件解释为 HTML 文件类型并渲染出来。
+        <p>建立一个 txt 文本文件，其中输入以下内容（实际 200 个 ASCII 字符，包含 TITLE 标签）：<em>plain.txt</em><br />
+<pre>
+0120123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789&lt;title&gt;
+</pre>
+        将此文件配置到服务端，通过 IE 访问此远程文件可以得到被解析为 HTML 格式的文本。
+        </p>
+        </li>
+        <li>在 <em>其他浏览器</em> 中，则是遵照响应头中 <strong>content-type</strong> 类型以纯文本的方式显示内容，所以页面的代码被显示出来。</li>
+        </ul>
+
+        <p>对于 <em>IE6 IE7 IE8</em> 的嗅探机制还不止于此，实际测试证明，对于常用可识别的非视频、非音频的 <strong>content-type</strong> 类型，如：'application/octet-stream'、'application/x-shockwave-flash'、'image/jpeg'、'image/gif、‘image/png’ 类型中均会启用嗅探机制。此处就不再一一测试证明，有兴趣的读者可以自行运行测试样例 <a href="../../tests/CH9002/ct_test.php?type=0">ct_test.php</a> 观看结果。</p>
+        
+        
+        <h2 id="solutions">解决方案</h2>
+      <p>这是由于 IE 浏览器的特有内容嗅探机制导致，故在不修改服务器端代码的情况下，无法通过常规办法解决此 IE 特性问题。更多关于此问题的资料参考官方信息：<a href="http://support.microsoft.com/kb/329661/zh-cn">Internet Explorer 未按预期方式处理“Text/Plain”内容类型</a>。</p>
+      <p>合理、正确地设置文档的 <strong>content-type</strong> 是最佳的解决方案，同时应避免在非 HTML 文件中出现可被 IE6 IE7 IE8 嗅探机制捕获的 HTML、BODY、HEAD、TITLE 标记书写格式。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="CH9001">CH9001: 各浏览器对常用或者错误的 Content-Type 类型处理方式不一致</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 5.0.342.2 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.50
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/CH9002/ct_plain.php">ct_plain.php</a><br />
+            <a href="../../tests/CH9002/plain.txt">plain.txt</a><br />
+            <a href="../../tests/CH9002/ct_test.php?type=0">ct_test.php</a>
+                      </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-02</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>content-type 文本 文档类型 plain html IE 内容嗅探</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

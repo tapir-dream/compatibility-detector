@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript">
+    window.onload = function() {
+        function $(id) {
+            return document.getElementById(id);
+        }
+
+        $("info").innerHTML = "red cell clientWidth : " + $("td1").clientWidth +
+                "<br/>blue cell clientWidth : " + $("td2").clientWidth +
+                "<br/>gold cell clientWidth : " + $("td3").clientWidth;
+    }
+</script>
+</head>
+<body>
+<table id="T" style="color:white;" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="td1" style="background-color:red;">td1</td>
+        <td id="td2" style="background-color:blue;">td2</td>
+    </tr>
+    <tr>
+        <td id="td3" style=" background-color:gold; width:300px;" colspan="2">td3</td>
+    </tr>
+</table>
+computed clientWidth:
+<div id="info" style="border:1px dashed red; width:300px;"></div>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	* { margin:0; font:14px/1.5 'Trebuchet MS'; }
+	h1 { font-weight:bold; border-bottom:1px solid black; }
+	strong { font-weight:bold; color:crimson; background:khaki; }
+	em { font-weight:bold; font-style:italic; color:orchid; }
+	.ok { background:palegreen; }
+	.fail { background:lightsalmon; }
+</style>
+</head>
+<body>
+<script>
+	var cec = 'calling execution context: ',
+		gec = 'glocal execution context: ',
+		ok = '<span class="ok">OK</span><br />',
+		fail = '<span class="fail">Fail</span><br />';
+</script>
+<h1><strong>&quot;eval&quot;</strong> in <em>global</em> execution context:</h1>
+<script>
+	eval('var a = 1;');
+	void function () {
+		try {
+			if (a == 1) {
+				document.write(cec + ok);
+			}
+		} catch(ex) {
+			document.write(cec + fail);
+		}
+	}();
+	try {
+		if (a == 1) {
+			document.write(gec + ok);
+		}
+	} catch(ex) {
+		document.write(gec + fail);
+	}
+</script>
+<br />
+<h1><strong>&quot;eval&quot;</strong> in <em>calling</em> execution context:</h1>
+<script>
+	void function () {
+		eval('var b = 1;');
+		try {
+			if (b == 1) {
+				document.write(cec + ok);
+			}
+		} catch(ex) {
+			document.write(cec + fail);
+		}
+	}();
+	try {
+		if (b == 1) {
+			document.write(gec + ok);
+		}
+	} catch(ex) {
+		document.write(gec + fail);
+	}
+</script>
+<br />
+<h1><strong>&quot;window.eval&quot;</strong> in <em>global</em> execution context:</h1>
+<script>
+	window.eval('var c = 1;');
+	void function () {
+		try {
+			if (c == 1) {
+				document.write(cec + ok);
+			}
+		} catch(ex) {
+			document.write(cec + fail);
+		}
+	}();
+	try {
+		if (c == 1) {
+			document.write(gec + ok);
+		}
+	} catch(ex) {
+		document.write(gec + fail);
+	}
+</script>
+<br />
+<h1><strong>&quot;window.eval&quot;</strong> in <em>calling</em> execution context:</h1>
+<script>
+	void function () {
+		window.eval('var d = 1;');
+		try {
+			if (d == 1) {
+				document.write(cec + ok);
+			}
+		} catch(ex) {
+			document.write(cec + fail);
+		}
+	}();
+	try {
+		if (d == 1) {
+			document.write(gec + ok);
+		}
+	} catch(ex) {
+		document.write(gec + fail);
+	}
+</script>
+</body>
+</html>

@@ -1,0 +1,375 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">CH9001: 各浏览器对常用或者错误的 Content-Type 类型处理方式不一致</h1>
+<ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p><strong>content-type</strong> 用于定义用户的浏览器或相关设备如何显示将要加载的数据，或者如何处理将要加载的数据，此属性的值可以查看 MIME 类型。</p>
+      <p>MIME (Multipurpose Internet Mail Extensions，多用途互联网邮件扩展) 是描述消息内容类型的因特网标准。MIME 消息能包含文本、图像、音频、视频以及其他应用程序专用的数据。</p>
+      <p><strong>content-type</strong> 一般以下面的形式出现：</p>
+      <p><code>Content-Type: [<em>type</em>]/[<em>subtype</em>]; parameter</code></p>
+      <p><em>type</em> 有下面的形式：</p>
+      <ul>
+        <li>Text：用于标准化地表示的文本信息，文本消息可以是多种字符集和或者多种格式的；</li>
+        <li>Multipart：用于连接消息体的多个部分构成一个消息，这些部分可以是不同类型的数据；</li>
+        <li>Application：用于传输应用程序数据或者二进制数据；</li>
+        <li>Message：用于包装一个E-mail消息；</li>
+        <li>Image：用于传输静态图片数据；</li>
+        <li>Audio：用于传输音频或者音声数据；</li>
+        <li>Video：用于传输动态影像数据，可以是与音频编辑在一起的视频数据格式。</li>
+      </ul>
+      <p><strong>subtype</strong> 用于指定 type 的详细形式。“type/subtype”配对的集合和与此相关的参数。下面是最经常用到的一些 MIME 类型：</p>
+      <ul>
+        <li>text/html（HTML 文档）；</li>
+        <li>text/plain（纯文本）；</li>
+        <li>text/css（CSS 样式表）；</li>
+        <li>image/gif（GIF 图像）；</li>
+        <li>image/jpeg（JPG 图像）；</li>
+        <li>application/x-javascript（JavaScript 脚本）；</li>
+        <li>application/x-shockwave-flash（Flash）；</li>
+        <li>application/x- www-form-urlencoded（使用 HTTP 的 POST 方法提交的表单）；</li>
+        <li>multipart/form-data（同上，但主要用于表单提交时伴随文件上传的场合）。</li>
+      </ul>
+      <p>关于 <strong>content-type</strong> 的详细信息，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html4/types.html#h-6.7">6.7 Content types (MIME types)</a> 中的内容。</p>
+      <p>关于 MIME 的相信信息，请参考 <a href="http://www.ietf.org/">IETF</a> 的 <a href="http://tools.ietf.org/html/rfc2045">[RFC2045]</a> 及 <a href="http://tools.ietf.org/html/rfc2046">[RFC2046]</a> 规范。</p>
+      <p>更多的 MIME 类型参见：</p>
+            <ul>
+      <li><a href="http://www.utoronto.ca/webdocs/HTMLdocs/Book/Book-3ed/appb/mimetype.html">http://www.utoronto.ca/webdocs/HTMLdocs/Book/Book-3ed/appb/mimetype.html</a></li>
+      <li><a href="http://www.iana.org/assignments/media-types/">http://www.iana.org/assignments/media-types/</a></li>
+            </ul>
+      <h2 id="description">问题描述</h2>
+      <p>Content-Type 报头字符串代表着服务器端发送给客户端浏览器的具体数据类型，浏览器将根据这个信息决定如何处理得到的数据内容。比如：'Content-Type:text/html' 表示着这是个 HTML 文件，需要渲染引擎解释内容后输出；'Content-Type: application/octet-stream' 表示这是个二进制流，需要下载到本地后由用户端环境决定如何使用。</p>
+      <p>每个浏览器内置支持的 Content-Type 类型表各不相同，这导致了某些类型字符串在某些浏览器下不被识别；另外，如果出现错误的  Content-Type 类型，各个浏览器又会以不同的方式处理。</p>
+      <h2 id="influence">造成的影响</h2>
+      <p>未知的或者是错误的  Content-Type 类型，在各个浏览器中处理方式不一致，草率对待将有可能使得同一文件在各种浏览器中展现方式完全不同。</p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>创建一个 Web 服务器，如 Apache。在服务器上编写一段动态代码，如：<em>ct_test.php</em></p>
+<pre>
+&lt;?php
+  $contentTypeList = array(
+    '0'=&gt;'Content-Type: text/plain',
+    '1'=&gt;'Content-Type: application/octet-stream',
+    '2'=&gt;'Content-Type: application/x-rar-compressed',
+    '3'=&gt;'Content-Type: application/zip',
+    '4'=&gt;'Content-Type: application/x-shockwave-flash',
+    '5'=&gt;'Content-Type: video/quicktime',
+    '6'=&gt;'Content-Type: video/mp4',
+    '7'=&gt;'Content-Type: audio/mpeg',
+    '8'=&gt;'Content-Type: image/jpeg',
+    '9'=&gt;'Content-Type: image/gif',
+    '10'=&gt;'Content-Type: image/png',
+    '11'=&gt;'Content-Type: application',
+    '12'=&gt;'Content-Type: audio',
+    '13'=&gt;'Content-Type: video',
+    '14'=&gt;'Content-Type: image',
+    '15'=&gt;'Content-Type: helloworld'
+    );
+  header($contentTypeList[$_GET["type"]]."; charset=UTF-8");
+?&gt;</pre>
+
+
+      <p>PHP 的文件中建立了 16 种 Content-Type 类型，根据 URL 中 GET 参数值选取其中一种文件类型  HTTP 报头发向客户端浏览器。其中 11 种常用类型，4 种故意写错的类型，1 种完全自定义类型：</p>
+      <table class="compare">
+              <tr>
+                <th>&nbsp;</th>
+                <th>文件类型</th>
+                <th>Content-Type 类型</th>
+              </tr>
+              <tr>
+                <th rowspan="11">常见类型</th>
+                <td>文本</td>
+                <td>text/plain</td>
+              </tr>
+              <tr>
+                <td>二进制流</td>
+                <td>application/octet-stream</td>
+              </tr>
+              <tr>
+                <td>RAR 压缩包</td>
+                <td>application/x-rar-compressed</td>
+              </tr>
+              <tr>
+                <td>Zip 压缩包</td>
+                <td>application/zip</td>
+              </tr>
+              <tr>
+                <td>Flash 文件</td>
+                <td>application/x-shockwave-flash</td>
+              </tr>
+              <tr>
+                <td>QuickTime 视频</td>
+                <td>video/quicktime</td>
+              </tr>
+              <tr>
+                <td>MP4 视频</td>
+                <td>video/mp4</td>
+              </tr>
+              <tr>
+                <td>MP3 音频</td>
+                <td>audio/mpeg</td>
+              </tr>
+              <tr>
+                <td>JPEG 图片</td>
+                <td>image/jpeg</td>
+              </tr>
+              <tr>
+                <td>GIF 图片</td>
+                <td>image/gif</td>
+              </tr>
+              <tr>
+                <td>PNG 图片</td>
+                <td>image/png </td>
+              </tr>
+              <tr>
+                <th rowspan="4">书写有误类型</th>
+                <td>数据</td>
+                <td>application</td>
+              </tr>
+              <tr>
+                <td>音频</td>
+                <td>audio</td>
+              </tr>
+              <tr>
+                <td>视频</td>
+                <td>video</td>
+              </tr>
+              <tr>
+                <td>图像</td>
+                <td>image</td>
+              </tr>
+              <tr>
+                <th>浏览器不可识别类型</th>
+                <td>自定义类型</td>
+                <td>helloworld</td>
+              </tr>
+            </table>
+      <p>分别以不同 HTTP Content-Type 报头类型运行此段代码，在不同的浏览器环境中的表现如下：</p>
+<table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8 </th>
+            <th>Firefox   </th>
+            <th>Chrome</th>
+            <th>Safari</th>
+            <th>Opera</th>
+        </tr>
+        <tr>
+          <th>text/plain</th>
+                  <td><span class="hl_2">显示文件内容</span></td>
+          <td><span class="hl_2">显示文件内容</span></td>
+          <td><span class="hl_2">显示文件内容</span></td>
+          <td><span class="hl_2">显示文件内容</span></td>
+          <td><span class="hl_2">显示文件内容</span></td>
+      </tr>
+        <tr>
+          <th>application/octet-stream</th>
+          <td><span class="hl_2">显示文件内容</span></td>
+            <td><span class="hl_3">下载文件</span></td>
+            <td><span class="hl_3">下载文件</span></td>
+            <td><span class="hl_3">下载文件</span></td>
+            <td><span class="hl_2">显示文件内容</span></td>
+        </tr>
+        <tr>
+          <th>application/x-rar-compressed</th>
+          <td><span class="hl_3">下载文件</span><sup>1</sup></td>
+          <td><span class="hl_3">下载文件</span></td>
+          <td><span class="hl_3">下载文件</span></td>
+          <td><span class="hl_3">下载文件</span></td>
+          <td><span class="hl_3">下载文件</span></td>
+      </tr>
+        <tr>
+          <th>application/zip</th>
+          <td><span class="hl_3">下载文件</span><sup>1</sup></td>
+          <td><span class="hl_3">下载文件</span></td>
+          <td><span class="hl_3">下载文件</span></td>
+          <td><span class="hl_3">下载文件</span></td>
+          <td><span class="hl_3">下载文件</span></td>
+      </tr>
+        <tr>
+          <th>application/x-shockwave-flash</th>
+          <td><span class="hl_4">试图显示 Flash</span></td>
+          <td><span class="hl_4">试图显示 Flash</span></td>
+          <td><span class="hl_4">试图显示 Flash</span></td>
+          <td><span class="hl_4">试图显示 Flash</span></td>
+          <td><span class="hl_4">试图显示 Flash</span></td>
+      </tr>
+        <tr>
+          <th>video/quicktime</th>
+          <td><span class="hl_3">下载文件</span></td>
+          <td><span class="hl_3">下载文件</span></td>
+          <td><span class="hl_3">下载文件</span></td>
+          <td><span class="hl_3">下载文件</span></td>
+          <td><span class="hl_3">下载文件</span></td>
+      </tr>
+        <tr>
+          <th>video/mp4</th>
+                  <td><span class="hl_3">下载文件</span></td>
+          <td><span class="hl_3">下载文件</span></td>
+          <td><span class="hl_4">试图播放视频</span><sup>3</sup></td>
+          <td><span class="hl_3">下载文件</span></td>
+          <td><span class="hl_3">下载文件</span></td>
+      </tr>
+        <tr>
+          <th>audio/mpeg</th>
+          <td><span class="hl_3">下载文件</span></td>
+          <td><span class="hl_3">下载文件</span></td>
+          <td><span class="hl_4">试图播放视频</span><sup>3</sup></td>
+          <td><span class="hl_3">下载文件</span></td>
+          <td><span class="hl_3">下载文件</span></td>
+      </tr>
+        <tr>
+          <th>image/jpeg</th>
+                  <td><span class="hl_2">显示文件内容</span></td>
+          <td><span class="hl_4">试图显示图片</span><sup>2</sup></td>
+          <td><span class="hl_4">试图显示图片</span></td>
+          <td><span class="hl_4">试图显示图片</span></td>
+          <td><span class="hl_4">试图显示图片</span></td>
+      </tr>
+        <tr>
+          <th>image/gif</th>
+          <td><span class="hl_2">显示文件内容</span></td>
+          <td><span class="hl_4">试图显示图片</span><sup>2</sup></td>
+          <td><span class="hl_4">试图显示图片</span></td>
+          <td><span class="hl_4">试图显示图片</span></td>
+          <td><span class="hl_4">试图显示图片</span></td>
+      </tr>
+        <tr>
+          <th>image/png </th>
+          <td><span class="hl_2">显示文件内容</span></td>
+          <td><span class="hl_4">试图显示图片</span><sup>2</sup></td>
+          <td><span class="hl_4">试图显示图片</span></td>
+          <td><span class="hl_4">试图显示图片</span></td>
+          <td><span class="hl_4">试图显示图片</span></td>
+      </tr>
+        <tr>
+          <th>application</th>
+          <td><span class="hl_3">下载文件</span><sup>1</sup></td>
+          <td><span class="hl_2">显示文件内容</span></td>
+          <td><span class="hl_2">显示文件内容</span></td>
+          <td><span class="hl_3">下载文件</span></td>
+          <td><span class="hl_2">显示文件内容</span></td>
+    </tr>
+        <tr>
+          <th>audio</th>
+          <td><span class="hl_3">下载文件</span><sup>1</sup></td>
+          <td><span class="hl_2">显示文件内容</span></td>
+          <td><span class="hl_2">显示文件内容</span></td>
+          <td><span class="hl_3">下载文件</span></td>
+          <td><span class="hl_2">显示文件内容</span></td>
+      </tr>
+        <tr>
+          <th>video</th>
+          <td><span class="hl_3">下载文件</span><sup>1</sup></td>
+          <td><span class="hl_2">显示文件内容</span></td>
+          <td><span class="hl_2">显示文件内容</span></td>
+          <td><span class="hl_3">下载文件</span></td>
+          <td><span class="hl_2">显示文件内容</span></td>
+      </tr>
+        <tr>
+          <th>image</th>
+          <td><span class="hl_3">下载文件</span><sup>1</sup></td>
+          <td><span class="hl_2">显示文件内容</span></td>
+          <td><span class="hl_2">显示文件内容</span></td>
+          <td><span class="hl_3">下载文件</span></td>
+          <td><span class="hl_2">显示文件内容</span></td>
+      </tr>
+        <tr>
+          <th>helloworld</th>
+          <td><span class="hl_3">下载文件</span><sup>1</sup></td>
+          <td><span class="hl_2">显示文件内容</span></td>
+          <td><span class="hl_2">显示文件内容</span></td>
+          <td><span class="hl_3">下载文件</span></td>
+          <td><span class="hl_2">显示文件内容</span></td>
+    </tr>
+      </table>
+      <p class="comment">【注1】：这几种 Content-Type 类型在测试环境中的 IE6 IE7 IE8 浏览器弹出的下载对话框提示中，均显示<strong>“不可识别类型”</strong>。</p>
+      <p class="comment">【注2】：Firefox 会将 URL 和一些错误信息输出在图片格式中显示。</p>
+      <p class="comment">【注3】：Chrome 试图使用 VIDEO 标记直接显示这两种格式的视频。</p>
+      <p>由表可见：</p>
+<ul>
+        <li>IE6 IE7 IE8 对于可以识别的非视频、音频流内容均会嗅探其内容，并且根据内容是否正常再决定如何输出显示；<br />
+          （关于嗅探的扩展阅读：<a href="CH9002">CH9002: IE6 IE7 IE8 未按预期方式处理 content-type 为 text/plain 的内容</a>）</li>
+        <li>Firefox Chrome 对于未知 Content-Type 的内容均直接显示其内容，其他类型则以直接以最合适的方式处理；</li>
+          <li>Opera 对于可以识别的视频、音频流内容会直接提示下载，图片类型和 Flash 类型会试图显示他们，未知 Content-Type 的内容均直接显示其内容则直接显示其内容，但在显示内容前不会嗅探其中的 HTML 标记。</li>
+</ul>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>这个问题比较复杂，如需避免出现显示异常，建议不要使用非法的  Content-Type 头字符串；并且文件实际内容和数据格式应与   Content-Type 头字符串内类型声明一致。</p>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="CH9002">CH9002: IE6 IE7 IE8 未按预期方式处理 content-type 为 text/plain 的内容</a><a href="#"></a></li>
+      </ul>
+
+    <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.9<br />
+              Chrome 7.0.517.0 dev<br />
+              Safari 5.0.1<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/CH9001/ct_test.php?type=0">ct_test.php</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-09</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>content-type  文档类型  html text/plain application/octet-stream application/x-rar-compressed application/zip application/x-shockwave-flash video/quicktime video/mp4 audio/mpeg image/jpeg image/gif image/png application audio video image</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

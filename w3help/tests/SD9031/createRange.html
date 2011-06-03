@@ -1,0 +1,17 @@
+<script type="text/javascript">
+	var methods = ["document.createRange()", "window.getSelection().getRangeAt", "document.selection.createRange()", "document.body.createTextRange()"],
+		i = 0, info, setInfo;
+    window.onload = function() {
+		info = document.getElementById("info"),
+		setInfo = function(msg){info.innerHTML += msg + "<br/>";};
+		
+		for(;i<methods.length;i++){
+			var method = methods[i];
+			try{
+				eval("(" + method + ")");
+				setInfo(method);
+			}catch(e){}
+		}
+    }
+</script>
+<div id="info">Support: <br/></div>

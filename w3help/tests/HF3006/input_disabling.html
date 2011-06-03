@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<style>
+	table { font:12px Arial; border-collapse:collapse; }
+	table td, table th { border:1px solid #999; }
+	th { background:#ddd; }
+	input { width:100px; color:#aaa; background:#eaeaea; }
+</style>
+</head>
+<body>
+<table>
+	<tr>
+		<th>&nbsp;</th>
+		<th>createElement</th>
+		<th>cloneNode</th>
+		<th>innerHTML</th>
+		<th>document.write</th>
+		<th>页面</th>
+	</tr>
+	<tr>
+		<th>初始 disabled</th>
+		<td id="a1"></td>
+		<td id="c1"></td>
+		<td id="i1"></td>
+		<td id="r1">
+			<script>
+				document.write('<input id="r1i" type="text" disabled value="W" />');
+			</script>
+		</td>
+		<td id="d1"><input id="d1i" type="text" disabled value="W" /></td>
+	</tr>
+	<tr>
+		<th>后设置 disabled</th>
+		<td id="a2"></td>
+		<td id="c2"></td>
+		<td id="i2"></td>
+		<td id="r2">
+			<script>
+				document.write('<input id="r2i" type="text" value="W" />');
+			</script>
+		</td>
+		<td id="d2"><input id="d2i" type="text" value="W" /></td>
+	</tr>
+	<tr>
+		<th colspan="6">disabled 之后恢复“可用”</th>
+	</tr>
+	<tr>
+		<th>初始 disabled</th>
+		<td id="a3"></td>
+		<td id="c3"></td>
+		<td id="i3"></td>
+		<td id="r3">
+			<script>
+				document.write('<input id="r3i" type="text" disabled value="W" />');
+			</script>
+		</td>
+		<td id="d3"><input id="d3i" type="text" disabled value="W" /></td>
+	</tr>
+	<tr>
+		<th>后设置 disabled</th>
+		<td id="a4"></td>
+		<td id="c4"></td>
+		<td id="i4"></td>
+		<td id="r4">
+			<script>
+				document.write('<input id="r4i" type="text" value="W" />');
+			</script>
+		</td>
+		<td id="d4"><input id="d4i" type="text" value="W" /></td>
+	</tr>
+</table>
+<script>
+	function $(id) { return document.getElementById(id); }
+
+	//---------------------------------------
+	var input = document.createElement('input');
+	input.type = 'text';
+	input.value = 'W';
+	input.disabled = true;
+	$('a1').appendChild(input);
+
+	$('i1').innerHTML = '<input id="i1i" type="text" disabled value="W" />';
+
+	var input_copy = input.cloneNode(true);
+	input_copy.disabled = true;
+	$('c1').appendChild(input_copy);
+
+
+	//----------------------------------------
+	var input2 = document.createElement('input');
+	input2.type = 'text';
+	input2.value = 'W';
+	$('a2').appendChild(input2);
+	input2.disabled = true;
+
+	$('i2').innerHTML = '<input id="i2i" type="text" value="W" />';
+	$('i2i').disabled = true;
+
+	$('r2i').disabled = true;
+
+	var input2_copy = input2.cloneNode(true);
+	$('c2').appendChild(input2_copy);
+	input2_copy.disabled = true;
+
+	$('d2i').disabled = true;
+
+	//---------------------------------------
+	var input3 = document.createElement('input');
+	input3.type = 'text';
+	input3.value = 'W';
+	input3.disabled = true;
+	$('a3').appendChild(input3);
+	input3.disabled = false;
+
+	$('i3').innerHTML = '<input id="i3i" type="text" disabled value="W" />';
+	$('i3i').disabled = false;
+
+	$('r3i').disabled = false;
+
+	var input_copy3 = input3.cloneNode(true);
+	input_copy3.disabled = true;
+	$('c3').appendChild(input_copy3);
+	input_copy3.disabled = false;
+
+	$('d3i').disabled = false;
+
+	//----------------------------------------
+	var input4 = document.createElement('input');
+	input4.type = 'text';
+	input4.value = 'W';
+	$('a4').appendChild(input4);
+	input4.disabled = true;
+	input4.disabled = false;
+
+	$('i4').innerHTML = '<input id="i4i" type="text" value="W" />';
+	$('i4i').disabled = true;
+	$('i4i').disabled = false;
+
+	$('r4i').disabled = true;
+	$('r4i').disabled = false;
+
+	var input4_copy = input4.cloneNode(true);
+	$('c4').appendChild(input4_copy);
+	input4_copy.disabled = true;
+	input4_copy.disabled = false;
+
+	$('d4i').disabled = true;
+	$('d4i').disabled = false;
+
+</script>
+</body>
+</html>

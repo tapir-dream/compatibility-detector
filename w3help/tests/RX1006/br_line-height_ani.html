@@ -1,0 +1,47 @@
+<!DOCTYPdE html>
+<style>
+	body { font-family:Arial; }
+    .cont { width:100px; background:sienna; line-height:200%; }
+	.cont br.lh { line-height:2px; }
+    .sibling { background:wheat; overflow:hidden; }
+    .info { font-size:12px; line-height:120%; }
+    .hl { background:gold; }
+</style>
+<script>
+	window.onload = function() {
+		function $(id) { return document.getElementById(id); }
+		if (!window.getComputedStyle) {
+			window.getComputedStyle = function($target) {
+				return $target.currentStyle;
+			}
+		}
+		
+		function ptToPx (pt) {
+			return (/pt/gi.test(pt)) ? (parseInt(pt) / 0.75) + "px" : pt;
+		}
+		
+		function showInfo () {
+			$('info').innerHTML = 'Container:<span class="hl">'
+				+ $('d').offsetHeight
+				+ 'px</span><br />&nbsp;&nbsp;&nbsp;&nbsp;line-height:'
+				+ ptToPx(getComputedStyle($('d')).lineHeight)
+				+ '<br />BR:<span class="hl">'
+				+ ($('d').offsetHeight - $('ds1').offsetHeight - $('ds2').offsetHeight)
+				+ 'px</span><br />&nbsp;&nbsp;&nbsp;&nbsp;line-height:'
+				+ ptToPx(getComputedStyle($('br')).lineHeight);
+		}
+		
+		var k = 60;
+		setInterval(function () {
+			$('br').style.lineHeight = --k + "px";
+			showInfo();
+			(k == 0) && (k = 60);
+		}, 50);
+	}
+</script>
+<div id="d" class="cont" style="font-size:12px;">
+    <div id="ds1" class="sibling">12px</div>
+    <br id="br" class="lh" />
+    <div id="ds2" class="sibling">12px</div>
+</div>
+<div id="info" class="info"></div>

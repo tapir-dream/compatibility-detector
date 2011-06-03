@@ -1,0 +1,258 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HO2009: 各浏览中对 MAP 和 AREA 元素的事件处理行为不同</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>MAP 和 AREA 元素通常组合起来使用为图片要设置一个超链接区域。使用时将 IMG 元素的 &quot;usemap&quot; 属性<sup class="hl_1">1</sup>关联到一个 MAP 元素上，这个 MAP 元素的 &quot;name&quot; 属性值要与 IMG 元素的 &quot;usemap&quot; 属性值相同。AREA 元素嵌入在 MAP 元素中，用来指定该图片中超链接区域的形状 (&quot;shape&quot;) 、所处位置 (&quot;coords&quot;)、链接地址 (&quot;href&quot;) 等。</p>
+      <p>HTML4.01 规范中对 AREA 元素的 &quot;shape&quot; 和 &quot;coords&quot; 属性的描述如下：</p>
+      <ul>
+        <li>shape：可取值为 default | rect | circle | poly，用来指定超链接区域的形状。
+          <ul>
+            <li style="list-style-type:circle">default：将整个图片定义为超链接区域；</li>
+            <li style="list-style-type:circle">rect：定义一个矩形超链接区域；</li>
+            <li style="list-style-type:circle">circle：定义一个圆形超链接区域；</li>
+            <li style="list-style-type:circle">poly：定义一个多边形超链接区域；</li>
+          </ul>
+        </li>
+        <li>coords：用来指定超链接区域在屏幕上的位置和形状，确定位置的坐标值和坐标值的书写顺序由所设定的形状来决定，确定位置与形状的可能性组合如下
+          <ul>
+            <li style="list-style-type:circle"><em>rect：left-x，top-y，right-x，bottom-y</em> ，通过两个点来确定一个矩形的左上角与右下角的坐标，从而确定一个矩形区域；</li>
+            <li style="list-style-type:circle"><em>circle：center-x, center-y, radius</em> ，通过一对坐标值确定一个点，并以这个点为圆心，"radius" 值为半径确定一个圆形的超链接区域，当 "radius" 值为百分数时，依照被关联对象的 min(width，height)计算出半径的数值；</li>
+            <li style="list-style-type:circle"><em>poly：x1, y1, x2, y2, ..., xN, yN</em> ，每两个为一对坐标用来确定一个点，当这些点的坐标值不全相同时，以第一个点为该多边形的起始点，最后一个点为多边形的终点，将这些点连接起来围成一个多边形；</li>
+          </ul>
+        </li>
+      </ul>
+      <p>关于 MAP 和 AREA 元素的更多内容，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/html401/struct/objects.html#edef-AREA">13.6.1 Client-side image maps: the MAP and AREA elements</a> 中的内容。</p>
+      <p class="comment">注 1：要关联 MAP 元素的 IMG 元素的 &quot;usemap&quot; 属性值必须以 &quot;#&quot; 开头并且加上要关联的 MAP 元素的 &quot;name&quot; 属性值。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>MAP 元素会影响指向 MAP 的元素，其父元素 A 元素的默认链接行为。</p>
+      <p>IE6 IE7 IE8 中，产生自 MAP 元素的事件冒泡路径，不依赖 MAP 本身所处的元素嵌套规则，他会执行到引向 MAP 的元素嵌套结构中。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>页面无法按照预期结果执行导航，并且意外的触发原本不应在事件冒泡路径上的事件处理程序。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <h3>1. 对 A 元素默认链接行为的阻止</h3>
+      <p>分析以下代码：<em>img-map.html</em></p>
+<pre>&lt;a href="http://www.google.com" target="_blank"&gt;
+  &lt;img src="Chrome1.png" usemap="#Map1" style="border:none" /&gt; text
+&lt;/a&gt;
+&lt;map name="Map1"&gt;&lt;/map&gt;</pre>
+      <p>A 元素链接到 Google 站点，元素内嵌套 IMG 标签，此图片使用 &quot;usemap&quot; 属性关联到名为 &quot;Map1&quot; 的 MAP 元素中。</p>
+      <p>分别点击 A 元素的图片区域及文本区域，各浏览器实际结果处理如下：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <th>点击图片区域</th>
+          <td><span class="hl_1">失效</span></td>
+          <td><span class="hl_2">有效</span></td>
+        </tr>
+        <tr>
+          <th>点击文本区域</th>
+          <td><span class="hl_2">有效</span></td>
+          <td><span class="hl_2">有效</span></td>
+        </tr>
+      </table>
+      <p>可见，在 <em>IE6 IE7 IE8</em> 中，如果 A 元素内带有使用 usemap 属性关联了 MAP 元素的 IMG 元素，将导致超链接中该图片区域默认行为失效。</p>
+      <p>&nbsp;</p>
+      <h3>2. MAP AREA 元素的事件冒泡机制差异</h3>
+      <p>分析以下两组代码：<em>map-area_event_bubble.html</em></p>
+      <pre>&lt;script&gt;
+  function clicked(i, o) {
+    document.getElementById('info' + i).innerHTML += o.tagName + ' Tag Clicked.&lt;br /&gt;';
+  }
+&lt;/script&gt;
+
+&lt;div&gt;
+  MAP 位于 A 之外，请点击图片：&lt;br /&gt;
+  &lt;a href=&quot;#&quot; onclick=&quot;clicked(1, this)&quot;&gt;
+    &lt;img src=&quot;Chrome1.png&quot; border=&quot;0&quot; usemap=&quot;#Map1&quot; onclick=&quot;clicked(1, this)&quot; /&gt;
+  &lt;/a&gt;
+  &lt;map name=&quot;Map1&quot; onclick=&quot;clicked(1, this)&quot;&gt;
+    &lt;area shape=&quot;rect&quot; coords=&quot;0,0,90,90&quot; onclick=&quot;clicked(1, this)&quot;&gt;
+  &lt;/map&gt;
+&lt;/div&gt;
+&lt;div id=&quot;info1&quot;&gt;&lt;/div&gt;
+&lt;br /&gt;
+&lt;div&gt;
+  MAP 位于 A 之内，请点击图片：&lt;br /&gt;
+  &lt;a href=&quot;#&quot; onclick=&quot;clicked(2, this)&quot;&gt;
+    &lt;img src=&quot;Chrome1.png&quot; border=&quot;0&quot; usemap=&quot;#Map2&quot; onclick=&quot;clicked(2, this)&quot; /&gt;
+    &lt;map name=&quot;Map2&quot; onclick=&quot;clicked(2, this)&quot;&gt;
+      &lt;area shape=&quot;rect&quot; coords=&quot;0,0,90,90&quot; onclick=&quot;clicked(2, this)&quot;&gt;
+    &lt;/map&gt;
+  &lt;/a&gt;
+&lt;/div&gt;
+&lt;div id=&quot;info2&quot;&gt;&lt;/div&gt;</pre>
+      <p>两组代码中均为 AREA MAP A IMG 元素写入内联 &quot;click&quot; 事件，第一组为 MAP 标签没有嵌套在 A 标签内情况，第二组为 MAP 标签嵌套在 A 元素内情况。</p>
+      <p>根据浏览器事件冒泡机制，点击 AREA 元素，在触发完成自身的 &quot;click&quot; 事件后，AREA 元素的父级元素直至到视口元素为止，都会依次触发他们的  &quot;click&quot; 事件。因此根据规范描述，第一组元素应会根据元素嵌套关系，实现事件冒泡机制，依次触发 AREA MAP 元素的  &quot;click&quot; 事件。而第二组则是，依次触发 AREA MAP A 元素的  &quot;click&quot; 事件。</p>
+      <p>尝试点击 AREA 元素，各浏览器实际结果处理如下：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <th>MAP 位于 A 之外</th>
+          <td>AREA Tag Clicked.<br />MAP Tag Clicked.<br />IMG Tag Clicked.<br />A Tag Clicked.</td>
+          <td>AREA Tag Clicked.<br />MAP Tag Clicked.</td>
+        </tr>
+        <tr>
+          <th>MAP 位于 A 之内</th>
+          <td>AREA Tag Clicked.<br />MAP Tag Clicked.<br />IMG Tag Clicked.<br />A Tag Clicked.</td>
+          <td>AREA Tag Clicked.<br />MAP Tag Clicked.<br />A Tag Clicked.</td>
+        </tr>
+      </table>
+      <p>可见，<em>IE6 IE7 IE8</em> 中即使 MAP 元素没有嵌套在 A 元素内，其事件冒泡机制依然会通过 IMG 元素关联起来，这显然是个不符合事件冒泡机制的实现扩展。</p>
+      <p>而其他浏览器则是严格根据元素实际嵌套关系产生事件冒泡。</p>
+      <p>&nbsp;</p>
+      <h3>3. MAP AREA 标签对 A 标签的默认行为支持差异</h3>
+      <p>结合之前的第一和第二点差异，我们构造出如下两组用例： </p>
+      <pre>&lt;script&gt;
+  function clicked(i, o) {
+    document.getElementById('info' + i).innerHTML += o.tagName + ' Tag Clicked.&lt;br /&gt;';
+  }
+&lt;/script&gt;
+
+&lt;div&gt;
+  MAP 位于 A 之外，请点击图片：&lt;br /&gt;
+  &lt;a href=&quot;http://www.google.com&quot; onclick=&quot;clicked(1, this)&quot; target=&quot;_blank&quot;&gt;
+    &lt;img src=&quot;Chrome1.png&quot; border=&quot;0&quot; usemap=&quot;#Map2&quot; /&gt;
+  &lt;/a&gt;
+  &lt;map name=&quot;Map2&quot;&gt;
+    &lt;area shape=&quot;rect&quot; coords=&quot;0,0,90,90&quot; onclick=&quot;clicked(1, this)&quot;&gt;
+  &lt;/map&gt;
+&lt;/div&gt;
+&lt;div id=&quot;info1&quot;&gt;&lt;/div&gt;
+&lt;br /&gt;
+&lt;div&gt;
+  MAP 位于 A 之内，请点击图片：&lt;br /&gt;
+  &lt;a href=&quot;http://www.google.com&quot; onclick=&quot;clicked(2, this)&quot; target=&quot;_blank&quot;&gt;
+    &lt;img src=&quot;Chrome1.png&quot; border=&quot;0&quot; usemap=&quot;#Map1&quot; /&gt;
+    &lt;map name=&quot;Map1&quot;&gt;
+      &lt;area shape=&quot;rect&quot; coords=&quot;0,0,90,90&quot; onclick=&quot;clicked(2, this)&quot;&gt;
+    &lt;/map&gt;
+  &lt;/a&gt;
+&lt;/div&gt;
+&lt;div id=&quot;info2&quot;&gt;&lt;/div&gt;</pre>
+      <p>第 1 组代码中，MAP 处于 A 标签外，第 2 组 MAP 处于 A 标签内。</p>
+      <p>两组代码中均使用， A 元素嵌套 IMG 和 MAP 元素，IMG 元素使用 &quot;usemap&quot; 属性指向 MAP 元素， MAP 中使用 AREA 元素创造出足以覆盖 IMG 区域的链接区。</p>
+      <p>根据之前说明可知，在第 2 组用例中，点击图片区域，会先触发 &quot;AREA&quot; 元素的 &quot;click&quot; 事件。然后根据事件冒泡机制，会使父元素 A 也产生 &quot;click&quot;。A 元素内存在  &quot;href&quot; 属性并链接到 Google 首页上，被点击后应将该页导航到 Google。</p>
+      <p>运行用例，来看不同的浏览器中的表现结果汇总如下： </p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox</th>
+          <th>Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <th>第 1 组</th>
+          <td><span class="hl_1">A 元素导航失效</span></td>
+          <td><span class="hl_2">事件冒泡不会到达 A 元素，不产生导航行为。</span></td>
+          <td><span class="hl_2">事件冒泡不会到达 A 元素，不产生导航行为。</span></td>
+        </tr>
+        <tr>
+          <th>第 2 组</th>
+          <td><span class="hl_1">A 元素导航失效</span></td>
+          <td><span class="hl_1">A 元素导航失效</span></td>
+          <td><span class="hl_2">导航到 Google</span></td>
+        </tr>
+      </table>
+      <p>根据上表可见：</p>
+      <ul>
+        <li><em>IE6 IE7 IE8</em> 中由于文章最开始说明的，如果 A 标签内包含有使用 MAP 的 IMG 标签，将导致 A 链接整体失效；</li>
+        <li><em>Firefox</em> 中，即使点击事件冒泡到 A 标签中，也不会触发 A 标签的默认导航行为发生；</li>
+        <li><em>Chrome Safari Opera</em> 均处理正常。</li>
+      </ul>
+
+      <h2 id="solutions">解决方案</h2>
+      <ul>
+        <li>注意 MAP 标记与其他标记的嵌套关系，IE6 IE7 IE8 中的 MAP 冒泡机制是根据指向 MAP 标记的标记位置决定的。如果期望所有浏览器冒泡路径基本一致，可以将 MAP 标记放在引用 MAP 的标记的兄弟级别。</li>
+        <li>注意 A 标记的默认导航行为触发限制，即使标签嵌套一致，点击事件冒泡路颈 A 标记，也不会在 IE6 IE7 IE8 Firefox 中触发浏览器默认行为产生导航。可以利用 A 标记也会执行点击事件冒泡的特性，使用 A 标记的 &quot;click&quot; 事件代替 &quot;href&quot; 属性执行页面跳转工作。</li>
+      </ul>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.11<br />
+              Chrome 8.0.552.11 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.63
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HO2009/img-map.html">img-map.html</a><br />
+            <a href="../../tests/HO2009/map-area_event_bubble.html">map-area_event_bubble.html</a><br />
+            <a href="../../tests/HO2009/map-area_default.html">map-area_default.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-25</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>AREA MAP A 事件冒泡 默认行为 链接 导航</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

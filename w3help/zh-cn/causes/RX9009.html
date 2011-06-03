@@ -1,0 +1,194 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RX9009: 各浏览器中 IFRAME 元素的 scrolling 属性与其子页面 HTML 与 BODY 元素 'overflow' 特性的制约关系有差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 HTML4.01 规范中的描述，FRAME 元素与 IFRAME 元素拥有一个特殊的属性 &quot;scrolling&quot;，这个属性为框架窗口指定滚动信息，可能值：</p>
+      <ul>
+        <li>auto：默认值，告诉用户端在必要时为框架窗口提供滚动设备；</li>
+        <li>yes：告诉用户端始终为框架窗口提供滚动设备；</li>
+        <li>no：告诉用户端不为框架窗口提供滚动设备。</li>
+      </ul>
+      <p>然而规范中并没有说明此属性与框架引入的子页面中的 HTML 元素或是 BODY 元素通过 CSS 的 'overflow' 特性生成的滚动条之间的制约关系。</p>
+      <p>关于 scrolling 属性的详细信息，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html401/present/frames.html#adef-scrolling">16.2.2 The FRAME element</a> 中的内容。</p>
+      <p></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 <em>IE Chrome Safari</em> 中，IFRAME 元素引入的子页面 HTML 元素的 &quot;overflow:hidden&quot; 会使 IFRAME 元素的 scrolling 属性失效，IFRAME 元素不会出现滚动条。</p>
+      <p>在 <em>Chrome  Safari</em> 中，虽然 IFRAME 元素的 scrolling 属性为 &quot;no&quot;，但若其子页面的 HTML 或 BODY 元素的 'overflow' 特性为 'scroll'，则 IFRAME 仍会被渲染上滚动条。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>各浏览器 IFRAME 元素的 scrolling 属性与其子页面 HTML 与 BODY 元素 'overflow' 特性的制约关系上的差异，可能造成子页面滚动条的渲染差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>首先观察子页面 HTML 与 BODY 元素为 &quot;overflow:scroll&quot; 时的情况。</p>
+
+      <p>分析以下代码：</p>
+      <p><em>parent_scroll.html</em></p>
+<pre>&lt;!DOCTYPE html&gt;
+&lt;iframe src="<em>sub1.htm</em>" <span class="hl_1">scrolling="yes"</span> style="width:80px; height:80px;"&gt;&lt;/iframe&gt;
+&lt;iframe src="<em>sub1.htm</em>" <span class="hl_1">scrolling="no"</span> style="width:80px; height:80px;"&gt;&lt;/iframe&gt;
+&lt;br /&gt;
+&lt;iframe src="<em>sub2.htm</em>" <span class="hl_1">scrolling="yes"</span> style="width:80px; height:80px;"&gt;&lt;/iframe&gt;
+&lt;iframe src="<em>sub2.htm</em>" <span class="hl_1">scrolling="no"</span> style="width:80px; height:80px;"&gt;&lt;/iframe&gt;</pre>
+      <p><em>sub1.htm</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html style="<span class="hl_2">overflow:scroll;</span> border:2px solid red;"&gt;
+&lt;body style="<span class="hl_2">overflow:scroll;</span> border:2px solid gold; margin:0; width:50px; height:50px;"&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+
+      <p><em>sub2.htm</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html style="border:2px solid red;"&gt;
+&lt;body style="<span class="hl_2">overflow:scroll;</span> border:2px solid gold; margin:0; width:50px; height:50px;"&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>主页面中包含两组共四个 IFRAME 元素，每组内 <span class="hl_1">scrolling</span> 属性值分别为 &quot;yes&quot;、&quot;no&quot;。子页面 <em>sub1.htm</em> 中的 HTML 与 BODY 元素的 'overflow' 特性均为 'scroll'。子页面 <em>sub2.htm</em> 中的 BODY 元素的 'overflow' 特性为 'scroll'。<strong>对于 IE6(Q) IE7(Q) IE8(Q) 混杂模式的根元素不是 HTML 造成的特殊效果这里不再分析。</strong></p>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE7(S)</th>
+          <th>IE8(S) Firefox Opera</th>
+          <th>Chrome Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RX9009/IE7_scrolling_scroll.gif" alt="IE7 scrolling and overflow:scroll" /></td>
+          <td><img src="../../tests/RX9009/FF_scrolling_scroll.gif" alt="IE8, Firefox, Opera scrolling and overflow:scroll" /></td>
+          <td><img src="../../tests/RX9009/CR_scrolling_scroll.gif" alt="Chrome, Safari scrolling and overflow:scroll" /></td>
+        </tr>
+      </table>
+      <p>在分析上面一组截图前，先在各浏览器下单独运行 <em>sub2.htm</em>，可知：</p>
+      <ul>
+        <li>在 <em>IE7(S)</em> 中，HTML 元素的 'overflow' 特性默认值为 'scroll'，所以默认即会出现页面滚动条。BODY 元素的&quot;overflow:scroll&quot; 生成的滚动条与页面滚动条无关；</li>
+        <li>在 <em>IE8(S) Firefox Chrome Safari Opera</em> 中，在 HTML 元素的 'overflow' 特性为 'visible' 时，BODY 元素的 &quot;overflow:scroll&quot; 生成的滚动条即作为页面的滚动条。</li>
+      </ul>
+      <br />
+      <p>回到上面的测试代码，可见：</p>
+      <ul>
+        <li>在 <em>IE8(S) Firefox Opera</em> 中，scrolling 属性为 &quot;no&quot; 会干扰其子页面的页面滚动条的生成，即使 HTML 元素的 'overflow' 特性失效，或 HTML 元素 overflow:visible 时 BODY 元素的 'overflow' 特性失效；</li>
+        <li>在 <em>IE7(S)</em> 中，虽视觉效果与上面的浏览器有区别，但 scrolling 属性的干扰效果一致，只是仅仅使 HTML 元素的 'overflow' 特性失效；</li>
+        <li>在 <em>Chrome Safari</em> 中，scrolling 属性为 &quot;no&quot; 不会对子页面中 HTML 及 BODY 元素的 'overflow' 特性有影响。</li>
+      </ul>
+      <br />
+      <br />
+      <p>下面继续观察子页面 HTML 与 BODY 元素为 &quot;overflow:hidden&quot; 时的情况。</p>
+      <p>分析以下代码：</p>
+      <p><em>parent_hidden.html</em></p>
+<pre>&lt;!DOCTYPE html&gt;
+&lt;iframe src="<em>sub.htm</em>" <span class="hl_1">scrolling="yes"</span> style="width:80px; height:80px;"&gt;&lt;/iframe&gt;</pre>
+      <p><em>sub.htm</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html style="<span class="hl_2">overflow:hidden;</span> border:2px solid red;"&gt;
+&lt;body style="overflow:scroll; border:2px solid gold; margin:0; width:50px; height:50px;"&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>主页面 IFRAME 元素的 scrolling 属性值为 &quot;yes&quot;。子页面的 HTML 与 BODY 元素的 'overflow' 特性分别为 'hidden' 与 'scroll'。</p>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE7(S)</th>
+          <th>IE8(S) Firefox Opera</th>
+          <th>Chrome Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RX9009/IE7_scrolling_hidden.gif" alt="IE7 scrolling and overflow:hidden" /></td>
+          <td><img src="../../tests/RX9009/FF_scrolling_hidden.gif" alt="IE8, Firefox, Opera scrolling and overflow:hidden" /></td>
+          <td><img src="../../tests/RX9009/CR_scrolling_hidden.gif" alt="Chrome, Safari scrolling and overflow:hidden" /></td>
+        </tr>
+      </table>
+      <p>仍然忽略 IE6 IE7 中的特殊现象，仅从 scrolling 属性对滚动条的影响上看，</p>
+      <ul>
+        <li>在 <em>IE Chrome Safari</em> 中，虽然 IFRAME 的 scrolling 属性值为 &quot;yes&quot;，但是子页面 HTML 元素的 &quot;overflow:hidden&quot; 使 IFRAME 的滚动条消失；</li>
+        <li>在 <em>Firefox Opera</em> 中，由 IFRAME 的 scrolling 属性生成的子页面滚动条并没有受到 HTML 元素的 &quot;overflow:hidden&quot; 的影响。</li>
+      </ul>
+      <p><strong>总结：</strong></p>
+      <ul>
+        <li>在 <em>Chrome Safari</em> 中，IFRAME 元素的 scrolling 属性仅影响其引入子页面的 HTML 元素 'overflow' 为 'visible'，或者 HTML 与 BODY 元素 'overflow' 均为 'visible' 时的子页面滚动条。若为子页面 HTML 与 BODY 元素单独设置其 'overflow' 特性，则会很容易地打破 scrolling 属性对子页面滚动条的约束。</li>
+        <li>在 <em>Firefox  Opera</em> 中，IFRAME 元素的 scrolling 属性会影响其引入子页面的 HTML 元素 'overflow' 特性，以及 HTML 元素 'overflow' 为 'visible' 时 BODY 元素的 'overflow' 特性，若为子页面 HTML 与 BODY 元素单独设置其 'overflow' 特性，则不会破坏由 scrolling 属性生成及隐藏的子页面滚动条。</li>
+        <li>在 <em>IE</em> 中当子页面的 HTML 元素 'overflow' 为 'hidden' 时，则表现得类似 <em>Chrome</em> 中的情况。当其 'overflow' 为其他值时，则表现得类似 <em>Firefox</em> 中的情况。</li>
+      </ul>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>W3C 规范并没有说明 scrolling 属性应该控制子页面哪个元素的滚动条的生成或者 'overflow' 特性，为防止在某些情况下 Chrome Safari 的 IFRAME 子页面中出现多余滚动条，应避免为 HTML 或者 BODY 元素设置 overflow:scroll。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.2<br />
+              Chrome 5.0.360.0 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RX9009/parent_scroll.html">parent_scroll.html</a><br />
+            <a href="../../tests/RX9009/parent_hidden.html">parent_hidden.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-06-24</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>IFRAME scrolling html body overflow 滚动条</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,182 @@
+ <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HF9018: IE 中 OPTION 元素仅包含属性名、没有属性值的 value 属性时会将 OPTION 元素的内容文提交到服务端</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 HTML4.01 规范中的描述，OPTION 元素的 value 属性指定了其对象下拉菜单选项的初始值 (<a href="http://www.w3.org/TR/html401/interact/forms.html#initial-value">initial value</a>)，若 value 属性未被设定，则初始值为 OPTION 元素的内容。</p>
+      <p>在 HTML4 中存在一种布尔属性，例如 OPTION 元素的 selected 属性，其出现在元素的起始标签中时代表此属性为&quot;真&quot;，否则为&quot;假&quot;。通常会将这种属性名作为属性值书写，如 <code>&lt;OPTION selected=&quot;selected&quot;&gt;...contents...&lt;/OPTION&gt;</code>。而 HTML 还为布尔属性提供了一种最小形式的书写方法，如：<code>&lt;OPTION selected&gt;</code>。</p>
+      <p>关于 BUTTON 元素的更多信息，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html401/interact/forms.html#edef-OPTION">17.6 The SELECT, OPTGROUP, and OPTION elements</a> 及 <a href="http://www.w3.org/TR/html401/intro/sgmltut.html#h-3.3.4.2">3.3.4 Attribute declarations</a> 中的内容。</p>
+      <p></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 IE7 IE8 中 若 OPTION 元素仅包含属性名、没有属性值的 value 属性，则浏览器会将 OPTION 元素的内容文提交到服务端。而其他浏览器会将空字符串提交到服务端。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>这会导致当 OPTION 元素仅包含属性名、没有属性值的 value 属性时，各浏览器提交到服务端的表单数据出现差异，可能造成数据丢失。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>在 HTML 规范中，仅仅布尔类型的属性存在省略属性名的最简写法。</p>
+      <p>根据问题描述构建如下测试样例：<em>option.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  * { margin:0; font-size:12px; font-family:'Trebuchet MS'; }
+  form { width:250px; }
+  form div { overflow:hidden; zoom:1; padding:3px; }
+  form div span { float:right; }
+  form div span em { font-weight:bold; background:coral; padding:2px; }
+  select { width:100px; height:24px; }
+  iframe { width:250px; height:90px; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body abc&gt;
+&lt;form action=&quot;submit.php&quot; target=&quot;iframe&quot;&gt;
+  &lt;div&gt;
+    &lt;span id=&quot;i1&quot;&gt;&lt;/span&gt;
+    &lt;select id=&quot;s1&quot; name=&quot;no_value&quot;&gt;
+      &lt;option id=&quot;o1&quot;<span class="hl_4"></span>&gt;no_value&lt;/option&gt;
+    &lt;/select&gt;
+  &lt;/div&gt;
+  &lt;div&gt;
+    &lt;span id=&quot;i2&quot;&gt;&lt;/span&gt;
+    &lt;select id=&quot;s2&quot; name=&quot;empty_value&quot;&gt;
+      &lt;option id=&quot;o2&quot; <span class="hl_4">value</span>&gt;empty_value&lt;/option&gt;
+    &lt;/select&gt;
+  &lt;/div&gt;
+  &lt;div&gt;
+    &lt;span id=&quot;i3&quot;&gt;&lt;/span&gt;
+    &lt;select id=&quot;s3&quot; name=&quot;has_value&quot;&gt;
+      &lt;option id=&quot;o3&quot; <span class="hl_4">value=&quot;has_value&quot;</span>&gt;has_value&lt;/option&gt;
+    &lt;/select&gt;
+  &lt;/div&gt;
+&lt;/form&gt;
+&lt;iframe name=&quot;iframe&quot; frameborder=&quot;0&quot;&gt;&lt;/iframe&gt;
+&lt;script&gt;
+  document.forms[0].submit();
+  document.getElementById('i1').innerHTML = 'value: &lt;em&gt;&amp;nbsp;&quot;' + document.getElementById('s1').value + '&quot;&amp;nbsp;&lt;/em&gt;';
+  document.getElementById('i2').innerHTML = 'value: &lt;em&gt;&amp;nbsp;&quot;' + document.getElementById('s2').value + '&quot;&amp;nbsp;&lt;/em&gt;';
+  document.getElementById('i3').innerHTML = 'value: &lt;em&gt;&amp;nbsp;&quot;' + document.getElementById('s3').value + '&quot;&amp;nbsp;&lt;/em&gt;';
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>页面中 FORM 元素内有三个 SELECT 元素，各包含一个 OPTION 元素，区别为这三个 OPTION 元素分别没有设定 value 属性、设定了仅包含属性名没有属性值的 value 属性、设定了正确的 value 属性值。</p>
+      <p>FORM 会自动提交到服务端 <em>submit.php</em> 并显示出服务端接收到的提交信息。</p>
+      <pre>&lt;style&gt;
+  body { margin:8px; font:14px/1.5 &quot;Trebuchet MS&quot;; background:wheat; }
+  span { background:plum; }
+  em { font-weight:bold; background:skyblue; padding:2px; }
+&lt;/style&gt;
+&lt;?php
+  function get($param) {
+    if (isset($_GET[$param])) {
+      echo '&lt;span&gt;' . $param . '&lt;/span&gt;: &lt;em&gt;&amp;nbsp;&quot;' . $_GET[$param] . '&amp;nbsp;&quot;&lt;/em&gt;&lt;br /&gt;';
+    } else {
+      echo '&lt;span&gt;' . $param . '&lt;/span&gt;: &lt;em&gt;&amp;nbsp;N/A&amp;nbsp;&lt;/em&gt;&lt;br /&gt;';
+    }
+  }
+  get('no_value');
+  get('empty_value');
+  get('has_value');
+?&gt;</pre>
+      <p>这段代码在各浏览器中运行效果为：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/HF9018/o1.gif" alt="" /></td>
+          <td><img src="../../tests/HF9018/o2.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>可见，若 OPTION 元素没有设定 value 属性，则所有浏览器均会将 OPTION 元素的内容文本提交到服务端。若 OPTION 元素设定了明确的 value 属性，各浏览器没有任何差异。</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8</em> 中，对于没有设定 value 属性的 OPTION 元素，虽然可以与其他浏览器一样将 OPTION 元素的内容文本提交到服务端，但是查看 SELECT 元素的 value 属性为空字符串，这点与提交的数据不符。<br />
+        而对于仅包含属性名、没有属性值的 value 属性 的 OPTION 元素，IE 同样将其视作没有设定 value 属性的情况，将 OPTION 元素的内容文本提交到了服务端；</li>
+        <li>在 <em>其他浏览器</em> 中，对于仅包含属性名、没有属性值的 value 属性 的 OPTION 元素，浏览器将其视作设定了 value 属性，属性值为空字符串，所以将空字符串提交到了服务端。</li>
+      </ul>
+      
+      <h2 id="solutions">解决方案</h2>
+      <p>在使用 OPTION 元素时避免出现其仅包含属性名、没有属性值的 value 属性的情况，若需要设定空的 value 属性值可以写做 <code>&lt;OPTION value=&quot;&quot;&gt;</code>。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.544.0 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HF9018/option.html">option.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-12</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>OPTION value submit attribute 属性 SELECT 选项</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

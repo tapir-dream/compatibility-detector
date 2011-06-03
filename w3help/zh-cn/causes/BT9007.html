@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BT9007: Element.all 属性方法只有 IE 和 Opera 支持</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>Firefox Chrome Safari 不支持 Element.all。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>在 Firefox Chrome Safari 中无法正确获取对象，导致严重的功能性错误。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8 Opera</th>
+                    <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>Element.all 是一个集合属性，它是每个元素包含的所有合法子元素的集合。此属性不是 W3C 的标准属性，其他浏览器中也没有此集合属性的说明。</p>
+      <p>关于 Element.all 的详细信息， 参考MSDN: <a href="http://msdn.microsoft.com/en-us/library/ms537434(v=VS.85).aspx">all Collection</a> 中的内容。</p>
+
+      <p>Element.all 在 IE 和 Opera 浏览器中，都会返回 [object HTMLCollection]，其他浏览器返回 undefined。</p>
+
+      <p>分析以下代码：</p>
+<pre>&lt;script type=&quot;text/javascript&quot;&gt;
+    window.onload = function() {
+        var info = document.getElementById(&quot;info&quot;);
+        var tests = document.getElementById(&quot;test&quot;);
+        try {
+            info.innerHTML = &quot;object.all : &quot; + tests.all;
+        } catch(err) {
+            info.innerHTML += &quot;tests.all : &quot; + err;
+        }
+
+        try {
+            info.innerHTML += &quot;&lt;br/&gt;object.all[name] : &quot; + tests.all['SPAN1'];
+        } catch(err) {
+            info.innerHTML += &quot;&lt;br/&gt;object.all[name] : &quot; + err;
+        }
+    }
+&lt;/script&gt;
+&lt;div id=&quot;test&quot;&gt;
+    &lt;span id=&quot;SPAN1&quot;&gt;&lt;/span&gt;
+    &lt;span id=&quot;SPAN2&quot;&gt;&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;div id=&quot;info&quot; style=&quot;font-size:12px;&quot;&gt;&lt;/div&gt;</pre>
+      <ul>
+        <li>本测试用例除测试 tests.all 之外还测试了直接用 tests.all 取元素，避免出现 Chrome 中 document.all 的情况。</li>
+      </ul>
+      <p>测试样例在各浏览器中表现如下：</p>
+      <table class="compare">
+        <tbody>
+          <tr>
+            <th>IE6 IE7 IE8 Opera</th>
+            <th>Firefox Chrome Safari</th>
+          </tr>
+          <tr>
+            <td><img src="../../tests/BT9007/BT9007-1.png" alt="IE6 IE7 IE8 Opera" /></td>
+            <td><img src="../../tests/BT9007/BT9007-2.png" alt="Firefox Chrome Safari" /></td>
+          </tr>
+        </tbody>
+      </table>
+
+
+      <h2 id="solutions">解决方案</h2>
+
+      <ul>
+        <li>使用 Node 接口的 'childNodes' 属性，注意在非 IE 浏览器中使用该属性会返回文本节点，使用 Node.nodeType 判断节点类型以获取想要的节点；</li>
+        <li>使用 Element.children 。</li>
+      </ul>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.6<br />
+              Chrome 6.0.453.1 dev<br />
+              Safari 5.0 <br />
+                            Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BT9007/element.all.html">element.all.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-07</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>Element.all Object.all all Collection Element Object</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

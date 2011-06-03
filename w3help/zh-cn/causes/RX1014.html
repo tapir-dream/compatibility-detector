@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RX1014: Chrome Safari 中设定的单元格上下间隙会作用在行组元素内部导致这些元素之间会出现双倍间隙</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 HTML4.01 规范中的描述，TABLE 元素的 cellspacing 属性指定了用户端需要为表格左边界与最左的列、表格上边界与最上的行、表格右边界与最右的列、表格下边界与最下的行以及表格单元格之间的空白间隙距离。如下图：<br />
+      <img src="../../tests/RX1014/cellsppad.gif" alt="These two attributes control spacing between and within cells. The following illustration explains how they relate" /></p>
+      <p>根据 CSS2.1 规范中的描述，在分离的边框模型 (The separated borders model, 'border-collapse:separate') 中，'border-spacing' 特性指定了毗邻的分离单元格边框之间的距离。其值的格式为 <code>&lt;length&gt; &lt;length&gt;? </code>，即若仅指定了一个值，则水平与垂直方向的间隙均为该值；若指定了两个值，则第一个值为水平方向间隙，第二个值为垂直方向间隙。长度不允许为负数。表格边框与处在表格边缘的单元格边框之间的距离为表格该边的 padding 加上其相应的 'border-spacing' 的距离。例如在表格最后边，这个距离为 'padding-right' + 水平 'border-spacing'。</p>
+      <p>从 HTML 与 CSS 规范的描述看，'border-spacing' 特性可以代替 cellspacing 属性。</p>
+      <p>关于 cellspacing 属性的更多信息，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html401/struct/tables.html#adef-cellspacing">11.3.3 Cell margins</a> 中的内容。</p>
+      <p>关于 'border-spacing' 特性的更多信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/tables.html#propdef-border-spacing">17.6.1 The separated borders model</a> 中的内容。</p>
+      <p></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 Chrome Safari 中，若表格设定了 cellspacing 属性或者 'border-spacing' 特性，则由于设定的单元格上下间隙会作用在 THEAD、TBODY、TFOOT 元素内部，会导致这些元素之间会出现双倍的间隙。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题会造成表格内的单元格间隙与设定值不符，影响到表格的高度计算值。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Chrome Safari</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>阅读前请注意，本问题分离的边框模型 (The separated borders model, 'border-collapse:separate') 中发生，并依据这个模型描述问题。</p>
+      <p>除 IE6 IE7 IE8(Q)<sup>1</sup>，其他被测浏览器均支持 'border-spacing' 特性，且为表格设定 cellspacing 特性后，浏览器均会将其值转换为 'border-spacing' 特性的值。为了达到一致的效果，本文仅列举设定 cellspacing 属性的情况，'border-spacing' 特性经测试，在 Chrome Safari 中的情况与 cellspacing 属性相同。</p>
+      <p class="comment">注 1: 关于 IE6 IE7 IE8(Q) 不支持 'border-spacing' 特性，请参考相关问题中的文章。</p>
+      <p>分析以下代码：<em>cellspacing_tbody.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  * { margin:0; padding:0; font:18px 'Trebuchet MS'; }
+  td { background:wheat; height:30px; }
+  div { font-size:12px; }
+&lt;/style&gt;
+&lt;script&gt;
+  function $(id) { return document.getElementById(id); }
+  
+  window.onload = function () {
+    $('info1').innerHTML += $('thead').offsetHeight;
+    $('info2').innerHTML += $('tbody').offsetHeight;
+    $('info3').innerHTML += $('tbody').getBoundingClientRect().top - $('thead').getBoundingClientRect().bottom;
+  }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;table cellspacing=&quot;30&quot; style=&quot;width:200px; border:5px solid black;&quot;&gt;
+  &lt;thead id=&quot;thead&quot;&gt;
+    &lt;tr&gt;
+      &lt;td&gt;THEAD&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody id=&quot;tbody&quot;&gt;
+    &lt;tr&gt;
+      &lt;td&gt;TBODY&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;TBODY&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+  &lt;tfoot&gt;
+    &lt;tr&gt;
+      &lt;td&gt;TFOOT&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tfoot&gt;
+&lt;/table&gt;
+&lt;div id=&quot;info1&quot;&gt;Height of THEAD: &lt;/div&gt;
+&lt;div id=&quot;info2&quot;&gt;Height of TBODY: &lt;/div&gt;
+&lt;div id=&quot;info3&quot;&gt;Distance between THEAD and TBODY: &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码中表格内包含了 THEAD、TBODY、TFOOT 元素，并设定了 cellspacing 属性值为 30，即单元格间隙为 30px。通过脚本检测 THEAD、TBODY 元素的高度以及它们之间的绝对距离。</p>
+      <p>在各浏览器中的运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Firefox Opera</th>
+          <th>Chrome Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RX1014/cellspacing1.gif" alt="" /></td>
+          <td><img src="../../tests/RX1014/cellspacing2.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>可见，</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8 Firefox Opera</em> 中，单元格间隙仅作用在单元格边框之间及边缘单元格与表格边框之间，垂直方向的间隙不属于 THEAD、TBODY、TFOOT 元素；</li>
+        <li>在 <em>Chrome Safari</em> 中，垂直方向的间隙属于 THEAD、TBODY、TFOOT 元素，在 THEAD、TBODY、TFOOT 元素形成了一个相对封闭的环境，所以造成了相邻 THEAD、TBODY、TFOOT 元素垂直方向出现了双倍的间隙。</li>
+      </ul>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>CSS 规范并没有明确说明单元格间隙的作用位置以及行组元素对其的影响，所以为了避免差异应避免在包含 THEAD、TBODY、TFOOT 这类行组元素的表格内设定非 0 的单元格间隙 (cellsping 属性或 'border-spacing' 特性)。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="RE1020">RE1020: IE6 IE7 IE8(Q) 不支持 border-spacing 特性</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 8.0.552.0 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.63
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RX1014/cellspacing_tbody.html">cellspacing_tbody.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-15</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>TABLE cell cellspacing border-spacing spacing TD 行组 表格 间隙 TBODY TFOOT THEAD</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

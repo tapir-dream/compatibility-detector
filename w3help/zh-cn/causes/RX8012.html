@@ -1,0 +1,243 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RX8012: 不同浏览器中 Flash 与其他元素发生覆盖时有差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>堆栈级 stack level 概念请参见 CSS 2.1 规范：<a href="http://www.w3.org/TR/CSS21/visuren.html#layers">9.9 Layered presentation</a>。</p>
+      <p>'z-index' 特性对 stack level 的影响，请参见 CSS 2.1 规范：<a href="http://www.w3.org/TR/CSS21/visuren.html#propdef-z-index">9.9.1 Specifying the stack level: the 'z-index' property</a>。</p>
+      
+      <h2 id="description">问题描述</h2>
+      <p>不同浏览器中 Flash 与其他元素发生覆盖时， Flash 与其他元素的层叠顺序有差异。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>Flash 被其他元素遮挡，或其他元素被 Flash 遮挡，与期待效果不同。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+            </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>一般情况下，页面中会用 OBJECT 与 EMBED 元素来显示一个 FLASH 动画。大致代码如下： </p>
+      <pre>&lt;object type=&quot;application/x-shockwave-flash&quot; data=&quot;<em>clock.swf</em>&quot;&gt;
+  &lt;param value=&quot;<em>clock.swf</em>&quot; name=&quot;movie&quot;/&gt;
+  <span class="hl_4">&lt;param value=&quot;wmode&quot; name=&quot;window&quot;/&gt;</span>
+&lt;/object&gt;</pre>
+
+      <p>OBJECT 元素内 PARAM 元素负责为 Flash 动画设置相应参数，其中 wmode 参数较为重要，它决定了 Flash 的渲染方式。</p>
+      <p>Adobe 公司的 Flash 开发者文档中有关于 wmode 参数值的详细说明： <a href="http://help.adobe.com/en_US/FlashLite/2.0_FlashLiteDevGuide2/WS7EC0491A-2E1C-4883-8514-88C53FDBB993.html">Support for WMODE</a></p>
+      <p>当 wmode = &quot;transparent&quot; 或 &quot;opaque&quot; 时，Flash 动画交由页面渲染引擎负责渲染，此时它在定位流中的位置由 CSS 中的 'z-index' 特性控制。 </p>
+      <p>如果 wmode 没有设置，他的默认值是 window，这代表 Flash 动画将在 window 窗口级别渲染，相应元素拥有系统级的窗口句柄，它所在定位流中的 'z-index' 特性将失效，而会处于所有未拥有窗口句柄特性的页面元素之上，此时用来控制定位流中 Z 轴方向中上下层位置的 'z-index' 特性将会失效。</p>
+      <p>分析如下代码：</p>
+<pre>&lt;body style=&quot;margin:40px;&quot;&gt;
+  &lt;object type=&quot;application/x-shockwave-flash&quot; data=&quot;<em>clock.swf</em>&quot; style=&quot;height:80px; width:80px; position:absolute; top:0; left:0;&quot;&gt;
+    &lt;param value=&quot;<em>clock.swf</em>&quot; name=&quot;movie&quot;/&gt;
+    <span class="hl_4">&lt;param value=&quot;wmode&quot; name=&quot;window&quot;/&gt;</span>
+  &lt;/object&gt;
+  &lt;iframe src=&quot;<em>http://www.google.com/logos/</em>&quot; style=&quot;width:240px; height:120px;&quot;&gt;&lt;/iframe&gt;
+&lt;/body&gt;
+</pre>
+      <p>页面中用来播放 Flash 的 OBJECT 元素被设置了绝对定位 position:absolute，使其处于定位流中，'z-index' 特性没有设置，采用默认值 auto。此时它已不在普通流中占有位置。</p>
+      <p>由于其本身已经处于定位流中，页面中其他元素均处于普通流中，它本身还在窗口级别渲染，其他定位流中元素也无法覆盖它。因此可以断定它会遮挡住其后的 IFRAME 元素显示。</p>
+      <p>观看实际情况：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Firefox Safari Opera</th>
+          <th>Chrome</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RX8012/01.png" alt="" /></td>
+          <td><img src="../../tests/RX8012/02.png" alt="" /></td>
+        </tr>
+      </table>
+      <p>在 <em>IE6 IE7 IE8 Firefox Safari Opera</em> 浏览器中显示情况均与相关规范吻合。但是 Chrome 中处于普通流中的 IFRAME 元素却将拥有窗口句柄的定位流中元素覆盖。</p>
+      <p>造成这个问题的情况只能有一种，即在 Chrome 中 IFRMAE 元素实际上拥有窗口句柄，虽然这个句柄无法使用 SPY++ 等窗口句柄信息查看工具获取到。</p>
+      <p>根据 window 窗口建立的规律，后建立的窗口会拥有更高的堆栈级别，覆盖于最先建立的窗口上。</p>
+      <p>我们只需将原始代码中的 IFRAME 元素放置到 OBJECT 元素之前，使它先被创建，观察其是否被后创建的 OBJECT 覆盖，就可以证实这个推测：</p>
+<pre>&lt;body style=&quot;margin:40px;&quot;&gt;
+  <strong>&lt;iframe src=&quot;<em>http://www.google.com/logos/</em>&quot; style=&quot;width:240px; height:120px;&quot;&gt;&lt;/iframe&gt;</strong>
+  &lt;object type=&quot;application/x-shockwave-flash&quot; data=&quot;<em>clock.swf</em>&quot; style=&quot;height:80px; width:80px; position:absolute; top:0; left:0;&quot;&gt;
+    &lt;param value=&quot;<em>clock.swf</em>&quot; name=&quot;movie&quot;/&gt;
+    <span class="hl_4">&lt;param value=&quot;wmode&quot; name=&quot;window&quot;/&gt;</span>
+  &lt;/object&gt;
+&lt;/body&gt;
+</pre>
+      <p>观看实际情况：</p>
+      <table class="compare">
+        <tr>
+          <th>所有浏览器</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RX8012/01.png" alt="" /></td>
+      </tr>
+          </table>
+      <p>根据上表可以看出，实际情况与猜测情况相吻合。</p>
+      <p>绝对定位元素与 Flash ( wmode = &quot;window&quot; )重叠时，当 'background' 的特性值不是 'transparent' 时， Firefox 中绝对定位元素却可以遮挡 Flash ，其它浏览器都不能遮挡 Flash 。</p>
+      <p>分析以下代码：</p>
+      <pre>&lt;!DOCTYPE HTML&gt;
+&lt;html&gt;
+    &lt;head&gt;&lt;/head&gt;
+    &lt;body style="margin:40px;"&gt;
+  &lt;object type="application/x-shockwave-flash"
+    data="clock.swf"
+    style="height:80px; width:80px; position:absolute; top:0; left:0;"&gt;
+    &lt;param value="clock.swf" name="movie"/&gt;
+    <span class="hl_4">&lt;param value="wmode" name="window"/&gt;</span>
+  &lt;/object&gt;
+  &lt;div style="top:0;<span class="hl_4">position:absolute;</span> left: 0;background: gold;"&gt;this is test word this is test word&lt;/div&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+      </pre>
+      <p>以上代码在不同浏览器中表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>Firefox</th>
+          <th>IE6 IE7 IE8 Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RX8012/firefox_absolute.png" alt="" /></td>
+          <td><img src="../../tests/RX8012/no_firefox_absolute.png" alt="" /></td>
+        </tr>
+      </table>
+      <p>绝对定位元素是 iframe 时与 Flash ( wmode = &quot;window&quot; )重叠， IE 和 Chrome 中 iframe 会遮挡 Flash ，而Firefox Safari Opera 中 Flash 会遮挡iframe</p>
+      <p>分析以下代码：</p>
+      <pre>&lt;!DOCTYPE HTML&gt;
+&lt;html&gt;
+    &lt;head&gt;&lt;/head&gt;
+    &lt;body style="margin:40px;"&gt;
+  &lt;object type="application/x-shockwave-flash"
+    data="clock.swf"
+    style="height:80px; width:80px; position:absolute; top:0; left:0;"&gt;
+    &lt;param value="clock.swf" name="movie"/&gt;
+    <span class="hl_4">&lt;param value="wmode" name="window"/&gt;</span>
+  &lt;/object&gt;
+  &lt;iframe src="about:blank" class="cover_iframe" width="200" height="50" frameborder="1" scrolling="no" style="<span class="hl_4">position:absolute;</span>top:0;left:0;"&gt;&lt;/iframe&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+      </pre>
+      <p>以上代码在不同浏览器中表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE Chrome</th>
+          <th>Firefox Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RX8012/chrome_ie_absolute_iframe.png" alt="" /></td>
+          <td><img src="../../tests/RX8012/firefox_safari_opera_absolute_iframe.png" alt="" /></td>
+        </tr>
+      </table>
+      <p>有没有办法让 iframe 元素在所有浏览器下都可以遮挡 Flash呢？</p>
+      <p>分析以下代码：</p>
+      <pre>&lt;!DOCTYPE HTML&gt;
+&lt;html&gt;
+    &lt;head&gt;&lt;/head&gt;
+    &lt;body style="margin:40px;"&gt;
+    &lt;embed type="application/x-shockwave-flash"
+    src="clock.swf" 
+    style="height:80px; width:80px; position:absolute; top:0; left:0;" wmode="transparent"&gt;
+    &lt;/embed&gt;
+  &lt;iframe src="about:blank" width="200" height="40" frameborder="1" scrolling="no" style="position:absolute;top:0px;left:0px;background: gold;"&gt;&lt;/iframe&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+      </pre>
+      <p>以上代码在不同浏览器中表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE</th>
+          <th>Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RX8012/ie.png" alt="" /></td>
+          <td><img src="../../tests/RX8012/noie.png" alt="" /></td>
+        </tr>
+      </table>
+      
+
+      <h2 id="solutions">解决方案</h2>
+      <p>若有页面需求是要求其他元素遮挡 Flash </p>
+      <ul>
+        <li>1.使用 EMBED 引入Flash 。</li>
+        <li>2.wmode的值使用 'transparent' 或 'opaque' 。</li>
+        <li>3.使用的 iframe 需要设置背景色(设置为白色)。</li>
+      </ul>
+      <p>注意：当wmode的值不是window时，Flash中有可能无法切换输入法，该问题为插件问题，期待插件厂商修复。关于 IE 和非IE浏览器背景色不同的问题请参见<a href ="http://w3help.org/zh-cn/causes/RC3001">RC3001: IE6 IE7(Q) IE8(Q) 中 IFRAME 元素 'background-color' 特性默认值不是 transparent</a></p>
+      
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.8<br />
+              Chrome 6.0.472.14 dev<br />
+              Safari 5.0.1<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RX8012/window_handle_stack_level.html">window_handle_stack_level.html</a><br />
+                          <a href="../../tests/RX8012/window_handle_stack_level_fix.html">window_handle_stack_level_fix.html</a><br />
+              <a href="../../tests/RX8012/absolute_element_background.html">absolute_element_background.html</a><br />
+              <a href="../../tests/RX8012/absolute_iframe_flash.html">absolute_iframe_flash.html</a><br />
+              <a href="../../tests/RX8012/iframe_obscure_flash.html">iframe_obscure_flash.html</a>
+                        </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-07</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>Flash OBJECT EMBED IFRAME z-index stack level 遮盖</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,118 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BW5008: WebKit 中 MARQUEE 元素 的 behavior 属性值为 alternate 时如果其中包含块级元素则会影响其滚动效果</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>MARQUEE 标记中存在 &quot;behavior&quot; 值为 &quot;alternate&quot; 时，MARQUEE 标记内的处于普通流中块元素的交替往复移动效果消失。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>在 Chrome Safari 中 MARQUEE 标记失效。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Chrome Safari</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>MARQUEE 不属于 W3C 规范中的元素，它最初由 IE2.0 引入，然而目前它以成为事实标准，所有浏览器均支持 MARQUEE 元素。</p>
+      <p>参考 MSND <a href="http://msdn.microsoft.com/en-us/library/ms533502(v=VS.85).aspx">BEHAVIOR Attribute | behavior Property</a> 中的相关说明。</p>
+      <p>参考 Mozilla Developer Center <a href="https://developer.mozilla.org/en/HTML/Element/marquee">marquee</a> 中的相关说明。</p>
+      <p>参考 Safari Reference Library <a href="http://developer.apple.com/safari/library/documentation/AppleApplications/Reference/SafariHTMLRef/Articles/Attributes.html#//apple_ref/html/attribute/behavior">Attribute behavior</a> 的相关说明。</p>
+      <p>分析以下代码：</p>
+<pre>
+&lt;marquee width=&quot;500&quot; behavior=&quot;alternate&quot;&gt;
+  &lt;div style=&quot;width:50px; height:50px; background:black;&quot;&gt;&lt;/div&gt;
+&lt;/marquee&gt;
+</pre>
+      <p>代码中 MARQUEE 标记使用了 behavior=&quot;alternate&quot; 属性值，期望内部的 DIV 块元素可以交替反复移动。</p>
+      <p>但在 Chrome Safari 中会失去 MARQUEE 效果。</p>
+      <p>如果将其内 DIV 标记的 'display' 值变更为 'inline' 或 'inline-block'，抑或加入 'float:left' 样式，均可以重新获得 MARQUEE 效果，如：</p>
+<pre>
+&lt;marquee width=&quot;500&quot; behavior=&quot;alternate&quot;&gt;
+  &lt;div style=&quot;width:50px; height:50px; background:black; <span class="hl_4">float:left;</span>&quot;&gt;&lt;/div&gt;
+&lt;/marquee&gt;
+</pre>
+      <p>这些样式属性修改最终影响的是块级标记的实际宽度，虽然之前 DIV 标记已经被设置了远远小于容器 MARQUEE 的宽度，实际上在 Webkit 内核浏览器中并没起到作用，MARQUEE标记依然认为其内部容器的宽度与它相同，交替反复移动效果无法支正常体现出来。</p>
+      <p>直到其子容器的显示样式被修改为非块级元素或进入浮动流重新计算了子容器宽度后，MARQUEE 标记才认为其内部空间足够子元素做交替反复移动，此时运动效果立现。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>在 MARQUEE 标记内避免使用普通流中的块级元素，或用脚本程序模拟 MARQUEE 标记的效果。</p>
+
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BW5008/marquee.html">marquee.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-28</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>WebKit MARQUEE behavior alternate block-level element 块级元素 不滚动</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

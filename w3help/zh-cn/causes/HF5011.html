@@ -1,0 +1,210 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HF5011: 多个 target 属性设置的目标窗口不为当前窗口的 FORM 同时提交后 Chrome Safari 中仅打开一新个窗口</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>表单是 HTML 文档的一部分，它包含文档内容、标记和特殊的元素控件 (checkboxes、radio、buttons、menus 等)。它包含 action、method、target、enctype、accept-charset、accept 等属性。FORM 元素扮演着控件容器的角色，它指定了如下规则：</p>
+      <ul>
+        <li>其内元素的布局；</li>
+        <li>由 action 属性值 (例如，这个值可以是 HTTP URI 或 mailto URI) 所指定的程序将要处理已经填写完毕并且已经提交的 FORM，这个接收程序必须能够从语法上描述或分析这个 FORM 的属性名称及与之对应的属性值 (name/value pairs) 以便可以利用它们；</li>
+        <li>要指定用户数据集将要通过什么方法 (get 或 post) 发送到服务器端；</li>
+        <li>所采用的字符编码方式 (由 accept-charset 属性指定) 必须是能够被服务器端接受的以便处理被提交的 FORM 中的数据集。</li>
+      </ul>
+      <p>FORM 的 target 属性指定该表单的处理结果在哪里显示，target 的值为窗口名。可称之为“目标窗口”。</p>
+      <p>关于 FORM 元素的更多内容，请参考 HTML4.01 <a href="http://www.w3.org/TR/html401/interact/forms.html#h-17.1">17.1 Introduction to forms</a> 中的内容。</p>
+      <p>关于 target 属性值类型 的更多内容，请参考 HTML4.01 <a href="http://www.w3.org/TR/html401/types.html#type-frame-target">6.16 Frame target names</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>当页面中存在多个 FORM 元素，它们的 target 属性设置的目标窗口均不为当前页面 URI 时，若同时提交这些 FORM，Chrome Safari 中只能自动打开一个窗口，而其他浏览器会同时打开多个窗口。</p>
+      
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题将造成多个 FORM 同时被提交到新窗口时，仅有一个 FORM 提交后的结果在 Chrome Safari 中可见。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Chrome Safri</th>
+          <th>&nbsp;</th>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>FORM 的 target 属性能够指定该表单的处理结果显示的目标窗口，当目标窗口不存在时，浏览器会新开一个名称为该值的窗口。</p>
+      <p>一般情况，有两种 target 属性设置可以促使浏览器打开新窗口。</p>
+      <p>一种是 FORM 的 target 属性的值为某具体窗口名，如果该名窗口在浏览器窗口列表中不存在时，浏览器会打开一个新窗口，并将 target 属性的值设置为该窗口名。然后在该窗口中显示 FORM 的处理结果。</p>
+      <p>另一种是  FORM 的 target 属性值设置为 _blank，他会将表单内容提交到新打开的窗口中。</p>
+      <p>&nbsp;</p>
+      <p>但当使用脚本同时提交多个 FORM 时，在 Chrome Safari 中的表现却与其他浏览器不同，如以下代码：</p>
+<pre>
+&lt;body&gt;
+&lt;form method="get" action="recieve.html" target="f_1"&gt;
+  &lt;input type="text" name="key" value="form1"&gt;
+  &lt;input type=&quot;submit&quot; /&gt;
+&lt;/form&gt;
+&lt;form method="get" action="receive.html" target="f_2"&gt;
+  &lt;input type="text" name="key" value="form2"&gt;
+  &lt;input type=&quot;submit&quot; /&gt;
+&lt;/form&gt;
+&lt;form method=&quot;get&quot; action=&quot;receive.html&quot; target=&quot;f_3&quot;&gt;
+  &lt;input type=&quot;text&quot; name=&quot;key&quot; value=&quot;form3&quot;&gt;
+  &lt;input type=&quot;submit&quot; /&gt;
+&lt;/form&gt;
+&lt;form method=&quot;get&quot; action=&quot;receive.html&quot; target=&quot;_blank&quot;&gt;
+  &lt;input type=&quot;text&quot; name=&quot;key&quot; value=&quot;form4&quot;&gt;
+  &lt;input type=&quot;submit&quot; /&gt;
+&lt;/form&gt;
+&lt;form method=&quot;get&quot; action=&quot;receive.html&quot; target=&quot;_blank&quot;&gt;
+  &lt;input type=&quot;text&quot; name=&quot;key&quot; value=&quot;form5&quot;&gt;
+  &lt;input type=&quot;submit&quot; /&gt;
+&lt;/form&gt;
+&lt;form method=&quot;get&quot; action=&quot;receive.html&quot; target=&quot;_blank&quot;&gt;
+  &lt;input type=&quot;text&quot; name=&quot;key&quot; value=&quot;form6&quot;&gt;
+  &lt;input type=&quot;submit&quot; /&gt;
+&lt;/form&gt;
+&lt;input id="submit" type="button" value="同时提交表单"&gt;
+&lt;script&gt;
+  window.onload = function(){
+    document.getElementById('submit').onclick=function(){
+      for(var i = 0, forms = document.forms; forms[i]; forms[i++].submit());
+    };
+  }
+&lt;/script&gt;
+&lt;/body&gt;
+</pre>
+<p>数据接收页面（receive.html）测试代码如下：</p>
+<pre>
+&lt;body&gt;
+&lt;div id="key"&gt;&lt;/div&gt;
+&lt;script type="text/javascript"&gt;
+  var $key=document.getElementById("key");
+  $key.innerHTML=location.search.substring(1);
+&lt;/script&gt;
+&lt;/body&gt;
+</pre>
+      <p>第一部分代码通过脚本同时提交了六个 FORM ，前三个对应的各自名称固定的窗口（如果这些窗口不存在则会新开窗口），后三个每个都会提交到新窗口中。</p>
+      <p>第二部分代码可以显示 FORM 提交的参数。</p>
+      <p>运行以上代码，使用同时提交方法，在各浏览器中运行的情况如下：</p>
+      <table class="compare" >
+        <tr>
+          <th>同时提交</th>
+          <th>IE6 IE7 IE8 <sup>1</sup> Firefox Opera</th>
+          <th>Chrome Safari</th>
+        </tr>
+        <tr>
+          <th>打开窗口情况</th>
+          <td style="text-align:center"><span class="hl_2">同时打开多个窗口</span></td>
+          <td style="text-align:center"><span class="hl_1">一次只创建一个新窗口</span> <sup>2</sup></td>
+        </tr>
+        <tr>
+          <th>表单数据接收情况</th>
+          <td><p>窗口 &quot;f_1&quot; ：key=form1</p>
+          <p>窗口 &quot;f_2&quot; ：key=form2</p>
+          <p>窗口 &quot;f_2&quot; ：key=form3</p>
+          <p>无名新窗口 ：key=form4</p>
+          <p>无名新窗口 ：key=form5</p>
+          <p>无名新窗口 ：key=form6</p></td>
+          <td style="vertical-align:baseline"><p>窗口 &quot;f_1&quot; ：key=form1</p></td>
+        </tr>
+      </table>
+      <p>依次点击各个表单的单独提交按键：</p>
+      <table class="compare" >
+        <tr>
+          <th>手工依次提交</th>
+          <th>IE6 IE7 IE8 <sup>1</sup> Firefox OperaChrome Safari</th>
+        </tr>
+              <tr>
+                <th>打开窗口情况</th>
+                <td style="text-align:center">可以打开多个窗口</td>
+              </tr>
+              <tr>
+                <th>表单数据接收情况</th>
+                <td><p>窗口 &quot;f_1&quot; ：key=form1</p>
+                    <p>窗口 &quot;f_2&quot; ：key=form2</p>
+                    <p>窗口 &quot;f_2&quot; ：key=form3</p>
+                    <p>无名新窗口 ：key=form4</p>   'overflow' 特性值不为 'visible' 
+                    <p>无名新窗口 ：key=form5</p>
+                  <p>无名新窗口 ：key=form6</p></td>
+              </tr>
+      </table>
+      <p class="comment">注 1: 在 IE9 Beta 版中此问题的表现与 IE 其他版本一致。<br />
+      注 2: Chrome Safari 一次只可以同时创建一个新窗口，这个新窗口是由第一个表单创建的，其后的新窗口都没有被一次创建出来。如果保持打开的窗口不关闭，多次点击同时提交按钮，则每次点击都可以依照表单提交顺序依次将全部窗口创建出来。这种情况可能有读者会怀疑是否为同时提交多个表单会受到这两个浏览器的拦截，如果修改代码使用 setTimeout 延时依次提交表单是否可以避免这个情况？事实证明即使延时提交也是如此情况，因此并非同时提交和延时提交到导致的问题，只有用户手工提交才可以正常创建新窗口。</p>
+      <p>根据上表情况可知，Chrome Safari 中无法通过脚本程序同时提交多个表单，但是通过用户手动提交则可以成功。这很有可能是 WebKit 浏览器引擎的防范恶意脚本功能一部分，用来防止恶意代码一次性提交多个表单。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>这个问题是 WebKit 核心浏览器的特性，如果需要同时提交多个表单，请将 target 的值分别设置具体窗口名，并使用 window.open 方法主动打开目标窗口，不要不依赖浏览器自动行为。</p>
+      <p>如，可以将上例代码一中 &quot;target=_blank&quot; 修改为具体窗口名，并将脚本修改为：</p>
+      <pre>document.getElementById(&quot;submit&quot;).onclick = function () {
+  for (var i = 0, forms = document.forms; forms[i]; window.open('about:blank', forms[i].target), document.forms[i++].submit());
+};
+</pre>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.517.8 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+            <a href="../../tests/HF5011/forms.html">forms.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-27</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>FORM target submit 提交</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<style>
+button{font-size:16px;}
+</style>
+<script>
+function openW3C(sFeatures){
+	window.open("http://www.w3.org/","",sFeatures,false);
+}
+</script>
+<body>
+<h2>请在各浏览器内依次点击下列按键，根据显示效果来判断 window.open 方法是否支持某项特性设定。</h2>
+channelmode sFeatures: <button onclick="openW3C('channelmode=no')">channelmode=no</button>
+<button onclick="openW3C('channelmode=no')">channelmode=yes</button><br />
+directories sFeatures:<button onclick="openW3C('directories=no')">directories=no</button>
+<button onclick="openW3C('directories=yes')">directories=yes</button><br />
+fullscreen sFeatures:<button onclick="openW3C('fullscreen=no')">fullscreen=no</button>
+<button onclick="openW3C('fullscreen=yes')">fullscreen=yes</button><br />
+location sFeatures:<button onclick="openW3C('location=no')">location=no</button>
+<button onclick="openW3C('location=yes')">location=yes</button><br />
+menubar sFeatures:<button onclick="openW3C('menubar=no')">menubar=no</button>
+<button onclick="openW3C('menubar=yes')">menubar=yes</button><br />
+resizable sFeatures:<button onclick="openW3C('resizable=no')">resizable=no</button>
+<button onclick="openW3C('resizable=yes')">resizable=yes</button><br />
+scrollbars sFeatures:<button onclick="openW3C('scrollbars=no')">scrollbars=no</button>
+<button onclick="openW3C('scrollbars=yes')">scrollbars=yes</button><br />
+status sFeatures:<button onclick="openW3C('status=no')">status=no</button>
+<button onclick="openW3C('status=yes')">status=yes</button><br />
+titlebar sFeatures:<button onclick="openW3C('titlebar=no')">titlebar=no</button>
+<button onclick="openW3C('titlebar=yes')">titlebar=yes</button><br />
+toolbar sFeatures:<button onclick="openW3C('toolbar=no')">toolbar=no</button>
+<button onclick="openW3C('toolbar=yes')">toolbar=yes</button><br />
+top sFeatures:<button onclick="openW3C('top=10')">top=10</button><br />
+left sFeatures:<button onclick="openW3C('left=10')">left=10</button><br />
+width sFeatures:<button onclick="openW3C('width=100')">width=100</button><br />
+height sFeatures:<button onclick="openW3C('height=100')">height=100</button><br />
+top and left sFeatures:<button onclick="openW3C('top=20,left=20')">top and left is 20</button><br />
+width and height sFeatures:<button onclick="openW3C('width=100,height=100')">width and height is 100</button><br />
+top and left and width and height sFeatures:<button onclick="openW3C('top=200,left=200,width=200,height=200')">top and left and width and height is 200</button>
+</body>
+</html>

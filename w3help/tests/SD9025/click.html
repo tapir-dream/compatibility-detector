@@ -1,0 +1,216 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+</head>
+<body>
+<script>
+window.onload = function (){
+	var tags = [
+		'A',
+		'AREA',
+		'ABBR',
+		'ACRONYM',
+		'ADDRESS',
+		'B',
+		'BDO',
+		'BIG',
+		'BLOCKQUOTE',
+		'BR',
+		'BUTTON',
+		'CAPTION',
+		'CENTER',
+		'CITE',
+		'CODE',
+		'COL',
+		'COLGROUP',
+		'DD',
+		'DEL',
+		'DIR',
+		'DIV',
+		'DFN',
+		'DL',
+		'DT',
+		'EM',
+		'FIELDSET',
+		'FONT',
+		'FORM',
+		'H1',
+		'H2',
+		'H3',
+		'H4',
+		'H5',
+		'H6',
+		'HR',
+		'I',
+		'IMG',
+		'INPUT',
+		'INS',
+		'IFRAME',
+		'KBD',
+		'LABEL',
+		'LEGEND',
+		'LI',
+		'MAP',
+		'MENU',
+		'OBJECT',
+		'OL',
+		'EMBED',
+		'P',
+		'PRE',
+		'Q',
+		'S',
+		'SAMP',
+		'SELECT',
+		'SMALL',
+		'SPAN',
+		'STRIKE',
+		'STRONG',
+		'SUB',
+		'SUP',
+		'TABLE',
+		'TBODY',
+		'TD',
+		'TEXTAREA',
+		'TFOOT',
+		'TH',
+		'THEAD',
+		'TR',
+		'TT',
+		'U',
+		'UL',
+		'VAR'
+		] ;
+	var htmls = [
+		'<a href ="javascript:void 0;">A</a>',
+		'<img src="google.gif" usemap="#planetmap" /><map name="planetmap"><area  shape="rect" coords="0,0,50,50" href ="javascript:void 0;"/></map>',
+		'<abbr>ABBR</abbr>',
+		'<acronym>ACRONYM</acronym>',
+		'<address>ADDRESS</address>',
+		'<b>B</b>',
+		'<bdo>BDO</bdo>',
+		'<big>BIG</big>',
+		'<blockquote>BLOCKQUOTE</blockquote>',
+		'<br/>',
+		'<button type="button">BUTTON(button)</button>',
+		'<button type="reset">BUTTON(reset)</button>',
+		'<button type="submit">BUTTON(submit)</button>',
+		'<table><caption>CAPTION</caption><tr><td></td></tr></table>',
+		'<center>CENTER</center>',
+		'<cite>CITE</cite>',
+		'<code>CODE</code>',
+		'<table><col/><tr><td>COL</td></tr></table>',
+		'<table><colgroup ></colgroup><tr><td>COLGROUP</td></tr></table>',
+		'<dd>DD</dd>',
+		'<del>DEL</del>',
+		'<dir>DIR</dir>',
+		'<div>DIV</div>',
+		'<dfn>DFN</dfn>',
+		'<dl>DL</dl>',
+		'<dt>DT</dt>',
+		'<em>EM</em>',
+		'<fieldset>FIELDSET</fieldset>',
+		'<font>FONT</font>',
+		'<form>FORM</form>',
+		'<h1>H1</h1>',
+		'<h2>H2</h2>',
+		'<h3>H3</h3>',
+		'<h4>H4</h4>',
+		'<h5>H5</h5>',
+		'<h6>H6</h6>',
+		'<hr/>',
+		'<i>I</i>',
+		'<input type="text"/>',
+		'<input type="checkbox"/>',
+		'<input type="hidden"/>',
+		'<input type="image"/>',
+		'<input type="password"/>',
+		'<input type="radio"/>',
+		'<input type="reset"/>',
+		'<input type="submit"/>',
+		'<input type="file"/>',
+		'<ins>INS</ins>',
+		'<iframe  src="google.html"></iframe>',
+		'<kbd>KBD</kbd>',
+		'<label>LABEL</label>',
+		'<fieldset><legend >LEGEND</legend>fieldset</fieldset>',
+		'<li>LI</li>',
+		'<menu>MENU</menu>',
+		'<object  type="application/x-shockwave-flash"><param name="movie" value="google.gif" /></object>',
+		'<ol>OL</ol>',
+		'<embed  type="application/x-shockwave-flash" src="clock.swf" />',
+		'<p>P</p>',
+		'<pre>PRE</pre>',
+		'<q>Q</q>',
+		'<s>S</s>',
+		'<samp>SAMP</samp>',
+		'<select><option>SELECT</option></select>',
+		'<small>SMALL</small>',
+		'<span>SPAN</span>',
+		'<strike>STRIKE</strike>',
+		'<strong>STRONG</strong>',
+		'<sub>SUB</sub>',
+		'<sup>SUP</sup>',
+		'<textarea >TEXTAREA</textarea>',
+		'<table><tbody><tr><td>TABLE</td></tr></tbody></table>',
+		'<table><tfoot><tr><td>TFOOT</td></tr></tfoot></table>',
+		'<table><tbody><tr><th >TH</th></tr></tbody></table>',
+		'<table><thead ><tr><td>THEAD</td></tr></thead></table>',
+		'<table><tbody><tr><td>TR</td></tr></tbody></table>',
+		'<tt>TT</tt>',
+		'<u>U</u>',
+		'<ul>UL</ul>',
+		'<var>VAR</var>'
+		];
+	window["element_click"] = function(){
+		document.getElementById("container").style.display="block";
+		document.getElementById("info1").style.display="block";
+		document.getElementById("info2").style.display="block";
+		for(var i in htmls){
+			document.getElementById("container").innerHTML+=htmls[i];
+			document.getElementById("container").innerHTML+="<br/>";
+			document.getElementById("inited").onclick="";
+		}
+		var flag;
+		for(var i in tags){
+			flag=0;
+			if(document.getElementsByTagName(tags[i])){
+			   var elements=document.getElementsByTagName(tags[i]);
+			   if(tags[i]=="BUTTON"||tags[i]=="INPUT"){
+						 for(var j=0;j<elements.length;j++){
+							 flag=0;
+							 try{
+								elements[j].click();
+							}catch(e){
+								document.getElementById("info1").innerHTML+=i+"."+tags[i]+"[type="+elements[j].type+"] :"+e+"<br/>";
+								 flag=1;
+							}
+							 if(flag==0)
+							 {
+								document.getElementById("info2").innerHTML+=i+"."+tags[i]+"[type="+elements[j].type+"] :"+"支持Click()<br/>";
+							 }
+
+						  }
+			}else{
+					try{
+						elements[0].click();
+						}
+					catch(e){
+						document.getElementById("info1").innerHTML+=i+"."+tags[i]+" :"+e+"<br/>";
+						flag=1;
+						}
+					if(flag==0)
+						document.getElementById("info2").innerHTML+=i+"."+tags[i]+" :"+"支持Click()<br/>";
+				}
+
+			}
+		}
+	}
+}
+</script>
+<input  type="button" value="点击此按键开始测试所有 HTML 标签的 Click 方法支持程度" id="inited" onclick="element_click()"/>
+<div id="container" style="border:1px solid black;display:none;"></div>
+<div id="info1" style="border:1px solid red;display:none;"></div>
+<div id="info2" style="border:1px solid blue;display:none;"></div>
+</body>
+</html>

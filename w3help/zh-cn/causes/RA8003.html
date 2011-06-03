@@ -1,0 +1,160 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RA8003: IE6 IE7(Q) IE8(Q) 不完全支持 !important 规则</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p><strong>!important 规则</strong></p>
+      <p>在 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS2/cascade.html#cascading-order">6.4.1 Cascading order</a> 中根据CSS样式的来源和重要性，给出了优先级的升序排列：</p>
+            <ol>
+        <li>浏览器默认样式； </li>
+        <li>浏览器用户自定义一般<sup>1</sup>样式；</li>
+                <li>开发者定义一般样式；</li>
+                <li>开发者定义加了 '!mportant' 的样式</li>
+                <li>浏览器用户自定义加了 '!mportant' 的样式</li>
+      </ol>
+          <p class="comment">
+      【注】<br />
+      1. 未加 '!important' 的样式。
+      </p>
+
+            <p>根据 CSS2.1 规范中的描述，<strong>'!important' 可以提高样式的优先级</strong>，他是最高优先权重，无疑对样式优先级影响是巨大的。</p>
+            <p>为了平衡开发者设置的样式和浏览器用户设定的样式，默认开发者设置的样式优于浏览器用户设置的样式；另外，声明了'!important' 的样式优于其他样式声明。</p>
+
+      <p>关于 '!important' 的详细信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/cascade.html#important-rules">6.4.2 !important rules</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE6 IE7(Q) IE8(Q) 中不支持位于同一个选择器内的 '!important' 规则，他可能会导致实际样式效果与预计不符。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>使用 '!important' 规则而没有考虑 IE6 的情况，可能会使 IE6 中的表现跟其他浏览器有差别。</p>
+            <p>其影响程度跟属性值的重要程度成正比。比如， '!important' 设置在跟页面布局有很大关系的宽度值上，那么宽度的影响可能会作用于整个布局。 </p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>不支持位于同一个选择器内的 '!important' 规则。</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+
+      <p>在 <em>IE6 IE7(Q) IE8(Q)</em> 中，不完全支持 '!important' 规则。位于同一个选择器内的 '!important '规则将失效。</p>
+
+      <p>分析以下代码：</p>
+<pre>&lt;style type=&quot;text/css&quot;&gt;
+    div{
+        width:100px;
+        height:30px;
+        background-color:gold <span class="hl_1">!important</span>;
+        background-color:silver;
+    }
+&lt;/style&gt;
+&lt;div&gt;&lt;/div&gt;</pre>
+      <ul>
+        <li>DIV 是一个宽高固定的长方形。</li>
+        <li>DIV 的颜色进行了两次设置，一次为金色，一次为银色，其中金色在银色的前面，并且颜色值后有 <span class="hl_1">'!important'</span> 声明；</li>
+      </ul>
+      <p>根据 CSS2.1 规范中的描述可知，DIV 最终显示应为<span class="hl_1">金色</span>。</p>
+      <p>这段代码在不同的浏览器环境中的表现：</p>
+      <table class="compare">
+                <tr>
+                    <th>IE6 IE7(Q) IE8(Q)</th>
+                  <th>IE7(S) IE8(S) Firefox Opera Safari Chrome</th>
+                </tr>
+                <tr>
+                    <td><img src="../../tests/RA8003/RA8003-1.jpg" alt=""></td>
+                    <td><img src="../../tests/RA8003/RA8003-2.jpg" alt=""></td>
+                </tr>
+            </table>
+
+      <p>&nbsp;</p>
+          <p>下面看若 '!important' 位于两个选择器内的情况：</p>
+            <pre>&lt;style&gt;
+  .c1 { background:blue !important; }
+  .c2 { background:green; }
+&lt;/style&gt;
+&lt;div style=&quot;width:100px; height:100px;&quot; class=&quot;c1 c2&quot;&gt;&lt;/div&gt;</pre>
+      <table class="compare">
+              <tr>
+                <th>所有浏览器</th>
+              </tr>
+              <tr>
+                <td><img src="../../tests/RA8003/RA8003-3.jpg" alt="" /></td>
+              </tr>
+            </table>
+      <p>运行后发现所有浏览器中，DIV 元素的背景色均为蓝色。则证明 IE6 IE7(Q) IE8(Q) 支持不位于同一个选择器内的 '!important' 规则。</p>
+      <h2 id="solutions">解决方案</h2>
+      <p>这是浏览器的 Bug 导致，无法通过常规方式解决。不过，一般 '!important' 规则常常用于 CSS hack 以区分 IE6 与其他浏览器，其作为 hack 存在的意义已大于其本身的含义。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+                            IE6<br/>
+                            IE7<br/>
+                            IE8<br/>
+                            Firefox 3.6.3<br/>
+                            Chrome 6.0.437.3 dev<br/>
+                            Safari 5.0<br />
+                            Opera 10.54
+                        </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RA8003/important.html">important.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-08</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>important order</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

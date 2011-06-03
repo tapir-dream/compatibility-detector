@@ -1,0 +1,24 @@
+<style>
+    iframe { width:450px; height:1800px; }
+</style>
+after window.onload, appendChild
+<div id="div1">
+    <iframe id="ifr1" name="ifr1" src="sub.html"></iframe>
+    <iframe id="ifr2" name="ifr2" src="0.html"></iframe>
+</div>
+<div id="div2">
+</div>
+<script>
+    function $(id) {
+        return document.getElementById(id);
+    }
+
+	window.onload = function () {
+	    var iframe1 = $("div1").children[0];
+	    var iframe2 = $("div1").children[1];
+	    $("div1").removeChild(iframe1);
+	    $("div1").removeChild(iframe2);
+	    $("div2").appendChild(iframe1);
+	    $("div2").appendChild(iframe2);
+	}
+</script>

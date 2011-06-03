@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<script>
+window.onload = function(){
+	function getHTML(){
+		return '<!DOCTYPE html>\
+			<html>\
+			<head>\
+			<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>\
+			</head>\
+			<body>\
+			<h2>执行 $write 方法以后的页面<\/h2>\
+			<button onclick="history.back()">后退到上一历史记录页面</button>\
+			</body>\
+			</html>';
+	}
+	function echo(type){
+		type = type?"writeln":"write";
+		document.open();
+		document[type](getHTML().replace(/\$write/,type));
+		document.close();
+	}
+	window["test_echo"] = echo;
+}
+</script>
+</head>
+<body>
+<h2>初始的页面</h2>
+<button onclick="test_echo()">使用 write 方法重写页面</button>
+<button  onclick="test_echo(1)">使用 writeln 方法重写页面</button>
+<button onclick="history.forward()">前进到下一历史记录页面</button>
+</body>
+</html>

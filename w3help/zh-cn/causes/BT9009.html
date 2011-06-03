@@ -1,0 +1,117 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BT9009: 只有 IE 和 Opera 支持 FORM.item() 方法</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>关于 HTMLFormElement 接口的标准说明请参考： <a href="http://www.w3.org/TR/REC-DOM-Level-1/level-one-html.html#ID-40002357">http://www.w3.org/TR/REC-DOM-Level-1/level-one-html.html#ID-40002357</a> </p>
+      <p>关于 HTMLCollection 接口的标准说明请参考： <a href="http://www.w3.org/TR/REC-DOM-Level-1/level-one-html.html#ID-75708506">http://www.w3.org/TR/REC-DOM-Level-1/level-one-html.html#ID-75708506</a></p>
+      <h2 id="description">问题描述</h2>
+      <p>得到 FORM 标记的 DOM 引用后，使用 item 方法获取表单内元素存在兼容性问题。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>在 Chrome Safari Firefox 浏览器中，调用 FORM 元素的 item 方法会导致脚本错误。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+              <tr>
+                <th>IE6 IE7 IE8 Opera</th>
+                <td>&nbsp;</td>
+              </tr>
+            </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>根据 W3C DOM 规范，FORM 标记的 DOM 引用接口类型是 HTMLFormElement ，它没有定义 item 方法。</p>
+      <p>分析以下代码：</p>
+<pre>
+  &lt;form id=&quot;formid&quot;&gt;
+      &lt;input type=&quot;text&quot; value=&quot;text0&quot; name=&quot;txt0&quot; /&gt;
+      &lt;input type=&quot;text&quot; value=&quot;text1&quot; id=&quot;txt1&quot; /&gt;
+  &lt;/form&gt;
+
+  &lt;script language=&quot;javascript&quot;&gt;
+  var oForm= document.getElementById(&quot;formid&quot;);
+  oForm.item
+  ? alert(&quot;HTMLFormElement 的 item 方法被支持。&quot;)
+  : alert(&quot;HTMLFormElement 的 item 方法没有发现。&quot;);
+  oForm.elements.item
+  ? alert(&quot;HTMLFormElement.elements 的 item 方法被支持。&quot;)
+  : alert(&quot;HTMLFormElement.elements 的 item 方法没有发现。&quot;);
+  &lt;/script&gt;
+</pre>
+      <p>以上代码说明在 IE Opera 浏览器中，HTMLFormElement 接口类型中存在 item 方法 ，其他浏览器中则不支持。</p>
+          <p>而通过 HTMLFormElement.elements 方法返回 HTMLCollection 接口类型后，再调用规范声明中 HTMLCollection 的 item 方法在所有浏览器中都支持。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>当使用 item 方法遍历 HTMLCollection 时，只有在IE Opera 浏览器下可以直接获取 HTMLFormElement 元素内所有标记引用，其他浏览器并不支持这种方法。</p>
+      <p>推荐使用 HTMLFormElement.elements 方法得到 HTMLCollection 后再使用 item 方法获取表单内元素。 </p>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BT9009/HTMLFormElement_item_method.html">HTMLFormElement_item_method.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-18</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>FORM item 表单元素 集合  HTMLFormElement elements HTMLCollection </p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

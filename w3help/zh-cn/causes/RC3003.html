@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RC3003: IE6 IE7 IE8(Q) 下 'background-attachment:scroll' 时背景图片会随着元素内容滚动</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>如果设置了背景图形（'background-image' 特性），'background-attachment' 特性指定了图形是否相对<a href="http://www.w3.org/TR/CSS21/visuren.html#viewport" title="视口">视口</a>固定（fixed）或随着包含块滚动（'scroll'）。</p>
+      <p>而每一个视图中仅有一个视口，如果有一个元素具备滚动机制（'overflow' 特性设置），则设定在该元素上的固定的背景（background-attachment : fixed）不随该元素移动，<strong>设定在该元素上的滚动的背景（background-attachment : scroll）不随该元素的滚动条滚动。</strong></p>
+      <p>即使背景图形是固定的，它也只是在元素的 content、padding 和 border 区域（即 border box 之内）可见。因此，除非图形平铺（background-repeat: repeat），否则它可能是不可见的。</p>
+      <p>关于 'background-attachment' 特性的详细信息，请参考 CSS 2.1 <a href="http://www.w3.org/TR/CSS21/colors.html#propdef-background-attachment">'background-attachment'</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 IE7 IE8(Q) 下，当一个拥有滚动机制的元素设置了 'background-image' 特性并且 'background-attachment' 特性值为 'scroll' 时，元素的背景图片会随着元素内容滚动。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>若为一个拥有滚动机制的元素设置了 'background-image' 特性并且 'background-attachment' 特性值为 'scroll'，
+        在 IE6 IE7 IE8(Q) 下滚动该元素时其背景图片也会随着滚动，而在其它浏览器中背景图片不会移动，这会造成了视觉上的差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>规范中明确规定了设置 'background-attachment : scroll' 的元素不随滚动条移动，而 IE6 IE7 IE8(Q) 却反其道为之。</p>
+      <p>分析以下代码：</p>
+<pre>&lt;div style="background:url(google.png) repeat-x scroll 0 0 #FFFFFF;width:300px;height:200px;overflow:auto;"&gt;
+  &lt;div style="background:yellow;height:200px;width:40px;"&gt;inner content inner content inner content inner content inner content&lt;/div&gt;
+  &lt;div style="width:400px;text-align:right;"&gt;OUTER CONTENT&lt;/div&gt;
+&lt;/div&gt;</pre>
+      <p>上述代码创建了一个拥有水平和垂直滚动机制的，并且设置了背景图片，'background-attachment' 特性值为 'scroll' 的元素，
+      分别将垂直滚动条滚动到最底部，将水平滚动条滚动到最右端，各浏览器中表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RC3003/ie67q.png" alt="" /></td>
+          <td><img src="../../tests/RC3003/others.png" alt="" /></td>
+        </tr>
+      </table>
+      <p>从以上测试结果中可以看出，IE6 IE7 IE8(Q) 中在水平及垂直方向上背景图片均会随着元素内容滚动。</p>
+      <p>
+        CSS Backgrounds and Borders Module Level 3 草案中为 'background-attachment' 添加了新的值 'local'。当设置了 'background-attachment : local' 后，
+        背景图片将相对于内容固定，如果元素拥有滚动机制（水平或垂直方向），背景图片会随着元素内容滚动。
+      </p>
+      <p>分析以下代码：</p>
+<pre>
+&lt;div style="background-image:url(google.png);background-attachment:local;background-repeat: repeat-x;width:300px;height:200px;overflow:auto;"&gt;
+  &lt;div style="background:yellow;height:200px;width:40px;"&gt;inner content inner content inner content inner content inner content&lt;/div&gt;
+  &lt;div style="width:400px;text-align:right;"&gt;OUTER CONTENT&lt;/div&gt;
+&lt;/div&gt;
+</pre>
+      <p>分别将垂直滚动条滚动到最底部，将水平滚动条滚动到最右端，在 Chrome Safari Opera 中表现如下：<sup>1</sup><br /><br />
+      <img src="../../tests/RC3003/ie67q.png" alt="background-attachment:local" /></p>
+      <p class="comment">注1：目前只有 Chrome Safari Opera 支持 'background-attachment : local'。</p>
+      <p>关于 'background-attachment : local' 的更详细信息，请参考 CSS Backgrounds and Borders Module Level 3 草案：<a href="http://www.w3.org/TR/css3-background/#the-background-attachment">3.5. The 'background-attachment' property</a>。</p>
+
+      <h2 id="solutions">解决方案</h2>
+            <p>
+            1.若需要在所有浏览器下元素图片不随元素内容滚动，则不给元素设置任何背景，并且在元素的父元素上设置背景图；<br />
+            2.若需要在所有浏览器下元素图片随元素内容滚动，则不设置元素背景，而设置元素内容的背景图片并设置 'background-attachment : scroll'；<br />
+            3.对于 Chrome Safari Opera，如果需要使背景图片随元素内容滚动，使用 'background-attachment : local'。
+          </p>
+    <ul>
+        <li>若需要在所有浏览器下元素图片不随元素内容滚动：</li>
+<pre>
+&lt;div style="background:url(google.png) repeat-x scroll 0 0 #FFFFFF;width:300px;"&gt;
+  &lt;div style="width:300px;height:200px;overflow:auto;"&gt;
+    &lt;div style="background:yellow;height:200px;width:40px;"&gt;inner content inner content inner content inner content inner content&lt;/div&gt;
+    &lt;div style="width:400px;text-align:right;"&gt;OUTER CONTENT&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</pre>
+        <li>若需要在所有浏览器下元素图片随元素内容滚动：</li>
+<pre>
+&lt;div style="width:300px;height:200px;overflow:auto;"&gt;
+  &lt;div style="background:url(google.png) repeat-x scroll 0 0 #FFFFFF;"&gt;
+    &lt;div style="background:yellow;height:200px;width:40px;"&gt;inner content inner content inner content inner content inner content&lt;/div&gt;
+    &lt;div style="width:400px;text-align:right;"&gt;OUTER CONTENT&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</pre>
+      </ul>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.8<br />
+              Chrome 7.0.503.0 dev<br />
+              Safari 5.0.1(7533.17.8) <br />
+              Opera 10.61
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+              <a href="../../tests/RC3003/background-attachment-scroll.html">background-attachment-scroll.html</a><br />
+              <a href="../../tests/RC3003/background-attachment-local.html">background-attachment-local.html</a><br />
+              <a href="../../tests/RC3003/solution_scroll.html">solution_scroll.html</a><br />
+              <a href="../../tests/RC3003/solution_local.html">solution_local.html</a><br />
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-06</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>background background-attachment scroll 滚动 背景 图片</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

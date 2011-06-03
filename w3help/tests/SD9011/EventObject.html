@@ -1,0 +1,136 @@
+<button type="button" id="iEvent">Interface Event</button>
+<button type="button" id="iUIMouse">Interface UIEvent & MouseEvent</button>
+<input type="text" id="nosK" />
+<p id="wrap" style="border:3px solid;padding:5px;width:500px;"><a id="nosCM" href="#"><img src="google.gif" alt="IE"/></a></p>
+<br />
+<table border="1">
+	<tbody>
+		<tr>
+			<th>Interface Event</th>
+			<td id="einfo"></td>
+		</tr>
+		<tr>
+			<th>Interface UIEvent<br/>&<br/>MouseEvent</th>
+			<td id="minfo"></td>
+		</tr>
+		<tr>
+			<th>Non-standard<br/>&<br/>click</th>
+			<td id="ncinfo"></td>
+		</tr>
+		<tr>
+			<th>Non-standard<br/>&<br/>mouseover mouseout</th>
+			<td id="nminfo"></td>
+		</tr>
+		<tr>
+			<th>Non-standard<br/>&<br/>keyCode</th>
+			<td id="nkinfo"></td>
+		</tr>
+	</tbody>
+</table>
+
+<script type="text/javascript">
+	function $(id){return document.getElementById(id);}
+	function addEvent(elem, type, handler, useCapture){
+		elem.addEventListener ? elem.addEventListener(type, handler, useCapture) : 
+			elem.attachEvent("on" + type, handler);
+	}
+	
+	addEvent($("iEvent"), "click", handleEvent, false);
+	addEvent($("iUIMouse"), "click", handleUIMouse, false);
+	
+	addEvent($("nosCM"), "click", handleNoSClick, false);
+	addEvent($("wrap"), "click", function(){alert("P tag.");}, false);
+	
+	addEvent($("nosCM"), "mouseover", handldNoSMouse, false);
+	addEvent($("nosCM"), "mouseout", handldNoSMouse, false);
+	
+	addEvent($("nosK"), "keydown", handleNoSKey, false);
+	addEvent($("nosK"), "keypress", handleNoSKey, false);
+	addEvent($("nosK"), "keyup", handleNoSKey, false);
+	
+	function handleEvent(e){
+		e = e || window.event;
+		var props = {
+			type : "type",
+			target : "target",
+			currentTarget : "currentTarget",
+			eventPhase : "eventPhase",
+			bubbles : "bubbles",
+			cancelable : "cancelable",
+			timeStamp : "timeStamp",
+			initEvent : "initEvent",
+			preventDefault : "preventDefault",
+			stopPropagation : "stopPropagation"				
+		};
+			
+		showMsg(props, e, $("einfo"));
+	}
+	
+	function handleUIMouse(e){
+		e = e || window.event;
+		var props = {
+			view : "view",
+			detail : "detail",
+			initUIEvent : "initUIEvent",
+			screenX: "screenX",
+			screenY : "screenY",
+			clientX : "clientX",
+			clientY : "clientY",
+			ctrlKey : "ctrlKey",
+			shiftKey : "shiftKey",
+			altKey : "altKey",
+			metaKey : "metaKey",
+			button : "button",
+			relatedTarget : "relatedTarget",
+			initMouseEvent : "initMouseEvent"
+		}
+		showMsg(props, e, $("minfo"));
+	}
+	
+	function handleNoSClick(e){
+		e = e || window.event;
+		e.returnValue = false;
+		e.cancelBubble = true;
+		
+		var props = {
+			cancelBubble : "cancelBubble",
+			offsetX : "offsetX",
+			offsetY : "offsetY",
+			returnValue : "returnValue",
+			srcElement : "srcElement",
+			x : "x",
+			y : "y"
+		};
+		
+		showMsg(props, e, $("ncinfo"));
+	}
+	
+	function handldNoSMouse(e){
+		e = e || window.event;
+		var props = {
+			fromElement : "fromElement",
+			toElement : "toElement"
+		};
+		showMsg(props, e, $("nminfo"));
+	}
+	
+	function handleNoSKey(e){
+		e = e || window.event;
+		$("nkinfo").innerHTML += "<strong>" + e.type + "</strong> : " + e.keyCode + "<br/>";
+	}
+	
+	function showMsg(props, e, info){
+		var tmp = "", p, val;
+		with(e){
+			for(p in props) {
+				try{
+					val = eval(props[p]) + " [" + typeof eval(props[p]) + "]";
+				} catch (e) {
+					val = undefined;
+				}
+				tmp += "<strong>" + p + "</strong> : " + val + "<br />"
+			}
+		}
+		info.innerHTML = tmp;
+	}
+</script>

@@ -1,0 +1,357 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">CH3005: 各浏览器遇到 HTTP 400 错误页面的提示方式存在巨大差异</h1>
+<ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p> HTTP 协议的状态响应码由三位十进制数字组成。出现在由 HTTP 服务器发送的响应的第一行。响应码分五种类型，由它们的第一位数字表示。 </p>
+      <p> 响应码的五种类型如下表所示： </p>
+      <table class="compare">
+              <tr>
+                <th>状态响应码</th>
+                <th>描述</th>
+              </tr>
+              <tr>
+                <td><strong>1XX</strong></td>
+                <td> 信息 </td>
+              </tr>
+              <tr>
+                <td><strong>2XX</strong></td>
+                <td> 成功 </td>
+              </tr>
+              <tr>
+                <td><strong>3XX</strong></td>
+                <td> 重定向 </td>
+              </tr>
+              <tr>
+                <td><strong>4XX</strong></td>
+                <td> 客户端错误 </td>
+              </tr>
+              <tr>
+                <td><strong>5XX</strong></td>
+                <td> 服务器错误 </td>
+              </tr>
+            </table>
+      <p> 详细的状态响应码信息请看下表： </p>
+      <table class="compare">
+              <tr>
+                <th>状态响应码</th>
+                <th>描述</th>
+                <th>状态响应码</th>
+                <th>描述</th>
+              </tr>
+              <tr>
+                <td><strong>100</strong></td>
+                <td> 继续</td>
+                <td><strong>101 </strong></td>
+                <td>分组交换协议</td>
+              </tr>
+              <tr>
+                <td><strong>200 </strong></td>
+                <td>OK</td>
+                <td><strong>201 </strong></td>
+                <td>被创建</td>
+              </tr>
+              <tr>
+                <td><strong>202 </strong></td>
+                <td>被采纳</td>
+                <td><strong>203 </strong></td>
+                <td>非授权信息</td>
+              </tr>
+              <tr>
+                <td><strong>204 </strong></td>
+                <td>无内容</td>
+                <td><strong>205 </strong></td>
+                <td>重置内容</td>
+              </tr>
+              <tr>
+                <td><strong>206 </strong></td>
+                <td>部分内容</td>
+                <td><strong>300 </strong></td>
+                <td>多选项</td>
+              </tr>
+              <tr>
+                <td><strong>301 </strong></td>
+                <td>永久地传递</td>
+                <td><strong>302 </strong></td>
+                <td>找到</td>
+              </tr>
+              <tr>
+                <td><strong>303 </strong></td>
+                <td>参见其他</td>
+                <td><strong>304 </strong></td>
+                <td>未改动</td>
+              </tr>
+              <tr>
+                <td><strong>305 </strong></td>
+                <td>使用代理</td>
+                <td><strong>307 </strong></td>
+                <td>暂时重定向</td>
+              </tr>
+              <tr>
+                <td><strong>400 </strong></td>
+                <td>请求无效</td>
+                <td><strong>401.1 </strong></td>
+                <td>未授权:登录失败</td>
+              </tr>
+              <tr>
+                <td><strong>401.2 </strong></td>
+                <td>未授权：服务器配置问题导致登录失败</td>
+                <td><strong>401.3 </strong></td>
+                <td>ACL 禁止访问资源</td>
+              </tr>
+              <tr>
+                <td><strong>401.4 </strong></td>
+                <td>未授权：授权被筛选器拒绝</td>
+                <td><strong>401.5 </strong></td>
+                <td>未授权：ISAPI 或 CGI 授权失败</td>
+              </tr>
+              <tr>
+                <td><strong>402 </strong></td>
+                <td>要求付费</td>
+                <td><strong>403  </strong></td>
+                <td>禁止访问</td>
+              </tr>
+              <tr>
+                <td><strong>403.1 </strong></td>
+                <td>禁止访问：禁止可执行访问</td>
+                <td><strong>403.2 </strong></td>
+                <td>禁止访问：禁止读访问</td>
+              </tr>
+              <tr>
+                <td><strong>403.3 </strong></td>
+                <td>禁止访问：禁止写访问</td>
+                <td><strong>403.4 </strong></td>
+                <td>禁止访问：要求 SSL</td>
+              </tr>
+              <tr>
+                <td><strong>403.5 </strong></td>
+                <td>禁止访问：要求 SSL 128</td>
+                <td><strong>403.6 </strong></td>
+                <td>禁止访问：IP 地址被拒绝</td>
+              </tr>
+              <tr>
+                <td><strong>403.7 </strong></td>
+                <td>禁止访问：要求客户证书</td>
+                <td><strong>403.8 </strong></td>
+                <td>禁止访问：禁止站点访问</td>
+              </tr>
+              <tr>
+                <td><strong>403.9 </strong></td>
+                <td>禁止访问：连接的用户过多</td>
+                <td><strong>403.10 </strong></td>
+                <td>禁止访问：配置无效</td>
+              </tr>
+              <tr>
+                <td><strong>403.11 </strong></td>
+                <td>禁止访问：密码更改</td>
+                <td><strong>403.12 </strong></td>
+                <td>禁止访问：映射器拒绝访问</td>
+              </tr>
+              <tr>
+                <td><strong>403.13 </strong></td>
+                <td>禁止访问：客户证书已被吊销</td>
+                <td><strong>403.15 </strong></td>
+                <td>禁止访问：客户访问许可过多</td>
+              </tr>
+              <tr>
+                <td><strong>403.16 </strong></td>
+                <td>禁止访问：客户证书不可信或者无效</td>
+                <td><strong>403.17 </strong></td>
+                <td>禁止访问：客户证书已经到期或
+                  者尚未生效</td>
+              </tr>
+              <tr>
+                <td><strong>404 </strong></td>
+                <td>无法找到文件</td>
+                <td><strong>404.1 </strong></td>
+                <td>无法找到 Web 站点</td>
+              </tr>
+              <tr>
+                <td><strong>405  </strong></td>
+                <td>资源被禁止</td>
+                <td><strong>406 </strong></td>
+                <td>无法接受</td>
+              </tr>
+              <tr>
+                <td><strong>407 </strong></td>
+                <td>要求代理身份验证</td>
+                <td><strong>408 </strong></td>
+                <td>请求超时</td>
+              </tr>
+              <tr>
+                <td><strong>409 </strong></td>
+                <td>冲突</td>
+                <td><strong>410 </strong></td>
+                <td>永远不可用</td>
+              </tr>
+              <tr>
+                <td><strong>411 </strong></td>
+                <td>要求的长度</td>
+                <td><strong>412 </strong></td>
+                <td>先决条件失败</td>
+              </tr>
+              <tr>
+                <td><strong>413 </strong></td>
+                <td>请求实例太大</td>
+                <td><strong>414 </strong></td>
+                <td>请求 - URL 太长</td>
+              </tr>
+              <tr>
+                <td><strong>415 </strong></td>
+                <td>不支持的媒体类型</td>
+                <td><strong>416 </strong></td>
+                <td>无法满足的请求范围</td>
+              </tr>
+              <tr>
+                <td><strong>417 </strong></td>
+                <td>失败的预期</td>
+                <td><strong>500 </strong></td>
+                <td>内部服务器错误</td>
+              </tr>
+              <tr>
+                <td><strong>500.11 </strong></td>
+                <td>服务器关闭</td>
+                <td><strong>500.12 </strong></td>
+                <td>应用程序重新启动</td>
+              </tr>
+              <tr>
+                <td><strong>500.13 </strong></td>
+                <td>服务器太忙</td>
+                <td><strong>500.14 </strong></td>
+                <td>应用程序无效</td>
+              </tr>
+              <tr>
+                <td><strong>500.15 </strong></td>
+                <td>不允许请求 global.asa</td>
+                <td><strong>500.24 </strong></td>
+                <td>当前网站的应用的IIS程序池不正确</td>
+              </tr>
+              <tr>
+                <td><strong>500.100 </strong></td>
+                <td>内部服务器错误 - ASP 错误</td>
+                <td><strong>501 </strong></td>
+                <td>未实现</td>
+              </tr>
+              <tr>
+                <td><strong>502 </strong></td>
+                <td>网关错误</td>
+                <td><strong>503 </strong></td>
+                <td>不可用的服务</td>
+              </tr>
+              <tr>
+                <td><strong>504 </strong></td>
+                <td>网关超时</td>
+                <td><strong>505 </strong></td>
+                <td>HTTP 版本未被支持</td>
+              </tr>
+            </table>
+      <p>关于 HTTP1.1状态响应码的更多信息，请参考HTTP协议 <a href="http://www.w3.org/Protocols/rfc2616/rfc2616.html" >rfc2616</a> 第 <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10">10</a> 章。</p>
+      <h2 id="description">问题描述</h2>
+      <p>如果服务器端产生 HTTP 400 错误，并且在服务器端没有配置相应的显示页面，则会由本地客户端使用本地资源文件显示此错误信息。但是各浏览器的本地资源提示不同，更有些浏览器使用空白页代替本体错误提示页，造成用户识别混淆。</p>
+      <h2 id="influence">造成的影响</h2>
+      <p>不同的本地提示错误页面会导致用户识别错误信息混淆，如果是未实现的本地错误提示页，也有可能会以空白页显示，这会让用户误以为页面还没有加载完成。</p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>一般情况下，如常见的 HTTP 402、HTTP 403、HTTP 404 、HTTP 500 等错误，服务器端都会有默认配置用远程页面来做对应显示，如果服务器端没有配置，那么本地客户端浏览器也会使用本地资源文件内对应的错误页面来提示用户出现 HTTP 错误。</p>
+      <p>但是，如果请求产生了 HTTP 400 错误，在服务器端没有配置相应远程显示页面的情况下，本地不同浏览器使用的本地提示页面存在很非常大的差异。</p>
+      <p> 我们可以通过如下方式将此问题模拟出来，步骤如下<sup>1</sup>：</p>
+        <ol>
+          <li>建立index.jsp文件，内容为：<strong>&lt;%response.sendError(400)%&gt;</strong>;</li>
+          <li>修正 tomcat 的 web.xml 文件，将 HTTP 400 错误输出信息定位到index.jsp文件，避免服务器返回自身预定义的 HTTP-400 信息，如下：
+<pre>
+&lt;error-page&gt;
+    &lt;error-code&gt;400&lt;/error-code&gt;
+    &lt;location&gt;/index.jsp&lt;/location&gt;
+&lt;/error-page&gt;
+</pre>
+      然后访问 index.jsp 将会产生 http-400 错误，它会触发 tomcat 调用页面自身，这样就发送了纯净的 http-400 错误信息。
+</li>
+            <li>通过 Charles 分析工具结果证明以上方法模拟无误，如下图所示： <br />
+              <img src="../../tests/CH3005/01.png" alt="" /></li>
+          </ol>
+          <p class="comment">【注】：此处以 java 技术为例来说明此问题，仅为避免与本站 PHP 技术体系干扰。如果使用 PHP 技术则无法在本站线上部署环境中配置出不干扰正常应用的测试用例，因此使用 JAVA 技术来说明此问题，有兴趣的读者可以自行在本地配置 JAVA 环境测试。</p>
+          <p> 当浏览器接到此响应后，如果服务器没有返回任何有效 HTML 代码，则应由浏览器将详细错误提示给用户。</p>
+          <p> 这个提示信息是一个本地的HTML文件，存在于本地浏览器程序文件内，属于本地资源文件。</p>
+          <p> IE 浏览器就是这么做的，它的 HTTP 400 错误提示文件存在于：&quot;res://ieframe.dll/http_400.htm&quot;，只要将这个地址输入 IE 浏览器地址栏就可见到。</p>
+          <p>            其它浏览器则使用了没有任何提示信息的空白本地 HTML 资源文件来显示这个服务器端响应。相比 IE 来说显得信息提示不够 &quot;人性化&quot;。<br />
+                                    </p>
+          <h2 id="solutions">解决方案</h2>
+      <p> HTTP 出错时返回错误代码，如果服务器端没有设置显示该问题的页面，则会由本地浏览器根据本地预置资源文件来显示，这些本地页面的显示风格由各浏览器决定，无法由用户控制。因此最好的解决方案还是在服务器端配置所有的错误代码对应的远程页面。</p>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+<div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.544.0 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>&nbsp;</td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-09</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>HTTP 503 500 404 403 400  协议的状态响应码 浏览器 本地资源文件</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

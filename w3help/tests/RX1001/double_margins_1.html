@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+	window.onload = function () {
+		document.getElementById("d1").innerHTML = document.getElementById("d1").parentNode.offsetWidth;
+		document.getElementById("d2").innerHTML = document.getElementById("d2").parentNode.offsetWidth;
+	}
+</script>
+</head>
+<body style="font:12px Arial; margin:0;">
+<div style="width:100px;">
+	<div style="background:gold; float:left;">
+		<div id="d1" style="float:left; margin:0 50px; background:olive; width:100px; height:50px;"></div>
+	</div>
+	<div style="background:pink; float:left;">
+		<div id="d2" style="float:right; margin:0 50px; background:deeppink; width:100px; height:50px;"></div>
+	</div>
+</div>
+</body>
+</html>

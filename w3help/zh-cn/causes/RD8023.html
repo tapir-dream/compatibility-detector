@@ -1,0 +1,136 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RD8023: IE6 IE7(Q) IE8(Q) 中包含未明确设定宽度的触发了 hasLayout 的元素的包含块的 shrink-to-fit 算法有误 </h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>如果一个浮动元素或绝对定位元素的的 'width' 是 'auto'，并且它是一个非替换元素，那么它的宽度将会采用 shrink-to-fit 算法计算得出。</p>
+      <p>shrink-to-fit 的计算公式：min(max(preferred minimum width, available width), preferred width)</p>
+      <p>CSS2.1 并未给出 preferred minimum width、available width 和 preferred width 确切算法，通常，将内容中非明确的换行外的其他部分强制不换行来计算 preferred width；反之，尝试将内容尽可能的换行，以得到 preferred minimum width；available width 即该元素的包含块的宽度减去 'margin-left'，'border-left-width'，'padding-left'，'padding-right'，'border-right-width'，'margin-right' 的值以及任何存在的纵向滚动条的宽度。</p>
+      <p>关于浮动非替换元素宽度计算的详细资料，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/visudet.html#float-width">10.3.5 Floating, non-replaced elements</a> 中的内容。</p>
+      <p>关于绝对定位非替换元素宽度计算的详细资料，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/visudet.html#abs-non-replaced-width">10.3.7 Absolutely positioned, non-replaced elements</a> 中的内容。</p>
+      <h2 id="description">问题描述</h2>
+      <p>IE6 IE7(Q) IE8(Q) 中，如果父需要使用 shrink-to-fit 算法，并且其子元素触发了 hasLayout<sup>1</sup> 特性以及 'width' 特性值为默认的 'auto'，那么会导致父元素 shrink-to-fit 计算值有误。</p>
+      <p class="comment">【注】：hasLayout 特性是 IE 渲染引擎特有的概念，某些 HTML 元素本身即存在这个特性（如 BODY 元素），另外不天生具备此特性的元素则可以由某些 CSS 样式设置触发该特性。在 IE6 IE7 中 hasLayout 特性会带来很多与规范描述不符的 IE 特有 BUG。关于 hasLayout 特性更详细的描述可以参考 MSDN 中 <a href="http://msdn.microsoft.com/en-us/library/bb250481(VS.85).aspx">"HasLayout" Overview</a> 一节。</p>
+      <h2 id="influence">造成的影响</h2>
+      <p>在 IE6 IE7(Q) IE8(Q) 中这种情况会导致局部布局错乱。</p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tbody>
+          <tr>
+            <th>IE6 IE7(Q) IE8(Q)</th>
+            <td>&nbsp;</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+<pre>
+&lt;div style=&quot;width:300px&quot;&gt;
+    &lt;div id=&quot;A&quot; style="float:left; border:1px solid #000066;"&gt;
+        &lt;div style="background-color:#999999; margin:2px; <span class="hl_4">zoom:1</span>"&gt;abc&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;br /&gt;
+    &lt;div id=&quot;B&quot; style="position:absolute; top:50px; border:1px solid #000066;"&gt;
+        &lt;div style="background-color:#999999; margin:2px; <span class="hl_4">zoom:1</span>"&gt;abc&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</pre>
+
+      <p>例子代码中 id 为 A 的 DIV 标记处于浮动流中，DIV 标记为非替换元素，宽度没有设置，将使用默认值 'auto '，根据规范定义，此时的 A 元素宽度计算应该遵循 shrink-to-fit 算法。</p>
+      <p>同理 id 为 B 的 DIV 标记处于绝对定位流中，其他设置与 A元素相同，其宽度计算同样应使用 shrink-to-fit 算法。</p>
+      <p>A 元素与 B 元素拥有相同的子元素 DIV，这个 DIV 使用了 "zoom:1" 样式使自身拥有了 hasLayout 特性，同时这个子元素没有显式性的设置宽度，宽度值为默认的 'auto'。</p>
+      <p>此代码在各浏览器中渲染如下：</p>
+      <table class="compare">
+              <tr>
+                <th>IE6 IE7(Q) IE8(Q)</th>
+                <th>IE7(S)  </th>
+                <th>IE8(S) Firefox Chrome Safari Opera</th>
+              </tr>
+              <tr>
+                <td><img src="../../tests/RD8023/02.png" align="IE6 IE7(Q) IE8(Q)" /></td>
+                <td><img src="../../tests/RD8023/01.png" align="IE7(S) IE8(S) Firefox Chrome Safari Opera" /></td>
+                <td><img src="../../tests/RD8023/01.png" align="IE7(S) IE8(S) Firefox Chrome Safari Opera" /></td>
+              </tr>
+            </table>
+      <p>根据实际显示情况可以得出以下结论：</p>
+      <ul>
+              <li>在 <strong><em>IE6 IE7(Q) IE8(Q)</em></strong> 中，当没有设定具体宽度的子元素触发 hasLayout 特性后，宽度试图按照父元素宽度设定。但是他的父元素也没有设定宽度，此时父元素的宽度应按照外层 DIV 的宽度 300px 设置，这导致内层 DIV 宽度按照 300px 渲染。此中情况下原本 A、B 元素需要进行的 shrink-to-fit 计算从表象上看是失效了或者是计算错误了。</li>
+                <li>在 <strong><em>IE7(S)</em></strong> 中，'zoom:1' 样式虽然触发了元素的 hasLayout 特性，但是  shrink-to-fit 计算已经被修复了，没有重现。</li>
+          <li>在 <strong><em>IE8(S)</em></strong> 中，'zoom:1' 样式已经无法触发元素的 hasLayout 特性，即使换用其他可触发 hasLayout 特性的 CSS 样式（如 'height' ）也无法重现 IE6 中情况；可以确定这个问题在 IE7(S) 中已经被修复。</li>
+            <li>在 <strong><em>Firefox Chrome Safari Opera</em></strong> 中，不存在  hasLayout 特性，因此也不存在 IE 中的 Bug 现象。</li>
+      </ul>
+      <h2 id="solutions">解决方案</h2>
+      <p>由于在 IE 浏览器中很难避免不触发 hasLayout 特性，因此建议在使用 ‘float’ ‘position:absolute' 这两个样式时，<strong>为 'width' 特性设置具体值</strong>。这样可以从根源上避免触发 shrink-to-fit 计算规则，由此来规避 IE6 IE7(Q) IE8(Q) 中由于 hasLayout 特性带来的渲染问题。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.8<br />
+              Chrome 7.0.517.5 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62</td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RD8023/ie_shrink_to_fit_bug_of_haslayout.html">ie_shrink_to_fit_bug_of_haslayout.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-14</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p> IE6 shrink-to-fit float position width 父元素 宽度 计算错误</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!doctype html>
+<html>
+	<head>
+		<style type="text/css">
+			.abs {
+				position : absolute;
+			}
+			
+			.cont {
+				width:40px;
+				background:red;
+				padding:5px;
+				position:absolute;
+				left:100px;
+			}
+			
+			.stf {
+				float:left;
+				border:5px solid;
+				padding:5px;
+				background:gold;
+			}
+		</style>
+	</head>
+	<body style="background:white;font:12px Arial;">
+	
+<div style="position:absolute;top:0;">min-width:0%;</div>
+<div class="cont" style="top:0;">
+	<div id="stf1" class="stf">
+		<img id="img1" src="google_small.gif" style="min-width:0%;" />
+	</div>
+</div>
+
+<div style="position:absolute;top:100px;">max-width:0%;</div>
+<div class="cont" style="top:100px;">
+	<div id="stf2" class="stf">
+		<img id="img2" src="google_small.gif" style="max-width:0%;" />
+	</div>
+</div>
+
+<div style="position:absolute;top:200px;">min-width:50%;</div>
+<div class="cont" style="top:200px;">
+	<div id="stf3" class="stf">
+		<img id="img1" src="google_small.gif" style="min-width:50%;" />
+	</div>
+</div>
+
+<div style="position:absolute;top:300px;">max-width:50%;</div>
+<div class="cont" style="top:300px;">
+	<div id="stf4" class="stf">
+		<img id="img2" src="google_small.gif" style="max-width:50%;" />
+	</div>
+</div>
+
+<div style="position:absolute;top:400px;">min-width:150%;</div>
+<div class="cont" style="top:400px;">
+	<div id="stf5" class="stf">
+		<img id="img1" src="google_small.gif" style="min-width:150%;" />
+	</div>
+</div>
+
+<div style="position:absolute;top:500px;">max-width:150%;</div>
+<div class="cont" style="top:500px;">
+	<div id="stf6" class="stf">
+		<img id="img2" src="google_small.gif" style="max-width:150%;" />
+	</div>
+</div>
+
+<div id="info" style="position:absolute;top:600px;"></div>
+<script type="text/javascript">
+window.onload = function(){
+	var $ = function(id){return document.getElementById(id);};
+	function info(msg){
+		$("info").innerHTML += "computed width : " + msg + "px<br />"; 
+	}
+	
+	function getComputedStyle(id){
+		return window.getComputedStyle ? window.getComputedStyle($(id),null) : $(id).currentStyle;
+	}
+	
+	var cs1 = getComputedStyle("stf1"), cs2 = getComputedStyle("stf2"), cs3 = getComputedStyle("stf3"),
+		cs4 = getComputedStyle("stf4"), cs5 = getComputedStyle("stf5"), cs6 = getComputedStyle("stf6");
+		
+	info($("stf1").offsetWidth - parseInt(cs1.paddingLeft) - parseInt(cs1.paddingRight) - parseInt(cs1.borderLeftWidth) - parseInt(cs1.borderRightWidth));
+	info($("stf2").offsetWidth - parseInt(cs2.paddingLeft) - parseInt(cs2.paddingRight) - parseInt(cs2.borderLeftWidth) - parseInt(cs2.borderRightWidth));
+	info($("stf3").offsetWidth - parseInt(cs3.paddingLeft) - parseInt(cs3.paddingRight) - parseInt(cs3.borderLeftWidth) - parseInt(cs3.borderRightWidth));
+	info($("stf4").offsetWidth - parseInt(cs4.paddingLeft) - parseInt(cs4.paddingRight) - parseInt(cs4.borderLeftWidth) - parseInt(cs4.borderRightWidth));
+	info($("stf5").offsetWidth - parseInt(cs5.paddingLeft) - parseInt(cs5.paddingRight) - parseInt(cs5.borderLeftWidth) - parseInt(cs5.borderRightWidth));
+	info($("stf6").offsetWidth - parseInt(cs6.paddingLeft) - parseInt(cs6.paddingRight) - parseInt(cs6.borderLeftWidth) - parseInt(cs6.borderRightWidth));
+}
+</script>
+</body></html>

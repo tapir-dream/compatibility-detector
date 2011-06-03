@@ -1,0 +1,142 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BW5004: Webkit 中 NOBR 标签与其他标签紧密相连在某些情况下会导致部分内容无法换行</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p> 无 </p>
+
+      <h2 id="description">问题描述</h2>
+      <p>Webkit 渲染引擎中 NOBR 标签与其他标签紧密相连在某些情况下会导致部分内容无法换行。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>无法换行的内容会对预期布局造成破坏。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+                <tr>
+                    <th>Safari Chrome</th>
+                    <td>&nbsp;</td>
+                </tr>
+            </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>观察以下代码：</p>
+<pre>
+&lt;div style=&quot;width:150px;background:gold&quot;&gt;
+        &lt;div&gt;
+            &lt;span style=&quot;float: left;&quot;&gt;AAAAA&lt;/span&gt;
+        &lt;/div&gt;
+        &lt;div&gt;<span class="hl_1">&lt;nobr&gt;</span>&lt;span&gt;BBBBBBBBBBBBBBBBB&lt;/span&gt;<span class="hl_1">&lt;/nobr&gt;</span>&lt;/div&gt;
+&lt;/div&gt;
+</pre>
+      <p>在各浏览器中的表现：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Firefox</th>
+          <th>Safari Chrome</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BW5004/1.png" alt="snapshot" /></td>
+          <td><img src="../../tests/BW5004/2.png" alt="snapshot" /></td>
+        </tr>
+      </table>
+      <p>可以看到在 Chrome Safari 内当容器空余空间无法呈现 B 元素内容时，由于紧密连接的 NOBR 标记和 DIV 标记的作用导致 B 元素内容不换行溢出容器。</p>
+      <p>但是在其它浏览器内则解释的很正常，NOBR 作用仅限制在 B 元素所在的 SPAN 标记范围中，而不是错误限制它的父 DIV 标记不换行显示。</p>
+      <p>我们把这个代码再稍作修改，在 &lt;/nobr&gt; 和 &lt;/div&gt; 之间加入一个空格：</p>
+
+      <p>这样处理后在所有浏览器中均显示如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Firefox Safari Chrome</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BW5004/1.png" alt="snapshot" /></td>
+        </tr>
+      </table>
+      <p>这是 WebKit 的 Bug。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <pre>
+&lt;div style=&quot;width:150px;background:gold&quot;&gt;
+        &lt;div&gt;
+            &lt;span style=&quot;float: left;&quot;&gt;AAAAA&lt;/span&gt;
+        &lt;/div&gt;
+        &lt;div&gt;<span class="hl_1">&lt;nobr&gt;</span>&lt;span&gt;BBBBBBBBBBBBBBBBB&lt;/span&gt;<span class="hl_1">&lt;/nobr&gt;</span><span class="hl_2"> </span>&lt;/div&gt;
+&lt;/div&gt;
+    </pre>
+        <p>
+          在 NOBR 闭合标记之后加入一个英文空格即可解决不换行问题。
+        </p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BW5004/nobr.html">nobr.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-12</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>Webkit NOBR 换行</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

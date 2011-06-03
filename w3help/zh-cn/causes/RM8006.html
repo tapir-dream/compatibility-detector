@@ -1,0 +1,177 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RM8006: IE6 IE7 IE8(Q)中设置了 'clear' 特性的元素 'margin-top' 特性处理有误，某些情况下会与浮动元素重叠</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 W3C CSS2.1 规范中的描述，'clear' 特性表明了一个元素的框的哪一边（left | right）不可以和一个先前的浮动框相邻。'clear' 特性并不考虑该元素内部或其他 block formatting context 中的浮动。'clear' 特性所带来的清理（Clearance）被当做一个元素 'margin-top' 之上的空白区域，它在垂直方向推动元素（通常是向下），越过浮动。</p>
+            <p>当它作用于非浮动块级框上时，其取值如下：</p>
+            <ul>
+              <li>left：清理生成的框使元素的 'border' 上边界（即 'border-top'）置于其之前的左浮动元素 'margin '下边界（即 'margin-bottom'）下面；</li>
+              <li>right：清理生成的框使元素的 'border' 上边界（即 'border-top'）置于其之前的右浮动元素 'margin '下边界（即 'margin-bottom'）下面；</li>
+              <li>both：清理生成的框使元素的 'border' 上边界（即 'border-top'）置于其之前的任意向右及向左浮动元素 'margin '下边界（即 'margin-bottom'）下面；</li>
+              <li>none：关于浮动对框的位置没有约束。</li>
+            </ul>
+            <p>可以看到 W3C 对 'clear' 特性的元素的要求是：</p>
+      <pre>拥有 'clear' 特性的元素顶部 'border-box' 在垂直方向不可位于之前浮动元素的底部 'margin-box' 之上。</pre>
+      <p>关于 'clear' 特性的更多信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/visuren.html#flow-control">9.5.2 Controlling flow next to floats: the 'clear' property</a>。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 IE7 IE8(Q) 下，为 'clear' 元素设置负的 'margin-top' 时， 'clear' 元素的顶部 'border-box' 出现在了其之前浮动元素的底部 'margin-box' 之上。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>在 IE6 IE7 IE8(Q) 下，为 'clear' 元素设置负的 'margin-top' 时，会造成页面内容重叠。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+                <tr>
+                    <th>IE6 IE7 IE8(Q)</th>
+                    <th>&nbsp;</th>
+                </tr>
+            </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>在 IE6 IE7 IE8(Q) 中，为设置了 'clear' 特性的元素设置负的 'margin-top' 时，'clear' 元素的顶部 border-box 会出现在了其之前浮动元素的底部 margin-box 之上、与其重叠。</p>
+      <p>分析以下代码：</p>
+      <pre>&lt;div style="float:left; width:200px; height:50px; background:gray; border:5px solid #CCC;; margin:10px;"&gt;FLOAT&lt;/div&gt;
+&lt;div style="<span class="hl_1">clear:left; margin:-30px 10px 10px;</span> border:5px solid black; width:200px; height:50px; background:silver; filter:alpha(opacity=50); opacity:0.5;"&gt;CLEAR&lt;/div&gt;</pre>
+      <p>测试代码中一个左浮动的 DIV 元素后跟随着一个 ’clear:left‘ 的 DIV 元素，同时 'clear' 特性元素有 -30px 的上边距。</p>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+                <tr>
+                    <th>IE6 IE7 IE8(Q)</th>
+                    <th>IE8(S) Firefox Chrome Safari Opera</th>
+                </tr>
+                <tr>
+                    <td><img src="../../tests/RM8006/RM8006-1.png" alt="IE6 IE7 IE8(Q)"></td>
+                    <td><img src="../../tests/RM8006/RM8006-2.png" alt="IE8(S) Firefox Chrome Safari Opera"></td>
+                </tr>
+                <tr>
+                  <td colspan="2">添加 margin-box、border-box 说明后：</td>
+                </tr>
+                <tr>
+                    <td><img src="../../tests/RM8006/clear_mt_1.gif" alt="IE6 IE7 IE8(Q)"></td>
+                    <td><img src="../../tests/RM8006/clear_mt_2.gif" alt="IE8(S) Firefox Chrome Safari Opera"></td>
+                </tr>
+            </table>
+      <p>可见，在 <em>IE6 IE7 IE8(Q)</em> 中， 'clear' 元素违反了CSS规范中对 'clear' 特性的规定，在为 'clear' 元素设置负的 'margin-top' 时， 'clear' 元素的顶部 'border-box' 出现在了其之前浮动元素的底部 'margin-box' 之上。<br />
+      而在 <em>其他浏览器</em> 中，如上例浮动元素的 margin-box 的高度为60px，所以当我们为 'clear' 元素设置小于60px（包括负值）的 'margin-top' 时，都不会使其垂直方向发生偏移，这是完全遵照 CSS 规范处理。</p>
+      <br />
+      <p>不仅仅是负值的 'margin'，事实上 IE6、IE7、IE8(Q) 对于 'clear' 元素上其他一些取值范围内的 'margin-top' 处理也有 Bug。</p>
+      <p>再看如下代码：</p>
+      <pre>&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div id="container" style="border:5px solid black;"&gt;
+    &lt;div id="float1" style="background:#777; width:100px; height:30px; float:left;"&gt;H:30px&lt;/div&gt;
+    &lt;div id="float2" style="background:#999; width:100px; height:40px; float:left; border:5px solid #333; margin-bottom:10px;"&gt;H:40px&lt;/div&gt;
+    &lt;div id="clear" style="background:#AAA; <span class="hl_1">clear:left;</span> border:5px solid #666;" id="d"&gt;CLEAR margin-top:&lt;span id="s"&gt;80px&lt;/span&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;script&gt;
+    var d = document.getElementById("d");
+    var s = document.getElementById("s");
+    var m = 80;
+    setInterval(function () {
+        s.innerHTML = m + "px";
+        d.style.marginTop = m-- + "px";
+        (m == -40) &amp;&amp; (m = 80);
+    }, 80);
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码中，容器【container】中包含两个左浮动元素【float1】及【float】，以及一个 'clear' 元素 【clear】，【clear】 上设置了 'margin-top:80px'。页面加载后，通过定时器每隔 80 毫秒使 【clear】 的 'margin-top' 的值减一，直到其值由最初的 80 减至 -39。</p>
+      <p>这段代码在不同浏览器中运行结果如下（忽略 IE 混杂模式的 width/height 作用位置差异）：</p>
+      <table class="compare">
+                <tr>
+                    <th style="width:50%">IE6 IE7 IE8(Q)</th>
+                    <th style="width:50%">IE8(S) Firefox Chrome Safari Opera</th>
+                </tr>
+                <tr>
+                  <td colspan="2"><img src="../../tests/RM8006/clear_ani.gif" alt="all"></td>
+                </tr>
+            </table>
+            <p>可见，对于测试样例，margin-top:60px 是一个分水岭，【container】内高度最大的浮动元素为【float2】，其高度为 40px，上下各有 5px 的边框，下部有 10px 的边距，则【container】中所有浮动元素生成框的底部外界距离它们的包含块（即【container】）为 60px。</p>
+            <p>当清除元素的 'margin-top' 大于等于 60px 时，各浏览器表现一致，即清除元素的 'margin-top' 是相对于其包含块；而当清除元素的 'margin-top' 小于 60px 时：</p>
+            <ul>
+              <li>在 <em>IE6 IE7 IE8(Q)</em> 中，【clear】的 'margin-top' 变为相对于【container】中所有浮动元素生成框的底部外界；</li>
+              <li>在 <em>其他浏览器</em> 中，则按照规范所描述的，拥有 'clear' 特性的元素顶部 border-box 在垂直方向不可位于之前浮动元素的底部 margin-box 之上。</li>
+            </ul>
+
+
+
+      <h2 id="solutions">解决方案</h2>
+      <p>尽量避免为 'clear' 特性不为 none 的元素（即清理元素）设置 'margin-top' 特性，尤其是负值。若需要为该元素设置正的 'margin-top' 特性，可以将 'clear' 元素当做容器，在其内部加入设置了 'margin-top' 的元素。若需要为该元素设置负的 'margin-top' ，可以为浮动元素设置负的 'margin-bottom' 以缩小其 'margin-box' ，提高了其底部 'margin-box' 的位置，从而使 'clear' 元素可以产生向上移动的效果。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RM8006/RM8006.html">RM8006.html</a><br />
+            <a href="../../tests/RM8006/clear_ani.html">clear_ani.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-20</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>clear float margin 浮动 清理</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	* { margin:0; padding:0; font:18px 'Trebuchet MS'; }
+	table { border-collapse:collapse; }
+	table td, table th { border:1px solid black; }
+	th { background:#ddd; }
+</style>
+</head>
+<body>
+window.execScript()
+<table cellspacing="0" cellpadding="0">
+<script>
+	var a, lang = ['JavaScript', 'JavaScript1.1', 'JavaScript1.2', 'JavaScript1.3', 'JavaScript1.4', 'JScript', 'VBS', 'VBScript', 'abcJavaScriptdef', 'Java-Script'];
+	for (var i in lang) {
+		try {
+			a = undefined;
+			window.execScript('a = 1', lang[i]);
+		} catch(ex) {
+			a = ex.message;
+		}
+		document.write('<tr><th>' + lang[i] + '</th><td>' + a + '</td></tr>');
+	}
+</script>
+</table>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+</head>
+<body>
+<input type="text" id="a" />
+<input type="text" id="i" value="www" disabled style="color:#aaa; background:#eaeaea;" />
+<script>
+	function $(id) { return document.getElementById(id); }
+	var a = $('a');
+	var i = $('i');
+	a.focus();
+	var f = document.activeElement;
+	i.disabled = false;
+	i.focus();
+	f.focus();
+</script>
+</body>
+</html>

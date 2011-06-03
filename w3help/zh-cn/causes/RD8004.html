@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RD8004: IE6 IE7 IE8(Q) 中浮动元素宽度的 shrink-to-fit 算法与标准规定的算法不同</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>如果一个浮动元素的 'width' 是 'auto'，并且它是一个非替换元素，那么它的宽度将会是shrink-to-fit。</p>
+      <p>shrink-to-fit的计算公式：min(max(preferred minimum width, available width), preferred width)</p>
+      <p>CSS2.1 并未给出 preferred minimum width、available width 和 preferred width 确切算法，通常，将内容中非明确的换行外的其他部分强制不换行来计算 preferred width；反之，尝试将内容尽可能的换行，以得到 preferred minimum width；available width 即该元素的包含块的宽度减去 'margin-left'，'border-left-width'，'padding-left'，'padding-right'，'border-right-width'，'margin-right' 的值以及任何存在的纵向滚动条的宽度。</p>
+      <p>关于浮动非替换元素宽度计算的详细资料，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/visudet.html#float-width">10.3.5 Floating, non-replaced elements</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 IE7 IE8(Q) 中，如果一个浮动元素的宽度是 shrink-to-fit，该元素的最终宽度可能比预期的小，并被尽可能的向上布局。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>这个问题将导致一些元素在各浏览器中的实际尺寸不一致，在有些浏览器中可能发生布局混乱的现象。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+<pre>&lt;div id="<strong>Container</strong>" style="width:300px; background:lightgrey; font:14px Consolas; overflow:auto;"&gt;
+    &lt;div id="<strong>Placeholder_150</strong>" style="float:left; width:150px; height:30px; background:dimgray;"&gt;&lt;/div&gt;
+    &lt;div id="<strong>Placeholder_100</strong>" style="clear:both; float:left; width:100px; height:30px; background:black;"&gt;&lt;/div&gt;
+    &lt;div id="<strong>STF</strong>" style="<span class="hl_1">float:left</span>; background:url(x.gif);"&gt;
+        &lt;span id="<strong>A</strong>" style="background:darkgray;"&gt;background_darkgray&lt;/span&gt;
+        &lt;span id="<strong>B</strong>" style="background:gray;"&gt;background_gray&lt;/span&gt;
+        &lt;span id="<strong>C</strong>" style="background:dimgray;"&gt;background_dimgray&lt;/span&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</pre>
+      <ul>
+        <li><strong>Container</strong> 是容器，设置宽度为 300px 的目的是限制 <strong>STF</strong> 的最大宽度。设置 'overflow:auto' 是为了使其创建 block formatting context 并自动容扩展高度容纳其内容，以便于查看其尺寸。设置了一个等宽字体（14px 的 Consolas 字体的每个英文字符的尺寸为 8px * 17px）的目的是为了便于计算 <strong>A</strong>、<strong>B</strong>、<strong>C</strong> 的宽度。</li>
+        <li><strong>Placeholder_150</strong> 是一个 150px * 30px 的左浮动元素，事实上可以使用 'float:right' 来替代本例中的 'float:left'。放置这个元素的目的是用来占位，以更直观的测试 IE6 IE7 IE8(Q) 中 <strong>STF</strong> 宽度算法的问题。</li>
+        <li><strong>Placeholder_100</strong> 是一个 100px * 30px 的左浮动元素，它也可以是一个右浮动元素。其作用与 <strong>Placeholder_150</strong> 相同。</li>
+        <li><strong>STF</strong> 是一个没有设置width（默认值是auto）的左浮动元素，事实上可以使用 'float:right' 来替代本例中的 'float:left'，关键点在于：它是一个宽度为 shrink-to-fit 的浮动元素。他被设置了一个网格状的图片背景，以便于查看其尺寸。</li>
+        <li><strong>A</strong> 包含了 19 个不可换行的字符，尺寸为 152px * 17px。</li>
+        <li><strong>B</strong> 包含了 15 个不可换行的字符，尺寸为 120px * 17px。</li>
+        <li><strong>C</strong> 包含了 18 个不可换行的字符，尺寸为 144px * 17px。</li>
+      </ul>
+      <p class="comment">注意：如果 <strong>STF</strong> 内包含右浮动元素，将触发由 <em>IE6 IE7 IE8(Q)</em> 中布局右浮动元素时的 Bug，导致 <strong>STF</strong> 的宽度尽可能的宽。</p>
+
+      <p>根据 CSS2.1 规范中 shrink-to-fit 的计算公式，获取 <strong>STF</strong> 的几个关键值：<br />
+      preferred minimum width：将 <strong>STF</strong> 中所有元素尽可能的换行，最宽的元素是 <strong>B</strong>，为 152px。<br />
+      available width：即 <strong>Container</strong> 的宽度，为 300px。<br />
+      preferred width：将 <strong>STF</strong> 中所有元素尽可能的不换行，即 <strong>A</strong>、<strong>B</strong>、<strong>C</strong> 的宽度之和，再加上 <strong>A</strong> 和 <strong>B</strong> 之间、<strong>B</strong> 和 <strong>C</strong> 之间的两个压缩后的空格，为 432px。</p>
+      <p>将结果代入计算公式：<br />min(max(152, 300), 432) = 300</p>
+      <p>也就是说，最终 <strong>STF</strong> 的宽度应该是 300px。</p>
+      <p>这段代码在不同的浏览器环境中表现如下：</p>
+      <p><img width="315" height="262" src="004/1.png" alt="Snapshot" /></p>
+      <p>删除 <strong>Placeholder_100</strong> 和 <strong>Placeholder_150</strong> 后：</p>
+      <p><img width="315" height="160" src="004/2.png" alt="Snapshot" /></p>
+      <p>可见，在 <em>IE6 IE7 IE8(Q)</em> 中，<strong>STF</strong> 的宽度计算并非是按照 CSS2.1 规范中描述的 shrink-to-fit 算法来进行的。</p>
+      <p>推测其算法如下：</p>
+      <ol>
+      <li>尽可能的将浮动元素靠上布局在其包含块中，如果当前所在行的剩余横向空间小于其 preferred minimum width，则尝试下一行，以此类推，直到可以将其放置在这行为止。</li>
+      <li>然后，将其内容逐行顺次摆放，无法摆放时则折行继续摆放，直到其所有内容摆放完毕。</li>
+      <li>最后，取其内容中最宽的行的宽度为其最终宽度。</li>
+      </ol>
+      <p>第一张图是因为第一行的 <strong>Placeholder_150</strong> 占据了 150px，导致该行剩余空间仅有 150px，无法放置 <strong>STF</strong> 中最宽的内容 <strong>A</strong>，因此换到第二行继续尝试。第二行的 <strong>Placeholder_100</strong> 占据了 100px，剩余 200px，大于 <strong>A</strong> 的宽度，因此在本行布局。顺次摆放其内容 <strong>A</strong>、<strong>B</strong> 和 <strong>C</strong> 后，取最长的一行 <strong>A</strong> 的宽度作为 <strong>STF</strong> 的最终宽度，即 152px。</p>
+      <p>第二张图的当前行宽度有 300px，因此 <strong>STF</strong> 在本行布局。放置了 <strong>A</strong> 和 <strong>B</strong> 后，剩余空间不足以放置 <strong>C</strong>，因此折行继续。全部内容放置完毕后，将其内容中最宽的、放置了 <strong>A</strong> 和 <strong>B</strong> 的行的宽度作为其最终宽度，即 152 + 120 + 8 = 280 (px)。（注：8px 是 <strong>A</strong> 和 <strong>B</strong> 中间被压缩的空白字符的宽度。）</p>
+      <p>在其他浏览器中，第一张图中的 <strong>STF</strong> 以及第二张图中的 <strong>STF</strong> 的最终宽度均为 300px，是正确的值。</p>
+      <p>这个差异是由 <em>IE6 IE7 IE8(Q)</em> 中浮动元素的 shrink-to-fit 的不规范算法造成的。</p>
+      <p>该问题将导致受影响的元素的宽度比预期的小，并且尽可能的靠上布局。</p>
+      <p>该问题在 IE8(S) 中被修复。在 IE8(S) 中，浮动元素的 shrink-to-fit 的算法与 CSS2.1 规范中描述的算法一致。</p>
+      <p>如果一个页面在 IE6(S) IE7(S) 或 IE6(Q) IE7(Q) IE8(Q) 中被设计，并且有该问题存在，那么这个页面在其他浏览器中的布局将与预期的不符。</p>
+      <p>关于 block formatting context 的详细资料，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/visuren.html#block-formatting">9.4.1 Block formatting contexts</a> 中的内容。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>这个问题的影响较大，避免该问题的最直接的方式是给浮动非替换元素指定一个宽度，而不使用其默认值 'auto'，从而避免其宽度为 shrink-to-fit，以使页面布局在各浏览器中的表现一致。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="RD8006">RD8006: IE6 IE7 IE8(Q) 中右浮动元素会撑大其祖先级元素的宽度</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RD8004/shrink_to_fit.html">shrink_to_fit.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-06-21</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>float left right shrink-to-fit 顶部 折行 缩小</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

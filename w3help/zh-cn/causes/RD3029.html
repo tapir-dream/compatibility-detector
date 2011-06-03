@@ -1,0 +1,268 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RD3029: IE6 IE7 IE8(Q) 中空的非替换行内元素渲染方式存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>非替换行内元素的高度由 'line-height' 特性值决定，'margin'、'padding'、'border' 都不加入行内框高度的计算 (也不参加线框高度的计算)，但是他们还是在行内框周围得到渲染。</p>
+      <p>具体描述请参考 CSS 2.1 规范的 <a href="http://www.w3.org/TR/CSS21/visudet.html#leading">10.8.1 Leading and half-leading</a>。</p>
+      <p>行内非替换元素的宽度不由 'width' 属性决定，他的实际宽度由其中的内容具体宽度决定，如果为空元素，那么宽度的计算值自然也就是 0。</p>
+      <p>具体描述请参考 CSS 2.1 规范的 <a href="http://www.w3.org/TR/CSS21/visudet.html#propdef-width">10.2 Content width: the 'width' property</a>。</p>
+      <p>根据标准文档描述可以断定，如果空的行内非替换元素存在 'margin'、'padding'、'border' 值，不管实际宽度是否为 0，他都应被渲染出来。</p>
+      <h2 id="description">问题描述</h2>
+      <p>当页面中存在一个空的非替换行内元素时，如果给这个元素设置了边框或者背景样式，那么在 IE6 IE7 IE8(Q) 中这些样式将无法显示出来。</p>
+      <h2 id="influence">造成的影响</h2>
+      <p>有可能造成局部布局效果不尽人意。</p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>这个问题发生在普通非替换行内元素上，根据 HTML 4.0 规范定义，一般常用的此类元素有：A,ABBR<sup>1</sup>,ACRONYM,B,BDO,BIG,CITE,CODE,DEL,DFN,EM,FONT,I,INS,KBD,LABEL,Q,S,SAMP,SMALL,SPAN,STRIKE,STRONG,SUB,SUP,TT,U,VAR 等。</p>
+      <p class="comment">【注】：ABBR 元素在 IE6 浏览器中存在脚本处理问题可参考文章 <a href="BT9023">BT9023: IE6 中对 ABBR 元素的相关实现有误</a> ，本文中将不把此元素列为测试范畴。</p>
+      <p>以下代码将通过脚本程序构建三组行内非替换元素，并通过样式表让他们都拥有了 'border'、'padding'、'background' 等特性。其中，第一组是空标记形式；第二组是非空标记形式；第三组是触发了 IE hasLayout 特性的空标记形式。</p>
+      <p> 他们都被绑定了 click 事件，以便在样式不显示时，可以通过点击节点来证明他们的盒模型已经被渲染，以及只是显示样式没有被渲染。另外，可以根据 CSS 2.1 规范描述得知，这三组元素的框以及背景都应该给被渲染出来。</p>
+      <pre style="height:300px;overflow-y:auto">
+&lt;style&gt;
+a,acronym,b,bdo,big,cite,code,del,dfn,em,font,i,ins,kbd,label,q,s,samp,small,span,strike,strong,sub,sup,tt,u,var
+{font-size:30px; line-height:50px; border:10px solid gold; padding:10px; background:yellow url(w3c.gif);  cursor:pointer;}
+div.info{font-size:12px; line-height:18px; color:#060; background:#EEE;margin:30px 0 30px 0;}
+&lt;/style&gt;
+&lt;script&gt;
+var inlineElements = {
+  'a':'&lt;a&gt;&lt;/a&gt;',
+  'acronym':'&lt;acronym&gt;&lt;/acronym&gt;',
+  'b':'&lt;b&gt;&lt;/b&gt;',
+  'bdo':'&lt;bdo&gt;&lt;/bdo&gt;',
+  'big':'&lt;big&gt;&lt;/big&gt;',
+  'cite':'&lt;cite&gt;&lt;/cite&gt;',
+  'code':'&lt;code&gt;&lt;/code&gt;',
+  'del':'&lt;del&gt;&lt;/del&gt;',
+  'dfn':'&lt;dfn&gt;&lt;/dfn&gt;',
+  'em':'&lt;em&gt;&lt;/em&gt;',
+  'font':'&lt;font&gt;&lt;/font&gt;',
+  'i':'&lt;i&gt;&lt;/i&gt;',
+  'ins':'&lt;ins&gt;&lt;/ins&gt;',
+  'kbd':'&lt;kbd&gt;&lt;/kbd&gt;',
+  'label':'&lt;label&gt;&lt;/label&gt;',
+  'q':'&lt;q&gt;&lt;/q&gt;',
+  's':'&lt;s&gt;&lt;/s&gt;',
+  'samp':'&lt;samp&gt;&lt;/samp&gt;',
+  'small':'&lt;small&gt;&lt;/small&gt;',
+  'span':'&lt;span&gt;&lt;/span&gt;',
+  'strike':'&lt;strike&gt;&lt;/strike&gt;',
+  'strong':'&lt;strong&gt;&lt;/strong&gt;',
+  'sub':'&lt;sub&gt;&lt;/sub&gt;',
+  'sup':'&lt;sup&gt;&lt;/sup&gt;',
+  'tt':'&lt;tt&gt;&lt;/tt&gt;',
+  'u':'&lt;u&gt;&lt;/u&gt;',
+  'var':'&lt;var&gt;&lt;/var&gt;'
+}
+
+function getElementSize(element){
+  return {w:element.offsetWidth,h:element.offsetHeight};
+}
+
+function getStyle(element,styleName){
+  return (element.currentStyle)
+    ?  element.currentStyle[styleName.replace(/-[a-z]/g, function() {
+      return arguments[0].charAt(1).toUpperCase();
+    })]
+    : (document.defaultView &amp;&amp; document.defaultView.getComputedStyle)
+      ? document.defaultView.getComputedStyle(element, null).getPropertyValue(styleName)
+      : null ;
+}
+
+function bindEvent(element,eventName,fn){
+  element[&quot;on&quot;+eventName] = fn;
+}
+
+function buildElementInfo(tagName,element){
+  var elementSize = getElementSize(element);
+  document.writeln('&lt;div class=&quot;info&quot;&gt;');
+  document.writeln(tagName,' 标记的宽为:',elementSize.w,'px; ','标记的高为:',elementSize.w,'px; ', 'display 值为:', getStyle(element,'display'));
+  document.writeln(&quot;&lt;/div&gt;&quot;);
+}
+function buildElement(title,type,html){
+  var elementSize,element;
+  document.write(title);
+  for (var i in inlineElements) {
+    document.writeln('&lt;div&gt;');
+    document.write(i,&quot; Tag:&quot;);
+    document.write(inlineElements[i]);
+    document.writeln(&quot;其他文本内容……&quot;);
+    document.writeln('&lt;/div&gt;');
+    element = document.getElementsByTagName(i)[type];
+    (type==2) &amp;&amp; (element.style.zoom = &quot;1&quot;);
+    element.innerHTML = html;
+    buildElementInfo(i,element);
+    bindEvent(element,&quot;click&quot;,(function(i){return function(){alert(i+&quot; 标记被点击&quot;)}})(i))
+  }
+}
+
+buildElement(&quot;&lt;h2&gt;空非替换行内元素渲染情况&lt;/h2&gt;&quot;,0,&quot;&quot;);
+buildElement(&quot;&lt;h2&gt;非空的非替换行内元素渲染情况&lt;/h2&gt;&quot;,1,&quot;hello&quot;);
+buildElement(&quot;&lt;h2&gt;触发了 IE6 IE7 IE8(Q) 中 hasLayout 特性的空非替换行内元素渲染情况&lt;/h2&gt;&quot;,2,&quot;&quot;);
+&lt;/script&gt;
+</pre>
+      <p>各浏览器运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Opera Chrome Safari</th>
+        </tr>
+        <tr>
+          <th colspan="3"><span style="height:300px;overflow-y:auto">空的非替换行内元素渲染情况</span></th>
+        </tr>
+        <tr>
+          <th>边框是否被渲染</th>
+          <td><span class="hl_1">否</span></td>
+          <td><span class="hl_2">是</span></td>
+        </tr>
+        <tr>
+          <th>背景色是否被渲染</th>
+          <td><span class="hl_1">否</span></td>
+          <td><span class="hl_2">是</span></td>
+        </tr>
+        <tr>
+          <th>背景图是否被渲染</th>
+          <td><span class="hl_1">否</span></td>
+          <td><span class="hl_2">是</span></td>
+        </tr>
+        <tr>
+          <th>是否可被点击</th>
+          <td><span class="hl_2">是</span></td>
+          <td><span class="hl_2">是</span></td>
+        </tr>
+        <tr>
+          <th colspan="3"><span style="height:300px;overflow-y:auto">非空的非替换行内元素渲染情况</span></th>
+        </tr>
+        <tr>
+          <th>边框是否被渲染</th>
+          <td><span class="hl_2">是</span></td>
+          <td><span class="hl_2">是</span></td>
+        </tr>
+        <tr>
+          <th>背景色是否被渲染</th>
+          <td><span class="hl_2">是</span></td>
+          <td><span class="hl_2">是</span></td>
+        </tr>
+        <tr>
+          <th>背景图是否被渲染</th>
+          <td><span class="hl_2">是</span></td>
+          <td><span class="hl_2">是</span></td>
+        </tr>
+        <tr>
+          <th>是否可被点击</th>
+          <td><span class="hl_2">是</span></td>
+          <td><span class="hl_2">是</span></td>
+        </tr>
+        <tr>
+          <th colspan="3"><span style="height:300px;overflow-y:auto">触发了 hasLayout 特性的空的非替换行内元素渲染情况</span></th>
+        </tr>
+        <tr>
+          <th>边框是否被渲染</th>
+          <td><span class="hl_2">是</span></td>
+          <td><span class="hl_2">是</span></td>
+        </tr>
+        <tr>
+          <th>背景色是否被渲染</th>
+          <td><span class="hl_2">是</span></td>
+          <td><span class="hl_2">是</span></td>
+        </tr>
+        <tr>
+          <th>背景图是否被渲染</th>
+          <td><span class="hl_2">是</span></td>
+          <td><span class="hl_2">是</span></td>
+        </tr>
+        <tr>
+          <th>是否可被点击</th>
+          <td><span class="hl_2">是</span></td>
+          <td><span class="hl_2">是</span></td>
+        </tr>
+      </table>
+      <br />
+      <p>根据实际运行结果汇总表可以看出：</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8(Q)</em> 中：
+          <ul>
+            <li>空的非替换行内元素的边框和背景没有被渲染，虽然此时已经不能通过脚本取得他们的具体宽高，但是由 'padding'、'border' 特性够成的盒模型渲染占位依然存在，元素可以具有视觉占位空间并且可以被点击到。</li>
+            <li>非空的非替换行内元素以及触发了 IE 专有 hasLayout 特性的 非替换行内元素以则无此问题，均渲染正常。</li>
+            <li>从 IE 浏览器的发展历史来推断，最初版本的 IE6 渲染引擎编写时还处于 CSS 1.0 规范执行时期，然而在  CSS 1.0 规范的 <a href="http://www.w3.org/TR/CSS1/#the-height-of-lines">4.4 The height of lines</a> 节内并没有明确说明 'margin'、'padding'、'border' 等特性是否还在行内框周围得到渲染。 因此，这很可能是造成 IE6 出现此问题的根源，之后的 IE7 版本依然疏忽了此问题的存在，直至 IE8(S) 以后才被修复。</li>
+          </ul>
+        </li>
+        <li>在 <em>IE8(S) Firefox Chrome Safar Opera</em> 中，不管元素是否为空都可以正常渲染边框和背景。</li>
+      </ul>
+      <h2 id="solutions">解决方案</h2>
+      <p>应尽量避免使用的空的非替换行内元素，以及避免为空元素添加显示用样式。</p>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="BT9023">BT9023: IE6 中对 ABBR 元素的相关实现有误</a></li>
+        <li><a href="BW9012">BW9012: Chrome Safari 中空行内非替换元素在某些情况下不占用文档流渲染空间</a></li>
+      </ul>
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td> IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.544.0 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62 </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RD3029/ie_empty_inline_element_render.html">ie_empty_inline_element_render.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-25</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>IE inline non-replace inline element border background hasLayout 空非替换行内元素 渲染</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

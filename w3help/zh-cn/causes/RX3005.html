@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RX3005: IE6 IE7 IE8(Q) Chrome(Q) Safari(Q) 中 A 元素的 ':hover' 及 ':active' 伪类在缺少 href 属性时会失效</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>A 元素表示一个链接或锚点，它的 href 属性可以指定 Web 资源的位置，也可以定义一个链接到锚点位置。</p>
+      <p>A 元素的 ':hover' 伪类中定义的样式在鼠标光标掠过该标签的时候应用；而 ':active' 伪类中定义的样式则是在用户激活（点击）一个链接时应用。</p>
+      <p>关于 A 元素的详细信息，请参考 HTML 4.01 规范 <a href="http://www.w3.org/TR/html401/struct/links.html#h-12.2">12.2 The A element</a> 中的内容。</p>
+      <p>关于 A 元素的 ':hover' 及 ':active' 伪类的详细信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/selector.html#dynamic-pseudo-classes">5.11.3 The dynamic pseudo-classes: :hover, :active, and :focus</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>A 元素缺少 href 属性时，在 IE6 IE7 IE8(Q) Chrome(Q) Safari(Q) 中 ':hover' 和 ':active' 伪类会失效。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>在不同浏览器下超链接的展现效果会有差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q) Chrome(Q) Safari(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+
+      <p>针对以上问题，使用以下测试用例说明问题，分析以下代码：<em>A_without_href.html</em></p>
+<pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  a { color:blue; }
+  a:hover { color:red; }
+  a:active{ color:gold; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body style="font:bold 40px Arial;"&gt;
+  &lt;a&gt;A element without href attribute&lt;/a&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>结果汇总如下表：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7<sup>1</sup> IE8(Q) Chrome(Q) Safari(Q)</th>
+          <th>IE8(S) Firefox Chrome(S) Safari(S)</th>
+        </tr>
+        <tr>
+          <th>:hover</th>
+          <td>无变化</td>
+          <td>红色</td>
+        </tr>
+        <tr>
+          <th>:active</th>
+          <td>无变化</td>
+          <td>金色</td>
+        </tr>
+      </table>
+      <p class="comment">注1：IE7(S) 中存在一种特殊情况，当 A 标签的 ':hover' 伪类被加入到一个 :hover 分组（例如 p:hover, a:hover）后，其 ':hover' 伪类变得有效，而使用相同的方法 ':active' 伪类依然无效。详细测试代码请参考 <em>IE7_A_without_href.html</em>。</p>
+      <p>从测试结果可以看出，当 A 元素缺失 href 属性后，<em>IE6 IE7 IE8(Q) Chrome(Q) Safari(Q)</em> 中 ':hover' 伪类和 ':active' 不再生效。</p>
+      
+      <h2 id="solutions">解决方案</h2>
+      <p>如果需要一个 A 元素能根据用户的行为改变样式，请添加 A 元素的 'href' 属性使伪类生效。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.9<br />
+              Chrome 7.0.517.0 dev<br />
+              Safari 5.0.2 (7533.18.5)<br />
+              Opera 10.62
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RX3005/A_without_href.html">A_without_href.html</a><br />
+            <a href="../../tests/RX3005/IE7_A_without_href.html">IE7_A_without_href.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-14</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>A anchor hover active href 链接 伪类</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

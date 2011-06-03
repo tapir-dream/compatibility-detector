@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+</head>
+<body>
+<div id="A"></div>
+<script>
+function iframeLoad(){
+	alert("IFRAME 标记的 onload 事件触发");
+}
+window.onload = function (){
+	document.getElementById("A").innerHTML = '<iframe id="B" onload="iframeLoad()"></iframe>';
+	document.getElementById("B").contentWindow.location.href = "iframe.html";
+}
+</script>
+</body>
+</html>

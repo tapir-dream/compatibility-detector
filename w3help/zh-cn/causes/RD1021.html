@@ -1,0 +1,174 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+  <!-- toc begin -->
+    <h1 class="title">RD1021: 各浏览器中包含 MARQUEE 元素及替换元素的包含块的 shrink-to-fit 宽度计算存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 CSS2.1 规范中的描述，如果一个浮动元素的 'width' 是 'auto'，并且它是一个非替换元素，那么它的宽度将会是shrink-to-fit。</p>
+      <p>shrink-to-fit的计算公式：min(max(preferred minimum width, available width), preferred width)</p>
+      <p>CSS2.1 并未给出 preferred minimum width、available width 和 preferred width 确切算法，通常，将内容中非明确的换行外的其他部分强制不换行来计算 preferred width；反之，尝试将内容尽可能的换行，以得到 preferred minimum width；available width 即该元素的包含块的宽度减去 'margin-left'，'border-left-width'，'padding-left'，'padding-right'，'border-right-width'，'margin-right' 的值以及任何存在的纵向滚动条的宽度。</p>
+      <p>关于浮动非替换元素宽度计算的详细资料，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/visudet.html#float-width">10.3.5 Floating, non-replaced elements</a> 中的内容。</p>
+      
+      <h2 id="description">问题描述</h2>
+      <p>若容器中包含 MARQUEE 元素，且容器遵循 shrink-to-fit 宽度算法，则容器及 MARQUEE 元素的宽度在不同浏览器中存在差异。</p>
+      
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题可能导致页面布局与不同浏览器不一致。</p>
+      
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>MARQUEE 不属于 W3C 规范中的元素，它最初由 IE2.0 引入，目前它已成为事实标准，所有浏览器均支持 MARQUEE 元素。</p>
+      <p>首先观察 MARQUEE 元素的一个特有现象：<em>marquee.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body style=&quot;font:20px 'Trebuchet MS';&quot;&gt;
+&lt;div style=&quot;width:200px; background:wheat;&quot;&gt;
+  &lt;span&gt;before&lt;/span&gt;
+  &lt;marquee style=&quot;background:lightskyblue; vertical-align:bottom;&quot;&gt;MARQUEE&lt;/marquee&gt;
+  &lt;span&gt;after&lt;/span&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div style=&quot;width:200px; background:wheat;&quot;&gt;
+  &lt;span&gt;before&lt;/span&gt;
+  &lt;marquee style=&quot;background:lightskyblue; width:50px; vertical-align:bottom;&quot;&gt;MARQUEE&lt;/marquee&gt;
+  &lt;span&gt;after&lt;/span&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码中第一个 MARQUEE 元素没有设定宽度，则其 'width' 特性为初始值 'auto'；第二个 MARQUEE 元素设定了宽度 50px。</p>
+      <p>各浏览器中运行效果均相同：<br />
+      <img src="../../tests/RD1021/marquee.gif" alt="" /></p>
+      <p>MARQUEE 元素在未设定宽度时 (width:auto)，其表现得像块级元素，会占满其包含块，有点类似 width:100%。当为 MARQUEE 元素显式地设定一个宽度后，其表现得像行内元素。</p>
+      <p>此外，
+      <ul>
+        <li>MSDN 关于 <a href="http://msdn.microsoft.com/en-us/library/ms535851(VS.85).aspx">MARQUEE 元素</a>也有说明：The default width of the MARQUEE element is equal to the width of its parent element. 同时在 IE 中 MARQUEE 元素会触发 hasLayout 特性。</p>
+        <li>Firefox 中 MARQUEE 元素 'width' 特性的默认值为 '-moz-available'，其含义与 MSDN 中的描述相同。</li>
+        <li>WebKit 内核中也提到 MARQUEE 元素是一种行内和块级混合型元素。参考 WebKit 源文件 RenderBox.cpp <code>bool RenderBox::sizesToIntrinsicWidth(WidthType widthType) const</code>。</li>
+      </ul>
+      <br />
+      
+      <p>分析以下代码：<em>marquee_stf.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  * { margin:0; padding:0; font:20px 'Trebuchet MS'; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;body&gt;
+&lt;div style=&quot;width:300px; background:gray; overflow:hidden;&quot;&gt;
+  &lt;div style=&quot;float:left; background:wheat;&quot;&gt;
+    &lt;marquee style=&quot;background:lightskyblue; vertical-align:bottom;&quot;&gt;MARQUEE&lt;/marquee&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;&lt;br /&gt;&lt;br /&gt;
+  &lt;div style=&quot;float:left; background:wheat;&quot;&gt;
+    &lt;img style=&quot;background:lightskyblue; width:100%;&quot; src=&quot;google.gif&quot; /&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面两组代码中，一组为 MARQUEE 元素，另一组为 IMG 元素。MARQUEE 元素没有设定宽度，IMG 元素设定了宽度 100%。这两个元素均位于一个遵照 shrink-to-fit 算法计算宽度的包含块内。</p>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Chrome Safari Opera</th>
+          <th>Firefox</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RD1021/01.png" alt=""></td>
+          <td><img src="../../tests/RD1021/02.png" alt=""></td>
+          <td><img src="../../tests/RD1021/03.png" alt=""></td>
+        </tr>
+      </table>
+      <p>首先解释 Firefox 中的差异：Firefox 中 MARQUEE 元素及其包含块 shrink-to-fit 计算宽度均为 IE8(S)、Chrome 中的 3 倍，这是由于 MARQUEE 元素在中使用 DIV 元素模拟。浏览器内部会在 MARQUEE 元素自身标记与其内容之间生成三层 DIV 元素，并通过 JavaScript 脚本控制 MARQUEE 元素的各种行为。而其中的一个生成的 DIV 元素设定了 margin: 0 [width]，脚本通过调整 scroll 值实现 MARQUEE 的滚动效果。所以实际上 MARQUEE 元素内部真正宽度为 margin-left:[width]、[width]、margin-right:[width]，这也是最终 shrink-to-fit 计算后的宽度出现了 3 倍的原因。</p>
+      <p>而在 IE6 IE7 IE8(Q) 中，MARQUEE 元素由于其特殊的宽度特性，以及其自身触发 hasLayout 特性，这导致其将 shrink-to-fit 的包含块撑大。</p>
+      <p>下面设定了 width:100% 的 IMG 元素同样反映出这个现象。此外，其他替换元素在设定了 width:100% 后，也有类似现象。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>给 MARQUEE 元素及替换元素定义具体的宽度，保证各浏览器兼容。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="BG1003">BG1003: Firefox 中 Date.now 方法被重写后 MARQUEE 元素不再滚动</a></li>
+        <li><a href="RX8017">RX8017: IE 对浮动非替换元素内包含宽度单位为百分比的元素时的 "shrink-to-fit" 宽度算法有误</a></li>
+      </ul>
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.11<br />
+              Chrome 9.0.570.0 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.63
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+              <a href="../../tests/RD1021/marquee.html">marquee.html</a>
+              <br/>
+              <a href="../../tests/RD1021/marquee_stf.html">marquee_stf.html</a>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-11-05</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>shrink-to-fit marquee 替换元素</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

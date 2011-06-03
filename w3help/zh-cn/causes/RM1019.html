@@ -1,0 +1,129 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RM1019: IE6 IE7 IE8(Q) Firefox 不支持 'display:run-in'</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>当一个元素的 'display' 特性的值设置为 'run-in' 时，创建了一个既不是块级 (block) 也不是行内 (inline) 的元素，这个元素的状态 (inline-level 或 block-level) 取决于它的上下文，从而使得应用在这个元素上的其他特性的表现也取决于这个元素的最终状态 (inline-level 或 block-level)。</p>
+            <p>CSS2 中对解析 'display:run-in' 的规则描述如下：</p>
+            <ol>
+                <li>如果一个设置 'display' 特性值为 'run-in' 的元素 A 包含一个块级元素，那么元素 A 将成为一个块级元素；</li>
+                <li>在同一层中，如果一个设置 'display' 特性值为 'run-in' 的元素 A( A 中不包含块级元素，即 A 此时不符合规则 1 中的描述) 之后紧随一个块级元素 B (没有设置浮动并且没有设置绝对定位)，那么元素 A 将成为其后的块级元素 B 的第一个行内元素。需要注意的是如果 B 中的第一个行内元素已经是一个从外部进入的 'run-in' 元素或者 B 本身就是由一个 'run-in' 元素转换成的块级元素，那么 B 之前的 A 将不能进入 B 中；</li>
+                <li>除以上两种情况以外时设置 'display' 特性值为 'run-in' 的元素将被视为块级元素。</li>
+            </ol>
+<p>关于 'display:run-in' 的详细信息，请参考 'CSS2' 规范 <a href="http://www.w3.org/TR/CSS2/visuren.html#run-in">9.2.3 Run-in boxes </a>和 <a href="http://www.w3.org/TR/CSS2/visuren.html#propdef-display">9.2.4 The 'display' property</a> 中的内容。</p>
+      <h2 id="description">问题描述</h2>
+      <p>IE6 IE7 IE8(Q) Firefox 不支持 'display:run-in'。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>由于各浏览器对 'display:run-in' 的支持情况不同，引发设置该特性的元素在不同浏览器中的排列不同从而导致在不同浏览器中的显示效果有差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q) Firefox</th>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>观察如下代码运行后在各浏览器中存在的差异：</p>
+<pre>
+&lt;p&gt;规则一：&lt;/p&gt;
+&lt;div style=" border:#FF0000 solid 2px; display:run-in; vertical-align:middle; width:80px;"&gt;A&lt;p style="border:#000099 solid 2px;width:40px;"&gt;B&lt;/p&gt;&lt;/div&gt;
+&lt;span  style="border:#FF00FF solid 2px;"&gt;C&lt;/span&gt;
+&lt;p&gt;规则二：&lt;/p&gt;
+&lt;div style=" border:#FF0000 solid 2px; display:run-in;height:40px;width:40px;"&gt;A&lt;span style="border:#000099 solid 2px;"&gt;B&lt;/span&gt;&lt;/div&gt;
+&lt;div style="border:#000099 solid 2px; height:80px; padding:5px;width:80px;"&gt;&lt;span style="border:#FF00FF solid 2px;"&gt;C&lt;/span&gt;&lt;/div&gt;
+&lt;p&gt;规则三:&lt;/p&gt;
+&lt;div style=" border:#FF0000 solid 2px; display:run-in; height:80px;width:80px;"&gt;A&lt;/div&gt;
+&lt;span style="border:#000099 solid 2px; "&gt;B&lt;/span&gt;
+</pre>
+<p>在各浏览器中的截图如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q) Firefox</th>
+          <th>Chrome Opera IE8(S)</th>
+        </tr>
+        <tr>
+          <td><img  src="../../tests/RM1019/RM1019-1.jpg" alt=""/></td>
+          <td><img  src="../../tests/RM1019/RM1019-2.jpg" alt=""/></td>
+        </tr>
+      </table>
+      <p>从测试结果可见：</p>
+            <p>IE6 IE7 IE8(Q) <sup>1</sup> Firefox 中对 'display:run-in' 的解析规则不符合 CSS2 中描述的解析 'display:run-in' 的第二项规则，而是把 'display:run-in' 当做 'display:block' 去解析，比较两个测试结果还可以清楚的看见在第二个测试结果中规则二下的包含字母 A 的元素的宽高设置已失效，这个现象说明了此元素变为行内元素后会引起它的其它某些属性失效。在其他浏览器中是按照规范解析，请读者结合标准参考中的三条规则和测试例子理解。</p>
+            <p class="comment">注1：实际上由于低版本 IE 浏览器开发时间跨越了 CSS 1.0 规范标准与 CSS 2.0 规范标准制定时段，在 ‘display’ 特性中他们遵循的是 CSS 1.0 规范标准——display Value: block | inline | list-item | none， Initial: block。'display:run-in' 特性值设定对于 IE6 IE7 IE8(Q) 来说是个错误值，因此他们使用了 DIV 标记的默认 'display' 值 'block' 来显示元素。这个问题还普遍存在于 display 值为 
+      run-in | compact | marker | table | inline-table | table-row-group | table-header-group | table-footer-group | table-row |  table-column-group | table-column | table-cell | table-caption | inherit 情况中 。</p>
+            <h2 id="solutions">解决方案</h2>
+      <p>'display:run-in' 特性目前用的地方不多，应用此特性的元素的最终状态 (inline-level 或 block-level) 要根据其上下文来判断，目前建议直接使用 'display:inline' 或 'display:block' 来固定元素的状态。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="RM8001">RM8001: 各浏览器对 'display' 特性值的支持程度不同</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.517.8 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RM1019/display_run_in.html">display_run_in.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-06</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>display run-in CSS2 CSS1 IE Firefox </p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

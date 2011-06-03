@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+</head>
+<body>
+
+<script>
+function iframeLoad(iframe){
+	var src = (iframe.src)?iframe.src:iframe.contentWindow.location.href;
+	document.body.appendChild(document.createElement("br"));
+	document.body.appendChild(document.createTextNode("IFAME 标记 src 值为 "+ src + " 的 onload 事件触发"));
+}
+function addEvent(eventName,element,fn){
+	if (element.attachEvent) element.attachEvent("on"+eventName,fn);
+	else element.addEventListener(eventName,fn,false);
+}
+window.onload = function (){
+	var iframe = document.createElement('iframe');
+	addEvent("load",iframe,function (){iframeLoad(iframe)});
+	iframe.src= "about:blank";
+	document.body.appendChild(iframe);
+	setTimeout(function (){iframe.src="iframe.html";},300)
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX2001: IE 支持使用 window.clipboardData 访问系统剪贴板，Chrome 和 Safari 中存在类似的 Clipboard 对象但尚未实现，Firefox 和 Opera 不支持这类对象</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE 支持使用 window.clipboardData 对象内的一系列方法访问系统剪贴板；<br />
+      Chrome 和 Safari 中存在类似的 Clipboard 对象，且有与 IE 中类似的方法，但其功能尚未实现；<br />
+      Firefox 和 Opera 不支持这类对象。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>若作者在需要访问剪贴板时仅仅考虑 IE 浏览器而使用了其专有的 clipboardData 对象，则在其他浏览器中可能导致功能无效且代码报错。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>非 IE 浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>现代操作系统中均提供了系统剪贴板（clipboard），它允许用户在不同的运行中的应用程序之间传递不同类型的数据。如：复制、粘贴等等。剪贴板已经成为最常用的一种不同进程间交换数据的方式。</p>
+      <p>有时候页面作者在 HTML 页面中也希望可以通过某种方式能否有权访问系统剪贴板，但处于安全的考虑，不是所有浏览器都提供实现访问剪贴板的接口。<br />
+      如以下代码：</p>
+<pre>
+&lt;script&gt;
+  window.<span class="hl_1">clipboardData.setData</span>("Text", "Hello");
+&lt;/script&gt;
+</pre>
+      <p>上面的代码只有在 IE 中可以将“hello”这个字符串复制到操作系统的剪贴板中，“Text”表明作为文本，在其他浏览器中则产生如下报错：</p>
+      <table class="compare">
+        <tr>
+          <th>Firefox</th>
+          <td>window.clipboardData is undefined</td>
+        </tr>
+        <tr>
+          <th>Chrome</th>
+          <td>Uncaught TypeError: Cannot call method 'setData' of undefined</td>
+        </tr>
+        <tr>
+          <th>Safari</th>
+          <td>TypeError: Result of expression 'window.clipboardData' [undefined] is not an object.</td>
+        </tr>
+        <tr>
+          <th>Opera</th>
+          <td>Statement on line 2: Cannot convert undefined or null to Object stacktrace</td>
+        </tr>
+      </table>
+      <p>出现此错误是因为 window.clipboardData 为 IE 专有，其他浏览器均没有此对象。更多关于 clipboardData 对象，参见 MSDN：<a href="http://msdn.microsoft.com/en-us/library/ms535220(VS.85).aspx">clipboardData Object</a>。
+      <p>在 IE7 及更高版本的 IE 浏览器中，默认情况下会出现访问剪贴板的提示，通过浏览器菜单“工具 -> internet 选项 -> 安全 -> 自定义级别” 步骤可以设置剪贴板访问提示。<br />
+      <img src="../../tests/BX2001/IE7_safety.gif" alt="IE7, IE8" /></p>
+      <br />
+      <p>下表列出了其他非 IE 的主流浏览器对访问剪贴板的支持情况：</p>
+      <table class="compare">
+        <tr>
+          <th>Chrome Safari</th>
+          <td><strong>Clipboard 对象</strong>：<br />虽能看到存在此接口，但其内的方法并未实现其功能，所以在 JavaScript 中无法调用。</td>
+        </tr>
+        <tr>
+          <th>Opera</th>
+          <td>无操作剪贴板的对象。</td>
+        </tr>
+        <tr>
+          <th>Firefox</th>
+          <td>
+            Firefox 中由于对用户权限设置较高，需要修改 Firefox 的配置文件以允许浏览器支持剪贴板操作。较通用的做法是：
+<pre>try {
+  netscape.security.PrivilegeManager.enablePrivilege("UniversalXPConnect");
+} catch (e) {
+  alert("被浏览器拒绝！\n请在浏览器地址栏输入'about:config'并回车\n然后将 'signed.applets.codebase_principal_support'设置为'true'");
+}</pre>
+            在访问剪贴板上，首先修改 Firefox 的配置文件，若无法修改，则通知用户自行进入管理界面修改配置文件参数。然后才有权限对剪贴板进行操作。
+<pre>var clip = Components.classes['@mozilla.org/widget/clipboard;1']
+  .createInstance(Components.interfaces.nsIClipboard);
+if (!clip)
+  return;
+var trans = Components.classes['@mozilla.org/widget/transferable;1']
+  .createInstance(Components.interfaces.nsITransferable);
+if (!trans)
+  return;
+trans.addDataFlavor('text/unicode');
+var str = new Object();
+var len = new Object();
+var str = Components.classes["@mozilla.org/supports-string;1"]
+  .createInstance(Components.interfaces.nsISupportsString);
+var copytext = txt;
+str.data = copytext;
+trans.setTransferData("text/unicode",str,copytext.length*2);
+var clipid = Components.interfaces.nsIClipboard;
+if (!clip)
+  return false;
+clip.setData(trans,null,clipid.kGlobalClipboard);
+alert(" 复制成功！")</pre>
+          </th>
+        </tr>
+      </table>
+
+      <h2 id="solutions">解决方案</h2>
+      <ul>
+        <li>判断浏览器类型，若不是 IE 则弹出提示，告诉用户当前浏览器不能访问剪贴板。如：<br />
+<pre>if (navigator.userAgent.indexOf("MSIE") == -1)
+{
+  alert("您的浏览器不支持此功能,请手工复制文本框中内容");
+  return false;
+}</pre>
+        </li>
+        <li>如果必须要实现跨浏览器的剪贴板访问，可考虑调使用 Flash 与 JS 通信方式来解决。如：<br />
+        <a href="http://code.google.com/p/zeroclipboard/">Zero Clipboard</a> </li>
+      </ul>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 5.0.342.2 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.50
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>无。</td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-09</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>clipboard clipboardData 剪贴板 系统 配置文件 Flash Zero</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

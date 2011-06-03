@@ -1,0 +1,178 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RM8015: IE6 IE7 IE8(Q) 中定位元素 'z-index' 为默认值在某些情况下会产生新的层叠上下文</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 W3C CSS2.1 规范中的描述，'z-index' 应用于定位元素（ 'position' 特性不是 static ），它接受整数值，默认值为 auto。</p>
+      <p>对于定位元素而言，'z-index' 意味着：</p>
+      <ul>
+        <li>确定该元素在当前层叠上下文（stacking context）中的层叠级别（stack level）。</li>
+        <li>确定该元素是否创建了一个新的局部层叠上下文。</li>
+      </ul>
+      <p>此处，有必要对层叠上下文和层叠级别做下说明。在 W3C CSS2.1 规范中，每个元素都具有三维的空间位置，除我们所熟悉的水平和垂直位置外，元素还可在 &quot;Z轴&quot; 方向上层层相叠、依次向前排开。<br />
+      元素在 &quot;Z 轴&quot; 方向上的呈现顺序，由层叠上下文和层叠级别决定。</p>
+      <p>在文档中，每个元素仅属于一个层叠上下文。在给定的层叠上下文中，每个元素都有一个整型的层叠级别，它描述了在相同层叠上下文中元素在 &quot;Z轴&quot; 上的显示顺序。</p>
+      <p>同一个层叠上下文中，层叠级别大的显示在上，层叠级别小的显示在下，相同层叠级别时，遵循后来居上的原则（back-to-font）。</p>
+      <p>不同层叠上下文中，元素显示顺序以父级层叠上下文的层叠级别来决定显示的先后顺序。与自身的层叠级别无关。</p>
+      <p>每个层叠上下文都有如下的层叠级别组成（显示顺序从后到前）：</p>
+      <ol>
+        <li>父级层叠上下文的背景和边框；</li>
+        <li>层叠级别为负值的层叠上下文（越小越在下）；</li>
+        <li>非行内、非定位的子元素；</li>
+        <li>非定位的浮动子元素和它们的内容；</li>
+        <li>行内非定位子元素；</li>
+        <li>'z-index:auto' 的定位子元素，和任何 'z-index:0' 的层级上下文；</li>
+        <li>层叠级别为正值的层叠上下文（越大越在上）。</li>
+      </ol>
+      <p>关于 'z-index' 及 层叠上下文（stacking context）的详细资料，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/visuren.html#layers">9.9 Layered presentation</a> 及 <a href="http://www.w3.org/TR/CSS21/zindex.html">Appendix E. Elaborate description of Stacking Contexts</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>当定位元素的 'z-index' 未设置时（默认为 auto），在 <em>IE6 IE7 IE8(Q)</em> 下将会创建一个新的局部层叠上下文。而在其它浏览器下，则严格按照规范，不产生新的局部层叠上下文。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>这个问题将导致定位元素的层叠关系在不同浏览器出现很大的区别，严重的可导致页面布局混乱、内容覆盖等。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+<pre>&lt;style type=&quot;text/css&quot;&gt;
+  body { margin:0; }
+  .p1{ top:20px; height:50px; width:150px; background-color:blue;}
+  .p2{ top:10px; left:20px; height:30px; width:100px; background-color:yellow;}
+  .p3{ top:0px; left:50px; height:100px; width:50px; background-color:red;}
+&lt;/style&gt;
+&lt;body&gt;
+&lt;div style=&quot;position:relative;&quot; class=&quot;p1&quot;&gt;1
+    &lt;div style=&quot;position:absolute; z-index:1;&quot; class=&quot;p2&quot;&gt;2&lt;/div&gt;
+&lt;/div&gt;
+&lt;div style=&quot;position:absolute;&quot; class=&quot;p3&quot;&gt;3&lt;/div&gt;
+&lt;/body&gt;</pre>
+      <p>在各浏览器下的结果汇总如下：</p>
+      <table class="compare">
+                <tr>
+                    <th>IE6 IE7 IE8(Q)</th>
+                    <th>IE8(S) Firefox Safari Chrome</th>
+                </tr>
+                <tr>
+                    <td><img src="../../tests/RM8015/zi_1.gif" alt="IE6 IE7 IE8(Q)"></td>
+                    <td><img src="../../tests/RM8015/zi_2.gif" alt="IE8(S) Firefox Safari Chrome"></td>
+                </tr>
+            </table>
+      <p>根据 W3C CSS2.1 规范中的说明，定位元素【p1】和【p3】由于未设置 'z-index' 特性（使用默认值 auto），它们不会创建新的局部层叠上下文，而定位元素【p2】设置了 z-index:1 则会创建新的层叠上下文。</p>
+      <p>另，在同一根层叠上下文中，同为 z-index:auto 的定位元素【p1】和【p3】，它们的层叠级别相同，但【p3】在【p1】之后，所以在 Z 轴上【p3】比【p1】靠前显示，又，【p2】层叠上下文的层叠级别为正数，所以【p2】的层叠级别要比【p3】高。因此，它们在 Z 轴上的顺序为：（遵循 back-to-font）<br />
+      【p1】 -> 【p3】 -> 【p2】</p>
+      <p>以上为标准浏览器下的情况。</p>
+      <p>而在 <em>IE6 IE7 E8(Q)</em> 下，定位元素【p1】和【p3】都创建了新的局部层叠上下文，在同一根层叠上下文中，它们的层叠级别相同，但【p3】在【p1】之后，所以在 Z 轴上【p3】比【p1】靠前显示。此时，由于【p2】处于【p1】的层叠上下文中，所以【p2】在 Z 轴上要比【p3】靠后。</p>
+      <br />
+
+      <p>为了使 <em>IE6 IE7 IE8(Q)</em> 下 'z-index:auto' 的 Bug 更一目了然，进一步举例如下：</p>
+      <pre>&lt;style&gt;
+  .parent{width:200px; height:200px; padding:10px;}
+  .sub{text-align:right; font:15px Verdana;width:100px; height:100px;}
+  .lt50{left:50px;top:50px;}
+&lt;/style&gt;
+
+&lt;div style=&quot;position:absolute; background:lightgrey;&quot; class=&quot;parent&quot;&gt;
+    &lt;div style=&quot;position:absolute;z-index:20;background:darkgray;&quot; class=&quot;sub&quot;&gt;20&lt;/div&gt;
+    &lt;div style=&quot;position:absolute;z-index:10;background:dimgray;&quot; class=&quot;sub lt50&quot;&gt;10&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div style=&quot;position:absolute;left:80px;top:80px;background:black;&quot; class=&quot;parent&quot;&gt;
+    &lt;div style=&quot;position:absolute;z-index:2;background:darkgray;&quot; class=&quot;sub&quot;&gt;2&lt;/div&gt;
+    &lt;div style=&quot;position:absolute;z-index:1;background:dimgray;&quot; class=&quot;sub lt50&quot;&gt;1&lt;/div&gt;
+&lt;/div&gt;</pre>
+      <p>各浏览器下的结果汇总如下：</p>
+      <table class="compare">
+                <tr>
+                    <th>IE6 IE7 IE8(Q)</th>
+                    <th>IE8(S) Firefox Safari Chrome</th>
+                </tr>
+                <tr>
+                    <td><img src="../../tests/RM8015/zi_more_1.png" alt="IE6 IE7 IE8(Q)"></td>
+                    <td><img src="../../tests/RM8015/zi_more_2.png" alt="IE8(S) Firefox Safari Chrome"></td>
+                </tr>
+            </table>
+
+
+      <h2 id="solutions">解决方案</h2>
+      <p>理解层叠上下文、层叠级别与 'z-index' 之间的关系。在可能出现定位元素相互覆盖的情况时，明确指定定位元素的 'z-index' 特性，避免此问题的出现。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 5.0.335.1 dev<br />
+              Safari 4.0.4
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RM8015/z-index_def.html">z-index_def.html</a><br />
+            <a href="../../tests/RM8015/z-index_def_2.html">z-index_def_2.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-21</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>z-index stack level stacking context 层叠 级别 上下文</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

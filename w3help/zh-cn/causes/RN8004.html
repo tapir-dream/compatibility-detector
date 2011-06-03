@@ -1,0 +1,196 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RN8004: 各浏览器对于 CSS 代码中的表意空格的处理存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 CSS2.1 规范中的描述，在 CSS 语法定义中包含标记 (Token) &quot;S&quot; 的语法代表空白 (<a href="http://www.w3.org/TR/CSS21/syndata.html#whitespace">white space</a>)，这些空白字符包括 "空格" (U+0020), "制表符" (U+0009), "换行" (U+000A), "回车" (U+000D), 及 "换页" (U+000C)。其他看似空白的字符，例如 "em-space" (U+2003) 及 "ideographic space" (U+3000，表意空格) 不是空白的一部分。</p>
+      <p>关于 CSS 语法中的空白 的更多资料，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/syndata.html#tokenization">4.1.1 Tokenization</a> 中的内容。</p>
+      <p>关于 U+3000 IDEOGRAPHIC SPACE 及 全角（Full-width）字符 的更多资料，请参考 <a href="http://www.unicode.org/versions/Unicode5.2.0/">Unicode 5.2.0</a> 标准 <a href="http://www.unicode.org/versions/Unicode5.2.0/ch06.pdf">Chapter 6 Writing Systems and Punctuation</a>、<a href="http://www.unicode.org/charts/PDF/U3000.pdf">CJK Symbols and Punctuation</a> 及 <a href="http://www.unicode.org/reports/tr11/tr11-19.html">UAX #11 EAST ASIAN WIDTH</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>若 CSS 代码中出现了表意空格 (U+3000)，如被当作了普通空白字符使用，则各浏览器的处理存在差异。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题会导致 CSS 特性的值在某些浏览器中为不合法值而被舍弃，从而造成页面布局差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>字符“<span class="hl_1">　</span>”，即表意空格（Ideographic Space），也可以叫全角空格（Full-width Space），对应的 HTML 实体字符为“<span class="hl_1">&amp;#12288</span>”。在相同的等宽中文字体下，全角空格的宽度与普通汉字的宽度相等。</p>
+      <p>关于“空格”的更多信息，请参考 <a href="http://zh.wikipedia.org/zh-cn/空格">http://zh.wikipedia.org/zh-cn/空格</a>。</p>
+      <p>分析以下代码：<em>fullwidth_space_css.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  body { font:18px 'Trebuchet MS'; }
+  .container { width:180px; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div class=&quot;container&quot;&gt;
+  &lt;div style=&quot;<em>padding:10px<span class="hl_4">　</span>20px<span class="hl_4">　</span>30px<span class="hl_4">　</span>40px;</em> border:5px solid brown; background:plum;&quot;&gt;
+    &lt;div style=&quot;background:white;&quot;&gt;some text&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;<em>font-size:<span class="hl_4">　</span>32px;</em> <em>background-image:url(<span class="hl_4">　</span>google.gif<span class="hl_4">　</span>);</em> border:5px solid brown;&quot;&gt;some text&lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;font-size<span class="hl_4">　</span>:32px; <em>background:coral<span class="hl_4">　</span>;</em> border:5px solid brown;&quot;&gt;some text&lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;<em>background-color:rgb(204,<span class="hl_4">　</span>204,<span class="hl_4">　</span>51);</em> border:5px solid brown;&quot;&gt;some text&lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;<em>font-style:italic;<span class="hl_4">　</span>background-color:wheat;</em> border:5px solid brown;&quot;&gt;some text&lt;/div&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上述代码中在 CSS 代码中原本应该为空白符号的地方使用了表意空格。</p>
+      <p>在各浏览器中运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S)</th>
+          <th>Firefox Chrome Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <th><img src="../../tests/RN8004/fwc1.gif" alt="" /></th>
+          <th><img src="../../tests/RN8004/fwc2.gif" alt="" /></th>
+          <th><img src="../../tests/RN8004/fwc3.gif" alt="" /></th>
+          <th><img src="../../tests/RN8004/fwc4.gif" alt="" /></th>
+        </tr>
+      </table>
+      <p>根据上面截图整理下表：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S)</th>
+          <th>Firefox Chrome Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <th>普通值 (value) 中的表意空格</th>
+          <td><span class="hl_2">合法</span></td>
+          <td><span class="hl_2">合法</span></td>
+          <td><span class="hl_1">不合法</span></td>
+          <td><span class="hl_1">不合法</span></td>
+        </tr>
+        <tr>
+          <th>特性名 (property) 后的表意空格</th>
+          <td><span class="hl_1">不合法</span></td>
+          <td><span class="hl_1">不合法</span></td>
+          <td><span class="hl_1">不合法</span></td>
+          <td><span class="hl_1">不合法</span></td>
+        </tr>
+        <tr>
+          <th>特性值 (value) 前的表意空格</th>
+          <td><span class="hl_2">合法</span></td>
+          <td><span class="hl_2">合法</span></td>
+          <td><span class="hl_1">不合法</span></td>
+          <td><span class="hl_1">不合法</span></td>
+        </tr>
+        <tr>
+          <th>URI 类型值 &quot;(&quot; 之后与 &quot;)&quot; 之前的表意空格</th>
+          <td><span class="hl_2">合法</span></td>
+          <td><span class="hl_2">合法</span></td>
+          <td><span class="hl_1">不合法</span></td>
+          <td><span class="hl_2">合法</span></td>
+        </tr>
+        <tr>
+          <th>特性值 (value) 前的表意空格</th>
+          <td><span class="hl_2">合法</span></td>
+          <td><span class="hl_2">合法</span></td>
+          <td><span class="hl_1">不合法</span></td>
+          <td><span class="hl_1">不合法</span></td>
+        </tr>
+        <tr>
+          <th>声明 (declaration) 之间的表意空格</th>
+          <td><span class="hl_2">合法</span></td>
+          <td><span class="hl_1">不合法</span></td>
+          <td><span class="hl_1">不合法</span></td>
+          <td><span class="hl_1">不合法</span></td>
+        </tr>
+      </table>
+      
+
+      <h2 id="solutions">解决方案</h2>
+      <p>正确地使用 CSS 的空白字符，避免使用表意空格 (U+3000)。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 6.0.522.0 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.63
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RN8004/fullwidth_space_css.html">fullwidth_space_css.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-18</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>CSS Token white space full-width 全角 空格</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

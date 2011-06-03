@@ -1,0 +1,185 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HF1010: INPUT[type=file] 的 'value' 属性值在各浏览器中存在差异 </h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>当一个 INPUT 元素的 'type' 属性值设置为 'file' 时创建了一个文件选择控件(file select)，其中 INPUT 元素的 'value' 属性值便是文件的初始名称。</p>
+            <p>另外，在 IE6 和 IE7 下通过此方法实现的文件选择控件的输入框是可以手动输入的，但若在此路径下不存在此文件则会显示错误信息，而在 IE8 和其他浏览器中是禁止手动输入的。</p>
+<p>关于 INPUT[type=file] 的详细信息，请参考 HTML4.0 规范 <a href="http://www.w3.org/TR/1998/REC-html40-19980424/interact/forms.html#adef-value-INPUT">17.4.1 Control types created with INPUT </a>中的内容。</p>
+      <h2 id="description">问题描述</h2>
+      <p>在通过设置 INPUT 元素的 'type' 属性值为 'file' 来实现一个文件选择控件时，按照规范的描述此 INPUT 的 'value' 属性值应为被选择的文件名称，而不应该包含文件路径或其他字符，然而在各浏览器中 INPUT 元素的 'value' 属性值不尽相同，在 IE 和 Opera 中与规范的描述不符。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>由于 'INPUT[type=file]' 的 'value' 属性值在各浏览器中存在差异，这使得例如要实现一个在客户端上传图片时当用户选择图片后要在特定位置重现该图片以便用户确认此图片的过程中如果用 JavaScript 脚本去获得 INPUT 元素的 'value' 属性值并将其赋给一个 'img' 元素的 'src' 属性时在除 IE 以外的浏览器中无法达到预期效果。</p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+<table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>测试代码如下：</p>
+<pre>
+&lt;body&gt;
+&lt;span&gt;请上传图片：&lt;/span&gt;
+&lt;input type="file" id="upload"&gt;
+&lt;input type="button" value="See" id="see" onclick="getseee()"&gt;
+&lt;div id="path" style="display:none" &gt;
+  &lt;p&gt;'input[type=file]' 的 'value' 属性值为：&lt;/p&gt;
+  &lt;div id="info"&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;hr&gt;
+&lt;div id="image" style="display:none" &gt;
+  &lt;p&gt;您选择的图片为：&lt;/p&gt;
+  &lt;img   alt="无法显示该图片" id="pic" style="height:100px; width:120px;"/&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+</pre>
+<pre>
+&lt;script&gt;
+  function getseee() {
+    document.getElementById("pic").src = document.getElementById("upload").value;
+    document.getElementById("info").innerHTML= document.getElementById("upload").value;
+    document.getElementById("path").style.display="";
+    document.getElementById("image").style.display="";
+    }
+&lt;/script&gt;
+</pre>
+        <p>以上代码的目的是通过 JavaScript 脚本实现获取被上传图片的路径并将其在客户端显示，但只有在 IE 中达到了预期效果。</p>
+        <p>在各浏览器中的截图如下：</p>
+      <table class="compare" style="width:450px;">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+                    
+        </tr>
+        <tr>
+          <td><img  src="../../tests/HF1010/IE_input_file.jpg" alt=""/></td>
+          
+        </tr>
+      </table>
+            <table class="compare" style="width:450px;">
+        <tr>
+                    <th>Opera<sup>1</sup></th>
+             
+        </tr>
+        <tr>
+          <td><img  src="../../tests/HF1010/Opera_input_file.jpg" alt=""/></td>
+                  
+        </tr>
+      </table>
+            <table class="compare" style="width:450px;">
+        <tr>
+        
+                    <th>FireFox</th>
+                 
+        </tr>
+        <tr>
+          
+          <td><img  src="../../tests/HF1010/FF_input_file.jpg" alt=""/></td>
+                    
+        </tr>
+      </table>
+            <table class="compare" style="width:450px;">
+        <tr>
+          
+                    <th>Chrome</th>
+        </tr>
+        <tr>
+          
+                    <td><img  src="../../tests/HF1010/Chrome_input_file.jpg" alt=""/></td>
+        </tr>
+      </table>
+            <table class="compare" style="width:450px;">
+        <tr>
+             
+                    <th>Safari</th>
+        </tr>
+        <tr>
+          
+                    <td><img  src="../../tests/HF1010/Safari_input_file.jpg" alt=""/></td>
+        </tr>
+      </table>
+      <p class="comment">【注】：IE9 Beta 版在默认安全设置下与 Opera 浏览器处理一致。</p>
+      <p>从截图可以看出运行结果可分为三类：</p>
+            <ul>
+              <li> IE 中可以通过 JavaScript 脚本获得所上传图片的完整路径并可以根据这个路径将图片显示在客户端；</li>
+                <li> Opera Chrome 中通过 JavaScript 脚本所获得的为所上传图片的伪路径 ( fakepath ) ，因此不能根据这个路径显示本地图本片；</li>
+                <li>FireFox Safari  中获得的为图片的名称，因此也不能根据这个独立图片名显示本地图本片。</li>
+          </ul>
+
+        <p>综上所述，这个问题的根本成因为——各个浏览器对用户选择的本地文件信任程度不同，只有 IE6 IE7 IE8 浏览器在默认安全设置下信任用户选择的本地文件。</p>
+        <h2 id="solutions">解决方案</h2>
+      <p>如果要实现类似上例中的客户端图片浏览功能建议读者查找 actionScript 3 相关资料来完成或先将图片存储到服务器端再显示到客户端。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.517.8 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HF1010/input_file.html">input_file.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-06</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>input file upload</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

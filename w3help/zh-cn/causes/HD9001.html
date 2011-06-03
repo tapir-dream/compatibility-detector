@@ -1,0 +1,343 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HD9001: 各浏览器对 URI 中非 ASCII 字符的处理有差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>URI 的组成如下所示：</p>
+<pre>
+         foo://example.com:8042/over/there?name=ferret#nose
+         \_/   \______________/\_________/ \_________/ \__/
+          |           |            |            |        |
+       scheme     authority       path        query   fragment
+          |   _____________________|__
+         / \ /                        \
+         urn:example:animal:ferret:nose
+</pre>
+      <p>根据 HTML 4.01 规范中的描述，URI 中不应该包含非 ASCII 字符。如以下 href 属性的值是<strong>不合法的</strong>：<br /><code>&lt;A href="http://foo.org/Håkon"&gt;...&lt;/A&gt;</code></p>
+      <p>规范中建议，用户端在这种情况下应采取以下方式处理非 ASCII 字符：</p>
+      <ol>
+        <li>将每个字符转换为 UTF-8 编码的相同字符，每个字符将有一或多个字节。</li>
+        <li>用 URI 编码机制对这些字节进行编码。如：每个字节转换为 %HH，其中的 HH 为这些字节的值的十六进制表示。这种方式称为“百分号编码”。</li>
+      </ol>
+      <p>关于 URI 类型及 URI 属性值中的非 ASCII 字符（Non-ASCII characters in URI attribute values）的详细信息，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html4/types.html#type-uri">6.4 URIs</a> 及 <a href="http://www.w3.org/TR/html4/appendix/notes.html#h-B.2.1">附录B.2.1</a> 中的内容。</p>
+      <p>关于“百分号编码”的详细信息，请参考 RFC-3986 <a href="http://tools.ietf.org/html/rfc3986#section-2.1">2.1. Percent-Encoding</a> 中的内容。</p>
+      <p>关于 URI 组成的更多信息，请参考 RFC-3986 <a href="http://tools.ietf.org/html/rfc3986#section-3">3. Syntax Components</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>对于 URI 中非 ASCII 字符，并非所有浏览器都是按照 HTML 4.01 规范中的建议实现的，而且不同浏览器在处理不同形式的 URI 时，表现也有差异。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>这个问题将导致在服务端或客户端通过代码获取 URI 中的非 ASCII 字符信息时无法分辨编码信息，并产生乱码。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td></td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>下面测试各种情况下各浏览器对于 URI 中非 ASCII 字符的编码方式。</p>
+      <p>在应用中经常使用的编码是 GB2312 和 UTF-8，一个汉字在 GB2312 编码下占 2 个字节，在 UTF-8 编码下占 3 个字节，因此通过对比这两种编码更容易看出区别。下面的例子中将分别使用这两种编码测试。</p>
+      <ul>
+        <li>测试使用的非 ASCII 字符均为中文字符“汉”，“汉”在 GB2312 编码中的字节码为“<span class="hl_1">BA BA</span>”，在 UTF-8 编码中的字节码为“<span class="hl_2">E6 B1 89</span>”。</li>
+        <li>测试结果的截图中，所有字符均为 ASCII 编码，GB2312 编码的“汉”以 ASCII 编码显示时，为“<span class="hl_3">ºº</span>”，UTF-8 编码的“汉”以 ASCII 编码显示时，为“<span class="hl_4">æ±ﾱ</span>”（第三个字节在 ASCII 字符集中无对应字符，因此显示为“ﾱ”）。</li>
+        <li>
+          测试的访问地址均为：<br/>
+          <code>http://local.test/<em>BrowserName</em>/汉?汉=汉</code><sup>1</sup><br/>
+          为了便于区分各浏览器的表现，<em>BrowserName</em> 将在测试中替换为各浏览器名。</li>
+        <li>
+          另外，当声明一段测试代码是 GB2312 编码时，其含义为该 HTML 文件的编码为 GB2312，并且在该文件中声明了：<br/>
+          <code>&lt;meta http-equiv="Content-Type" content="text/html; charset=gb2312"/&gt;</code><br/>
+          同样，当声明一段测试代码是 UTF-8 编码时，其含义为该 HTML 文件的编码为 UTF-8，并且在该文件中声明了：<br/>
+          <code>&lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8"/&gt;</code>
+        </li>
+      </ul>
+      <p class="comment">注：<br/>1. 此处的“汉”字，在不同测试中，实际的编码也不相同。</p>
+
+      <h3>1. 在浏览器的地址栏直接输入包含非 ASCII 字符的 URI 时</h3>
+      <p>在各浏览器的地址栏中，直接输入“<code>http://local.test/<em>BrowserName</em>/汉?汉=汉</code>”，结果如下：<sup>1</sup></p>
+      <p><img src="../../tests/HD9001/address_bar.png" alt="snapshot"/></p>
+      <p>可见，对于 URI 中的非 ASCII 字符：</p>
+      <ul>
+        <li>在 path 部分，所有浏览器都使用了 UTF-8 并做了百分比编码。</li>
+        <li>在 query 部分，IE 使用了 GB2312，未做百分比编码；Firefox 和 Opera 使用了 GB2312，做了百分比编码；Chrome 和 Safari 则仍使用 UTF-8 并做了百分比编码。</li>
+      </ul>
+      <p class="comment">注：<br/>1. 因各浏览器的地址栏使用的编码未能确定，本测试仅强调 URI 中 非 ASCII 字符最终<strong>使用</strong>的字符集。</p>
+
+      <h3>2. 点击链接跳转或使用脚本跳转到包含非 ASCII 字符的 URI 时</h3>
+      <p>在不同的编码下，测试以下两段代码：</p>
+<pre>
+&lt;button onclick="location.href='http://local.test/<em>BrowserName</em>/汉?汉=汉';"&gt;go&lt;/button&gt;
+</pre>
+<pre>
+&lt;a href="http://local.test/<em>BrowserName</em>/汉?汉=汉"&gt;go&lt;/a&gt;
+</pre>
+      <p>点击按钮或链接后，各浏览器实际发送的 URI 如下：</p>
+      <table class="compare">
+        <tr>
+          <th>GB2312</th>
+          <td><img src="../../tests/HD9001/GB2312_click_and_script.png" alt="snapshot"/></td>
+        </tr>
+        <tr>
+          <th>UTF-8</th>
+          <td><img src="../../tests/HD9001/UTF-8_click_and_script.png" alt="snapshot"/></td>
+        </tr>
+      </table>
+      <p>可见，对于 URI 中的非 ASCII 字符：</p>
+      <ul>
+        <li>在 path 部分，所有浏览器都转换为 UTF-8，做了百分比编码。</li>
+        <li>在 query 部分，IE 使用当前编码，未做百分比编码；其他浏览器则使用当前编码做百分比编码。</li>
+      </ul>
+
+      <h3>3. 使用 Ajax 请求包含非 ASCII 字符的 URI 时（get 方法）</h3>
+      <p>在不同的编码下，测试以下代码：</p>
+<pre>
+&lt;script&gt;
+function go(){
+  var xhr=window.XMLHttpRequest?new XMLHttpRequest():new ActiveXObject("Microsoft.XMLHTTP");<sup>1</sup>
+  xhr.open("get","http://local.test/<em>BrowserName</em>/汉?汉=汉",true);<sup>2</sup>
+  xhr.send(null);
+}
+&lt;/script&gt;
+&lt;button onclick="go();"&gt;go&lt;/button&gt;
+</pre>
+      <p>点击按钮后，各浏览器实际发送的 URI 如下：</p>
+      <table class="compare">
+        <tr>
+          <th>GB2312</th>
+          <td><img src="../../tests/HD9001/GB2312_ajax.png" alt="snapshot"/></td>
+        </tr>
+        <tr>
+          <th>UTF-8</th>
+          <td><img src="../../tests/HD9001/UTF-8_ajax.png" alt="snapshot"/></td>
+        </tr>
+      </table>
+      <p>可见：</p>
+      <ul>
+        <li>
+          IE 无视页面编码设置，将任意编码的字符转换为 GB2312 发送请求，并且对于 URI 中的非 ASCII 字符处理如下：
+          <ul>
+            <li>在 path 部分，IE6 并未处理；IE7 IE8 则做百分比编码。</li>
+            <li>在 query 部分，IE 并未对其处理。</li>
+          </ul>
+        </li>
+        <li>
+          其他浏览器对于 URI 中的非 ASCII 字符处理如下：
+          <ul>
+            <li>在 path 部分，均转换为 UTF-8 并做百分比编码。</li>
+            <li>在 query 部分，Firefox Opera 转换为 UTF-8 并做百分比编码，Chrome Safari 则使用当前编码做百分比编码。</li>
+          </ul>
+        </li>
+      </ul>
+      <p class="comment">
+        注：<br/>
+        1. 这段代码仅为测试编码用，因此并未设置 Ajax 请求的回调函数及后续处理，并且对于 IE7 IE8，使用 XMLHttpRequest 创建的 xhr 对象和使用 ActiveXObject 创建的 xhr 对象的测试结果没有区别。<br/>
+        2. 假设这段代码所在域为 local.test，即不会有跨域的问题。
+      </p>
+
+      <h3>4. 差异总结</h3>
+      <p>根据以上的测试，总结各浏览器对 URI 中非 ASCII 字符的处理的差异如下：</p>
+      <h4>地址栏直接输入：</h4>
+      <table class="compare">
+        <tr>
+          <th rowspan="2">浏览器</th>
+          <th colspan="2">path 部分</th>
+          <th colspan="2">query 部分</th>
+        </tr>
+        <tr>
+          <th>使用 UTF-8</th>
+          <th>百分比编码</th>
+          <th>使用 UTF-8</th>
+          <th>百分比编码</th>
+        </tr>
+        <tr>
+          <th>IE</th>
+          <td><span class="hl_2">是</span></td>
+          <td><span class="hl_2">是</span></td>
+          <td><span class="hl_1">否</span></td>
+          <td><span class="hl_1">否</span></td>
+        </tr>
+        <tr>
+          <th>Firefox Opera</th>
+          <td><span class="hl_2">是</span></td>
+          <td><span class="hl_2">是</span></td>
+          <td><span class="hl_1">否</span></td>
+          <td><span class="hl_2">是</span></td>
+        </tr>
+        <tr>
+          <th>Chrome Safari</th>
+          <td><span class="hl_2">是</span></td>
+          <td><span class="hl_2">是</span></td>
+          <td><span class="hl_2">是</span></td>
+          <td><span class="hl_2">是</span></td>
+        </tr>
+      </table>
+      <h4>点击链接跳转或使用脚本跳转：</h4>
+      <table class="compare">
+        <tr>
+          <th rowspan="2">浏览器</th>
+          <th colspan="2">path 部分</th>
+          <th colspan="2">query 部分</th>
+        </tr>
+        <tr>
+          <th>转换为 UTF-8</th>
+          <th>百分比编码</th>
+          <th>转换为 UTF-8</th>
+          <th>百分比编码</th>
+        </tr>
+        <tr>
+          <th>IE</th>
+          <td><span class="hl_2">是</span></td>
+          <td><span class="hl_2">是</span></td>
+          <td><span class="hl_1">否</span><span class="hl_3">使用页面编码</span></td>
+          <td><span class="hl_1">否</span></td>
+        </tr>
+        <tr>
+          <th>Firefox Chrome Safari Opera</th>
+          <td><span class="hl_2">是</span></td>
+          <td><span class="hl_2">是</span></td>
+          <td><span class="hl_1">否</span><span class="hl_3">使用页面编码</span></td>
+          <td><span class="hl_2">是</span></td>
+        </tr>
+      </table>
+      <h4>使用 Ajax 的 get 方法请求：</h4>
+      <table class="compare">
+        <tr>
+          <th rowspan="2">浏览器</th>
+          <th colspan="2">path 部分</th>
+          <th colspan="2">query 部分</th>
+        </tr>
+        <tr>
+          <th>使用 UTF-8</th>
+          <th>百分比编码</th>
+          <th>使用 UTF-8</th>
+          <th>百分比编码</th>
+        </tr>
+        <tr>
+          <th>IE6</th>
+          <td><span class="hl_1">否</span><span class="hl_4">无视页面编码使用 GB2312</span></td>
+          <td><span class="hl_1">否</span></td>
+          <td><span class="hl_1">否</span><span class="hl_4">无视页面编码使用 GB2312</span></td>
+          <td><span class="hl_1">否</span></td>
+        </tr>
+        <tr>
+          <th>IE7 IE8</th>
+          <td><span class="hl_1">否</span><span class="hl_4">无视页面编码使用 GB2312</span></td>
+          <td><span class="hl_2">是</span></td>
+          <td><span class="hl_1">否</span><span class="hl_4">无视页面编码使用 GB2312</span></td>
+          <td><span class="hl_1">否</span></td>
+        </tr>
+        <tr>
+          <th>Firefox Opera</th>
+          <td><span class="hl_2">是</span></td>
+          <td><span class="hl_2">是</span></td>
+          <td><span class="hl_2">是</span></td>
+          <td><span class="hl_2">是</span></td>
+        </tr>
+        <tr>
+          <th>Chrome Safari</th>
+          <td><span class="hl_2">是</span></td>
+          <td><span class="hl_2">是</span></td>
+          <td><span class="hl_1">否</span><span class="hl_3">使用页面编码</span></td>
+          <td><span class="hl_2">是</span></td>
+        </tr>
+      </table>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>当 URI 中含有非 ASCII 字符时，不要依赖浏览器对 URI 的编码方式，以避免产生差异。建议：</p>
+      <ul>
+        <li>在使用此 URI 之前，先对其进行处理，如使用 JS 的 encodeURI 或 encodeURIComponent 方法（JS 的这两个方法会将字符串转换为 UTF-8 并做百分比编码）。</li>
+        <li>在使用 XHR 对象发送 Ajax 请求时，如果仅在 query 部分含有非 ASCII 字符，请使用 post 方法发送，并在 send 之前使用 <code>xhrObject.setRequestHeader("Content-Type","application/x-www-form-urlencoded")</code>。或者仍使用 get 方法，但在发送前使用 encodeURI 或 encodeURIComponent 方法编码。</li>
+        <li>
+          经过上述处理，在此 URI 的接收端使用 UTF-8 编码来解码，如：
+          <ul>
+            <li>
+              客户端 JS：
+<pre>
+var queryString = decodeURI(<em>uriString or queryString</em>);
+</pre>
+            </li>
+            <li>
+              服务端 JAVA：
+<pre>
+request.setCharacterEncoding("UTF-8");
+String queryString = request.getParameter(<em>queryName</em>);
+</pre>
+            </li>
+        </li>
+      </ul>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.8<br />
+              Chrome 6.0.495.0 dev<br />
+              Safari 5.0(7533.16)<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+              无
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-20</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>URI URL ASCII 地址栏 中文 乱码 escape unescape encodeURI decodeURI</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

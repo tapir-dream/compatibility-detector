@@ -1,0 +1,106 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RG1003: LI 元素设置标记类型的特性 'style-list-type' 的 'disc | circle | square' 三个特性值在各浏览器中的渲染方式不同</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>请参考 W3C CSS 2.1 规范说明中的 'list-style' 部分：<a href="http://www.w3.org/TR/CSS21/generate.html#propdef-list-style-type">http://www.w3.org/TR/CSS21/generate.html#propdef-list-style-type</a></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>LI 元素设置标记类型的特性 'style-list-type' 的 'disc | circle | square' 三个特性值在各浏览器中的渲染方式不同。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>不同浏览器中 LI 标记前的 mark 字符渲染效果不一致。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>根据 W3C 规范说明：'disc | circle | square' 这三个图形的渲染样式<span class="hl_1">由客户端浏览器具体决定</span>。      因此各浏览器内显示效果存在不同。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p> 建议放弃使用 'disc | circle | square' 这三个样式，改用背景图片代替样式显示。</p>
+            <p>例如：</p>
+<pre>
+li {
+  background:url(....) no-repeat 0 50%;
+  padding-left:1em;
+}
+</pre>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.5.6<br />
+              Opera 10.10<br />
+              Chrome 4.0.266.0 dev<br />
+              Safari 4.0.4
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>&nbsp;</td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-21</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>LI style-list-type disc circle square 列表 列表样式类型 外观</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

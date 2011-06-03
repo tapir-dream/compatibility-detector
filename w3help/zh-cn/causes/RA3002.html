@@ -1,0 +1,594 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RA3002: IE8  Chrome Safari 中具有加粗效果的 HTML 元素的 'font-weight' 特性会受到其祖先元素的影响</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 W3C CSS2.1 规范中的描述，'font-weight' 特性描述了文字的粗细程度：</p>
+      <table class="compare">
+        <tr>
+          <th>取值</th>
+          <td>
+            <table>
+              <tr>
+                <td>lighter</td>
+                <td>100</td>
+                <td>200</td>
+                <td>300</td>
+                <td>400</td>
+                <td>500</td>
+                <td><strong>600</strong></td>
+                <td><strong>700</strong></td>
+                <td><strong>800</strong></td>
+                <td><strong>900</strong></td>
+                <td>bolder</td>
+                <td>inherit</td>
+              </tr>
+              <tr>
+                <td colspan="4">&nbsp;</td>
+                <td>= normal</td>
+                <td colspan="2">&nbsp;</td>
+                <td><strong>= bold</strong></td>
+                <td colspan="4">&nbsp;</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <th>初始值</th>
+          <td>normal</td>
+        </tr>
+        <tr>
+          <th>作用于</th>
+          <td>所有元素</td>
+        </tr>
+        <tr>
+          <th>作用于</th>
+          <td>所有元素</td>
+        </tr>
+        <tr>
+          <th>继承性</th>
+          <td>可以继承</td>
+        </tr>
+        <tr>
+          <th>百分比</th>
+          <td>N/A</td>
+        </tr>
+      </table>
+      <p>对于所有浏览器，'font-weight' 取值为 100、200、300、400、500 时，文字均呈现正常不加粗效果，即 'normal'、'font-weight' 取值为 600、700、800、900 时，文字均呈显与 ’bold‘ 相同的加粗效果。</p>
+      <p>‘lighter’ 及 ‘bolder’ 则是相对的概念，它们分别指定了比继承来的 'font-weight' 特性更轻及更重的 'font-weight' 的数字值。<br />
+      如父元素的 'font-weight' 计算值为 100，而子元素的 'font-weight' 设置为“bolder”，则子元素的计算后的 'font-weight' 为 200。若继承的值为 900，‘font-weight:bolder’ 计算后的值仍为 900；同样地，若继承的值为 100，‘font-weight:lighter’ 计算后的值仍为 100。</p>
+      <p>CSS2.1 附录中列出了 W3C 推荐的各 HTML 元素的默认样式，其中 <em>TH、H1、H2、H3、H4、H5、H6、B、STRONG</em> 这几个元素的 'font-weight' 特性默认值为 <strong>bolder</strong>。</p>
+      <p>关于 'font-weight' 特性的更多信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/fonts.html#font-boldness">15.6 Font boldness: the 'font-weight' property</a>。</p>
+      <p>关于 W3C 推荐的 HTML 默认样式表，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS2/sample.html">Appendix D. Default style sheet for HTML 4</a>。</p>
+
+
+      <h2 id="description">问题描述</h2>
+      <p>在 Chrome 和 Safari 中，默认样式下的 B、STRONG 元素的 'font-weight' 特性计算值可能会受到其继承来的 'font-weight' 特性影响，在 IE8(S) 中，除 B、STRONG 外，H1~H6、TH 元素的 'font-weight' 特性也会受影响。在其他浏览器中，则完全不受影响。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>由于此差异可能导致文本的 'font-weight' 特性计算后的值在各浏览器中出现差异。即影响文字的粗度。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE8(S) Chrome Safari</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>在分析之前，首先确定一下各浏览器中对于 <em>TH、H1、H2、H3、H4、H5、H6、B、STRONG</em> 元素的 'font-weight' 特性的默认值：</p>
+      <p>对于非 IE 浏览器，可直接通过各自的开发人员工具查看到上述元素的默认样式；而 IE 各版本中均无法看到默认样式，可以通过如下代码推测：</p>
+      <pre>&lt;script&gt;
+function $(id) { return document.getElementById(id); }
+for (var i = 100; i &lt;= 900; i+=100) {
+  document.write('&lt;div style="font-weight:' + i + '"&gt;&lt;b id="b' + i + '"&gt;B{font-weight:&lt;span&gt;&lt;/span&gt;} &lt;/b&gt;&lt;/div&gt;');
+  document.write('&lt;div style="font-weight:' + i + '"&gt;&lt;strong id="strong' + i + '"&gt;STRONG{font-weight:&lt;span&gt;&lt;/span&gt;} &lt;/strong&gt;&lt;/div&gt;');
+  document.write('&lt;div style="font-weight:' + i + '"&gt;&lt;h3 id="h3' + i + '"&gt;H3{font-weight:&lt;span&gt;&lt;/span&gt;} &lt;/h3&gt;&lt;/div&gt;');
+  document.write('&lt;table border="1" style="font-weight:' + i + '"&gt;&lt;tr&gt;&lt;th id="th' + i + '"&gt;TH{font-weight:&lt;span&gt;&lt;/span&gt;}&lt;/th&gt;&lt;/tr&gt;&lt;/table&gt;');
+  $("b" + i).getElementsByTagName("span")[0].innerHTML = $("b" + i).currentStyle.fontWeight;
+  $("strong" + i).getElementsByTagName("span")[0].innerHTML = $("b" + i).currentStyle.fontWeight;
+  $("h3" + i).getElementsByTagName("span")[0].innerHTML = $("b" + i).currentStyle.fontWeight;
+  $("th" + i).getElementsByTagName("span")[0].innerHTML = $("b" + i).currentStyle.fontWeight;
+}
+&lt;/script&gt;</pre>
+      <p>上面的代码在 IE 各版本中运行，IE8(S) 中前三组没有应用粗体，其他版本中则全是粗体，通过这个现象推测 IE8(S) 中上述元素的 'font-weight' 特性的默认值为 bolder，而其他版本中则为 bold。<br />
+      在 Firefox 中，B、STRONG 元素的默认 'font-weight' 为 bolder，是一个相对量，而它们计算后的值比较特殊，为 401。H3、TH 元素的默认 'font-weight' 为 bold，是一个绝对量，所以其计算后的值仍为 bold。<br />
+      在 Chrome、Safari 中，上述元素的默认 'font-weight' 与 Firefox 相同，不同之处为 B、STRONG 元素的计算值为 bold。<br />
+      在 Opera 中，上述元素的 'font-weight' 无论是默认值还是计算值均为固定的 700，是绝对量。</p>
+      <p>整理成表格如下（H1、H2、H3、H4、H5、H6 具有相似性，这里仅列举 H3 元素）：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S)</th>
+          <th>Firefox</th>
+          <th>Chrome</th>
+          <th>Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <th>B</th>
+          <td>默认值：bold<sup>1</sup><br />计算值：700</td>
+          <td>默认值：bolder<sup>1</sup><br />计算值：700</td>
+          <td>默认值：bolder<br />计算值：401</td>
+          <td>默认值：bolder<br />计算值：bold</td>
+          <td>默认值：bolder<br />计算值：bold</td>
+          <td>默认值：700<br />计算值：700</td>
+        </tr>
+        <tr>
+          <th>STRONG</th>
+          <td>默认值：bold<sup>1</sup><br />计算值：700</td>
+          <td>默认值：bolder<sup>1</sup><br />计算值：700</td>
+          <td>默认值：bolder<br />计算值：401</td>
+          <td>默认值：bolder<br />计算值：bold</td>
+          <td>默认值：bolder<br />计算值：bold</td>
+          <td>默认值：700<br />计算值：700</td>
+        </tr>
+        <tr>
+          <th>H3</th>
+          <td>默认值：bold<sup>1</sup><br />计算值：700</td>
+          <td>默认值：bolder<sup>1</sup><br />计算值：700</td>
+          <td>默认值：bold<br />计算值：bold</td>
+          <td>默认值：bold<br />计算值：bold</td>
+          <td>默认值：bold<br />计算值：bold</td>
+          <td>默认值：700<br />计算值：700</td>
+        </tr>
+        <tr>
+          <th>TH</th>
+          <td>默认值：bold<sup>1</sup><br />计算值：700</td>
+          <td>默认值：bolder<sup>1</sup><br />计算值：700</td>
+          <td>默认值：bold<br />计算值：bold</td>
+          <td>默认值：bold<br />计算值：bold</td>
+          <td>默认值：bold<br />计算值：bold</td>
+          <td>默认值：700<br />计算值：700</td>
+        </tr>
+      </table>
+      <p class="comment">
+        注1. 此值仅为通过测试代码得到的推测结果。
+      </p>
+      <br />
+      <p>下面具体分析各浏览器下 'font-weight' 特性继承性的差异。</p>
+      <p>分析以下代码：</p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style type="text/css"&gt;
+    * { font-size: 12px; margin: 0; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;script&gt;
+    window.onload = function() {
+        function $(id) {
+            return document.getElementById(id);
+        }
+
+        function $s($target, styleName) {
+            return document.defaultView ? document.defaultView.getComputedStyle($target, null).getPropertyValue(styleName)
+                    : $target.currentStyle[styleName.replace(/-[a-z]/g, function() {
+                return arguments[0].charAt(1).toUpperCase();
+            })];
+        }
+        $("da1").innerHTML = "computed:" + $s($("a1"), "font-weight");
+        $("da2").innerHTML = "computed:" + $s($("a2"), "font-weight");
+        $("da3").innerHTML = "computed:" + $s($("a3"), "font-weight");
+        $("da4").innerHTML = "computed:" + $s($("a4"), "font-weight");
+        $("da5").innerHTML = "computed:" + $s($("a5"), "font-weight");
+        $("da6").innerHTML = "computed:" + $s($("a6"), "font-weight");
+        $("da7").innerHTML = "computed:" + $s($("a7"), "font-weight");
+        $("da8").innerHTML = "computed:" + $s($("a8"), "font-weight");
+    }
+&lt;/script&gt;
+&lt;div style="font-weight:100"&gt;&lt;b id="a1"&gt;DIV{font-weight:100} &gt; B&lt;/b&gt;&lt;/div&gt;
+&lt;div style="background:#CCC;" id="da1"&gt;&lt;/div&gt;
+
+&lt;div style="font-weight:100"&gt;&lt;strong id="a2"&gt;DIV{font-weight:100} &gt; SRTONG&lt;/strong&gt;&lt;/div&gt;
+&lt;div style="background:#CCC;" id="da2"&gt;&lt;/div&gt;
+
+&lt;div style="font-weight:100"&gt;&lt;h3 id="a3"&gt;DIV{font-weight:100} &gt; H3&lt;/h3&gt;&lt;/div&gt;
+&lt;div style="background:#CCC;" id="da3"&gt;&lt;/div&gt;
+
+&lt;div style="font-weight:100"&gt;&lt;table&gt;&lt;tr&gt;&lt;th id="a4"&gt;DIV{font-weight:100} &gt; TH&lt;/th&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;
+&lt;div style="background:#CCC;" id="da4"&gt;&lt;/div&gt;
+
+&lt;br /&gt;
+&lt;div style="font-weight:normal"&gt;&lt;b id="a5"&gt;DIV{font-weight:normal} &gt; B&lt;/b&gt;&lt;/div&gt;
+&lt;div style="background:#CCC;" id="da5"&gt;&lt;/div&gt;
+
+&lt;div style="font-weight:normal"&gt;&lt;strong id="a6"&gt;DIV{font-weight:normal} &gt; SRTONG&lt;/strong&gt;&lt;/div&gt;
+&lt;div style="background:#CCC;" id="da6"&gt;&lt;/div&gt;
+
+&lt;div style="font-weight:normal"&gt;&lt;h3 id="a7"&gt;DIV{font-weight:normal} &gt; H3&lt;/h3&gt;&lt;/div&gt;
+&lt;div style="background:#CCC;" id="da7"&gt;&lt;/div&gt;
+
+&lt;div style="font-weight:normal"&gt;&lt;table&gt;&lt;tr&gt;&lt;th id="a8"&gt;DIV{font-weight:normal} &gt; TH&lt;/th&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/div&gt;
+&lt;div style="background:#CCC;" id="da8"&gt;&lt;/div&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码分为两组，每组内测试了 4 个元素—— B、STRONG、H3、TH 与父元素对于 'font-weight' 特性的继承关系。两组的区别为父元素的 'font-weight' 特性的设定值不同。</p>
+      <p>这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q) Opera</th>
+          <th>Firefox</th>
+          <th>Chrome Safari</th>
+          <th>IE8(S)</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RA3002/fw_1.gif" alt="IE6 IE7 IE8(Q) Opera" /></td>
+          <td><img src="../../tests/RA3002/fw_2.gif" alt="Firefox" /></td>
+          <td><img src="../../tests/RA3002/fw_3.gif" alt="Chrome Safari" /></td>
+          <td><img src="../../tests/RA3002/fw_4.gif" alt="IE8(S)" /></td>
+        </tr>
+      </table>
+      <p>可见，对于具有加粗效果的 HTML 元素—— B、STRONG、H1~H6、TH：</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8(Q) Opera</em> 中，其继承来的 'font-weight' 特性的值无法影响其自身 'font-weight' 特性值的计算，所有元素仍具备加粗效果，而计算后 'font-weight' 均为 700，即 bold；</li>
+        <li>在 <em>Firefox</em> 中，在渲染效果上与上面 IE6 IE7 Opera 中一致，但是 B、STRONG 元素 'font-weight' 特性计算后的值为 101、401 等非法值，但是并没有影响到渲染；</li>
+        <li>在 <em>Chrome Safari</em> 中，对于 B、STRONG，由于其默认的 'font-weight' 为 bolder，是相对量，所以继承来的 'font-weight' 特性的值将会影响其自身 'font-weight' 属性值的计算。对于 H1~H6、TH，其默认的 'font-weight' 为 bold，是绝对量，这时继承来的 'font-weight' 特性的值无法影响其自身" 'font-weight' 特性值的计算；</li>
+        <li>在 <em>IE8(S)</em> 中，继承来的 'font-weight' 特性的值均会影响其自身 'font-weight' 特性值的计算。</li>
+      </ul>
+      <p>最后，总结一下各浏览器对 'font-weight' 特性的 bolder 与 lighter 的计算差异。</p>
+      <pre>&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+    * { font-size:12px; font-family:Tahoma; margin: 0; }
+    table { border-collapse;collapse; border-top:1px solid black; border-left:1px solid black; }
+    td, th { border-right:1px solid black; border-bottom:1px solid black; }
+&lt;/style&gt;
+&lt;script&gt;
+    window.onload = function() {
+        function $(id) {
+            return document.getElementById(id);
+        }
+
+        function $s($target, styleName) {
+            return document.defaultView ? document.defaultView.getComputedStyle($target, null).getPropertyValue(styleName)
+                    : $target.currentStyle[styleName.replace(/-[a-z]/g, function() {
+                return arguments[0].charAt(1).toUpperCase();
+            })];
+        }
+
+        var values = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, "normal", "bold"];
+
+        var str1 = [];
+        str1.push('&lt;table cellpadding="2" cellspacing="0"&gt;&lt;tr&gt;&lt;th&gt;V&lt;/th&gt;&lt;th&gt;P&lt;/th&gt;&lt;th&gt;B&lt;/th&gt;&lt;th&gt;L&lt;/th&gt;&lt;/tr&gt;');
+        for (var i = 0, j = values.length; i &lt; j; i++) {
+            var p = values[i];
+            str1.push('&lt;tr&gt;&lt;td&gt;' + p + '&lt;/td&gt;'
+                + '&lt;td&gt;&lt;div id="div' + p + '" style="font-weight:' + p + '"&gt;&lt;/div&gt;&lt;/td&gt;'
+                + '&lt;td&gt;&lt;div style="font-weight:' + p + '"&gt;&lt;span id="span' + p + '" style="font-weight:bolder;"&gt;&lt;/span&gt;&lt;/div&gt;&lt;/td&gt;'
+                + '&lt;td&gt;&lt;div style="font-weight:' + p + '"&gt;&lt;span id="spanl' + p + '" style="font-weight:lighter;"&gt;&lt;/span&gt;&lt;/div&gt;&lt;/td&gt;&lt;/tr&gt;');
+        }
+        str1.push('&lt;/table&gt;');
+        $("table").innerHTML = str1.join("");
+
+        for (var i = 0, j = values.length; i &lt; j; i++) {
+            var p = values[i];
+            $("div" + p).innerHTML = $s($("div" + p), "font-weight");
+            $("span" + p).innerHTML = $s($("span" + p), "font-weight");
+            $("spanl" + p).innerHTML = $s($("spanl" + p), "font-weight");
+        }
+
+    }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div id="table"&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码目的是测试当父元素的 'font-weight' 特性设置为：0、100、200、300、400、500、600、700、800、900、1000、normal、bold，且子元素分别设置了 ‘font-weight:bolder’ 与 ‘font-weight:lighter‘ 时，子元素计算后的 'font-weight' 的值的情况。</p>
+      <p>这段代码在不同浏览器中运行结果如下（白色背景代表未加粗，蓝色背景代表加粗）：</p>
+      <table class="compare">
+        <tr>
+          <th rowspan="2">font-weight</th>
+          <th colspan="3">IE6 IE7 IE8</th>
+          <th colspan="3">Firefox</th>
+          <th colspan="3">Chrome Safari</th>
+          <th colspan="3">Opera</th>
+        </tr>
+        <tr>
+          <th>Parent</th>
+          <th>Bolder</th>
+          <th>Lighter</th>
+          <th>Parent</th>
+          <th>Bolder</th>
+          <th>Lighter</th>
+          <th>Parent</th>
+          <th>Bolder</th>
+          <th>Lighter</th>
+          <th>Parent</th>
+          <th>Bolder</th>
+          <th>Lighter</th>
+        </tr>
+        <tr>
+          <th>0</th>
+          <td>400</td>
+          <td class="hl_3">700</td>
+          <td>100</td>
+          <td>400</td>
+          <td class="hl_3">401</td>
+          <td>399</td>
+          <td>normal</td>
+          <td class="hl_3">bold</td>
+          <td>300</td>
+          <td>400</td>
+          <td class="hl_3">700</td>
+          <td>400</td>
+        </tr>
+        <tr>
+          <th>100</th>
+          <td>100</td>
+          <td>400</td>
+          <td>100</td>
+          <td>100</td>
+          <td class="hl_3">101</td>
+          <td>100</td>
+          <td>100</td>
+          <td>300</td>
+          <td>100</td>
+          <td>100</td>
+          <td>400</td>
+          <td>100</td>
+        </tr>
+        <tr>
+          <th>200</th>
+          <td>200</td>
+          <td>500</td>
+          <td>100</td>
+          <td>200</td>
+          <td class="hl_3">201</td>
+          <td>199</td>
+          <td>200</td>
+          <td>300</td>
+          <td>100</td>
+          <td>200</td>
+          <td>400</td>
+          <td>200</td>
+        </tr>
+        <tr>
+          <th>300</th>
+          <td>300</td>
+          <td class="hl_3">600</td>
+          <td>100</td>
+          <td>300</td>
+          <td class="hl_3">301</td>
+          <td>299</td>
+          <td>300</td>
+          <td>normal</td>
+          <td>200</td>
+          <td>300</td>
+          <td>400</td>
+          <td>300</td>
+        </tr>
+        <tr>
+          <th>400</th>
+          <td>400</td>
+          <td class="hl_3">700</td>
+          <td>100</td>
+          <td>400</td>
+          <td class="hl_3">401</td>
+          <td>399</td>
+          <td>normal</td>
+          <td class="hl_3">bold</td>
+          <td>300</td>
+          <td>400</td>
+          <td class="hl_3">700</td>
+          <td>400</td>
+        </tr>
+        <tr>
+          <th>500</th>
+          <td>500</td>
+          <td class="hl_3">800</td>
+          <td>200</td>
+          <td>500</td>
+          <td class="hl_3">501</td>
+          <td>499</td>
+          <td>500</td>
+          <td class="hl_3">bold</td>
+          <td>300</td>
+          <td>500</td>
+          <td class="hl_3">700</td>
+          <td>400</td>
+        </tr>
+        <tr>
+          <th>600</th>
+          <td class="hl_3">600</td>
+          <td class="hl_3">900</td>
+          <td>300</td>
+          <td class="hl_3">600</td>
+          <td class="hl_3">601</td>
+          <td>599</td>
+          <td class="hl_3">600</td>
+          <td class="hl_3">800</td>
+          <td>normal</td>
+          <td class="hl_3">600</td>
+          <td class="hl_3">700</td>
+          <td>400</td>
+        </tr>
+        <tr>
+          <th>700</th>
+          <td class="hl_3">700</td>
+          <td class="hl_3">90</td>
+          <td>400</td>
+          <td class="hl_3">700</td>
+          <td class="hl_3">701</td>
+          <td>699</td>
+          <td class="hl_3">bold</td>
+          <td class="hl_3">800</td>
+          <td>normal</td>
+          <td class="hl_3">700</td>
+          <td class="hl_3">700</td>
+          <td>400</td>
+        </tr>
+        <tr>
+          <th>800</th>
+          <td class="hl_3">800</td>
+          <td class="hl_3">900</td>
+          <td>500</td>
+          <td class="hl_3">800</td>
+          <td class="hl_3">801</td>
+          <td>799</td>
+          <td class="hl_3">800</td>
+          <td class="hl_3">900</td>
+          <td>500</td>
+          <td class="hl_3">800</td>
+          <td class="hl_3">800</td>
+          <td class="hl_3">700</td>
+        </tr>
+        <tr>
+          <th>900</th>
+          <td class="hl_3">900</td>
+          <td class="hl_3">900</td>
+          <td class="hl_3">600</td>
+          <td class="hl_3">900</td>
+          <td class="hl_3">900</td>
+          <td>899</td>
+          <td class="hl_3">900</td>
+          <td class="hl_3">900</td>
+          <td class="hl_3">bold</td>
+          <td class="hl_3">900</td>
+          <td class="hl_3">900</td>
+          <td class="hl_3">700</td>
+        </tr>
+        <tr>
+          <th>1000</th>
+          <td>400</td>
+          <td class="hl_3">700</td>
+          <td>100</td>
+          <td>400</td>
+          <td class="hl_3">401</td>
+          <td>399</td>
+          <td>normal</td>
+          <td class="hl_3">bold</td>
+          <td>300</td>
+          <td>400</td>
+          <td class="hl_3">700</td>
+          <td>400</td>
+        </tr>
+        <tr>
+          <th>normal</th>
+          <td>400</td>
+          <td class="hl_3">700</td>
+          <td>100</td>
+          <td>400</td>
+          <td class="hl_3">401</td>
+          <td>399</td>
+          <td>normal</td>
+          <td class="hl_3">bold</td>
+          <td>300</td>
+          <td>400</td>
+          <td class="hl_3">700</td>
+          <td>400</td>
+        </tr>
+        <tr>
+          <th>bold</th>
+          <td class="hl_3">700</td>
+          <td class="hl_3">900</td>
+          <td>400</td>
+          <td class="hl_3">bold</td>
+          <td class="hl_3">701</td>
+          <td>699</td>
+          <td class="hl_3">bold</td>
+          <td class="hl_3">800</td>
+          <td>normal</td>
+          <td class="hl_3">700</td>
+          <td class="hl_3">700</td>
+          <td>400</td>
+        </tr>
+      </table>
+      <p>上表中，第一列代表给父元素设置的 'font-weight' 特性的值，这之中有 'font-weight' 的所有绝对量的取值。列 Parent 代表在当前浏览器中父元素的 'font-weight' 特性计算后的值，列 Bolder 代表父元素内子元素的 'font-weight' 特性为 bolder 时的计算后的值，列 Lighter 代表父元素内子元素的 'font-weight' 特性为 lighter 时的计算后的值。</p>
+      <p>可见，关于父元素的 'font-weight' 设定值与计算后的值的关系：</p>
+      <ul>
+        <li>在 <em>IE Opera</em> 中，不正确的值被修复为 400；</li>
+        <li>在 <em>Firefox</em> 中，不正确的值也被修复为 400，700 被 bold 替换；</li>
+        <li>在 <em>Chrome、Safari</em> 中，不正确的值被修复为 normal，400、700 分别被 normal、bold 替换。</li>
+      </ul>
+      <p>关于 bolder 及 lighter：</p>
+      <ul>
+        <li>在 <em>IE</em> 中，由于 normal 对应 400，bold 对应 700，浏览器将 bolder 与 lighter 的增减量定为了 300，当计算后大于 900 或小于 100 时仍按照 900 和 100 计算，而由于 100-500 时渲染为 normal，600-900 时渲染为 bold，则只有父元素 'font-weight' 特性为 100 及 200 时，由于子元素经过 bolder 后的计算值为 400 及 500，没有达到 600，所以这两种情况下子元素仍未“非加粗”。而 lighter 后的情况也是如此；</li>
+        <li>在 <em>Firefox</em> 中，忽略计算后的值的错误，则在渲染层面上看浏览器对于 bolder 和 lighter 的值的计算完全不参考其继承来的 'font-weight' 特性的值，对于 bolder 一律加粗，对于 lighter 一律不加粗；</li>
+        <li>在 <em>Chrome Safari</em> 中，bolder 和 lighter 的增减量并不是 IE 中的线性规律，可以很明显看到当父元素的 'font-weight' 特性计算值为 400 及以上时，子元素设置了 ’font-weight:bolder‘ 将呈现加粗效果。对于 lighter 则与 IE 一样，仅父元素 ’font-weight:900‘ 时，子元素设置了 ’font-weight:lighter’ 仍然呈现加粗效果；</li>
+        <li>在 <em>Opera</em> 中，bolder 和 lighter 的增减量同样不是线性规律，对于子元素设置 ‘font-weight:bolder’ 的渲染效果与 Chrome 一致，对于子元素设置 ‘font-weight:lighter’ 则比 Chrome 多了当父元素 ‘font-weight:800’ 时也会使子元素设置了 ‘font-weight:lighter’ 仍然呈现加粗效果。</li>
+      </ul>
+
+
+      <h2 id="solutions">解决方案</h2>
+      <p>最好为元素设置绝对明确的 'font-weight' 特性的值，避免使用 bolder、lighter 这类相对量以及浏览器的默认样式。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.3<br />
+              Chrome 5.0.375.29 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.52
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RA3002/font-weight.html">font-weight.html</a><br />
+            <a href="../../tests/RA3002/bolder_lighter.html">bolder_lighter.html</a><br />
+            <a href="../../tests/RA3002/IE8_S.html">IE8_S.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-06</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>font-weight bold bolder lighter normal 加粗 字体 B H1 H2 H3 H4 H5 H6 STRONG TH</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

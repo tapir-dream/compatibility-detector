@@ -1,0 +1,116 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RB1005: IE6 IE7 IE8(Q) 中父元素或子元素触发 hasLayout 时子元素的 margin 值与期望值不符</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无</p>
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 IE7 IE8(Q)下，容器触发 hasLayout 导致其浮动子元素 'margin-bottom' 消失。</p>
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题导致的边距消失可能影响到页面的布局，如段落过于紧凑，甚至是文字重叠。</p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+<pre>&lt;span&gt;content_text&lt;/span&gt;
+&lt;div style="zoom:1; overflow:hidden; background:lightgrey;"&gt;
+    &lt;div style="float:left; width:50px; height:50px; margin:20px; background:dimgray;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;span&gt;content_text&lt;/span&gt;
+</pre>
+      <p>
+        测试代码中 DIV 容器内包含一个左浮动元素，左浮动元素宽度和高度均为50px，四个方向均有20px的边距。容器设置了 '<strong>zoom:1; overflow:hidden;' </strong>。
+      </p>
+
+      <p>各浏览器表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Chrome Safari Firefox Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RB1005/01.png" alt="" /></td>
+          <td><img src="../../tests/RB1005/02.png" alt="" /></td>
+        </tr>
+      </table>
+      <p>可见，</p>
+      <ul>
+        <li>在 IE6 IE7 IE8(Q)中，容器 DIV 的 'zoom:1' 触发了 hasLayout，其内部浮动子元素也参与到了容器的高度计算之中。但是浮动子元素设置的 'margin-bottom' 消失； </li>
+        <li>在其他浏览器中，容器的 'overflow:hidden' 创建了新的 Block Formatting Context ，同样，其内部浮动子元素也参与到了容器的高度计算之中。浮动子元素的四个方向的 margin 均正常。</li>
+      </ul>
+      <h2 id="solutions">解决方案</h2>
+      <p>为容器显式地设置高度。若容器高度不定，则要避免在触发了 hasLayout 的容器内的浮动子元素上设置 'margin-bottom' 特性，可以通过为容器设置 'padding-bottom' 达到相似的效果。</p>
+      <h2 id="see_also">参见</h2>
+
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.60
+              </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RB1005/RB1005.html">RB1005.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-22</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>float margin 浮动 hasLayout Block Formatting Context 清除</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

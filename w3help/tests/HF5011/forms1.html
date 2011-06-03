@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<head>
+<title></title>
+</head>
+<body>
+<form method="get" action="recieve.html" target="f_1">
+	<input type="text" name="key" value="form1">
+</form>
+<form method="get" action="recieve.html" target="f_2">
+	<input type="text" name="key" value="form2">
+</form>
+<input id="submit" type="button" value="GO">
+<script>
+var $form0=document.forms[0];
+var $form1=document.forms[1];
+document.getElementById("submit").onclick=function(){
+	$form0.submit();
+	$form1.submit();
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RD3020: 在不同的文档模式中，当唯一的非表单控件类行内替换元素存在于其包容块中时，其父框的行高并不一定会计算文本基线高度</h1>
+<ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>关于 'vertical-align' 属性说明请参照 W3C CSS 2.1 规范：<a href="http://www.w3.org/TR/CSS21/visudet.html#propdef-vertical-align">http://www.w3.org/TR/CSS21/visudet.html#propdef-vertical-align</a> </p>
+      <p>关于基线 ( baseline ) 标准判定参见 ： <a href="http://people.w3.org/rishida/docs/unicode-tutorial/part6#baseline">http://people.w3.org/rishida/docs/unicode-tutorial/part6#baseline</a></p>
+      <p>关于替换元素的说明，请参考 W3C CSS 2.1 规范描述：<a href="http://www.w3.org/TR/CSS21/conform.html#replaced-element">http://www.w3.org/TR/CSS21/conform.html#replaced-element</a></p>
+      <p>关于行高设定，请参考 W3C CSS 2.1 规范描述：   <a href="http://www.w3.org/TR/CSS21/visudet.html#propdef-line-height">http://www.w3.org/TR/CSS21/visudet.html#propdef-line-height</a> </p>
+      <p>关于行内替换元素高度计算的说明，请参考 W3C CSS 2.1 规范描述：<a href="http://www.w3.org/TR/CSS21/visudet.html#inline-replaced-height">http://www.w3.org/TR/CSS21/visudet.html#inline-replaced-height</a></p>
+      <h2 id="description">问题描述</h2>
+      <p>在非标准文档模式中（包括混杂模式和近乎标准模式），当唯一的非表单控件类行内替换元素存在于其包容块中时，其父框的行高并不一定会计算文本基线高度。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>在标准模式下，IMG、IFRAME、OBJECT 三个行内替换元素与其父框底部会产生一定间隙。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE8(S) Firefox Chrome Safari</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <h3>文档模式说明：</h3>
+      <p>这个问题与浏览器文档模式有关，从现有资料分析，浏览器一般拥有三种文档模式：标准模式( Standards Mode )、近乎标准模式( Almost Standards Mode )和混杂模式( Quirks Mode )。</p>
+      <p>他们可以由文档头部的 DTD 声明触发。常见情况中：</p>
+            <ol>
+              <li><strong>触发标准模式</strong>：
+                  <ul>
+                      <li>&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Strict//EN&quot; &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd&quot;&gt;</li>
+                        <li>&lt;!DOCTYPE html &gt;</li>
+                  </ul>
+                </li>
+                <li><strong>触发混杂模式</strong>
+                  <ul>
+                      <li>没有写 DTD 声明 </li>
+                        <li>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 3.2 Final//EN&quot;&gt;</li>
+                        <li>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0 Transitional//EN&quot;&gt;</li>
+                      <li>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.01 Transitional//EN&quot;&gt;</li>
+                  </ul>
+                </li>
+                <li><strong>触发近乎标准模式</strong>
+                                    <ul>
+                      <li>&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot; &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd&quot;&gt;</li>
+                    </ul>
+               </li>
+            </ol>
+        <p>关于更详细的文档模式说明请参考：  <a href="http://hsivonen.iki.fi/doctype/">http://hsivonen.iki.fi/doctype/</a> </p>
+        <p>其中说明了 IE6 IE7 中没有标准模式，即使设置了可触发标准模式的 DTD 也仅运行在近乎标准模式中。</p>
+        <p>&nbsp;</p>
+        <h3>行高样式 'line-height' ：</h3>
+        <p> 在行高部分，规范说明中提及——行高所指定的高度用于行框的高度计算，但需除去行内替换元素，其高度设定来自于 ‘height’ 属性设置 。 </p>
+        <p>此样式的默认值是 &quot;normal&quot;，它的说明如下：</p>
+        <p class="hl_1"> Tells user agents to set the used value to a &quot;reasonable&quot; value based on the font of the element.  </p>
+        <p>即：当其为默认值时，将基于字体尺寸计算出一个 &quot;合理&quot; 的值。</p>
+        <p>&nbsp;</p>
+        <h3>垂直对齐样式 'vertical-align' ：</h3>
+        <p>此样式不可继承，负责影响垂直位置上行内框在行框中产生的位置，它的默认值为 '<a href="http://people.w3.org/rishida/docs/unicode-tutorial/part6#baseline">baseline</a>'。</p>
+        <p>此时对齐方式为：</p>
+        <p class="hl_1">Align the baseline of the box with the baseline of the parent box. If the box does not have a baseline, align the bottom margin edge with the parent's baseline. </p>
+        <p> 即：将行内框的基线对齐父框的基线。如果该行内框没有基线，将框的底线对齐父框的基线。 </p>
+        <h3>&nbsp;</h3>
+        <h3>实际问题：</h3>
+        <p>在不同的文档模式中，当唯一的行内替换元素存在于其包容块中时，其父框在使用 &quot;normal&quot; 行高设定值时计算出的 &quot;合理&quot; 行高内并不一定会包含文字基线高度。</p>
+        <p>分析以下代码：</p>
+<pre>
+&lt;div style=&quot;background:#CCC; font-size:16px; font-family:simsun;&quot;&gt;
+  &lt;img src=&quot;http://www.google.com/intl/en_ALL/images/srpr/logo1w.png&quot;/&gt;
+&lt;/div&gt;
+</pre>
+    <p>在父容器 DIV 中放置了行内替换元素 IMG，且父容器内没有其他文本内容，此代码实际执行效果如下：</p>
+    <table class="compare">
+          <tr>
+            <th>IE8(Q)(A)<br />
+            Chrome(Q)(A)<br />
+            Safari(Q)(A)<br />
+            Firefox(Q)(A)<br />
+            Opera(Q)(A)</th>
+            <td><img src="../../tests/RD3020/01.gif" alt="运行效果截图" /></td>
+          </tr>
+          <tr>
+            <th>IE8(S) <br />
+            Chrome(S) <br />
+            Safari(S) <br />
+            Firefox(S) <br />
+            Opera(S)</th>
+            <td><img src="../../tests/RD3020/02.gif" alt="运行效果截图" /></td>
+          </tr>
+          <tr>
+            <td class="hl_1" style="text-align:center;">IE6<br />
+            IE7</td>
+            <td class="hl_1" ><img src="../../tests/RD3020/02.gif" alt="运行效果截图" /></td>
+          </tr>
+        </table>
+    <p>根据规范说明，父框 DIV 元素本身并没有显式性的设置行高属性，此时 'line-height' 为默认值 ‘normal’ ，他将基于字体计算出 &quot;合理&quot; 行高。</p>
+    <p>行内替换元素 IMG 本身不存在基线位置，在 'vertical-align:baseline' 默认设置下，他的底边界应与父框 DIV 元素的基线位置对齐。</p>
+    <p>由于此处规范说明中存在估算词汇——&quot;合理&quot; 行高，这将导致各个浏览器中对容器内行高计算理解有误。</p>
+    <p>从上表中可以看出：</p>
+          <ul>
+              <li>IE8 和其他浏览在<strong>近乎标准模式</strong>下父框  'line-height:normal' 样式时，计算出来的行高不预留文字基线高度，导致行内替换元素的底边直接与父框底边对齐。</li>
+                <li>IE8 和其他浏览在<strong>标准模式</strong>下父框  'line-height:normal' 样式时，计算出来的行高是预留了文字基线高度，行内替换元素的底边直接与父框基线位置对齐，因此产生了底部有一些间隙的现象。</li>
+            </ul>
+         <p><em>IE6 IE7</em> 浏览器在此时显得有些特殊，从表象上看他们均与其他浏览器标准模式显示效果相同。但是有个细节需要注意，代码中父容器标记 DIV 与子标记 IMG 之间存在换行符，这是否会导致 IE6 IE7 浏览器中产生文本节点并促使父框在计算 ”合理“行高时预留基线高度呢？</p>
+    <p>为 <em>IE6 IE7</em> 浏览器修改代码，避免因换行造成出现文本节点，看看是否会因此导致父框 (也就是 line box) 产生基线：</p>
+<pre>
+&lt;div style=&quot;background:#CCC; font-size:16px; font-family:simsun;&quot;&gt;&lt;img src=&quot;http://www.google.com/intl/en_ALL/images/srpr/logo1w.png&quot;/&gt;&lt;/div&gt;
+</pre>
+        <table class="compare">
+          <tr>
+            <th>IE6<br />
+              IE7<br />
+              IE8(Q)(A)<br />
+        Chrome(Q)(A)<br />
+        Safari(Q)(A)<br />
+        Firefox(Q)(A)<br />
+        Opera(Q)(A)</th>
+            <td><img src="../../tests/RD3020/01.gif" alt="运行效果截图" /></td>
+          </tr>
+          <tr>
+            <th>IE8(S) <br />
+        Chrome(S) <br />
+        Safari(S) <br />
+        Firefox(S) <br />
+        Opera(S)</th>
+            <td><img src="../../tests/RD3020/02.gif" alt="运行效果截图" /></td>
+          </tr>
+        </table>
+    <p>实际运行结果证明了刚才的猜测，以上 <em>IE6 IE7</em> 表现是由于产生了文本节点使父框存在基线。当标签间紧密相连没有换行符等任何其他字符存在时，父框内不会产生基线。</p>
+    <p>根据这个情况可以判断出如果父框内没有产生文本元素，在混杂模式和近乎标准模式中同样不会计算文本基线高度。</p>
+        <p>将 DIV 中加入文本内容，分析以下代码：</p>
+<pre>
+&lt;div style=&quot;background:#AAA;&quot;&gt;
+  &lt;img src=&quot;http://www.google.com/intl/en_ALL/images/srpr/logo1w.png&quot;/&gt;&lt;span style=&quot;background:gold;&quot;&gt;Bg&lt;/span&gt;
+&lt;/div&gt;
+</pre>
+        <p>实际执行效果如下：</p>
+        <table class="compare">
+          <tr>
+            <th>IE6<br />
+              IE7<br />
+              IE8<br />
+              Chrome<br />
+              Safari<br />
+              Firefox<br />
+              Opera</th>
+            <td><img src="../../tests/RD3020/03.gif" alt="运行效果截图" /></td>
+          </tr>
+        </table>
+        <p>此时所有浏览器在所有三种文档模式下均显示一致，说明在有其他文本内容的情况下，行高计算时将文本基线高度计算在内，行内替换元素在 'baseline' 对齐方式下遵守规范描述。</p>
+        <p>综上所述，所有浏览器在混杂模式和近乎标准模式中，如果父元素本身没有任何文本内容，使用 &quot;line-height:normal&quot; 设置时所计算出来的 &quot;合理&quot; 行高内不会考虑文本基线高度。</p>
+        <p>而标准模式中任何情况下则会计算文本行基线高度，因而底部会产生由文本基线高度带来的间隙空间。</p>
+        <p class="comment">【注】：其他常用非表单控件类型的行内替换元素也会受这种情况影响，比如 IFRAME 和 OBJECT 标记；为了简化本文，他们将不再说明，如有需要请在测试页面内观看效果。</p>
+        <h2 id="solutions">解决方案</h2>
+      <p>如果在 <strong>非标准模式</strong> 中，需要父容器在仅有行内替换元素的情况下计算出包含文本基线高度的行高值，则必须加入其他行内文本元素。相反的，如果在 <strong>标准模式</strong> 中，需要行内替换元素与其父容器底部无间隙，请修改 'vertical-align' 值为非 'baseline' 。</p>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.211.4<br />
+                            Safari 4.0.4<br />
+                            Opera 10.51
+                        </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+                          <a href="../../tests/RD3020/parent_baseline_in_quirks_doctype.html">parent_baseline_in_quirks_doctype.html</a> <br />
+                            <a href="../../tests/RD3020/parent_baseline_in_almost_standards_doctype.html">parent_baseline_in_almost_standards_doctype.html</a> <br />
+                            <a href="../../tests/RD3020/parent_baseline_in_standards_doctype.html">parent_baseline_in_standards_doctype.html</a>
+                        </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-22</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>IMG  baseline vertical-align 文本高度  DTD doctype 文档模式</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

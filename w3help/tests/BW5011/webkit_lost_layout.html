@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+</head>
+<body>
+<h1>产生问题的布局:</h1>
+<h2>最内容器'float:left' 'overflow:auto'</h2>
+<input type="button" onclick="document.getElementById('A').style.height='29px'" value="祖先容器高度变小" />
+<input type="button" onclick="document.getElementById('A').style.height='60px'" value="祖先容器高度恢复"  />
+<input type="button" onclick="document.getElementById('B').style.position='relative'" value="修复此问题"  />
+<div id="A" style="height:60px;background:gold;">
+	<div style="height:31px;background:red;">
+		<div style="overflow:auto;float:left; background:gray;height:30px;" id="B" >
+			内容文字<br/>
+		</div>
+		<span>环绕文字</span>
+	</div>
+</div>
+
+<h2>最内容器 'float:right' 'overflow:auto'</h2>
+<input type="button" onclick="document.getElementById('C').style.height='29px'" value="祖先容器高度变小" />
+<input type="button" onclick="document.getElementById('C').style.height='60px'" value="祖先容器高度恢复"  />
+<input type="button" onclick="document.getElementById('D').style.position='relative'" value="修复此问题"  />
+<div id="C" style="height:60px;background:gold;">
+	<div style="height:31px;background:red;">
+		<div style="overflow:auto;float:right; background:gray;height:30px;"  id="D"  >
+			内容文字<br/>
+		</div>
+		<span>环绕文字</span>
+	</div>
+</div>
+
+<h2>最内容器 'float' 'overflow:hidden'</h2>
+<input type="button" onclick="document.getElementById('E').style.height='29px'" value="祖先容器高度变小" />
+<input type="button" onclick="document.getElementById('E').style.height='60px'" value="祖先容器高度恢复"  />
+<input type="button" onclick="document.getElementById('F').style.position='relative'" value="修复此问题"  />
+<div id="E" style="height:60px;background:gold;">
+	<div style="height:31px;background:red;">
+		<div style="overflow:hidden;float:left; background:gray;height:30px;"  id="F"  >
+			内容文字<br/>
+		</div>
+		<span>环绕文字</span>
+	</div>
+</div>
+
+<br /><hr /><br />
+
+<h1>不产生问题的布局:</h1>
+
+<h2>最内容器 'float' 'overflow:visible'</h2>
+<input type="button" onclick="document.getElementById('G').style.height='29px'" value="祖先容器高度变小" />
+<input type="button" onclick="document.getElementById('G').style.height='60px'" value="祖先容器高度恢复"  />
+<div id="G" style="height:60px;background:gold;">
+	<div style="height:31px;background:red;">
+		<div style="overflow:visible;float:left; background:gray;height:30px;" >
+			内容文字<br/>
+		</div>
+		<span>环绕文字</span>
+	</div>
+</div>
+
+<h2>最内容器仅'overflow:hidden'</h2>
+<input type="button" onclick="document.getElementById('H').style.height='29px'" value="祖先容器高度变小" />
+<input type="button" onclick="document.getElementById('H').style.height='60px'" value="祖先容器高度恢复"  />
+<div id="H" style="height:60px;background:gold;">
+	<div style="height:31px;background:red;">
+		<div style="overflow:visible; background:gray;height:30px;" >
+			内容文字<br/>
+		</div>
+		<span>环绕文字</span>
+	</div>
+</div>
+
+<h2>祖先容器高度设置变更大于等于最内容器计算高度</h2>
+<input type="button" onclick="document.getElementById('I').style.height='30px'" value="祖先容器高度变小" />
+<input type="button" onclick="document.getElementById('I').style.height='60px'" value="祖先容器高度恢复"  />
+<div id="I" style="height:60px;background:gold;">
+	<div style="height:31px;background:red;">
+		<div style="overflow:auto;float:left; background:gray;height:30px;" >
+			内容文字<br/>
+		</div>
+		<span>环绕文字</span>
+	</div>
+</div>
+
+<h2>中层容器高度设置小于最内容器计算高度</h2>
+<input type="button" onclick="document.getElementById('J').style.height='29px'" value="祖先容器高度变小" />
+<input type="button" onclick="document.getElementById('J').style.height='60px'" value="祖先容器高度恢复"  />
+<div id="J" style="height:60px;background:gold;">
+	<div style="height:29px;background:red;">
+		<div style="overflow:auto;float:left; background:gray;height:30px;" >
+			内容文字<br/>
+		</div>
+		<span>环绕文字</span>
+	</div>
+</div>
+
+</body>
+</html>

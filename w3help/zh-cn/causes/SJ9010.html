@@ -1,0 +1,118 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SJ9010: 各浏览器中 Date 对象的 getYear 方法的返回值不一致</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 <a href="http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-262.pdf">ECMAScript 规范</a>附录 <strong>B.2.4 Date.prototype.getYear()</strong> 中的描述，'getYear' 返回的是当前年份与 1900 的差值，该方法已经作废，应使用 'getFullYear' 来代替以避免“千年虫”问题。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>Date 对象的 getYear 方法在各浏览器下的返回值存在差异。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>使用 Date.getYear 方法在不同的浏览器中将出现预料外的结果。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>根据规范，这个方法将返回当前时间的年份值与 1900 的差值，如 1800 年返回 -100，2010 返回 110。但 IE 仅在一个 1900 - 1999 年之间的日期值上调用 getYear 方法时，减去 1900，在其他的日期中返回的是实际的年份，就和 getFullYear 一样。<sup>1</sup></p>
+      <p>在各浏览器中运行以下代码：</p>
+<pre>
+alert(new Date(1979,11,1).getYear());
+alert(new Date(2010,2,17).getYear());
+</pre>
+      <p>各浏览器下的输出结果，如下表所示：</p>
+      <table class="compare">
+        <tr>
+          <th>IE </th>
+          <td>79<br/>2010</td>
+        </tr>
+        <tr>
+          <th>Firefox Chrome Safari Opera</th>
+          <td>79<br/>110</td>
+        </tr>
+      </table>
+      <p>可见：不能保证 Date.prototype.getYear() 在各浏览器下返回相同的字符串。</p>
+      <p class="comment">注：<br/>1. 关于 IE 下的 getYear 方法的描述，请参考 <a href="http://msdn.microsoft.com/en-us/library/x0a9sc10%28VS.85%29.aspx">MSDN - getYear Method</a>。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>要获得一个具体时间的年份，请不要使用 Date.prototype.getYear() 方法，使用 Date.prototype.getFullYear() 代替，以在各浏览器下获得相同的表现。</p>
+      <p>另外，要给一个 Date 对象设置年份，也请不要使用 Date.prototype.setYear() 方法，使用 Date.prototype.setFullYear() 代替。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="SJ2004">SJ2004: 各浏览器中 Date 对象的 toLocalString 方法的返回值不一致</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="#">...</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-09</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>Date toLocalString getYear</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

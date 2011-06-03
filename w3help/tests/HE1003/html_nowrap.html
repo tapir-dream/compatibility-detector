@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	.nr { background:#ddd; }
+</style>
+</head>
+<body>
+    <table style="width:120px;" border="1">
+        <tr>
+            <th class="nr" nowrap>TH: </th>
+        </tr>
+        <tr>
+            <td class="nr" nowrap>TD: </td>
+        </tr>
+    </table>
+    <div class="nr" style="width:120px;" nowrap>DIV: </div>
+    <h3 class="nr" style="width:120px;" nowrap>H3: </h3>
+    <p class="nr" style="width:120px;" nowrap>P: </p>
+    <dl>
+        <dt id="dt" class="nr" style="width:120px;" nowrap>DT: </dt>
+        <dd class="nr" style="width:120px;" nowrap>DD: </dd>
+    </dl>
+    <script>
+    	window.onload = function() {
+		    function getComputedStyle($target, styleName) {
+		        return document.defaultView ? document.defaultView.getComputedStyle($target, null).getPropertyValue(styleName)
+		                : $target.currentStyle[styleName.replace(/-[a-z]/g, function() {
+		            return arguments[0].charAt(1).toUpperCase();
+		        })];
+		    }
+	    	var a = document.getElementsByTagName("*"), b, html;
+	    	for (var i = 0; i < a.length; i++) {
+	    		if (a[i].className == "nr") {
+	    			html = "<span>" + getComputedStyle(a[i], "white-space") + "</span>";
+	    			a[i].innerHTML += "white-space:" + html;
+	    			b = a[i].children(0);
+	    			b.style.color = (b.innerHTML == "nowrap") ? "red" : "blue";
+	    		}
+	    	}
+	    }
+    </script>
+</body>
+</html>

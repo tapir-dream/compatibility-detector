@@ -1,0 +1,167 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SD9005: IE 中一个对象的 native 方法是跟该对象绑定的</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE 中将一个 DOM 或 BOM 对象的原生方法赋给一个变量后，该变量可以成功调用。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>在非 IE 浏览器中可能导致脚本异常，停止解析。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr><th>IE</th></tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>这里使用 document.getElementById 来说明问题。</p>
+      <p>在前端开发过程中经常需要使用 document.getElementById 来获取页面中含有 id 属性 DOM 元素，为了方便，该方法经常被简写，如下：</p>
+<pre>
+//方式1
+var $1 = function(id){return document.getElementById(id);};
+
+//方式2
+var $2 = document.getElementById;
+</pre>
+      <p>用缩写的 $1、$2 测试，代码如下：</p>
+<pre>
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div id="d1"&gt;Div Element&lt;/div&gt;
+&lt;script type="text/javascript"&gt;
+    var $1 = function(id){return document.getElementById(id);};
+    var $2 = document.getElementById;
+
+    alert($1('d1'));
+    alert($2('d1'));
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+      <p>各浏览器中表现如下：<sup>1</sup></p>
+      <table class="compare">
+        <tr>
+          <th>函数名</th>
+          <th>IE</th>
+          <th>Firefox Safari Chrome Opera</th>
+        </tr>
+        <tr>
+          <th>$1</th>
+          <td>OK</td>
+          <td>OK</td>
+        </tr><tr>
+          <th>$2</th>
+          <td>OK</td>
+          <td>FAIL</td>
+        </tr>
+      </table>
+      <p class="comment">注1：OK 表示可以获取 DIV 元素，FAIL 表示不能获取 DIV 元素，控制台出错。</p>
+
+      <p>方式 1 在所有浏览器中均有效，而方式 2 仅在 IE 浏览器中有效。相同的效果也发生在 document 对象的其他方法上，
+      甚至是 location、history 等 BOM 对象的方法上。如：</p>
+<pre>
+//方式1
+var println1 = function(str){document.writeln(str);};
+
+//方式2 （仅IE）
+var println2 = document.writeln;
+
+//JS
+println2('&lt;h1&gt;Hello,world.&lt;/h1&gt;');
+</pre>
+
+      <p>
+        IE 下方式 2 在 DOM 或 BOM 对象的原生函数赋值给其他变量时会自动将其绑定到在 DOM 或 BOM 对象上，
+        而非 IE 浏览器（Firefox Safari Chrome Opera）需要用到 this，这里的 this 是 document 对象。
+        直接调用 $2() 时内部的 this 却是 window 对象，所以造成 $2() 不能根据 id 来正常获取元素。
+      </p>
+      <p>如果将 document.getElementById 的执行环境换成了 document ，则可以正常的使用 $2 了，如下：</p>
+<pre>
+document.getElementById = (function(fn){
+    return function(){
+        return fn.apply(document,arguments);
+    };
+})(document.getElementById);
+
+var $2 = document.getElementById;
+</pre>
+      <h2 id="solutions">解决方案</h2>
+      <p>使用方式 1 达到简写一些 DOM 和 BOM 对象原生方法的目的。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/SD9005/dom_bom_native_method_bind.html">dom_bom_native_method_bind.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-02</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>DOM BOM object this native context 上下文</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

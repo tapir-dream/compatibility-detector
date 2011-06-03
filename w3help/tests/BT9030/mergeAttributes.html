@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+	<head>
+		<style type="text/css">
+			.divC {
+				background:yellow;
+			}
+		</style>
+	</head>
+	<body>
+		<span id="oSource">
+			<div 
+				id="oDiv" 
+				attribute1="true" 
+				attribute2="true" 
+				onclick="alert('click');" 
+				onmouseover="this.style.color='#0000FF';" 
+				onmouseout="this.style.color='#000000';"
+				class="divC"
+				style="font-size:20px;"
+				name="divName"
+				onXXX="alert(xxx)"
+			>
+				This is a sample <b>div</b> element.
+			</div>
+			<div id="oDiv2" name="divName2">
+				This is another sample <b>div</b> element. 
+			</div>
+		</span>
+		<div id="info" style="height:100px;"></div>
+		<script type="text/javascript">
+			var oSource = document.getElementById('oSource'),
+				div1 = oSource.children[0],
+				div2 = oSource.children[1],
+				info = document.getElementById("info");
+			if(window.Element){
+				!Element.prototype.mergeAttributes && (Element.prototype.mergeAttributes = function(src){
+					var bPreserve = arguments[1] === undefined ? true : arguments[1],
+						attrs = src.attributes,
+						i = attrs.length - 1;
+					for(;i>=0;i--){
+						var name = attrs[i].name;
+						if(bPreserve && name.toLowerCase() === 'id')
+							continue;
+						this.setAttribute(name, attrs[i].value);
+					}
+				})
+			}
+
+			function fnMerge(){
+			   div2.mergeAttributes(div1);
+			}
+			function showAttributes(){
+				var attrs = div2.attributes,
+					i = attrs.length - 1,
+					tmp = "";
+				for(;i>=0;i--){
+					var attr = attrs[i];
+					tmp += attr.name + "=" + attr.value + " | "
+				}
+				info.innerHTML = tmp;
+			}
+		</script>
+		<button type="button" onclick="fnMerge()">merge attributes</button>
+		<button type="button" onclick="showAttributes()">show attributes</button>
+	</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX1049: 各浏览器通过 window.resizeTo() 方法最终得到的页面可视区域大小存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>虽然所有主流浏览器均支持 window.resizeTo() 方法，但由于各浏览器地址栏、状态栏等尺寸不同，以及对诸如 window.open() 这类方法的支持存在差异，导致通过 window.resizeTo() 方法最终得到的页面可视区域大小存在差异。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>若通过 window.resizeTo() 方法调整了窗口外边尺寸的页面布局依赖于某些浏览器下窗口可视区域大小，则可能造成其他浏览器中此页面布局出现差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>window.resizeTo() 方法可以通过传入表示宽度和高度的两个整型参数来控制当前 window 对象对应的浏览器窗口的外边尺寸，这个尺寸包括浏览器窗口的标题栏及窗口边框。<br />
+      虽然 window.resizeTo() 方法目前不属于任何规范，但所有的主流浏览器均支持此方法。</p>
+      <p>更多关于 window.resizeTo() 方法的信息，参见 MSDN <a href="http://msdn.microsoft.com/en-us/library/ms536723(VS.85).aspx">resizeTo Method</a> 及 Mozilla Developer Center <a href="https://developer.mozilla.org/en/DOM/window.resizeTo">window.resizeTo</a> 中的内容。<br />
+      <p>测试代码：<em>resizeToParent.html</em></p>
+      <pre>&lt;a href=&quot;javascript:void 0;&quot; onclick=&quot;window.open('<em>resizeTo.html</em>','','width=300,height=300,location=yes,menubar=no,status=yes,toolbar=no')&quot;&gt;resizeTo&lt;/a&gt;</pre>
+      <p>测试代码：<em>resizeTo.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;resizeTo&lt;/title&gt;
+&lt;style&gt;
+  html, body { margin:0; padding:0; width:100%; height:100%; font:60px 'Trebuchet MS'; }
+&lt;/style&gt;
+&lt;script&gt;
+  window.resizeTo(300, 300);
+  window.onload = window.onresize = function () {
+    document.body.innerHTML = document.body.clientWidth + ', ' + document.body.clientHeight;
+  }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>运行 resizeToParent.html，点击超链接，将弹出一个子窗口，这里通过 window.open() 方法统一使子窗口只显示地址栏与状态栏。子窗口 resizeTo.html 中通过 window.resizeTo() 方法使页面窗口尺寸定为 300px * 300px。最后计算重新调整尺寸后的子窗口的可视区域。</p>
+      <p>各浏览器中运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6</th>
+          <th>IE7<sup>1</sup></th>
+          <th>IE8<sup>1</sup></th>
+          <th>Firefox</th>
+          <th>Chrome</th>
+          <th>Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BX1049/open_IE6.gif" alt="" /></td>
+          <td><img src="../../tests/BX1049/open_IE7.gif" alt="" /></td>
+          <td><img src="../../tests/BX1049/open_IE8.gif" alt="" /></td>
+          <td><img src="../../tests/BX1049/open_FF.gif" alt="" /></td>
+          <td><img src="../../tests/BX1049/open_CR.gif" alt="" /></td>
+          <td><img src="../../tests/BX1049/open_SF.gif" alt="" /></td>
+          <td><img src="../../tests/BX1049/open_OP.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>虽然通过 window.open() 方法设定了子窗口仅显示地址栏与状态栏，但由于各浏览器地址栏与状态栏的尺寸不同 (Chrome 不具备地址栏)，而整个窗口的外边尺寸又均为 300px * 300px，这导致各浏览器子窗口内的可视区域出现差异。<br />
+      而 Opera 中子窗口并不是一个原生独立的窗口导致子窗口可视区域与其他浏览器相差甚远。</p>
+      <p>同时，各浏览器对于 window.open() 方法窗口特征 sFeatures 参数支持程度存在差异，这也进一步导致了通过 window.resizeTo() 方法重新调整后的子窗口内可视区域大小在不同浏览器之间出现很大数值差异。</p>
+      <p class="comment">注 1: IE7 IE8 对于子窗口的显示与浏览器选项卡设置有关，这里全部使用浏览器缺省值。</p>
+      <br />
+      <p>下面查看若直接运行 resizeTo.html 页面，各浏览器对窗口内可视区域的计算结果：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Firefox</th>
+          <th>Chrome</th>
+          <th>Safari<sup>1</sup></th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <td><span class="hl_2">可以调整</span><sup>2</sup></td>
+          <td><span class="hl_1">不可以调整</span></td>
+          <td><span class="hl_2">可以调整</span></td>
+          <td><span class="hl_1">不可以调整</span></td>
+        </tr>
+      </table>
+      <p class="comment">注 1: Safari 中若移动窗口，则窗口的外边宽度会变为 350px。<br />
+      注 2: IE7 IE8 开启了多选项卡浏览后，若当前浏览器窗口已开有其他选项卡，此时可能不可以调整尺寸。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>使用 window.resizeTo() 方法时需谨慎，不要使被调整窗口尺寸的页面内布局完全依赖于某些浏览器中可视区域的大小。</p>
+      
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="BX1053">BX1053: 各浏览器对 window.open() 的窗口特征 sFeatures 参数支持程度存在差异</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows XP Professional SP3</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 8.0.552.0 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.63
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BX1049/resizeToParent.html">resizeToParent.html</a><br />
+            <a href="../../tests/BX1049/resizeTo.html">resizeTo.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-13</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>resizeTo width height</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

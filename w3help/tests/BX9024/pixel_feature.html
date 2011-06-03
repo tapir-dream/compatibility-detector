@@ -1,0 +1,38 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<style>
+    div { width:200px; background:#DDD; }
+</style>
+</head>
+<body>
+    <script type="text/javascript">
+        window.onload = function() {
+            var divObj = document.getElementById('test');
+            document.getElementById('info').innerHTML =
+                    "style.pixelWidth: " + divObj.style.pixelWidth +
+                    "<br/>style.pixelHeight: " + divObj.style.pixelHeight +
+                    "<br/> style.pixelTop: " + divObj.style.pixelTop +
+                    "<br/>style.pixelLeft: " + divObj.style.pixelLeft +
+                    "<br/> style.pixelBottom : " + divObj.style.pixelBottom +
+                    "<br/> style.pixelRight: " + divObj.style.pixelRight;
+
+            document.getElementById('info2').innerHTML =
+                    "style.width: " + divObj.style.width +
+                    "<br/> style.height: " + divObj.style.height +
+                    "<br/> style.top: " + divObj.style.top +
+                    "<br/> style.left: " + divObj.style.left +
+                    "<br/> style.bottom: " + divObj.style.bottom +
+                    "<br/> style.right: " + divObj.style.right;
+        }
+
+    </script>
+    <div id="test" style="position:absolute; right:20px; bottom:3em; left:3pt;
+          top:20px; width:100px; height:5em; background-color:green;">
+        test
+    </div>
+    <div id="info" style="position:absolute; top:120px; border:1px dashed red;"></div>
+    <div id="info2" style="position:absolute; top:120px; left:250px; border:1px dashed green;"></div>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<html>
+<head>
+<style>
+    * { font:12px Arial; }
+    body { margin:0; }
+    span { font-weight:bold; }
+    .g { color:green; }
+    .r { color:red; }
+</style>
+</head>
+<body>
+<dl>
+<script>
+	function myEval (code) {
+		var script = document.createElement("script");
+		script.text = "var ret =" + code;
+		document.body.appendChild(script);
+		var x = ret;
+		document.body.removeChild(script);
+		return x;
+	}
+	
+    function tryObj (obj_text) {
+        var ok = '<span class="g">OK</span>';
+        var fail = '<span class="r">FAIL</span>'
+        try {
+            var f = "";
+            var ev = myEval(obj_text);
+            try {
+            	f = ev.toString();
+            } catch(e) {
+            	f = "";
+            }
+            return ev ? ok + " " + f : fail + " " + f;
+        } catch(e) {
+          return fail + " " + f;
+        }
+    }
+    
+    var arr = [
+        'parent', 
+        'parent.document',
+        'parent.document.getElementById("ifr1")',
+        'parent.document.getElementById("ifr1").contentWindow',
+        'parent.document.getElementById("ifr1").contentWindow.document',
+        'parent.document.getElementById("ifr1").contentWindow.history',
+        'parent.document.getElementById("ifr1").contentWindow.location',
+        'parent.document.getElementById("ifr1").contentWindow.navigator',
+        'parent.document.getElementById("ifr1").contentWindow.screen',
+        'parent.document.getElementById("ifr1").contentWindow.alert',
+        'parent.document.getElementById("ifr2")',
+        'parent.document.getElementById("ifr2").contentWindow',
+        'parent.document.getElementById("ifr2").contentWindow.document',
+        'parent.document.getElementById("ifr2").contentWindow.history',
+        'parent.document.getElementById("ifr2").contentWindow.location',
+        'parent.document.getElementById("ifr2").contentWindow.navigator',
+        'parent.document.getElementById("ifr2").contentWindow.screen',
+        'parent.document.getElementById("ifr2").contentWindow.alert',
+        'parent.frames', 
+        'parent.frames["ifr1"]', 
+        'parent.frames["ifr1"].document', 
+        'parent.frames["ifr1"].history',
+        'parent.frames["ifr1"].location',
+        'parent.frames["ifr1"].navigator',
+        'parent.frames["ifr1"].screen',
+        'parent.frames["ifr1"].alert',
+        'parent.frames["ifr2"]', 
+        'parent.frames["ifr2"].document', 
+        'parent.frames["ifr2"].history',
+        'parent.frames["ifr2"].location',
+        'parent.frames["ifr2"].navigator',
+        'parent.frames["ifr2"].screen',
+        'parent.frames["ifr2"].alert'
+    ];
+    for (var i in arr) {
+        document.write('<dt>' + arr[i] + ':</dt>');
+        document.write('<dd>' + tryObj(arr[i]) + '</dd>');
+    }
+</script>
+</dl>
+</body>
+</html>

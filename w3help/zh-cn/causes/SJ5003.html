@@ -1,0 +1,228 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SJ5003: 各浏览器中用 for in 可以遍历对象中被更新的内置方法存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>在 ECMAScript 中，原生对象的 prototype 中的预置 property 是不会被遍历出来的，因为这些 property 的 [[Enumerable]] 属性都为 'false'。</p>
+      <p>关于 Property Attributes 请参考 <a href="http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-262.pdf">ECMAScript 规范</a> <strong>8.6.1 Property Attributes</strong> 中的内容。</p>
+      <p>关于 for...in 语法的说明请参考 <a href="http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-262.pdf">ECMAScript 规范</a> <strong>12.6.4 The for-in Statement</strong> 中的内容。</p>
+      <p>关于 Function Prototype Object 的说明请参考 <a href="http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-262.pdf">ECMAScript 规范</a> <strong>15.3.4 Properties of the Function Prototype Object</strong> 中的内容。</p>
+      <h2 id="description">问题描述</h2>
+      <p>改变 Date、Array 或 String 等对象的原型对象中的属性或方法的引用后，再用 for in 遍历一个 Date、Array 或 String 对象时，在 Safari Chrome 中可以遍历出这个修改过的属性或方法名。</p>
+      <h2 id="influence">造成的影响</h2>
+      <p>代码执行在各浏览器下效果可能不一致。</p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Chrome Safari </th>
+          <td></td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+      <pre>
+Array.prototype.pop=function(){};
+var a=[];
+for(var i in a)document.write(i," ");
+</pre>
+      <p>各浏览器表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE Firefox Oprea</th>
+          <th>Chrome Safari</th>
+        </tr>
+        <tr>
+          <th>Array.prototype</th>
+          <td>无内容</td>
+          <td> pop</td>
+        </tr>
+      </table>
+      <p>本例中，Array.prototype.pop 被重指向为一个新的函数，在这种情况下，仅在 Chrome Safari 中，'pop' 也将被遍历出来。</p>
+      <p>将 Array 替换为 Date  String 对象后，分别修改它们的属性或方法名，这个修改过的属性或方法名也将被遍历出来。此外，如果覆盖 Math 对象的内置方法，也同样会被遍历，具体可看测试用例：</p>
+      <pre>
+  String.prototype.charCodeAt = function(){};
+  var s = '';
+  document.writeln('&lt;p style="background:#CCC" &gt;for in String :&lt;/p&gt;');
+  for(var i in s)
+    document.write(i, ' ');
+
+  Date.prototype.getFullYear = function(){};
+  var d = new Date();
+  document.writeln('&lt;p style="background:#CCC" &gt;for in Date :&lt;/p&gt;');
+  for(var i in d)
+    document.write(i, ' ');</pre>
+      <p>各浏览器表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE Firefox Oprea</th>
+          <th>Chrome Safari</th>
+        </tr>
+        <tr>
+          <th>Date.prototype</th>
+          <td>无内容</td>
+          <td>getFullYear</td>
+        </tr>
+        <tr>
+          <th>String.prototype</th>
+          <td>无内容</td>
+          <td>charCodeAt</td>
+        </tr>
+        <tr>
+          <th>Math</th>
+          <td>无内容</td>
+          <td>abs</td>
+        </tr>
+      </table>
+      <p>但是，如果覆盖 Object Number 对象原型中的 toString valueOf 内置方法则不会被遍历，如下例：</p>
+      <pre>
+  Number.prototype.valueOf = function(){}
+  Number.prototype.toString = function(){}
+  var n = new Number(1);
+  document.writeln('&lt;p style="background:#CCC" &gt;for in Number :&lt;/p&gt;');
+  for(var i in n)
+    document.write(i, ' ');
+
+  Object.prototype.valueOf = function(){};
+  Object.prototype.toString = function(){};
+  var o = new Object();
+  document.writeln('&lt;p style="background:#CCC" &gt;for in Object :&lt;/p&gt;');
+  for(var i in o)
+    document.write(i, ' ');
+</pre>
+      <p>各浏览器表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>所有浏览器</th>
+        </tr>
+        <tr>
+          <th>Number.prototype.toString</th>
+          <td>不可被遍历</td>
+        </tr>
+        <tr>
+          <th>Number.prototype.valueOf</th>
+          <td>不可被遍历</td>
+        </tr>
+        <tr>
+          <th>Object.prototype.toString</th>
+          <td>不可被遍历</td>
+        </tr>
+        <tr>
+          <th>Object.prototype.valueOf</th>
+          <td>不可被遍历</td>
+        </tr>
+      </table>
+      <p>此外还有特殊情况存在，如下：</p>
+      <pre>
+  document.writeln('&lt;p style=&quot;background:#CCC&quot; &gt;for in Function :&lt;/p&gt;');  
+  document.writeln('Function.prototype.valueOf is:', Function.prototype.valueOf ? true : false);
+  Function.prototype.valueOf = function() {};
+  Function.prototype.toString = function() {};
+  var f = function(){};
+  for(var i in f)
+    document.write(i, ' ');
+</pre>
+      <p>各浏览器表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8</th>
+          <th>Chrome Safari Firefox IE9 Beta</th>
+          <th>Oprea</th>
+        </tr>
+        <tr>
+          <th>Function.prototype.valueOf</th>
+          <td>true</td>
+          <td>true</td>
+          <td>true</td>
+        </tr>
+        <tr>
+          <th>Function.prototype<sup>1</sup></th>
+          <td>无内容输出</td>
+          <td> valueOf </td>
+          <td> prototype valueOf </td>
+        </tr>
+      </table>
+      <p class="comment">【注】：Function.prototype 并不是一个 javaScript 中指的 object。ECMAScript 中规定了 Function.prototype 需要存在 [[Call]] 内部方法，并且需要实现 call 和 apply 两种 JavaScript 方法。因此，从 JavaScript 语言层面来看， Function.prototype 实质上是个 function 而非 object。</p>
+      <p>根据 ECMAScript 5th 以及 ECMAScript 3th 中描述，Function.prototype 内没有规定实现 valueOf 方法。但是测试结果证明，所有浏览器都实现了他。但由于这种实现为非标准的，Chrome Safari Firefox Opera IE9 Beta 都没有强制保护这个 valueOf 方法不被枚举。valueOf 原生方法中自带 [[Enumerable]] 属性与原始设定值，由于覆盖这个方法的的新函数并不具备内置的 [[Enumerable]] 属性，导致他可被遍历。Opera 的情况更为特殊，Function.prototype 被修改或扩充后，prototype 对象的 [[Enumerable]] 属性丢失或其值或被修改为 true，使得他也被枚举出来。</p>
+      <p>另外，Function.prototype 的 toString 方法被覆盖后依然无法被枚举，这证明了这个方法被做了特殊处理，即使被覆盖，其原始的 [[Enumerable]] 属性值依然不变。</p>
+      <p><strong>综上所有情况可见：</strong></p>
+      <ul>
+        <li>在 Chrome Safari 浏览器的脚本引擎实现中，原生方法自带 [[Enumerable]] 属性与原始设定值，由于覆盖内置方法的的新函数并不具备内置的 [[Enumerable]] 属性，导致他们可被枚举。</li>
+        <li>而 IE6 IE7 IE8 Opera 中，可能是将 [[Enumerable]] 属性是与原生方法名放置在对照表内，同名新方法覆盖老方法后，检查对照表后，同名新方法的  [[Enumerable]] 属性值不变，因此依然无法被枚举。</li>
+        <li>Function.prototype 的情况较为特殊，所有浏览器中均实现了原生的 valueOf 方法，并且在他被覆盖后  [[Enumerable]] 属性值丢失，变得可被枚举。这说明 IE6 IE7 IE8 Opera 中，此原生方法并未放置在可能的存在的对照标表中，而是使用如同 Chrome Safari 机制来处理。</li>
+        <li>所有浏览器中，对于位于 Object 与 Number 原型对象上的 toString 和 valueOf 内置方法都做了特殊处理，即使被原生方法被覆盖，其 [[Enumerable]] 属性值依然不变，无法被枚举。</li>
+        <li>Opera 中，当 Function.prototype 被修改或者扩充后，prototype 原始的 [[Enumerable]] 属性丢失或其值或被修改为 true，使他变得可被枚举。</li>
+      </ul>
+      <h2 id="solutions">解决方案</h2>
+      <p>对于数组，避免用 for...in 方式而采用索引即数字下标的形式枚举数组成员。</p>
+      <p>对于 Date String 以及其他对象，没有必要使用 for...in 来枚举它们的成员，因此一般不会有兼容性问题。</p>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td> IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.13<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 5.0.2<br />
+              Opera 11.01 </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/SJ5003/for_in_native_code.html">for_in_native_code.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2011-02-18</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>Date Array String prototype property for in enumerable DontEnum 枚举 原型 属性</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

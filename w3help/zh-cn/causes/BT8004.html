@@ -1,0 +1,156 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BT8004: 只有 IE 支持条件注释</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+      
+      <h2 id="description">问题描述</h2>
+      <p>条件注释是 IE5.0 以上版本所特有的一种对注释的扩展，其它浏览器不支持。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>对于&lt;!--[if expression]&gt; HTML &lt;![endif]--&gt;，非 IE 浏览器会当作注释内容，不显示；对于 &lt;![if expression]&gt; HTML &lt;![endif]&gt;，非 IE 浏览器浏览器会当作普通代码段显示。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>条件注释是 IE5.0 以上版本所特有的一种对注释的扩展。</p>
+      <p>条件注释有以下两种方式：</p>
+<pre>&lt;!--[if expression]&gt; HTML &lt;![endif]--&gt;</pre>
+<pre>&lt;![if expression]&gt; HTML &lt;![endif]&gt;</pre>
+      <p>expression 可用的常见值如下：</p>
+      <dl>
+        <dt>IE</dt>
+        <dd>IE5 以上的版本</dd>
+        <dt>IE version</dt>
+        <dd>版本号为 version 的 IE</dd>
+        <dt>lt IE version</dt>
+        <dd>版本号小于 version 的 IE</dd>
+        <dt>lte IE version</dt>
+        <dd>版本号小于等于 version 的 IE</dd>
+        <dt>gt IE version</dt>
+        <dd>版本号大于 version 的 IE</dd>
+        <dt>gte IE version</dt>
+        <dd>版本号大于等于 version 的 IE</dd>
+      </dl>
+      <p>另外，expression 还可以是以上值的逻辑组合。</p>
+      
+      <p>分析以下代码：</p>
+<pre>
+    &lt;!--[if <span class="hl_1">IE 8</span>]&gt;
+    &lt;p&gt;show if IE 8&lt;/p&gt;
+    &lt;![endif]--&gt;
+
+    &lt;!--[if !(<span class="hl_1">IE 8</span>)]&gt;
+    &lt;p&gt;show if !(IE 8)&lt;/p&gt;
+    &lt;![endif]--&gt;
+
+    &lt;![if <span class="hl_1">IE 8</span>]&gt;
+    &lt;p&gt; show if IE 8&lt;/p&gt;
+    &lt;![endif]&gt;
+
+    &lt;![if <span class="hl_1">IE 6</span>]&gt;
+    &lt;p&gt; show if IE 6&lt;/p&gt;
+    &lt;![endif]&gt;
+</pre>
+      <p>上面代码利用了 IE 特有的条件注释，所以在 IE 中会针对条件表达式的判断，在相应的版本中显示代码段。此问题与文档模式无关。</p>
+      <p>这段代码在不同的浏览器环境中表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6</th>
+          <th>IE7</th>
+          <th>IE8</th>
+          <th>非IE浏览器</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BT8004/BT8004-1.png" alt=""></td>
+          <td><img src="../../tests/BT8004/BT8004-2.png" alt=""></td>
+          <td><img src="../../tests/BT8004/BT8004-3.png" alt=""></td>
+          <td><img src="../../tests/BT8004/BT8004-4.png" alt=""></td>
+        </tr>
+      </table>
+      <p>可见：在 IE 浏览器中，在不同的版本下，按照条件显示了条件注释中包含的代码。</p>
+      <p>但是在非 IE 浏览器中不支持条件注释，所以，对于 &lt;!--[if expression]&gt; HTML &lt;![endif]--&gt; 形式的条件注释，其中的代码被当作普通的注释内容，没有显示；而对于 &lt;![if expression]&gt; HTML &lt;![endif]&gt; 形式的条件注释，其中的代码会当作普通代码段显示出来。</p>
+      <p>关于 IE 条件注释的详细资料，请参照 MSDN 的 <a href="http://msdn.microsoft.com/en-us/library/ms537512(VS.85).aspx">About Conditional Comments</a>。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>在没有特殊需求的情况下，尽量避免使用 IE 特有的条件注释。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BT8004/IE_comment.html">IE_comment.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-12</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>IE  Conditional Comments 条件注释</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

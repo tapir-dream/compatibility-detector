@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	body { margin:0; font:14px/1 'Trebuchet MS'; }
+	div.ov { overflow-y:hidden; }
+	div.ov { width:150px; height:60px; background:wheat; overflow:scroll; }
+	div.info { font-size:12px; }
+</style>
+<script>
+	function $(id) { return document.getElementById(id); }
+	window.onload = function () {
+		if (!window.getComputedStyle) {
+			window.getComputedStyle = function ($target) {
+				return $target.currentStyle;
+			};
+		}
+
+		$('i1').innerHTML = 'overflow:' + getComputedStyle($('d1'), null).overflow + '<br />overflow-x:' +
+			getComputedStyle($('d1'), null).overflowX + '<br />overflow-y:' +
+			getComputedStyle($('d1'), null).overflowY;
+		$('i2').innerHTML = 'overflow:' + getComputedStyle($('d2'), null).overflow + '<br />overflow-x:' +
+			getComputedStyle($('d2'), null).overflowX + '<br />overflow-y:' +
+			getComputedStyle($('d2'), null).overflowY;
+	}
+</script>
+</head>
+<body>
+<div id="d1" class="ov">overflow-y:hidden;<br />overflow:scroll;</div>
+<div id="i1" class="info"></div>
+<br />
+<div id="d2" class="ov" style="overflow:visible;">overflow-y:scroll;<br />overflow:visible;</div>
+<div id="i2" class="info"></div>
+</body>
+</html>

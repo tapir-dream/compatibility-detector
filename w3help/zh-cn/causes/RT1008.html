@@ -1,0 +1,177 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RT1008: IE6 IE7 IE8(Q) 中某些情况下不可视元素导致空白符与其他浏览器不同</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>W3C 规定 &quot;ASCII 空格&quot; 、 &quot;ASCII 制表符&quot; 、 &quot;ASCII 换行符&quot; 等属于空白符（white space），对于多个连续的空白符，浏览器将对他们进行合并。</p>
+      <p>关于空白符的详细信息，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html401/struct/text.html#h-9.1">9.1</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 IE7 IE8(Q) 下</p>
+      <ul>
+        <li>样式设置了 'display:none' 的块元素后面的空格将被忽略。</li>
+        <li>样式设置了 'display:none' 的块元素之间的空格将被忽略。</li>
+        <li>样式设置了 'display:none' 的行内元素之间的空格和 INPUT 类型是 hidden 的元素之间的空格将阻止与其相邻空格的合并。</li>
+      </ul>
+      <p>其他浏览器符合规范，不存在此问题</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>没有合并的空格，或忽略的空格，可能使文字这行，在各浏览器中布局产生差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+            <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>对于此问题，通过以下测试用例来说明，分析以下代码：</p>
+<pre>
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="content-type" content="text/html; charset=utf-8"/&gt;
+&lt;style&gt;
+body{
+font-family:consolas;
+font-size:15px;
+}
+div{
+margin:2px;
+}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div style="background:gold;border:1px solid black;padding:3px;width:150px;"&gt;
+&lt;span style="border:2px dotted;"&gt;text1&lt;/span&gt;&lt;div style="display:none;"&gt;div&lt;/div&gt; &lt;span
+style="border:2px dotted;"&gt;text2&lt;/span&gt;
+&lt;/div&gt;
+&lt;div style="background:gold;border:1px solid black;padding:3px;width:150px;"&gt;
+&lt;span style="border:2px dotted;"&gt;text1&lt;/span&gt;&lt;div style="display:none;"&gt;div&lt;/div&gt; &lt;div style="display:none;"&gt;div&lt;/div&gt;&lt;span style="border:2px dotted;"&gt;text2&lt;/span&gt;
+&lt;/div&gt;
+&lt;div style="background:gold;border:1px solid black;padding:3px;width:150px;"&gt;
+&lt;span style="border:2px dotted;"&gt;text1&lt;/span&gt;&lt;div style="display:none;"&gt;div&lt;/div&gt; &lt;div style="display:none;"&gt;div&lt;/div&gt; &lt;span style="border:2px dotted;"&gt;text2&lt;/span&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div style="background:gold;border:1px solid black;padding:3px;width:150px;"&gt;
+&lt;span style="border:2px dotted;"&gt;text1&lt;/span&gt; &lt;span style="display:none;"&gt;span&lt;/span&gt; &lt;span style="display:none;"&gt;span&lt;/span&gt;&lt;span style="border:2px dotted;"&gt;text2&lt;/span&gt;
+&lt;/div&gt;
+&lt;div style="background:gold;border:1px solid black;padding:3px;width:150px;"&gt;
+&lt;span style="border:2px dotted;"&gt;text1&lt;/span&gt; &lt;input type="hidden" /&gt; &lt;input type="hidden" /&gt;&lt;span style="border:2px dotted;"&gt;text2&lt;/span&gt;
+&lt;/div&gt;
+&lt;div style="background:gold;border:1px solid black;padding:3px;width:150px;"&gt;
+&lt;span style="border:2px dotted;"&gt;text1&lt;/span&gt;&lt;span style="display:none;"&gt;span&lt;/span&gt; &lt;span style="display:none;"&gt;span&lt;/span&gt; &lt;span style="border:2px dotted;"&gt;text2&lt;/span&gt;
+&lt;/div&gt;
+&lt;div style="background:gold;border:1px solid black;padding:3px;width:150px;"&gt;
+&lt;span style="border:2px dotted;"&gt;text1&lt;/span&gt;&lt;input type="hidden" /&gt; &lt;input type="hidden" /&gt; &lt;span style="border:2px dotted;"&gt;text2&lt;/span&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div style="background:gold;border:1px solid black;padding:3px;width:150px;"&gt;
+&lt;span style="border:2px dotted;"&gt;text1&lt;/span&gt; &lt;span style="display:none;"&gt;span&lt;/span&gt; &lt;span  style="display:none;"&gt;span&lt;/span&gt; &lt;span style="border:2px dotted;"&gt;text2&lt;/span&gt;
+&lt;/div&gt;
+&lt;div style="background:gold;border:1px solid black;padding:3px;width:150px;"&gt;
+&lt;span style="border:2px dotted;"&gt;text1&lt;/span&gt; &lt;input type="hidden" /&gt; &lt;input type="hidden" /&gt; &lt;span style="border:2px dotted;"&gt;text2&lt;/span&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+
+      <p>各浏览器中表现如下：</p>
+
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RT1008/RT1008-1.gif" alt="运行效果截图" /></td>
+          <td><img src="../../tests/RT1008/RT1008-2.gif" alt="运行效果截图" /></td>
+        </tr>
+      </table>
+
+      <p>
+        可以看出:
+      </p>
+      <ul>
+        <li>IE6 IE7 IE8(Q) 中，不可视元素导致空白符与其他浏览器不同。</li>
+        <li>其他浏览器不存在这种情况。</li>
+      </ul>
+
+
+      <h2 id="solutions">解决方案</h2>
+      <p>删除不必要的空格。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.12<br />
+              Chrome 9.0.597.10 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.63
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RT1008/word-wrap_spaces.html">word-wrap_spaces.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-12-10</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>white space 空白符 合并</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

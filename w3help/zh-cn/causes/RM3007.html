@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RM3007: 在 IE6 IE7 IE8(Q) 中包含被清除浮动的浮动元素的块级元素的背景在某些情况下不是设置值</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 W3C CSS2.1 规范中的描述，'clear' 特性表明了一个元素的框的哪一边（left | right）不可以和一个先前的浮动框相邻。'clear' 特性并不考虑该元素内部或其他 block formatting context 中的浮动。'clear' 特性所带来的清理（Clearance）被当做一个元素 'margin-top' 之上的空白区域，它在垂直方向推动元素（通常是向下），越过浮动。</p>
+      <p>关于 'clear' 特性的更多信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/visuren.html#flow-control">9.5.2 Controlling flow next to floats: the 'clear' property</a>。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE6 IE7 IE8(Q) 中，使用 'clear' 特性清除浮动后，浮动元素的容器若没有触发 hasLayout，则其背景将会丢失。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>此现象不会导致大的布局问题，但会导致元素的背景出现异常，影响视觉效果。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>设置了 'clear' 特性的元素通常被防止在容器内，用来清理容器内的浮动，使容器的高度可以自动适应浮动元素的高度而不再是 0。</p>
+      <p>分析以下代码：</p>
+      <pre>&lt;div id=&quot;outer_cont&quot; style=&quot;background:gold;&quot;&gt;
+  &lt;div id=&quot;inner_cont&quot; style=&quot;background:red;&quot;&gt;
+    &lt;div style=&quot;float:left; border:10px solid black; display:inline; margin:10px 10px 0 0;&quot;&gt;
+      &lt;div id=&quot;inner_float&quot; style=&quot;width:100px; height:100px;&quot;&gt;FLOAT&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div style=&quot;<span class="hl_1">clear:left;</span>&quot;&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;script&gt;
+  var outer_cont = document.getElementById(&quot;outer_cont&quot;);
+  var inner_float = document.getElementById(&quot;inner_float&quot;);
+  var width = 160;
+  var interval = 40;
+  var thisCall = null;
+  (function () {
+    inner_float.innerHTML = outer_cont.style.width = width-- + &quot;px&quot;;
+    (width &lt; 80) &amp;&amp; (width = 160);
+    (((width &gt;= 125 &amp;&amp; width &lt;= 135) || width == 80) &amp;&amp; (interval = 200)) || (interval = 40);
+    thisCall = arguments.callee;
+    setTimeout(function () { thisCall() }, interval);
+  })();
+&lt;/script&gt;</pre>
+      <p>测试代码中，最外层是一个金色 DIV 容器【outer_cont】，内部包含一个<strong>没有</strong>设置 'width' 和 'height' 特性以及没有 'border'、'margin'、'padding' 的 DIV 元素【inner_cont】，【inner_cont】的内部包含了一个左浮动元素【inner_float】及一个设置了 <span class="hl_1">'clear' 特性</span>的清除元素。<br />
+      其中，为了消除 IE6(Q) IE7(Q) IE8(Q) 的 &quot;width/height的作用位置与其他浏览器的不同&quot; ，左浮动元素的没有显式地设定宽度，其宽度为 shrink-to-fit 其 100x100 的子元素的宽度，并且其四周各有 10px 黑色边框，上边和右边各有 10px 的外边距，则其 margin-box 的尺寸为 130x130。</p>
+      <p>通过 JavaScript 脚本动态调整【outer_cont】的宽度，并将这个宽度实时显示在【inner_float】中。</p>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7(Q) IE8(Q)</th>
+          <th>IE7(S)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RM3007/ani_IE6.gif" alt="IE6 IE7(Q) IE8(Q)" /></td>
+          <td><img src="../../tests/RM3007/ani_IE7.gif" alt="IE7(S)" /></td>
+          <td><img src="../../tests/RM3007/ani_IE8.gif" alt="IE8(S) Firefox Chrome Safari Opera" /></td>
+        </tr>
+      </table>
+      <ul>
+        <li>在 <em>IE6 IE7(Q) IE8(Q)</em> 中，使用 'clear' 特性清除浮动后，浮动元素的容器若没有触发 hasLayout，则其的背景可能丢失。且这时可以看到触发了 IE 中 &quot;width/height的设定值可能被其内容撑大&quot; 的 Bug；</li>
+        <li>在 <em>IE7(S)</em> 中，使用 'clear' 特性清除浮动后，当没有触发 hasLayout 的容器的 margin-box 溢出其父容器时，其的背景可能丢失；</li>
+        <li>在 <em>其他浏览器</em> 中，不存在容器背景丢失现象。</li>
+      </ul>
+
+
+      <h2 id="solutions">解决方案</h2>
+      <p>使丢失背景的容器触发 IE 浏览器特有的 hasLayout，如 'zoom:1'，或者设置宽度和高度。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="RD8001">'width' 和 'height' 的作用位置在不同浏览器中可能有差异</a></li>
+        <li><a href="RD1002">IE6 IE7(Q) IE8(Q)中width/height的设定值可能被其内容撑大</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.3<br />
+              Chrome 5.0.371.0 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RM3007/clear_background.html">clear_background.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-19</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>float 浮动 hasLayout Background 背景 clear 清除</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

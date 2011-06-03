@@ -1,0 +1,1 @@
+document.write('<div style="font-size:16px; color:blue;">' + $('sc').src.replace(/.+\/(.+\.[^\?]+)(?:\?.+)?/g, '$1') + '</div>');

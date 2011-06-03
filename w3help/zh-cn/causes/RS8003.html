@@ -1,0 +1,132 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RS8003: IE6 IE7(Q) IE8(Q) 不支持属性选择器</h1>
+    <ul class="toc">
+      <li><a href="../../tests/RS8003.html#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="../../tests/RS8003.html#description">问题描述</a> <span>•</span></li>
+      <li><a href="../../tests/RS8003.html#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="../../tests/RS8003.html#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="../../tests/RS8003.html#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="../../tests/RS8003.html#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="../../tests/RS8003.html#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p><strong>关于属性选择器</strong></p>
+      <p>选择拥有指定属性的元素。</p>
+      <p>属性选择器有以下四种方式：</p>
+      <ul>
+        <li>[att]:选定设置了 att 属性的元素，不管设定的值是什么</li>
+        <li>[att=val]:选定 att 属性的值设置为 val 的元素</li>
+        <li>[att~=val]:表示一个元素拥有属性 att ，并且该属性含有空格分隔的一组值，其中之一为 'val'</li>
+        <li>[att|=val]:表示一个元素拥有属性 att ，并且该属性含 'val' 或以 'val-' 开头</li>
+      </ul>
+      <p>关于属性选择器的详细信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/selector.html#attribute-selectors">5.8 Attribute selectors</a> 中的内容。</p>
+      <h2 id="description">问题描述</h2>
+      <p>CSS 2.1 规范中描述的若干种选择器，在 CSS 1 历史规范中均无规定，这导致早期版本的浏览器，如： <em>IE6 IE7(Q) IE8(Q)</em> 不支持属性选择器。</p>
+      <h2 id="influence">造成的影响</h2>
+      <p>当使用了属性选择器后，可能会使页面在 IE6 IE7(Q) IE8(Q) 中的无法得到预期效果，因而跟其他浏览器产生差异。</p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>对于此问题，我们通过以下的测试用例来说明。</p>
+      <p>分析以下代码：</p>
+      <pre>&lt;style type=&quot;text/css&quot;&gt;
+  <span class="hl_4">p[id]</span> {
+    color: red;
+  }
+&lt;/style&gt;
+&lt;p id=&quot;aloha&quot;&gt;Aloha!&lt;/p&gt;</pre>
+      <ul>
+        <li>样式中使用了属性选择器 <strong>[att]</strong>:<span class="hl_4">p[id]</span></li>
+        <li>含有 'id' 属性的 P 元素将被选中； </li>
+      </ul>
+      <p>根据 CSS2.1 规范中的描述可知，文本 'Aloha!' 将被置成红色。</p>
+      <p>这段代码在不同的浏览器环境中的表现：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7(Q) IE8(Q)</th>
+          <th>IE7(S) IE8(S) Firefox Opera Safari Chrome</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RS8003/RS8003-1.jpg" alt=""></td>
+          <td><img src="../../tests/RS8003/RS8003-2.jpg" alt=""></td>
+        </tr>
+      </table>
+      <p>所以对于属性选择器的支持情况，如下表：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7(Q) IE8(Q)</th>
+          <th>IE7(S) IE8(S) Firefox Safari Opera Chrome</th>
+        </tr>
+        <tr>
+          <td class="hl_1">N</td>
+          <td class="hl_2">Y</td>
+        </tr>
+      </table>
+      <p class="comment">【注】：实际中其他除常用 HTML 标记同样适用此例，并非仅 P 标记自身不支持，此文中不在一一测试证明。</p>
+      <h2 id="solutions">解决方案</h2>
+      <p>避免在 IE6 IE7(Q) IE8(Q) 中使用属性选择器。</p>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="../../tests/RS8003.html#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="../../tests/RS8003.html#">...</a></li>
+      </ul>
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td> IE6<br/>
+              IE7<br/>
+              IE8<br/>
+              Firefox 3.6.3<br/>
+              Chrome 6.0.437.3 dev<br/>
+              Safari 5.0<br />
+              Opera 10.60 </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RS8003/attribute_selectors.html">attribute_selectors.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-30</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p> selector IE 属性选择器</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

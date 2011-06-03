@@ -1,0 +1,130 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HF3012: IE6 Firefox Chrome(Q) Safari(Q) 不支持 OPTION 元素的 label 属性</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>
+        HTML 4.01 中规定，SELECT 元素创建了用来选择的用户选项菜单，每一个用户选项都用 OPTION 元素表示，一个 SELECT 元素中至少有一个 OPTION 元素。
+        当给 OPTION 元素添加了 label 属性的时候，UA 应该使用 label 的属性值替代 OPTION 的元素内容作为选项标签。
+      </p>
+
+      <p>关于 SELECT 及 OPTION 元素的更多信息，请参考 HTML 4.01 <a href="http://www.w3.org/TR/REC-html40/interact/forms.html#h-17.6">17.6 The SELECT, OPTGROUP, and OPTION elements</a>。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE6 Firefox Chrome(Q) Safari(Q) 中对 OPTION 元素设置 label 属性无效，浏览器仍然会使用 OPTION 元素中的内容渲染选项标签文本。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>这可能造成 SELECT 元素显示的选项标签文本在不同浏览器中表现不同。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 Firefox Chrome(Q) Safari(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+<pre>
+&lt;form action="google.com" method="post"&gt;
+  &lt;select multiple="multiple"&gt;
+    &lt;option value="none"&gt;None&lt;/option&gt;
+    &lt;option label="from label 1" value="1"&gt;from text 1&lt;/option&gt;
+  &lt;/select&gt;
+&lt;/form&gt;
+</pre>
+      <p>各浏览器中表现如下：</p>
+      <table class="compare">
+        <tbody>
+          <tr>
+            <th>IE7 IE8 Opera Chrome(S) Safari(S)</th>
+            <th>IE6 Firefox Chrome(Q) Safari(Q)</th>
+          </tr>
+          <tr>
+            <td><img src="../../tests/HF3012/label_y.png" alt="" /></td>
+            <td><img src="../../tests/HF3012/label_n.png" alt="" /></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>从上图中可以看出，在 IE6 Firefox Chrome(Q) Safari(Q) 中在 OPTION 元素上应用 label 属性是无效的。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>尽量避免在 OPTION 元素上使用 label 属性，如果想替代 OPTION 原有的内容值，请使用 Javascript。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.9<br />
+              Chrome 7.0.517.5 dev<br />
+              Safari 5.0.2 (7533.18.5)<br />
+              Opera 10.62
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+              <a href="../../tests/HF3012/OPTION_label_q.html">OPTION_label_q.html</a><br />
+              <a href="../../tests/HF3012/OPTION_label_s.html">OPTION_label_s.html</a>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-14</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>OPTION label</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

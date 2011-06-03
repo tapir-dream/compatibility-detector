@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body style="font:12px Consolas; margin:0;">
+<div id="p1" style="background:gold; width:50px; height:50px; min-width:100px; min-height:100px; padding:10px;">
+	<div id="c1" style="width:100%; height:100%; background:plum;"></div>
+</div>
+<br />
+<div id="p2" style="background:gold; width:150px; height:150px; max-width:100px; max-height:100px; padding:10px;">
+	<div id="c2" style="width:100%; height:100%; background:plum;"></div>
+</div>
+<script>
+	function $(id) { return document.getElementById(id); }
+	
+	$("c1").innerHTML = "<em>Child:</em>" + $("c1").clientWidth + "*" + $("c1").clientHeight;
+	$("c2").innerHTML = "<em>Child:</em>" + $("c2").clientWidth + "*" + $("c2").clientHeight;
+</script>
+</body>
+</html>

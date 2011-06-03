@@ -1,0 +1,172 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RB5002: Chrome Safari 中为处于浮动元素后创建了 in-flow 的 Block Formatting Context 的元素设置的 'margin-left' 或 'margin-right' 特性会出错</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>普通流中块级非替换元素包含块的计算公式如下：</p>
+      <p>'margin-left' + 'border-left-width' + 'padding-left' + 'width' + 'padding-right' + 'border-right-width' + 'margin-right' = width of containing block</p>
+      <p>'width' 计算规则中有如下一条：</p>
+      <p>如果 'width' 值为 'auto'，其他任何特性的 'auto' 值将被视为0，'width' 的实际值由公式计算得出。</p>
+      <p>关于 'margin' 特性的介绍，请参考 CSS 2.1 <a href="http://www.w3.org/TR/CSS21/box.html#margin-properties">8.3 Margin properties: 'margin-top', 'margin-right', 'margin-bottom', 'margin-left', and 'margin'</a> 。</p>
+      <p>关于普通流中块级非替换元素包含块的计算介绍，请参考 CSS 2.1 <a href="http://www.w3.org/TR/CSS21/visudet.html#blockwidth">10.3.3 Block-level, non-replaced elements in normal flow</a> 。</p>
+      <p>关于浮动的详细信息，请参 CSS 2.1 <a href="http://www.w3.org/TR/CSS21/visuren.html#floats">9.5 Floats</a>。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 WebKit 内核的浏览器中，当元素满足三个条件时，宽度计算不符合规范：</p>
+      <ul>
+        <li>元素的兄弟元素是浮动元素；</li>
+        <li>元素的 'width' 特性值为 'auto'，'overflow' 特性值不是 'visible'；</li>
+        <li>元素设置了与浮动同方向的 'margin' 值(如：当 'float:left' 时，设置 'margin-left' 值，当 'float:right' 时，设置 'margin-right')。</li>
+      </ul>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>当元素符合上述三个条件时，WebKit 内核浏览器布局与其他浏览器布局不一致。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Chrome Safari</th>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <h3>兄弟浮动元素设置 'float:left' 同时元素设置 'margin-left'</h3>
+      <p>分析以下代码：</p>
+<pre>
+&lt;div id="A" style="width:200px; height:200px; background:pink;"&gt;
+  &lt;div id="FL" style="width:20px; height:170px; padding:5px; border:5px solid blue; margin: 5px; float:left; background:gold;"&gt;FL&lt;/div&gt;
+  &lt;div id="ML" style="overflow:hidden; margin-left:80px; background:red;"&gt;ML&lt;/div&gt;
+&lt;/div&gt;
+</pre>
+      <ul>
+        <li>A 为容器，宽是 200px，高是 200px；</li>
+        <li>FL 为左浮动元素，浮动框的 margin box 的宽是 50px，高是 100px；</li>
+        <li>ML 为设置 'overflow:hidden;' ，且 'margin-left:80px' 。</li>
+      </ul>
+      <p>
+        在 CSS 2.1 规范中，根据普通流中块级非替换元素包含块的计算公式：ML 的宽度等于包含块的宽度减 'margin-left' 值，所以 ML 的宽度应该是120px。
+        再将 'margin-left' 修改为50px，则 ML 的宽度应该是150px。这里 'margin-left' 是30px时有一点特殊，按上面公式计算 ML 的宽度应该是170px，
+        但是由于 ML 设置了 'overflow:hidden' 创建了 Block Formatting Context (以下简称 BFC)，创建了 BFC 的元素与浮动元素不可重叠。
+        浏览器重新给 'margin-left' 赋值，该值为能保证创建了 BFC 的元素与浮动元素不重叠的最小值，在本例中该最小值为50px，所以最终 ML 的宽度为150px。</p>
+      <p class="comment">注：关于 'margin-left:30px' 时，ML 的宽度是150px的得出过程为推测。</p>
+
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>margin-left</th>
+          <th>IE Firefox Opera</th>
+          <th>ML的宽度</th>
+          <th>Chrome Safari</th>
+          <th>ML的宽度</th>
+        </tr>
+        <tr>
+          <td>30px</td>
+          <td><img src="../../tests/RB5002/01.png" alt=""></td>
+          <td>150px</td>
+          <td><img src="../../tests/RB5002/02.png" alt=""></td>
+          <td>120px</td>
+        </tr>
+        <tr>
+          <td>50px</td>
+          <td><img src="../../tests/RB5002/03.png" alt=""></td>
+          <td>150px</td>
+          <td><img src="../../tests/RB5002/04.png" alt=""></td>
+          <td>100px</td>
+        </tr>
+        <tr>
+          <td>80px</td>
+          <td><img src="../../tests/RB5002/05.png" alt=""></td>
+          <td>120px</td>
+          <td><img src="../../tests/RB5002/06.png" alt=""></td>
+          <td>70px</td>
+        </tr>
+      </table>
+      <p>可见：</p>
+      <ul>
+        <li>IE Firefox Opera 下，ML 的宽度符合 CSS 2.1规范中第10.3.3中规定的计算公式。</li>
+        <li>Chrome Safari 下，ML 的宽度与规范中规定的计算公式不符。</li>
+      </ul>
+      <p>根据上面代码，可得出：</p>
+      <ul>
+        <li>Chrome Safari 下，当 'margin-left' 的值小于等于浮动元素的 margin box 的宽(50px)时，会使 ML 的宽度减少 margin-left 的宽度('margin-left:30px' 时，ML 的宽度是 120px = 150px - 30px)。</li>
+        <li>Chrome Safari 下，当 'margin-left' 的值大于浮动元素的 margin box 的宽(50px)时，会使 ML 的宽度减少浮动元素的 margin box 的宽度(当 'margin-left' 分别等于 100px = 150px - 50px 和 70px = 120px - 50px)。</li>
+      </ul>
+      <p class="comment">注：上述代码中 Chrome Safari 中计算 ML 的 'margin-left' 临界值是左浮动元素的 margin box 的宽度。当有多个左浮动元素时，临界值为多个左浮动元素的 margin box 的宽度之和。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>
+        1、为该创建了 BFC 的元素设置一个明确的宽度。<br />
+        2、如果 'margin' 值不小于浮动元素的 margin box 的宽时，去掉 'overflow:hidden'。
+      </p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Opera 10.60<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RB5002/RB5002.html">RB5002.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-27</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>width float overflow Block Formatting Context margin-left margin-right 浮动 行框</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

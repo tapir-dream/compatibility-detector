@@ -1,0 +1,236 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BW5011: Chrome Safari 中拥有 'float' 和 'overflow' 特性值不为 'visible' 的元素在祖先容器布局大小被更改后存在渲染问题</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+      
+      <h2 id="description">问题描述</h2>
+      <p>WebKit 内核浏览器中，当使用脚本对拥有 'float' 特性以及 'overflow' 特性值不为 'visible' 特性的布局进行变更盒模型操作后，Chrome Safari 的 Reflow 计算会出现偏差，导致之后的 Repaint 操作时，无法渲染出布局内容。</p>
+      
+      <h2 id="influence">造成的影响</h2>
+      <p>由于页面局部没有被更新，可能会导致局部内容丢失，处于丢失内容中的功能将不可用。</p>
+      
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Chrome Safari</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>从现有资料中得知，Reflow<sup>1</sup> 作为一个名词概念，最初出是在 Mozilla.org 中被提及，它表示了所有浏览器的布局引擎对元素实际位置的计算过程。在 Reflow 计算完成后，渲染引擎会根据布局数据绘制出页面内容，于是最终现实效果出现在浏览器窗口中，这个渲染过程被称作 Repaint<sup>1</sup>。如果页面中发生了影响整体布局的情况，将触发 Reflow 以及其后的 Repaint 动作，如：</p>
+      <ul>
+        <li>调整窗口大小</li>
+        <li>改变字体</li>
+        <li>影响到盒模型大小的修改</li>
+        <li>文档树结构变更</li>
+      </ul>
+      <p>详细说明可以参考  Mozilla.org 站点内文章：<a href="http://www.mozilla.org/newlayout/doc/reflow.html">Notes on HTML Reflow</a>。</p>
+      <p class="comment">注 1: 任何浏览器都存在 Reflow 及 Repaint 概念，有可能各个浏览器厂商有各自不同的命名方式，为避免混淆，本文中统一使用 Reflow、Repaint 单词来说明布局计算和布局渲染这两个概念。</p>
+      <p>我们看一个实例，例子中构造了出现这个问题必须的 5个条件：
+      <ul>
+        <li>存在三层嵌套的布局标签；</li>
+        <li>最外层元素设置了布局高度；</li>
+        <li>中层元素的高度要大于最内层元素的高度；</li>
+        <li>内层元素设置了 'float' 特性以及非 'overflow:visilbe' 特性值；</li>
+        <li>对最外层布局动态修改高度时，修改的高度小于最内容器高度。</li>
+      </ul>
+      <p>代码如下：</p>
+<pre>
+&lt;h2&gt;产生问题的布局&lt;/h2&gt;
+&lt;input type="button" onclick="document.getElementById('A').style.<span class="hl_4">height='29px'</span>" value="祖先容器高度变小" /&gt;
+&lt;input type="button" onclick="document.getElementById('A').style.height='60px'" value="祖先容器高度恢复"  /&gt;
+&lt;input type="button" onclick="document.getElementById('B').style.position='relative'" value="修复此问题"  /&gt;
+&lt;div id="A" style="height:60px;background:gold;"&gt;
+  &lt;div style="<span class="hl_5">height:31px;</span>background:red;"&gt;
+    &lt;div style="<span class="hl_1">overflow:auto;float:left;</span> background:gray;width:500px; <span class="hl_4">height:30px;</span>" id="B" &gt;
+      内容文字&lt;br/&gt;
+    &lt;/div&gt;
+    &lt;span&gt;环绕文字&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</pre>
+
+      <p>高亮部分标注了产生问题的几个条件，此代码运行后，依次点击 &quot;祖先容器高度变小&quot;、&quot;祖先容器高度恢复&quot; 按键，使页面触发 Reflow 重绘布局，然后来看各浏览器中渲染情况。</p>
+
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8 Firefox Opera</th>
+          <th>Chrome Safari</th>
+        </tr>
+        <tr>
+          <th>按键点击前</th>
+          <td><img src="../../tests/BW5011/02.png" alt="IE6 IE7 IE8 Firefox Opera" /></td>
+          <td><img src="../../tests/BW5011/02.png" alt=">Chrome Safari" /></td>
+        </tr>
+        <tr>
+          <th>按键点击 &quot;祖先容器高度变小&quot; 和 &quot;祖先容器高度恢复&quot; 后</th>
+          <td><img src="../../tests/BW5011/02.png" alt="IE6 IE7 IE8 Firefox Opera" /></td>
+          <td><img src="../../tests/BW5011/01.png" alt="Chrome Safari" /></td>
+        </tr>
+        <tr>
+          <th>修复按键点击后</th>
+          <td><img src="../../tests/BW5011/02.png" alt="IE6 IE7 IE8 Firefox Opera" /></td>
+          <td><img src="../../tests/BW5011/02.png" alt="&gt;Chrome Safari" /></td>
+        </tr>
+      </table>
+      <p>从表中对比可以看出，当最外层布局块高度变更到比最内层布局块小后，再还原为比最内层布局块高度大的时候：</p>
+      <ul>
+      <li>IE6 IE7 IE8 Firefox Opera 中，整体布局无变化。</li>
+      <li>Chrome Safari (WebKit 渲染引擎) 中，在触发 Reflow 后没有将最内层布局块显示。从具体表现形式中可以看到，&quot;环绕文字&quot; 这个行内元素依然在原始位置没有变化，说明消失元素的布局依然存在，只是没有被浏览器 Repaint 。点击修复按键后，问题布局块被设置了 'position:relative' 特性值，他成为了相对定位块，使页面布局发生变化。由此触发 Reflow/Repaint 操作后，布局出现；此时再点击  &quot;祖先容器高度变小&quot;、&quot;祖先容器高度恢复&quot; 按键时，问题不能被重现，说明已被修复。</li>
+      </ul>
+      <p>以上代码中仅说明了最内层子元素在 'overflow:auto' 和 'float:left' 特性值设置时的表现情况，下面看在 'overflow:hiddden' 和 'float:right' 特性值设置时的表现。</p>
+      <p>我们将代码稍作调整：</p>
+      <pre>&lt;h2&gt;最内容器 'float:right' 'overflow:auto'&lt;/h2&gt;
+&lt;input type="button" onclick="document.getElementById('C').style.height='29px'" value="祖先容器高度变小" /&gt;
+&lt;input type="button" onclick="document.getElementById('C').style.height='60px'" value="祖先容器高度恢复"  /&gt;
+&lt;input type="button" onclick="document.getElementById('D').style.position='relative'" value="修复此问题"  /&gt;
+&lt;div id="C" style="height:60px;background:gold;"&gt;
+  &lt;div style="height:31px;background:red;"&gt;
+    &lt;div style="overflow:auto;<span class="hl_4">float:right;</span> background:gray;height:30px;"  id="D"  &gt;
+      内容文字&lt;br/&gt;
+    &lt;/div&gt;
+    &lt;span&gt;环绕文字&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+      <pre>&lt;h2&gt;最内容器 'float' 'overflow:hidden'&lt;/h2&gt;
+&lt;input type="button" onclick="document.getElementById('E').style.height='29px'" value="祖先容器高度变小" /&gt;
+&lt;input type="button" onclick="document.getElementById('E').style.height='60px'" value="祖先容器高度恢复"  /&gt;
+&lt;input type="button" onclick="document.getElementById('F').style.position='relative'" value="修复此问题"  /&gt;
+&lt;div id="E" style="height:60px;background:gold;"&gt;
+  &lt;div style="height:31px;background:red;"&gt;
+    &lt;div style="<span class="hl_4">overflow:hidden;</span>float:left; background:gray;height:30px;"  id="F"  &gt;
+      内容文字&lt;br/&gt;
+    &lt;/div&gt;
+    &lt;span&gt;环绕文字&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+      <p>各览器中渲染情况：</p>
+      <table class="compare">
+        <tr>
+          <th>'float:right'</th>
+          <th>IE6 IE7 IE8 Firefox Opera</th>
+          <th>Chrome Safari</th>
+        </tr>
+        <tr>
+          <th>按键点击前</th>
+          <td><img src="../../tests/BW5011/03.png" alt="IE6 IE7 IE8 Firefox Opera" /></td>
+          <td><img src="../../tests/BW5011/03.png" alt="Chrome Safari" /></td>
+        </tr>
+        <tr>
+          <th>按键点击 &quot;祖先容器高度变小&quot; 和 &quot;祖先容器高度恢复&quot; 后</th>
+          <td><img src="../../tests/BW5011/03.png" alt="IE6 IE7 IE8 Firefox Opera" /></td>
+          <td><img src="../../tests/BW5011/04.png" alt="Chrome Safari" /></td>
+        </tr>
+        <tr>
+          <th>修复按键点击后</th>
+          <td><img src="../../tests/BW5011/03.png" alt="IE6 IE7 IE8 Firefox Opera" /></td>
+          <td><img src="../../tests/BW5011/03.png" alt="Chrome Safari" /></td>
+        </tr>
+      </table>
+      <br />
+      <table class="compare">
+        <tr>
+          <th>'overflow:hidden'</th>
+          <th>IE6 IE7 IE8 Firefox Opera</th>
+          <th>Chrome Safari</th>
+        </tr>
+        <tr>
+          <th>按键点击前</th>
+          <td><img src="../../tests/BW5011/02.png" alt="IE6 IE7 IE8 Firefox Opera" /></td>
+          <td><img src="../../tests/BW5011/02.png" alt="&gt;Chrome Safari" /></td>
+        </tr>
+        <tr>
+          <th>按键点击 &quot;祖先容器高度变小&quot; 和 &quot;祖先容器高度恢复&quot; 后</th>
+          <td><img src="../../tests/BW5011/02.png" alt="IE6 IE7 IE8 Firefox Opera" /></td>
+          <td><img src="../../tests/BW5011/01.png" alt="Chrome Safari" /></td>
+        </tr>
+        <tr>
+          <th>修复按键点击后</th>
+          <td><img src="../../tests/BW5011/02.png" alt="IE6 IE7 IE8 Firefox Opera" /></td>
+          <td><img src="../../tests/BW5011/02.png" alt="&gt;Chrome Safari" /></td>
+        </tr>
+      </table>
+      <p>在进一步修改验证之后，可发现 WebKit 渲染引擎的这个 Reflow/Repaint 问题与最内子元素同时设置 'float' 和 'overflow' 特性值不为 'visible' 有关。</p>
+      <p>根据这个特性可以继续验证出，如果去除 float' 和非 'overflow:visible' 特性值中任意一个，就会不出现此渲染问题。</p>
+      <p>或者在不修改特性值设定情况下，使最外层祖先容器高度设置变更大于等于最内容器计算高度，以及中层容器高度设置小于最内容器计算高度时，同样不会出现渲染问题。</p>
+      <p>具体验证代码不在文档内给出，读者可以运行下方的 <a href="../../tests/BW5011/webkit_lost_layout.html">测试用例</a> 页面，自行验证。</p>
+      <p>由此可以得出结论：在本问题情况下，WebKit 渲染引擎浏览器执行 Reflow 计算后由于某种原因，执行 Repaint 重绘机制不完善，导致局部内容没有被重绘。</p>
+      
+      <h2 id="solutions">解决方案</h2>
+      <p>应尽量避免出现类似的布局结构，如果无法避免，并出现了上文所描述的布局异常，根据实际情况可以使用以下方案解决：</p>
+      <ul>
+        <li>对出现问题的元素设置 'position:relative' 特性值可以避免这个现象。</li>
+        <li>为具体出现问题的布局块加入 'opacity:.99' 特性值，迫使浏览器因计算透明度，从而避免由 Reflow 现象产生后不重绘局部布局的情况。</li>
+        <li>也可以通过改变盒模型大小等手段迫使浏览器进行 Reflow 后的 RePrint 操作，比如将布局盒的高度或宽度修改，然后再使用 setTimeout(function...,0) 语句在当前脚本流执行完成以及 Reflow 完成时，将盒模型改回需要的大小。</li>
+      </ul>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.544.0 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62</td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BW5011/webkit_lost_layout.html">webkit_lost_layout.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-12</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>webkit Chrome Safari float overflow hidden reflow layout repaint</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

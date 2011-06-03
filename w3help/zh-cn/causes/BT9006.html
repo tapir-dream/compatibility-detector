@@ -1,0 +1,128 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BT9006: 只有 IE 的脚本引擎支持 JScript.Encode 和 VBScript.Encode</h1>
+  <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>Microsoft 提供了脚本加密（Script Encoder）机制，可以对脚本进行加密，包括 JScript 和 VBScript。经过加密的脚本，仅在 IE 下能正常运行，其它浏览器下不识别。<sup>1</sup></p>
+      <p class="comment">注1：仅 IE 支持 VBScript，因此无论是否对 VBScript 进行加密，其他浏览器都无法识别。</p>
+      <h2 id="influence">造成的影响</h2>
+      <p>在非 IE 浏览器中使用脚本加密的代码不执行或代码出错。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>实际上脚本加密器是一简单的命令行工具，可加密脚本代码。当作者不希望自己的脚本在客服端被他人查看或修改时，提供的一种保护机制，但这种机制是不严格的，因为这种加密没有密钥保护，并且是可逆的。</p>
+      <p>关于 Microsoft 脚本加密器的更多信息，请参考 MSDN <a href="http://msdn.microsoft.com/en-us/library/d14c8zsc%28VS.85%29.aspx">Script Encoder Overview</a> 中的内容。</p>
+      <p>如以下代码使用 JScript Encode 加密：</p>
+<pre>&lt;HTML&gt;
+&lt;HEAD&gt;
+&lt;TITLE&gt;Script Encoder Sample Page&lt;/TITLE&gt;
+&lt;SCRIPT LANGUAGE="<span class="hl_1">JScript.Encode</span>"&gt;
+&lt;!--//
+//Copyright© 1998 Microsoft Corporation. All Rights Reserved.
+//**Start Encode**#@~^QwIAAA==@#@&amp;0;mDkWP7nDb0zZKD.n1YAMGhk+Dvb`@#@&amp;P,kW`UC7kLlDGDcl22gl:n~{'~Jtr1DGkW6YP&amp;xDnD+OPA62sKD+ME#@#@&amp;P,~~k6PvxC\rLmYGDcCwa.n.kkWU bx[+X66Pcr*cJ#,@*{~!*P~P,P~.YEMU`DDEbIP,P,+s/n@#@&amp;P~P,~PM+O;Mx`WC^/n#pN6EU1YbWx,oObaw.WaDrCD+nmL+v#@#@&amp;~P7lMPdY.q,'~J_CN,Y4rkP4nnPCx,C1Y;mV,+(PkrY~~l,wCLPmKhwmYk(snPSkDt~JI@#@&amp;P~\m.PkY.+,'PE8MWA/.kPGDtDPDtmUPri@#@&amp;,P-CMP/D.&amp;,'Pr\rmMWkWWY~(YnDnY,2a2^WDn.,* !,Ep@#@&amp;,P7lD,/D.c,'~JSW;s9Ptm-+,4+U~VKl9+[REI,Pr0,c\DrWHZW..mOAMGS/nM`*#@#@&amp;P,~P9W^Es+UOchDbO+v/YMq~_,/DDfPQ~kY.c*IP,+sd@#@&amp;~~,P[W1;s+UDRSDkD+vdYMF~_,/O.yP_,dYM&amp;P3~dYMc*iNz&amp;R @*^#~@
+//--&gt;
+&lt;/SCRIPT&gt;
+&lt;/HEAD&gt;
+&lt;BODY onload="<span class="hl_2">getAppropriatePage</span>()"&gt;
+&lt;/BODY&gt;
+&lt;/HTML&gt;</pre>
+      <p>如以下代码使用 VBScript Encode 加密：</p>
+<pre>&lt;HTML&gt;
+&lt;HEAD&gt;
+&lt;TITLE&gt;Script Encoder Sample Page&lt;/TITLE&gt;
+&lt;SCRIPT LANGUAGE="<span class="hl_1">VBScript.Encode</span>"&gt;
+&lt;!--//
+//Copyright© 1998 Microsoft Corporation. All Rights Reserved.
+//**Start Encode**#@~^QwIAAA==@#@&amp;0;mDkWP7nDb0zZKD.n1YAMGhk+Dvb`@#@&amp;P,kW`UC7kLlDGDcl22gl:n~{'~Jtr1DGkW6YP&amp;xDnD+OPA62sKD+ME#@#@&amp;P,~~k6PvxC\rLmYGDcCwa.n.kkWU bx[+X66Pcr*cJ#,@*{~!*P~P,P~.YEMU`DDEbIP,P,+s/n@#@&amp;P~P,~PM+O;Mx`WC^/n#pN6EU1YbWx,oObaw.WaDrCD+nmL+v#@#@&amp;~P7lMPdY.q,'~J_CN,Y4rkP4nnPCx,C1Y;mV,+(PkrY~~l,wCLPmKhwmYk(snPSkDt~JI@#@&amp;P~\m.PkY.+,'PE8MWA/.kPGDtDPDtmUPri@#@&amp;,P-CMP/D.&amp;,'Pr\rmMWkWWY~(YnDnY,2a2^WDn.,* !,Ep@#@&amp;,P7lD,/D.c,'~JSW;s9Ptm-+,4+U~VKl9+[REI,Pr0,c\DrWHZW..mOAMGS/nM`*#@#@&amp;P,~P9W^Es+UOchDbO+v/YMq~_,/DDfPQ~kY.c*IP,+sd@#@&amp;~~,P[W1;s+UDRSDkD+vdYMF~_,/O.yP_,dYM&amp;P3~dYMc*iNz&amp;R @*^#~@
+//--&gt;
+&lt;/SCRIPT&gt;
+&lt;/HEAD&gt;
+&lt;BODY onload="<span class="hl_2">getAppropriatePage</span>()"&gt;
+&lt;/BODY&gt;
+&lt;/HTML&gt;</pre>
+      <p>这段代码仅在 IE 中能运行，在其他浏览器中都会报错：getAppropriatePage is not defined。</p>
+      <h2 id="solutions">解决方案</h2>
+      <p>避免使用 IE 特有脚本扩展方式书写代码。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>&nbsp;</td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-05</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>Script Encoder</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,206 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX9002: document.all 在各浏览器中的支持不同</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>document.all 在各浏览器中的支持不同。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>各浏览器中对 document.all 方法的支持不同，使用它获取元素引用可能造成兼容性问题。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>all 方法最初是由 IE 浏览器拥有的，并不属于 W3C 规范范畴，他返回调用 all 方法的 HTML 标记自身内的所有子孙元素的 HTML 标记集合 。</p>
+            <p>all 方法的详细说明请参见 MSDN：<a href="http://msdn.microsoft.com/en-us/library/ms537434(VS.85).aspx">http://msdn.microsoft.com/en-us/library/ms537434(VS.85).aspx</a>。</p>
+
+      <p>通常情况下使用 document.all 方法获得文档元素内所有 HTML 标记的集合，他最先使用在 IE 浏览器中。现在其他浏览器已经支持 document.all 这个方法了，但在支持细节上有差异。</p>
+      
+      <h3>1. 所有浏览器使用 document.all 获取取元素的支持程度。</h3>
+      <p>分析以下代码：</p>
+      <pre>&lt;script type=&quot;text/javascript&quot;&gt;
+    window.onload = function() {
+        document.getElementById(&quot;info&quot;).innerHTML = &quot;document.all : &quot; + document.all;
+    }
+&lt;/script&gt;
+&lt;span id=&quot;SPAN1&quot;&gt;&lt;/span&gt;
+&lt;div id=&quot;info&quot;&gt;&lt;/div&gt;</pre>
+            <p>在各浏览器中运行结果如下表：</p>
+            <table class="compare">
+              <tbody>
+                <tr>
+                  <th>IE6 IE7 IE8(Q)<br /></th>
+                  <td>document.all : [object]</td>
+                </tr>
+                <tr>
+                  <th>Opera Safari IE8(S)<br /></th>
+                  <td>document.all : [object HTMLColletion]</td>
+                </tr>
+                <tr>
+                  <th>Firefox(Q)<br /></th>
+                  <td>document.all : [object HTML document.all.class]</td>
+                </tr>
+                <tr>
+                  <th> Firefox(S)</th>
+                  <td>document.all : undefined</td>
+                </tr>
+                <tr>
+                  <th>Chrome</th>
+                  <td class="hl_4">document.all : [object HTMLColletion]</td>
+                </tr>
+              </tbody>
+            </table>
+          <p>【注】：此处需要注意 Chrome 中 document.all 方法可直接使用，但无法被检测其返回的数据类型，因而代码中返回 undefined 值。</p>
+          
+          <h3>2. 在 IE 中 document.all 的布尔值是 true ，其他浏览器都是 false。</h3>
+            <p>分析以下代码：</p>
+            <pre>&lt;script type=&quot;text/javascript&quot;&gt;
+    window.onload = function() {
+        document.getElementById(&quot;info&quot;).innerHTML = &quot;!!document.all : &quot; + !!document.all;
+    }
+&lt;/script&gt;
+&lt;span id=&quot;SPAN1&quot;&gt;&lt;/span&gt;
+&lt;div id=&quot;info&quot;&gt;&lt;/div&gt;</pre>
+            <p>在各浏览器中运行结果如下表：</p>
+            <table class="compare">
+              <tbody>
+                <tr>
+                  <th>IE6 IE7 IE8</th>
+                  <td>!!document.all : true</td>
+                </tr>
+                <tr>
+                  <th>Firefox Chrome Safari Opera</th>
+                  <td>!!document.all : false</td>
+                </tr>
+              </tbody>
+            </table>
+            <h3>3. 所有浏览器都支持使用 document.all 取元素的方式。</h3>
+            <p>分析以下代码：</p>
+            <pre>
+&lt;html id=&quot;HTML1&quot;&gt;
+&lt;script type=&quot;text/javascript&quot;&gt;
+    window.onload = function() {
+        var html = &quot;&lt;table border='1' style='font-size:12px;'&gt;&quot;;
+        function getElement(sec) {
+            html += &quot;&lt;tr&gt;&lt;td&gt;&quot; + sec + &quot;&lt;/td&gt;&quot; + &quot;&lt;td&gt;&quot; + eval(sec).id + &quot;&lt;/td&gt;&quot;;
+        }
+        getElement(&quot;document.all(0)&quot;);
+        getElement(&quot;document.all[0]&quot;);
+        getElement(&quot;document.all.item(0)&quot;);
+        getElement(&quot;document.all('SPAN1')&quot;);
+        getElement(&quot;document.all.SPAN1&quot;);
+        getElement(&quot;document.all['SPAN1']&quot;);
+        getElement(&quot;document.all.namedItem('SPAN1')&quot;);
+        html += &quot;&lt;/table&gt;&quot;;
+        document.getElementById(&quot;info&quot;).innerHTML = html;
+    }
+&lt;/script&gt;
+&lt;span id=&quot;SPAN1&quot;&gt;&lt;/span&gt;
+&lt;div id=&quot;info&quot;&gt;&lt;/div&gt;
+&lt;/html&gt;
+            </pre>
+            <p>在各浏览器中表现如下：</p>
+            <table class="compare">
+        <tbody>
+          <tr>
+            <th>IE6(Q) IE7(Q) IE8(Q)<br/>Chrome Safari Opera<br/>Firefox(Q)</th>
+            <td><img src="../../tests/BX9002/others.png" /></td>
+          </tr>
+          <tr>
+            <th>IE6(S) IE7(S) IE8(S)</th>
+            <td><img src="../../tests/BX9002/ies.png" /></td>
+          </tr>
+          <tr>
+            <th>Firefox(S)</th>
+            <td><img src="../../tests/BX9002/ffs.png" /></td>
+          </tr>
+        </tbody>
+      </table>
+      <h2 id="solutions">解决方案</h2>
+      <p>由于 document.all 方法存在支持程度问题，获取元素还是推荐用 W3C DOM 规范中提供的 document.getElementById、document.getElementsByTagName 等标准方法。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.2<br />
+              Opera 10.60<br />
+              Chrome 5.0.375.7 dev<br />
+              Safari 4.0.4
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+              <a href="../../tests/BX9002/output_document.all.html">output_document.all.html</a><br/>
+              <a href="../../tests/BX9002/document.all_boolean.html">document.all_boolean.html</a><br/>
+              <a href="../../tests/BX9002/document.all.html">document.all.html</a>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-09</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>document all getElementById getElementsByTagName</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<body>
+	<div id="A" style="float:left; border:1px solid #000066;">
+	    <span style="background:#CCC;">float - non-replaced element</span>
+	    <span style="position:absolute;">123</span>
+	</div>
+	<div style="clear:both">&nbsp;</div>
+	<div id="B" style="float:left; border:1px solid #000066;">
+	    <span style="background:#CCC;">float - replaced element</span>
+	    <input style="position:absolute;" />
+	</div>
+	<div id="C" style="position:absolute; top:100px; left:10px; border:1px solid #000066;">
+	    <span style="background:#CCC;">Absolutely positioned - non-replaced element</span>
+	    <span style="position:absolute;">123</span>
+	</div>
+	<div id="D" style="position:absolute; top:150px; left:10px; border:1px solid #000066;">
+	    <span style="background:#CCC;">Absolutely positioned - replaced element</span>
+	    <input style="position:absolute;" />
+	</div>
+</body>
+</html>

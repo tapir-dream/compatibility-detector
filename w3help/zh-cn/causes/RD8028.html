@@ -1,0 +1,195 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RD8028: 各浏览器对未明确设定宽度的块级元素通过 margin 导致溢出其宽度为 0 的包含块时的宽度计算值存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2> 
+      <h3>普通流中的块级非替换元素的宽度算法</h3>
+      <pre>'margin-left' + 'border-left-width' + 'padding-left' + 'width' + 'padding-right' + 'border-right-width' + 'margin-right' = width of containing block (包含块的宽度)</pre>
+      <p>上面的等式中必须使用各特性的使用值，以下为不同情况时该公式的计算规则：</p>
+      <ul>
+        <li>若 'width' 不是 'auto'，并且 'border-left-width' + 'padding-left' + 'width' + 'padding-right' + 'border-right-width' (加上任意值不为 'auto' 的 'margin-left' 或 'margin-right') 大于包含块的宽度，则值为 'auto' 的 'margin-left' 或 'margin-right' 在如下规则中被视作 0。</li>
+        <li>若上述所有特性的计算值不为 'auto'，则这些值被称为 &quot;过度约束&quot; (over-constrained)，并且其中一个的使用值不得已会与其计算值不同。若包含块的 'direction' 特性值为 'ltr'，'margin-right' 的指定值会被忽略并重新计算该值以满足等式。若 'direction' 特性为 'rtl'，同样对 'margin-left' 采用上述做法。</li>
+        <li>若仅有一个值指定为 'auto'，则其计算值由等式得出。</li>
+        <li>若 'width' 设定为 'auto，则其它的 'auto' 值变为 '0'，'width' 由等式的得出。</li>
+        <li>若 'margin-left' 与 'margin-right' 均为 'auto'，则它们的使用值相同。这将使元素相对于包含块的边缘水平居中。</li>
+      </ul>
+      <p>关于 正常文档流中的块级非替换元素宽度算法 的更多内容，请参考 W3C CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/visudet.html#blockwidth">10.3.3 Block-level, non-replaced elements in normal flow</a> 中的描述。</p>
+      
+      <h2 id="description">问题描述</h2>
+      <p>在正常文档流中，当包含块宽度为 0，其内未设定明确宽度的块级元素由于设定了 'margin' 溢出包含块时，则该块级元素的宽度计算在 Chrome Safari 中会计算为 0。</p>
+      
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题可能导致包含块内的块级元素的宽度过小，严重时会导致其内容丢失 (若设定了 'overflow:hidden')。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>根据问题描述编写如下测试样例：<em>negative_margin.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;utf-8&quot; /&gt;
+&lt;script&gt;
+  function $(id) { return document.getElementById(id); }
+  window.onload = function () {
+    $(&quot;info&quot;).innerHTML = &quot;&amp;nbsp;+--[a]: &quot; + $('a').clientWidth
+      + &quot;&lt;br /&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;+--[b]: &quot; + $('b').clientWidth
+      + &quot;&lt;br/&gt;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;+--[c]: &quot; + $('c').clientWidth;
+  }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body style=&quot;margin:0; font:14px/1.2 'Lucida Console';&quot;&gt;
+&lt;div style=&quot;<span class="hl_1">width:0;</span> background:skyblue; margin-left:150px; border:10px solid crimson;&quot; id=&quot;a&quot;&gt;
+  &lt;div style=&quot;background:wheat; <span class="hl_4">margin-left:-150px;</span> border:10px solid black; <em>position:relative; zoom:1;</em>&quot; id=&quot;b&quot;&gt;
+    &lt;div style=&quot;width:100px; height:100px; background:limegreen;&quot; id=&quot;c&quot;&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&quot;info&quot;&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>以上代码一个 <span class="hl_1">width:0;</span> 的 DIV 元素 <strong>[a]</strong> 中包含一个设定了 <span class="hl_4">margin-left:-150px;</span> 且没有明确设定宽度的 DIV 元素 <strong>[b]</strong>，则 <strong>[b]</strong> 会从左侧溢出 <strong>[a]</strong>，通过脚本得到 <strong>[a]</strong> 与 <strong>[b]</strong> 的计算后的宽度。</p>
+      <p class="comment">注: 代码中所有块级元素均没有设定 padding，则通过 clientWidth 属性获得的即元素的内容宽度。设定 <em>position:relative; zoom:1;</em> 的设置是为了避免 IE6 IE7 IE8(Q) 中负边距 (margin) 导致元素溢出 hasLayout 容器时显示异常，请参考：<a href="RB1001">RB1001: IE6 IE7 IE8(Q) 负边距 (margin) 导致元素溢出 hasLayout 容器时显示异常。</a>
+      <p>运行结果截图如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Opera Firefox</th>
+          <th>Chrome Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RD8028/negative_margin_1.gif" alt="" /></td>
+          <td><img src="../../tests/RD8028/negative_margin_2.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>各浏览器中 <strong>[b]</strong> 的计算后宽度出现了较大差异，先将 <strong>[b]</strong> 在等式中的各特性值列表如下：</p>
+      <pre>'margin-left' + 'border-left-width' + 'padding-left' + 'width' + 'padding-right' + 'border-right-width' + 'margin-right' = width of containing block (包含块的宽度)</pre>
+      <table class="compare">
+        <tr>
+          <th><strong>[b]</strong></th>
+          <th>'margin-left'</th>
+          <th>'border-left-width'</th>
+          <th>'padding-left'</th>
+          <th>'width'</th>
+          <th>'padding-right'</th>
+          <th>'border-right-width'</th>
+          <th>'margin-right'</th>
+          <th>包含块的宽度</th>
+        </tr>
+        <tr>
+          <th>设定值</th>
+          <td>-150px</td>
+          <td>10px</td>
+          <td>无<br />[使用初始值 0]</td>
+          <td>无<br />[使用初始值 auto]</td>
+          <td>无<br />[使用初始值 0]</td>
+          <td>10px</td>
+          <td>无<br />[使用初始值 auto]</td>
+          <td>0px</td>
+        </tr>
+        <tr>
+          <th>计算值</th>
+          <td>-150px</td>
+          <td>10px</td>
+          <td>0px</td>
+          <td>auto<br /><span class="hl_3">[根据等式计算此值]</span></td>
+          <td>0px</td>
+          <td>10px</td>
+          <td>0px<br />[若 'width' 设定为 'auto'，则其它的 'auto' 值变为 '0']</td>
+          <td>0px</td>
+        </tr>
+      </table>
+      <p>将上述计算值填入宽度计算等式 (单位均为 px)：-150 + 10 + 0 + <span class="hl_3">auto</span> + 0 + 10 + 0 = 0。<br />
+      则 <span class="hl_3">auto</span> = 130px。</p>
+      <p>根据 CSS2.1 规范中的宽度算法定义，<strong>[b]</strong> 的宽度应为 130px。</p>
+      <p>从测试样例的截图中可知，</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8 Firefox Opera</em> 中，<strong>[b]</strong> 的计算后宽度为 130px，与规范中普通流中块级非替换元素的宽度算法得到的结果相同；</li>
+        <li>在 <em>Chrome Safari</em> 中，<strong>[b]</strong> 的计算后宽度为 0，与等式中得到的结果不同。</li>
+      </ul>
+      <p>将测试样例中 <strong>[a]</strong> 的 'width' 特性设定值改为 1px：<code>&lt;div style=&quot;<span class="hl_1">width:1px;</span> background:skyblue; margin-left:150px; ... id=&quot;<strong>a</strong>&quot;&gt;</code>。<br />
+      此时所有浏览器中运行效果均相同，且符合规范描述：<br />
+      <img src="../../tests/RD8028/negative_margin_3.gif" alt="" /></p>
+      <p>由此可见 Chrome Safari 中，对于在正常文档流中，当包含块宽度为 0，其内未明确设定宽度的块级元素由于 'margin' 特性溢出包含块时，对该块级元素的宽度计算并未遵循规范的算法描述，但当包含块宽度大于 0 时遵循规范中的描述。</p>
+      
+      <h2 id="solutions">解决方案</h2>
+      <p>尽量避免出现未明确设定宽度 (值为 'auto') 的块级元素由于设定了 'margin' 导致其溢出其宽度为 0 的包含块，应为其设定一个明确的宽度。</p>
+      
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.544.0 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+              <a href="../../tests/RD8028/negative_margin.html">negative_margin.html</a><br/>
+              <a href="../../tests/RD8028/margin_ani.html">margin_ani.html</a>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-27</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>width margin containing block 包含块 宽度</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

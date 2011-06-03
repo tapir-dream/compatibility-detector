@@ -1,0 +1,49 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<script>
+window.onload = function (){
+	window["textElement"] =  document.getElementsByTagName('textarea')[0];
+}
+function appentText(str){
+	str = str + "\n";
+	textElement.value += str;
+	textElement.scrollTop = textElement.scrollHeight;
+}
+function mouse_out(obj){
+	obj.style.background='yellow';
+	appentText("mouseout 事件触发");
+}
+function mouse_over(obj){
+	obj.style.background='gold';
+	appentText("mouseover 事件触发");
+}
+function mouse_leave(obj){
+	obj.style.background='yellow';
+	appentText("onmouseleave 事件触发");
+}
+function mouse_enter(obj){
+	obj.style.background='gold';
+	appentText("onmouseenter 事件触发");
+}
+
+</script>
+</head>
+<body>
+
+<div style="background:yellow; width:100px; height:100px; padding:30px;"
+	onmouseout="mouse_out(this)"
+	onmouseover="mouse_over(this)">
+	<div style="background:gray; height:100%;"></div>
+</div>
+
+<br />
+<div style="background:yellow; width:100px; height:100px;padding:30px"
+	onmouseleave="mouse_leave(this)"
+	onmouseenter="mouse_enter(this)">
+	<div style="background:gray; height:100%;"></div>
+</div>
+<textarea style="widht:200px; height:100px;"></textarea>
+</body>
+</html>

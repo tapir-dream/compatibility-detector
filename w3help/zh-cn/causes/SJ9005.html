@@ -1,0 +1,173 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SJ9005: IE6 IE7 IE8 会忽略 JavaScript 代码中大括号之后的第一个分号</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 <a href="http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-262.pdf">ECMAScript 规范</a> <strong>12.1 Block</strong> 中的描述，“{ [StatementList] }”即一组大括号之间包含有一组语句，这被称作一个“块”（block）。</p>
+      <p>根据 <a href="http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-262.pdf">ECMAScript 规范</a> <strong>12.3 Empty Statement</strong> 中的描述，单独一个分号“;”是一个“空语句”（EmptyStatement）。</p>
+      <p>
+        在 <a href="http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-262.pdf">ECMAScript 规范</a>的 <strong>12.5 The if Statement</strong>、<strong>12.6.1 The do-while Statement</strong> 和 <strong>12.14 The try Statement</strong> 中，分别描述了“if-else”、“do-while”、“try-catch”的语法，他们有一个共同点：都是一个整体的语句结构（statement）。<br />
+        也就是说，在“if”和“else”之间、“do”和“while”之间、“try”和“catch”之间是不允许有其他语句存在的，包括“空语句”。
+      </p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 IE7 IE8 中，JavaScript 代码中语句块结束符号“}”之后的第一个分号“;”会被忽略。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>若在如“if”和“else”这样的整体语句结构之间插入一个分号“;”（即在“if”块的结束大括号“}”之后插入一个分号“;”），则仅在 IE6 IE7 IE8 中可以正常运行，其他浏览器均会在预处理期出错而使所有代码无法进入解释期，导致页面中的所有 JavaScript 代码均不会正常执行。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>运行下面三组测试代码：</p>
+<pre>
+if(true){
+  alert("IF");
+}<span class="hl_4">;</span>
+else{
+  alert("ELSE")
+}
+</pre>
+<pre>
+do{
+  alert("DO");
+}<span class="hl_4">;</span>
+while(false);
+</pre>
+<pre>
+try{
+  aler("TRY");
+}<span class="hl_4">;</span>
+catch(e){
+  alert("CATCH");
+}
+</pre>
+      <p>上面三组测试代码中，“if-else”、“do-while”、“try-catch”均为一个整体语句结构，但他们都被一个空语句“<span class="hl_4">;</span>”给分隔开了。</p>
+      <p>以上代码在各浏览器中的运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox</th>
+          <th>Chrome</th>
+          <th>Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <td class="hl_2">弹出提示框：<br />“IF”</td>
+          <td class="hl_1">syntax error: <br />else {</td>
+          <td class="hl_1">Uncaught SyntaxError: <br />Unexpected token else</td>
+          <td class="hl_1">SyntaxError: <br />Parse error</td>
+          <td class="hl_1">Syntax error: <br />expected expression, <br />got keyword 'else'</td>
+        </tr>
+        <tr>
+          <td class="hl_2">弹出提示框：<br />“DO”</td>
+          <td class="hl_1">missing while <br />after do-loop body</td>
+          <td class="hl_1">Uncaught SyntaxError: <br />Unexpected token ;</td>
+          <td class="hl_1">SyntaxError: <br />Parse error</td>
+          <td class="hl_1">Syntax error: <br />syntax error</td>
+        </tr>
+        <tr>
+          <td class="hl_2">弹出提示框：<br />“TRY”</td>
+          <td class="hl_1">missing catch or finally <br />after try</td>
+          <td class="hl_1">Uncaught SyntaxError: <br />Missing catch or finally after try</td>
+          <td class="hl_1">SyntaxError: <br />Parse error</td>
+          <td class="hl_1">Syntax error: <br />missing catch or finally <br />clause in try statement</td>
+        </tr>
+      </table>
+      <p>可见：IE6 IE7 IE8 忽略了这个多余的“;”，使代码能够正常解释，而非 IE 浏览器均按照规范对代码进行了解释，提示错误。</p>
+      <p>进一步测试如下（简单起见，仅以“if-else”语句为例）：</p>
+<pre>
+if(true){
+  alert("IF");
+}<span class="hl_4">;</span><span class="hl_3">;</span>
+else{
+  alert("ELSE")
+}
+</pre>
+      <p>这时在所有浏览器中均会出现“语法错误”。</p>
+      <p>可见，IE6 IE7 IE8 仅可以忽略“}”后的第一个“;”，若“;”多于一个则在构造语法树时也会发生语法错误。<sup>1</sup></p>
+      <p class="comment">注：</p>
+      <ol class="comment">
+        <li>不说 IE6 IE7 IE8 允许在“;”的位置允许出现空语句，是因为一个空语句和两个空语句都会破坏代码结构，从测试结果看，IE6 IE7 IE8 是单纯的忽略了第一个“;”而已。</li>
+      </ol>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>按照规范书写正确的代码。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.3<br />
+              Chrome 5.0.375.23 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="#">...</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-12</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>brace JavaScript semicolon grammar offending token 分号 语法</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

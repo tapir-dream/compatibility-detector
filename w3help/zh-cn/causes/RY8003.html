@@ -1,0 +1,450 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RY8003: 各浏览器对 CSS 错误解析规则的差异及 CSS hack</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>各浏览器对 CSS 错误解析规则的差异。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p> CSS 错误解析规则的差异会导致在不同浏览器中达不到预期的效果。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+              <tr>
+                <th>所有浏览器</th>
+                <td>&nbsp;</td>
+              </tr>
+            </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>CSS 语法适用于任何版本的 CSS，它描述了 CSS 的核心句法 (syntax)、关键字、厂商扩展、可用字符集、规则集合、声明块、选择器、特性以及注释等所有 CSS 的构成部分。</p>
+
+      <p>CSS 语法规定了 CSS 的写法，但是开发人员还是可能写出不合 CSS 语法的代码，这时候，浏览器就需要忽略一部分不合法的样式表。CSS2.1 及所有后继版本中，对于任何以破折号、下划线开头的 property:value 组合和不包含标识符的 @-keywords 组合，都以忽略的方式处理。</p>
+      <p>为了保证新的属性和值可以被正确添加，但遇到以下情况时，浏览器必须遵循以下的规则：</p>
+      <ol>
+              <li>未知的属性。浏览器必须忽略带有未知属性的声明。如，p { yes:'good' }</li>
+        <li>不合法的值。浏览器必须忽略带有不合法值的声明。如，p { height:20 }</li>
+        <li>畸形的声明。当浏览器解析一个声明时，读取它的代码直到这个声明的结束，同时，检查 (), [], {}, &quot;&quot;, 和 '' 的匹配规则，并且正确的处理编码，这时候，浏览器必须处理它所遇到的意外出现的标记。  如，p { height }或 ( { )P { width:100px }</li>
+        <li>不可用的 @ 关键字。如：@hello {...}</li>
+        <li>样式表的意外结束。浏览器必须自动闭合敞开的结构 (如，块，字符串和注解等) 如 @media screen { p:before { content: 'Hello</li>
+        <li>字符串的意外结束。如， p { color: green; font-family: 'Courier New Times color: red; color: green; }</li>
+      </ol>
+      <p>因为各大厂商对标准的实现不尽相同，所以，不同浏览器对CSS代码的解析标准不同。因此，对相同的 CSS 代码，各浏览器的解析可能会有差异。而在此差异的基础上，写出的只有个别浏览器或某些浏览器识别的 CSS 代码，就形成了 CSS hack 。</p>
+      <p>&nbsp;</p>
+      <h3>浏览器对 CSS 错误解析规则的差异</h3>
+      <p><strong>1. 畸形的声明</strong></p>
+      <p>(1). 多余的右大括号：.pink { background:pink;}  }。在 IE5 IE5.5 IE6 IE7 IE8(Q) 下可自动修复。</p>
+      <p>(2). 未闭合的左大括号：.pink { background:pink;    /*大括号没有闭合*/。在 IE5 IE5.5 IE6(Q) IE7(Q) IE8(Q) 下，未闭合的左大括号把下一个声明的右大括号当作了闭合括号。</p>
+      <p>(3). 多余的左括号——情况1：左括号位于选择器之后：.pink { { background:pink; }。在 IE5 IE5.5 IE6 IE7 IE8(Q)下，浏览器直接忽略了多余的左大括号 &quot;{&quot; 。</p>
+      <p> 多余的左括号——情况2：左括号位于选择器之前：{.pink  { background:pink; }。在 IE5 IE5.5 IE6 IE7(Q) IE8(Q) 下，浏览器将多余的左大括号 &quot;{&quot; 与其后的选择器合并。</p>
+      <p>(4). 属性和值由等号连接：.pink { background=pink; color=blue; font-size=28px; }。在IE5 IE5.5 IE6(Q) IE7(Q) IE8(Q) 下，浏览器直接将错误的等号替换为了正确的冒号。</p>
+      <p>(5). 空的特性值：background:pink; background:;。在 IE6 IE7 IE8(Q) 下， 浏览器将没有值的  &quot;background:&quot;  替换了之前的 &quot;background:pink;&quot; ，而由于值为空，所以使用默认样式值渲染。</p>
+      <p>(6). 选择器与 &quot;{&quot; 之间出现多余 &quot;,&quot; ：.pink, { background:pink; }。在 IE6 IE7 IE8(Q) 下，浏览器将选择器后多余的逗号忽略。</p>
+      <p>(7). 选择器之前出现分号：;.pink { background:pink; } ;。在 IE6 IE7 IE8(Q)下，浏览器将选择器前多余的分号忽略。</p>
+      <p>(8). 选择器之前出现多余的&quot;.&quot;：...pink { background:pink; } ..gold { background:gold; }。在 IE6 IE7(Q) IE8(Q) 下，浏览器将选择器前多余的点忽略。</p>
+      <p><strong>2. 不合法的属性值</strong></p>
+      <p>(1). 属性值对之间没有分号：.pink { background:pink color:blue font-size:28px }。在 IE5 IE5.5 IE6(Q) IE7(Q) IE8(Q) 下，浏览器会正确解释缺失的第一个分号之前的声明 'background:pink' 被正确的解释及渲染。</p>
+      <p>(2).使用 !important，且声明之间缺失分号：.pink { background:pink !important color:blue !important font-size:28px }。在 IE5.5 IE6(Q) IE7(Q) IE8(Q) 下， 浏览器会正确解释所有声明。</p>
+      <p>(3). 长度值缺失单位：.pink {background:pink; font-size:28; height:50;}。在 IE5 IE5.5 其他各浏览器的混杂模式下， 浏览器会为缺失 px 的属性值添加 &quot;px&quot; 以正确解释其含义。</p>
+      <p><strong>3. 其他</strong></p>
+      <p>(1). HTML标签 &quot;style&quot; 属性内出现多余大括号：&lt;div style=&quot;{background:pink;}&quot;&gt;background:pink&lt;/div&gt;。在IE5 IE5.5 IE6 IE7 IE8(Q) Firefox(Q) Opera(Q) 下， 浏览器会忽略 &quot;style&quot; 属性中最外层多余的一对大括号。</p>
+      <p>(2). 注释前出现多余字符：在 IE6 IE7 IE8(Q) 下， 浏览器直接忽略 &quot;&lt;!--&quot; 之前多余的字符。</p>
+      <p>&nbsp;</p>
+      <h3>CSS hack</h3>
+      <p>由于不同的浏览器，比如 IE6 IE7 IE8 Firefox 等，对 CSS 解析的标准不同，因此对于相同的 CSS 代码，可能会生成不同的页面效果，从而无法在所有浏览器中得到我们想要的效果。这时，我们就需要针对不同的浏览器去写不同的 CSS 代码，让它能够在所有浏览器中获得相同的效果。这个过程，就是 CSS hack 。也就是上面说到的： &quot;写出只有个别浏览器或某些浏览器识别的 CSS 代码&quot; 。</p>
+      <p>CSS hack 是因为现有浏览器对标准的解析不同，为了兼容各浏览器，所采用的一种补救方法。CSS hack 是 一种类似作弊的手段，以欺骗浏览器的方式达到兼容的目的，是用浏览器的兼容性差异来解决浏览器的兼容性问题。</p>
+      <p>因此，在设计之初，写 CSS hack 需要遵循以下三条原则：</p>
+<ul>
+              <li>有效： 能够通过 Web 标准的验证</li>
+        <li>只针对太古老的/不再开发的/已被抛弃的浏览器， 而不是目前的主流浏览器</li>
+        <li>代码要丑陋。让人记住这是一个不得已而为之的 Hack, 时刻记住要想办法去掉它。</li>
+      </ul>
+      <p>现在很多 hacks 已经抛弃了最初的原则。滥用 hack 会导致浏览器更新之后产生更多的兼容性问题。因此，并不推荐使用 CSS hack 来解决兼容性问题。</p>
+      <p>CSS hack 的实现方式</p>
+      <ol>
+              <li>利用浏览器对相同代码的解析和支持的不同实现的 hack</li>
+        <li>以 Firefox 或 Webkit 特有的扩展样式实现的 hack</li>
+        <li>利用 IE 对标准的支持缺陷写的 hack</li>
+        <li>以 IE 特有的条件注释为基础的 hack</li>
+      </ol>
+      <p>Windows 系统下 CSS hack 汇总表</p>
+      <table class="compare">
+              <tbody>
+                <tr>
+                  <th>&nbsp;</th>
+                  <th colspan="2">IE6</th>
+                  <th colspan="2">IE7</th>
+                  <th colspan="2">IE8</th>
+                  <th colspan="2">FF</th>
+                  <th colspan="2">Ch</th>
+                  <th colspan="2">Sa</th>
+                  <th colspan="2">Op</th>
+                </tr>
+                <tr>
+                  <th>&nbsp;</th>
+                  <th>Q</th>
+                  <th>S</th>
+                  <th>Q</th>
+                  <th>S</th>
+                  <th>Q</th>
+                  <th>S</th>
+                  <th>Q</th>
+                  <th>S</th>
+                  <th>Q</th>
+                  <th>S</th>
+                  <th>Q</th>
+                  <th>S</th>
+                  <th>Q</th>
+                  <th>S</th>
+                </tr>
+                <tr>
+                  <th>*+html selector </th>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                </tr>
+                <tr>
+                  <th>*html selector </th>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                </tr>
+                <tr>
+                  <th>_property:value </th>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                </tr>
+                <tr>
+                  <th>-property:value </th>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                </tr>
+                <tr>
+                  <th>html* selector </th>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                </tr>
+                <tr>
+                  <th>*property:value </th>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                </tr>
+                <tr>
+                  <th>operty:value\9</th>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                </tr>
+                <tr>
+                  <th>selector, x:-moz-any-link{...} </th>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                </tr>
+                <tr>
+                  <th>selector, x:-moz-any-link, x:default{...} </th>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                </tr>
+                <tr>
+                  <th>@-moz-document url-prefix(){...} </th>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                </tr>
+                <tr>
+                  <th>html&gt;/**/body selector, x:-moz-any-link</th>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                </tr>
+                <tr>
+                  <th>html&gt;/**/body selector, x:-moz-any-link, x:default{...}</th>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                </tr>
+                <tr>
+                  <th>以-moz开头的Firefox特有扩展样式</th>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                </tr>
+                <tr>
+                  <th>@media screen and (-webkit-min-device-pixel-ratio:0) {... &nbsp;}</th>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                </tr>
+                <tr>
+                  <th>以-webkit开头的Webkit浏览器特有扩展样式</th>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                </tr>
+                <tr>
+                  <th>@media all and (-webkit-min-device-pixel-ratio:10000), not all and (-webkit-min-device-pixel-ratio:0){...}</th>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_1">N</td>
+                  <td class="hl_4">Y</td>
+                  <td class="hl_4">Y</td>
+                </tr>
+              </tbody>
+            </table>
+      <h2 id="solutions">解决方案</h2>
+      <p>合理运用各浏览器对 CSS 错误解析规则的差异及 CSS hack 为不同浏览器赋予不同样式。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.5.5<br />
+              Chrome 4.0.249.22<br />
+              Safari 4.0.4<br />
+                            Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>&nbsp;</td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-19</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>CSS hack 识别浏览器 bug IE6 IE7 IE8 Firefox Webkit</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

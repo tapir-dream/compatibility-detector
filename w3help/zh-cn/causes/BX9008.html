@@ -1,0 +1,228 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX9008: 各浏览器对于获取文档水平及垂直方向滚动条位置（scrollLeft、scrollTop）时的参考元素存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>针对获取页面的垂直滚动条的位置，IE Firefox Opera 标准模式下使用 document.documentElement.scrollLeft 获取页面的水平滚动条位置，而混杂模式下则是使用 document.body.scrollLeft。Chrome Safari 在两种文档模式下均使用 document.body.scrollLeft 获取页面的水平滚动条位置。<br />
+      同理，针对获取页面的水平滚动条的位置的情况与上面类似。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>在混杂模式下，由于所有浏览器均使用 document.body.scrollTop 获取页面的垂直滚动条的位置，所以不会出现兼容性问题。<br />
+      而在标准模式下，由于 Chrome 与 Safari 仍然使用 document.body.scrollTop，而对于 document.documentElement.scrollTop 返回为 0。这时如果仅仅使用 document.documentElement.scrollTop 获取页面垂直滚动条顶端位置，则在 Chrome 和 Safari 中就会因为永久返回 0 导致页面运行异常（如，绝对定位的元素不能随页面的滚动条而滚动或位置有误）。<br />
+      对于获取页面的水平滚动条的位置，情况与上面描述类似。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>Element.scrollTop 及 Element.scrollLeft 不是 W3C 规范的标准属性，最初被 IE 的 DHTML Object Model 引入，但已被目前各主流浏览器所支持。更多参见 MSDN：<a href="http://msdn.microsoft.com/en-us/library/ms534618(VS.85).aspx">scrollTop Property</a> 与 <a href="http://msdn.microsoft.com/en-us/library/ms534617(VS.85).aspx">scrollLeft Property</a>。</p>
+      <ul>
+        <li>Element.scrollTop 属性获取或者设置一个元素的内容已经滚动到其上边界的像素数。只有在元素具备垂直滚动条的时候此属性才有效。</li>
+        <li>Element.scrollLeft 属性获取或者设置一个元素的内容已经滚动到其左边界的像素数。只有在元素具备水平滚动条的时候此属性才有效。</li>
+      </ul>
+      <p>而无论是 MSDN 还是 Mozilla Developer Center，均没有明确提及对于页面（即视口元素）的滚动条，其垂直与水平的位置需要通过哪一个 DOM 对象获取。</p>
+      <p>分析以下代码：</p>
+      <pre>&lt;html&gt;
+&lt;head&gt;
+&lt;script&gt;
+  var d, str;
+  window.onload = window.onscroll = function () {
+    d = document.getElementById("d");
+    str = "&lt;strong&gt;" + ((document.compatMode.toLowerCase().indexOf("back") &gt;= 0) ? "Quirks" : "Standards") + "&lt;/strong&gt;&lt;br /&gt;"
+      + "<span class="hl_1">document.documentElement.scrollTop</span>:" + document.documentElement.scrollTop + "&lt;br /&gt;"
+      + "<span class="hl_2">document.documentElement.scrollLeft</span>:" + document.documentElement.scrollLeft + "&lt;br /&gt;"
+      + "<span class="hl_3">document.body.scrollTop</span>:" + document.body.scrollTop + "&lt;br /&gt;"
+      + "<span class="hl_4">document.body.scrollLeft</span>:" + document.body.scrollLeft;
+    d.innerHTML = str;
+  }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body style="font:12px Arial; _background-attachment:fixed; _background-image:url(about:blank);"&gt;
+&lt;div style="width:10000px; height:10000px;"&gt;&lt;/div&gt;
+&lt;div id="d" style="position:fixed; top:0; left:0; _position:absolute; _top:expression(offsetParent.scrollTop); _left:expression(offsetParent.scrollLeft); background:#ddd;"&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>测试代码中，当在页面中改变垂直滚动条与水平滚动条的位置，会动态地在灰色背景的 DIV 元素中显示出当前页面的文档模式以及 <span class="hl_1">document.documentElement.scrollTop</span> <span class="hl_2">document.documentElement.scrollLeft</span> <span class="hl_3">document.body.scrollTop</span> <span class="hl_4">document.body.scrollLeft</span> 这四个属性的返回值。</p>
+      <p>不同的浏览器运行的结果列表如下：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th colspan="2">IE6 IE7 IE8 Firefox Opera</th>
+          <th colspan="2">Chrome Safari</th>
+        </tr>
+        <tr>
+          <th>文档模式</th>
+          <th>Quirks</th>
+          <th>Standards</th>
+          <th>Quirks</th>
+          <th>Standards</th>
+        </tr>
+        <tr>
+          <th><span class="hl_1">document.documentElement.scrollTop</span></th>
+          <td>0</td>
+          <td>垂直滚动条的实际位置</td>
+          <td>0</td>
+          <td>0</td>
+        </tr>
+        <tr>
+          <th><span class="hl_2">document.documentElement.scrollLeft</span></th>
+          <td>0</td>
+          <td>水平滚动条的实际位置</td>
+          <td>0</td>
+          <td>0</td>
+        </tr>
+        <tr>
+          <th><span class="hl_3">document.body.scrollTop</span></th>
+          <td>垂直滚动条的实际位置</td>
+          <td>0</td>
+          <td>垂直滚动条的实际位置</td>
+          <td>垂直滚动条的实际位置</td>
+        </tr>
+        <tr>
+          <th><span class="hl_4">document.body.scrollLeft</span></th>
+          <td>水平滚动条的实际位置</td>
+          <td>0</td>
+          <td>水平滚动条的实际位置</td>
+          <td>水平滚动条的实际位置</td>
+        </tr>
+      </table>
+      <p>通过上表可知：</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8 Firefox Opera</em> 中，标准模式下分别使用 <span class="hl_1">document.documentElement.scrollTop</span> 及 <span class="hl_2">document.documentElement.scrollLeft</span> 获取页面的垂直与水平滚动条的位置，混杂模式下使用 <span class="hl_3">document.body.scrollTop</span> 及 <span class="hl_4">document.body.scrollLeft</span> 获取页面的垂直与水平滚动条的位置。</li>
+        <li>在 <em>Chrome Safari</em> 中，标准模式与混杂模式下均使用 <span class="hl_3">document.body.scrollTop</span> 及 <span class="hl_4">document.body.scrollLeft</span> 获取页面的垂直与水平滚动条的位置。</li>
+      </ul>
+      <br />
+      <h3>引申资料：</h3>
+      <p>我们通过 WebKit 内核与 Gecko 内核的源代码中也可以看出 Chrome Safari 与 Firefox 对页面的 scrollTop scrollTop 获取方式的不同：</p>
+      <p>WebKit 内核：<em>/WebCore/html/HTMLBodyElement.cpp</em></p>
+      <pre>int <span class="hl_1">HTMLBodyElement</span>::scrollTop() const
+{
+    // Update the document's layout.
+    Document* doc = document();
+    doc-&gt;updateLayoutIgnorePendingStylesheets();
+    FrameView* view = doc-&gt;view();
+    return view ? adjustForZoom(view-&gt;scrollY(), view) : 0;
+}
+
+int <span class="hl_1">HTMLBodyElement</span>::scrollLeft() const
+{
+    // Update the document's layout.
+    Document* doc = document();
+    doc-&gt;updateLayoutIgnorePendingStylesheets();
+    FrameView* view = doc-&gt;view();
+    return view ? adjustForZoom(view-&gt;scrollX(), view) : 0;
+}</pre>
+      <p>Gecko 内核：<em>/content/base/src/nsGenericElement.cpp</em></p>
+      <pre>nsNSElementTearoff::GetScrollInfo(nsIScrollableView **aScrollableView,
+                                  nsIFrame **aFrame)
+{
+    ...
+    if ((quirksMode &amp;&amp; mContent-&gt;NodeInfo()-&gt;Equals(nsGkAtoms::body)) ||
+        (!quirksMode &amp;&amp; mContent-&gt;NodeInfo()-&gt;Equals(nsGkAtoms::html))) {
+      // In quirks mode, the scroll info for the body element should map to the
+      // scroll info for the nearest scrollable frame above the body element
+      // (i.e. the root scrollable frame).  This is what IE6 does in quirks
+      // mode.  In strict mode the root scrollable frame corresponds to the
+      // html element in IE6, so we map the scroll info for the html element to
+      // the root scrollable frame.
+
+      do {
+        frame = frame-&gt;GetParent();
+
+        if (!frame) {
+          break;
+        }
+
+        scrollFrame = do_QueryFrame(frame);
+      }
+    ...
+}</pre>
+      <p>Firefox 的 Gecko 内核源代码中通过对文档模式的判断决定通过哪个对象获取和设置 scrollTop scrollLeft 属性。从注释中可以看到，Firefox 这么做是为了兼容 IE6 的标准模式与混杂模式对这两者的处理。</p>
+      <p>而 WebKit 内核则没有针对文档模式进行判断，对页面滚动条信息通过 [Object HTMLBodyElement] 对象获取与设置。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>使用 "||" 逻辑语句将这两种获取方式相连，以保证兼容性。如：</p>
+      <pre>var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;</pre>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 5.0.342.2 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.50
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BX9008/scroll_Quirks.html">scroll_Quirks.html</a><br />
+            <a href="../../tests/BX9008/scroll_Standards.html">scroll_Standards.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-15</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>scrollLeft scrollTop document documentElement BODY 滚动 视口</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

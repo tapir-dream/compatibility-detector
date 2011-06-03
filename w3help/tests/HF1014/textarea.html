@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	* { margin:0; padding:0; border:0 none; font:24px Consolas; }
+	textarea { width:200px; height:100px; background:wheat; overflow:auto; resize:none; }
+</style>
+<script>
+	function $(id) { return document.getElementById(id); }
+	window.onload = function () {
+		if (!window.getComputedStyle) {
+			window.getComputedStyle = function ($target) {
+				return $target.currentStyle;
+			};
+		}
+		$('info').innerHTML = 'word-wrap: ' + getComputedStyle($('ta'), null).wordWrap;
+		document.forms[0].submit();
+	}
+</script>
+</head>
+<body>
+<form method="post" action="submit.php" target="submit">
+	<textarea id="ta" name="ta">ABCDEFGHIJKLMNOPQRSTUVWXYZ</textarea>
+</form>
+<div id="info" style="font-size:16px;"></div>
+<br />
+<iframe name="submit" style="width:200px; height:100px;" frameborder="0"></iframe>
+</body>
+</html>

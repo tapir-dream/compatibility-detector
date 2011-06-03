@@ -1,0 +1,157 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RM8018: IE6 IE7(Q) IE8(Q) 中包含块若未触发 hasLayout 则会影响参照其定位的绝对定位元素的偏移位置计算</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 W3C CSS2.1 规范，定位的元素（'position' 特性的值不为 'static'）可以通过 'top'、'right'、'bottom'、'left' 特性设定其相对其包含块（<a href="http://www.w3.org/TR/CSS2/visuren.html#containing-block">containing block</a>）的偏移位置。</p>
+      <p>绝对定位元素（position:absolute）的包含块由其最近的一个 'position' 不为 'static' 的祖先元素创建。当这个祖先元素不是行内级别时，包含块由其 <a href="http://www.w3.org/TR/CSS2/box.html#padding-edge">padding edge</a> 组成。</p>
+      <p>关于 'top'、'right'、'bottom'、'left' 特性及包含块的计算 的详细信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS2/visuren.html#position-props">9.3.2 Box offsets</a> 及 <a href="http://www.w3.org/TR/CSS2/visudet.html#containing-block-details">10.1 Definition of "containing block"</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 IE7(Q) IE8(Q) 下，若包含块没有触发 hasLayout 特性，则其内参照其定位的绝对定位元素的偏移位置计算会出现问题。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题会导致绝对定位元素的位置在各浏览器中产生差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7(Q) IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>
+        W3C 规范中说明了如果绝对定位元素的包含块是由非行内祖先元素生成的，则包含块由这个祖先元素的 'padding edge' 即边白边组成。
+        换句话说，绝对定位元素应该参照这个祖先元素 padding 和 border 之间的那个分界线所形成的矩形。
+      </p>
+      <p>分析以下代码：</p>
+      <pre>&lt;body style="margin:20px; font:16px/1 Arial;"&gt;
+&lt;div style="width:200px; background:wheat;"&gt;
+  &lt;div id="d" style="position:relative; text-align:right; background:khaki; border:5px solid navy; padding:5px;"&gt;
+    &lt;span style="background:peru;"&gt;1111 1111 1111&lt;br /&gt;1111 1111&lt;/span&gt;
+    &lt;span style="position:absolute; left:0px; top:0px; background:gold;"&gt;TL&lt;/span&gt;
+    &lt;span style="position:absolute; right:0px; top:0px; background:gold;"&gt;TR&lt;/span&gt;
+    &lt;span style="position:absolute; left:0px; bottom:0px; background:gold;"&gt;BL&lt;/span&gt;
+    &lt;span style="position:absolute; right:0px; bottom:0px; background:gold;"&gt;BR&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div style="width:200px; background:wheat;"&gt;
+  &lt;div id="d" style="position:relative; text-align:center; background:khaki; border:5px solid navy; padding:5px;"&gt;
+    &lt;span style="background:peru;"&gt;1111 1111 1111&lt;br /&gt;1111 1111&lt;/span&gt;
+    &lt;span style="position:absolute; left:0px; top:0px; background:gold;"&gt;TL&lt;/span&gt;
+    &lt;span style="position:absolute; right:0px; top:0px; background:gold;"&gt;TR&lt;/span&gt;
+    &lt;span style="position:absolute; left:0px; bottom:0px; background:gold;"&gt;BL&lt;/span&gt;
+    &lt;span style="position:absolute; right:0px; bottom:0px; background:gold;"&gt;BR&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div style="width:200px; background:wheat;"&gt;
+  &lt;div id="d" style="position:relative; text-align:left; background:khaki; border:5px solid navy; padding:5px;"&gt;
+    &lt;span style="background:peru;"&gt;1111 1111 1111&lt;br /&gt;1111 1111&lt;/span&gt;
+    &lt;span style="position:absolute; left:0px; top:0px; background:gold;"&gt;TL&lt;/span&gt;
+    &lt;span style="position:absolute; right:0px; top:0px; background:gold;"&gt;TR&lt;/span&gt;
+    &lt;span style="position:absolute; left:0px; bottom:0px; background:gold;"&gt;BL&lt;/span&gt;
+    &lt;span style="position:absolute; right:0px; bottom:0px; background:gold;"&gt;BR&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;/body&gt;</pre>
+      <p>上面代码分为三组，区别为每组中的【d】的 'text-align' 特性的值不同，分别为居右、居中、居左。<br />
+      每组中均包含一个普通流中的 SPAN 元素；4 个绝对定位元素，他们的 'top'、'right'、'bottom'、'left' 特性设置可以描绘出它们包含块的范围。<br />
+      需要注意的是，【d】在 IE 中均没有触发 hasLayout 特性。</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7(Q) IE8(Q)</th>
+          <th>IE7(S) IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RM8018/absolute_align1.gif" alt="IE6 IE7(Q) IE8(Q)" /></td>
+          <td><img src="../../tests/RM8018/absolute_align2.gif" alt="IE7(S) IE8(S) Firefox Chrome Safari Opera" /></td>
+        </tr>
+      </table>
+      <p>可以看到在 <em>IE6 IE7(Q) IE8(Q)</em> 中，水平方向对包含块的宽度计算有误，【d】中那个普通流中的 SPAN 元素的文字位置对包含块造成了影响，导致绝对定位元素定位错误；另外垂直方向对包含块的高度计算也有误，直接将【d】的 border edge 作为了包含块的垂直高度。<br />
+      而在 <em>其他浏览器</em> 中包含块的计算则完全遵照 W3C 规范中的描述。</p>
+
+
+
+
+
+
+
+      <h2 id="solutions">解决方案</h2>
+      <p>使包含块触发 hasLayout 特性。如 'zoom:1' 或者设置明确的宽度、高度。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.8<br />
+              Chrome 6.0.472.11 dev<br />
+              Safari 5.0.1<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RM8018/absolute_align.html">absolute_align.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-30</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>absolute offsetParent 包含块 绝对定位 对齐 containing block text-align</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	button { width:80px; height:30px; font:14px Arial; padding:0; }
+</style>
+<script>
+	var k = 100;
+	var a = null;
+	var $ = function (id) { return document.getElementById(id); }
+	var siv = function () {
+		sub.style.width = --k + "%";
+		info.innerHTML = inline.offsetWidth + " / " + k + "%=" +  sub.offsetWidth + " / " + cont.offsetWidth;
+		(k == 20) && (k = 100);
+		return true;
+	}
+	var start = function () { a = setInterval(siv, 50); };
+	var pause = function () { clearInterval(a); }
+	window.onload = function () {
+		var cont = $("cont");
+		var sub = $("sub");
+		var inline = $("inline");
+		var info = $("info");
+		var stop = $("stop");
+		var next = $("next");
+		stop.onclick = function () { next.disabled = (this.innerHTML = ((this.innerHTML == "Stop") ? (pause(), "Play") : (start(), "Stop"))) == "Stop"; }
+		next.onmousedown = function () { (event.button != 2) && (start()); }
+		next.onmouseup = pause;
+	}
+</script>
+</head>
+<body style="font:16px/1.5 ËÎÌו; margin:0;">
+<button id="stop">Play</button>&nbsp;<button id="next">Next Step</button>
+<div style="width:200px; background:#ddd;">
+	<div id="cont" style="float:left; background:khaki; word-wrap:break-word; word-break:break-all;">
+		<span id="sub" style="width:100%; background:cornflowerblue; display:inline-block;">
+			<span id="inline" style="background:lavender;">XXXXXXXXXXXXXXXXXXXX</span>
+		</span>
+	</div>
+	<div id="info" style="font:12px Arial; clear:left;"></div>
+</div>
+</body>
+</html>

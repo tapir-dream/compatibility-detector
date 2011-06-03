@@ -1,0 +1,28 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+</head>
+<body>
+<script>
+var Browser=(function(){
+	var name="Unknown";
+	var userAgent=navigator.userAgent;
+	if(userAgent.match(/(IE|Firefox|Safari|Chrome|Opera)(?: |\/)/)){
+		name=RegExp.$1;
+	}
+	return{
+		name:name
+	};
+})();
+function go(){
+	location.href='/汉?汉=汉';
+}
+</script>
+<button onclick="go();">go</button>
+<pre>
+UTF-8:	E6 B1 89
+GB2312:	BA BA
+</pre>
+</body>
+</html>

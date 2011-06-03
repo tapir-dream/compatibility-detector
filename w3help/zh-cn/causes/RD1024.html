@@ -1,0 +1,238 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RD1024: 各浏览器对设定了 'min-height'、'max-height' 特性的元素生成的包含块的高度计算存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 CSS2.1 规范中的描述，'width' 和 'height' 特性当指定百分比的值时，其百分比将参照其 <a href="http://www.w3.org/TR/CSS21/visuren.html#containing-block">包含块</a> 的生成框进行计算。</p>
+      <p>'min-width' 和 'max-width' 可以限定内容宽度 (content width) 的范围。下列算法描述了这两个特性对 'width' 特性的 <a href="http://www.w3.org/TR/CSS21/cascade.html#computed-value">使用值</a> 产生的影响：</p>
+      <ol>
+        <li>根据 &quot;<a href="http://www.w3.org/TR/CSS21/visudet.html#Computing_widths_and_margins">宽度及边框计算</a>&quot; 规则计算初步使用宽度 (不考虑 'min-width' 及 'max-width')；</li>
+        <li>如果初步使用宽度大于 'max-width'，则再次使用 &quot;<a href="http://www.w3.org/TR/CSS21/visudet.html#Computing_widths_and_margins">宽度及边框计算</a>&quot; 规则，但这时将使用 'max-width' 的计算值作为 'width' 的计算值；</li>
+        <li>如果得到的宽度小于 'min-width'，则再次使用 &quot;<a href="http://www.w3.org/TR/CSS21/visudet.html#Computing_widths_and_margins">宽度及边框计算</a>&quot; 规则，但这时使用 'min-width' 的计算值作为 'width' 的计算值。</li>
+          </ol>
+        <p>上述步骤不影响这些宽度特性实际计算值。参见： <a href="http://www.w3.org/TR/CSS21/visudet.html#min-max-widths">10.4 Minimum and maximum widths: 'min-width' and 'max-width'</a></p>
+        <p>'min-height' 和 'max-height' 可以限定框高度 (box height) 的范围。下列算法描述了这两个特性对 'width' 特性的 <a href="http://www.w3.org/TR/CSS21/cascade.html#computed-value">使用值</a> 产生的影响：</p>
+      <ol>
+        <li>根据 &quot;<a href="http://www.w3.org/TR/CSS21/visudet.html#Computing_heights_and_margins">高度及边框计算</a>&quot; 规则计算初步使用高度 (不考虑 'min-height' 及 'max-height')；</li>
+        <li>如果初步使用高度大于 'max-height'，则再次使用 &quot;<a href="http://www.w3.org/TR/CSS21/visudet.html#Computing_heights_and_margins">高度及边框计算</a>&quot; 规则，但这时将使用 'max-height' 的计算值作为 'height' 的计算值；</li>
+        <li>如果得到的高度小于 'min-height'，则再次使用 &quot;<a href="http://www.w3.org/TR/CSS21/visudet.html#Computing_heights_and_margins">高度及边框计算</a>&quot; 规则，但这时使用 'min-height' 的计算值作为 'height' 的计算值。</li>
+        </ol>
+        <p>上述步骤不影响这些高度特性实际计算值。参见： <a href="http://www.w3.org/TR/CSS21/visudet.html#propdef-min-height">10.7 Minimum and maximum heights: 'min-height' and 'max-height'</a></p>
+        <p>关于 'width' 及 'height' 特性的更多资料，请参见 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/visudet.html#the-width-property">10.2 Content width: the 'width' property</a>、<a href="http://www.w3.org/TR/CSS21/visudet.html#the-height-property">10.5 Content height: the 'height' property</a> 中的内容。</p>
+      <p>关于 'min-width' 及 'max-width' 特性的更多资料，请参见 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/visudet.html#min-max-widths">10.4 Minimum and maximum widths: 'min-width' and 'max-width'</a> 中的内容。</p>
+      <p>关于 'min-height' 及 'max-height' 特性的更多资料，请参见 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/visudet.html#min-max-heights">10.7 Minimum and maximum heights: 'min-height' and 'max-height'</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE7(S) Firefox 中，若元素的高度出于某种原因使用了其 'min-height' 或 'max-height' 设定的值，则其生成的包含块的高度为元素的实际高度；而在 IE8(S) Chrome Safari Opera 中，生成的包含块的高度仍然为元素原始的高度。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题会造成不同浏览器对于包含块的高度计算出现差异，从而使所有参照其计算的元素的高度出现差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tbody>
+          <tr>
+            <th>所有浏览器</th>
+            <td>&nbsp;</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>下面将分别以普通流与定位流两种情形进行分析。</p>
+      <p class="comment"><span class=" hl_4">注: 由于 IE6 IE7(Q) IE8(Q) 不支持 'min-height'、'max-height' 特性，故本文不再对这些浏览进行测试及分析。</span></p>
+      <br />
+      <h3>1. 普通流</h3>
+      <p>分析以下代码：<em>static_min_max_height.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body style=&quot;font:12px Consolas; margin:0;&quot;&gt;
+&lt;div id=&quot;p1&quot; style=&quot;background:gold; width:50px; height:50px; min-width:100px; min-height:100px; padding:10px;&quot;&gt;
+  &lt;div id=&quot;c1&quot; style=&quot;width:100%; height:100%; background:plum;&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div id=&quot;p2&quot; style=&quot;background:gold; width:150px; height:150px; max-width:100px; max-height:100px; padding:10px;&quot;&gt;
+  &lt;div id=&quot;c2&quot; style=&quot;width:100%; height:100%; background:plum;&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;script&gt;
+  function $(id) { return document.getElementById(id); }
+  
+  $(&quot;c1&quot;).innerHTML = &quot;&lt;em&gt;Child:&lt;/em&gt;&quot; + $(&quot;c1&quot;).clientWidth + &quot;*&quot; + $(&quot;c1&quot;).clientHeight;
+  $(&quot;c2&quot;).innerHTML = &quot;&lt;em&gt;Child:&lt;/em&gt;&quot; + $(&quot;c2&quot;).clientWidth + &quot;*&quot; + $(&quot;c2&quot;).clientHeight;
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码包含两组，每组的结构相同，均为一个设定了 ‘padding:10px’ 的 DIV 元素内包含了一个宽高都设置了 ‘100%’ 的 DIV 元素。<br />
+      两组的区别为，第一组外层 DIV 元素【p1】的宽高均为 ‘50px’，但 'min-width' 与 'min-height' 特性均设置了 ’100px‘；第二组外层 DIV 元素【p2】的宽高均为 '150px'，但 'max-width' 与 'max-height' 特性均设置了 '100px'。</p>
+      <p>根据 CSS2.1 规范所述，第一组【p1】的宽度计算值应为 '100px'，高度计算值应为 '100px'；第二组【p2】的宽度计算值应为 '100px'，高度计算值应为 '100px'。</p>
+      <p>这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE7(S) Firefox</th>
+          <th>IE8(S) Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RD1024/p1.gif" alt="" /></td>
+          <td><img src="../../tests/RD1024/p2.gif" alt="" /></td>
+        </tr>
+      </table>
+      <ul>
+        <li>在 <em>IE7(S) Firefox</em> 中，通过子元素【c1】、【c2】可以看到，容器生成的包含块的尺寸均使用了宽度和高度的最终计算值；</li>
+        <li>在 <em>IE8(S) Chrome Safari Opera</em> 中，通过子元素【c1】、【c2】可以看到，容器生成的包含块的尺寸使用的是浏览器根据 'min-width'、'min-height'、'max-width'、'max-height' 算法计算出的宽度和高度计算值之前的 'width' 与 'height' 特性的计算值。</li>
+      </ul>
+      
+      <br />
+      <h3>2. 定位流</h3>
+      <p>分析以下代码：<em>pos_min_max_height.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body style=&quot;font:12px Consolas; margin:0;&quot;&gt;
+&lt;div id=&quot;p3&quot; style=&quot;background:gold; width:50px; height:50px; min-width:100px; min-height:100px; position:relative;&quot;&gt;
+  &lt;div id=&quot;c3&quot; style=&quot;width:100%; height:100%; background:plum; position:absolute; left:3px; top:3px;&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div id=&quot;p4&quot; style=&quot;background:gold; width:150px; height:150px; max-width:100px; max-height:100px; position:relative;&quot;&gt;
+  &lt;div id=&quot;c4&quot; style=&quot;width:100%; height:100%; background:plum; position:absolute; left:3px; top:3px;&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div id=&quot;p5&quot; style=&quot;background:gold; width:50px; height:50px; min-width:100px; min-height:100px; position:relative; padding:10px;&quot;&gt;
+  &lt;div id=&quot;c5&quot; style=&quot;width:100%; height:100%; background:plum; position:absolute; left:3px; top:3px;&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div id=&quot;p6&quot; style=&quot;background:gold; width:150px; height:150px; max-width:100px; max-height:100px; position:relative; padding:10px;&quot;&gt;
+  &lt;div id=&quot;c6&quot; style=&quot;width:100%; height:100%; background:plum; position:absolute; left:3px; top:3px;&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;script&gt;
+  function $(id) { return document.getElementById(id); }
+  
+  $(&quot;c3&quot;).innerHTML = &quot;&lt;em&gt;Child:&lt;/em&gt;&quot; + $(&quot;c3&quot;).clientWidth + &quot;*&quot; + $(&quot;c3&quot;).clientHeight;
+  $(&quot;c4&quot;).innerHTML = &quot;&lt;em&gt;Child:&lt;/em&gt;&quot; + $(&quot;c4&quot;).clientWidth + &quot;*&quot; + $(&quot;c4&quot;).clientHeight;
+  $(&quot;c5&quot;).innerHTML = &quot;&lt;em&gt;Child:&lt;/em&gt;&quot; + $(&quot;c5&quot;).clientWidth + &quot;*&quot; + $(&quot;c5&quot;).clientHeight;
+  $(&quot;c6&quot;).innerHTML = &quot;&lt;em&gt;Child:&lt;/em&gt;&quot; + $(&quot;c6&quot;).clientWidth + &quot;*&quot; + $(&quot;c6&quot;).clientHeight;
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码包含四组，每组的结构相同，均为 'position' 特性为 'relative' 的 DIV 元素内包含了一个宽高都设置了 100% 的 DIV 绝对定位元素。<br />
+      第一、三组外层 DIV 元素的宽高均为 50px，但 'min-width' 与 'min-height' 特性均设置了 100px；第二、四组外层 DIV 元素的宽高均为 150px，但 'max-width' 与 'max-height' 特性均设置了 100px。<br />
+      第三、四组为外层 DIV 元素设定了 padding:10px。</p>
+      <p>这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE7(S)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RD1024/p3.gif" alt="" /></td>
+          <td><img src="../../tests/RD1024/p4.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>根据 CSS2.1 规范，非行内级绝对定位元素的偏移量参照为其包含块的 padding-box，则若设定了 'padding' 不会对偏移产生影响。</p>
+      <ul>
+        <li>对于第一、二组，各浏览器没有任何差异，通过子元素可以看到，容器生成的包含块的尺寸均使用了宽度和高度的最终计算值；</li>
+        <li>对于第三、四组，通过子元素可以看到，容器生成的包含块的尺寸均使用了宽度和高度的最终计算值，
+          <ul>
+            <li>在 <em>IE7(S)</em> 中，高度上 'padding-top' 与 'padding-bottom' 对包含块的判断产生影响，此时浏览器在垂直方向将上下 content 区域作为包含块的高度；</li>
+            <li>在 <em>其他浏览器</em> 中，与规范描述相符。</li>
+          </ul>
+        </li>
+      </ul>
+      <p>通过上面的测试样例可知，仅包含块区域的高度在各浏览器中会出现差异。</p>
+
+
+      <h2 id="solutions">解决方案</h2>
+      <p>在子孙元素参照设定并在计算值上应用了 'min-height'、'max-height' 特性的元素生成的包含块的高度时需格外注意，此时尽量避免使用百分比等需要参照包含块计算的单位。</p>
+      <p>由于第二个测试样例中，对于绝对定位元素，各浏览器容器生成的包含块的尺寸均使用了宽度和高度的最终计算值，不为容器设置 'padding' 特性则还会消除 IE7(S) 中的问题，继而可以达到各浏览器兼容的效果<sup>1</sup>。如：<em>res.html</em></p>
+      <pre>&lt;body style=&quot;font:12px Consolas; margin:0;&quot;&gt;
+&lt;div id=&quot;p1&quot; style=&quot;background:gold; width:50px; height:50px; min-width:100px; min-height:100px; position:relative;&quot;&gt;
+  &lt;div id=&quot;c1&quot; style=&quot;background:plum; position:absolute; top:10px; bottom:10px; left:10px; right:10px;&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div id=&quot;p2&quot; style=&quot;background:gold; width:150px; height:150px; max-width:100px; max-height:100px; position:relative;&quot;&gt;
+  &lt;div id=&quot;c2&quot; style=&quot;background:plum; position:absolute; top:10px; bottom:10px; left:10px; right:10px;&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;script&gt;
+  function $(id) { return document.getElementById(id); }
+  
+  $(&quot;c1&quot;).innerHTML = &quot;&lt;em&gt;Child:&lt;/em&gt;&quot; + $(&quot;c1&quot;).clientWidth + &quot;*&quot; + $(&quot;c1&quot;).clientHeight;
+  $(&quot;c2&quot;).innerHTML = &quot;&lt;em&gt;Child:&lt;/em&gt;&quot; + $(&quot;c2&quot;).clientWidth + &quot;*&quot; + $(&quot;c2&quot;).clientHeight;
+&lt;/script&gt;
+&lt;/body&gt;</pre>
+      <p class="comment"><span class="hl_4">注: 这里的浏览器不包括 IE6 IE7(Q) IE8(Q)。</span></p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.9<br />
+              Chrome 7.0.517.5 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RD1024/static_min_max_height.html">static_min_max_height.html</a><br />
+            <a href="../../tests/RD1024/pos_min_max_height.html">pos_min_max_height.html</a><br />
+            <a href="../../tests/RD1024/res.html">res.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-15</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>min-height max-height min-width max-width height width containing block percent 包含块 宽度 高度</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

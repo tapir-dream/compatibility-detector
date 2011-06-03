@@ -1,0 +1,191 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HG8001: DTD 之前的非空白字符在某些情况下会使该 DTD 失效</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>HTML 4.01 规范中提到，DTD 的前面或后面允许出现空白符，这里提到的“空白符”包括<strong>空格符</strong>、<strong>换行符</strong>、<strong>制表符</strong>和<strong>注释</strong>。</p>
+      <p>关于 HTML 文档结构的详细信息，请参考 HTML 4.01 规范 <a href="http://www.w3.org/TR/html401/struct/global.html#h-7.1">7.1 Introduction to the structure of an HTML document</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>如果在 DTD 之前加入注释或其他内容，在某些浏览器中该 DTD 将无法被识别。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>这个问题将导致同一个页面在有些浏览器中工作在标准模式 (S) 下，在其他浏览器中工作在混杂模式 (Q) 下，从而导致该页面的表现在各浏览器中产生较大差异，如布局混乱、内容重叠、功能无法使用等。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6</th>
+          <td>DTD 前的任何非空白符都将使浏览器忽略 DTD，包括注释和 XML 声明。</td>
+        </tr>
+        <tr>
+          <th>IE7 IE8</th>
+          <td>DTD 前的任何非空白符都将使浏览器忽略 DTD，包括注释，但不包括 XML 声明。</td>
+        </tr>
+        <tr>
+          <th>Firefox</th>
+          <td>DTD 前的任何包含“&lt;”的字符都将使浏览器忽略 DTD，但不包括 XML 声明。</td>
+        </tr>
+        <tr>
+          <th>Chrome Safari Opera</th>
+          <td>DTD 前的任何非空白符都将使浏览器忽略 DTD，但不包括 XML 声明。</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>一个 HTML 文档的 DTD 前边如果出现其他字符，在各浏览器中的处理情况是不一致的。</p>
+      <p>具体差异请参考下表：</p>
+      <table class="compare">
+        <tr>
+          <th rowspan="2">如果 DTD 之前出现</th>
+          <th colspan="7">浏览器是否能识别该 DTD</th>
+        </tr>
+        <tr>
+          <th>IE6</th>
+          <th>IE7</th>
+          <th>IE8</th>
+          <th>Firefox</th>
+          <th>Chrome</th>
+          <th>Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <td>空格符 换行符 制表符</td>
+          <td><span class="hl_2">可以识别</span></td>
+          <td><span class="hl_2">可以识别</span></td>
+          <td><span class="hl_2">可以识别</span></td>
+          <td><span class="hl_2">可以识别</span></td>
+          <td><span class="hl_2">可以识别</span></td>
+          <td><span class="hl_2">可以识别</span></td>
+          <td><span class="hl_2">可以识别</span></td>
+        </tr>
+        <tr>
+          <td>注释<sup>1</sup></td>
+          <td><span class="hl_1">不能识别</span></td>
+          <td><span class="hl_1">不能识别</span></td>
+          <td><span class="hl_1">不能识别</span></td>
+          <td><span class="hl_2">可以识别</span></td>
+          <td><span class="hl_2">可以识别</span></td>
+          <td><span class="hl_2">可以识别</span></td>
+          <td><span class="hl_2">可以识别</span></td>
+        </tr>
+        <tr>
+          <td>XML 声明<sup>2</sup></td>
+          <td><span class="hl_1">不能识别</span></td>
+          <td><span class="hl_2">可以识别</span></td>
+          <td><span class="hl_2">可以识别</span></td>
+          <td><span class="hl_2">可以识别</span></td>
+          <td><span class="hl_2">可以识别</span></td>
+          <td><span class="hl_2">可以识别</span></td>
+          <td><span class="hl_2">可以识别</span></td>
+        </tr>
+        <tr>
+          <td>其他不包含“&lt;”的字符<sup>3</sup></td>
+          <td><span class="hl_1">不能识别</span></td>
+          <td><span class="hl_1">不能识别</span></td>
+          <td><span class="hl_1">不能识别</span></td>
+          <td><span class="hl_2">可以识别</span></td>
+          <td><span class="hl_1">不能识别</span></td>
+          <td><span class="hl_1">不能识别</span></td>
+          <td><span class="hl_1">不能识别</span></td>
+        </tr>
+        <tr>
+          <td>其他包含“&lt;”的字符<sup>4</sup></td>
+          <td><span class="hl_1">不能识别</span></td>
+          <td><span class="hl_1">不能识别</span></td>
+          <td><span class="hl_1">不能识别</span></td>
+          <td><span class="hl_1">不能识别</span></td>
+          <td><span class="hl_1">不能识别</span></td>
+          <td><span class="hl_1">不能识别</span></td>
+          <td><span class="hl_1">不能识别</span></td>
+        </tr>
+      </table>
+      <p class="comment">
+      【注】<br />
+      1. 即HTML注释，如 &lt;!-- comment --&gt;。<br />
+      2. 类似 &lt;?xml version="1.0" encoding="utf-8"?&gt; 的 XML 声明。<br />
+      3. 即不是空格符、换行符、制表符，也不是注释、XML 声明的任何其他字符串，但不能包含“&lt;”字符。<br />
+      4. 即不是空格符、换行符、制表符，也不是注释、XML 声明的任何其他字符串，其中包含“&lt;”字符。<br />
+      </p>
+      <p>通过以上对比可以看出，要保证 DTD 在所有浏览器中都能正常识别，DTD 之前只能出现<strong>空格符</strong>、<strong>换行符</strong>和<strong>制表符</strong>。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>声明 DTD 时，确保 DTD 之前没有其他字符，即便有，也只能是<strong>空格符</strong>、<strong>换行符</strong>和<strong>制表符</strong>。</p>
+      <p>如将 DTD 放在 HTML 文档的第一行。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+              <a href="../../tests/HG8001/comment.html">comment.html</a><br />
+              <a href="../../tests/HG8001/xml_statement.html">xml_statement.html</a><br />
+              <a href="../../tests/HG8001/with_lt_char.html">with_lt_char.html</a><br />
+              <a href="../../tests/HG8001/without_lt_char.html">without_lt_char.html</a>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-05-28</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>DTD 空白字符 注释 渲染模式</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

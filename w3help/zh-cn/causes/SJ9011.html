@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SJ9011: Chrome Opera 中 for-in 语句遍历出对象属性的顺序与定义的不同</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 ECMA-262（ECMAScript）第三版中描述，for-in 语句的属性遍历的顺序是由<strong><em>对象定义时属性的书写顺序决定的</em></strong>。</p>
+      <p>关于 ECMA-262（ECMAScript）第三版中 for-in 语句的更多信息，请参考 <a href="http://www.ecma-international.org/publications/files/ECMA-ST-ARCH/ECMA-262,%203rd%20edition,%20December%201999.pdf">ECMA-262 3rd Edition</a> 中 12.6.4 The for-in Statement。</p>
+      <p>在现有最新的  ECMA-262（ECMAScript）第五版规范中，对 for-in 语句的遍历机制又做了调整，<strong><em>属性遍历的顺序是没有被规定的</em></strong>。</p>
+      <p>关于 ECMA-262（ECMAScript）第五版中 for-in 语句的更多信息，请参考 <a href="http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-262.pdf">ECMA-262 5rd Edition</a> 中 12.6.4 The for-in Statement。</p>
+      <p>新版本中的属性遍历顺序说明与早期版本不同，这将导致遵循 ECMA-262 第三版规范内容实现的 JavaScript 解析引擎在处理 for-in 语句时，与遵循第五版规范实现的解析引擎，对属性的遍历顺序存在不一致的问题。</p>
+      <h2 id="description">问题描述</h2>
+      <p>Chrome Opera 中使用 for-in 语句遍历对象的属性时，遍历出的属性顺序与对象定义时不同。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>在使用了 for-in 遍历对象属性，并且依赖属性顺序的脚本中，该问题可能造成脚本报错，功能失效。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Chrome Opera</th>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>Chrome Opera 中使用 for-in 语句遍历对象属性时会遵循一个规律，它们会先提取所有 key 的 parseFloat 值为非负整数的属性，
+      然后根据数字顺序对属性排序首先遍历出来，然后按照对象定义的顺序遍历余下的所有属性。其它浏览器则完全按照对象定义的顺序遍历属性。</p>
+      <p>分析以下代码：</p>
+<pre>
+&lt;script type="text/javascript"&gt;
+  window.onload = function(){
+    var obj = {
+      city: "Beijing",
+      12: 12,
+      7: 7,
+      0: 0,
+      "-2": -2,
+      "age": 15,
+      "-3.5": -3.5,
+      7.7: 7.7,
+      _: "___",
+      online: true,
+      3: 3,
+      "23": "23",
+      "44": 44
+    },
+    info = document.getElementById("info"), key;
+
+    for(key in obj){
+      info.innerHTML += key + " : " + obj[key] + "&lt;br/&gt;";
+    }
+  }
+&lt;/script&gt;
+&lt;div id="info"&gt;&lt;/div&gt;
+</pre>
+      <p>以上代码测试了对象属性 key 为正负整数及小数、字符串和符号的情况下 for-in 语句遍历的顺序。执行代码，各浏览器中表现如下：</p>
+
+      <table class="compare">
+        <tr>
+          <th>Chrome Opera</th>
+          <th>IE6 IE7 IE8 Firefox Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/SJ9011/chrome_opera.png" alt="result in Chrome and Opera" /></td>
+          <td><img src="../../tests/SJ9011/others.png" alt="result in other browsers" /></td>
+        </tr>
+      </table>
+
+      <p>经测试该问题与文档模式、属性 value 的数据类型以及对象是否是直接量创建的无关。</p>
+      <p>可见，Chrome Opera 的 JavaScript 解析引擎遵循的是新版 ECMA-262 第五版规范。因此，使用 for-in 语句遍历对象属性时遍历书序并非属性构建顺序。而 IE6 IE7 IE8 Firefox Safari 的 JavaScript 解析引擎遵循的是较老的 ECMA-262 第三版规范，属性遍历顺序由属性构建的顺序决定。<sup>1</sup></p>
+      <p class="comment">【注】：IE6 IE7 IE8 Firefox Safari 浏览器的 JavaScript 解析引擎完成时间早于  ECMA-262 第五版规范发布时间，他们均遵守第三版规范，这无可厚非。</p>
+      <h2 id="solutions">解决方案</h2>
+      <p>for-in 语句无法保证遍历顺序，应尽量避免编写依赖对象属性顺序的代码。如果想顺序遍历一组数据，请使用数组并使用 for 语句遍历。
+      如果想按照定义的次序遍历对象属性，请参考本文针对各浏览器编写特殊代码。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="SJ5003">SJ5003: Safari Chrome 中用 for in 可以遍历出 Date Array String 对象中被更新的原型方法</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.544.0 dev<br />
+              Safari 5.0.2(7533.18.5)<br />
+              Opera 10.62
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/SJ9011/for-in.html">for-in.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-09</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>for-in object property 遍历 顺序</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

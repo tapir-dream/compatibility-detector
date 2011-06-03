@@ -1,0 +1,370 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX9010: 各浏览器中对直接以 id 或者 name 属性值获取元素存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 HTML4.01 规范中的描述，元素的 id 属性为元素指定了一个唯一标识符，在整个文档中这个标识符必须是唯一的。<br />
+      而 HTML 属性属性表中则指明 id 属性可以用于除 BASE、HEAD、HTML、META、SCRIPT、STYLE、TITLE 之外的所有 HTML 元素。</p>
+      <p>元素的 name 属性仅存在于 BUTTON、TEXTAREA、APPLET、SELECT、FORM、FRAME、IFRAME、IMG、A、INPUT、OBJECT、MAP、PARAM、META 这些元素。而 name 属性在这些元素中也有不同的意义：</p>
+      <ul>
+        <li>FORM：name 属性指定了表单的名称，以便可能被某些脚本引用。<sup>1</sup></li>
+        <li>BUTTON、TEXTAREA、SELECT、INPUT、OBJECT：name 属性指定了控件名称（control name），FORM 元素内一个控件的 name 属性的作用域就是这个 FORM 元素。</li>
+        <li>FRAME、IFRAME：name 属性指定了当前框架的名称，这个名称可用于在脚本中引用这个元素，或者作为超链接的目标（target）。</li>
+        <li>IMG：name 属性指定了图像的名称，以便可能被某些脚本引用。<sup>1</sup></li>
+        <li>A：name 属性指定了当前锚的名称，它可能指向另一个链接。这个属性的值必须具备唯一性，其作用域为当前文档。<sup>1</sup></li>
+        <li>MAP：name 属性指定了 image map 的名称，与 IMG 元素的 usemap 属性相关联，创建图像与映射之间的联系。</li>
+        <li>PARAM：name 属性定义了插入对象的 run-time 参数。</li>
+        <li>META：name 属性提供了键/值对中的键（名称）。规范中未列举这个属性的合法取值。</li>
+      </ul>
+      <p class="comment">
+        注 1：这个属性的存在是为了向后兼容，目前应使用 id 属性来唯一标识一个元素。
+      </p>
+      <p>关于 id 属性的更多信息，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html401/struct/global.html#adef-id">7.5.2 Element identifiers: the id and class attributes</a> 中的内容。</p>
+      <p>关于 name 属性的更多信息，请参考 HTML4.01 规范如下章节中的内容：</p>
+      <ul>
+        <li><a href="http://www.w3.org/TR/html4/struct/global.html#adef-name-META">7.4.4 Meta data</a></li>
+        <li><a href="http://www.w3.org/TR/html4/struct/links.html#adef-name-A">12.2 The A element</a></li>
+        <li><a href="http://www.w3.org/TR/html4/struct/objects.html#adef-name-IMG">13.2 Including an image: the IMG element</a></li>
+        <li><a href="http://www.w3.org/TR/html4/struct/objects.html#adef-name-PARAM">13.3.2 Object initialization: the PARAM element</a></li>
+        <li><a href="http://www.w3.org/TR/html4/struct/objects.html#adef-name-MAP">13.6.1 Client-side image maps: the MAP and AREA elements</a></li>
+        <li><a href="http://www.w3.org/TR/html4/present/frames.html#adef-name-FRAME">16.2.2 The FRAME element</a></li>
+        <li><a href="http://www.w3.org/TR/html4/present/frames.html#adef-name-IFRAME">16.5 Inline frames: the IFRAME element</a></li>
+        <li><a href="http://www.w3.org/TR/html4/interact/forms.html#adef-name-FORM">17.3 The FORM element</a></li>
+        <li><a href="http://www.w3.org/TR/html4/interact/forms.html#adef-name-INPUT">17.4 The INPUT element</a></li>
+        <li><a href="http://www.w3.org/TR/html4/interact/forms.html#adef-name-BUTTON">17.5 The BUTTON element</a></li>
+        <li><a href="http://www.w3.org/TR/html4/interact/forms.html#adef-name-SELECT">17.6 The SELECT, OPTGROUP, and OPTION elements</a></li>
+        <li><a href="http://www.w3.org/TR/html4/interact/forms.html#adef-name-TEXTAREA">17.7 The TEXTAREA element</a></li>
+      </ul>
+      
+      <h2 id="description">问题描述</h2>
+      <p>直接以 id 或 name 属性值获取元素不能保证在各浏览器中通用。</p>
+      
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题可能造成在某些浏览器内通过此方法不能获取到元素对象。</p>
+      
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>对于直接以 id 属性值获取元素对象，除 <em>Firefox(S)</em> 外，其他各浏览器均可以获取到所有被测元素的对象。<br />
+      对于直接以 name 属性值获取元素对象，所有浏览器均支持直接通过 name 属性值获取 IFRAME、FRAME 元素，并且获取到的对象均为子页面的 window 对象。而其他元素则出现较大差异。</p>
+      <p>下面分别通过两端测试代码检测各浏览器中直接以 id 或 name 属性值能否正确地获取到元素的对象，并且检测当出现重复的 id 或 name 属性的值时，获取到的对象类型。</p>
+      <ol>
+        <li><span class="hl_2">OK</span> 代表可以获取到元素的对象，返回了对象的引用。</li>
+        <li><span class="hl_1">Fail</span> 代表无法获取到元素的对象。</li>
+      </ol>
+      <p>其中 IFRAME、FRAME 元素还需要额外检测获取到的对象类型。</p>
+      <p><strong>由于测试代码较多较长，这里不再全部贴出，具体代码请参见页面底部的“测试页面”部分的链接。</strong></p>
+      <h3>1. 通过 id 属性值</h3>
+      <p>分析以下三段代码：</p>
+      <ol>
+        <li><em>id.html</em>，检测 <strong>A ABBR ACRONYM ADDRESS AREA B BDO BIG BLOCKQUOTE BR BUTTON CAPTION CENTER CITE CODE COL COLGROUP DD DEL DIR DIV DFN DL DT EM FIELDSET FONT FORM H1 H2 H3 H4 H5 H6 HR I IMG INPUT INS ISINDEX KBD LABEL LEGEND LI LINK MAP MENU META OBJECT OL OPTGROUP OPTION EMBED P PARAM PRE Q S SAMP SCRIPT SELECT SMALL SPAN STRIKE STRONG STYLE SUB SUP TABLE TBODY TD TEXTAREA TFOOT TH THEAD TITLE TR TT U UL VAR XMP</strong> 元素
+        </li>
+        <li><em>id_frame.html</em><sup>1</sup>，检测 <strong>FRAMESET FRAME</strong> 元素
+        </li>
+        <li><em>id_html.html</em><sup>2</sup>，检测 <strong>HTML HEAD STYLE SCRIPT BODY IFRAME</strong> 元素
+        </li>
+      </ol>
+      <p class="comment">
+        注 1：由于 FRAMESET 与 FRAME 元素构成的框架页的特殊结构（此时页面不允许出现 BODY 元素），所以将这两个元素单独测试。<br />
+        注 2：由于 HTML、HEAD、BODY 这类代表 HTML 文档结构的元素，以及 SCRIPT、STYLE 元素的特殊性，所以将这些元素与 IFRAME 一起单独测试。
+      </p>
+      <p>列表总结如下：</p>
+      <table class="compare">
+        <tr>
+          <th>id</th>
+          <th>IE6 IE7 IE8 Chrome Safari Opera</th>
+          <th>Firefox(Q)</th>
+          <th>Firefox(S)</th>
+        </tr>
+        <tr>
+          <th>IFRAME</th>
+          <td><span class="hl_2">OK</span><br />[window]</td>
+          <td><span class="hl_2">OK</span><br />[HTMLIFrameElement]</td>
+          <td><span class="hl_1">Fail</span></td>
+        </tr>
+        <tr>
+          <th>FRAME</th>
+          <td><span class="hl_2">OK</span><br />[window]</td>
+          <td><span class="hl_2">OK</span><br />[HTMLFrameElement]</td>
+          <td><span class="hl_1">Fail</span></td>
+        </tr>
+        <tr>
+          <th>测试代码中的其他 HTML 元素<sup>1</sup></th>
+          <td><span class="hl_2">OK</span><br />[HTMLCollection]，若有重复，返回集合。</td>
+          <td><span class="hl_2">OK</span><br />[HTMLElement]，若有重复，返回第一个。</td>
+          <td><span class="hl_1">Fail</span></td>
+        </tr>
+      </table>
+      <p class="comment">
+        注 1：这些元素包括：<strong>A ABBR ACRONYM ADDRESS AREA B BDO BIG BLOCKQUOTE BR BUTTON CAPTION CENTER CITE CODE COL COLGROUP DD DEL DIR DIV DFN DL DT EM FIELDSET FONT FORM H1 H2 H3 H4 H5 H6 HR I IMG INPUT INS ISINDEX KBD LABEL LEGEND LI LINK MAP MENU META OBJECT OL OPTGROUP OPTION EMBED P PARAM PRE Q S SAMP SCRIPT SELECT SMALL SPAN STRIKE STRONG STYLE SUB SUP TABLE TBODY TD TEXTAREA TFOOT TH THEAD TITLE TR TT U UL VAR XMP FRAMESET HTML HEAD STYLE SCRIPT BODY</strong>。
+      </p>
+      <p>对于直接以 id 属性值获取元素对象，除 <em>Firefox(S)</em> 外，其他各浏览器均可以获取到所有被测元素的对象。</p>
+      <p>针对 IFRAME 及 FRAME 元素，<em>Firefox(Q)</em> 中获得的是元素对象自身；而 <em>其他浏览器</em> 中则是其内子页面的 window 对象。<br />
+      针对其他元素，当出现 id 属性值重复的元素时，在 <em>Firefox(Q)</em> 返回的是符合这个 id 属性值的第一个元素对应的 DOM 对象；而 <em>其他浏览器</em> 中则是一个对象集合，集合内包含了所有符合这个 id 属性值的元素对象。</p>
+        <br />
+      <h3>2. 通过 name 属性值</h3>
+      <p>分析以下四段代码：
+      <ol>
+        <li><em>name.html</em>，检测 <strong>A ABBR ACRONYM ADDRESS AREA B BDO BIG BLOCKQUOTE BR BUTTON CAPTION CENTER CITE CODE COL COLGROUP DD DEL DIR DIV DFN DL DT EM FIELDSET FONT FORM H1 H2 H3 H4 H5 H6 HR I IMG INPUT INS ISINDEX KBD LABEL LEGEND LI LINK MAP MENU META OBJECT OL OPTGROUP OPTION EMBED P PARAM PRE Q S SAMP SCRIPT SELECT SMALL SPAN STRIKE STRONG STYLE SUB SUP TABLE TBODY TD TEXTAREA TFOOT TH THEAD TITLE TR TT U UL VAR XMP</strong> 元素
+        </li>
+        <li><em>name_frame.html</em>，检测 <strong>FRAMESET FRAME</strong> 元素
+        <li><em>name_html.html</em>，检测 <strong>HTML HEAD STYLE SCRIPT BODY IFRAME</strong> 元素
+        </li>
+        <li><em>name_form.html</em><sup>1</sup>，检测 <strong>FORM 元素中的 INPUT SELECT TEXTAREA OBJECT BUTTON</strong> 元素
+        </li>
+      </ol>
+      <p class="comment">
+        注 1：由于 FORM 元素对象在 DOM 中的特殊性，这里单独测试位于 FORM 元素内的各表单元素。
+      </p>
+      <p>对于直接以 name 属性值获取元素对象，各浏览器出现较大的差异。</p>
+      <p>列表总结如下：</p>
+      <table class="compare">
+        <tr>
+          <th>name</th>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox(S)</th>
+          <th>Firefox(Q) Chrome Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <th>A</th>
+          <td><span class="hl_2">OK</span><br />[HTMLCollection]，若有重复，返回集合。</td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_2">OK</span><br />[HTMLCollection]，若有重复，返回集合。</td>
+        </tr>
+        <tr>
+          <th>FRAMESET</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr style="background-color:pink;">
+          <th style="background-color:pink;">FRAME</th>
+          <td><span class="hl_2">OK</span><br />[window]</td>
+          <td><span class="hl_2">OK</span><br />[window]</td>
+          <td><span class="hl_2">OK</span><br />[window]</td>
+          <td><span class="hl_2">OK</span><br />[window]</td>
+        </tr>
+        <tr style="background-color:pink;">
+          <th style="background-color:pink;">IFRAME</th>
+          <td><span class="hl_2">OK</span><br />[window]</td>
+          <td><span class="hl_2">OK</span><br />[window]</td>
+          <td><span class="hl_2">OK</span><br />[window]</td>
+          <td><span class="hl_2">OK</span><br />[window]</td>
+        </tr>
+        <tr>
+          <th>IMG</th>
+          <td><span class="hl_2">OK</span><br />[HTMLCollection]，若有重复，返回集合。</td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_2">OK</span><br />[HTMLCollection]，若有重复，返回集合。</td>
+          <td><span class="hl_2">OK</span><br />[HTMLCollection]，若有重复，返回集合。</td>
+        </tr>
+        <tr>
+          <th>MAP</th>
+          <td><span class="hl_2">OK</span><br />[HTMLCollection]，若有重复，返回集合。</td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_1">Fail</span></td>
+        </tr>
+        <tr>
+          <th>META</th>
+          <td><span class="hl_2">OK</span><br />[HTMLCollection]，若有重复，返回集合。</td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_1">Fail</span></td>
+        </tr>
+        <tr>
+          <th>EMBED</th>
+          <td><span class="hl_2">OK</span><br />[HTMLCollection]，若有重复，返回集合。</td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_2">OK</span><br />[HTMLCollection]，若有重复，返回集合。</td>
+          <td><span class="hl_1">Fail</span></td>
+        </tr>
+        <tr>
+          <th>FORM</th>
+          <td><span class="hl_2">OK</span><br />[HTMLCollection]，若有重复，返回集合。</td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_2">OK</span><br />[HTMLCollection]，若有重复，返回集合。</td>
+          <td><span class="hl_2">OK</span><br />[HTMLCollection]，若有重复，返回集合。</td>
+        </tr>
+        <tr>
+          <th colspan="5" style="background-color:moccasin;">位于 <em>FORM 元素之外</em>的表单元素：</th>
+        </tr>
+        <tr style="background-color:moccasin;">
+          <th style="background-color:moccasin;">INPUT</th>
+          <td><span class="hl_2">OK</span><br />[HTMLCollection]，若有重复，返回集合。</td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_2">OK</span><br />[HTMLCollection]，若有重复，返回集合。</td>
+        </tr>
+        <tr style="background-color:moccasin;">
+          <th style="background-color:moccasin;">OBJECT</th>
+          <td><span class="hl_2">OK</span><br />[HTMLCollection]，若有重复，返回集合。</td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_2">OK</span><br />[HTMLCollection]，若有重复，返回集合。</td>
+          <td><span class="hl_2">OK</span><br />[HTMLCollection]，若有重复，返回集合。</td>
+        </tr>
+        <tr style="background-color:moccasin;">
+          <th style="background-color:moccasin;">SELECT</th>
+          <td><span class="hl_2">OK</span><br />[HTMLCollection]，若有重复，返回集合。</td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_2">OK</span><br />[HTMLCollection]，若有重复，返回集合。</td>
+        </tr>
+        <tr style="background-color:moccasin;">
+          <th style="background-color:moccasin;">TEXTAREA</th>
+          <td><span class="hl_2">OK</span><br />[HTMLCollection]，若有重复，返回集合。</td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_2">OK</span><br />[HTMLCollection]，若有重复，返回集合。</td>
+        </tr>
+        <tr style="background-color:moccasin;">
+          <th style="background-color:moccasin;">BUTTON</th>
+          <td><span class="hl_2">OK</span><br />[HTMLCollection]，若有重复，返回集合。</td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_2">OK</span><br />[HTMLCollection]，若有重复，返回集合。</td>
+        </tr>
+        <tr>
+          <th colspan="5" style="background-color:khaki;">位于 <em>FORM 元素之内</em>的表单元素：</th>
+        </tr>
+        <tr colspan="5" style="background-color:khaki;">
+          <th style="background-color:khaki;">INPUT</th>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_1">Fail</span></td>
+        </tr>
+        <tr style="background-color:khaki;">
+          <th style="background-color:khaki;">OBJECT</th>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_2">OK</span><br />[HTMLCollection]，若有重复，返回集合。</td>
+          <td><span class="hl_2">OK</span><br />[HTMLCollection]，若有重复，返回集合。</td>
+        </tr>
+        <tr style="background-color:khaki;">
+          <th style="background-color:khaki;">SELECT</th>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_1">Fail</span></td>
+        </tr>
+        <tr style="background-color:khaki;">
+          <th style="background-color:khaki;">TEXTAREA</th>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_1">Fail</span></td>
+        </tr>
+        <tr style="background-color:khaki;">
+          <th style="background-color:khaki;">BUTTON</th>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_1">Fail</span></td>
+        </tr>
+        <tr>
+          <th>测试代码中的其他 HTML 元素<sup>1</sup></th>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_1">Fail</span></td>
+        </tr>
+      </table>
+      <p class="comment">
+        注 1：这些元素包括：<strong>ABBR ACRONYM ADDRESS AREA B BDO BIG BLOCKQUOTE BR CAPTION CENTER CITE CODE COL COLGROUP DD DEL DIR DIV DFN DL DT EM FIELDSET FONT H1 H2 H3 H4 H5 H6 HR I INS ISINDEX KBD LABEL LEGEND LI LINK MENU OL OPTGROUP OPTION P PARAM PRE Q S SAMP SCRIPT SMALL SPAN STRIKE STRONG STYLE SUB SUP TABLE TBODY TD TFOOT TH THEAD TITLE TR TT U UL VAR XMP HTML HEAD STYLE SCRIPT BODY</strong>。
+      </p>
+      <p>可以看到，IE 可以通过 name 属性值获取到所有拥有 name 属性的元素。</p>
+      <p>所有浏览器均支持直接通过 name 属性值获取 IFRAME、FRAME 元素，并且获取到的对象均为子页面的 window 对象。</p>
+      <p>当出现 name 属性值重复的元素时，在各浏览器中若能返回对象且对象不为 window，则均为集合，集合内包含了所有符合这个 name 属性值的元素对象。</p>
+      
+        <h2 id="solutions">解决方案</h2>
+      <p>通过上面的测试可以看到，仅仅在通过 name 属性获取 IFRAME 和 FRAME 元素内子页面的 window 对象时，所有浏览器没有差异。<br />
+      所以应避免直接以 id 或者 name 属性值获取元素，应该使用标准的 <a href="http://www.w3.org/TR/DOM-Level-2-Core/core.html">document.getElementById</a> 或 <a href="http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-71555259">document.getElementsByName</a> 方法获取元素。</p>
+      
+        <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.8<br />
+              Chrome 6.0.472.14 dev<br />
+              Safari 5.0.1<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+              <a href="../../tests/BX9010/id.html">id.html</a><br />
+              <a href="../../tests/BX9010/id_frame.html">id_frame.html</a><br />
+              <a href="../../tests/BX9010/id_html.html">id_html.html</a><br />
+              <a href="../../tests/BX9010/name.html">name.html</a><br />
+              <a href="../../tests/BX9010/name_frame.html">name_frame.html</a><br />
+              <a href="../../tests/BX9010/name_html.html">name_html.html</a><br />
+              <a href="../../tests/BX9010/name_form.html">name_form.html</a>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-05</td>
+          </tr>
+        </table>
+        
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>getElementById getElementsByName id name 获取 元素</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

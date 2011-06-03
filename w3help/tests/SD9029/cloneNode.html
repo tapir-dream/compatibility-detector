@@ -1,0 +1,22 @@
+<!DOCTYPE HTML>
+<HTML>
+<HEAD>
+</HEAD>
+<BODY>
+<div id="C" style="width:200px;height:40px;background: pink;"></div>
+<div id="A" style="width:200px;height:100px;background: gold;">
+</div>
+<div id="B" style="width:120px;height:40px;background: silver;">
+	<script language="JavaScript">
+		document.getElementById("C").innerHTML+="content ";
+	</script>
+</div>
+<button onclick="copy()">copy</button>
+</BODY>
+</HTML>
+<script language="JavaScript">
+function copy(){
+	var A=document.getElementById('A');
+	A.appendChild(document.getElementById('B').cloneNode(true));
+}
+</script>

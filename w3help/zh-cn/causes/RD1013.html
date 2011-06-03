@@ -1,0 +1,148 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RD1013: IE6 IE7 IE8(Q) 中触发 hasLayout 的空块级非替换元素的高度不是 0</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+            <p><strong>关于块级非替换元素的高度计算规则</strong></p>
+      <p>W3C 规范中规定，对于没有生成 Block Formatting Context 的块级非替换元素的 auto 高度的计算依赖于它的普通流中子元素的高度。 </p>
+      <p>而对于生成了 Block Formatting Context 的块级非替换元素的 auto 高度的计算则取决于非绝对定位子元素的高度。</p>
+            <p>总的来说，块级非替换元素的高度跟它的子元素的高度有关。</p>
+            <p>如果一个块级非替换元素没有任何子元素时，它的 auto 高度的计算值应该是0。</p>
+
+            <br/>
+            <p>关于块级非替换元素高度计算规则，请参考 W3C CSS 2.1 规范 <a href="http://www.w3.org/TR/CSS2/visudet.html#normal-block">10.6.3 Block-level non-replaced elements in normal flow when 'overflow' computes to 'visible'</a> 以及
+                <a href="http://www.w3.org/TR/CSS2/visudet.html#root-height">10.6.7 'Auto' heights for block formatting context roots</a> 中的内容。</p>
+      <p>关于 Block Formatting Context，请参考 W3C CSS 2.1 规范 <a href="http://www.w3.org/TR/CSS2/visuren.html#block-formatting">9.4.1 Block formatting context</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p><em>IE6 IE7 IE8(Q)</em> 中触发 hasLayout 的空块级非替换元素的高度不为 0。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>该问题可能会导致布局混乱。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+
+            <p>在 IE6 IE7 IE8(Q) 中，如果空的块级非替换元素触发了 hasLayout ，那么它的高度不为零，并且这个高度跟 'font-size' 有关。然而，'font-size' 是 0 的块级非替换元素的高度也不是 0。</p>
+      <p>分析以下代码：</p>
+<pre>
+&lt;style type="text/css"&gt;
+    div div {
+        background-color: gold;
+    }
+&lt;/style&gt;
+&lt;div id="<strong>Container</strong>" style="border:1px solid silver; width:300px;"&gt;
+    div[font-size:30px;] hasLayout=false
+    &lt;div id="<strong>DIV1</strong>" style=" <span class="hl_1">font-size:30px;</span>"&gt;&lt;/div&gt;
+    div[font-size:30px;] hasLayout=true
+    &lt;div id="<strong>DIV2</strong>" style=" <span class="hl_2">font-size:30px; zoom:1;</span>"&gt;&lt;/div&gt;
+    div[font-size:15px;] hasLayout=true
+    &lt;div id="<strong>DIV3</strong>" style=" <span class="hl_2">font-size:15px; zoom:1;</span>"&gt;&lt;/div&gt;
+    div[font-size:0px;] hasLayout=true
+    &lt;div id="<strong>DIV4</strong>" style=" <span class="hl_2">font-size:0; zoom:1;</span>"&gt;&lt;/div&gt;
+    &lt;br/&gt;
+&lt;/div&gt;
+</pre>
+      <ul>
+        <li><strong>Container</strong> 的宽度是 300px ；它的子元素都是<strong>没有</strong>设置宽度的 DIV 元素，因此，子元素的宽度也都会是 300px；</li>
+        <li><strong>DIV1</strong> 没有设置 'zoom:1'，所以没有在 IE 中触发 hasLayout ；</li>
+        <li><strong>DIV2</strong> 、<strong>DIV3</strong> 和 <strong>DIV4</strong> 都触发了 hasLayout。</li>
+      </ul>
+      <p>根据W3C标准，<strong>DIV1</strong> 、<strong>DIV2</strong> 、<strong>DIV3</strong> 和 <strong>DIV4</strong> 的高度应该是 0， <strong>container</strong> 中不应出现
+                <strong style="color:gold;">金色</strong>的方块。</p>
+
+      <p>这段代码在不同的浏览器环境中表现如下：</p>
+      <table class="compare">
+                <tr>
+                    <th>IE6 IE7 IE8(Q)</th>
+                    <th>IE8(S) Firefox Opera Safari Chrome</th>
+                </tr>
+                <tr>
+                    <td><img src="../../tests/RD1013/01.jpg" alt=""></td>
+                    <td><img src="../../tests/RD1013/02.jpg" alt=""></td>
+                </tr>
+            </table>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>如果想让一个触发了 hasLayout 的块级非替换元素的高度为 0，可以给这个空的块级非替换元素增加一个空的注释块：</p>
+<pre>&lt;div style="zoom:1"&gt;<span class="hl_1">&lt;!-- --&gt;</span>&lt;/div&gt;</pre>
+      <p>另外，不让元素在 IE 中触发 hasLayout 也可以避免此 BUG 。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li>...</li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Oprera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RD1013/height_of_null_block_non_replaced_element.html">height_of_null_block_non_replaced_element.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-21</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>hasLayout block non-replaced element font-size zero height</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<body style="margin:0">
+<div id="outer_cont" style="background:gold;">
+	<div id="inner_cont" style="background:red; zoom:1;">
+		<div style="float:left; border:10px solid black; display:inline; margin:10px 10px 0 0;">
+			<div id="inner_float" style="width:100px; height:100px;">FLOAT</div>
+		</div>
+		<div style="clear:left;"></div>
+	</div>
+</div>
+<script>
+	var outer_cont = document.getElementById("outer_cont");
+	var inner_float = document.getElementById("inner_float");
+	var width = 160;
+	var interval = 40;
+	var thisCall = null;
+	(function () {
+		inner_float.innerHTML = outer_cont.style.width = width-- + "px";
+		(width < 80) && (width = 160);
+		(((width >= 125 && width <= 135) || width == 80) && (interval = 200)) || (interval = 40);
+		thisCall = arguments.callee;
+		setTimeout(function () { thisCall() }, interval);
+	})();
+</script>

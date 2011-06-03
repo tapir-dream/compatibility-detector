@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HF1004: IE6 IE7 IE8(Q) 中 FIELDSET 元素的宽度不是 'auto' 时的表现与行内元素相同</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>
+        FIELDSET 元素用来将表单 (FORM) 内的相关元素(控件)分组，一般结合 LEGEND 使用。<br/>
+        FIELDSET 元素是 block-level 元素，它的 CSS 属性 'display' 为 'block'。<br/>
+        参考：
+          <ul>
+                <li><a href="http://www.w3.org/TR/CSS21/sample.html">http://www.w3.org/TR/CSS21/sample.html</a></li>
+        <li><a href="http://www.w3.org/TR/html401/interact/forms.html#edef-FIELDSET">http://www.w3.org/TR/html401/interact/forms.html#edef-FIELDSET</a></li>
+      <li><a href="http://www.w3.org/TR/html401/interact/forms.html#edef-LEGEND">http://www.w3.org/TR/html401/interact/forms.html#edef-LEGEND</a></li>
+          </ul>
+      </p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 IE7 IE8(Q) 中，当给 FIELDSET 元素设置了一个固定的宽度时，该元素的表现更像是一个行内元素，虽然它的 'display' 值仍是 'block'。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>这个问题会造成局部的布局混乱。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>根据 HTML 4.01 和 CSS 2.1 中相应规范说明 FIELDSET 元素是个块级元素，现实中各个浏览器均是如此表现的么？分析以下代码：</p>
+<pre>&lt;fieldset style=&quot;width:150px;&quot;&gt;
+  FIELDSET ELement
+&lt;/fieldset&gt;
+&lt;span style=&quot;border:1px solid gray;padding:0 5px;background:gold;&quot;&gt;
+  Span Element
+&lt;/span&gt;</pre>
+      <p>FIELDSET 元素设置了 'width:150px'，其后是个行内元素 SPAN。 FIELDSET 是块级元素，没有设置浮动或绝对定位处在普通文档流中，SPAN 元素应该是另起一行显示。</p>
+      <p>但事实不是这样：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+            <th>IE8(S) Firefox Safari Chrome</th>
+          </tr>
+        <tr>
+          <td><img src="../../tests/HF1004/2.png" alt="运行效果截图"/></td>
+            <td><img src="../../tests/HF1004/1.png" alt="运行效果截图"/></td>
+          </tr>
+      </table>
+      <p>
+      结果是：<br/>
+      <strong>IE8(S) Firefox Safari Chrome</strong>：FIELDSET 是块级元素，处于普通文档流中，单独占据一行显示。SPAN 元素另起一行显示。按照规范这样渲染正常的。<br/>
+
+      <strong>IE6 IE7 IE8(Q)</strong>：FIELDSET 元素和 SPAN 元素在同一行显示，这时 FIELDSET 元素表现更像是 'inline-block' 元素。</p>
+      <p>检查 <a href="http://msdn.microsoft.com/en-us/library/ms535247(v=VS.85).aspx">MSDN</a> 说明，其内同样表明 FIELDSET 元素是块级元素，由此可以证明，以上现象是 IE6 IE7 IE8(Q) 浏览器的 Bug ，直至 IE8(S) 才将此问题修复。</p>
+      <h2 id="solutions">解决方案</h2>
+      <p>这是一个 Bug，通过显式设置 FIELDSET 的样式为 'display:block' 来修复。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.2<br />
+              Chrome 5.0.356.2 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HF1004/fieldset_element.html">fieldset_element.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-03</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>FIELDSET width display block inline-block 折行</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RM8008: IE6 IE7 IE8(Q) 中对浮动元素上 'clear' 特性的解释出现错误，使其自身位置和其后浮动元素的位置与其他浏览器中不同</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p><a href="http://www.w3.org/TR/CSS21/visuren.html#float-position">W3C CSS Level 2 Revision 1 第9.5.1节</a>对浮动元素方式的规则中有如下定义：</p>
+      <p>规则2:左浮动元素的顶外边必须在所有先前的左浮动框的底外边界之下，此规则同样使用右浮动。</p>
+      <p>规则5:浮动框的顶边不可以高于源文档中先前的元素产生的块或浮动框的顶。</p>
+      <p><a href="http://www.w3.org/TR/CSS21/visuren.html#flow-control">W3C CSS Level 2 Revision 1 第9.5.2节</a>对控制紧邻浮动流—— 'clear' 特性做了规定：</p>
+            <p>该属性说明了一个元素的框的哪一边不得与其之前的浮动框相邻。 'clear' 属性并不考虑该元素内部或其他 &quot;block formatting context &quot;中的浮动。</p>
+            <p>间隙（Clearance）以元素 'margin top' 上方空白的方式被引入。它用来把元素垂直（典型情况是向下）推过浮动框。它是一个值。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在IE6 IE7 IE8(Q)中，如果 clear 特性被设置在一个浮动的元素上，该浮动元素会与其前边的浮动元素放置在同一行。</p>
+      <p>在IE6 IE7 IE8(Q)中，如果 clear 属性被设置到一个浮动的元素上，位于其后的浮动元素的外顶边高于该元素的外顶边。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>在IE6 IE7 IE8(Q)中，clear 特性被设置在一个浮动的元素上时，造成页面布局错乱。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+                <tr>
+                    <th>IE6 IE7 IE8(Q)</th>
+                    <th>&nbsp;</th>
+                </tr>
+            </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>对于上述两个问题，我们通过以下的测试用例来说明。</p>
+      <p>分析以下代码：</p>
+<pre>
+&lt;div id= &quot;Container &quot; style= &quot;background-color:silver; width:150px; float:left; &quot;&gt;
+  &lt;div id= &quot;Float &quot; style= &quot;<span class="hl_1">float:right;</span> width:100px; height:100px; background-color: green; &quot;&gt;Float&lt;/div&gt;
+  &lt;div id= &quot;Clear &quot; style= &quot;<span class="hl_1">clear:right; float:left;</span> width:100px; height:100px;background-color:yellow;filter:alpha(opacity=50);-moz-opacity:0.5; opacity: 0.5; &quot;&gt;Clear&lt;/div&gt;
+&lt;/div&gt;
+</pre>
+      <ul>
+      <li> Container 的宽度为150px，设置 &quot;float:left &quot;是为使容器高度自适应。</li>
+      <li> Clear 是含有 'clear' 特性的浮动元素， Float 和 Clear 的尺寸都是 100px*100px。</li>
+      <li>对 Clear 设置 'filter:alpha(opacity=50);-moz-opacity:0.5; opacity: 0.5;' 是为了让Clear可以透明，突出 Clear 把 Float 覆盖的事实。</li>
+      </ul>
+      <p>根据浮动元素位置规则2， Clear 不应该与 Float 处于同一行，应该折行显示。</p>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+                <tr>
+                    <th>IE6 IE7 IE8(Q)</th>
+                    <th>IE8(S) Firefox Chrome Safari Opera</th>
+                </tr>
+                <tr>
+                    <td><img src="../../tests/RM8008/RM8008-1.png" alt=""></td>
+                    <td><img src="../../tests/RM8008/RM8008-2.png" alt=""></td>
+                </tr>
+            </table>
+      <p>分析以下代码：</p>
+<pre>
+&lt;div id= &quot;Container&quot; style= &quot;width:300px; height:200px; border:1px solid red; &quot;&gt;
+        &lt;div id= &quot;DIV1&quot; style= &quot;<span class="hl_1">float:right;</span> width:150px; height: 50px; background-color:darkgray; &quot;&gt;1 float:right;&lt;/div&gt;
+        &lt;div id= &quot;DIV2&quot; style= &quot;<span class="hl_1">clear:right; float:right;</span> width:250px; height: 50px; background-color:silver; &quot;&gt;2 clear:right; float:right;&lt;/div&gt;
+        &lt;div id= &quot;DIV3&quot; style= &quot;<span class="hl_1">float:left; </span>width:100px; height: 50px; background-color:gray; &quot;&gt;3 float:left;&lt;/div&gt;
+&lt;/div&gt;
+</pre>
+      <ul>
+      <li> Container 的宽度大于 DIV1+DIV3 的宽度和， Container 的宽度小于 DIV2+DIV3 的宽度。</li>
+      <li> DIV1 是一个右浮动的元素。</li>
+      <li> DIV2 一个右浮动元素，它含有 'clear:right' 特性，可以清除前面的右浮动，可以使 DIV2 位于 DIV1 的下方。</li>
+      <li> DIV3 是一个普通的左浮动元素。</li>
+      </ul>
+
+      <p>根据浮动元素的位置规则5， DIV3 的顶外边不应该高于 DIV2 的顶外边。所以，根据标准推测，当 DIV2+DIV3 宽度大于容器宽度时， DIV3 应该位于 DIV2 的下方；而当 DIV2+DIV3 宽度小于容器宽度时， DIV3 应该与 DIV2 处在同一行。</p>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+                <tr>
+                    <th>IE6 IE7 IE8(Q)</th>
+                  <th>IE8(S) Firefox Chrome Safari Opera</th>
+                </tr>
+                <tr>
+                    <td><img src="../../tests/RM8008/RM8008-3.png" alt=""></td>
+                    <td><img src="../../tests/RM8008/RM8008-4.png" alt=""></td>
+                </tr>
+            </table>
+      <p>可见，</p>
+      <ul>
+      <li>在IE6 IE7 IE8(Q)中，如果浮动元素的 'clear' 不为 'none' ( 'clear' 的默认值是 'none' ），那么它自身的位置和处于它之后的浮动元素的位置都会出现兼容性问题。</li>
+      <li>在其他浏览器中，则按照规范进行了正确的处理，不存在此问题</li>
+      </ul>
+      <p>这个差异是由 IE6 IE7 IE8(Q) 中处理 'clear' 特性时的 Bug 造成的，它在 IE8(S) 中被修复。</p>
+      <p>如果一个页面在 IE6 IE7 IE8(Q) 中被设计，并且触发了该 Bug ，那么这个页面在其他浏览器中的布局将与预期的不符。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>不要将 'clear' 特性应用在浮动元素上，以免出现上述不兼容的问题。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.60 </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+            <a href="../../tests/RM8008/RM8008-1.html">RM8008-1.html</a>
+            <br/>
+            <a href="../../tests/RM8008/RM8008-2.html">RM8008-2.html</a>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-19</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>float clear 清除浮动 位置</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

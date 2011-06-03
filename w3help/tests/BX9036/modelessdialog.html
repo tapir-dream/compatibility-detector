@@ -1,0 +1,12 @@
+<input type="text" id="textbox" value="defaultValue" /><br />
+<button id="open1">Open ModelessDialog</button>
+<script>
+    var updatetext = "";
+    function update() {
+        document.getElementById("textbox").value = updatetext;
+    }
+    
+    document.getElementById("open1").onclick = function () {
+        window.showModelessDialog("inner.html", window);
+    }
+</script>

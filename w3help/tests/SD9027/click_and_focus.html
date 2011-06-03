@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+</head>
+<body>
+<h3>请依次点击各个标记，会在message浮动窗中打印出 click 和 focus 事件消息：</h3>
+<div id="A"></div>
+<script>
+window.onload = function (){
+	var htmls = [
+		'<a href="javascript:void 0;">A</a>',
+		'<img src="logo_cn.png" usemap="#planetmap" /><map name="planetmap"><area shape="rect" coords="0,0,50,50" title="AREA" href ="javascript:void 0;" style="display:inline;" />MAP</map>',
+		'<abbr>ABBR</abbr>',
+		'<acronym>ACRONYM</acronym>',
+		'<address>ADDRESS</address>',
+		'<b>B</b>',
+		'<bdo>BDO</bdo>',
+		'<big>BIG</big>',
+		'<blockquote>BLOCKQUOTE</blockquote>',
+		'<button>BUTTON</button>',
+		'<table><caption>CAPTION</caption><tr><td></td></tr></table>',
+		'<center>CENTER</center>',
+		'<cite>CITE</cite>',
+		'<code>CODE</code>',
+		'<table><col /><tr><td>COL</td></tr></table>',
+		'<table><colgroup></colgroup><tr><td>COLGROUP</td></tr></table>',
+		'<dd>DD</dd>',
+		'<del>DEL</del>',
+		'<dir>DIR</dir>',
+		'<div>DIV</div>',
+		'<dfn>DFN</dfn>',
+		'<dl>DL</dl>',
+		'<dt>DT</dt>',
+		'<em>EM</em>',
+		'<fieldset>FIELDSET</fieldset>',
+		'<font>FONT</font>',
+		'<form>FORM</form>',
+		'<h1>H1</h1>',
+		'<h2>H2</h2>',
+		'<h3>H3</h3>',
+		'<h4>H4</h4>',
+		'<h5>H5</h5>',
+		'<h6>H6</h6>',
+		'<hr />',
+		'<i>I</i>',
+		'<img src="logo_cn.png" />',
+		'<input type="text" value="text" />',
+		'<input type="password" value="password" />',
+		'<input type="button" value="inputButton" />',
+		'<input type="submit" value="submit" />',
+		'<input type="file" />',
+		'<input type="radio">',
+		'<input type="checkbox">',
+		'<ins>INS</ins>',
+		'<iframe src="google.html"></iframe>',
+		'<kbd>KBD</kbd>',
+		'<label>LABEL</label>',
+		'<fieldset><legend>LEGEND</legend></fieldset>',
+		'<li>LI</li>',
+		'<menu>MENU</menu>',
+		'<object data="logo_cn.jpg"></object>',
+		'<ol>OL</ol>',
+		'<embed type="application/x-shockwave-flash" src="clock.swf" />',
+		'<p>P</p>',
+		'<pre>PRE</pre>',
+		'<q>Q</q>',
+		'<s>S</s>',
+		'<samp>SAMP</samp>',
+		'<select><option>SELECT</option></select>',
+		'<small>SMALL</small>',
+		'<span>SPAN</span>',
+		'<strike>STRIKE</strike>',
+		'<strong>STRONG</strong>',
+		'<sub>SUB</sub>',
+		'<sup>SUP</sup>',
+		'<table><tbody><tr><td>TABLE</td></tr></tbody></table>',
+		'<table><tbody><tr><td>TBODY</td></tr></tbody></table>',
+		'<table><tbody><tr><td>TD</td></tr></tbody></table>',
+		'<textarea>TEXTAREA</textarea>',
+		'<table><tfoot><tr><td>TFOOT</td></tr></tfoot></table>',
+		'<table><tbody><tr><th>TH</th></tr></tbody></table>',
+		'<table><thead><tr><td>THEAD</td></tr></thead></table>',
+		'<table><tbody><tr><td>TR</td></tr></tbody></table>',
+		'<tt>TT</tt>',
+		'<u>U</u>',
+		'<ul>UL</ul>',
+		'<var>VAR</var>'
+	]
+
+	function buildElement(){
+		var html ="";
+		for (var i=0,l=htmls.length; i<l; i++) html += htmls[i];
+		var targetElement = document.getElementById("A");
+		targetElement.innerHTML = html;
+		var tags = targetElement.getElementsByTagName("*");
+		for (i=0,l=tags.length; i<l; i++){
+			void function (tag){
+				eventBind(tag,"click",function (){
+					setMessageBoxValue(tag.tagName + " TAG clicked \n");
+				});
+				eventBind(tag,"focus",function (){
+					setMessageBoxValue(tag.tagName + " TAG focused \n");
+				});
+			}(tags[i]);
+		}
+	}
+
+	function eventBind( obj, type, fn ) {
+			( obj.attachEvent )
+			? obj.attachEvent( "on"+type, fn)
+			:obj.addEventListener(type,fn,false);
+	}
+
+	function buildMessageBox(){
+		var msgbox = '<div id="message" style="position:absolute;top:0;right:0;width:300px;border:1px solid #CCC; background:#ECECEC"> \
+				message: <button>clear message</button>\
+				<textarea style="display:block;height:200px;width:290px;"></textarea> \
+				</div>';
+
+		document.body.innerHTML += msgbox;
+		msgbox = document.getElementById("message");
+		eventBind(window,"scroll",function(){
+			var scrollTop = document.body.scrollTop || document.documentElement.scrollTop;
+			msgbox.style.top = scrollTop +"px";
+		});
+		eventBind(msgbox.getElementsByTagName("button")[0],"click",function(){
+			getMessageBox().value = "";
+		});
+
+	}
+	function getMessageBox(){
+		return msgbox = document.getElementById("message").getElementsByTagName("textarea")[0];
+	}
+	function setMessageBoxValue(s){
+		var msgElement = getMessageBox();
+		msgElement.value += s;
+		msgElement.scrollTop = 9999999;
+	}
+	buildMessageBox();
+	buildElement();
+}
+</script>
+</body>
+</html>

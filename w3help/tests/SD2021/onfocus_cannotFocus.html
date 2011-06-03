@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	* { margin:0; padding:0; }
+	*:focus { border:10px solid; }
+	body { margin:20px; font:16px/1.5 Arial; }
+	a { color:blue; text-decoration:none; border-bottom:1px solid lightblue; }
+	a:hover { color:red; border-bottom:1px solid pink; }
+	a:active { position:relative; bottom:-1px; }
+	#cont { height:200px; overflow:scroll; background:#ddd; border:1px solid black; }
+</style>
+<script src="tags.js"></script>
+<script>
+	window.onload = function() {
+		var resf = [], resn = [], el;
+		var test = $('test');
+		var cont = $('cont');
+		var flist = $('flist');
+		var elements = test.getElementsByTagName("*");
+		test.innerHTML = htmls.join("");
+		setTimeout(function () { 
+			for (var i = 0, j = elements.length, r = 0; i < j; i++) {
+				resetScroll(cont);
+				el = elements[i];
+				if (el.getAttribute('myID') == 'tmp') {
+					el.id = 'm' + ++r;
+					el.tabIndex = 1;
+					el.onfocus = function () {
+						resf.push(this.tagName);
+					}
+					el.focus();
+				}
+			}
+			setTimeout(function () {
+				for (var i = 0, j = tags.length; i < j; i++) {
+					if (resf.indexOf(tags[i]) < 0) {
+						resn.push(tags[i]);
+					}
+				}
+				flist.innerHTML = (resn.length > 0) ? resn.join(", ") : 'N/A';
+				resetScroll(cont);
+			}, 0)
+		}, 0)
+	}
+</script>
+</head>
+<body>
+<h1>onfocus - cannot focus</h1>
+<div id="flist">N/A</div>
+<div id="cont">
+<script>
+	whiteBR(150);
+</script>
+<div id="test"></div>
+</div>
+</body>
+</html>

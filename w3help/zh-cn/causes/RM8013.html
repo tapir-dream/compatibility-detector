@@ -1,0 +1,119 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RM8013: IE6 IE7(Q) IE8(Q) 不支持固定定位（position:fixed）</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 W3C CSS2.1 规范中的描述，position:fixed 固定定位是绝对定位的子类。与绝对定位不同的是，固定定位的包含块由视口（<a href="http://www.w3.org/TR/CSS21/visuren.html#viewport">viewport</a>）创建的。</p>
+      <p>'position' 特性的 fixed 值允许一个元素绝对的相对于浏览器窗口定位。</p>
+      <p>关于 'position:fixed' 的详细信息，请参考 CSS 2.1 规范 <a href="http://www.w3.org/TR/CSS21/visuren.html#fixed-positioning">9.6.1 Fixed positioning</a> 中的内容。</p>
+      <p>在 CSS 1 版中，没有 position 定位特性，仅支持 CSS 1 的浏览器将不会拥有人和定位效果。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE6 IE7(Q) IE8(Q) 不支持固定定位（position:fixed），对其设置 'position:fixed' 无任何效果。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>由于 IE6 IE7(Q) IE8(Q) 将 'position' 特性的 fixed 值当作错误值处理，从而使用 'position' 特性的初始值 static，即这个元素在 IE6 IE7(Q) IE8(Q) 变成了普通流中的静态元素，这将会造成布局混乱等多种兼容性问题。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7(Q) IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>对于此问题，我们通过以下的测试用例来说明。</p>
+
+      <p>分析以下代码：</p>
+<pre>&lt;div id="<strong>DIV1</strong>" style="float:left; height:3000px;"&gt;&lt;/div&gt;
+&lt;div id="<strong>DIV2</strong>" style="<span class="hl_1">position:fixed;</span> top:300px;"&gt;fixed div&lt;/div&gt;</pre>
+      <ul>
+        <li><strong>DIV1</strong> 的高度为 3000px，使浏览器窗口出现滚动条；</li>
+        <li><strong>DIV2</strong> 是固定定位元素，它的位置不会随页面滚动而变化。</li>
+      </ul>
+      <p>根据 CSS2.1 规范中的描述可知，当页面中滚动条滚动时，<strong>DIV2</strong> 的位置应该不发生变化。</p>
+
+      <p>以上测试用例在不同的浏览器中打开，除 IE6 IE7(Q) IE8(Q) 外，滚动窗口，<strong>DIV2</strong> 中的文本“fixed div”会一直位于窗口中部。</p>
+      <p class="comment">【注】：从 IE6 开发以及发布时间可知，当时 CSS 2.0 的成文规范还没有推出。反观 MSND 中说明 IE 4.0 版本以上即支持除 'position:fixed' 外其定位特性值设置。这意味着 IE6 以及之前的 IE 版本所支持的 'position' 特性并非 CSS 2.0 规范中描述的定位特性，他是遵循 IE 自身定义的渲染规范的。 </p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>在 IE6 IE7(Q) IE8(Q) 中为固定定位元素设置 'position:absolute'，再通过 JavaScript 脚本或者 CSS Expression 动态设置其偏移量。</p>
+            <p>参考代码如下：<p>
+<pre>&lt;body style="font:12px Arial; _background-attachment:fixed; _background-image:url(about:blank);"&gt;
+  &lt;div style="width:10000px; height:10000px;"&gt;&lt;/div&gt;
+  &lt;div id="d" style="position:fixed; top:0; left:0; _position:absolute; _top:expression(offsetParent.scrollTop); _left:expression(offsetParent.scrollLeft); background:#ddd; width:100px; height:100px;"&gt;&lt;/div&gt;
+&lt;/body&gt;
+</pre>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br/>
+              IE7<br/>
+              IE8<br/>
+              Firefox 3.6.6<br/>
+              Chrome 6.0.447.0 dev<br/>
+              Safari 5.0
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RM8013/fixed_position.html">fixed_position.html</a><br />
+            <a href="../../tests/RM8013/fixed_sol.html">fixed_sol.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-21</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>position fixed 固定 定位</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

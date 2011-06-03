@@ -1,0 +1,245 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX9011: 各浏览器对 setTimeout 方法传入时间参数的某些极端值的处理存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。<br />
+      
+      <h2 id="description">问题描述</h2>
+      <p>setTimeout 方法的时间参数若为极端值（如负数、0、或者极大的正数），则各浏览器的处理会出现较大差异，某些浏览器会立即执行。</p>
+      
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题会造成不同浏览器中执行代码的时刻出现差异，可能造成后面的脚本出错。</p>
+      
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>setTimeout 方法通常的调用语法为：<code>setTimeout(code, millisec)</code>。其用于在 millisec 参数指定的毫秒数之后调用 code 参数中的代码或者是函数表达式，setTimeout 方法中的代码仅执行一次。</p>
+      <p>关于 setTimeout 方法的更多信息，</p>
+      <ul>
+        <li>请参见 MSDN <a href="http://msdn.microsoft.com/en-us/library/ms536753(v=VS.85).aspx">setTimeout Method</a> 中的内容；</li>
+        <li>请参见 Mozilla Developer Center <a href="https://developer.mozilla.org/en/DOM/window.setTimeout">window.setTimeout</a> 中的内容；</li>
+        <li>请参见 HTML5 草案 <a href="http://www.w3.org/TR/html5/timers.html#timers">6.2 Timers</a> 中的内容。</li>
+      </ul>
+      <p>各种规范草案及官方文档中均为提及 setTimeout 方法中设定毫秒数的参数的取值范围。下面将针对一些极端值进行测试。</p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body style=&quot;font:24px Consolas;&quot;&gt;
+&lt;div&gt;setTimeout: N/A&lt;/div&gt;
+&lt;script&gt;
+  setTimeout(function () {
+    document.getElementsByTagName(&quot;div&quot;)[0].innerHTML = 'setTimeout: Trigger';
+  }, <span class="hl_1">-10</span>);
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码为 setTimeout 方法设定了一个值为 <span class="hl_1">-10</span> 的时间参数。</p>
+      <p>各浏览器中运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td>setTimeout: N/A</td>
+          <td>setTimeout: Trigger</td>
+        </tr>
+      </table>
+      <p>可见，对于值为 <span class="hl_1">-10</span> 的时间参数，在 <em>Firefox Chrome Safari Opera</em> 中立即执行<sup>2</sup>了代码。而在 IE 中则没有执行，可以看作各浏览器进入了代码延时执行环节。</p>
+      <p class="comment">注 1: 此处以及之后的立即执行是指与 setTimeout (func,0) 执行情况相同，即在完成当前执行流后的延时执行情况。</p>
+    <br />
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body style=&quot;font:24px Consolas;&quot;&gt;
+&lt;div&gt;setTimeout: N/A&lt;/div&gt;
+&lt;script&gt;
+  setTimeout(function () {
+    document.getElementsByTagName(&quot;div&quot;)[0].innerHTML = 'setTimeout: Trigger';
+  }, <span class="hl_1">-2147483649</span>);
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码为 setTimeout 方法设定了一个值为 <span class="hl_1">-2147483649</span> 的时间参数。</p>
+      <p>各浏览器中运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Firefox Chrome Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <td>setTimeout: N/A</td>
+          <td>setTimeout: Trigger</td>
+        </tr>
+      </table>
+      <p>可见，对于值为 <span class="hl_1">-2147483649</span> 的时间参数， <em>Opera</em> 立即执行了代码。而在 其他浏览器中则没有执行，可以看作各浏览器进入了代码延时执行环节。</p>
+      <br />
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body style=&quot;font:24px Consolas;&quot;&gt;
+&lt;div&gt;setTimeout: N/A&lt;/div&gt;
+&lt;script&gt;
+  setTimeout(function () {
+    document.getElementsByTagName(&quot;div&quot;)[0].innerHTML = 'setTimeout: Trigger';
+  }, <span class="hl_1">Infinity</span>);
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码为 setTimeout 方法设定了一个值为 <span class="hl_1">Infinity</span> 的时间参数。</p>
+      <p>各浏览器中运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Firefox Chrome Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <td>setTimeout: N/A</td>
+          <td>setTimeout: Trigger</td>
+        </tr>
+      </table>
+      <p>可见，对于值为 <span class="hl_1">Infinity</span> 的时间参数，<em>Opera</em> 立即执行了代码。而在其他浏览器中则没有执行，这有两种可能存在，一为此参数无效被忽略，二为浏览器已经进入大数延时执行状态；但是我们无法确切知道是各浏览器中实际执行的是哪种情况，因为等待他们执行需要的时间太长了。</p>
+    <br />
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body style=&quot;font:24px Consolas;&quot;&gt;
+&lt;div&gt;setTimeout: N/A&lt;/div&gt;
+&lt;script&gt;
+  setTimeout(function () {
+    document.getElementsByTagName(&quot;div&quot;)[0].innerHTML = 'setTimeout: Trigger';
+  }, <span class="hl_1">2147483647</span>);
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码为 setTimeout 方法设定了一个值为 <span class="hl_1">2147483647</span> 的时间参数。</p>
+      <p>各浏览器中运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td>setTimeout: N/A</td>
+        </tr>
+      </table>
+      <p>可见，所有浏览器对于值为 <span class="hl_1">2147483647</span> 的时间参数，运行后代码均没有很快被执行，这说明各浏览器仅进入了延时执行环节。</p>
+<br />
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body style=&quot;font:24px Consolas;&quot;&gt;
+&lt;div&gt;setTimeout: N/A&lt;/div&gt;
+&lt;script&gt;
+  setTimeout(function () {
+    document.getElementsByTagName(&quot;div&quot;)[0].innerHTML = 'setTimeout: Trigger';
+  }, <span class="hl_1">2147483648</span>);
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码为 setTimeout 方法设定了一个值为 <span class="hl_1">2147483648</span> 的时间参数。</p>
+      <p>各浏览器中运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Opera</th>
+          <th>Firefox Chrome Safari</th>
+        </tr>
+        <tr>
+          <td>setTimeout: N/A</td>
+          <td>setTimeout: Trigger</td>
+        </tr>
+      </table>
+      <p>可见，对于值为 <span class="hl_1">Infinity</span> 的时间参数，在 <em>Firefox Chrome Safari</em> 中立即执行了代码。而在 <em>IE Opera</em> 中则没有执行，可以看作各浏览器进入了代码延时执行环节。</p>
+      <br />
+      <p>统计各浏览器对于 setTimeout 方法传入的时间参数的极端值的处理并无实际意义，这其中涉及到浏览器内核的实现，以及整型溢出等问题。但通过上面的测试样例已经可以看出各浏览器对于极大、负值的事件参数的处理有很大的差异。</p>
+      
+      
+      
+      
+      
+      <h2 id="solutions">解决方案</h2>
+      <p>明确使用 setTimeout 方法的意义，若不希望代码被执行则应通过其他方法达到类似的效果，而不能依赖于为 setTimeout 方法设定极端的时间参数；负数的时间参数是无意义的，应避免使用，若希望代码在当前执行流完成后立即执行，则应设定 0 作为参数。</p>
+      
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.9<br />
+              Chrome 7.0.517.5 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+              <a href="../../tests/BX9011/settimeout.html">settimeout.html</a>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-14</td>
+          </tr>
+        </table>
+        
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>setTimeout setInterval timer 定时 时间</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

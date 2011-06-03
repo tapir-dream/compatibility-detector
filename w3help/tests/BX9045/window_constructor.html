@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>
+<title>window constructor</title>
+<script>
+window.onload = function (){
+	void function (){
+		var msg = document.createElement('h2');
+		try{
+			msg.innerHTML = 'window 对象的构造器为 : ' + window.constructor.toString();
+		}catch(e){
+			msg.innerHTML = 'window 对象的构造器不可探知';
+		}
+		document.body.appendChild(msg);
+	}();
+
+	void function (){
+		var msg;
+		msg = document.createElement('h2');
+		msg.innerHTML = '扩充 window 对象构造器方法,其他 Javascript 原生对象是否可访问:'
+		document.body.appendChild(msg);
+		var objectList = {
+				'window':window,
+				'String':String,
+				'Number':Number,
+				'Function':Function,
+				'Boolean':Boolean,
+				'Array':Array,
+				'Math':Math,
+				'Date':Date,
+				'RegExp':RegExp,
+				'Object':Object
+				};
+		try{
+			window.constructor.prototype.myTest = function (){};
+		}catch(e){
+			msg = document.createElement('h2');
+			msg.innerHTML = 'window 对象的构造器不可扩充';
+			document.body.appendChild(msg);
+			return;
+		}
+		for (var i in objectList){
+			msg = document.createElement('h2');
+			msg.innerHTML =  i + '对象 : '
+				+ (
+					objectList[i].myTest
+					?'<span style="color:red"> myTest 方法存在</span>'
+					:'<span style="color:gray"> myTest 方法不存在</span>'
+				);
+			document.body.appendChild(msg);
+		}
+
+	}();
+
+}
+</script>
+</head>
+<body>
+</body>
+</html>

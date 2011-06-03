@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<script>
+	window.onload = function (){
+		function stopDefault(e){
+			e = e || window.event;
+			(e.preventDefault)
+			?e.preventDefault()
+			:e.returnValue = false;
+		}
+		function addEvent(el, type, fn){
+			(el.addEventListener)
+			? el.addEventListener(type, fn, false)
+			:(function () {
+				el.attachEvent("on" + type, function(e){
+					fn.call(el,e);
+				 });
+			})();
+		}
+		function setEvents(elment){
+			addEvent(elment,"mousedown",function (e){
+				this.value+=' mousedown 事件被触发';
+				stopDefault(e);
+			});
+			addEvent(elment,"focus",function (e){
+				this.value+=' focus 事件被触发';
+			});
+			addEvent(elment,"mouseup",function (e){
+				this.value+=' mouseup 事件被触发';
+			});
+			addEvent(elment,"click",function (e){
+				this.value+=' click 事件被触发';
+			});
+		}
+		setEvents(document.getElementsByTagName("input")[2]);
+	}
+</script>
+</head>
+<body>
+<ol>
+<li>
+	<h2> 鼠标默认行为触发顺序  </h2>
+	<input style="width:100%;" onmousedown="this.value+=' mousedown 事件被触发 ';" onfocus="this.value+=' focus 事件被触发 '" onclick="this.value+=' click 事件被触发 '" onmouseup="this.value+=' mouseUp 事件被触发 '">
+	<p>点击文本域后显示 click 事件相关联的各个事件触发顺序。</p>
+</li>
+<li>
+	<h2> 使用 return false 语句阻止 MouseDown 后续默认行为触发  </h2>
+	<input style="width:100%;" onmousedown="this.value+=' mousedown 事件被触发 ';return false;" onfocus="this.value+=' focus 事件被触发 '" onclick="this.value+=' click 事件被触发 '" onmouseup="this.value+=' mouseUp 事件被触发 '">
+	<p>点击文本域后没有继续执行 focuse 事件内程序，则说明成功阻止了默认行为。</p>
+</li>
+<li>
+	<h2>使用 preventDefault 方法阻止 MouseDown 后续默认行为触发 </h2>
+	<input style="width:100%;">
+	<p>点击文本域后没有继续执行 focuse 事件内程序，则说明成功阻止了默认行为。</p>
+</li>
+</ol>
+</body>
+</html>

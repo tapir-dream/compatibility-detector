@@ -1,0 +1,136 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RX1008: IE6 IE7 IE8(Q) 中 cellspacing 属性在重合的边框模型的表格中仍然有效</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 HTML4.01 规范中的描述，TABLE 元素的 cellspacing 属性指定了表格的四边与其内单元格之间、单元格与单元格之间的间隙。在 CSS2 中新增的 'border-spacing' 特性可以替代这个属性。</p>
+      <p>根据 W3C CSS2.1 规范中的描述，'border-collapse' 特性则决定了表格采用何种边框模型， 'border-collapse:collapse' 表示表格将采用重合的边框模型（The collapsing border model）。<br />
+      cellspacing 属于分离的边框模型（The separated borders model），即 'border-collapse' 特性值应为 'separate'，若与 'border-collapse:collapse' 一起作用于 TABLE 元素上时，cellspacing 属性应不再起作用。</p>
+      <p>关于表格的边框模型以及 cellspacing 属性 的详细信息，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html401/struct/tables.html#adef-cellspacing">11.3.3 Cell margins</a> 以及 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS2/tables.html#borders">17.6 Borders</a> 中的内容。</p>
+      <p></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE6 IE7 IE8(Q) 中 cellspacing 属性在重合的边框模型的表格中仍然有效。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>若同时使用 cellspacing 属性及 border-collapse:collapse，将会导致表格的边框在不同浏览器中产生差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：<em>cellspacing_and_collapsed_border.html</em></p>
+<pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;table <span class="hl_1">cellspacing=&quot;10&quot;</span> style=&quot;<span class="hl_2">border-collapse:collapse;</span> background:wheat; border:5px solid brown; font:20px 'Trebuchet MS';&quot;&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;background:lightcyan; border:5px solid navy;&quot;&gt;TD&lt;/td&gt;
+    &lt;td style=&quot;background:lightcyan; border:5px solid navy;&quot;&gt;TD&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;background:lightcyan; border:5px solid navy;&quot;&gt;TD&lt;/td&gt;
+    &lt;td style=&quot;background:lightcyan; border:5px solid navy;&quot;&gt;TD&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码为 TABLE 元素设置了 <span class="hl_1">cellspacing</span> 属性及 <span class="hl_2">border-collapse:collapse</span>。</p>
+      <p>这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Chrome Safari Oepra</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RX1008/IE6_7_cellspacing_and_collapsed_border.gif" alt="IE6/7 cellspacing and collapsed border" /></td>
+          <td><img src="../../tests/RX1008/non_IE6_7_cellspacing_and_collapsed_border.gif" alt="non-IE6/7 cellspacing and collapsed border" /></td>
+        </tr>
+      </table>
+      <p>可见：</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8(Q)</em> 中，在通过 <span class="hl_2">border-collapse:collapse</span> 使用表格的重合边框模型后，其 <span class="hl_1">cellspacing</span> 属性仍然有效；</li>
+        <li>在 <em>其他浏览器</em> 中，此时的 <span class="hl_1">cellspacing</span> 属性不再生效。</li>
+      </ul>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>在使用 border-collapse:collapse 时应保证 TABLE 元素的 cellspacing 属性值为 0。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.3<br />
+              Chrome 5.0.396.0 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.53
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RX1008/cellspacing_and_collapsed_border.html">cellspacing_and_collapsed_border.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-06-24</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>TABLE cellspacing border-collapse border collapse 表格 边框 合并</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

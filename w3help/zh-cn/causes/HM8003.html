@@ -1,0 +1,280 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HM8003: 各浏览器对 BODY 元素或通常被放置在 BODY 元素内的元素出现在第一个 FRAMESET 元素之前时所生成的文档树存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <h3>FRAME 元素介绍(Introduction to frames)</h3>
+      <p><em>HTML FRAMES</em> 可以将文档(HTML 页面)呈现在多个视口中，并且该文档(HTML 页面)可以成为一个独立的窗口或子窗口。当某些视口发生滚动或变化(页面内容改变或被重定向)时，多个视口提供给设计者保持其他视口的信息始终可见的一种方法。例如，在同一个窗口中，第一个 FRAME 可以用来呈现标题等静态信息，第二个 FRAME 可以用来呈现一个导航菜单，第三个 FRAME 可以用来呈现主题内容并且它可以被用户滚动或通过第二个窗口中的导航菜单被新页面替换掉，而这些发生在第三个 FRAME 中的变化是不会影响其他两个 FRAME 的。<br/>
+        请参考 HTML4.01：<a href="http://www.w3.org/TR/html401/present/frames.html#h-16.1">16.1 Introduction to frames</a> 。 </p>
+      <h3>FRAMESET 元素介绍(Introduction to FRAMESET)</h3>
+      <p>包含 FRAME 的 HTML 文档(又称："frameset document")与不包含 FRAME 的文档有着不同的标记。一个标准的 HTML 文档包含一个 HEAD 部分和一个 BODY 部分，然而一个 "frameset document" 包含一个 HEAD 部分和一个 FRAMESET 部分。<br/>
+        文档的 FRAMESET 部分用来指定视口在客户端主窗口中的布局。另外，当客户端不支持 FRAME 或被配置为不显示 FRAME 时，FRAMESET 部分可以包含一个非 FRAME 元素作为替换内容。<br/>
+        <span class="hl_4">通常被放置在 BODY 元素内的元素不能出现在第一个 FRAMESET 元素之前，否则 FRAMESET 元素将被忽略。</span><br/>
+        请参考 HTML4.01：<a href="http://www.w3.org/TR/html401/present/frames.html#h-16.2">16.2 Layout of frames</a> 。 </p>
+      <p> 更多参考资料：<br/>
+        W3C HTML4.01：<a href="http://www.w3.org/TR/html401/present/frames.html#edef-FRAMESET">16.2.1 The FRAMESET element</a>。<br/>
+        W3C DOM-level_2：<a href="http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-43829095">Interface HTMLFrameSetElement</a>。<br/>
+        关于 window.frames 集合资料，请参考各浏览器厂商相关文档： <a href="http://msdn.microsoft.com/en-us/library/ms537459(v=VS.85).aspx">MSDN</a>、 <a href="https://developer.mozilla.org/en/window.frames">Mozilla Developer Center</a>、 <a href=        "http://developer.apple.com/safari/library/documentation/AppleApplications/Reference/WebKitDOMRef/DOMWindow_idl/Classes/DOMWindow/index.html#//apple_ref/js/data/DOMWindow/frames">Safari Refernece Library</a>。 </p>
+      <h2 id="description">问题描述</h2>
+      <p>各浏览器对 BODY 元素或通常被放置在 BODY 元素内的元素出现在第一个 FRAMESET 元素之前时，最终生成的文档树存在差异。<br/>
+      </p>
+      <h2 id="influence">造成的影响</h2>
+      <p>由于该问题会引起各浏览器中最后生成的文档树存在差异，最终会导致页面中其他元素的布局可能在各浏览器中的最终表现不同。</p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>下面分别建立四个 HTML 页面，top.html、test.html、frame1.html、frame2.html，页面间的关系及主要内容和作用如下：
+      <ul>
+        <li>frame1.html、frame2.html 通过 frameset 标记嵌入在 test.html 中，frame1.html和frame2.html 为只有简单内容的两个普通页面，而 test.html 是为了触发本文所叙述的问题所设计的页面，其内容请见下面的代码部分； </li>
+        <li>test.html 通过 "iframe" 标记嵌入在 top.html 中，并在 top.html 中通过一个递归函数遍历出 test.html 中 HTML 结点下的结点树形结构；</li>
+      </ul>
+      </p>
+      <p> top.html中的代码如下： </p>
+      <pre>
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta charset="utf-8" /&gt;
+&lt;style&gt;
+body{font:'arial' 16px/1.5;}
+&lt;/style&gt;
+&lt;script&gt;
+
+window.onload=function(){
+  var tree = "",
+      string = "";
+
+  function build(){
+    var htmlElement = window.frames["ifr"].document.documentElement;
+    traverse(htmlElement,0);
+    document.getElementById("info").innerHTML += tree;
+
+  }
+
+  function traverse(element,level){
+    var tabs;
+    if (!element.children.length){
+      tabs = "└";
+      tree += new Array(level + 1).join('&amp;nbsp;&amp;nbsp;&amp;nbsp;') + tabs + element.tagName + "&lt;br /&gt;";
+      return;
+    }else{
+      tabs = "+";
+      tree += new Array(level + 1).join('--') + tabs + element.tagName + "&lt;br /&gt;";
+      level++;
+    }
+    for (var i = 0, l = element.children.length; i &lt; l; i++){
+      traverse( element.children[i] ,level );
+    }
+  }
+  build();
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;iframe name="ifr" src="test.html"&gt;
+&lt;/iframe&gt;
+&lt;div id="info"&gt;
+test.html中 HTML 结点下的结点树形结构如下：&lt;br/&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+      <p> test.html中的代码如下： </p>
+      <pre>
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta charset="utf-8" /&gt;
+&lt;title&gt;&lt;/title&gt;
+&lt;style&gt;
+  * { font-family: 'Lucida Console' }
+&lt;/style&gt;
+&lt;/head&gt;
+<span class="hl_4">&lt;form&gt;&lt;div&gt;&lt;input type="hidden" value="test"/&gt;&lt;/div&gt;</span>
+<span class="hl_4">&lt;p&gt;&lt;span&gt;&lt;/span&gt;&lt;/p&gt;</span>
+<span class="hl_4">&lt;/form&gt;</span>
+&lt;frameset cols="40%, 60%"&gt;
+  &lt;frame src="frame1.html" /&gt;
+  &lt;frame src="frame2.html" /&gt;
+&lt;/frameset&gt;
+&lt;/html&gt;
+</pre>
+      <p>test.html 中 HTML 的结点树形结构如下： </p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7(S) IE8(S)</th>
+          <th>IE7(Q) IE8(Q)<sup>1</sup></th>
+          <th>FireFox</th>
+        </tr>
+        <tr style="vertical-align:top;">
+          <td>
+<pre>
++HTML
+---+HEAD
+      └TITLE
+      └META
+      └STYLE
+------+FORM
+         └INPUT
+---+FRAMESET
+      └FRAME
+      └FRAME
+---+BODY
+      └DIV
+------+P
+         └SPAN
+</pre>          </td>
+          <td>
+<pre>
++HTML
+---+HEAD
+      └TITLE
+      └META
+      └STYLE
+------+FORM
+         └INPUT
+---+FRAMESET
+      └FRAME
+      └FRAME
+</pre>          </td>
+          <td><pre>
++HTML
+---+HEAD
+      └META
+      └TITLE
+      └STYLE
+---+FRAMESET
+      └FRAME
+      └FRAME
+          </pre>          </td>
+        </tr>
+        <tr style="vertical-align:top;">
+          <th>Opera<sup>1</sup></th>
+          <th>Safari<sup>1</sup></th>
+          <th>Chrome</th>
+        </tr>
+        <tr style="vertical-align:top;">
+          <td><pre>
++HTML
+---+HEAD
+      └META
+      └TITLE
+      └STYLE
+---+BODY
+------+FORM
+---------+DIV
+           └INPUT
+---------+P
+           └SPAN
+------+FRAMESET
+         └FRAME
+         └FRAME
+          </pre>          </td>
+          <td><pre>
++HTML
+---+HEAD
+    └META
+    └TITLE
+    └STYLE
+---+BODY
+------+FORM
+---------+DIV
+        └INPUT
+---------+P
+        └SPAN
+---+FRAMESET
+    └FRAME
+    └FRAME
+          </pre>          </td>
+          <td><pre>
++HTML
+---+HEAD
+      └META
+      └TITLE
+      └STYLE
+---+BODY
+------+FORM
+---------+DIV
+            └INPUT
+---------+P
+            └SPAN
+          </pre>          </td>
+        </tr>
+      </table>
+      <p class="comment">注【1】：Opera 和 Safari 中的差异在于 FRAMESET 结点在文档树中所处的位置不同。Opera 中属于 BODY 的子元素，Safari 中属于 HTML 的子元素。</p>
+      <p>各浏览器中产生差异的主要原因为：在一个页面中，当 BODY 元素或通常被放置在 BODY 元素内的元素出现在第一个 FRAMESET 元素之前时，各浏览器是按照 "HTML Document" 还是按照 "frameset document" 去生成最终文档树所产生的。从运行结果中可以看到在 <em>IE7(Q) IE8(Q) Opera Safari Chrome</em> 生成的文档树中加入了 BODY 结点，这是各浏览器的修复功能所产生的，根据规范中的描述(<span class="hl_4">通常被放置在 BODY 元素内的元素不能出现在第一个 FRAMESET 元素之前，否则 FRAMESET 元素将被忽略。</span>)可知，只有在 Chrome 中符合规范的描述。 </p>
+      <p> 读者也可以将此测试用例在不同浏览器中运行后使用各浏览器特有的调试工具查看最终生成的文档树结构。 </p>
+      <h2 id="solutions">解决方案</h2>
+      <p> 针对此问题在各浏览器中产生的差异，要看设计者的最终目的是什么，但始终应该参照规范中的描述使得 BODY 元素或通常被放置在 BODY 元素内的元素不能出现在第一个 FRAMESET 元素之前。 </p>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td> IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.11<br />
+              8.0.552.5 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.63 </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HM8003/top.html">top.html</a><br />
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-20</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>FRAME FRAMESET BODY</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

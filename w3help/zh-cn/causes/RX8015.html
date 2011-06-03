@@ -1,0 +1,213 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" /></head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RX8015: IE6 IE7 IE8(Q) 没有完全正确地将 IMG、OBJECT、IFRAME、TABLE 等元素的 align='left|right' 理解为浮动</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 HTML4.01 规范中的描述，图像（IMG）、对象（OBJECT）、表格（TABLE）、框架（IFRAME）等的 align 属性可使该元素浮动到左或右边距。而浮动的元素通常会开始新的一行。此属性的取值如下：</p>
+      <ul>
+        <li>left：向左浮动该元素，随后的文本显示在其右侧；</li>
+        <li>right：向右浮动该元素，随后的文本显示在其左侧。</li>
+      </ul>
+      <p>关于 应用在图像（IMG）、对象（OBJECT）、表格（TABLE）、框架（IFRAME）等的 align 属性的详细信息，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html401/present/graphics.html#h-15.1.3">15.1.3 Floating objects</a> 中的内容。</p>
+      <p></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 IE7 IE8(Q) 中，无论容器的宽度为多大，其内所有 align 属性设置为 'left' 或 'right' 的 IMG、OBJECT、TABLE、IFRAME 等元素将始终显示在一行中。并不会随着其包含块宽度的缩小而发生折行现象。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>若容器内包含多个设置了 align="left" 或 align="right" 的 IMG、OBJECT、IFRAME、TABLE 等元素，当容器宽度比这些元素的宽度小时，在 IE6 IE7 IE8(Q) 中将产生与其他标准浏览器中完全不同的布局。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>首先，观察标题所述的几种元素的 align 属性的特点，这里以 IMG 元素为例。</p>
+
+      <p>分析以下代码：</p>
+<pre>
+&lt;div style="background:#DDD; padding:5px; border:5px solid;"&gt;
+  &lt;div style="float:left; width:50px; height:30px; background:#999;"&gt;DIV&lt;/div&gt;
+  &lt;img align="left" style="width:110px; height:20px; background:#666;"/&gt;
+  &lt;img align="left" style="width:110px; height:20px; background:#666;"/&gt;
+&lt;/div&gt;
+</pre>
+      <p>上面代码中，一个 DIV 容器内包含了一个左浮动 DIV 元素及两个 align 属性为 'left' 的 IMG 元素。</p>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6(Q) IE7(Q) IE8(Q)</th>
+          <th>IE6(S) IE7(S) IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RX8015/IEQ_img_align_float.gif" alt="IMG align attribute in IE(Q)" /></td>
+          <td><img src="../../tests/RX8015/non_IEQ_img_align_float.gif" alt="IMG align attribute in non-IE(Q)" /></td>
+        </tr>
+      </table>
+      <p>忽略 IE(Q) 中元素之间的多余间隙<sup>1</sup>。在所有浏览器中，IMG 元素的 align 属性为 left 或 right 时的表现与 CSS 规范中的“浮动”概念很像，align="left" 理解为类似 float:left 的效果。同时容器由于其内元素全部脱离了文本流而内容高度变为 0。通过在 Firefox Chrome Safari Opera 的开发工具中查看 IMG 元素计算后的样式可以发现，这些浏览器都直接将 align="left" 解释为 float:left。对于 right 的情况也类似。</p>
+      <p class="comment">注 1: 此现象为 IE(Q) 的 Bug (在本文后面的讨论中不再考虑)。</p>
+      
+      <br />
+      <p>下面通过另一个例子来分析 IE 中对 align 属性的错误渲染。</p>
+      <p>分析以下代码：</p>
+<pre>
+&lt;div style="width:300px;"&gt;
+  &lt;div style="background:#DDD; padding:5px; border:5px solid;"&gt;
+    &lt;img align="left" src="doodle.gif" style="width:100px; border:1px solid black;"/&gt;
+    &lt;img align="left" src="doodle.gif" style="width:100px; border:1px solid black;"/&gt;
+    &lt;img align="right" src="doodle.gif" style="width:100px; border:1px solid black;"/&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</pre>
+      <p>上面代码中，一个 DIV 容器内包含了两个 align 属性为 left 及一个 align 属性为 right 的 IMG 元素。</p>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RX8015/IE6_7_img_align_left_right.gif" alt="IMG align attribute bug in IE6/7,IE8(Q)" /></td>
+          <td><img src="../../tests/RX8015/non_IE6_7_img_align_left_right.gif" alt="IMG align attribute in non IE6/7,IE8(Q)" /></td>
+        </tr>
+      </table>
+      <p>带边框的 DIV 容器没有设置 'width'，则为默认的 'auto'，其宽度将由其父容器决定，即 300px。可见：</p>
+      <ul>
+        <li>在 IE6 IE7 IE8(Q)<em> </em>中，当容器的宽度比其内三个 IMG 元素的宽度小时，IMG 元素并没有发生换行，而是溢出了容器。无论容器的宽度多小，这三个 IMG 元素始终显示在同一行上；</li>
+        <li>在 <em>其他浏览器</em> 中，当容器的宽度比其内三个 IMG 元素的宽度小时，IMG 元素会发生换行，这种表现同将这三个 IMG 元素设置了相应的浮动特性相同。</li>
+      </ul>
+      <br />
+      <p>下面测试一下 OBJECT、TABLE、IFRAME 元素的 align 属性的特点。</p>
+      <p>OBJECT</p>
+<pre>
+&lt;div style="width:300px;"&gt;
+  &lt;div style="background:#DDD; padding:5px; border:5px solid;"&gt;
+    &lt;object align="left" data="doodle.gif" type="application/x-shockwave-flash" style="width:100px; height:42px; border:1px solid black; background-color:#aaa;"&gt;
+      &lt;param value="doodle.gif" name="movie" /&gt;
+    &lt;/object&gt;
+    &lt;object align="left" data="doodle.gif" type="application/x-shockwave-flash" style="width:100px; height:42px; border:1px solid black; background-color:#aaa;"&gt;
+      &lt;param value="doodle.gif" name="movie" /&gt;
+    &lt;/object&gt;
+    &lt;object align="right" data="doodle.gif" type="application/x-shockwave-flash" style="width:100px; height:42px; border:1px solid black; background-color:#aaa;"&gt;
+      &lt;param value="doodle.gif" name="movie" /&gt;
+    &lt;/object&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</pre>
+
+      <p>TABLE</p>
+<pre>
+&lt;div style="width:300px;"&gt;
+  &lt;div style="background:#DDD; padding:5px; border:5px solid;"&gt;
+    &lt;table align="left"&gt;
+      &lt;tr&gt;
+        &lt;td&gt;
+          &lt;img align="left" src="doodle.gif" style="width:100px; border:1px solid black;"/&gt;
+        &lt;/td&gt;
+      &lt;/tr&gt;
+    &lt;/table&gt;
+    &lt;table align="left"&gt;
+      &lt;tr&gt;
+        &lt;td&gt;
+          &lt;img align="left" src="doodle.gif" style="width:100px; border:1px solid black;"/&gt;
+        &lt;/td&gt;
+      &lt;/tr&gt;
+    &lt;/table&gt;
+    &lt;table align="right"&gt;
+      &lt;tr&gt;
+        &lt;td&gt;
+          &lt;img align="left" src="doodle.gif" style="width:100px; border:1px solid black;"/&gt;
+        &lt;/td&gt;
+      &lt;/tr&gt;
+    &lt;/table&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</pre>
+      <p>IFRAME</p>
+<pre>
+&lt;div style="width:300px;"&gt;
+  &lt;div style="background:#DDD; padding:5px; border:5px solid;"&gt;
+    &lt;iframe align="left" style="width:100px; height:42px;"&gt;&lt;/iframe&gt;
+    &lt;iframe align="left" style="width:100px; height:42px;"&gt;&lt;/iframe&gt;
+    &lt;iframe align="right" style="width:100px; height:42px;"&gt;&lt;/iframe&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</pre>
+      <p>对于 OBJECT、TABLE、IFRAME、APPLET、EMBED 元素也同样存在此现象。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>align 属性已被废弃，应避免使用这类 HTML 属性。为 IMG、OBJECT、IFRAME、TABLE、APPLET、EMBED 元素使用 CSS 的 'float' 特性以达到相同的效果。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.3<br />
+              Chrome 5.0.375.9 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.51</td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RX8015/align.html">align.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-10</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>IMG Object Table align left right float 浮动 对齐 图片</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

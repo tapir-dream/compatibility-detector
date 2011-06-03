@@ -1,0 +1,125 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RD1014: 行内非替换元素的高度和宽度的设置仅在 IE 混杂模式中生效</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+            <p><strong>关于宽度、高度特性的适用元素</strong></p>
+      <p>宽度和高度特性是用来指定块级元素和替换元素生成框的内容宽度（content width）和内容高度（content height）。</p>
+      <p>CSS2.1 中明确规定这两个特性不适用于行内非替换元素。</p>
+      <p>行内非替换元素框的宽度是它的内容渲染后（在任何子元素相对偏移之前）的宽度，它的高则是基于字体。</p>
+      <p>关于宽度高度的详细信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS2/visudet.html#the-width-property">10.2 Content width: the 'width' property</a> 、<a href="http://www.w3.org/TR/CSS2/visudet.html#the-height-property">10.5 Content height: the 'height' property</a>
+                、 <a href="http://www.w3.org/TR/CSS2/visudet.html#inline-width">10.3.1 Inline, non-replaced elements</a> 以及 <a href="http://www.w3.org/TR/CSS2/visudet.html#inline-non-replaced">10.6.1 Inline, non-replaced elements</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE 的混杂模式中行内非替换元素的宽高可设置。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>可能会导致严重的布局混乱。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE(Q)</th>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+            <p>在 IE 的混杂模式中，行内非替换元素的高度宽度值都可以设置，这时候，行内非替换元素表现的像一个 inline-block 元素。</p>
+
+            <p>分析以下代码：</p>
+<pre>&lt;span style="width:50px; height:50px; background-color:gold;"&gt;
+    ALOHA
+&lt;/span&gt;</pre>
+      <ul>
+        <li>SPAN 分别设置了 50px 的宽和高。</li>
+      </ul>
+      <p>SPAN 是行内非替换元素，根据 CSS 2.1 规范规定，宽高不应当起作用。所以 SPAN 元素渲染后的宽高都应跟它的内容 “ALOHA” 有关。</p>
+
+            <p>这段代码在不同的浏览器环境中表现如下：</p>
+      <table class="compare">
+                <tr>
+                    <th>IE(Q)</th>
+                    <th>IE(S) Firefox Opera Safari Chrome</th>
+                </tr>
+                <tr>
+                    <td><img src="../../tests/RD1014/01.jpg" alt=""></td>
+                    <td><img src="../../tests/RD1014/02.jpg" alt=""></td>
+                </tr>
+            </table>
+
+      <p>可见，IE 只有在混杂模式下，宽高才会对行内非替换元素起作用。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>在页面上添加&lt;!DOCTYPE HTML&gt;，使页面工作在标准模式下。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.6<br />
+              6.0.447.0 dev<br />
+              Safari 5.0
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RD1014/RD1014.html">RD1014.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-21</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>width height non-replaced inline-level element</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

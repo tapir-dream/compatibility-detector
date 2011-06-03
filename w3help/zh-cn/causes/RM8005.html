@@ -1,0 +1,158 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RM8005: IE6 IE7 IE8(Q) 中行内元素后相邻的浮动元素在某些情况下会折行放置在之前行内元素所在行框的底部</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>W3C CSS 2.1 规范文档里对于浮动元素与非浮动行内元素相邻时的情况有如下解释。以下是关键段落：</p>
+      <pre>A floated box is shifted to the left or right until its outer edge touches the containing block edge or the outer edge of another float. If there's a line box, the top of the floated box is aligned with the top of the current line box.</pre>
+      <p>由上面的描述可以得到以下结论：如果一个元素浮动前是一个行内元素，则该元素浮动后，顶部应与其之前所在的行框顶部对齐。</p>
+      <p>关于浮动的详细信息，请参考 CSS 2.1 规范 <a href="http://www.w3.org/TR/CSS2/visuren.html#floats">9.5 Floats</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE6 IE7 IE8(Q) 下，若浮动元素之前存在兄弟行内非浮动元素，IE 会将浮动元素所在的“当前行”认为是其前边的兄弟行内元素所产生的匿名框的底边，导致该浮动元素折行。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>如果我们仅仅在 IE6 IE7 中编写页面并进行测试，当看到上面对测试代码的截图中的效果，在不清楚导致右浮动元素换行的原因是 IE6 IE7 对于同一行内浮动元素与非浮动行内元素的处理存在 Bug 的情况时，有可能会为右浮动元素设置一个负值 'margin-top'，这样虽然在 IE6 IE7 中能保证布局的正常，但在其他浏览器下就会出现异常。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+      <pre>&lt;div style="border:1px solid black; font:14px Verdana; padding:5px;"&gt;
+&lt;span style="background:gold;"&gt;Text1&lt;/span&gt;
+&lt;span style="background:lightblue;"&gt;Text2&lt;/span&gt;
+&lt;span style="background:pink;"&gt;Text3&lt;/span&gt;
+&lt;span style="background:greenyellow;"&gt;Text4&lt;/span&gt;
+&lt;span style="background:peru;"&gt;Text5&lt;/span&gt;
+&lt;span style="background:tomato; float:right;"&gt;Some text aligning right&lt;/span&gt;
+&lt;/div&gt;</pre>
+      <p>这段代码在各浏览器中的效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6
+            IE7
+            IE8(Q)
+          </th>
+          <th>IE8(S)
+            Firefox
+            Chrome
+            Safari
+            Opera
+          </th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RM8005/float_after_inline_1.gif" alt="" /></td>
+          <td><img src="../../tests/RM8005/float_after_inline_2.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>可见，</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8(Q)</em> 中，浮动的 SPAN 折行浮动在新的一行上，同时位置也脱离了其父容器；</li>
+        <li>在其他浏览器中，则遵照 CSS 2.1 规范对浮动的定义，将浮动元素显示在浮动框另一边的第一个可用行上。</li>
+      </ul>
+      <p>
+        在 IE6 IE7 下，测试代码没有达到我们预计的效果，右浮动的 SPAN 折行浮动在新的一行上，同时位置也脱离了其父容器。
+        现在看看 Text1、 Text2……Text5 所在的 SPAN 元素作为浮动框之前当前行的内容，应该显示在浮动框另一边的第一个可用行上。
+        右浮动的 SPAN 紧贴在其父容器的右边界，其左侧的空白区域只要有足够的空间容纳这 5 个非浮动的 SPAN 元素，它们就应该保持与右浮动的 SPAN 元素位于同一行上。
+        这里 IE6 IE7 以及所有版本 IE 的混杂模式的处理均是错误的。</p>
+      <p>此问题的触发条件:</p>
+      <ol>
+        <li>同一个父容器内有多个行内元素；</li>
+        <li>某些为非浮动元素，某些为浮动元素（可以是左浮动或右浮动）；</li>
+        <li>浮动的子元素不都是位于非浮动的子元素之前。</li>
+      </ol>
+
+      <h2 id="solutions">解决方案</h2>
+            <p>依具体情况可以使用三种方法：使用绝对定位模拟右浮动、使用 IE hack 专门在IE6 IE7 中设置负的上外边距、将右浮动的 SPAN 元素调整到所有非浮动 SPAN 元素之前。</p>
+      <ol>
+        <li>使用绝对定位（position:absolute）模拟右浮动（float:right）。
+            为了避免 IE6 IE7 的这个 BUG，可以不使用右浮动，而是用绝对定位及右偏移（right:XXXpx），如为右浮动元素设置 'position:absolute' 及 'right:3px' 替代 'float:right'，但这样做的代价是必须为父容器 DIV 元素设置 'postion:relative'，这么做仍然会破坏原文档结构。所以我们并不推荐此方法。</li>
+        <li>使用 IE hack 专门在IE6 IE7 中设置负的上外边距（margin-top:-XXXpx）。
+            既然此 Bug 为IE6 IE7 专有，则只需要在 IE6 IE7 下为右浮动元素设置一个负的上外边距即可，其他浏览器保持原样式。所以可以考虑使用只有 IE6 IE7支持的 hack 方式：在 CSS 特性前加星号 '*'。如 <span class="hl_4">*margin:-23px 5px 0 0</span>，这样既可消除 IE6 IE7 中的 Bug，但是这么做是利用了浏览器的 Bug，并没有消除 Bug。在能有个更好的解决方法的时候，不推荐使用 CSS hack 来解决问题。</li>
+        <li> 调整SPAN元素的位置。
+            通过上面总结的 Bug 触发条件，我们可以考虑直接调整父容器中 SPAN 子元素的位置来回避 IE6 IE7 中此 Bug，即将右浮动的 SPAN 元素调整到所有非浮动 SPAN 元素之前。
+            <pre>&lt;div style="border:1px solid black; font:14px Verdana; padding:5px;"&gt;
+&lt;span style="background:tomato; float:right;"&gt;Some text aligning right&lt;/span&gt;
+&lt;span style="background:gold;"&gt;Text1&lt;/span&gt;
+&lt;span style="background:lightblue;"&gt;Text2&lt;/span&gt;
+&lt;span style="background:pink;"&gt;Text3&lt;/span&gt;
+&lt;span style="background:greenyellow;"&gt;Text4&lt;/span&gt;
+&lt;span style="background:peru;"&gt;Text5&lt;/span&gt;
+&lt;/div&gt;</pre>
+        </li>
+      </ol>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+          <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+          <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 5.0.342.2 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.50
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RM8005/float_after_inline.html">float_after_inline.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-21</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>float bug inline 行内 浮动 换行</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

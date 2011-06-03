@@ -1,0 +1,127 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RD1003: 零宽高的 IFRAME 元素的实际尺寸在不同浏览器中有差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 CSS 2.1 规范中的描述：</p>
+      <ul>
+        <li>'width' 和 'height' 可以用来定义一个元素的内容尺寸。</li>
+        <li>'border-width' 用来定义 border 区域的宽度，'border-style' 用来定义边框的样式，当 'border-style' 为 'none' 时，'border-width' 的计算值为 0。</li>
+      </ul>
+      <p>关于 'width' 和 'height' 的更多信息，请参考 CSS 2.1 规范 <a href="http://www.w3.org/TR/CSS21/visudet.html#the-width-property">10.2 Content width: the 'width' property</a> 和 <a href="http://www.w3.org/TR/CSS21/visudet.html#the-height-property">10.5 Content height: the 'height' property</a> 中的内容。</p>
+      <p>关于 'border-width' 和 'border-style' 的更多信息，请参考 CSS 2.1 规范 <a href="http://www.w3.org/TR/CSS21/box.html#border-width-properties">8.5.1 Border width: 'border-top-width', 'border-right-width', 'border-bottom-width', 'border-left-width', and 'border-width'</a> 和 <a href="http://www.w3.org/TR/CSS21/box.html#border-style-properties">8.5.3 Border style: 'border-top-style', 'border-right-style', 'border-bottom-style', 'border-left-style', and 'border-style'</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 IE7 IE8 中，'width' 或 'height' 任意一个或两个都设置为 '0' 的 IFRAME 元素是不可见的，而在其它浏览器中这样设置后的 IFRAME 元素仍可见。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>该问题将造成局部布局错乱或视觉效果有差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+        </tr>
+        <tr>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>IFRAME 元素的默认样式在各浏览器下是不同的，其 'border-style' 的默认值在 IE 中是 'none'，在其他浏览器中则为 'inset'，而其 'border-width' 的默认值在 IE 中是 'medium'，在其他浏览器中则为 '2px'。也就是说，默认情况下，IFRAME 的边框在 IE 中是不可见的，而在其他浏览器中则可以看到 2px 宽的边框。<sup>1</sup></p>
+      <p>因此即便设置其宽或高为 0，也只能保证在 IE 中不可见，在其他浏览器中，其边框则是可见的。</p>
+      <p>测试代码如下（本问题不区分浏览器模式）：</p>
+<pre>
+&lt;div style="width:400px; background:gold;"&gt;
+  &lt;span&gt;iframe 1&lt;/span&gt;&lt;iframe style="width:0;"&gt;&lt;/iframe&gt;&lt;br/&gt;
+  &lt;span&gt;iframe 2&lt;/span&gt;&lt;iframe style="height:0;"&gt;&lt;/iframe&gt;&lt;br/&gt;
+  &lt;span&gt;iframe 3&lt;/span&gt;&lt;iframe style="width:0; height:0;"&gt;&lt;/iframe&gt;
+&lt;/div&gt;
+</pre>
+      <p>这段代码各浏览器中的表现如下：</p>
+      <table class="compare">
+        <tr><th>IE6 IE7 IE8</th><td><img src="../../tests/RD1003/RD8003-1.png" alt="运行效果截图" /></td></tr>
+        <tr><th>Firefox</th><td><img src="../../tests/RD1003/RD8003-2.png" alt="运行效果截图" /></td></tr>
+        <tr><th>Safari</th><td><img src="../../tests/RD1003/RD8003-3.png" alt="运行效果截图" /></td></tr>
+        <tr><th>Chrome</th><td><img src="../../tests/RD1003/RD8003-4.png" alt="运行效果截图" /></td></tr>
+      </table>
+      <p>可见：通过使用零宽高隐藏 IFRAME 仅在 IE 中可行，在其他浏览器中无法实现。</p>
+      <p class="comment">注：</p>
+      <ol class="comment">
+        <li>宽高不为 0 的 IFRAME 在 IE 能看到“边框”，但这个“边框”并不是 IFRAME 元素本身的边框，而是其嵌入的文档的边框。</li>
+      </ol>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>根据实际情况选择使用 'visibility:hidden' 或者 'display:none' 隐藏 IFRAME 。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="#">...</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-20</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>width height 0 IFRAME 零宽高 隐藏</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

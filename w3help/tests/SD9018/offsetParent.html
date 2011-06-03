@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+	function $(id) { return document.getElementById(id); }
+	window.onload = function () {
+		$('info').innerHTML += '<br />P\'s offsetParent: ' + $('P').offsetParent.tagName;
+		$('info').innerHTML += '<br />P\'s offsetTop: ' + $('P').offsetTop;
+		$('info').innerHTML += '<br />P\'s offsetLeft: ' + $('P').offsetLeft;
+	}
+</script>
+</head>
+<body style="margin:0; font:18px 'Trebuchet MS';">
+<div style="float:left; margin:50px; background:wheat;">
+	<p id="P" style="width:50px; height:50px; margin:50px; background:plum;">P</p>
+</div>
+<div id="info" style="clear:left;"></div>
+</body>
+</html>

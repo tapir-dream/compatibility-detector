@@ -1,0 +1,172 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RM1009: IE6 IE7 IE8(Q) 中一些块级元素的默认上下外边距会在其浮动或触碰到 hasLayout 的容器后消失</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>'margin' 特性指定了一个框的外边距区域的宽度，它指定了可以作为简写同时指定上下左右四个方向的外边距距离，也可以使用 'margin-top'、'margin-bottom'、'margin-left' 和 'margin-right' 分别指定各自的宽度。</p>
+      <p>这些特性可以应用在所有元素上，但垂直方向的 margin 不会影响行内非替换元素。</p>
+      <p>关于 'margin' 特性的更详细信息，请参考 CSS 2.1：<a href="http://www.w3.org/TR/CSS21/box.html#margin-properties">8.3 Margin properties: 'margin-top', 'margin-right', 'margin-bottom', 'margin-left', and 'margin'</a>。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE6 IE7 IE8(Q) 中一些拥有默认上下外边距的块级元素（浏览器设置的）在浮动，或触碰到触发了 hasLayout 特性的容器后，上下外边距会消失。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题导致的外边距消失可能影响到页面的布局，如段落过于紧凑，甚至是文字重叠。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8 (Q)</th>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p><strong>在各浏览器中，P、H1、H2、H3、H4、H5、H6、PRE、UL、OL、DL等块级元素都拥有默认的 'margin-top' 与 'margin- bottom'。</strong></p>
+      <h3>1. IE6 IE7 IE8 (Q) 中有默认上下外边距的块级元素浮动后外边距消失</h3>
+      <p>在 IE6 IE7 IE8(Q) 中，拥有默认 'margin-top'、'margin-bottom' 的块级元素在浮动后，其原有默认的上下外边距丢失。</p>
+      <p>分析以下代码：</p>
+<pre>
+&lt;div style=&quot;float:left; width:100%; height:20px; background:#DDD;&quot;&gt;&lt;/div&gt;
+&lt;p style=&quot;float:left; width:100%; background:gray;&quot;&gt;P&lt;/p&gt;
+&lt;h1 style=&quot;float:left; width:100%; background:gray;&quot;&gt;H1&lt;/h1&gt;
+&lt;div style=&quot;float:left; width:100%; height:20px; background:#DDD;&quot;&gt;&lt;/div&gt;
+&lt;div style=&quot;float:left; width:100%; height:20px; background:#DDD; margin-top:30px;&quot;&gt;&lt;/div&gt;
+&lt;p style=&quot;float:left; width:100%; background:gray; margin:10px 0;&quot;&gt;P&lt;/p&gt;
+&lt;h1 style=&quot;float:left; width:100%; background:gray; margin:10px 0;&quot;&gt;H1&lt;/h1&gt;
+&lt;div style=&quot;float:left; width:100%; height:20px; background:#DDD;&quot;&gt;&lt;/div&gt;
+</pre>
+      <p>测试代码中所有元素均为浮动且宽度均为100%，两个 DIV 元素之间有 P 元素和 H1 元素，前面一组没有为 P、H1 元素设置 'margin-top' 与 'margin-bottom'，使用浏览器默认样式。后面一组为它们设置了 'margin:10px 0'。在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RM1009/a.gif" alt="" /></td>
+          <td><img src="../../tests/RM1009/b.gif" alt="" /></td>
+        </tr>
+      </table>
+
+      <ul>
+        <li>在 IE6 IE7 IE8(Q) 中，拥有默认 'margin-top'、'margin-bottom' 的块级元素在浮动后，其原有默认的上下外边距丢失，而由用户设置的则不会丢失；</li>
+        <li>在 IE8(S) Firefox Chrome Safari Opera 中，浮动并没有对拥有默认 'margin-top' 和 'margin-bottom' 的块级元素造成任何影响。</li>
+      </ul>
+      <h3>2. IE6 IE7 IE8(Q) 中有默认上下外边距的块级元素触碰到 hasLayout 容器后外边距可能会消失</h3>
+      <p>在 IE6 IE7 IE8(Q) 下，若一个 P 元素是其触发了 hasLayout 特性的容器的第一个元素，则这个 P 元素的默认上外边距会消失，若为容器的最后一个元素，则默认下外边距会消失；对于其他拥有默认上下外边距的块级元素，若是触发了 hasLayout 特性的容器的第一个元素，则这个元素的默认上外边距会消失。</p>
+      <p>分析以下代码：</p>
+<pre>
+&lt;div&gt;P元素，默认样式，容器触发hasLayout：&lt;/div&gt;
+&lt;div style=&quot;border:5px solid black; zoom:1;&quot;&gt;
+    &lt;p style=&quot;background:gray;&quot;&gt;P&lt;/p&gt;
+    &lt;p style=&quot;background:gray;&quot;&gt;P&lt;/p&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div&gt;H3 元素，默认样式，容器触发hasLayout：&lt;/div&gt;
+&lt;div style=&quot;border:5px solid black; zoom:1;&quot;&gt;
+    &lt;h3 style=&quot;background:gray;&quot;&gt;H3&lt;/h3&gt;
+    &lt;h3 style=&quot;background:gray;&quot;&gt;H3&lt;/h3&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div&gt;P元素，用户样式，容器触发hasLayout：&lt;/div&gt;
+&lt;div style=&quot;border:5px solid black; zoom:1;&quot;&gt;
+    &lt;p style=&quot;background:gray; margin:10px;&quot;&gt;P&lt;/p&gt;
+    &lt;p style=&quot;background:gray; margin:10px;&quot;&gt;P&lt;/p&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div&gt;H3元素，用户样式，容器触发hasLayout：&lt;/div&gt;
+&lt;div style=&quot;border:5px solid black; zoom:1;&quot;&gt;
+    &lt;h3 style=&quot;background:gray; margin:10px;&quot;&gt;H3&lt;/h3&gt;
+    &lt;h3 style=&quot;background:gray; margin:10px;&quot;&gt;H3&lt;/h3&gt;
+&lt;/div&gt;
+</pre>
+      <p>测试代码分为4组，第一组测试了默认样式下的 P 元素，第二组为默认样式下的 H3 元素，第三组和第四组则测试了用户设置 'margin' 特性后 P 和 H3 元素。在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RM1009/c.gif" alt="" /></td>
+          <td><img src="../../tests/RM1009/d.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>可见，在 IE6 IE7 IE8(Q) 中，在使用浏览器默认样式时，如果 P 元素是触发了 hasLayout 的容器内的第一个元素，则这个 P 元素的默认上外边距会消失，而容器内的最后一个元素如果是 P 元素，这个 P 元素的默认下外边距会消失。对于 H3 元素，则仅当容器内第一个元素是 H3 元素的时候，其默认的上外边距消失。此外 H1、H2、H4、H5、H6、PRE、UL、OL、DL 等拥有默认上下外边距的元素的情况与 H3 类似。</p>
+      <p>与上一节相同，当为这些元素设置 'margin' 代替浏览器默认的外边距样式后，此现象消失。</p>
+      <p>若容器没有触发 hasLayout 特性，则不会出现此现象。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>用自定义的 'margin' 取代浏览器的默认外边距样式。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RM1009/ie_float_and_hasloyout_maring_hidden.html">ie_float_and_hasloyout_maring_hidden.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-09</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>float margin 浮动 hasLayout 外边距 容器</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

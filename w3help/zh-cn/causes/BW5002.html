@@ -1,0 +1,166 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BW5002: WebKit 中依赖文本流定位的绝对定位元素某些情况下不会更新其位置</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>当一个绝对定位的元素的 'top' 'right' 'bottom' 'left' 为 'auto' 时，绝对定位的元素可能会被放置在其“静态位置”上。</p>
+      <p>“静态位置”粗略地说是指元素如果在正常流中的位置。具体来说：“静态位置”的包含块是若一个元素的 'position' 为 'static' 'float' 为 'none' 时生成元素的第一个框的假想框。</p>
+      <p>关于“静态位置”的详细信息，请参考 CSS 2.1 规范 <a href="http://www.w3.org/TR/CSS21/visudet.html#static-position">static position</a> 中的内容。</p>
+      <p>关于绝对定位元素放置位置的计算方式，请参考 CSS 2.1 规范 <a href="http://www.w3.org/TR/CSS21/visudet.html#abs-non-replaced-width">10.3.7 Absolutely positioned, non-replaced elements</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>WebKit 中依赖文本流定位的绝对定位元素在其“静态位置”改变后不会变更其位置。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>该问题将导致页面布局在 Chrome Safari 中的某些情况下与预期不符。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Chrome Safari</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <h3>1. 通过修改容器的 scrollLeft/scrollTop 值测试依赖该容器内文本流定位的绝对定位元素是否会更新其位置</h3>
+      <p>分析以下代码：</p>
+<pre>
+&lt;script type="text/javascript"&gt;
+function $(id){
+  return document.getElementById(id);
+}
+function toggle($target){
+  $target.style.display=$target.offsetWidth?"none":"block";
+}
+&lt;/script&gt;
+&lt;div id="container_1" style="width:300px; height:300px; margin:0 auto; border:3px solid gold; overflow:scroll;"&gt;
+  &lt;div style="width:600px; height:600px; padding:50px; background:silver;"&gt;
+    &lt;div style="width:80px; height:80px; background:blue;"&gt;&lt;/div&gt;
+    &lt;div id="<strong>absolutely_1</strong>" style="position:absolute; background:red; width:100px; height:100px;"&gt;absolute&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div style="width:300px; margin:0 auto;"&gt;
+  &lt;button style="height: 100px; float:right;" onclick="toggle($('absolutely_1'));"&gt;show/hide Red&lt;/button&gt;
+  &lt;button onclick="$('container_1').scrollLeft=0;"&gt;Silver.scrollLeft=0&lt;/button&gt;
+  &lt;button onclick="$('container_1').scrollLeft=30;"&gt;Silver.scrollLeft=30&lt;/button&gt;
+  &lt;button onclick="$('container_1').scrollTop=0;"&gt;Silver.scrollTop=0&lt;/button&gt;
+  &lt;button onclick="$('container_1').scrollTop=30;"&gt;Silver.scrollTop=30&lt;/button&gt;
+&lt;/div&gt;
+</pre>
+      <p>样例代码中有依赖文本流定位的绝对定位元素 <strong>absolutely_1</strong>（即其 'top' 'right' 'bottom' 'left' 均为 'auto'）。</p>
+      <p>在更改其容器的 scrollLeft/scrollTop 值时：</p>
+      <ul>
+        <li>IE6(Q) IE7(Q) IE8(Q) 会实时更新 <strong>absolutely_1</strong> 的位置，其他浏览器则不会。</li>
+        <li>window.onresize 被触发时，IE8(S) Firefox 会更新 <strong>absolutely_1</strong> 的位置。</li>
+        <li>将 <strong>absolutely_1</strong> 的 'display' 设置为 'none' 再重设为 'block' 时，IE6(S) IE7(S) Firefox 会更新 <strong>absolutely_1</strong> 的位置，IE8(S) Chrome Safari Opera(S) 不会更新，Opera(Q) 出现渲染错误。</li>
+      </ul>
+      <h3>2 通过修改容器的 marginLeft/marginTop 值测试依赖该容器内文本流定位的绝对定位元素是否会更新其位置</h3>
+      <p>分析以下代码：</p>
+<pre>
+&lt;script type="text/javascript"&gt;
+function $(id){
+  return document.getElementById(id);
+}
+function toggle($target){
+  $target.style.display=$target.offsetWidth?"none":"block";
+}
+&lt;/script&gt;
+&lt;div style="width:300px; height:300px; margin:0 auto; border:3px solid gold; overflow:hidden;"&gt;
+  &lt;div id="container_2" style="width:600px; height:600px; padding:50px; background:silver;"&gt;
+    &lt;div style="width:80px; height:80px; background:blue;"&gt;&lt;/div&gt;
+    &lt;div id="<strong>absolutely_2</strong>" style="position:absolute; background:red; width:100px; height:100px;"&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div style="width:400px; margin:0 auto;"&gt;
+  &lt;button style="height: 100px; float:right;" onclick="toggle($('absolutely_2'));"&gt;show/hide Red&lt;/button&gt;
+  &lt;button onclick="$('container_2').style.marginLeft='0';"&gt;Silver.style.marginLeft='0'&lt;/button&gt;
+  &lt;button onclick="$('container_2').style.marginLeft='-30px';"&gt;Silver.style.marginLeft='-30px'&lt;/button&gt;
+  &lt;button onclick="$('container_2').style.marginTop='0';"&gt;Silver.style.marginTop='0'&lt;/button&gt;
+  &lt;button onclick="$('container_2').style.marginTop='-30px';"&gt;Silver.style.marginTop='-30px'&lt;/button&gt;
+&lt;/div&gt;
+</pre>
+      <p>样例代码中有依赖文本流定位的绝对定位元素 <strong>absolutely_2</strong>（即其 'top' 'right' 'bottom' 'left' 均为 'auto'）。</p>
+      <p>在更改其容器的 'margin' 值时：
+      <ul>
+        <li>IE6 IE7 IE8 Firefox Opera Safari 会实时更新 <strong>absolutely_2</strong> 的位置。</li>
+        <li>将 <strong>absolutely_2</strong> 的 'display' 设置为 'none' 再重设为 'block' 时，Chrome 会更新 <strong>absolutely_2</strong> 的位置。</li>
+      </ul>
+      <h3>3. 总结</h3>
+      <p>依赖文本流定位的绝对定位元素在其“静态位置”发生变更后，在不同浏览器中的位置变化情况不同。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>在绝对定位元素的包含块可能发生改变时（即该绝对定位元素的“静态位置”可能发生变化时），不要让该绝对定位元素依赖其“静态位置”来定位，给该元素设定明确的 left、right、top 或 bottom 值。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BW5002/position_refresh.html">position_refresh.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-16</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>position absolute 文档流 位置 更新</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

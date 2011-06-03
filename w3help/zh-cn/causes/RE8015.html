@@ -1,0 +1,225 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RE8015: IE 中 TABLE 等表格类元素的 'display' 特性的值被设置为 'table'、'inline-table' 之外的其他合法值后其 TABLE 特性不受影响</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 CSS2.1 规范中的描述，CSS 中的表格模型基于 HTML4 的表格模型，包括了表格，标题，行，行组，列，列组以及单元格。下列 'display' 特性的值可以将表格语义指派给一个任意的元素：
+      <table class="compare">
+        <tr>
+          <th>'display' 特性的值</th>
+          <th>对应 HTML 中的元素</th>
+        </tr>
+        <tr>
+          <td>table</td>
+          <td>TABLE (block-level)</td>
+        </tr>
+        <tr>
+          <td>inline-table</td>
+          <td>TABLE (inline-level)</td>
+        </tr>
+        <tr>
+          <td>table-row</td>
+          <td>TR</td>
+        </tr>
+        <tr>
+          <td>table-row-group</td>
+          <td>TBODY</td>
+        </tr>
+        <tr>
+          <td>table-header-group</td>
+          <td>THEAD</td>
+        </tr>
+        <tr>
+          <td>table-footer-group</td>
+          <td>TFOOT</td>
+        </tr>
+        <tr>
+          <td>table-column</td>
+          <td>COL</td>
+        </tr>
+        <tr>
+          <td>table-column-group</td>
+          <td>COLGROUP</td>
+        </tr>
+        <tr>
+          <td>table-cell</td>
+          <td>TD, TH</td>
+        </tr>
+        <tr>
+          <td>table-caption</td>
+          <td>CAPTION</td>
+        </tr>
+      </table>
+      <p>附录中的 <a href="http://www.w3.org/TR/CSS21/sample.html">HTML4 缺省样式表</a> 说明了这些值在 HTML4 中的应用：</p>
+      <pre>table    { display: table }
+tr       { display: table-row }
+thead    { display: table-header-group }
+tbody    { display: table-row-group }
+tfoot    { display: table-footer-group }
+col      { display: table-column }
+colgroup { display: table-column-group }
+td, th   { display: table-cell }
+caption  { display: table-caption }</pre>
+      <p>用户端对于 HTML 表格元素可能忽略这些 'display' 特性值，因为 HTML 表格可能出于向后兼容而使用其他有意图的算法。然而这并不代表不可以在其他非表格的 HTML 元素上使用 'display:table'。</p>
+      <p>关于 CSS 表格模型 特性的更多信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/tables.html#table-display">17.2 The CSS table model</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE 中，为 TABLE 及 TD 等表格类元素设定 CSS2.1 规范附录中 &quot;HTML4 缺省样式表&quot; 之外<sup>1</sup>的 'display' 特性值并不会影响其元素的原生特性及表现形式。<br />
+      而其他浏览器中，这些设定的 'display' 特性则会覆盖该表格类元素的原生特性。</p>
+      <p class="comment">注 1: 对于 TABLE 元素还包括 'display:inline-table'。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题可能导致为表格类元素设定了某些 'display' 特性值后在非 IE 浏览器中表格类元素的原生特性改变，从而影响到布局。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>由于 HTML 表格类元素众多，CSS2.1 中 'display' 特性的属性值也众多，本文将挑选常用的表格类元素以及 'display' 特性值进行重点分析。</p>
+      <p>分析以下代码：<em>table_display.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  * { font:18px/1.2 'Trebuchet MS'; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;table style=&quot;width:240px; border:5px solid black;&quot;&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;background:wheat;&quot;&gt;native&lt;/td&gt;
+    &lt;td style=&quot;background:lightskyblue;&quot;&gt;native&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;br /&gt;
+&lt;table style=&quot;width:240px; border:5px solid black; <span class="hl_1">display:block;</span>&quot;&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;background:wheat;&quot;&gt;block TABLE&lt;/td&gt;
+    &lt;td style=&quot;background:lightskyblue;&quot;&gt;block TABLE&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;br /&gt;
+&lt;table style=&quot;width:240px; border:5px solid black;&quot;&gt;
+  &lt;tr style=&quot;<span class="hl_1">display:block;</span>&quot;&gt;
+    &lt;td style=&quot;background:wheat;&quot;&gt;block TR&lt;/td&gt;
+    &lt;td style=&quot;background:lightskyblue;&quot;&gt;block TR&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;br /&gt;
+&lt;table style=&quot;width:240px; border:5px solid black;&quot;&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;background:wheat; <span class="hl_1">display:block;</span>&quot;&gt;block TD&lt;/td&gt;
+    &lt;td style=&quot;background:lightskyblue; <span class="hl_1">display:block;</span>&quot;&gt;block TD&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上述代码包含 4 组结构一样的 TABLE-TR-TD 元素，第一组没有单独为表格类元素设定任何其他 'display' 特性的值，为原生渲染；后面三组分别将 TABLE、TR、TD 元素的 'display' 特性值设定为 'block'。</p>
+      <p>这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox Opera</th>
+          <th>Chrome(Q) Safari(Q)</th>
+          <th>Chrome(S) Safari(S)</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RE8015/table1.gif" alt="" /></td>
+          <td><img src="../../tests/RE8015/table2.gif" alt="" /><sup>1</sup></td>
+          <td><img src="../../tests/RE8015/table3.gif" alt="" /></td>
+          <td><img src="../../tests/RE8015/table4.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>可见：</p>
+      <ul>
+        <li><em>IE6 IE7 IE8<sup>2</sup></em> 中，为 TABLE、TR、TD 元素设定的 'display:block' 没有对这些元素的原生特性造成任何影响；</li>
+        <li><em>Chrome(Q) Safari(Q)</em> 中，为 TABLE、TD 元素设定的 'display:block' 没有对这些元素的原生特性造成任何影响；</li>
+        <li><em>其他浏览器</em> 中，为 TABLE、TR、TD 元素设定的 'display:block' 改变了其原生的特性，导致表格的布局相比第一组出现了很大变化。</li>
+      </ul>
+      <p>而 CSS2.1 规范中仅提到用户端对于 HTML 表格元素可能忽略这些 'display' 特性值，并没有明确地说对于表格类元素，其默认 'display' 特性是否可以被其他值替代从而改变其原生特性。此时恰恰在不同浏览器中出现了差异。</p>
+      <p class="comment">
+        注 1: Firefox、Opera 中 TABLE 元素默认样式中分别有的 '-moz-box-sizing' 与 'box-sizing' 特性，其值均为 'border-box'，本文忽略这个差异。<br />
+        注 2: IE6 IE7 IE8(Q) 不支持 'display:table' 等表格类的值。
+      </p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>避免改变表格类元素的默认 'display' 特性。若需要隐藏某个表格类元素，即设定其 'display' 特性为 'none'，之后需要恢复其的可视状态，可以为其设定一个非法的 'display' 特性的值，如：<code>TR.style.display = "";</code></p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="RM8001">RM8001: IE6 IE7 IE8(Q) 不支持 'display' 的替代值</a></li>
+        <li><a href="RD8001">RD8001: 各浏览器中 'width' 和 'height' 在某些元素上的作用位置有差异</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 8.0.552.0 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.63
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RE8015/table_display.html">table_display.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-14</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>TABLE display TR TD block 表格</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

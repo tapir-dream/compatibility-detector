@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RT2009: Chrome Safari 中 word-spacing 特性不可作用于非文本内容</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 CSS 2.1 规范中的描述，'word-spacing' 特性指定了单词 (word) 之间的间距特性。<br />
+      单词间距算法取决于用户端，同时也会受对齐 (参见 '<a href="http://www.w3.org/TR/CSS21/text.html#propdef-text-align">text-align</a>' 特性) 的影响。当应用了空白处理规则后，单词间距会作用在文本中的空格 (U+0020)、非间断空格 (&amp;nbsp;, U+00A0)、表意空格 (全角空格, U+3000) 的左侧。</p>
+      <p>关于 'border-collapse' 特性的更多信息，请参考 CSS2.1 规范：<a href="http://www.w3.org/TR/CSS21/text.html#propdef-word-spacing">16.4 Letter and word spacing: the 'letter-spacing' and 'word-spacing' properties</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>若行框内包含非文本内容 (如图片、表单元素等替换元素)，设定了 'word-spacing' 特性，则在 Chrome Safari 中，单词间隙不会作用在这些内容之间的空白符上。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>这个问题将造成行内内容的间隙在不同浏览器之间出现差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Chrome Safari</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>CSS 规范中仅描述了 'word-spacing' 特性设定的是 &quot;单词&quot; 之间的间距，并没有会说明 &quot;单词&quot; 是否包含所有的行内级元素，还是仅指代文本。</p>
+      <p>根据问题描述构造如下测试样例：<em>word-spacing_text.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  * { margin:0; padding:0; border:0; font:12px 'Trebuchet MS'; }
+  div * { background:dodgerblue; vertical-align:bottom; overflow:hidden; resize:none; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div style=&quot;word-spacing:30px; heidght:30px; background:wheat; &quot;&gt;
+  &lt;span&gt;text&lt;/span&gt;
+  &lt;span style=&quot;display:inline-block; width:50px;&quot;&gt;i-block&lt;/span&gt;
+  &lt;img src=&quot;google_small.gif&quot; style=&quot;width:50px;&quot; /&gt;
+  &lt;input type=&quot;text&quot; style=&quot;width:50px;&quot; /&gt;
+  &lt;input type=&quot;button&quot; style=&quot;width:50px;&quot; value=&quot;123&quot; /&gt;
+  &lt;button style=&quot;width:50px;&quot;&gt;123&lt;/button&gt;
+  &lt;textarea style=&quot;width:50px;&quot;&gt;TA&lt;/textarea&gt;
+  &lt;select style=&quot;width:50px;&quot;&gt;&lt;/select&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上述代码中，DIV 元素设定了 <span class="hl_1">word-spacing:30px;</span>，其内创建了若干行内级元素，包括了文本及非文本内容 (如图片、表单元素)，各行内级元素之间存在空格。</p>
+      <p>在各浏览器中的表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td><img src="../../tests/RT2009/ws1.gif" alt="" /></td>
+        </tr>
+        <tr>
+          <th>IE8(S) Firefox Opera</th>
+          <td><img src="../../tests/RT2009/ws2.gif" alt="" /></td>
+        </tr>
+        <tr>
+          <th>Chrome Safari</th>
+          <td><img src="../../tests/RT2009/ws3.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>可见，</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8(Q)</em> 中，在本例中除 BUTTON 元素之外，其他被测行内级元素之间的空格均可以应用 'word-spacing' 特性设定的单词间距；</li>
+        <li>在 <em>IE8(S) Firefox Opera</em> 中，所有被测行内元素之间的空格均可以应用 'word-spacing' 特性设定的单词间距；</li>
+        <li>在 <em>Chrome Safari</em> 中，只有文本内容之后的空格可以应用 'word-spacing' 特性设定的单词间距，其他非文本内容之间的空格均无法应用 'word-spacing' 特性设定的单词间距。</li>
+      </ul>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>使用 'word-spacing' 特性时需谨慎，应只将其使用在文本内容上。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 8.0.552.5 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.63
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+              <a href="../../tests/RT2009/word-spacing_text.html">word-spacing_text.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-21</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>word-spacing word 单词 间距 inline text 文本 替换 行内</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

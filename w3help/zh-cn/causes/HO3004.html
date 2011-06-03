@@ -1,0 +1,163 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HO3004: IE6 不支持 PNG24 格式图片的半透明效果</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>PNG24 格式图片可以携带 Alpha 半透明通道，以便呈现从透明到不透明间过渡色彩效果，但是 IE6 不支持这种格式原有的透明特性。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>带有半透明通道的 PNG24 格式图片在 IE6 中通道颜色被显示成灰色，不具有半透明效果。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+<pre>
+    &lt;body style=" background-color:#00FF00"&gt;
+  &lt;h3&gt;透明背景的 PNG8 格式图片&lt;/h3&gt;
+  &lt;img src=&quot;png8.png&quot; /&gt;
+  &lt;h3&gt;具有半透明过度背景的 PNG24 格式图片&lt;/h3&gt;
+  &lt;img src=&quot;png24_alpha.png&quot; /&gt;
+  &lt;h3&gt;没有透明效果的 PNG24 格式图片&lt;/h3&gt;
+  &lt;img src=&quot;png24_no_alpha.png&quot; /&gt;
+    &lt;/body&gt;
+</pre>
+
+      <p>以上代码向页面引入 PNG8 和 PNG24 图片，其中 PNG8 格式图片背景透明，PNG24 格式图片第一张具有半透明通道，第二张不具有透明度通道。</p>
+      <p>各浏览器显示效果如下：</p>
+    <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6</th>
+            <th>IE7 IE8 Firefox Safari Chrome Opera</th>
+        </tr>
+        <tr>
+          <td>PNG8 透明背景图</td>
+          <td colspan="2"><img src="../../tests/HO3004/01.jpg" alt="" /></td>
+          </tr>
+        <tr>
+          <td>PNG24 半透明通道图</td>
+          <td><img src="../../tests/HO3004/03.jpg" alt="" /></td>
+          <td><img src="../../tests/HO3004/02.jpg" alt="" /></td>
+      </tr>
+        <tr>
+          <td>PNG24 无透明通道图</td>
+          <td colspan="2"><img src="../../tests/HO3004/04.jpg" alt="" /></td>
+      </tr>
+      </table>
+      <p>对照上表可见， IE6 浏览器在处理带有半透明通道的 PNG24 格式图片时，错误的将半透明通道渲染成灰色。其他浏览处理正常，无此问题。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <ul>
+              <li>使用 IE 专有滤镜 AlphaImageLoader Filter 来修复 IE6 透明通道问题，详情请参考 MSDN 说明：  <a href="http://msdn.microsoft.com/en-us/library/ms532969(VS.85).aspx">http://msdn.microsoft.com/en-us/library/ms532969(VS.85).aspx</a> </li>
+                <li>或者使用脚本批量处理方式：<br />
+<pre>
+function fixpng24(){
+    var arVersion = navigator.appVersion.split("MSIE");
+    var version = parseFloat(arVersion[1]);
+    if ((version &gt;= 5.5) &amp;&amp; (document.body.filters)){
+       for(var i=0; i&lt;document.images.length; i++){
+          var img = document.images[i];
+          if (img.src.toLowerCase().slice(-3) == "png"){
+             var imgID = (img.id) ? "id='" + img.id + "' " : "";
+             var imgClass = (img.className) ? "class='" + img.className + "' " : "";
+             var imgTitle = (img.title) ? "title='" + img.title + "' " : "title='" + img.alt + "' ";
+             var imgStyle = "display:inline-block;" + img.style.cssText ;
+             if (img.align == "left") imgStyle = "float:left;" + imgStyle;
+             if (img.align == "right") imgStyle = "float:right;" + imgStyle;
+             if (img.parentElement.href) imgStyle = "cursor:pointer;" + imgStyle;
+             var strNewHTML = "&lt;span " + imgID + imgClass + imgTitle
+             + " style=\"width:" + img.width + "px; height:" + img.height + "px;" + imgStyle
+             + "filter:progid:DXImageTransform.Microsoft.AlphaImageLoader"
+             + "(src='" + img.src + "', sizingMethod='scale');\"&gt;&lt;/span&gt;";
+             img.outerHTML = strNewHTML;
+             i--;
+          }
+       }
+    }
+}
+</pre>
+              </li>
+                </ul>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HO3004/ie6_png24_alpha.html">ie6_png24_alpha.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-05</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>PNG alpha 通道 透明 半透明</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

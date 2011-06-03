@@ -1,0 +1,175 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RC3001: IE6 IE7(Q) IE8(Q) 中 IFRAME 元素 'background-color' 特性默认值不是 transparent</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>W3C CSS 2.1 规范规定，'background-color' 特性的默认值为 'transparent'，即透明，同时描述了透明（transparent）关键字可使其下的颜色能透出来。</p>
+      <p>关于 'background-color' 的详细信息，请参考：<a href="http://www.w3.org/TR/CSS21/colors.html#propdef-background-color">'background-color'</a>。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE6 IE7(Q) IE8(Q)中 BODY 元素的背景色不是 CSS 2.1 规范规定的 transparent，而是 #FFFFFF。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>各浏览器 IFRAME 中的 BODY 元素的背景色不一致。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7(Q) IE8(Q)</th>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>
+        在 Firefox Chrome Safari Opera 中，IFRAME 元素与其他元素一样，其 'background-color' 默认为 'transparent'，而在 IE 中，
+        通过 currentStyle 对象查看测得默认情况下 IFRAME 元素的背景色为 '#FFFFFF'，即为白色。所以默认情况下，
+        当我们为一个 IFRAME 元素设置背景色或者 IFRAME 元素将其祖先元素的背景色透过时，在非 IE 浏览器中 IFRAME 所引入的页面的 BODY 元素也“透出”这个颜色，
+        而 IE 中 BODY 元素依然为其默认的白色。</p>
+      <p>IE 中 IFRAME 元素有一个专有的 'allowtransparency' 属性，参见：<a href="http://msdn.microsoft.com/zh-cn/library/ms533072(en-us,VS.85).aspx">http://msdn.microsoft.com/zh-cn/library/ms533072(en-us,VS.85).aspx</a>。
+      当设置了该属性后，IFRAME 元素可以透明。</p>
+      <p>下面通过一个例子观察 'allowtransparency' 属性对 IE 中的 IFRAME 元素的影响：</p>
+<pre>
+&lt;iframe id="i1" src="2.htm"&gt;&lt;/iframe&gt;
+&lt;iframe id="i2" src="2.htm" style="background:red;"&gt;&lt;/iframe&gt;
+&lt;iframe id="i3" src="2.htm" allowtransparency="true"&gt;&lt;/iframe&gt;
+&lt;iframe id="i4" src="2.htm" style="background:red;" allowtransparency="true"&gt;&lt;/iframe&gt;
+</pre>
+      <p>在IE中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <td>document.getElementById("i1").currentStyle.backgroundColor</td>
+          <td>#FFFFFF</td>
+        </tr>
+        <tr>
+          <td>document.getElementById("i2").currentStyle.backgroundColor</td>
+          <td>#FFFFFF</td>
+        </tr>
+        <tr>
+          <td>document.getElementById("i3").currentStyle.backgroundColor</td>
+          <td>transparent</td>
+        </tr>
+        <tr>
+          <td>document.getElementById("i4").currentStyle.backgroundColor</td>
+          <td>red</td>
+        </tr>
+      </table>
+      <ul>
+        <li>当没有 'allowtransparency' 属性时，IFRAME 元素的背景色始终为 '#FFFFFF'，并且设置其背景色也无效。</li>
+        <li>当拥有 'allowtransparency' 属性后，IFRAME 元素的背景色随即变为 'transparent'，然后我们可以随意设置其背景色。</li>
+      </ul>
+      <p>下面看看加入 'allowtransparency=true'代码：</p>
+<pre>
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body style="background:gold;"&gt;
+    &lt;iframe allowtransparency="true" src="blank.html" frameborder="1" width="100" scrolling="no" height="26"&gt;&lt;/iframe&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+
+blank.html：
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body style="margin:4px;"&gt;
+BLANK.HTM
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7(Q) IE8(Q)</th>
+          <th>IE7(S) IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RC3001/01.png" alt=""></td>
+          <td><img src="../../tests/RC3001/02.png" alt=""></td>
+        </tr>
+      </table>
+      <p>IE7(S) IE8(S)已经达到了 IFRAME 全透明化，而 IE6 IE7(Q) IE8(Q) 看上去依然不是透明的。</p>
+<pre>
+IE6 IE7(Q) IE8(Q) 中 BODY 元素的背景色不是 CSS 规定的 transparent，而是 #FFFFFF。这个 #FFFFFF 是由 'background-color:window' 得来，'window' 值是 Windows 系统主题设定的“窗口背景色”，这个设置会影响很多程序的窗口背景色，而其他浏览器多不受此影响。
+</pre>
+      <p>所以虽然 IFRAME 元素已经透明，但其引入的子页面中的 BODY 元素的背景色不是透明，这样让人无法将 IFRAME 的背景色“透到”子页面的 BODY 元素之上。从而使得 IFRAME 元素在设置了 allowtransparency 属性后看上去依然不是透明。</p>
+      <p>更多内容，参见微软公司官方文档：<a href="http://msdn.microsoft.com/en-us/library/ms537627%28VS.85%29.aspx">Using IFRAME Elements</a>。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>
+        IFRAME 透明是一个常见的问题，有时候我们需要其透明，这时需要为 IFRAME 元素添加属性 allowtransparency，
+        同时保证引入子页面的 BODY 元素的背景色是透明的，当被引入的页面不是我们能控制的时，可以通过 IFRAME.contentWindow.documnet.body.backgroundColor="transparent" 来使其透明。
+        若不需要 IFRAME 的透明背景，为使非 IE 浏览器中呈现 IE 中的默认白色背景，可以直接为 IFRAME 设置白色背景色。
+      </p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 5.0.342.2 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.50
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RC3001/RC3001.html">RC3001.html</a><br/><a href="../../tests/RC3001/blank.html">blank.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-20</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>IFRAME background-color transparent 背景色 透明</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

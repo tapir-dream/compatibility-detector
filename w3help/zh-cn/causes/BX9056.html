@@ -1,0 +1,213 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX9056: 各浏览器下 window.eval 方法的执行上下文存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>eval 方法，可以执行一段脚本，该脚本的上下文是当前代码的上下文执行的，如果没有指定上下文，该脚本将在全局上下文中执行。</p>
+      <p>该方法属于 native code 范畴 ，由全局对象 Global 提供支持。</p>
+      <p>关于 eval 的详细描述可以参见：<a href="http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-262.pdf">ECMA 262 第五版</a> 。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>eval 方法在各浏览器都按照规范定义，根据当前代码上下文执行 eval 方法中的脚本，如果没有指定上下文，该脚本将在全局上下文中执行。<br />
+      window.eval 方法，在 IE6 IE7 IE8 中依然在脚本所在上下文中执行，而 Firefox Chrome Safari Opera 中则将该脚本会在全局上下文中执行。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>window.eval 方法执行一段代码时，若在指定上下文中定义了变量， IE6 IE7 IE8 在全局上下文中无法访问该变量，导致代码报错。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+      <pre>&lt;script&gt;
+  var cec = 'calling execution context: ',
+    gec = 'glocal execution context: ',
+    ok = '&lt;span class=&quot;ok&quot;&gt;OK&lt;/span&gt;&lt;br /&gt;',
+    fail = '&lt;span class=&quot;fail&quot;&gt;Fail&lt;/span&gt;&lt;br /&gt;';
+&lt;/script&gt;
+&lt;h1&gt;&lt;strong&gt;&amp;quot;eval&amp;quot;&lt;/strong&gt; in &lt;em&gt;global&lt;/em&gt; execution context:&lt;/h1&gt;
+&lt;script&gt;
+  eval('var a = 1;');
+  void function () {
+    try {
+      if (a == 1) {
+        document.write(cec + ok);
+      }
+    } catch(ex) {
+      document.write(cec + fail);
+    }
+  }();
+  try {
+    if (a == 1) {
+      document.write(gec + ok);
+    }
+  } catch(ex) {
+    document.write(gec + fail);
+  }
+&lt;/script&gt;
+&lt;br /&gt;
+&lt;h1&gt;&lt;strong&gt;&amp;quot;eval&amp;quot;&lt;/strong&gt; in &lt;em&gt;calling&lt;/em&gt; execution context:&lt;/h1&gt;
+&lt;script&gt;
+  void function () {
+    eval('var b = 1;');
+    try {
+      if (b == 1) {
+        document.write(cec + ok);
+      }
+    } catch(ex) {
+      document.write(cec + fail);
+    }
+  }();
+  try {
+    if (b == 1) {
+      document.write(gec + ok);
+    }
+  } catch(ex) {
+    document.write(gec + fail);
+  }
+&lt;/script&gt;
+&lt;br /&gt;
+&lt;h1&gt;&lt;strong&gt;&amp;quot;window.eval&amp;quot;&lt;/strong&gt; in &lt;em&gt;global&lt;/em&gt; execution context:&lt;/h1&gt;
+&lt;script&gt;
+  window.eval('var c = 1;');
+  void function () {
+    try {
+      if (c == 1) {
+        document.write(cec + ok);
+      }
+    } catch(ex) {
+      document.write(cec + fail);
+    }
+  }();
+  try {
+    if (c == 1) {
+      document.write(gec + ok);
+    }
+  } catch(ex) {
+    document.write(gec + fail);
+  }
+&lt;/script&gt;
+&lt;br /&gt;
+&lt;h1&gt;&lt;strong&gt;&amp;quot;window.eval&amp;quot;&lt;/strong&gt; in &lt;em&gt;calling&lt;/em&gt; execution context:&lt;/h1&gt;
+&lt;script&gt;
+  void function () {
+    window.eval('var d = 1;');
+    try {
+      if (d == 1) {
+        document.write(cec + ok);
+      }
+    } catch(ex) {
+      document.write(cec + fail);
+    }
+  }();
+  try {
+    if (d == 1) {
+      document.write(gec + ok);
+    }
+  } catch(ex) {
+    document.write(gec + fail);
+  }
+&lt;/script&gt;</pre>
+      <p>上述代码分别检测了当使用 eval 及 window.eval 方法分别在全局作用域及局部作用域下执行声明并初始化变量的脚本代码，然后又分别在这两种作用域下尝试使用声明的变量，检查是否变量是否可用以及是否为初始化的值。</p>
+      <p>各浏览器执行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BX9056/eval1.gif" alt="" /></td>
+          <td><img src="../../tests/BX9056/eval2.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>可见，对于直接调用的 eval 方法在各浏览器都按照规范定义，根据当前代码上下文执行 eval 方法中的脚本，如果没有指定上下文，该脚本将在全局上下文中执行。</p>
+      <p>当使用 window.eval 方法时，</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8</em> 中，window.eval 方法等同于直接调用的 eval 方法，会根据当前代码上下文执行 window.eval 方法中的脚本，此时浏览器认为没有指定上下文;</li>
+        <li>在 <em>Firefox Chrome Safari Opera</em> 中，浏览器认为 window.eval 方法确定了全局作用域，则其内脚本代码将在全局上下文中执行。</li>
+      </ul>
+      <p>由于 window 对象属于宿主环境 ( host environment  )，由 window 对象提供的 eval 方法不是规范中提到的与宿主环境无关的 Global Natvie Code。</p>
+      <p>此问题中， IE6 IE7 IE8 中处理情况可以认为是将 Gloabl 全局对象与 Host 宿主对象统一处理了，window.eval 即是 Global.eval，他会根据当前代码上下文确定执行内容的作用域位置。</p>
+      <p>而其他浏览器则与规范描述相吻合，他们都认为 window 中的 eval 是 Host 对象提供的，其作用域应与 Host 环境一致，而不用考虑代码在全局上下文中的位置。另一个直接调用的 eval 方法才是全局对象的，应该根据规范描述依赖执行上下文决定其中代码的作用域。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p> IE 中的 window.eval 方法不会产生全局上下文，对内部需要指定全局作用域环境的属性(变量)，请在前面逐个加入window 关键字，以便确定该属性(变量)执行时处于指定的 window 全局作用域环境。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="BX9055">BX9055: 各浏览器对 window.execScript 方法的支持不同</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.552.0 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.63
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+              <a href="../../tests/BX9056/eval.html">eval.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-26</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>eval window.eval context 作用域</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

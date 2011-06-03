@@ -1,0 +1,200 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX2012: 某些情况下除了 IE 和 Opera 之外的浏览器中 window.close 方法无法关闭由直接输入 URL 或 Ctrl + 点击链接方式打开的窗口</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+
+      <p>无。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>
+      目前的主流浏览器都支持 window.close 方法，但并不是所有的窗口都可以通过调用 window.close 方法来关闭。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>用多种方式打开一个页面，然后用 window.close() 关闭它，在各浏览器下表现有所不同。如在地址栏中直接输入URL 时，Firefox Chrome Safari 下调用 window.close() 关闭页面无效。再如 Ctrl + 点击链接打开的窗口，Firefox 下无法通过调用 window.close() 来关闭。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Firefox Chrome Safari</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>window 对象属于 BOM 范畴，在现行规范标准中没有提及此部门，整体 BOM 实现由各个浏览器厂商制定：</p>
+      <p>关于 window 对象的资料请参考 MSDN 中说明：<a href="http://msdn.microsoft.com/en-us/library/ms535873(v=VS.85).aspx">http://msdn.microsoft.com/en-us/library/ms535873(v=VS.85).aspx</a> </p>
+      <p>关于 window 对象的 close 方法请参考 MSDN 中说明：  <a href="http://msdn.microsoft.com/en-us/library/ms536367(v=VS.85).aspx">http://msdn.microsoft.com/en-us/library/ms536367(v=VS.85).aspx</a> </p>
+      <p>关于 window 对象的 close 方法请参 Gecko DOM 中说明：  <a href="https://developer.mozilla.org/en/DOM/window.close">window.close</a>。</p>
+      <p>也可参考 W3C HTML5 草案中关于 window 对象说明：<a href="http://www.w3.org/TR/html5/browsers.html#window">http://www.w3.org/TR/html5/browsers.html#window</a><a href="http://msdn.microsoft.com/en-us/library/ms535873(v=VS.85).aspx"></a></p>
+      <p>&nbsp;</p>
+      <p>close 方法属 BOM 体系中的 window 对象的成员，目前它不属于任何标准；但在 w3c html5 草案5.2节 Window 对象中，定义有 close 方法，并指出它将关闭由脚本打开的窗口。</p>
+      <p>
+      另外，使用 close 方法，存在着安全方面的限制，MSDN 开发中心在介绍 &quot;close Method&quot; 时指出，如果关闭非脚本打开的窗口，将弹出确认提示框。如在 IE 下将告知“网页正在试图关闭窗口”，让你确认是否真的要关闭。
+      </p>
+      <p>
+      下面再来引用下 Gecko DOM 参考中关于 window.close 的描述：
+      </p>
+      <p>
+         该方法只允许由 window.open 打开的窗口调用，如果窗口不是通过脚本方式打开的，JavaScript 控制台将报如下警告信息：不允许脚本关闭非脚本打开的窗口。      </p>
+      <p>分析以下代码 ：</p>
+
+      <pre>
+&lt;a onclick=&quot;window.close();return false;&quot; href=&quot;javascript:void(0)&quot;&gt;close window&lt;/a&gt;
+&lt;br/&gt;&lt;br/&gt;
+&lt;a onclick=&quot;window.open('#')&quot; href=&quot;javascript:void(0)&quot;&gt;JS : window.open('#')&lt;/a&gt;
+&lt;br/&gt;&lt;br/&gt;
+&lt;a onclick=&quot;window.showModalDialog('#')&quot; href=&quot;javascript:void(0)&quot;&gt;
+    JS : window.showModalDialog('#')&lt;/a&gt;
+&lt;br/&gt;&lt;br/&gt;
+&lt;a href=&quot;#&quot; target=&quot;_blank&quot;&gt;link(or Press ctrl)&lt;/a&gt;
+&lt;br/&gt;&lt;br/&gt;
+&lt;div id=&quot;info&quot;&gt;&lt;/div&gt;
+&lt;script&gt;
+    window.onload = function() {
+        document.getElementById(&quot;info&quot;).innerHTML = &quot;window.opener : &quot; + window.opener;
+    }
+&lt;/script&gt;
+      </pre>
+      <p>其差异如下表格：</p>
+    <table class="compare">
+<tr>
+          <th>&nbsp;</th>
+          <th>地址栏输入URL</th>
+          <th>点击链接</th>
+          <th>Ctrl键+点击链接</th>
+          <th>window.open</th>
+          <th>window.showModalDialog</th>
+    </tr>
+        <tr>
+          <th>IE6</th>
+          <td class="hl_4">提示窗口关闭</td>
+          <td class="hl_2">直接关闭</td>
+          <td class="hl_2">直接关闭</td>
+          <td class="hl_2">直接关闭</td>
+          <td class="hl_2">直接关闭</td>
+    </tr>
+        <tr>
+          <th>IE7/8</th>
+          <td class="hl_2">直接关闭</td>
+          <td class="hl_4">提示窗口关闭</td>
+          <td class="hl_4">提示窗口关闭</td>
+          <td class="hl_2">直接关闭</td>
+          <td class="hl_2">直接关闭</td>
+    </tr>
+        <tr>
+          <th>Firefox</th>
+          <td class="hl_3">不关闭，无提示</td>
+          <td class="hl_2">直接关闭</td>
+          <td class="hl_3">不关闭，无提示</td>
+          <td class="hl_2">直接关闭</td>
+          <td class="hl_2">直接关闭</td>
+    </tr>
+        <tr>
+          <th>Safari</th>
+          <td class="hl_3">不关闭，无提示</td>
+          <td class="hl_2">直接关闭</td>
+          <td class="hl_2">直接关闭</td>
+          <td class="hl_2">直接关闭</td>
+          <td class="hl_2">直接关闭</td>
+    </tr>
+        <tr>
+          <th>Chrome</th>
+          <td class="hl_3">不关闭，无提示</td>
+          <td class="hl_2">直接关闭</td>
+          <td class="hl_2">直接关闭</td>
+          <td class="hl_2">直接关闭</td>
+          <td class="hl_2">直接关闭</td>
+    </tr>
+        <tr>
+          <th>Opera</th>
+          <td class="hl_2">直接关闭</td>
+          <td class="hl_2">直接关闭</td>
+          <td class="hl_2">直接关闭</td>
+          <td class="hl_2">直接关闭</td>
+          <td class="hl_1">不支持</td>
+    </tr>
+      </table>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>
+      使用 window.close() 来关闭窗口时，需注意以下两点：<br/>
+
+         1. 直接在地址栏输入URL打开的窗口，在 Firefox Chrome Safar 下无法关闭<br/>
+         2. Ctrl 键 + 点击链接打开的窗口，在 Firefox 下无法关闭<br/>
+
+
+      为保证在各主流浏览器下的兼容性，建议采用以脚本形式、或点击链接形式打开新窗口。
+      </p>
+
+      <h2 id="see_also">参见</h2>
+
+
+      <h3>知识库</h3>
+      <ul class="see_also">
+              <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+              <li><a href="#">...</a></li>
+      </ul>
+<div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+                            Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BX2012/window_close.html">window_close.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-06</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>window close 关闭 opener</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

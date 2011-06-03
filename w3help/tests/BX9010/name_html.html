@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html name="n_HTML">
+<head name="n_HEAD">
+<style name="n_STYLE">
+</style>
+<script name="n_SCRIPT">
+	function $(id) { return document.getElementById(id); }
+	window.onload = function () {
+		var els = document.getElementsByTagName("*");
+		var n_res1 = [], n_res2 = [], a, b;
+		for (var i = 0, j = els.length; i < j; i++) {
+			a = els[i];
+			if (!a.getAttribute("name") || a.getAttribute("name").indexOf("n_") < 0) { continue; }
+			b = a.tagName.toUpperCase();
+			(function () { try { return eval("n_" + b); } catch(e) { return false; } }())
+				? ((b == "IFRAME") ? n_res1.push(b + ((eval("n_" + b).tagName) ? "[HTMLIFrameElement]" : "[window]")) : n_res1.push(b))
+				: n_res2.push(b);
+		}
+		$("mode").innerHTML = (document.compatMode.toLowerCase().indexOf("css1") < 0) ? "Quirks Mode" : "Standards Mode";
+		$("name_ok").innerHTML = n_res1.join("<br>");
+		$("name_fail").innerHTML = n_res2.join(", ");
+	}
+</script>
+</head>
+<body name="n_BODY" style="font:16px/1.5 Arial;">
+	<iframe name="n_IFRAME" src="" style="display:none;"></iframe>
+	<div>
+		<h3 id="mode"></h3>
+		<h1>by name, OK</h1>
+		<div id="name_ok"></div>
+		<h1>by name, Fail</h1>
+		<div id="name_fail"></div>
+	</div>
+</body>
+</html>

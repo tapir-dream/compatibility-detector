@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html style="border:5px solid blue;">
+<head>
+</head>
+<body style="border:5px solid green;">
+<div id="d" style="background:gray; height:30px;"></div>
+<div id="e" style="background:lightgray;">Test line</div>
+<script>
+    var d = document.getElementById("d");
+    var c = 0;
+    setInterval(function () {
+        c = parseInt(Math.random() * 100);
+        d.style.height = c + "px";
+    }, 1000);
+    window.onresize = function () {
+        d.innerHTML = d.style.height;
+    }
+</script>
+</body>
+</html>

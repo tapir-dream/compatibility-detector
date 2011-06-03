@@ -1,0 +1,356 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SJ9009: 元素的内联事件处理函数的特殊作用域链在各浏览器中存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在一个元素的属性中绑定事件，实际上就创建了一个<strong>内联事件处理函数</strong>（如&lt;h1 onclick="<span class="hl_1">alert(this);</span>"...&gt;...&lt;/h1&gt;）,<strong>内联事件处理函数</strong>有其特殊的作用域链，并且各浏览器的实现细节也有差异。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>如果在元素的<strong>内联事件处理函数</strong>中使用的变量或调用的方法不当，将导致脚本运行出错。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <h3>1. 内联事件处理函数的作用域链</h3>
+      <p>与其他函数不同，<strong>内联事件处理函数</strong>的作用域链从头部开始依次是：调用对象、该元素的 DOM 对象、该元素所属 FORM 的 DOM 对象（如果有）、document 对象、window 对象（全局对象）。</p>
+      <p>如以下代码：</p>
+<pre>
+&lt;form action="." method="get"&gt;
+  &lt;input type="button" value="compatMode" onclick="alert(compatMode);"&gt;
+&lt;/form&gt;
+</pre>
+      <p>相当于<sup>1</sup>：</p>
+<pre>
+&lt;form action="." method="get"&gt;
+  &lt;input type="button" value="compatMode"&gt;
+&lt;/form&gt;
+&lt;script&gt;
+document.getElementsByTagName("input")[0].onclick=function(){
+  with(document){
+    with(this<sup>2</sup>.form)<sup>3</sup>{
+      with(this<sup>2</sup>){
+        alert(compatMode);
+      }
+    }
+  }
+}
+&lt;/script&gt;
+</pre>
+      <p>以上两种写法的代码在所有浏览器中都将弹出 document.compatMode 的值。</p>
+      <p>将上述代码中的 'compatMode' 替换为 'method'，则在各浏览器中都将弹出 'get'，即 INPUT 元素所在表单对象的 method 属性值。</p>
+      <p class="comment">
+        注：<br/>
+        1. 这段代码仅为说明问题而模拟各浏览器的行为，并非表示所有浏览器都是如此实现的。<br/>
+        2. 是使用 this 关键字还是直接使用这个 DOM 对象，在各浏览器中有差异，详情请看本文 2.1 中的内容。<br/>
+        3. 是否添加 FORM 对象到作用域链中，各浏览器在实现上也有差异，详情请看本文 2.2 中的内容。
+      </p>
+
+      <h3>2. 内联事件处理函数的作用域链在各浏览器中的差异</h3>
+      <p>参考 WebKit 的源码：</p>
+<pre>
+void V8LazyEventListener::prepareListenerObject(ScriptExecutionContext* context)
+{
+    if (hasExistingListenerObject())
+        return;
+
+    v8::HandleScope handleScope;
+
+    V8Proxy* proxy = V8Proxy::retrieve(context);
+    if (!proxy)
+        return;
+
+    // Use the outer scope to hold context.
+    v8::Local&lt;v8::Context&gt; v8Context = worldContext().adjustedContext(proxy);
+    // Bail out if we cannot get the context.
+    if (v8Context.IsEmpty())
+        return;
+
+    v8::Context::Scope scope(v8Context);
+
+    // FIXME: cache the wrapper function.
+
+    // <strong>Nodes other than the document object, when executing inline event handlers push document, form, and the target node on the scope chain.</strong>
+    // We do this by using 'with' statement.
+    // See chrome/fast/forms/form-action.html
+    //     chrome/fast/forms/selected-index-value.html
+    //     base/fast/overflow/onscroll-layer-self-destruct.html
+    //
+    // Don't use new lines so that lines in the modified handler
+    // have the same numbers as in the original code.
+    String code = "(function (evt) {" \
+            "with (<strong>this</strong>.ownerDocument ? <strong>this</strong>.ownerDocument : {}) {" \
+            "with (<em><strong>this</strong>.form</em> ? <strong>this</strong>.form : {}) {" \
+            "with (<strong>this</strong>) {" \
+            "return (function(evt){";
+    code.append(m_code);
+    // Insert '\n' otherwise //-style comments could break the handler.
+    code.append(  "\n}).call(this, evt);}}}})");
+    v8::Handle&lt;v8::String&gt; codeExternalString = v8ExternalString(code);
+    v8::Handle&lt;v8::Script&gt; script = V8Proxy::compileScript(codeExternalString, m_sourceURL, m_lineNumber);
+    if (!script.IsEmpty()) {
+        v8::Local&lt;v8::Value&gt; value = proxy-&gt;runScript(script, false);
+        if (!value.IsEmpty()) {
+            ASSERT(value-&gt;IsFunction());
+
+            v8::Local&lt;v8::Function&gt; wrappedFunction = v8::Local&lt;v8::Function&gt;::Cast(value);
+
+            // Change the toString function on the wrapper function to avoid it
+            // returning the source for the actual wrapper function. Instead it
+            // returns source for a clean wrapper function with the event
+            // argument wrapping the event source code. The reason for this is
+            // that some web sites use toString on event functions and eval the
+            // source returned (sometimes a RegExp is applied as well) for some
+            // other use. That fails miserably if the actual wrapper source is
+            // returned.
+            DEFINE_STATIC_LOCAL(v8::Persistent&lt;v8::FunctionTemplate&gt;, toStringTemplate, ());
+            if (toStringTemplate.IsEmpty())
+                toStringTemplate = v8::Persistent&lt;v8::FunctionTemplate&gt;::New(v8::FunctionTemplate::New(V8LazyEventListenerToString));
+            v8::Local&lt;v8::Function&gt; toStringFunction;
+            if (!toStringTemplate.IsEmpty())
+                toStringFunction = toStringTemplate-&gt;GetFunction();
+            if (!toStringFunction.IsEmpty()) {
+                String toStringResult = "function ";
+                toStringResult.append(m_functionName);
+                toStringResult.append("(");
+                toStringResult.append(m_isSVGEvent ? "evt" : "event");
+                toStringResult.append(") {\n  ");
+                toStringResult.append(m_code);
+                toStringResult.append("\n}");
+                wrappedFunction-&gt;SetHiddenValue(V8HiddenPropertyName::toStringString(), v8ExternalString(toStringResult));
+                wrappedFunction-&gt;Set(v8::String::New("toString"), toStringFunction);
+            }
+
+            wrappedFunction-&gt;SetName(v8::String::New(fromWebCoreString(m_functionName), m_functionName.length()));
+
+            setListenerObject(wrappedFunction);
+        }
+    }
+}
+</pre>
+      <p>从以上代码可以看出，WebKit 在向作用域链中添加对象时，使用了 'this' 关键字，并且通过判断 'this.form' 是否存在来决定是否添加 FORM 对象到作用域链中。</p>
+      <p>其他浏览器中也有类似的实现方式，但在各浏览器中，将目标对象（即绑定了此<strong>内联事件处理函数</strong>的对象）添加到作用域链中的方式有差异，判断并决定是否在作用域链中添加 FORM 对象的方法也不相同。</p>
+
+      <h4>2.1. 各浏览器在生成这个特殊的作用域链时添加目标对象时使用的方法不同</h4>
+      <p>各浏览器都会将<strong>内联事件处理函数</strong>所属的元素的 DOM 对象加入到作用域链中，但加入的方式却是不同的。</p>
+      <p>如以下代码：</p>
+<pre>
+&lt;input type="button" value="hello" onclick="alert(value);"&gt;
+</pre>
+      <p>在所有浏览器中，都将弹出 'hello'。</p>
+      <p>再修改代码以变更 INPUT 元素的<strong>内联事件处理函数</strong>的执行上下文：</p>
+<pre>
+&lt;input type="button" value="hello" onclick="alert(value);"&gt;
+&lt;script&gt;
+var $target=document.getElementsByTagName("input")[0];
+var o={
+  onclick:$target.onclick,
+  value:"Hi, I'm here!"
+};
+o.onclick();
+&lt;/script&gt;
+</pre>
+      <p>在各浏览器中运行的结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE Chrome</th>
+          <td>Hi, I'm here!</td>
+        </tr>
+        <tr>
+          <th>Firefox Safari Opera</th>
+          <td>hello</td>
+        </tr>
+      </table>
+      <p>可见，各浏览器将<strong>内联事件处理函数</strong>所属的元素的 DOM 对象加入到作用域链中的方式是不同的。</p>
+      <p>在 IE Chrome 中的添加方式类似以下代码：</p>
+<pre>
+&lt;input type="button" value="hello"&gt;
+&lt;script&gt;
+var $target=document.getElementsByTagName("input")[0];
+$target.onclick=function(){
+  with(document){
+    with(<span class="hl_2">this</span>){
+      alert(value);
+    }
+  }
+}
+&lt;/script&gt;
+</pre>
+      <p>而在 Firefox Safari Opera 中的添加方式则类似以下代码：</p>
+<pre>
+&lt;input type="button" value="hello"&gt;
+&lt;script&gt;
+var $target=document.getElementsByTagName("input")[0];
+$target.onclick=function(){
+  with(document){
+    with(<span class="hl_3">$target</span>){
+      alert(value);
+    }
+  }
+}
+&lt;/script&gt;
+</pre>
+      <p>由于极少需要改变<strong>内联事件处理函数</strong>的执行上下文，这个差异造成的影响并不多见。</p>
+
+      <h4>2.2. 各浏览器在生成这个特殊的作用域链时对于在何种情况下添加 FORM 对象有不同理解</h4>
+      <p>各浏览器都会将<strong>内联事件处理函数</strong><em>所属</em>的 FORM 对象加入到作用域链中，但如何判断该元素是否“属于”一个表单对象，各浏览器的处理方式则不相同。</p>
+      <p>如以下代码：</p>
+<pre>
+&lt;form action="." method="get"&gt;
+  &lt;div&gt;
+    &lt;span onclick="alert(method);"&gt;click&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/form&gt;
+&lt;script&gt;
+document.method="document.method";
+&lt;/script&gt;
+</pre>
+      <p>在各浏览器中，点击 SPAN 元素后弹出的信息如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE Safari Opera</th>
+          <td>get</td>
+        </tr>
+        <tr>
+          <th>Chrome Firefox</th>
+          <td>document.method</td>
+        </tr>
+      </table>
+      <p>可见：</p>
+      <ul>
+        <li>IE Safari Opera 将 FORM 对象加入到了<strong>内联事件处理函数</strong>的作用域链中，是否加入 FORM 对象看起来是由这个元素是否是一个 FORM 的子孙级元素来决定的。因此在这些浏览器中，函数内的变量 'method' 最终得到的是 FORM 的 'method' 的值。</li>
+        <li>Chrome Firefox 没有将 FORM 对象加入到<strong>内联事件处理函数</strong>的作用域链中，判断是否加入 FORM 对象是看该函数绑定的目标对象的 'form' 属性是否存在。从上文中的 WebKit 的源码中可以看到 Chrome 正是使用了 'this.form' 来判断，只有目标元素是一个 FORM 的子孙级元素并且该目标元素是一个表单元素时，'form' 属性才会存在。本例中的 SPAN 元素并不是表单元素，因此变量 'method' 最终得到的是 'document.method' 的值。</li>
+      </ul>
+      <p>如果将以上代码中的 SPAN 元素更换为 INPUT 元素或其他表单元素，则在所有浏览器中的表现将一致。</p>
+
+      <h3>3. 由于内联事件处理函数的这种特殊的作用域链而产生问题的实例</h3>
+      <h4>3.1. 在元素的内联事件处理函数中访问的变量意外的与该该函数作用域链中非全局对象的其他对象的属性重名时出现的问题</h4>
+      <p>当一个内联事件处理函数中访问的变量意外的与该函数作用域链中非全局对象（window）的其他对象的属性重名，将导致该变量的实际值不是预期值。</p>
+      <p>假设有以下代码：</p>
+<pre>
+&lt;button onclick="onsearch()"&gt; click here &lt;/button&gt;
+&lt;script&gt;
+function onsearch(){
+  alert("Click!");
+}
+&lt;/script&gt;
+</pre>
+      <p>作者本意为点击按钮即弹出“Click!”信息，但 WebKit 引擎浏览器的 HTMLElement 对象都有一个名为 onsearch 的事件监听器，这将导致上述代码在 Chrome Safari 中不能按照预期执行。本例中由于该监听器未定义（为 null），因此将报 “Uncaught TypeError: object is not a function” 的错误。</p>
+      <p>附：在上述代码中，追加以下代码确认 'onsearch' 的位置：</p>
+<pre>
+&lt;script&gt;
+var o=document.getElementsByTagName("button")[0];
+if("onsearch" in o)alert("当前对象有 onsearch 属性。");
+if(o.hasOwnProperty("onsearch"))alert("onsearch 属性是当前对象私有。");
+&lt;/script&gt;
+</pre>
+
+      <h4>3.2. 在表单内的子孙级非表单元素的内联事件处理函数中试图调用表单的属性或方法时出现的问题</h4>
+      <p>假设有以下代码：</p>
+<pre>
+&lt;form action="xxx" method="get"&gt;
+  ...
+  &lt;a href="#" onclick="submit();"&gt;click&lt;/a&gt;
+&lt;/form&gt;
+</pre>
+      <p>作者本意为点击 A 元素后调用 FORM 的 'submit' 方法，但 Chrome Firefox 并未将 FORM 对象加入到该<strong>内联事件处理函数</strong>的作用域链中，因此以上代码在 Chrome Firefox 中并不能正常运行。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>1. 尽量不要使用<strong>内联事件处理函数</strong>，使用 DOM 标准的事件注册方式为该元素注册事件处理函数，如：</p>
+<pre>
+&lt;button&gt; click here &lt;/button&gt;
+&lt;script&gt;
+function onsearch(){
+  alert("Click!");
+}
+function bind($target,eventName,onEvent){
+  $target.addEventListener?$target.addEventListener(eventName,onEvent,false):$target.attachEvent("on"+eventName,onEvent);
+}
+bind(document.getElementsByTagName("button")[0],"click",onsearch);
+&lt;/script&gt;
+</pre>
+      <p>2. 必须使用内联事件处理函数时，要保证该函数内试图访问的变量是位于全局作用域内的，而不会因该函数独特的作用域链而引用到非预期的对象。最简单的办法是使用前缀，如 'my_onsearch'。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.8<br />
+              Chrome 6.0.495.0 dev<br />
+              Safari 5.0(7533.16)<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+              <a href="../../tests/SJ9009/this_or_element.html">this_or_element.html</a><br>
+              <a href="../../tests/SJ9009/add_form_object.html">add_form_object.html</a><br>
+              <a href="../../tests/SJ9009/webkit_onsearch.html">webkit_onsearch.html</a>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-20</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>webkit onsearch event 事件处理程序 作用域 执行上下文对象</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

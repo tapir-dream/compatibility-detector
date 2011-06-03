@@ -1,0 +1,26 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+<span>请上传图片：</span>
+<input type="file" id="upload">
+<input type="button" id="see" value="See" onclick="getseee()">
+<div id="path" style="display:none" >
+  <p>'input[type=file]' 的 'value' 属性值为：</p>
+  <div id="info"></div>
+</div>
+<hr>
+<div id="image" style="display:none" >
+  <p>您选择的图片为：</p>
+  <img   alt="无法显示该图片" id="pic" style="height:100px; width:120px;"/></div>
+</body>
+<script>
+    function getseee() {
+        document.getElementById("pic").src = document.getElementById("upload").value;
+	    document.getElementById("info").innerHTML= document.getElementById("upload").value;
+		document.getElementById("path").style.display="";
+		document.getElementById("image").style.display="";
+    }
+</script>
+</html>

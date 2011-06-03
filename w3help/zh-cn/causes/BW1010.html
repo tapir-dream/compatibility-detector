@@ -1,0 +1,175 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BW1010: Chrome Safari 中页面文档树建立完毕后通过 document.write 系列方法重写文档不记录到历史记录中</h1>
+  <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+      <h2 id="description">问题描述</h2>
+      <p>document.write 与 document.writeln 方法的作用是向打开的文档流中写入内容，并产生一个文档<sup>1</sup>。</p>
+
+        <p>History<sup>2</sup> 历史记录对象属于 BOM (Browser Object Model) 范畴，他是浏览器访问页面记录的集合。在现行规范中没有对 History 对象进行明确约定，他由各浏览器自行实现。</p>
+        <p>当使用 write 系列方法向打开的文档流中写入内容后，并没有规范规定浏览器本身的历史记录是否会记录这次文档变更内容。</p>
+        <p>这个情况已经超出现有标准规范说明内容范畴，各个浏览器对此实现并不一致。</p>
+        <p class="comment">【注1】：在初始文档流还未关闭的情况下只是向文档流中输出内容，不会产生新 document。<br />
+          write 和 writeln 方法的标准说明请参考现行的 DOM-Level-2 HTML 规范标准：  <a href="http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-75233634">1.5. Objects related to HTML documents</a>。</p>
+        <p class="comment">【注2】：在现有 HTML5 草案中存在 History 对象接口说明：  <a href="http://www.w3.org/TR/html5/history.html#the-history-interface">5.4.2 The History interface</a>。</p>
+        <h2 id="influence">造成的影响</h2>
+      <p>Chrome Safari 中当正常输出文档流关闭后，再通过 document.write 方法重写文档内容，该内容不会记录到历史记录中。</p>
+      <p>这可能导致用户使用浏览器的后退、前进按键或开发者使用 History 对象的 go 、back、forward 等导航历史记录的方法将不可能再访问到被 write 系列方法重写的页面。</p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Chrome Safari</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>根据描述情况，构造测试用例如下：</p>
+<pre>
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8"/&gt;
+&lt;script&gt;
+window.onload = function(){
+  function getHTML(){
+    return '&lt;!DOCTYPE html&gt;\
+      &lt;html&gt;\
+      &lt;head&gt;\
+      &lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8"/&gt;\
+      &lt;/head&gt;\
+      &lt;body&gt;\
+      &lt;h2&gt;执行 $write 方法以后的页面&lt;\/h2&gt;\
+      &lt;button onclick="history.back()"&gt;后退到上一历史记录页面&lt;/button&gt;\
+      &lt;/body&gt;\
+      &lt;/html&gt;';
+  }
+  function echo(type){
+    type = type?"writeln":"write";
+    document.open();
+    document[type](getHTML().replace(/\$write/,type));
+    document.close();
+  }
+  window["test_echo"] = echo;
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;h2&gt;初始的页面&lt;/h2&gt;
+&lt;button onclick="test_echo()"&gt;使用 wirte 方法重写页面&lt;/button&gt;
+&lt;button onclick="test_echo(1)"&gt;使用 wirteln 方法重写页面&lt;/button&gt;
+&lt;button onclick="history.forward()"&gt;前进到下一历史记录页面&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+
+
+      <p>例子中分别使用 document.write 和 document.writeln 方法来构造新页面，并使用了 history.forward 和 history.back 方法导航浏览器的历史记录。</p>
+      <p>在执行此例前请先将浏览器导航到 http://www.google.com 站点，使其拥有可后退的浏览器访问历史记录。</p>
+      <p>最终各浏览器运行结果如下：</p>
+      <table class="compare">
+              <tr>
+                <th>&nbsp;</th>
+                <th>IE6 IE7 IE8 Firefox Opera</th>
+                <th>Chrome</th>
+                <th> Safari</th>
+              </tr>
+
+              <tr>
+                <th>write 新页面内点击&quot;后退到上一历史记录页面&quot;按钮</th>
+                <td><span class="hl_2">初始页</span></td>
+                <td><span class="hl_1"> Google 首页</span></td>
+                <td><span class="hl_1"> Google 首页</span></td>
+              </tr>
+              <tr>
+                <th>初始页内点击&quot;前进到下一历史记录页面&quot;按钮</th>
+                <td><span class="hl_2">wirte 操作后页面</span></td>
+                <td><span class="hl_1">无效</span></td>
+                <td><span class="hl_1">无效</span></td>
+              </tr>
+              <tr>
+                <th>回到 google 首页使用前进历史记录</th>
+                <td><span class="hl_2">初始页</span></td>
+                <td><span class="hl_1">初始页</span></td>
+                <td><span class="hl_4">write 操作后页面</span></td>
+              </tr>
+            </table>
+      <p>通过上表可见：</p>
+      <ul>
+              <li>在 <strong><em>IE6 IE7 IE8 Firefox Opera</em></strong> 中，浏览器历史记录的顺序为：Google 首页--> 原页面 --> write 后页面； 执行 write 操作后产生的<strong>新页面被记录到历史记录中</strong>。</li>
+                <li>在 <strong><em>Safari</em></strong> 中，浏览器历史记录的顺序为：Google 首页--> 被 write 后新页面 ；执行 write 操作后产生的新页面<strong>不被新记录到浏览器历史记录中，而是将原页面的访问历史替换</strong>。</li>
+                <li>在 <strong><em>Chrome</em></strong> 中，浏览器历史记录的顺序为：Google 首页--&gt; 原页面；执行 write 操作后产生的新页面<strong>不被新记录到浏览器历史记录中，这个新页面也不会替换原始页面的访问历史。</strong></li>
+      </ul>
+      <h2 id="solutions">解决方案</h2>
+      <p>不要期望 document.write、document.writeln 操作后浏览器依旧保留该页面的历史记录<sup>1</sup>，建议只在不依赖历史记录导航的应用需求中使用 document.write、document.writeln 方法。</p>
+      <p class="comment">【注1】：即使在 write 操作后的新页面里使用 location.hash 方法为 URL 加入锚点迫使浏览器记录浏览历史，也无法阻止 Safari 浏览器对原始页面历史记录的替换，同时还会导致 Chrome Firefox 历史记录访问出现新问题。</p>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td> IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.8<br />
+              Chrome 7.0.517.0 dev<br />
+              Safari 5.0.2 <br />
+              Opera 10.62 </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BW1010/write_and_history.html">write_and_history.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-14</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p> Document Write History Webkit Chrome Safari 历史记录 后退</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RT2013: 各浏览器对 'word-spacing' 特性可作用的空格种类存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 CSS 2.1 规范中的描述，'word-spacing' 特性指定了单词 (word) 之间的间距特性。<br />
+      单词间距算法取决于用户端，同时也会受对齐 (参见 '<a href="http://www.w3.org/TR/CSS21/text.html#propdef-text-align">text-align</a>' 特性) 的影响。当应用了空白处理规则后，单词间距会作用在文本中的<strong>空格 (U+0020)、非间断空格 (&amp;nbsp;, U+00A0)、表意空格 (全角空格, U+3000) 的左侧</strong>。</p>
+      <p>关于 'border-collapse' 特性的更多信息，请参考 CSS2.1 规范：<a href="http://www.w3.org/TR/CSS21/text.html#propdef-word-spacing">16.4 Letter and word spacing: the 'letter-spacing' and 'word-spacing' properties</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>若行框内包含非文本内容 (如图片、表单元素等替换元素)，设定了 'word-spacing' 特性，则在 Chrome Safari 中，单词间隙不会作用在这些内容之间的空白符上。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>这个问题将造成设定的 'word-spacing' 特性所带来的间隙在不同浏览器之间出现差异，影响文本内容的布局。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Chrome Safari</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>CSS 规范中仅描述了 'word-spacing' 特性设定的单词间距会作用在文本中的<strong>空格 (U+0020)、非间断空格 (&amp;nbsp;, U+00A0)、表意空格 (全角空格, U+3000) 的左侧</strong>。</p>
+      <p>下面将针对 HTML 代码中出现的普通空格、&amp;nbsp;、全角空格测试 'word-spacing' 特性带来的间距，其中&amp;nbsp;及全角空格还要测试当出现多个<sup>1</sup>的情况。</p>
+      <p class="comment">注 1: 由于连续的普通空格在 HTML 中会被自动合并为一个，故这里不再测试多个普通空格的情况。</p>
+      <p>根据问题描述构造如下测试样例：<em>word-spacing.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;gbk&quot; /&gt;
+&lt;style&gt;
+  * { margin:0; padding:0; border:0; font:18px 'Trebuchet MS'; }
+  h1 { font-weight:bold; border-bottom:1px solid black; }
+  p span { background:lightsalmon; }
+  div.ws { <span class="hl_1">word-spacing:30px;</span> background:wheat; margin-top:5px; fodnt-size:18px; }
+  div.info { background:mintcream; }
+  div span { background:violet; }
+&lt;/style&gt;
+&lt;script&gt;
+  function $(id) { return document.getElementById(id); }
+
+  window.onload = function () {
+    var nbsp_width = $('nbsp_width').previousSibling.offsetWidth,
+      ispace_width = $('ispace_width').previousSibling.offsetWidth,
+      w_spacing = 30,
+      a = [nbsp_width, nbsp_width, nbsp_width, ispace_width, ispace_width],
+      t = [1, 1, 2, 1, 2];
+    $('nbsp_width').appendChild(document.createTextNode('width=' + nbsp_width));
+    $('ispace_width').appendChild(document.createTextNode('width=' + ispace_width));
+
+    for (var i = 1; i &lt;= 5; i++) {
+      var g1_off = $('g' + i + '_2').getBoundingClientRect().left - $('g' + i + '_1').getBoundingClientRect().right;
+      $('i' + i + '').appendChild(document.createTextNode(g1_off + '=' + a[i - 1] + '*' + t[i - 1] + '+' + w_spacing + '*' + (g1_off - a[i - 1] * t[i - 1]) / w_spacing));
+      $('i' + i + '').style.paddingLeft = $('g' + i + '_1').offsetWidth + 'px';
+    }
+  }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;p&gt;
+  &lt;span&gt;&amp;nbsp;&lt;/span&gt;&lt;em id=&quot;nbsp_width&quot;&gt;&lt;/em&gt;
+  &lt;span&gt;　&lt;/span&gt;&lt;em id=&quot;ispace_width&quot;&gt;&lt;/em&gt;
+&lt;/p&gt;
+&lt;br /&gt;
+&lt;h1&gt;Space&lt;/h1&gt;
+&lt;div class=&quot;ws&quot;&gt;
+  &lt;span id=&quot;g1_1&quot;&gt;text&lt;/span&gt; &lt;span id=&quot;g1_2&quot;&gt;text&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class=&quot;info&quot; id=&quot;i1&quot;&gt;&lt;/div&gt;
+&lt;br /&gt;
+&lt;h1&gt;Non-breaking space&lt;/h1&gt;
+&lt;div class=&quot;ws&quot;&gt;
+  &lt;span id=&quot;g2_1&quot;&gt;text&lt;/span&gt;&amp;nbsp;&lt;span id=&quot;g2_2&quot;&gt;text&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class=&quot;info&quot; id=&quot;i2&quot;&gt;&lt;/div&gt;
+&lt;div class=&quot;ws&quot;&gt;
+  &lt;span id=&quot;g3_1&quot;&gt;text&lt;/span&gt;&amp;nbsp;&amp;nbsp;&lt;span id=&quot;g3_2&quot;&gt;text&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class=&quot;info&quot; id=&quot;i3&quot;&gt;&lt;/div&gt;
+&lt;br /&gt;
+&lt;h1&gt;Ideographic space&lt;/h1&gt;
+&lt;div class=&quot;ws&quot;&gt;
+  &lt;span id=&quot;g4_1&quot;&gt;text&lt;/span&gt;　&lt;span id=&quot;g4_2&quot;&gt;text&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class=&quot;info&quot; id=&quot;i4&quot;&gt;&lt;/div&gt;
+&lt;div class=&quot;ws&quot;&gt;
+  &lt;span id=&quot;g5_1&quot;&gt;text&lt;/span&gt;　　&lt;span id=&quot;g5_2&quot;&gt;text&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class=&quot;info&quot; id=&quot;i5&quot;&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上述代码分为 5 组，每组均为 DIV 元素设定了 <span class="hl_1">word-spacing:30px;</span>，其内包含两个 SPAN 元素，SPAN 元素内仅包含一个单词，SPAN 元素之间存在不同种类的空格。第一组为普通空格，第二组为一个 &amp;nbsp; 空格，第三组为两个 &amp;nbsp; 空格，第四组为一个全角空格，第五组为两个全角空格。最后通过脚本检测两个 SPAN 元素 (即两个单词) 之间的间距。</p>
+      <p>在各浏览器中的表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox</th>
+          <th>Chrome Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RT2013/ws1.gif" alt="" /></td>
+          <td><img src="../../tests/RT2013/ws2.gif" alt="" /></td>
+          <td><img src="../../tests/RT2013/ws3.gif" alt="" /></td>
+          <td><img src="../../tests/RT2013/ws4.gif" alt="" /></td>
+      </table>
+      <p>在测试代码的字体样式设定下，空格、&amp;nbsp; 的宽度为 5px，全角空格宽度为 18px。</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8(Q)</em> 中，对于三种空格：普通空格、&amp;nbsp;、全角空格均可以在它们左侧应用设定的 'word-spacing' 特性值；</li>
+        <li>在 <em>IE8(S) Firefox</em> 中，普通空格、&amp;nbsp; 可以在它们左侧应用设定的 'word-spacing' 特性值，而对于全角空格则无效；</li>
+        <li>在 <em>Chrome Safari</em> 中，普通空格、全角空格可以在它们左侧应用设定的 'word-spacing' 特性值，而对于 &amp;nbsp; 则无效。值得注意的是，对于多个连续的全角空格，仅会出现一份 'word-spacing' 特性设定的间距值；</li>
+        <li>在 <em>Opera</em> 中，仅普通空格可以在其左侧应用设定的 'word-spacing' 特性值，对于 &amp;nbsp;、全角空格则无效；</li>
+      </ul>
+      <p>可以看到，仅 IE6 IE7 IE8(Q) 完整支持了三种空格左侧加入 'word-spacing'。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>使用 'word-spacing' 特性时需谨慎，为避免兼容性问题，应保证单词之间仅由普通空格 (U+0020) 隔开。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 8.0.552.5 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.63
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+              <a href="../../tests/RT2013/word-spacing.html">word-spacing.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-21</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>word-spacing word 单词 间距 inline text 文本 空格 space 全角 full-width nbsp</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HE1005: 各浏览器中对于拥有水平单元格间隙的表格元素内存在过度设定的 colspan 属性的单元格的渲染存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 HTML 4.01 规范中的描述，TD 和 TH 元素的 colspan 属性指定了当前单元格横跨的列数，缺省值为 1。</p>
+      <p>关于 colspan  属性的更多信息，请参考 HTML 4.01 规范 <a href="http://www.w3.org/TR/html401/struct/tables.html#adef-colspan">11.2.6 Table cells: The TH and TD elements</a> 中的内容。</li>
+
+      <h2 id="description">问题描述</h2>
+      <p>若表格设定了大于零的水平单元格间隙 (即 cellspacing 属性)，且其内单元格存在过度设定的 colspan 属性，也就是单元格横跨的列数的设定值多余实际存在的单元格的个数，这时各浏览器对表格的渲染效果存在较大差异。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题将导致表格的宽度在各浏览器中出现差异，同时也会影响到表格的布局。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：<em>colspan.html</em></p>
+<pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  table td { background:navy; width:20px; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;table cellspacing=&quot;10&quot; cellpadding=&quot;0&quot; style=&quot;background:wheat;&quot;&gt;
+  &lt;tr&gt;
+    &lt;td&gt;&amp;nbsp;&lt;/td&gt;
+    &lt;td&gt;&amp;nbsp;&lt;/td&gt;
+    &lt;td&gt;&amp;nbsp;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td <span class="hl">colspan=&quot;15&quot;&gt;</span>&amp;nbsp;&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>表格第一行有三个单元格，而第二行唯一的单元格设定了 <span class="hl">colspan="15"</span>，横跨的单元格个数大于存在的单元格个数。</p>
+      <p>这段代码在不同的浏览器环境中的表现：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S)</th>
+          <th>Firefox</th>
+          <th>Chrome Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/HE1005/colspan1.gif" alt="snapshot" /></td>
+          <td><img src="../../tests/HE1005/colspan2.gif" alt="snapshot" /></td>
+          <td><img src="../../tests/HE1005/colspan3.gif" alt="snapshot" /></td>
+          <td><img src="../../tests/HE1005/colspan4.gif" alt="snapshot" /></td>
+          <td><img src="../../tests/HE1005/colspan5.gif" alt="snapshot" /></td>
+        </tr>
+      </table>
+      <p>这种情况 W3C 规范并没有明确说明处理办法，由截图可见，各浏览器也出现了非常大的布局差异。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>在进行表格布局时，务必精准设定 colspan 属性的值。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.12<br />
+              Chrome 9.0.576.0 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.63
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HE1005/colspan.html">colspan.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-11-16</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>width attribute percentage</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

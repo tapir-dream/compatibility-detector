@@ -1,0 +1,276 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RD8025: 各浏览器对使用 shrink-to-fit 宽度的包含块中行内元素后的绝对定位元素的静态位置判断存在差异</h1>
+  <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>1、如果一个浮动元素或绝对定位元素的的 'width' 是 'auto'，并且它是一个非替换元素，那么它的宽度将会采用 shrink-to-fit 算法计算得出。</p>
+      <p>shrink-to-fit 的计算公式：min(max(preferred minimum width, available width), preferred width)</p>
+      <p>CSS2.1 并未给出 preferred minimum width、available width 和 preferred width 确切算法，通常，将内容中非明确的换行外的其他部分强制不换行来计算 preferred width；反之，尝试将内容尽可能的换行，以得到 preferred minimum width；available width 即该元素的包含块的宽度减去 'margin-left'，'border-left-width'，'padding-left'，'padding-right'，'border-right-width'，'margin-right' 的值以及任何存在的纵向滚动条的宽度。</p>
+      <p>关于浮动非替换元素宽度计算的详细资料，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/visudet.html#float-width">10.3.5 Floating, non-replaced elements</a> 中的内容。</p>
+      <p>关于绝对定位非替换元素宽度计算的详细资料，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/visudet.html#abs-non-replaced-width">10.3.7 Absolutely positioned, non-replaced elements</a> 中的内容。</p>
+      <p>&nbsp;</p>
+      <p>2、当绝对定位元素的 'top' 'left' 'bottom' 'right' 都为 'auto' 时，该元素的 'left' 'top' 值将使用其处于静态流位置中的定位值。</p>
+      <p>请参考 CSS2.1 规范以下章节中，对于绝对定位非替换元素和替换元素各自位置计算规则的第二条 ：</p>
+      <p><a href="http://www.w3.org/TR/CSS21/visudet.html#abs-non-replaced-width">10.3.7 Absolutely positioned, non-replaced elements</a></p>
+      <p><a href="http://www.w3.org/TR/CSS21/visudet.html#abs-replaced-width">10.3.8 Absolutely positioned, replaced elements</a></p>
+      <p><a href="http://www.w3.org/TR/CSS21/visudet.html#abs-non-replaced-height">10.6.4 Absolutely positioned, non-replaced elements</a></p>
+      <p><a href="http://www.w3.org/TR/CSS21/visudet.html#abs-replaced-height">10.6.5 Absolutely positioned, replaced elements</a></p>
+      <h2 id="description">问题描述</h2>
+      <p>当采用如下布局方法时，各浏览器可能会造成 shrink-to-fit 计算规则处理差异：</p>
+            <ul>
+              <li>父元素采用浮动或绝对定位样式，宽度值为 'auto'；</li>
+                <li>子元素存在两个以上连续的行内元素；</li>
+                <li>两个行内元素之间存在空文本节点而非标记首尾紧密相连；</li>
+                <li>第二个行内元素采用绝对定位样式，且 'top' 'left' 'bottom' 'right' 都为 'auto' 。</li>
+            </ul>
+        <p>此时，Safari 和 Chrome 中的父元素采用  shrink-to-fit 计算规则时，可能使用了 preferred minimum width 来作为 preferred width ，导致在空文本节点处产生换行，使依赖元素普通流位置的绝对定位元素显示位置产生差异。</p>
+          <h2 id="influence">造成的影响</h2>
+      <p>可能会导致各浏览器中，页面局部布局存在差异。</p>
+        <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tbody>
+          <tr>
+            <th>Chrome Safari</th>
+            <td>&nbsp;</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>根据问题描述中说明，构造以下代码：</p>
+<pre>
+&lt;div id="A" style="float:left; border:1px solid #000066;"&gt;
+    &lt;span style="background:#CCC;"&gt;float - non-replaced element&lt;/span&gt;<sup>1</sup>
+    &lt;span style="position:absolute"&gt;123&lt;/span&gt;
+&lt;/div&gt;
+&lt;div style="clear:both"&gt;&amp;nbsp;&lt;/div&gt;
+&lt;div id="B" style="float:left; border:1px solid #000066;"&gt;<sup>1</sup>
+    &lt;span style="background:#CCC;"&gt;float - replaced element&lt;/span&gt;
+    &lt;input style="position:absolute" /&gt;
+&lt;/div&gt;
+&lt;div id="C" style="position:absolute; top:100px; left:10px; border:1px solid #000066;"&gt;
+    &lt;span style="background:#CCC;"&gt;Absolutely positioned - non-replaced element&lt;/span&gt;<sup>1</sup>
+    &lt;span style="position:absolute"&gt;123&lt;/span&gt;
+&lt;/div&gt;
+&lt;div id="D" style="position:absolute; top:150px; left:10px; border:1px solid #000066;"&gt;
+    &lt;span style="background:#CCC;"&gt;Absolutely positioned - replaced element&lt;/span&gt;<sup>1</sup>
+    &lt;input style="position:absolute;" /&gt;
+&lt;/div&gt;
+</pre>
+      <p class="comment">【注】：此处存在换行符，会产生一个空文本节点。</p>
+
+      <p>代码中分别使用浮动样式、绝对定位样式、自动宽度设置使父容器产生 shrink-to-fit 计算规则；行内子元素间使用换行符产生空文本节点，第二个子元素分别使用绝对定位替换和非替换元素来综合验证此情况。</p>
+      <p>实际各浏览器渲染结果如下：</p>
+      <table class="compare">
+              <tr>
+                <th colspan="2">IE6 IE7 IE8 Firefox Opera</th>
+              </tr>
+              <tr>
+                <th>float - non-replaced element</th>
+                <td><img src="../../tests/RD8025/01.png" alt="IE6 IE7 IE8 Firefox Opera"/></td>
+              </tr>
+              <tr>
+                <th>float - replaced element</th>
+                <td><img src="../../tests/RD8025/02.png" alt="IE6 IE7 IE8 Firefox Opera"/></td>
+              </tr>
+              <tr>
+                <th>Absolutely positioned - non-replaced element</th>
+                <td><img src="../../tests/RD8025/03.png" alt="IE6 IE7 IE8 Firefox Opera"/></td>
+              </tr>
+              <tr>
+                <th>Absolutely positioned - replaced element</th>
+                <td><img src="../../tests/RD8025/04.png" alt="IE6 IE7 IE8 Firefox Opera"/></td>
+              </tr>
+              <tr>
+                <th colspan="2">Safari Chrome</th>
+              </tr>
+              <tr>
+                <th>float - non-replaced element</th>
+                <td><img src="../../tests/RD8025/05.png" alt="Safari Chrome"/></td>
+              </tr>
+              <tr>
+                <th>float - replaced element</th>
+                <td><img src="../../tests/RD8025/06.png" alt="Safari Chrome"/></td>
+              </tr>
+              <tr>
+                <th>Absolutely positioned - non-replaced element</th>
+                <td><img src="../../tests/RD8025/07.png" alt="Safari Chrome"/></td>
+              </tr>
+              <tr>
+                <th>Absolutely positioned - replaced element</th>
+                <td><img src="../../tests/RD8025/08.png" alt="Safari Chrome"/></td>
+              </tr>
+            </table>
+
+      <p>上表数据表明，Safari Chrome 中按照 shrink-to-fit 计算规则计算父容器的实际宽度值时，由于两个行内元素间存在空白文本节点并且第二个元素定位参照其静态位置计算，导致出现  preferred minimum width 可能等于 preferred width 值的情况。</p>
+      <p>此处存在两个关键点需要一一证明其影响：</p>
+      <ol>
+            <li>两个行内元素间的空白节点；</li>
+            <li>处于第一个行内元素之后的元素绝对定位是参照其静态位置的。</li>
+          </ol>
+      <p>&nbsp;</p>
+      <p>首先，解决两个行内元素间的空白节点问题。</p>
+      <p>将代码改成标记首尾紧密相连模式，不让他存在有可以换行的空文本节点，迫使 preferred minimum width 计算值与 preferred width 值相同：</p>
+      <pre>
+&lt;div id="A" style="float:left; border:1px solid #000066;"&gt;
+    &lt;span style="background:#CCC;"&gt;float - non-replaced element&lt;/span&gt;&lt;span style="position:absolute"&gt;123&lt;/span&gt;
+&lt;/div&gt;
+&lt;div style="clear:both"&gt;&amp;nbsp;&lt;/div&gt;
+&lt;div id="B" style="float:left; border:1px solid #000066;"&gt;
+    &lt;span style="background:#CCC;"&gt;float - replaced element&lt;/span&gt;&lt;input style="position:absolute" /&gt;
+&lt;/div&gt;
+&lt;div id="C" style="position:absolute; top:100px; left:10px; border:1px solid #000066;"&gt;
+    &lt;span style="background:#CCC;"&gt;Absolutely positioned - non-replaced element&lt;/span&gt;&lt;span style="position:absolute"&gt;123&lt;/span&gt;
+&lt;/div&gt;
+&lt;div id="D" style="position:absolute; top:150px; left:10px; border:1px solid #000066;"&gt;
+    &lt;span style="background:#CCC;"&gt;Absolutely positioned - replaced element&lt;/span&gt;&lt;input style="position:absolute;" /&gt;
+&lt;/div&gt;
+</pre>
+    <p>此时所有览器渲染结果均一致：</p>
+    <table class="compare">
+          <tr>
+            <th colspan="2">IE6 IE7 IE8 Firefox Opera Chrome Safari</th>
+          </tr>
+          <tr>
+            <th>float - non-replaced element</th>
+            <td><img src="../../tests/RD8025/01.png" alt="IE6 IE7 IE8 Firefox Opera"/></td>
+          </tr>
+          <tr>
+            <th>float - replaced element</th>
+            <td><img src="../../tests/RD8025/02.png" alt="IE6 IE7 IE8 Firefox Opera"/></td>
+          </tr>
+          <tr>
+            <th>Absolutely positioned - non-replaced element</th>
+            <td><img src="../../tests/RD8025/03.png" alt="IE6 IE7 IE8 Firefox Opera"/></td>
+          </tr>
+          <tr>
+            <th>Absolutely positioned - replaced element</th>
+            <td><img src="../../tests/RD8025/04.png" alt="IE6 IE7 IE8 Firefox Opera"/></td>
+          </tr>
+        </table>
+    <p>可见，preferred minimum width 计算值与 preferred width 值相同时，各浏览器处理不会产生差异。</p>
+    <p>&nbsp;</p>
+    <p>然后，再观看依赖静态流位置定位的定位元素问题。</p>
+    <p>将原始代码中替换元素和非替换元素的绝对定位样式去除，此时 preferred minimum width 计算值会与 preferred width 值不同：</p>
+<pre>
+&lt;div id="A" style="float:left; border:1px solid #000066;"&gt;
+    &lt;span style="background:#CCC;"&gt;float - non-replaced element&lt;/span&gt;
+    &lt;span&gt;123&lt;/span&gt;
+&lt;/div&gt;
+&lt;div style="clear:both"&gt;&amp;nbsp;&lt;/div&gt;
+&lt;div id="B" style="float:left; border:1px solid #000066;"&gt;
+    &lt;span style="background:#CCC;"&gt;float - replaced element&lt;/span&gt;
+    &lt;input /&gt;
+&lt;/div&gt;
+&lt;div id="C" style="position:absolute; top:100px; left:10px; border:1px solid #000066;"&gt;
+    &lt;span style="background:#CCC;"&gt;Absolutely positioned - non-replaced element&lt;/span&gt;
+    &lt;span&gt;123&lt;/span&gt;
+&lt;/div&gt;
+&lt;div id="D" style="position:absolute; top:150px; left:10px; border:1px solid #000066;"&gt;
+    &lt;span style="background:#CCC;"&gt;Absolutely positioned - replaced element&lt;/span&gt;
+    &lt;input /&gt;
+&lt;/div&gt;
+</pre>
+
+    <p>此时所有览器渲染结果均一致：</p>
+    <table class="compare">
+          <tr>
+            <th colspan="2">IE6 IE7 IE8 Firefox Opera Chrome Safari</th>
+          </tr>
+          <tr>
+            <th>float - non-replaced element</th>
+            <td><img src="../../tests/RD8025/09.png" alt="IE6 IE7 IE8 Firefox Opera"/></td>
+          </tr>
+          <tr>
+            <th>float - replaced element</th>
+            <td><img src="../../tests/RD8025/10.png" alt="IE6 IE7 IE8 Firefox Opera"/></td>
+          </tr>
+          <tr>
+            <th>Absolutely positioned - non-replaced element</th>
+            <td><img src="../../tests/RD8025/11.png" alt="IE6 IE7 IE8 Firefox Opera"/></td>
+          </tr>
+          <tr>
+            <th>Absolutely positioned - replaced element</th>
+            <td><img src="../../tests/RD8025/12.png" alt="IE6 IE7 IE8 Firefox Opera"/></td>
+          </tr>
+        </table>
+    <p>可见，当不存在依赖元素普通流位置的绝对定位元素时，即使 preferred minimum width 计算值与 preferred width 值不相同，各浏览器处理也不会产生差异。</p>
+    <p>&nbsp;</p>
+    <p>综合以上分析，Safari 和 Chrome 中的父元素采用  shrink-to-fit 计算规则时，可能使用了 preferred minimum width 来作为 preferred width ，导致在空文本节点处产生换行，使依赖元素普通流位置的绝对定位元素显示位置产生差异。这种差异仅出现在父元素的某个子行内元素之后存在有空白文件节点，空白文件节点之后又存在依赖元素普通流位置的绝对定位元素时。</p>
+    <h2 id="solutions">解决方案</h2>
+      <p>建议在使用 ‘float’ ‘position:absolute' 这两个样式时，<strong>为 'width' 特性设置具体值</strong>。这样可以从根源上避免触发 shrink-to-fit 计算规则带来的差异。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.8<br />
+              Chrome 7.0.517.5 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62</td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RD8025/absolute_and_shrink-to-fit.html">absolute_and_shrink-to-fit.html</a><br />
+                        <a href="../../tests/RD8025/absolute_and_shrink-to-fit_fix_1.html">absolute_and_shrink-to-fit_fix_1.html</a><br />
+                        <a href="../../tests/RD8025/absolute_and_shrink-to-fit_fix_2.html">absolute_and_shrink-to-fit_fix_2.html</a>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-15</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>  shrink-to-fit float position Absolutely positioned  static position replaced element  non-replaced element  preferred minimum width  preferred width webkit Chrome Safari   Empty text nodes  </p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HH8001: 在 Firefox 中注释内容中如果包含 '-' 字符在某些情况下会使该注释解析错误</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>注释元素（Comment Element）的作用是，注释一行或多行 HTML 代码，在注释标签内的文本不被显示，但对通过查看页面源码的方式还是可见的。</p>
+      <p>注释标签的标准写法如下：</p>
+<pre>// 单行注释
+&lt;!-- this is a comment --&gt;
+
+// 多行注释
+&lt;!-- and so is this one,
+     which occupies more than one line --&gt;</pre>
+      <p>另，根据 W3C HTML 4.01 文档中的描述，需注意以下几点：</p>
+      <ol>
+        <li>注释元素的开始标签 “&lt;!” 和 “--” 之间不允许有空白符存在，但是在各浏览器下就算它们之间存在空白符，也能被正确的识别，如下代码所示：<br />
+<pre>// 此处的注释，在各浏览器下，都能被作为注释标签正常识别
+&lt;! -- this is a comment --&gt; </pre></li>
+        <li>注释元素的关闭标签 “--” 和 “&gt;” 之间允许有空白符存在。</li>
+        <li>应避免在注释内容中出现两个或以上的“-”字符，否则可能会出错。</li>
+      </ol>
+
+      <p>关于 HTML 注释的更多说明，请参考 HTML 4.01 规范 <a href="http://www.w3.org/TR/html401/intro/sgmltut.html#h-3.2.4">3.2.4</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>注释内容含中横线（-）在 Firefox 中可能会使中间内容丢失。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>这个问题将导致页面中的注释部分在 Firefox 标准模式(S)下被当做文本内容解释出来，从而造成文本内容异常甚至影响到页面布局。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Firefox(S)</th>
+          <td>注释的内容连同注释标签本身被当做纯文本解析并渲染到页面上。</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>W3C HTML 4.01 文档中提到，注释标签中存在两个或两个以上相连的连字号 (&quot;-&quot;) 时，注释标签将出错。此情况只在 Firefox(S) 下出现，而在其它浏览器下，则不会出错。</p>
+      <p>以下讨论仅针对 Firefox(S) ，因为其它浏览器下均正常。</p>
+      <h3>1. 出错条件</h3>
+      <p>观察如下HTML代码：</p>
+<pre>&lt;!-- 这里是注释内容 <strong>-</strong>  --&gt;</pre>
+      <p>记录测试结果，然后增加注释标签内的连字号数量，如下：</p>
+<pre>&lt;!-- 这里是注释内容 <strong>--</strong>  --&gt;</pre>
+      <p>再次记录测试结果，重复以上步骤N次，整理结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>注释标签中相连连字号数量</th>
+          <td>1</td>
+          <td>2</td>
+          <td>3</td>
+          <td>4</td>
+          <td>5</td>
+          <td>6</td>
+          <td>7</td>
+          <td>8</td>
+          <td>9</td>
+          <td>10</td>
+          <td>11</td>
+          <td>12</td>
+          <td>13</td>
+          <td>14</td>
+          <td>15</td>
+          <td>16</td>
+          <td>17</td>
+          <td>18</td>
+          <td>19</td>
+          <td>...</td>
+        </tr>
+        <tr>
+          <th>测试结果<sup>1</sup></th>
+          <td><span class="hl_2">T</span></td>
+          <td><span class="hl_1">F</span></td>
+          <td><span class="hl_1">F</span></td>
+          <td><span class="hl_2">T</span></td>
+          <td><span class="hl_2">T</span></td>
+          <td><span class="hl_1">F</span></td>
+          <td><span class="hl_1">F</span></td>
+          <td><span class="hl_2">T</span></td>
+          <td><span class="hl_2">T</span></td>
+          <td><span class="hl_1">F</span></td>
+          <td><span class="hl_1">F</span></td>
+          <td><span class="hl_2">T</span></td>
+          <td><span class="hl_2">T</span></td>
+          <td><span class="hl_1">F</span></td>
+          <td><span class="hl_1">F</span></td>
+          <td><span class="hl_2">T</span></td>
+          <td><span class="hl_2">T</span></td>
+          <td><span class="hl_1">F</span></td>
+          <td><span class="hl_1">F</span></td>
+          <td>...</td>
+        </tr>
+      </table>
+      <p class="comment">
+      【注】<br />
+      1. F-出错；T-正常。<br />
+      </p>
+      <p>从上表可以看出，<strong>当注释标签中相连连字号数量为2的奇数倍、或2的奇数倍加1时，Firefox(S) 下注释标签出错。</strong></p>
+      <p>另，改变相连连字号的位置，不影响测试结果，例如：改变如下</p>
+<pre>&lt;!-- 这里是<strong>---</strong>注释内容 --&gt;</pre>
+      <p>或</p>
+<pre>&lt;!-- <strong>---</strong>这里是注释内容 --&gt;</pre>
+
+      <h3>2. 一个注释中多个地方出错时</h3>
+      <p>观察如下代码：</p>
+<pre>// case 1:
+&lt;!-- <strong>--</strong> a --&gt;
+// case 2:
+&lt;!-- <strong>--</strong> a <strong>--</strong> --&gt;
+// case 3:
+&lt;!-- <strong>--</strong> a <strong>--</strong> b <strong>--</strong>  --&gt;
+// case 4:
+&lt;!-- <strong>--</strong> a <strong>--</strong> b <strong>--</strong> c <strong>--</strong> --&gt;
+......</pre>
+      <p>注意：代码中红色部分，只要满足【（A）情况一】中出错条件即可。</p>
+      <p>以上代码在各浏览器下的表现，汇总如下表：</p>
+      <table class="compare">
+        <tr>
+          <th>case x</th>
+          <td>1</td>
+          <td>2</td>
+          <td>3</td>
+          <td>4</td>
+          <td>5</td>
+          <td>6</td>
+          <td>7</td>
+          <td>8</td>
+          <td>9</td>
+          <td>...</td>
+        </tr>
+        <tr>
+          <th>测试结果<sup>1</sup></th>
+          <td><span class="hl_1">F</span></td>
+          <td><span class="hl_2">T</span></td>
+          <td><span class="hl_1">F</span></td>
+          <td><span class="hl_2">T</span></td>
+          <td><span class="hl_1">F</span></td>
+          <td><span class="hl_2">T</span></td>
+          <td><span class="hl_1">F</span></td>
+          <td><span class="hl_2">T</span></td>
+          <td><span class="hl_1">F</span></td>
+          <td>...</td>
+        </tr>
+      </table>
+      <p class="comment">
+      【注】<br />
+      1. F-出错；T-正常。<br />
+      </p>
+      <p>从上表中可以看出，<strong>当注释中有多处出错时，满足负负得正的规律，即出错了偶数次时，相当于没出错，此时注释标签解析正常，反之，如果出错了奇数次，此时注释标签将出错。</strong>其实，【（A）情况一】中的出错条件也可以用负负得正的规律来解释。</p>
+
+      <h3>3. 两个出错的注释标签，其间的内容被视为注释的一部分</h3>
+      <p>观察如下代码：</p>
+<pre>&lt;!-- <strong>--</strong>a --&gt;
+     abc                 // 这里的内容将被视为注释的一部分
+&lt;!-- <strong>--</strong>b --&gt;</pre>
+      <p>注意：代码中红色部分，只要满足【（A）情况一】/【（B）情况二】中的出错条件即可。</p>
+      <p>以上代码在各浏览器下的表现如下表所示：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>Firefox(S)</th>
+          <th>IE6 IE7 IE8 Firefox(Q) Safari Chrome Opera</th>
+        </tr>
+        <tr>
+          <th>输出</th>
+          <td>无</td>
+          <td>abc</td>
+        </tr>
+      </table>
+      <p>从上表可以看出，<strong>在两个出错的注释标签间的内容，将被视为注释的一部分而不予显示。</strong></p>
+
+      <p>Firefox(S)下，以上代码相当于如下所示的代码，此时的情况在【（B）情况二】中已经讨论过。</p>
+<pre>&lt;!-- -- a
+     abc
+-- b --&gt;</pre>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>按标准推荐的方法写注释标签，如：</p>
+<pre>
+&lt;!--  //此处 &quot;&lt;!&quot; 和 &quot;--&quot; 之间尽量不要有空格。
+这里是注释内容，应避免在注释内容中出现两个或以上的“-”字符。
+--&gt;  //此处 &quot;--&quot; 和 &quot;&gt;&quot; 之间避免有空格。
+</pre>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.3<br />
+              Chrome 5.0.375.9 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>&nbsp;</td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-06-18</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>HTML 注释标签 注释 连字号 空格 comment</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

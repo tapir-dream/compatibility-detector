@@ -1,0 +1,194 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SD9008: 已经被废弃的 DocumentLS 接口目前仅在 Firefox 和 Opera 下被部分支持</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>DocumnetLS 是 DOM3 中一个过时的接口。它为文档内容的处理提供了一种机制，使其可序列化，或可通过加载一个 URI 来替换已生成的 DOM 树，或解析一个字符串。该接口在 200 1-04-19 的 DOM-Level-3-CMLS 草案中第一次出现，直到 2003-06-19 的 DOM-Level-3-LS 草案还一直存在。然而，在 2003-11-07 的候选版本 CR-DOM-Level-3-LS 中，该接口落马。目前 w3c 推荐的版本 DOM-Level-3-LS 中并无该接口。</p>
+      <p>更多参考资料：</p>
+      <p>2001-04-19 <a href="http://www.w3.org/TR/2001/WD-DOM-Level-3-CMLS-20010419/load-save.html#LS-Interfaces-DocumentLS">DOM-Level-3-CMLS 草案</a></p>
+      <p>2003-06-19 <a href="http://www.w3.org/TR/2003/WD-DOM-Level-3-LS-20030619/load-save.html#LS-DocumentLS">DOM-Level-3-LS 草案</a></p>
+      <p>2003-11-07 <a href="http://www.w3.org/TR/2003/CR-DOM-Level-3-LS-20031107/">CR-DOM-Level-3-LS 候选版本</a></p>
+      <p>目前 W3C 推荐 <a href="http://www.w3.org/TR/DOM-Level-3-LS/">DOM-Level-3-LS 版本</a></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>DocumnetLS 是 DOM3 中一个过时的接口。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>有些浏览器还在支持它，而有些浏览器则不支持，从而导致浏览器间的兼容性问题。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>DocumentLS 接口中定义了一些属性和方法，如下：</p>
+<pre>
+interface DocumentLS {
+  attribute boolean async;// 指出 load() 将以同步，还是异步方式加载
+  void abort();//中断加载资源
+  boolean load(in DOMString uri);// 加载指定的 URI 资源
+  boolean loadXML(in DOMString source);// 解析 xml 字符串
+  DOMString saveXML(in Node node);// 保存节点为一字符串，即序列化节点
+};
+</pre>
+      <p>DocumentLS 接口为可选接口，如果被支持，它将绑定到 Document 接口实例，也就是说，我们可以通过如下方式来访问 DocumentLS 接口中的方法，或属性，代码如下：</p>
+<pre>
+document.load(URI);
+</pre>
+      <p>在W3C推荐的 DOM3 Load and Save 说明文档中，DocumentLS 接口已经被抛弃。那么，目前主流的浏览器对 DocumentLS 接口支持如何呢？请观察如下代码：</p>
+<pre>
+var xmlDoc = document.implementation.createDocument("", "", null);
+alert(xmlDoc.async);
+alert(xmlDoc.abort);
+alert(xmlDoc.load);
+alert(xmlDoc.loadXML);
+alert(xmlDoc.saveXML);
+</pre>
+      <p>在各浏览器下的运行结果，汇总如下表：</p>
+            <table class="compare">
+              <tbody>
+                <tr>
+                  <th>DocumentLS 接口属性/方法 </th>
+                  <th>IE </th>
+                  <th>Firefox(Gecko 1.9) </th>
+                  <th>Chrome/Safari </th>
+                  <th>Opera </th>
+                </tr>
+                <tr>
+                  <th>async </th>
+                  <td class="hl_1">NO </td>
+                  <td class="hl_2">YES </td>
+                  <td class="hl_1">NO </td>
+                  <td class="hl_2">YES </td>
+                </tr>
+                <tr>
+                  <th>abort </th>
+                  <td class="hl_1">NO </td>
+                  <td class="hl_2">NO </td>
+                  <td class="hl_1">NO </td>
+                  <td class="hl_1">NO </td>
+                </tr>
+                <tr>
+                  <th>load </th>
+                  <td class="hl_1">NO </td>
+                  <td class="hl_2">YES </td>
+                  <td class="hl_1">NO </td>
+                  <td class="hl_2">YES </td>
+                </tr>
+                <tr>
+                  <th>loadXML </th>
+                  <td class="hl_1">NO </td>
+                  <td class="hl_1">NO </td>
+                  <td class="hl_1">NO </td>
+                  <td class="hl_1">NO </td>
+                </tr>
+                <tr>
+                  <th>saveXML </th>
+                  <td class="hl_1">NO </td>
+                  <td class="hl_1">NO </td>
+                  <td class="hl_1">NO </td>
+                  <td class="hl_1">NO </td>
+                </tr>
+              </tbody>
+            </table>
+          <p>从上表中，可以清楚的看出，DocumentLS 接口在各主流浏览器下的支持情况。</p>
+          <p>关于 Firefox 下 document.load 的更详细信息，请参考 <a href="https://developer.mozilla.org/en/DOM/document.load">mozilla document.load</a> 。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>由于 W3C 推荐的标准中，已经放弃了 DocumentLS 接口，为更好的兼容各浏览器，建议采用 XMLHttpRequest 方式载入xml文件，示例代码如下：</p>
+<pre>
+var xhr = window.XMLHttpRequest ?
+                    new window.XMLHttpRequest():
+                    new window.ActiveXObject("Microsoft.XMLHTTP")
+xhr.onreadystatechange = function(){
+    if(xhr.readyState == 4){
+        var xmlDoc = xhr.responseXML
+        // do something what you want ...
+    }
+};
+xhr.open('GET', 'test.xml', true);
+xhr.send();
+</pre>
+<pre>
+关于 ActiveXObject ，请参考MSDN的 <a href="http://msdn.microsoft.com/en-us/library/7sw4ddf8%28VS.85%29.aspx">ActiveXObject Object</a> 。
+关于 XML DOM 的属性，请参考MSDN的 <a href="http://msdn.microsoft.com/en-us/library/ms757828%28v=VS.85%29.aspx">XML DOM Properties</a> 。
+关于 XML DOM的方法，请参考MSDN的 <a href="http://msdn.microsoft.com/en-us/library/ms763798%28v=VS.85%29.aspx">XML DOM Methods</a> 。
+关于 XMLHttpRequest 的详细信息，请参考 w3c 草案的 <a href="http://www.w3.org/TR/XMLHttpRequest/">XMLHttpRequest</a> 。
+</pre>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/SD9008/DocumentLS_support.html">DocumentLS_support.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-26</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>DocumentLS implementation load XMLHttpRequest ActiveXObject</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

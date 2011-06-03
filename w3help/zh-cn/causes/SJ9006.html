@@ -1,0 +1,121 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SJ9006: 在 IE6 IE7 IE8(Q) 中不能在 JSON 字符串或对象直接量的最后一个键值对后加 ','</h1>
+    <a href=""></a>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>JSON（JavaScript Object Notation）是一种易于人们阅读和编写、同时也易于机器解析和生成的轻量级的数据交换格式。它是基于 <a href="http://www.crockford.com/javascript/">JavaScript Programming Language</a> 和 <a href="http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-262.pdf">Standard ECMA-262 3rd Edition - December 1999</a> 的一个子集。 JSON 采用完全独立于语言的文本格式，但是也使用了类似于 C 语言家族的习惯（包括 C，C++，C#，Java，JavaScript，Perl，Python 等）。这些特性使 JSON 成为了理想的数据交换语言。</p>
+      <p>对象是一个无序的“‘名称/值’对”集合。一个对象以“{”（左括号）开始，“}”（右括号）结束。每个“名称”后跟一个“:”（冒号）；“‘名称/值’ 对”之间使用“,”（逗号）分隔。</p>
+      <p>关于 JSON 的更多内容，请参考 www.json.org 的 <a href="http://www.json.org/json-zh.html">介绍 JSON</a>。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>JSON 字符串或对象直接量的最后一个键值对后加 ',' 在 IE6 IE7 IE8(Q) 浏览器中会导致脚本中断。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>该问题将导致脚本不能按照预期的效果正常执行。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q) </th>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+<pre>
+&lt;script language="JavaScript"&gt;
+var jsonObj = {key1:"value1",key2:"value2",key3:"value3" <span class="hl_1">,</span>};
+alert(jsonObj.key1);
+&lt;/script&gt;
+</pre>
+
+      <p>以上代码在各浏览器中的运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q) </th>
+          <th>其他浏览器</th>
+        </tr>
+        <tr>
+          <td>脚本执行出错，提示“缺少标识符、字符串或数字”</td>
+          <td>脚本正常执行，弹出“value1”</td>
+        </tr>
+      </table>
+      <p>可见，JSON 字符串或对象直接量的最后一个键值对后加 ',' 在 IE6 IE7 IE8(Q) 浏览器中会导致脚本中断。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>即便规范没有强调最后一个键值对的后边不能出现 ','，也要确保最后一个键值对之后没有多余的 ','，以兼容各浏览器。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+            <a href="../../tests/SJ9006/json.html">json.html</a><br/>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-23</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>JSON 对象 直接量 逗号</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

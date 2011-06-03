@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+	window.onload=function (){
+		var ua = navigator.userAgent;
+		Test = {
+			version: (ua.match(/.+(?:rv|it|ra|ie|me)[\/: ]([\d.]+)/i)||[])[1],
+			ie: /msie/i.test(ua) && !/opera/i.test(ua),
+			op: /opera/i.test(ua),
+			sa: /version.*safari/i.test(ua),
+			ch: /chrome/.test(ua),
+			ff: /gecko/i.test(ua) && !/webkit/i.test(ua),
+			wk: /webkit/i.test(ua),
+			mz: /mozilla/i.test(ua)&&!/(compatible|webkit)/i.test(ua)
+		}
+		
+		function $(id) { return document.getElementById(id); }
+		
+		function addEvent(el, type, fn){
+			(el.attachEvent) ? (el.attachEvent("on" + type, fn)) : (el.addEventListener(type, fn, false));
+		};
+
+		function fixMouseWheel(elem, fn) {
+			var mousewheel = Test.ff ? "DOMMouseScroll" : "mousewheel";
+			(elem == null || elem == window ) && (elem = document);
+			return {
+				type: mousewheel,
+				elem: elem,
+				fn: function(e){
+					var delta = 0;
+					e = e || window.event;
+					if (e.wheelDelta) {
+						delta = event.wheelDelta / 120;
+						if ( Test.op && Test.version < 10 ) delta = -delta;
+					} else if (e.detail) {
+						delta = -e.detail / 3;
+					}
+					e.delta = Math.round(delta);
+					fn.call(elem, e);
+				}
+			}
+		}
+		
+		var a = fixMouseWheel($("d"), function (e) {
+			$("e").innerHTML = e.delta;
+		});
+
+		addEvent(a.elem, a.type, a.fn);
+	}
+</script>
+</head>
+<body>
+	<div id="d" style="width:200px; height:200px; border:1px solid black; overflow:scroll; position:relative;">
+		<div id="e" style="position:absolute; top:0; left:0;"></div>
+	</div>
+</body>
+</html>

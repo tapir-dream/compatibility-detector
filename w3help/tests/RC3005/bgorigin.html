@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	* { font:12px 'Trebuchet MS'; }
+	.bg { background-image:url(bg.gif); border:10px double brown; padding:10px; }
+	.child { width:120px; height:30px; line-height:30px; text-align:center; background:wheat; opacity:0.7; filter:alpha(opacity=70); }
+</style>
+</head>
+<div style="float:left;">
+	<div class="bg" style="background-origin:border-box;">
+		<div class="child">border-box</div>
+	</div>
+</div>
+<br />
+<div style="float:left; clear:left; margin-top:5px;">
+	<div class="bg" style="background-origin:padding-box;">
+		<div class="child">padding-box</div>
+	</div>
+</div>
+<br />
+<div style="float:left; clear:left; margin-top:5px;">
+	<div class="bg" style="background-origin:content-box;">
+		<div class="child">content-box</div>
+	</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RE8004: IE6 IE7 IE8(Q) 中自动布局的表格在其中包含无内容的左浮动元素时的宽度计算在某些情况下有误</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 CSS 2.1 规范的描述，如果一个 TABLE 的 'table-layout' 特性的值为 'auto'，那么设置在 TABLE 及 TD 上的宽度未必是它们的最终宽度，它们的最终宽度取决于它们的内容。</p>
+      <p>当单元格的内容的尺寸较大时，单元格会被撑大，设置的宽度会被忽略，从而影响到该单元格所在列、及其所在表格的最终宽度。</p>
+      <p>关于自动布局的表格的宽度计算的更多信息，请参考 CSS 2.1 规范 <a href="http://www.w3.org/TR/CSS21/tables.html#auto-table-layout">Automatic table layout</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 IE7 IE8(Q) 中，如果一个 TABLE 的 'table-layout' 特性的值为 'auto'，并且其中某个单元格中包含无内容的左浮动元素时，计算该单元格的宽度时将忽略这个左浮动元素。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>这个问题会导致页面在某些浏览器下布局混乱。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+<pre>
+&lt;table style="width:100px; border:5px solid black;" cellspacing="0" cellpadding="0"&gt;
+    &lt;tr id="tr1"&gt;
+        &lt;td id="td1"&gt;
+            &lt;div id="d1" style="float:left; width:200px; height:50px; background:gray;"&gt;&lt;/div&gt;
+        &lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;
+&lt;div id="info1"&gt;&lt;/div&gt;
+&lt;br /&gt;
+&lt;table style="width:100px; border:5px solid black;" cellspacing="0" cellpadding="0"&gt;
+    &lt;tr id="tr2"&gt;
+        &lt;td id="td2"&gt;
+            &lt;div id="d2" style="float:right; width:200px; height:50px; background:gray;"&gt;&lt;/div&gt;
+        &lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;
+&lt;div id="info2"&gt;&lt;/div&gt;
+&lt;br /&gt;
+&lt;table style="width:100px; border:5px solid black;" cellspacing="0" cellpadding="0"&gt;
+    &lt;tr id="tr3"&gt;
+        &lt;td id="td3"&gt;
+            &lt;div id="d3" style="float:left; width:200px; height:50px; background:gray;"&gt;&amp;nbsp;&lt;/div&gt;
+        &lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;
+&lt;div id="info3"&gt;&lt;/div&gt;
+&lt;script&gt;
+    function $(id) { return document.getElementById(id); }
+    $("info1").innerHTML = "TR1:" + $("tr1").offsetWidth + ", TD1:" + $("td1").offsetWidth;
+    $("info2").innerHTML = "TR2:" + $("tr2").offsetWidth + ", TD2:" + $("td2").offsetWidth;
+    $("info3").innerHTML = "TR3:" + $("tr3").offsetWidth + ", TD3:" + $("td3").offsetWidth;
+&lt;/script&gt;
+</pre>
+      <p>上面代码分为三组，每一组均为一个一行一列的表格中包含一个200x50的浮动的 DIV 元素。区别为第一组中 DIV 左浮动、无内容，第二组 DIV 右浮动、无内容，第三组 DIV 左浮动、有内容。</p>
+      <p>这段代码在不同浏览器中运行结果如下：</p>
+    <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RE8004/dfp5h4pg_1894gjddfjdq_b.gif" alt="" /></td>
+          <td><img src="../../tests/RE8004/dfp5h4pg_1895gvt4pzfw_b.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>可见，当 TABLE 的 'table-layout' 为 'auto'（其默认值就是 'auto'），并且其单元格内的子元素左浮动，且无内容时：</p>
+      <ul>
+        <li>在IE6 IE7 IE8(Q)中，在计算最小内容宽度（MCW）时没有考虑到浮动元素的宽度，导致表格的宽度计算错误。</li>
+        <li>在其他浏览器中，按照 W3C 规范中对于表格的宽度算法的要求进行渲染。</li>
+      </ul>
+      <p>对于右浮动元素及内容非空的左浮动元素，在IE中不存在此现象。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>避免在 TD 元素内出现左浮动、内容为空的元素。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td> IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.51
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RE8004/ie_table_float_width.html">ie_table_float_width.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-2</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>TABLE TD table-layout auto width float 表格 单元格 宽度 浮动</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

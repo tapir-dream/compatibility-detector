@@ -1,0 +1,148 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RS3008: IE6 IE7 IE8(Q) 不支持 A 元素以外的其他元素的 ':active' 伪类</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p><strong>关于 ':active' 伪类</strong></p>
+      <p>':active' 伪类适用于一个元素被用户激活的时候。如鼠标在元素范围区域中按下但还没有释放的时候。</p>
+      <p>关于 ':active' 伪类的详细信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/selector.html#dynamic-pseudo-classes">5.11.3 The dynamic pseudo-classes: :hover, :active, and :focus</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 CSS 1 历史规范中 ':link '、':visited '、':hover'、 ':active' 伪类仅作用于 A 标记中，这导致根据早期 CSS 版本实现的浏览器 <em>IE6 IE7 IE8(Q)</em> 不支持 A 元素以外的其他元素的 ':active' 伪类。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>如果在非 A 元素上使用了 ':active' 伪类，会使非 A 元素预期的激活效果在 <em>IE6 IE7 IE8(Q)</em> 中无效，但不会影响使用和布局。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>对于此问题，我们通过以下的测试用例来说明。</p>
+      <p>分析以下代码：</p>
+<pre>&lt;style type=&quot;text/css&quot;&gt;
+  <span class="hl_1">p:active</span> {
+    color: red;
+  }
+&lt;/style&gt;
+&lt;p&gt;Aloha!&lt;/p&gt;</pre>
+      <ul>
+        <li>以上代码对 P 元素声明了 ':active' 伪类；</li>
+      </ul>
+      <p>根据CSS2.1 规范中的描述可知，当鼠标在 'Aloha!' 上按下不释放时，P 标记中的字体会变成红色。</p>
+      <p>这段代码在不同的浏览器环境中的表现在 'Aloha!' 按下鼠标左键，但不释放情况下的截图)：</p>
+    <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Opera Safari Chrome</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RS3008/RS3008-1.jpg" alt=""></td>
+          <td><img src="../../tests/RS3008/RS3008-2.jpg" alt=""></td>
+        </tr>
+      </table>
+      <p>所以对于 :active 伪类的支持情况，如下表：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6</th>
+          <th>IE7</th>
+          <th>IE8(Q)</th>
+          <th>IE8(S)</th>
+          <th>Firefox</th>
+          <th>Safari</th>
+          <th>Opera</th>
+          <th>Chrome</th>
+        </tr>
+        <tr>
+          <td class="hl_1">N</td>
+          <td class="hl_1">N</td>
+          <td class="hl_1">N</td>
+          <td class="hl_2">Y</td>
+          <td class="hl_2">Y</td>
+          <td class="hl_2">Y</td>
+          <td class="hl_2">Y</td>
+          <td class="hl_2">Y</td>
+        </tr>
+      </table>
+          <p class="comment">【注】：实际中其他除常用 HTML 标记同样适用此例，并非仅 P 标记自身不支持，本文中不再一一测试证明。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>
+        使用 JavaScript 绑定 onmousedown onmouseup 事件模仿 ‘:active’ 伪类效果；<br />
+        使用 <a href="http://www.xs4all.nl/~peterned/csshover.html">Whatever:hover</a>，该组件利用 IE 特有的 CSS 行为（behavior）及通过 JavaScript 来模拟 ':active' 伪类的效果。
+      </p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br/>
+              IE7<br/>
+              IE8<br/>
+              Firefox 3.6.3<br/>
+              Chrome 6.0.437.3 dev<br/>
+              Safari 5.0<br />
+              Opera 10.54
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RS3008/active_pseudo-class.html">active_pseudo-class.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-08</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>active Pseudo class</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

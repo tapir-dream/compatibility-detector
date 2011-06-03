@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+	function $(id) { return document.getElementById(id); }
+	
+	window.onload = function () {
+		var image = document.createElement('image');
+		image.setAttribute('src', 'google.gif');
+		document.body.appendChild(document.createTextNode('tagName of image: ' + image.tagName));
+		$('d').appendChild(image);
+		document.body.appendChild(document.createElement('br'));
+		document.body.appendChild(document.createTextNode($('d').innerHTML));
+	}
+</script>
+</head>
+<body style="font:14px 'Trebuchet MS';">
+document.createElement('image'):<br />
+<div id="d"></div>
+<br />
+</body>
+</html>

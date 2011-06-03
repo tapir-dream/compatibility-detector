@@ -1,0 +1,38 @@
+<body style="font-size:12px; margin:20px;">
+<table border='1'><tr><th  class="t">　　TH　　</th><td  class="t">　　TD　　</td></tr></table>
+
+<a href="#" style="background:cyan; zoom:1;" class="t">　　A　　</a>
+
+<button class="t"><span style="background:pink;">　　BUTTON　　</span></button>
+
+<span style="background:gold; display:inline-block;" class="t">　　SPAN　　</span>
+
+<span style="background:yellow; overflow:hidden;" class="t">　　SPAN　　</span>
+
+<span style="background:gray; width:50px; height:50px;" class="t">　　SPAN　　</span>
+
+<div style="background:silver; width:90px;" class="t">　　DIV　　</div>
+
+<div style="background:red; float:left;" class="t">　　FLOAT DIV　　</div>
+
+<div style="background:yellowgreen; float:right;" class="t">　　FLOAT DIV　　</div>
+
+<div style="background:lightblue; position:absolute; top:0; left:0;" class="t">　　POS DIV　　</div>
+
+<script>
+    var t = document.getElementsByTagName("*");
+    var w = [];
+    var has = "";
+    var a = "";
+    for (var i = 0, j = t.length; i < j; i++) {
+        if (t[i].className == "t") {
+            w.push(t[i]);
+        }
+    }
+    for (var i = 0, j = w.length; i < j; i++) {
+        a = w[i].innerHTML;
+        has = ((w[i].currentStyle == undefined) || (w[i].currentStyle.hasLayout == undefined)) ? "_N/A_" : ((w[i].currentStyle.hasLayout) ? "_yes_" : " _no__");
+        w[i].innerHTML = a.replace(/　　/, "　　　(" + has + ")");
+    }
+</script>
+</body>

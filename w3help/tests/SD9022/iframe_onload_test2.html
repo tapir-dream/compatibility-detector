@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+</head>
+<body>
+<div id="msgA">通过 HTMLIFrameElement.onload 属性动态加入事件处理函数的 IFRAME 没有触发 onload 事件。</div>
+<div id="msgB">静态 IFRAME 没有触发 onload 事件。</div>
+<br />
+<script>
+function iframeLoadA(){
+	document.getElementById("msgA").innerHTML = "通过 HTMLIFrameElement.onload 属性动态加入事件处理函数的 IFRAME 已经触发 onload 事件。";
+}
+function iframeLoadB(){
+	document.getElementById("msgB").innerHTML = "静态 IFRAME 已经触发 onload 事件。";
+}
+
+window.onload = function (){
+	var iframeB = document.getElementById("ifarmeB");
+	var iframeA = document.createElement('iframe');
+	iframeA.setAttribute("onload","iframeLoadA()");
+	document.body.appendChild(iframeA);
+}
+
+</script>
+<iframe id="ifarmeB" onload="iframeLoadB()"></iframe>
+</body>
+</html>

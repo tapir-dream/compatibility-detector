@@ -1,0 +1,468 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RE8001: 固定表格布局下的各浏览器对与表格宽度计算算法不同</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+    <h2 id="standard_reference">标准参考</h2>
+      <p> 请参照 W3C CSS2.1 规范 第17.5.3节：<a href="http://www.w3.org/TR/CSS21/tables.html#width-layout">http://www.w3.org/TR/CSS21/tables.html#width-layout</a></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>固定表格布局下的各浏览器对与表格宽度计算算法不同。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <h3>1. 内容溢出</h3>
+      <p>列的宽度不够容纳其内容时，IE6 IE7 IE8(Q) 会将溢出的内容隐藏，而其他浏览器则会根据单元格的 'overflow' 属性决定是否隐藏溢出内容，这时候溢出单元格的内容有可能与其他单元格的文字重叠。</p>
+      <h3>2. 列的实际宽度不是设定宽度</h3>
+      <p>有浏览器对于 TABLE 元素均是将宽度作用于 'border-box'，但是对于 TD 元素的宽度的作用范围在不同浏览器中却产生了差异，而 IE(Q) Chrome Safari 中的处理更接近标准，即单元格与表格一样，其宽度均作用于 border-box 。      </p>
+      <p>由于单元格边白的影响，当我们为一组列设定宽度后，其实际运行效果不一定与设定宽度相符。这有可能造成一系列的问题，如内容溢出、内容折行等。这时应尽量避免设置单元格的 'padding'，若需要单元格内容需要留有空白，可以为其添加子元素 DIV，为 DIV 元素设置 margin 达到相同的效果。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+        <th>所有浏览器</th>
+        <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <h3>1. 表格的宽度算法table-layout介绍</h3>
+      <p>CSS2 中的 'table-layout' 属性定义了两种不同的表格宽度计算方式，根据 W3C CSS2.1 规范第 17.5.3 节中的描述， 'table-layout' 属性值有 'auto' 与 'fixed'，对应两种不同的计算方法，'auto'为缺省值。</p>
+      <ul>
+        <li> <strong>“auto”（自动算法）</strong>适用于任何表格布局，CSS规范并没有明确规定用户端在表格布局时必须遵守何种算法，此种算法反映了传统HTML表格的特征，每列的宽度是由各列单元格中没有折行的最宽的内容设定的，自动算法有时会较慢，因为它需要在下载完整个表格并访问表格中所有的内容后才能决定表格的最终布局。 </li>
+        <li><strong>'fixed'（固定布局算法）适</strong>用于固定表格布局，这是一种快速算法，表格的水平布局不依赖于单元格的内容，而只依赖于表格的宽度，列的宽度以及边框或单元格的间隔。使用固定布局算法，用户端在下载完第一行后就可以开始表格布局，后续行的单元格不影响列宽。</li>
+      </ul>
+      <p class="section">1.1. 固定布局算法概述</p>
+      <p>CSS 规范中对 'table-layout:fixed' 这种固定布局算法有更具体的描述，这种算法下，表格的宽度应显式的由 'width' 属性指定。如果其 width 为 auto，则代表将使用自动算法（'table-layout:auto'）对表格布局。</p>
+      <p>在固定表格布局算法中，各列的宽度也有规定：</p>
+      <ol>
+        <li>若列元素的宽度不为auto，则该列的宽度即为该指定值；</li>
+        <li>如果单元格扩展到若干个列（rowspan属性），宽度将在列内平分；</li>
+        <li>其它列平均分配剩下的表格水平空间（减去边框或单元格间隔）。</li>
+      </ol>
+      <p>所以，表格的实际宽度是 TABLE 元素的 'width' 设定宽度和各列宽（加上单元格间隔或边框）之和的较大值。若表格比各列之和更宽，则多余的空间（或宽度）将被分配到所有列中。</p>
+      <p>上述内容仅规定了最一般情况下对于 'table-layout:fixed' 时表格宽度计算所应遵循的基本规范。而对于列宽设定为百分数及像素单位时，单元格包含边白（padding），或者 TABLE 元素设置了 cellpadding 及 cellspacing 属性时等复杂情况，规范并没有明确说明浏览器端应该遵循的一些基本算法。下面将就这些较复杂的情况分析各浏览器对固定布局算法的表格、单元格宽度的计算。</p>
+      <p><em>由于在 <strong>IE6(SQ) IE7(SQ) IE8(Q)</strong> 中TD元素内容溢出 BUG，所以为了简化情况，下面的测试样例只讨论算法的差别，不再对 IE 的 BUG 进行截图。各浏览器对于计算后的宽度为小数时，由于精度不同带来的 1px 的差异不再进行分别讨论。</em></p>
+
+      <h3>2. 各浏览器对于固定布局下的表格宽度计算算法差异</h3>
+      <p><strong>由于 W3C 规范中并没有明确说明宽度算法，各浏览器根据各自的理解进行宽度计算，而浏览器之间出现差异主要体现在表格元素设置的宽度与单元格设置的宽度之和不符时，各浏览器的算法差异。</strong></p>
+      <p> 测试代码中均在 TD 元素内加了一层 DIV 元素，目的是通过 TD 与 DIV 背景色区分出 TD 元素的实际可用宽度，即 TD 内可以容纳内容的实际宽度。 </p>
+      <p class="section">2.1. 宽度设定为百分比</p>
+      <p class="section">2.1.1. 算法分类</p>
+<pre>
+&lt;table style="width:200px; table-layout:fixed; background:darkkhaki;" cellpadding="0" cellspacing="0"&gt;
+  &lt;tr&gt;
+    &lt;td style="width:10%; background:plum;"&gt; &lt;!--  【TD1】  --&gt;
+      &lt;div style="background:pink;"&gt;AAA&lt;/div&gt;
+    &lt;/td&gt;
+    &lt;td style="width:30%; background:dodgerblue; padding-left:50px;"&gt; &lt;!--  【TD2】  --&gt;
+      &lt;div style="background:lightblue;"&gt;BBB&lt;/div&gt;
+    &lt;/td&gt;
+    &lt;td style="width:60%; background:crimson;"&gt; &lt;!--  【TD3】  --&gt;
+      &lt;div style="background:gold;"&gt;CCC&lt;/div&gt;
+    &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+</pre>
+
+      <p>这段代码在各浏览器环境中的表现如下：</p>
+      <table class="compare">
+        <tr>
+        <th>IE6 IE7 IE8(Q)</th>
+        <td><img src="../../tests/RE8001/01.png" alt="运行效果截图" /></td>
+        </tr>
+        <tr>
+        <th>IE8(S) Chrome Safari Opera</th>
+        <td><img src="../../tests/RE8001/02.png" alt="运行效果截图" /></td>
+        </tr>
+        <tr>
+        <th>Firefox</th>
+        <td><img src="../../tests/RE8001/03.png" alt="运行效果截图" /></td>
+        </tr>
+      </table>
+      <p> 从上面截图中可以明显看出，Firefox与其他浏览器对于单元格设置了padding后的算法不同，而IE6/7及IE8混杂模式与Chrome的区别仅仅是对于TD元素中的内容溢出后浏览器是否隐藏溢出的内容。W3C <a href="http://www.w3.org/TR/CSS21/tables.html#fixed-table-layout">CSS2.1规范第17.5.2.1节</a> 中有明确的规定： </p>
+      <p> <em>In this manner, the user agent can begin to lay out the table once the entire first row has been received. Cells in subsequent rows do not affect column widths. <strong>Any cell that has content that overflows uses the  <a href="http://www.w3.org/TR/CSS21/visufx.html#propdef-overflow" title="'overflow'">'overflow'</a>  property to determine whether to clip the overflow content.</strong></em> </p>
+      <p> 上面规范中说明：如果单元格内容有溢出，经根据 'overflow' 属性确定是否剪裁溢出的内容。默认的 'overflow' 属性值为 'visible'，在本例中浏览器应该保持内容的默认 'overflow' 属性，但由于 'table-layout:fixed' 下 TD 元素宽度无法被其内容撑开，所以会发生内容溢出后与其他单元格内容重叠的现象。而在 <strong>IE6 IE7 IE8(Q)</strong> 中，浏览器的处理是错误的。 </p>
+      <p> 通过各浏览器的开发人员工具可以测得：<br />
+      </p>
+      <ul type="square">
+        <li>在 <strong>IE Chrome Safari Opera</strong> 中，三个列的实际宽度分别为：20px、60px、120px，即它们的百分比宽度乘以TABLE元素的<strong>列的可用宽度</strong>（由于 TABLE 没有边框，且 cellpadding 与cellspacing 均为0，所以这时的 TABLE 元素的设置宽度等于其<strong>列的可用宽度</strong>），即10% * 200px、30% * 200px、60% * 200px，【TD3】的 'padding' 属性并没有影响到所有 TD 元素的宽度计算；</li>
+        <li>在 <strong>Firefox</strong> 中，三个TD元素的实际宽度变为：15px、95px、90px，它们的宽度计算遵循如下算法：</li>
+        <ul>
+          <li><em>列的可用内容宽度之和 = 表格的可用宽度 - 列的左右边白之和 - 列的左右边框之和 - 单元格间距之和 </em></li>
+          <li><em>列的实际宽度 = 列的可用内容宽度之和 * 列的百分比宽度 + 列的 padding </em></li>
+        </ul>
+        所以列的可用宽度之和 = 200px - 50px = 150px，则【TD1】宽度为10% * 150px = 15px，【TD2】实际宽度为30% * 150px + 50px = 95px，【TD3】宽度为60% * 150px = 90px。
+      </ul>
+      <p class="section">2.1.2. 加入边框、边白、及边距</p>
+      <pre>
+&lt;table style=&quot;width:200px; table-layout:fixed; background:darkkhaki; border:1px solid black&quot; cellpadding=&quot;5&quot; cellspacing=&quot;5&quot;&gt;
+  &lt;tr&gt;
+    &lt;td style=&quot;width:10%; background:plum;&quot;&gt;  &lt;!-- 【TD1】 --&gt;
+      &lt;div style=&quot;background:pink;&quot;&gt;AAA&lt;/div&gt;
+    &lt;/td&gt;
+    &lt;td style=&quot;width:30%; background:dodgerblue; padding-left:20px;&quot;&gt; &lt;!--【TD2】--&gt;
+      &lt;div style=&quot;background:lightblue;&quot;&gt;BBB&lt;/div&gt;
+    &lt;/td&gt;
+    &lt;td style=&quot;width:60%; background:crimson; padding-right:20px;&quot;&gt; &lt;!--【TD3】 --&gt;
+      &lt;div style=&quot;background:gold;&quot;&gt;CCC&lt;/div&gt;
+    &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+      </pre>
+      <p> 这段代码在各浏览器环境中的表现如下：</p>
+      <table class="compare">
+
+        <tr>
+        <th>IE6 IE7 IE8 Chrome Safari Opera</th>
+        <td><img src="../../tests/RE8001/04.png" alt="运行效果截图" /></td>
+        </tr>
+        <tr>
+        <th>Firefox</th>
+        <td><img src="../../tests/RE8001/05.png" alt="运行效果截图" /></td>
+        </tr>
+      </table>
+      <p> 在增加了边框、cellpadding、cellspacing 后，与上面的情况类似，同样是 Firefox 中的算法与其他浏览器不同。</p>
+      <p> 在这里当单元格设置了 'padding' 后，如 'padding-left:20px' ，且 TABLE 元素有 'cellpadding' 属性，如 cellpadding=&quot;5&quot;，这时候该单元格实际的左补白为 CSS 的 padding-left 而不再是cellpadding 属性，即 'padding-left' 为 '20px'。</p>
+      <p> TABLE 元素的内容宽度为200px - 1px - 1px = 198px，即TABLE设置的宽度减去左右边框所占的宽度，因为在所有浏览器下TABLE的宽度都是作用于 border-box，且与文档模式无关。由于 border=&quot;1&quot;、cellpadding=&quot;5&quot;、cellspacing=&quot;5&quot;，所以这时的TABLE元素的<strong>列的可用宽度</strong>为198px - 4 * 5px = <em>178px</em>，即TABLE元素的内容宽度减去由 cellspacing 属性带来的4个水平方向的单元格间距。<strong>列的可用内容宽度</strong>为178px - 5px - 5px - 20px - 5px - 5px - 20px = <em>118px</em>，即<strong>列的可用宽度</strong>再减去各列左右边框及边白占去的宽度。</p>
+      <p> 在<strong>IE Chrome Safari Opera</strong>中，【td1】的实际宽度为10% * <em>178px</em> = 18px，其可用内容宽度为18px - 5px - 5px = 8px，即减去由单元格边白带来的2个5px；【td2】的实际宽度为30% * <em>178px</em> = 54px，其可用内容宽度为54px - 20px - 5px = 29px，【td3】的实际宽度为60% * <em>178px</em> = 106px，其可用内容宽度为106px - 5px - 20px = 81px。</p>
+      <p> 在 <strong>Firefox</strong> 中，【td1】的可用宽度为10% * <em>118px</em> = 12px，其实际宽度为12px + 5px + 5px = 22px，即加上由单元格边白带来的2个5px；【td2】的可用宽度为30% * <em>118px</em> = 35px，其实际宽度为35px + 20px + 5px = 60px；【td1】的可用宽度为60% * <em>118px</em> = 71px，其实际宽度为71px + 5px + 20px = 96px。 </p>
+      <p class="section">2.1.3. 列的宽度之和小于 TABLE 的总宽度</p>
+<pre>
+&lt;table style="width:200px; table-layout:fixed; background:darkkhaki; border:5px solid black" cellpadding="5" cellspacing="5"&gt;
+  &lt;tr&gt;
+    &lt;td style="width:10%; background:plum;"&gt; &lt;!--【TD1】--&gt;
+      &lt;div style="background:pink;"&gt;AAA&lt;/div&gt;
+    &lt;/td&gt;
+    &lt;td style="width:20%; background:dodgerblue; padding-left:20px;"&gt; &lt;!-- 【TD2】--&gt;
+      &lt;div style="background:lightblue;"&gt;BBB&lt;/div&gt;
+    &lt;/td&gt;
+    &lt;td style="width:30%; background:crimson; padding-right:20px;"&gt; &lt;!--【TD3】--&gt;
+      &lt;div style="background:gold;"&gt;CCC&lt;/div&gt;
+    &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+</pre>
+
+      <p> 这段代码在各浏览器环境中的表现如下：</p>
+      <table class="compare">
+        <tr>
+        <th>IE6 IE7 IE8 Chrome Safari Opera</th>
+        <td><img src="../../tests/RE8001/06.png" alt="运行效果截图" /></td>
+        </tr>
+        <tr>
+        <th>Firefox</th>
+        <td><img src="../../tests/RE8001/07.png" alt="运行效果截图" /></td>
+        </tr>
+      </table>
+      <p> 三个列的宽度之和仅为60%，这时各浏览器均是将剩余的40%根据这三列的宽度的比例大小进行分配。如上例中，【td1】的实际宽度百分比为10% / 60% = 16.667%；【td2】的实际宽度百分比为20% / 60% = 33.333%；【td3】的实际宽度百分比为 30% / 60% = 50%。而对于各列的实际渲染宽度计算则遵循上面 <strong>2.1.2</strong> 中的规律。 </p>
+<pre>
+&lt;table style="width:200px; table-layout:fixed; background:darkkhaki; border:5px solid black" cellpadding="5" cellspacing="5"&gt;
+  &lt;tr&gt;
+    &lt;td style="width:20%; background:plum;"&gt; &lt;!--【TD1】--&gt;
+      &lt;div style="background:pink;"&gt;AAA&lt;/div&gt;
+    &lt;/td&gt;
+    &lt;td style="width:40%; background:dodgerblue; padding-left:20px;"&gt;&lt;!--【TD2】--&gt;
+      &lt;div style="background:lightblue;"&gt;BBB&lt;/div&gt;
+    &lt;/td&gt;
+    &lt;td style="width:120%; background:crimson; padding-right:20px;"&gt; &lt;!--【TD3】--&gt;
+      &lt;div style="background:gold;"&gt;CCC&lt;/div&gt;
+    &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+</pre>
+
+      <p> 这段代码在各浏览器环境中的表现如下：</p>
+      <table class="compare">
+      <tr>
+        <th>IE6 IE7 IE8 Opera</th>
+        <td><img src="../../tests/RE8001/08.png" alt="运行效果截图" /></td>
+      </tr>
+      <tr>
+        <th>Chrome Safari </th>
+        <td><img src="../../tests/RE8001/09.png" alt="运行效果截图" /></td>
+      </tr>
+      <tr>
+        <th>Firefox</th>
+        <td><img src="../../tests/RE8001/10.png" alt="运行效果截图" /></td>
+      </tr>
+      </table>
+      <p> 三个列的宽度之和达到了180%，超出了TABLE自身宽度100%，且第三列【td3】的宽度已经超出了100%，这时各浏览器对于列宽分配出现的不同：<br />
+      </p>
+      <ul type="square">
+      <li>在 <strong>IE、Opera</strong> 下，浏览器没有重新调整【td1】和【td2】的百分比列宽，而是直接将超过100%的【td3】的列宽进行裁切，直接将其裁至40%，即100% - 【td1】百分比列宽 - 【td2】百分比列宽；</li>
+      <li>在 <strong>Chrome Safari Firefox</strong> 下，浏览器对各列的百分比宽度进行了重新调整，与上面 <strong>2.1.3</strong> 中的情况类似，【td1】的实际宽度百分比为20% / 180% = 11.111%；【td2】的实际宽度百分比为40% / 180% = 22.222%；【td3】的实际宽度百分比为120% / 180% = 66.667%。</li>
+      </ul>
+      <p>而对于各列的实际渲染宽度计算则同样遵循上面<strong>3.2.1.2</strong>中的规律。</p>
+      <p> 针对 <strong>IE Opera</strong> 下的特殊情况，再看一组测试代码：</p>
+<pre>
+&lt;table style="width:200px; table-layout:fixed; background:darkkhaki; border:5px solid black" cellpadding="5" cellspacing="5"&gt;
+  &lt;tr&gt;
+    &lt;td style="width:110%; background:plum;"&gt; &lt;!--【TD1】--&gt;
+      &lt;div style="background:pink;"&gt;AAA&lt;/div&gt;
+    &lt;/td&gt;
+    &lt;td style="width:120%; background:dodgerblue; padding-left:20px;"&gt; &lt;!-- 【TD2】--&gt;
+      &lt;div style="background:lightblue;"&gt;BBB&lt;/div&gt;
+    &lt;/td&gt;
+    &lt;td style="width:130%; background:crimson; padding-right:20px;"&gt; &lt;!-- 【TD3】--&gt;
+      &lt;div style="background:gold;"&gt;CCC&lt;/div&gt;
+    &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+</pre>
+
+    <p> 这段代码在各浏览器环境中的表现如下：</p>
+    <table class="compare">
+      <tr>
+      <th>IE6 IE7 IE8 Opera</th>
+      <td><img src="../../tests/RE8001/11.png" alt="运行效果截图" /></td>
+      </tr>
+      <tr>
+      <th>Chrome Safari </th>
+      <td><img src="../../tests/RE8001/12.png" alt="运行效果截图" /></td>
+      </tr>
+      <tr>
+      <th>Firefox</th>
+      <td><img src="../../tests/RE8001/13.png" alt="运行效果截图" /></td>
+      </tr>
+    </table>
+    <p> 可以看到，IE 和 Opera 中，【td1】宽度直接被裁切至100%，而其他两列宽度均变成了0。</p>
+
+    <p class="section">2.2. 宽度设定为像素</p>
+    <p> 在单元格无边框、边白、边距，各列宽度之和更好等于 TABLE 宽度时，各浏览器处理一致，下面讨论其中任何一个条件发生变化迫使浏览器对列宽重新计算时的情况。 </p>
+    <p class="section">2.2.1. 无边框、边白、边距，各列宽度之和小于 TABLE 宽度</p>
+<pre>
+&lt;table style="width:200px; table-layout:fixed; background:darkkhaki;" cellpadding="0" cellspacing="0"&gt;
+  &lt;tr&gt;
+    &lt;td style="width:10px; background:plum;"&gt; &lt;!-- 【TD1】--&gt;
+      &lt;div style="background:pink;"&gt;AAA&lt;/div&gt;
+    &lt;/td&gt;
+    &lt;td style="width:20px; background:dodgerblue;"&gt; &lt;!-- 【TD2】--&gt;
+      &lt;div style="background:lightblue;"&gt;BBB&lt;/div&gt;
+    &lt;/td&gt;
+    &lt;td style="width:30px; background:crimson;"&gt; &lt;!-- 【TD3】--&gt;
+      &lt;div style="background:gold;"&gt;CCC&lt;/div&gt;
+    &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+</pre>
+
+    <p>这段代码在各浏览器环境中的表现如下：</p>
+    <table class="compare">
+      <tr>
+      <th>IE6 IE7(Q) IE8(Q) Opera</th>
+      <td><img src="../../tests/RE8001/11.png" alt="运行效果截图" /></td>
+      </tr>
+      <tr>
+      <th>IE7(S)</th>
+      <td><img src="../../tests/RE8001/12.png" alt="运行效果截图" /></td>
+      </tr>
+      <tr>
+      <th>IE8(S) Firefox Chrome Safari</th>
+      <td><img src="../../tests/RE8001/13.png" alt="运行效果截图" /></td>
+      </tr>
+    </table>
+    <p> 各浏览器对于无边框、边白、边距，且各列宽度之和小于 TABLE 宽度时，均会对各列宽度进行调整，调整算法均为：该列宽度 / 各列宽度之和 * 表格宽度，即对于【td1】则是10px / 60px * 200px = 34px。</p>
+    <p> 但此时 IE 对于 TD 元素内的 DIV 元素的宽度计算有差异，DIV 元素为 TD 元素内的唯一子元素，且没设置宽度，即 'width:auto'，对块级元素来说其宽度应该撑满其父元素的内容区域的宽度： </p>
+    <ul type="square">
+      <li>在 <strong>IE6 IE7(Q) IE8(Q)</strong> 中，DIV的实际宽度为<em>其内容宽度</em>与<em>表格列宽度调整前其父元素TD设置宽度</em>这两个值之中的<strong>较大者</strong>；</li>
+      <li>在 <strong>IE7(S)</strong> 中，DIV的实际宽度恒为<em>表格列宽度调整前其父元素TD设置宽度</em>；</li>
+      <li>在 <strong>IE8(S) Firefox Chrome Safari Opera</strong>中，DIV 的实际宽度即<em>列宽度调整后的其父元素TD的宽度</em>。</li>
+      </ul>
+    <p><strong> <em>下面只讨论宽度算法的差异，不再就 IE 中TD元素的特殊现象进行讨论。</em> </strong></p>
+    <p class="section">2.2.2. 无边框、边白、边距，各列宽度之和大于TABLE宽度</p>
+<pre>
+&lt;table style="width:200px; table-layout:fixed; background:darkkhaki;" cellpadding="0" cellspacing="0"&gt;
+  &lt;tr&gt;
+    &lt;td style="width:50px; background:plum;"&gt;&lt;!--【TD1】--&gt;
+      &lt;div style="background:pink;"&gt;AAA&lt;/div&gt;
+    &lt;/td&gt;
+    &lt;td style="width:100px; background:dodgerblue;"&gt; &lt;!-- 【TD2】--&gt;
+      &lt;div style="background:lightblue;"&gt;BBB&lt;/div&gt;
+    &lt;/td&gt;
+    &lt;td style="width:150px; background:crimson;"&gt; &lt;!--【TD3】--&gt;
+      &lt;div style="background:gold;"&gt;CCC&lt;/div&gt;
+    &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+</pre>
+
+    <p> 这段代码在各浏览器环境中的表现如下：</p>
+    <table class="compare">
+      <tr>
+      <th>所有浏览器</th>
+      <td><img src="../../tests/RE8001/14.png" alt="运行效果截图" /></td>
+      </tr>
+    </table>
+    <p>各浏览器结果一样，对于无边框、边白、边距，且各列宽度之和大于 TABLE 宽度时，不会对各列宽度进行调整，各列宽度维持其设置的宽度，TABLE 元素原有的设置宽度无效，表格被各列撑大。 </p>
+    <p class="section">2.2.3. 算法分类，列的宽度与边框、边白、单元格间距之和小于TABLE宽度</p>
+<pre>
+&lt;style&gt;
+  td {border: 5px solid black;}
+&lt;/style&gt;
+&lt;table style="width:200px; table-layout:fixed; background:darkkhaki; border:5px solid black" cellpadding="5" cellspacing="5"&gt;
+  &lt;tr&gt;
+    &lt;td style="width:10px; background:plum;"&gt; &lt;!--【TD1】--&gt;
+      &lt;div style="background:pink;"&gt;AAA&lt;/div&gt;
+    &lt;/td&gt;
+    &lt;td style="width:20px; background:dodgerblue; padding-left:20px;"&gt; &lt;--【TD2】--&gt;
+      &lt;div style="background:lightblue;"&gt;BBB&lt;/div&gt;
+    &lt;/td&gt;
+    &lt;td style="width:30px; background:crimson; padding-right:20px;"&gt; &lt;!--【TD3】--&gt;
+      &lt;div style="background:gold;"&gt;CCC&lt;/div&gt;
+    &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+</pre>
+
+    <p>这段代码在各浏览器环境中的表现如下：</p>
+    <table class="compare">
+
+      <tr>
+      <th>IE6(S) IE7(S) IE8(S) Firefox Opera</th>
+      <td><img src="../../tests/RE8001/15.png" alt="运行效果截图" /></td>
+      </tr>
+      <tr>
+      <th>IE6(Q) IE7(Q) IE8(Q)  Chrome Safari</th>
+      <td><img src="../../tests/RE8001/16.png" alt="运行效果截图" /></td>
+      </tr>
+    </table>
+    <p> 增加了单元格的border、边白、边距后，浏览器直接出现了宽度算法差异。 </p>
+    <ul type="square">
+      <li>在 <strong>IE(S)、Firefox(SQ)、Opera(SQ)</strong> 中，三个列的实际宽度分别为：34px、62px、74px。它们的宽度算法遵循如下公式：<br />
+      </li>
+      <ul>
+        <li><em>TABLE的可用宽度 = TABLE width - TABLE border - cellspacing之和</em></li>
+        <li><em>各列的宽度之和 = 各列的宽度设定值 + 各列单元格的 padding + 各列的 border </em></li>
+        <li><em>列的实际宽度 = ( 列的设定宽度 + 单元格左右 padding + 单元格左右 border 宽度 ) / 各列的宽度之和 * TABLE 的可用宽度</em></li>
+      </ul>
+      <p>所以，TABLE 的可用宽度为200px - 2 * 5px - 4 * 5px = 170px，各列的宽度之和为10px + 20px + 30px + 5px + 5px + 20px + 5px + 5px + 20px + 5px + 5px + 5px + 5px + 5px + 5px = 150px，则【td1】的实际宽度为( 10px + 2 * 5px + 2 * 5px ) / 150px * 170px = 34px；【td2】的实际宽度为( 20px + 20px + 5px + 2 * 5px ) / 150px * 170px = 62px；【td3】的实际宽度为( 30px + 5px + 20px + 2 * 5px ) / 150px * 170px = 74px。</p>
+      <li>在 <strong>Chrome Safari</strong> 中，三个列的实际宽度分别为：29px、56px、85px。它们的宽度算法遵循如下公式：<br />
+      </li>
+      <ul>
+        <li><em> TABLE的可用宽度 = TABLE总宽度 - TABLE border - cellspacing之和</em></li>
+        <li><em>列的实际宽度 = 列的设定宽度 / 各列设定宽度之和 * TABLE的可用宽度</em></li>
+      </ul>
+      所以，TABLE的可用宽度为200px - 2 * 5px - 4 * 5px = 170px，各列设定宽度之和 = 10px + 20px + 30px = 60px。则【td1】的实际宽度为10px / 60px * 170px = 29px；【td2】的实际宽度为20px / 60px * 170px = 56px；【td3】的实际宽度为30px / 60px * 170px = 85px。
+      </ul>
+    <p class="section">2.2.4. 列的宽度与边框、边白、单元格间距之和大于 TABLE 宽度</p>
+<pre>
+&lt;style&gt;
+  td {border: 5px solid black;}
+&lt;/style&gt;
+&lt;table style="width:200px; table-layout:fixed; background:darkkhaki; border:5px solid black" cellpadding="5" cellspacing="5"&gt;
+  &lt;tr&gt;
+    &lt;td style="width:50px; background:plum;"&gt; &lt;!--【TD1】--&gt;
+      &lt;div style="background:pink;"&gt;AAA&lt;/div&gt;
+    &lt;/td&gt;
+    &lt;td style="width:80px; background:dodgerblue; padding-left:2px;"&gt; &lt;!--【TD2】--&gt;
+      &lt;div style="background:lightblue;"&gt;BBB&lt;/div&gt;
+    &lt;/td&gt;
+    &lt;td style="width:150px; background:crimson; padding-right:20px;"&gt;&lt;!--【TD3】--&gt;
+      &lt;div style="background:gold;"&gt;CCC&lt;/div&gt;
+    &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+</pre>
+
+    <p>这段代码在各浏览器环境中的表现如下：</p>
+    <table class="compare">
+      <tr>
+      <th>IE6(S) IE7(S) IE8(S) Firefox Opera</th>
+      <td><img src="../../tests/RE8001/17.png" alt="运行效果截图" /></td>
+      </tr>
+      <tr>
+      <th>IE6(Q) IE7(Q) IE8(Q)  Chrome Safari</th>
+      <td><img src="../../tests/RE8001/18.png" alt="运行效果截图" /></td>
+      </tr>
+    </table>
+    <p> 这种情况下，TABLE 出现了两种不同的宽度。 </p>
+    <ul type="square">
+      <li>在 <strong>IE(S) Firefox Opera</strong> 中，三个列的实际宽度分别为：70px、97px、185px，而内容宽度分别为：50px、80px、150px。在<strong>各列的宽度与其 'border' 'padding' 'cellspacing' 之和大于表格的内容宽度</strong>时，列的设定宽度直接作用于TD元素的content-box，其 'padding' 'border' 及 cellspacing 则一次加到设定的宽度上，表格的设定宽度这时不再生效，表格被撑大。</li>
+      <li> 此现象触发条件：<br />
+      在<strong> IE(Q) Chrome Safari</strong> 中，三个列的实际宽度分别为：50px、80px、150px，而内容宽度分别为：30px、63px、115px。在<strong>各列的设定宽度之和大于表格的内容宽度（= 表格的设定宽度 - 表格边框 - 单元格间距）</strong>时，列的设定宽度直接作用于 TD 元素的border-box，其padding、border被包含在设定宽度内，而cellspacing则加到设定的宽度之外，表格的设定宽度此时也不再生效，表格被撑大，但撑大幅度小于 Firefox。</li>
+      </ul>
+    <p>&nbsp;</p>
+    <h2 id="solutions">解决方案</h2>
+      <p> 
+            在 'table-layout:fixed' 这种固定布局算法下的表格中，可以为表格最后一列不设置宽度，尽量消除由算法差异带来的列的宽度差异。<br />
+            如果内容溢出，可以为溢出的单元格设置 'overflow:hidden'。
+            </p>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.5.5<br />
+              Chrome 4.0.249.22<br />
+              Safari 4.0.4
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RE8001/table_width_1.html">table_width_1.html</a><br />
+            <a href="../../tests/RE8001/table_width_2.html">table_width_2.html</a><br />
+            <a href="../../tests/RE8001/table_width_3.html">table_width_3.html</a><br />
+            <a href="../../tests/RE8001/table_width_4.html">table_width_4.html</a><br />
+            <a href="../../tests/RE8001/table_width_5.html">table_width_5.html</a><br />
+            <a href="../../tests/RE8001/table_width_6.html">table_width_6.html</a><br />
+            <a href="../../tests/RE8001/table_width_7.html">table_width_7.html</a><br />
+            <a href="../../tests/RE8001/table_width_8.html">table_width_8.html</a><br />
+            <a href="../../tests/RE8001/table_width_9.html">table_width_9.html</a>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-23</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>table-layout 表格 布局 fixed 固定 宽度 算法</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

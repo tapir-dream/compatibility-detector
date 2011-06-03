@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+	function $(id) { return document.getElementById(id); }
+	
+	window.onload = function () {
+		$('info').appendChild(document.createTextNode("IMAGE elements: " + document.getElementsByTagName('image').length));
+		$('info').appendChild(document.createElement('br'));
+		$('info').appendChild(document.createTextNode("IMG elements: " + document.getElementsByTagName('img').length));
+	}
+</script>
+</head>
+<body style="font:14px 'Trebuchet MS';">
+<img src="google.gif" />
+<image src="google.gif" />
+<div id="info"></div>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<style>
+p {float:right;color:#EEE;}
+</style>
+<script>
+window.onload=function(){
+	var pElement = document.getElementsByTagName('p')[0];
+	if(!window.getComputedStyle){
+		window.getComputedStyle=function($target){
+			return $target.currentStyle;
+		};
+	}
+	pElement.appendChild(
+		document.createTextNode('float:'
+			+ ( getComputedStyle(pElement,null)['cssFloat'] || getComputedStyle(pElement,null)['styleFloat'] )
+		)
+	);
+}
+</script>
+<body>
+<p style="float:center;background:gray;"></p>
+</body>
+</html>
