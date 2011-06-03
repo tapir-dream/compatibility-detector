@@ -1,0 +1,20 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+</head>
+<body>
+<button onclick="onsearch()"> click here </button>
+<script>
+function onsearch(){
+	alert("Click!");
+}
+</script>
+
+<script>
+var o = document.getElementsByTagName("button")[0];
+if("onsearch" in o)alert("当前对象有 onsearch 属性。");
+if(o.hasOwnProperty("onsearch"))alert("onsearch 属性是当前对象私有。");
+</script>
+</body>
+</html>

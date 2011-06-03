@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX9024: Firefox 不支持 DOM 元素 style 属性中的 pixel* 属性，并且某些情况下 Webkit 浏览器 pixel* 属性的返回值和 IE 中不同</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无</p>
+      <h2 id="description">问题描述</h2>
+      <p>style 属性中以 pixel 字符开头的属性最初是 IE 浏览器私有的，他可能会导致如下兼容问题：<br />
+        1. Firefox 不支持 style 属性中以 pixel 字符开头的属性；<br />
+      2. Webkit 内核浏览器以 pixel 字符开头的属性返回值和 IE 中有差异。当值的单位是 &quot;em&quot; 时，Webkit 浏览器返回的值是没有经过 em 单位至 px 单位转换的数字。</p>
+      <h2 id="influence">造成的影响</h2>
+      <p>使用 HTMLElement.style.pixel* 属性得到相应样式值会导致计算失误或脚本报错。</p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Firefox Safari Chrome</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>HTMLElement.style.pixel* 属性最初是微软公司为 IE 4.0 以上浏览器制定的特性，他们都是非标准的。</p>
+      <p>在 MSDN 中可以找到 <a href="http://msdn.microsoft.com/en-us/library/ms531135(v=VS.85).aspx">pixelWidth</a> <a href="http://msdn.microsoft.com/en-us/library/ms531127(v=VS.85).aspx">pixelHeight</a> <a href="http://msdn.microsoft.com/en-us/library/ms531133(v=VS.85).aspx">pixelTop</a> <a href="http://msdn.microsoft.com/en-us/library/ms531129(v=VS.85).aspx">pixelLeft</a> <a href="http://msdn.microsoft.com/en-us/library/ms531125(v=VS.85).aspx">pixelBottom</a> <a href="http://msdn.microsoft.com/en-us/library/ms531131(v=VS.85).aspx">pixelRight</a> 这几个特有属性的具体说明。</p>
+      <p>分析以下代码：</p>
+<pre>
+&lt;script type=&quot;text/javascript&quot;&gt;
+window.onload = function() {
+  var divObj = document.getElementById('test');
+  document.getElementById('info').innerHTML =
+    &quot;style.pixelWidth: &quot; + divObj.style.pixelWidth +
+    &quot;&lt;br/&gt;style.pixelHeight: &quot; + divObj.style.pixelHeight +
+    &quot;&lt;br/&gt; style.pixelTop: &quot; + divObj.style.pixelTop +
+    &quot;&lt;br/&gt;style.pixelLeft: &quot; + divObj.style.pixelLeft +
+    &quot;&lt;br/&gt; style.pixelBottom : &quot; + divObj.style.pixelBottom +
+    &quot;&lt;br/&gt; style.pixelRight: &quot; + divObj.style.pixelRight;
+
+  document.getElementById('info2').innerHTML =
+    &quot;style.width: &quot; + divObj.style.width +
+    &quot;&lt;br/&gt; style.height: &quot; + divObj.style.height +
+    &quot;&lt;br/&gt; style.top: &quot; + divObj.style.top +
+    &quot;&lt;br/&gt; style.left: &quot; + divObj.style.left +
+    &quot;&lt;br/&gt; style.bottom: &quot; + divObj.style.bottom +
+    &quot;&lt;br/&gt; style.right: &quot; + divObj.style.right;
+}
+&lt;/script&gt;
+&lt;div id=&quot;test&quot; style=&quot;position:absolute; right:20px; bottom:3em; left:3pt; top:20px; width:100px; height:5em; background-color:green;&quot;&gt;
+  test
+&lt;/div&gt;
+&lt;div id=&quot;info&quot; style=&quot;position:absolute; top:120px; border:1px dashed red;&quot;&gt;&lt;/div&gt;
+&lt;div id=&quot;info2&quot; style=&quot;position:absolute; top:120px; left:250px; border:1px dashed green;&quot;&gt;&lt;/div&gt;
+</pre>
+      <p> 示例中 id 值为 test 的 DIV 标记是一个绝对定位元素，其尺寸是宽 '100px' 高 '5em' ，并设置了 'top' 'right' 'left' 'bottom' 四个样式。</p>
+      <p> 示例中 id 值为 info 的 DIV 中输出的是 pixel* 些列的值，id 值为 info 的 DIV 中输出的是 DOM 规范中定义 widht height top right left bottom 六个属性值。</p>
+      <p><em><strong>【注意】  id 值为 test 的 DIV 样式中各个值的单位不全是 px，height 和 bottom 的 单位是 em ，left 的 单位是 pt。</strong></em></p>
+      <p>在各浏览器下的截图：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BX9024/a.jpg" alt="" /></td>
+        </tr>
+        <tr>
+          <th>Safari Chrome</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BX9024/b.jpg" alt="" /></td>
+        </tr>
+        <tr>
+          <th>Firefox</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BX9024/c.jpg" alt="" /></td>
+        </tr>
+      </table>
+      <p>从上面的截图中可以看出，Firefox 浏览器不支持这几个 pixel* 类型的值，所以返回的是 undefined。<br />Webkit 浏览器中的 pixelHeight 和 pixelBottom 的返回值和 IE 中不同，IE 中的值明显是经过了 em 尺寸单位至 px 尺寸单位的转换，而 Webkit 则是直接去掉了单位返回单位前的数字值，其结果显然是错误的。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>避免使用 IE6 IE7 IE8  浏览器私有 DOM 属性值，改用标准 DOM 规范中定义的有度量单位的 &quot;width &quot;、&quot;height&quot;、&quot;top&quot;、 &quot;right&quot;、 &quot;left&quot;、 &quot;bottom&quot; 属性来代替它们。</p>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td> IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4 <br />
+                            Opera 10.51
+                            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BX9024/pixel_feature.html">pixel_feature.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-15</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>pixelWidth pixelHeight pixelTop pixelLeft pixelBottom pixelRight style position absolute width height top right left bottom</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

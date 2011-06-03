@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<style>
+abbr,.abbrStyle,#A,#B{font-size:30px; line-height:50px; border:10px solid gray; background:yellow;}
+</style>
+<body>
+<script>
+window.onload=function(){
+	function G(s){return document.getElementById(s);}
+	function abbrTagChange(id,type,that,index){
+		var E = G(id);
+		switch(type){
+			case 1:
+				domProcess(E,'createTextNode 方法修改 ABBR 标签内容处理成功',that);
+				break;
+			case 2:
+				innerHTMLProcess(E,'innerHTML 方法修改 ABBR 标签内容处理成功',that);
+				break;
+			case 3:
+				removeElement(E,'ABBR 标签被移除',that,index);
+				break;
+		}
+	}
+
+	function getInnerHTML(E){
+		try{
+			alert(E.innerHTML);
+		}catch(e){
+			alert('读取错误');
+		}
+	}
+
+	function domProcess(E,content,that){
+		try{
+			if (E.firstChild) E.removeChild(E.firstChild);
+			E.appendChild(document.createTextNode(content));
+		}catch(e){
+			that.innerHTML = '修改 ABBR 标签内容出错';
+			that.disabled = 'disabled';
+		}
+	}
+	function innerHTMLProcess(E,content,that){
+		try{
+			E.innerHTML = content;
+		}catch(e){
+			that.innerHTML = '修改 ABBR 标签内容出错';
+			that.disabled = 'disabled';
+		}
+
+	}
+	function removeElement(E,content,that,index){
+		try{
+			document.getElementsByTagName('p')[index].removeChild(E);
+		}catch(e){
+			that.innerHTML = '移除 ABBR 标签出错';
+			that.disabled = 'disabled';
+		}
+	}
+	window['abbrTagChange']=abbrTagChange;
+	window['getInnerHTML']=getInnerHTML;
+
+}
+</script>
+
+<h1>使用 createElement 方法建立的 ABBR 标记后：</h1>
+<script>
+void function (){
+	document.createElement('abbr');
+}();
+</script>
+
+
+<h2>静态 ABBR 标记处理</h2>
+<p><abbr id="A" class="abbrStyle" style="font-size:30px; line-height:50px; border:10px solid gray; background:yellow;">STATIC ABBR TAG</abbr></p>
+<ul>
+	<li><button onclick="abbrTagChange('A',1,this)">使用 DOM 标准相关方法修改 ABBR 标记内容</button></li>
+	<li><button onclick="abbrTagChange('A',2,this)">使用 innerHTML 方法修改 ABBR 标记内容</button></li>
+	<li><button onclick="getInnerHTML(document.getElementsByTagName('p')[0])">读出 ABBR 标记实际 DOM 字符串</button></li>
+	<li><button onclick="abbrTagChange('A',3,this,0)">从 DOM 树中移除 ABBR 标记</button></li>
+</ul>
+
+
+<h2>使用 document.write 方法建立的 ABBR 标记处理</h2>
+<p>
+<script id="script">
+	document.write('<abbr id="B" class="abbrStyle" style="font-size:30px; line-height:50px; border:10px solid gray; background:yellow;">Document Write ABBR TAG</abbr>');
+	document.getElementsByTagName('p')[1].removeChild(document.getElementById('script'));
+</script>
+</p>
+<ul>
+	<li><button onclick="abbrTagChange('B',1,this)">使用 DOM 标准相关方法修改 ABBR 标记内容</button></li>
+	<li><button onclick="abbrTagChange('B',2,this)">使用 innerHTML 方法修改 ABBR 标记内容</button></li>
+	<li><button onclick="getInnerHTML(document.getElementsByTagName('p')[1])"> 读出 ABBR 标记实际 DOM 字符串 </button></li>
+	<li><button onclick="abbrTagChange('B',3,this,1)">从 DOM 树中移除 ABBR 标记</button></li>
+</ul>
+
+<h2>使用 innerHTML 方法建立的 ABBR 标记处理</h2>
+<p></p>
+<script>document.getElementsByTagName('p')[2].innerHTML = '<abbr id="C" style="font-size:30px; line-height:50px; border:10px solid gray; background:yellow;">InnerHTML ABBR TAG</abbr>'</script>
+<ul>
+	<li><button onclick="abbrTagChange('C',1,this)">使用 DOM 标准相关方法修改 ABBR 标记内容</button></li>
+	<li><button onclick="abbrTagChange('C',2,this)">使用 innerHTML 方法修改 ABBR 标记内容</button></li>
+	<li><button onclick="getInnerHTML(document.getElementsByTagName('p')[2])"> 读出 ABBR 标记实际 DOM 字符串 </button></li>
+	<li><button onclick="abbrTagChange('C',3,this,2)">从 DOM 树中移除 ABBR 标记</button></li>
+</ul>
+
+</body>
+</html>

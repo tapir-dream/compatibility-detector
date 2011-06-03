@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+<div id="d" style="display:none;">DIV element</div>
+<script>
+	try {
+		Document.prototype.getElementById = function () { return "method getElementById in interface Document modified"; }
+	} catch (ex) {
+		document.write(ex.message + '<br />');
+	}
+	document.write('getElementById("d"): ' + document.getElementById("d") + '<br />');
+	try {
+		document.write('HTMLDocument.prototype.getElementById: ' + HTMLDocument.prototype.getElementById);
+	} catch (ex) {
+		document.write(ex.message + '<br />');
+	}
+</script>
+</body>
+</html>

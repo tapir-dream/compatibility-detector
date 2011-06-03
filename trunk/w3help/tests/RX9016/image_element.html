@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+	function $(id) { return document.getElementById(id); }
+	
+	window.onload = function () {
+		$('i1').appendChild(document.createTextNode('after: ' + $('p1').innerHTML.toLowerCase()));
+		$('i2').appendChild(document.createTextNode('after: ' + $('p2').innerHTML.toLowerCase()));
+	}
+</script>
+</head>
+<body style="font:14px 'Trebuchet MS';">
+	<p id="p1"><img src="google.gif" /></p>
+	<div id="i1">before: &lt;img src=&quot;google.gif&quot; /&gt;<br /></div>
+	<br />
+	<p id="p2"><image src="google.gif" /></p>
+	<div id="i2">before: &lt;image src=&quot;google.gif&quot; /&gt;<br /></div>
+</body>
+</html>

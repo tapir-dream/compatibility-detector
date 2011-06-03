@@ -1,0 +1,202 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BT9029: 在 IE 中被透明元素遮挡的元素仍能响应鼠标事件</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>如果一个元素被另一个元素遮盖，不论遮盖元素的背景色是否是 'transparent'，也不论遮盖元素的透明度是否为全透明，被遮盖元素是不能响应用户的鼠标事件的。</p>
+      <p>
+      关于 'background-color' 请参考 W3C CSS 2.1 规范 <a href="http://www.w3.org/TR/CSS21/colors.html#propdef-background-color">14.2.1 'background-color'</a> 中的内容。<br/>
+      关于 'opacity' 请参考 W3C CSS 3 color module 规范 <a href="http://www.w3.org/TR/css3-color/#transparency">3.2 Transparency: the 'opacity' property</a> 中的内容。<br/>
+      关于 'filter:alpha' 请参考 MSDN <a href="http://msdn.microsoft.com/en-us/library/ms532967%28VS.85%29.aspx">Alpha Filter</a> 中的内容。
+      </p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 IE7 IE8 中被透明元素遮挡的元素仍能响应鼠标事件，而其他浏览器则不能响应。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>如果页面在设计时依赖 IE6 IE7 IE8 的此特性，将造成其他浏览器的用户无法操作部分区域。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <td></td>
+        </tr>
+
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <h3>1. 所谓透明遮挡</h3>
+      <p>被一个元素遮挡，又能完全可见，只有一种情况，那就是遮挡元素完全透明。</p>
+      <p>让一个元素完全透明有两种方式：</p>
+      <ol>
+        <li>设置背景色为透明，如 'background-color:transparent'。事实上 'background-color' 的默认值即为 'transparent'；</li>
+        <li>设置 'opacity:0'（标准），或采用滤镜 'filter:alpha(opacity=0)'（仅 IE 支持）</li>
+      </ol>
+
+      <h3>2. 被遮挡元素是否能响应鼠标事件</h3>
+
+      <p>
+      <h4>2.1. 遮挡元素采用设置 'background-color:transparent' 的方式时</h4>
+      <p>
+        在 IE6 IE7 IE8 下，遮挡元素的行框范围内，其下被遮挡的行内元素可响应鼠标事件，而块级元素则不能。
+        另外在 Firefox Safari Chrome 下，被遮挡的元素，不管是块级元素还是行内元素，都无法响应鼠标事件。
+      </p>
+      <p>分析如下代码：</p>
+<pre>
+&lt;style type=&quot;text/css&quot;&gt;
+body{margin:0;}
+a{color:blue;}
+a:hover{color:red;}
+&lt;/style&gt;
+
+&lt;div&gt;
+    &lt;a href=&quot;javascript:void(0);&quot;
+            onmouseover=&quot;this.style.backgroundColor='yellow'&quot;
+            onmouseout=&quot;this.style.backgroundColor='transparent'&quot;&gt;
+            please put your mouse on
+    &lt;/a&gt;
+    &lt;div style=&quot;height:20px; width:190px; margin-top:10px; background-color:blue;&quot;
+            onmouseover=&quot;this.style.backgroundColor='red'&quot;
+            onmouseout=&quot;this.style.backgroundColor='blue'&quot;&gt;&lt;/div&gt;
+    &lt;div style=&quot;background-color:transparent;position:absolute;left:10%;top:-23px;
+                    border:10px solid green;width:100px;height:80px;&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+</pre>
+      <p>以上代码在各个浏览器下的结果汇总如下：</p>
+      <table class="compare">
+        <tr>
+          <th>
+          IE6<br/>
+          IE7<br/>
+          IE8
+          </th>
+          <td><img src="../../tests/BT9029/1.png" alt="运行效果截图"/></td>
+        </tr>
+        <tr>
+          <th>
+          Firefox<br/>
+          Safari<br/>
+          Chrome
+          </th>
+          <td><img src="../../tests/BT9029/2.png" alt="运行效果截图"/></td>
+        </tr>
+
+      </table>
+
+      <p>当遮挡元素的 'background-color' 不为 'transparent' 时，IE6 IE7 IE8 中被遮挡的元素不响应鼠标事件。</p>
+      <p>修改以上代码中遮挡元素的 'bacground-color' 为 'green'，此时在各个浏览器下的表现将一致：<br/><br/><img src="../../tests/BT9029/3.png" alt="运行效果截图"/></p>
+      <h4>2.2. 遮挡元素采用设置 'opacity' 或 'filter:alpha' 为0时</h4>
+      <p>此时在所有浏览器下，遮挡元素行框范围内，被遮挡元素都无法响应鼠标事件。分析如下代码：</p>
+<pre>
+&lt;style type=&quot;text/css&quot;&gt;
+body{margin:0;}
+a{color:blue;}
+a:hover{color:red;}
+&lt;/style&gt;
+
+&lt;div style=&quot;position:relative;margin:50px;width:300px;&quot;&gt;
+    &lt;a href=&quot;javascript:void(0);&quot;
+            onmouseover=&quot;this.style.backgroundColor='yellow'&quot;
+            onmouseout=&quot;this.style.backgroundColor='transparent'&quot;&gt;
+            please put your mouse on
+    &lt;/a&gt;
+    &lt;div style=&quot;height:20px; width:190px; margin-top:10px; background-color:blue;&quot;
+            onmouseover=&quot;this.style.backgroundColor='red'&quot;
+            onmouseout=&quot;this.style.backgroundColor='blue'&quot;&gt;&lt;/div&gt;
+    &lt;div style=&quot;opacity:0;filter:alpha(opacity=0);background-color:green;
+                    position:absolute;left:10%;top:-23px;
+                    border:10px solid green;width:100px;height:80px;&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+</pre>
+      <p>
+      这时，所有浏览器下表现一致：<br/><br/>
+      <img src="../../tests/BT9029/4.png" alt="运行效果截图"/>
+      </p>
+      <p>
+        可见：
+        <strong>
+          在 IE6 IE7 IE8 下，当遮挡元素的 'background-color' 为 'transparent' 时，其下被遮挡的行内元素可响应鼠标事件，
+          而块级元素则不能。而在其它浏览器下，被遮挡的元素都无法响应鼠标事件，无论它是块级元素还是行内元素。
+        </strong>
+      </p>
+
+      <h2 id="solutions">解决方案</h2>
+      <ul>
+        <li>如果想遮盖某些元素，请为其设置一个非 'transparent' 的背景色。如果需要让这个遮掩层“隐形”，使用 'opacity:0' 和 'filter:alpha(opacity=0)' 来实现。</li>
+        <li>如果不想遮盖某些元素，请确认这些元素没有被一个背景色为 'transparent' 的定位元素（positioned element）遮挡。</li>
+          <li>如果想要使元素遮盖下的内容可被点击，在非 IE6 IE7 IE8 的最新版本浏览器下，可以尝试使用 W3C SVG 规范中的 'pointer-events:none' 特性。<br />
+          详细说明参见 SVG 规范 ：  <a href="http://www.w3.org/TR/SVG/interact.html#PointerEventsProperty">http://www.w3.org/TR/SVG/interact.html#PointerEventsProperty</a> </li>
+      </ul>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BT9029/element_transparent_event.html">element_transparent_event.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-02</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>transparent background-color click opacity filter 透明 遮挡</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

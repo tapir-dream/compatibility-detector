@@ -1,0 +1,201 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HY1005: IE6 IE7 IE8(Q) 会忽略 LI DD DT 元素的结束标记</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 W3C HTML 4.01 规范中对HTML中的列表元素进行了详细的描述，其中将列表分为三类：</p>
+      <ul>
+        <li>无序信息列表，使用 UL 元素创建，列表项由 LI 元素构成；</li>
+        <li>有序信息列表，使用 OL 元素创建，列表项由 LI 元素构成；</li>
+        <li>定义列表，使用 DL 元素创建，通常由一系列的 &quot;项/定义&quot; 对（term/definition pairs）组成，即 DT 元素和 DD 元素。</li>
+      </ul>
+      <p>任何列表必须包含一个或多个列表元素。</p>
+      <p>关于列表的详细信息，请参考 HTML 4.01 规范 <a href="http://www.w3.org/TR/html401/struct/lists.html">10 Lists</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE6 IE7 IE8(Q) 会忽略 LI DD DT 元素的结束标记，并且位于同一个父元素内的 LI 元素在文档树中会前后相连，位于 LI 元素之后的元素<sup>1</sup>会被修复到其前面最近的 LI DD DT 元素内，成为该 LI DD DT 元素的子元素。</p>
+      <p class="comment">注 1: 所指元素不包括 LI、DD、DT、HTML、HEAD、BODY、TITLE 等。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>对 LI DD DT 元素之后出现的非列表元素处理在不同浏览器中导致布局上的差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>根据 HTML4.01 规范可知，LI DD DT 元素只应存在于其对应的 UL OL DL 元素中，而由 UL OL DL 元素创建的列表从 HTML 规范的定义上说不应该包含具有其他意义的非列表元素 ('display' 不为 'list-item' )，但在实际中，经常会碰到诸如 DIV SPAN 甚至文本内容被放置在 LI 元素之后。</p>
+      <p>分析以下代码：</p>
+<pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  * { margin:0; padding:0; }
+  li { list-style-type:none; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div style=&quot;width:200px;&quot;&gt;
+&lt;li&gt;li A&lt;/li&gt;
+&lt;li style=&quot;border:1px solid black;&quot;&gt;li B&lt;/li&gt;
+&lt;span style=&quot;background:gray;&quot;&gt;CCC&lt;/span&gt;
+&lt;li&gt;li C&lt;/li&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div style=&quot;width:200px;&quot;&gt;
+&lt;dd&gt;dd A&lt;/dd&gt;
+&lt;dd style=&quot;border:1px solid black;&quot;&gt;dd B&lt;/dd&gt;
+&lt;span style=&quot;background:gray;&quot;&gt;CCC&lt;/span&gt;
+&lt;dd&gt;dd C&lt;/dd&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div style=&quot;width:200px;&quot;&gt;
+&lt;dt&gt;dt A&lt;/dt&gt;
+&lt;dt style=&quot;border:1px solid black;&quot;&gt;dt B&lt;/dt&gt;
+&lt;span style=&quot;background:gray;&quot;&gt;CCC&lt;/span&gt;
+&lt;dt&gt;dt C&lt;/dt&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>一个 SPAN 元素被插在了第二个 LI 元素之后、第三个 LI 元素之前，对于后面的 DD DT 元素也是如此。这段代码在不同的浏览器环境中的表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/HY1005/screenshot1.gif" alt="screen shot 1" /></td>
+          <td><img src="../../tests/HY1005/screenshot2.gif" alt="screen shot 2" /></td>
+        </tr>
+      </table>
+      <p>在浏览器开发人员工具中查看运行时的源代码：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6<br />IE7<br />IE8(Q)</th>
+          <td><pre>&lt;div style=&quot;width:200px;&quot;&gt;
+&lt;li&gt;li A
+&lt;li style=&quot;border:1px solid black;&quot;&gt;li B<span class="hl_1">&lt;span style=&quot;background:gray;&quot;&gt;CCC&lt;/span&gt;</span>
+&lt;li&gt;li C&lt;/li&gt;
+&lt;/div&gt;
+<br />
+&lt;div style=&quot;width:200px;&quot;&gt;
+&lt;dd&gt;dd A
+&lt;dd style=&quot;border:1px solid black;&quot;&gt;dd B<span class="hl_1">&lt;span style=&quot;background:gray;&quot;&gt;CCC&lt;/span&gt;</span>
+&lt;dd&gt;dd C&lt;/dd&gt;
+&lt;/div&gt;
+<br />
+&lt;div style=&quot;width:200px;&quot;&gt;
+&lt;dt&gt;dt A
+&lt;dt style=&quot;border:1px solid black;&quot;&gt;dt B<span class="hl_1">&lt;span style=&quot;background:gray;&quot;&gt;CCC&lt;/span&gt;</span>
+&lt;dt&gt;dt C&lt;/dt&gt;
+&lt;/div&gt;</pre></td>
+        </tr>
+        <tr>
+          <th>IE8(S)<br />Firefox<br />Chrome<br />Safari<br />Opera</th>
+          <td><pre>&lt;div style=&quot;width:200px;&quot;&gt;
+&lt;li&gt;li A&lt;/li&gt;
+&lt;li style=&quot;border:1px solid black;&quot;&gt;li B&lt;/li&gt;
+<span class="hl_1">&lt;span style=&quot;background:gray;&quot;&gt;CCC&lt;/span&gt;</span>
+&lt;li&gt;li C&lt;/li&gt;
+&lt;/div&gt;
+<br />
+&lt;div style=&quot;width:200px;&quot;&gt;
+&lt;dd&gt;dd A&lt;/dd&gt;
+&lt;dd style=&quot;border:1px solid black;&quot;&gt;dd B&lt;/dd&gt;
+<span class="hl_1">&lt;span style=&quot;background:gray;&quot;&gt;CCC&lt;/span&gt;</span>
+&lt;dd&gt;dd C&lt;/dd&gt;
+&lt;/div&gt;<br />
+&lt;div style=&quot;width:200px;&quot;&gt;
+&lt;dt&gt;dt A&lt;/dt&gt;
+&lt;dt style=&quot;border:1px solid black;&quot;&gt;dt B&lt;/dt&gt;
+<span class="hl_1">&lt;span style=&quot;background:gray;&quot;&gt;CCC&lt;/span&gt;</span>
+&lt;dt&gt;dt C&lt;/dt&gt;
+&lt;/div&gt;</pre></td>
+        </tr>
+      </table>
+      <p>可以看到，LI DD DT 元素之后出现了非列表元素时，浏览器间对代码的修复特性不相同，</p>
+      <ul>
+        <li>在<em> IE6 IE7 IE8(Q)</em>中，SPAN 元素被移动到了其前面最近的 LI 元素内，成为 LI 元素的子元素，所以 SPAN 元素的内容显示在 &quot;List B&quot; 的同一行上，对于 DD DT 元素也是如此；</li>
+        <li>在<em>IE8(S) Firefox Safari Chrome Opera</em>中，浏览器没有对代码结构作任何调整，SPAN 元素依然位于第二个 LI 元素之后、第三个 LI 元素之前，由于 LI 元素为块级元素，所以 SPAN 元素的内容独立显示为一行，对于 DD DT 元素也是如此。</li>
+      </ul>
+      <p>这个现象，与 LI DT DD 元素之后插入的非列表元素类型无关，也与包含 LI DD DT 元素的类型无关。从获取到的浏览器解析后的 HTML 代码可以看出IE6 IE7 IE8(Q) 会忽略 LI DD DT 元素的结束标记，并且位于同一个父元素内的 LI 元素在文档树中会前后相连。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>虽然 HTML 4.01 规范中没有明确指出列表元素的兄弟元素必须是同一列表元素；但是根据 HTML 语义化理念，建议不要在列表元素 LI DD DT 之后插入其他元素。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 5.0.342.2 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.50
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HY1005/list.html">list.html</a><br />
+            <a href="../../tests/HY1005/li.html">li.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-14</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>ul ol dl li dt dd list 列表 嵌套</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

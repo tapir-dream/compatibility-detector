@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<style>
+div { font:'Tahoma,14px/2';border:5px solid gray;margin:10px;}
+</style>
+<script>
+window.onload=function(){
+	function getDisplayValues(){
+		return {
+			'inline':'inline',
+			'block':'block',
+			'table':'table',
+			'inline-table':'inline-table',
+			'table-row-group':'table-row-group',
+			'table-header-group':'table-header-group',
+			'table-footer-group':'table-footer-group',
+			'table-row':'table-row',
+			'table-column-group':'table-column-group',
+			'table-column':'table-column',
+			'table-cell':'table-cell',
+			'table-caption':'table-caption',
+			'none':'none',
+			'list-item':'list-item',
+			'run-in':'run-in',
+			'inline-block':'inline-block',
+			'inherit':'inherit'
+		}
+	}
+	function getHTMLElement(tagName){
+		return document.createElement(tagName);
+	}
+	function patchComputedStyle(){
+		if(!window.getComputedStyle){
+			window.getComputedStyle=function($target){
+				return $target.currentStyle;
+			};
+		}
+	}
+	function setDisplayStyleValue(element,value){
+		try{
+			element.style['display'] = value;
+		}catch(e){
+			return ;
+		}
+	}
+	function setElementText(element,setValue,computedValue){
+		element.appendChild(
+			document.createTextNode(
+				'Setting Value is: $setValue , Computed display style value is : $computedValue'
+				.replace(/\$setValue/,setValue)
+				.replace(/\$computedValue/,computedValue)
+		));
+		if (detectorInherit(setValue)){
+			setValue = getComputedStyle(element.parentNode,null).display;
+		}
+
+		element.style['background'] = (setValue === computedValue) ? '' : 'red';
+
+	}
+	function appendElement(parentElement,childElement){
+		parentElement.appendChild(childElement);
+	}
+
+	function buildElement(key,value){
+		var divElement = getHTMLElement('div');
+		setDisplayStyleValue(divElement,value);
+		appendElement(document.body,divElement);
+		setElementText(divElement,value, getComputedStyle(divElement,null).display);
+		divElement = null;
+	}
+	function buildElementOfInherit(key,value){
+		var parentDivElement = getHTMLElement('div'),
+		childDivElement = getHTMLElement('div');
+		setDisplayStyleValue(parentDivElement,'inline');
+		setDisplayStyleValue(childDivElement,value);
+		appendElement(parentDivElement,childDivElement);
+		appendElement(document.body,parentDivElement);
+		setElementText(childDivElement,value, getComputedStyle(childDivElement,null).display);
+		parentDivElement = null;
+		childDivElement = null;
+	}
+
+	function detectorInherit(value){
+		return 'inherit' === value;
+	}
+	function buildTest(){
+		var displayValues = getDisplayValues();
+		for (var key in displayValues){
+			if (detectorInherit(displayValues[key]))
+				buildElementOfInherit(key,displayValues[key]);
+			else
+				buildElement(key,displayValues[key]);
+		}
+	}
+	patchComputedStyle();
+	buildTest();
+}
+</script>
+</head>
+<body>
+</body>
+</html>

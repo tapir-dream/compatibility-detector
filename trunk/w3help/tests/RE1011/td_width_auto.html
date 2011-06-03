@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	* { margin:0; font:18px/2 'Trebuchet MS'; }
+	.info td { text-align:center; }
+	table { width:300px; }
+</style>
+<script>
+	function $(id) { return document.getElementById(id); }
+
+	window.onload = function () {
+		for (var k = 1; k <= 3; k++) {
+			for (var i = 1; i <= 4; i++) {
+				$('c' + k + i + 'i').innerHTML = $('c' + k + i).offsetWidth;
+				$('c' + k + i + 'i').width = $('c' + k + i).offsetWidth;
+			}
+		}
+	}
+</script>
+</head>
+<body>
+<table cellpadding="0" cellspacing="0">
+	<tr>
+		<td id="c11" style="background:palegreen;"><div style="width:100px;">DIV 100px</div></td>
+		<td id="c12" style="background:goldenrod;">
+			<div style="float:left; width:20px; height:20px; background:#ccc;"></div>
+			<div style="float:left; width:20px; height:20px; background:#bbb;"></div>
+			<div style="float:left; width:20px; height:20px; background:#aaa;"></div>
+		</td>
+		<td id="c13" style="background:palegreen;"><div style="width:100px;">DIV 100px</div></td>
+		<td id="c14" style="background:goldenrod;">
+			<div style="float:left; width:20px; height:20px; background:#ccc;"></div>
+			<div style="float:left; width:20px; height:20px; background:#bbb;"></div>
+			<div style="float:left; width:20px; height:20px; background:#aaa;"></div>
+			<div style="float:left; width:20px; height:20px; background:#999;"></div>
+			<div style="float:left; width:20px; height:20px; background:#888;"></div>
+		</td>
+	</tr>
+</table>
+<table class="info" cellpadding="0" cellspacing="0">
+	<tr>
+		<td id="c11i"></td>
+		<td id="c12i"></td>
+		<td id="c13i"></td>
+		<td id="c14i"></td>
+	</tr>
+</table>
+<table cellpadding="0" cellspacing="0">
+	<tr>
+		<td id="c21" style="background:palegreen;"><div style="width:100px;">DIV 100px</div></td>
+		<td id="c22" style="background:goldenrod;">
+			<div style="float:left; width:30px; height:20px; background:#ccc;"></div>
+			<div style="float:left; width:30px; height:20px; background:#bbb;"></div>
+		</td>
+		<td id="c23" style="background:palegreen;"><div style="width:100px;">DIV 100px</div></td>
+		<td id="c24" style="background:goldenrod;">
+			<div style="float:left; width:30px; height:20px; background:#ccc;"></div>
+			<div style="float:left; width:40px; height:20px; background:#bbb;"></div>
+			<div style="float:left; width:30px; height:20px; background:#aaa;"></div>
+		</td>
+	</tr>
+</table>
+<table class="info" cellpadding="0" cellspacing="0">
+	<tr>
+		<td id="c21i"></td>
+		<td id="c22i"></td>
+		<td id="c23i"></td>
+		<td id="c24i"></td>
+	</tr>
+</table>
+<table cellpadding="0" cellspacing="0">
+	<tr>
+		<td id="c31" style="background:palegreen;"><div style="width:100px;">DIV 100px</div></td>
+		<td id="c32" style="background:goldenrod;">
+			<div style="float:left; width:20px; height:20px; background:#ccc;"></div>
+			<div style="float:left; width:20px; height:20px; background:#bbb;"></div>
+			<div style="float:left; width:20px; height:20px; background:#aaa;"></div>
+			<div style="float:left; width:20px; height:20px; background:#999;"></div>
+			<div style="float:left; width:20px; height:20px; background:#888;"></div>
+			<div style="float:left; width:20px; height:20px; background:#777;"></div>
+		</td>
+		<td id="c33" style="background:palegreen;"><div style="width:100px;">DIV 100px</div></td>
+		<td id="c34" style="background:goldenrod;">
+			<div style="float:left; width:20px; height:20px; background:#ccc;"></div>
+			<div style="float:left; width:20px; height:20px; background:#bbb;"></div>
+			<div style="float:left; width:20px; height:20px; background:#aaa;"></div>
+			<div style="float:left; width:20px; height:20px; background:#999;"></div>
+			<div style="float:left; width:20px; height:20px; background:#888;"></div>
+			<div style="float:left; width:20px; height:20px; background:#777;"></div>
+		</td>
+	</tr>
+</table>
+<table class="info" cellpadding="0" cellspacing="0">
+	<tr>
+		<td id="c31i"></td>
+		<td id="c32i"></td>
+		<td id="c33i"></td>
+		<td id="c34i"></td>
+	</tr>
+</table>
+</body>
+</html>

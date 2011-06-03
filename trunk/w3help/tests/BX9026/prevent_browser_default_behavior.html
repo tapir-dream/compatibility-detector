@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<script>
+	window.onload = function (){
+		function stopDefault(e){
+			e = e || window.event;
+			(e.preventDefault)
+			?e.preventDefault()
+			:e.returnValue = false;
+		}
+		function addEvent(el, type, fn){
+			(el.addEventListener)
+			? el.addEventListener(type, fn, false)
+			: el.attachEvent("on" + type, fn);
+
+		}
+		addEvent(document.getElementsByTagName("a")[1],"click",function (e){stopDefault(e)});
+		addEvent(document.getElementsByTagName("a")[2],"click",function (){return false});
+	}
+</script>
+</head>
+<body>
+
+<ol>
+<li>
+  <h2>在内联事件内使用 return false 语句阻止链接默认行为</h2>
+  <a href="http://www.google.com/" onclick="return false">点击链接去 google ~~</a>
+  <p>点击后页面没有跳转到 google.com 则说明成功阻止了默认行为。</p>
+</li>
+<li>
+  <h2>在事件监听处理函数内使用 preventDefault 方法阻止链接默认行为</h2>
+  <a href="http://www.google.com/">点击链接去 google ~~</a>
+<p>点击后页面没有跳转到 google.com 则说明成功阻止了默认行为。</p>
+</li>
+<li>
+  <h2>在事件监听处理函数内使用 return false 语句阻止链接默认行为</h2>
+  <a href="http://www.google.com/">点击链接去 google ~~</a>
+  <p>点击后页面可以跳转到 google.com 则说明在事件监听处理函数内使用 return false 方法不会阻止默认行为。</p>
+</li>
+</ol>
+</body>
+</html>

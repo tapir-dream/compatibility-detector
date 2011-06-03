@@ -1,0 +1,18 @@
+<!DOCTYPE HTML>
+<HTML>
+<HEAD>
+</HEAD>
+<BODY>
+<div id="A" style="width:200px;height:200px;background: gold;">
+</div>
+<script id="B" language="JavaScript" src="test.js">
+</script>
+<button onclick="copy()">copy</button>
+</BODY>
+</HTML>
+<script language="JavaScript">
+function copy(){
+	var A=document.getElementById('A');
+	A.appendChild(document.getElementById('B').cloneNode(true));
+}
+</script>

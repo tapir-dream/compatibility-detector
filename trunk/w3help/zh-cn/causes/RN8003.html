@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RN8003: IE6 IE7 IE8(Q) 会忽略 &lt;uri&gt; 类型的 CSS 值中的换行符与制表符</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>Web 上可用的每种资源 - HTML 文档、图像、视频片段、程序等 - 由一个通用资源标志符（Uniform Resource Identifier，简称 &quot;URI&quot;，参见 <a href="http://www.ietf.org/rfc/rfc3986">[RFC3986]</a>）进行定位。URL 是 Uniform Resource Location 的缩写，译为“统一资源定位符”。它是 URI 命名机制的一个子集。</p>
+      <p>根据 CSS2.1 规范中的描述，URI 表示为 &lt;uri&gt;。注意，定义 URI 使用 “url()”。如：</p>
+      <pre>body { background: url(&quot;http://www.example.com/pinkish.png&quot;) }</pre>
+      <p>URI 值的格式为：'url(' 后跟随可选的空白 (<a href="http://www.w3.org/TR/CSS21/syndata.html#whitespace">white space</a>)，后跟随可选的单引号 (') 或双引号 (&quot;)，后跟随 URI 自身，后跟随可选的单引号或双引号，后跟随可选的空白，后跟随 ')'。两个引号字符必须相同。</p>
+      <p>根据 URI 规范中的描述，在某些情况下，为了使长的 URI 可以换行，可能会加入多余的空白 (空格、换行、制表等)。在获得 URI 时应忽略这些空白。</p>
+      <p>关于 &lt;URI&gt; 的更多信息，请参见 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/syndata.html#value-def-uri">4.3.4 URLs and URIs</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 IE7 IE8(Q) 中，若 &lt;uri&gt; 类型的 CSS 值中包含换行符与制表符，则浏览器会忽略 URI 中的这些空白而获取到正确的资源。</p>
+      
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题会导致 URI 所指资源在某些浏览器在无法正确获得，如背景图片、鼠标指针资源。</p>
+      <p></p>
+      
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>根据问题描述构建如下测试代码：<em>css_break.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  div.text { font-size:40px; float:left; border:1px solid black; color:navy; }
+  #text2 { background-image:<em>url(go    ogle.
+gif)</em>; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body style=&quot;font:12px/1.2 'Trebuchet MS';&quot;&gt;
+&lt;div id=&quot;text1&quot; class=&quot;text&quot; style=&quot;background-image:<em>url(goo  gle_s
+mall.gif)</em>;&quot;&gt;some text 1&lt;/div&gt;
+&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;
+&lt;div id=&quot;text2&quot; class=&quot;text&quot;&gt;some text 2&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码中 DIV#text1 与 DIV#text2 设置了 'background-image' 特性，根据规范 'background-image' 特性的值为 &lt;URI&gt; 类型。URI 指向了两个图片资源地址。在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RN8003/uri1.gif" alt="" /></td>
+          <td><img src="../../tests/RN8003/uri2.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>可见，在 <em>IE6 IE7 IE8(Q)</em> 中，浏览器会忽略 &lt;uri&gt; 类型的 CSS 值中的换行符与制表符这些空白而获取到正确的资源。<br />
+      在 <em>其他浏览器</em> 中，浏览器会将 URI 值作为错误值而舍弃。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>避免在 &lt;uri&gt; 类型的 CSS 值出现任何空白。</p>
+      
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="KB002 ">KB002: CSS 特性和值</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 8.0.522.0 dev<br />
+              Safari 5.0.2 <br />
+              Opera 10.63
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RN8003/css_break.html">css_break.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-14</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>CSS uri URL background-image</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

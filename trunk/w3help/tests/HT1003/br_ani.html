@@ -1,0 +1,15 @@
+<style>
+	p { margin:0; float:left; margin-right:5px; border:3px solid black; font:64px/1.5 Simsun; }
+</style>
+<div style="zoom:1; overflow:hidden; margin-top:10px;">
+	<p id="p" style="text-align:right;">
+		<span style="background:#ddd;">TEXT_A</span> <br /><span style="background:#eee;">TEXT_B</span>
+	</p>
+</div>
+<script>
+	var p = document.getElementById('p'), k = 300;
+	setInterval(function () {
+		p.style.width = k-- + 'px';
+		(k < 150) && (k = 300);
+	}, 20);
+</script>

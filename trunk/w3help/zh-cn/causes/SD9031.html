@@ -1,0 +1,385 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SD9031: 各浏览器对 Range 接口的实现存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>DOM Level 2 Traversal Range 规范中定义了 Range：一个 Range（范围）是文档、文档片段或属性中的一个内容范围。从某种意义上说 Range 是连续的，
+      它由一对边界点之间的选中的所有内容构成并会被突出标注。</p>
+      
+      <p>一个 Range 是由范围对应的开始和结束两个边界点组成的，在 Document 或 DocumentFragment 树中，
+      一个边界点位置（boundary-point's position）表现为一个节点和一个偏移量（offset）。
+      这个节点被称为边界点的容器或节点位置的容器，该容器以及它的祖先节点被称为边界点的祖先容器或祖先节点位置的容器。
+      节点中的偏移量被称为边界点和它的位置的偏移量。<strong>如果容器是一个 Attr、Document、DocumentFragment、Element 或 EntityReference 节点，
+      则偏移量位于它们的子节点之间；如果容器是一个 CharacterData、Comment 或 ProcessingInstruction 节点，
+      则偏移量位于它们包含的 UTF-16 编码的字符串中的 16 位单元之间。</strong></p>
+      
+      <p>Range 接口提供了访问和操作文档树的方法，这些方法比 Node 接口中类似的一些方法更高级。
+      每一个 Range 接口提供的插入、删除以及复制内容的方法可以直接映射到一系列 DOM Core 允许的节点编辑操作上，
+      也就是说 Range 接口的操作可以被看成是常用编辑操作的高效实现。</p>
+             
+      <p>可以通过调用 DocumentRange 接口的 <strong>createRange()</strong> 方法来创建一个 Range，DocumentRange 接口可以从 Document 接口的对象实现中得到。</p>
+      <p>关于 Range 的更详细信息，请参考 <a href="http://www.w3.org/TR/DOM-Level-2-Traversal-Range/ranges.html">Document Object Model Range</a>。</p>
+      
+      <h2 id="description">问题描述</h2>
+      <p>各浏览器对 Range 接口的实现存在差异。IE6 IE7 IE8 实现了独有的类似 Range 的 TextRange 对象，该对象拥有一些与标准 Range 接口中类似的属性及方法，
+      并且在创建 TextRange 时也与标准存在差异；而 Firefox Chrome Safari Opera 除了实现标准的 Range 接口外，还在此基础上扩展了一些属性及方法。
+      在创建 Range 时，也可以使用各自实现的 Selection 对象的 getRangeAt() 方法。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>在使用标准 Range 接口的方法和属性时，IE6 IE7 IE8 中脚本可能会抛出异常；在使用浏览器特有的 Range 接口属性和方法时，
+      在其它浏览器下可能会脚本异常。这都可能导致依赖这些脚本的功能失效。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <h3>1. Selection 接口</h3>
+      <p>根据 HTML 5 草案和 MDN 中的描述，selection 表示一个页面中的文本选择集，它可能跨越多个元素，
+      它由用户在页面中拖拽鼠标选中的静态文本或页面的其它部分构成。
+      每一个<a href="http://www.w3.org/TR/html5/browsers.html#browsing-context">浏览上下文</a>有一个 selection，
+      它可以为空，也可以拥有多个范围（range）（一个不连续的 selection）。</p>
+      
+      <p>HTML 5 草案中定义了 Selection 接口，该接口表现为一组 Range 对象，第一个 Range 对象在组中的索引为0，以此类推。
+      Selection 接口中的所有成员以 Range 对象上的操作方式定义，这些操作可以像 Range 接口中定义的一样抛出异常。
+      可以通过 'Selection.getRangeAt(index)' 方法从当前的选择集中获得指定索引的 Range；
+      使用 'Selection.toString()' 方法可以获得选择集中包含的文本。</p>
+      
+      <p>Firefox Opera 将 Selection 接口实现为 Selection 对象，Chrome Safari 实现为 DOMSelection。
+      在以上浏览器中，都可以通过 'window.getSelection()' 方法获得 Selection 对象；在 Firefox Chrome Safari 下，也可以通过 'document.getSelection()' 得到该对象。</p>
+      <p>IE6 IE7 IE8 实现了与上述浏览器不同的、属性和方法都很有限的 selection 对象，并且只能使用 'document.selection' 获取该对象。</p>
+      
+      <p>关于 selection 及 Selection 接口的详细信息，请参考 HTML 5 草案 <a href="http://www.w3.org/TR/html5/editing.html#selection">7.6 The text selection APIs</a>。</p>
+      <p>MDN 中关于 Selection 对象的详细信息，请参考 MDN DOM：<a href="https://developer.mozilla.org/en/DOM/Selection">Selection</a>。</p>
+      <p>MSDN 中关于 selection 对象的详细信息，请参考 MSDN：<a href="http://msdn.microsoft.com/en-us/library/ms535869(v=VS.85).aspx">selection Object</a>。</p>
+      
+      <h3>2. 各浏览器对 Range 接口的实现存在差异</h3>
+      <p>IE6 IE7 IE8 实现了 TextRange 对象，该对象定义了部分和 Range 接口对应的属性及方法；同时它也实现了部分 Selection 接口的操作，
+      因此 TextRange 更像是一个 Range 接口和 Selection 接口的组合，但在功能上相对标准有一定的限制。
+      Firefox Chrome Safari Opera 则在实现 Range 和 Selection 接口的基础上，扩展了部分属性和方法。</p>
+      
+      <h4>2.1. 各浏览器创建 Range 对象的差异</h4>
+      <p>规范中只给出了使用 DocumentRange 接口的 'createRange()' 方法创建 Range，除此之外，各浏览器还实现了其它的创建 Range 的方法。</p>
+      <p>IE6 IE7 IE8 中只有 TextRange，在指定的对象上创建一个 TextRange 需要使用 'object.createTextRange()'。
+      注意不是任何类型的对象都可以创建 TextRange，只有 body 对象、button 对象、textarea 对象和 type='text' 的 input 对象才可以。</p>
+      <p>也可以通过 selection 对象获取一个 range 对象。在 IE6 IE7 IE8 中通过 'document.selection.createRange()' 可以从当前的文本 selection 中得到一个 TextRange；
+      在其它浏览器中则可以使用 'window.getSelection().getRangeAt(index)' 获得一组 Range 中指定的 Range。</p>
+      <p>我们通过以下代码来测试各浏览器对各种创建 Range 对象的方法的支持程度：</p>
+<pre>
+&lt;script type="text/javascript"&gt;
+  var methods = ["document.createRange()", "window.getSelection().getRangeAt", "document.selection.createRange()", "document.body.createTextRange()"],
+    i = 0, info, setInfo;
+    window.onload = function() {
+    info = document.getElementById("info"),
+    setInfo = function(msg){info.innerHTML += msg + "&lt;br/&gt;";};
+    
+    for(;i&lt;methods.length;i++){
+      var method = methods[i];
+      try{
+        eval("(" + method + ")");
+        setInfo(method);
+      }catch(e){}
+    }
+    }
+&lt;/script&gt;
+&lt;div id="info"&gt;Support: &lt;br/&gt;&lt;/div&gt;
+</pre>
+      <p>各浏览器中表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/SD9031/ie.png" alt="IE6 IE7 IE8" /></td>
+          <td><img src="../../tests/SD9031/nonIE.png" alt="Firefox Chrome Safari Opera" /></td>
+        </tr>
+      </table>
+      <p>由此可见，IE6 IE7 IE8 只支持创建自己独有的 TextRange，它们无法创建标准的 Range。
+      这也说明了 IE6 IE7 IE8 的确没有实现 Range 接口，而其它浏览器也不支持 TextRange 对象。</p>
+      
+      <h4>2.2. 各浏览器中 Range 接口及 TextRange 对象的成员存在差异</h4>
+      <p>Firefox Chrome Safari Opera 在实现标准 Range 接口的基础上，针对自身需求并参考 IE 的实现，添加了若干常量、属性和方法。</p>
+      <p>以下代码汇总测试了 Range 接口标准和扩展的以及 IE 下的属性及方法在各浏览器中的支持程度：</p>
+<pre>
+&lt;script type="text/javascript"&gt;
+  var standard = ["startContainer", "startOffset", "endContainer", "endOffset", "collapsed", "commonAncestorContainer",
+      "START_TO_START", "START_TO_END", "END_TO_END", "END_TO_START","setStart", "setEnd", "setStartBefore", 
+      "setStartAfter", "setEndBefore", "setEndAfter", "collapse", "selectNode", "selectNodeContents", "compareBoundaryPoints",
+      "deleteContents", "extractContents", "cloneContents", "insertNode", "surroundContents", "cloneRange", "toString", "detach"],
+    ext = ["compareNode", "comparePoint", "createContextualFragment", "intersectsNode", "isPointInRange", 
+      "getBoundingClientRect", "getClientRects", "NODE_AFTER", "NODE_BEFORE", "NODE_BEFORE_AND_AFTER", "NODE_INSIDE", "expand"],
+    ie = ["boundingHeight", "boundingLeft", "boundingTop", "boundingWidth", "htmlText", 
+      "offsetLeft", "offsetTop", "text", "compareEndPoints", "duplicate", "execCommand", 
+      "execCommandShowHelp", "findText", "getBookmark", "inRange", "isEqual", "move", "moveEnd", 
+      "moveStart", "moveToBookmark", "moveToElementText", "moveToPoint", "parentElement", "pasteHTML", 
+      "queryCommandEnabled", "queryCommandIndeterm", "queryCommandState", "queryCommandSupported", 
+      "queryCommandText", "queryCommandValue", "scrollIntoView", "select", "setEndPoint"],
+    range, i, count = 0, info, setInfo, testRange;
+    
+    window.onload = function() {
+    info = document.getElementById("info"),
+    setInfo = function(msg){info.innerHTML += msg + "&lt;br/&gt;";},
+    testRange = function(member){
+      if(range[member] !== undefined){
+        setInfo(member);
+        count++;
+      }
+    };
+    
+    if(document.createRange)
+      range = document.createRange();
+    else
+      range = document.selection.createRange();
+    
+    setInfo("&lt;strong&gt;标准 Range 接口的常量、属性及方法：&lt;/strong&gt;");
+    for(i=0;i&lt;standard.length;i++){
+      testRange(standard[i]);
+    }
+    
+    setInfo("&lt;strong&gt;扩展 Range 接口的常量、属性及方法：&lt;/strong&gt;");
+    for(i=0;i&lt;ext.length;i++){
+      testRange(ext[i]);
+    }
+    
+    setInfo("&lt;strong&gt;TextRange 的常量、属性及方法：&lt;/strong&gt;");
+    for(i=0;i&lt;ie.length;i++){
+      testRange(ie[i]);
+    }
+    
+    document.getElementById("total").innerHTML = count;
+    }
+&lt;/script&gt;
+&lt;div id="info"&gt;&lt;strong&gt;Support: &lt;span id="total"&gt;&lt;/span&gt;&lt;/strong&gt;&lt;br/&gt;&lt;/div&gt;
+</pre>
+      <p>以上所有参与测试的常量、属性及方法来自各浏览器的官方实现文档引用及 Range.prototype。汇总测试结果如下表：<sup>1</sup></p>
+      <table class="compare"><tbody>
+        <tr>
+          <th>常量、属性及方法</th>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox</th>
+          <th>Chrome Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <th>标准 Range 接口</th>
+          <td><span class="hl_1">N</span><sup>2</sup></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+        </tr>
+        <tr>
+          <th>compareNode</th>
+          <td><span class="hl_1">N</span></td>
+          <td><span class="hl_1">N</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_1">N</span></td>
+        </tr>
+        <tr>
+          <th>comparePoint</th>
+          <td><span class="hl_1">N</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+        </tr>
+        <tr>
+          <th>createContextualFragment</th>
+          <td><span class="hl_1">N</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+        </tr>
+        <tr>
+          <th>intersectsNode</th>
+          <td><span class="hl_1">N</span></td>
+          <td><span class="hl_1">N</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+        </tr>
+        <tr>
+          <th>isPointInRange</th>
+          <td><span class="hl_1">N</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_1">N</span></td>
+        </tr>
+        <tr>
+          <th>getBoundingClientRect</th>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_1">N</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+        </tr>
+        <tr>
+          <th>getClientRects</th>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_1">N</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+        </tr>
+        <tr>
+          <th>expand</th>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_1">N</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_1">N</span></td>
+        </tr>
+        <tr>
+          <th>NODE_AFTER</th>
+          <td><span class="hl_1">N</span></td>
+          <td><span class="hl_1">N</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_1">N</span></td>
+        </tr>
+        <tr>
+          <th>NODE_BEFORE</th>
+          <td><span class="hl_1">N</span></td>
+          <td><span class="hl_1">N</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_1">N</span></td>
+        </tr>
+        <tr>
+          <th>NODE_BEFORE_AND_AFTER</th>
+          <td><span class="hl_1">N</span></td>
+          <td><span class="hl_1">N</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_1">N</span></td>
+        </tr>
+        <tr>
+          <th>NODE_INSIDE</th>
+          <td><span class="hl_1">N</span></td>
+          <td><span class="hl_1">N</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_1">N</span></td>
+        </tr>
+        <tr>
+          <th>不包含扩展成员<sup>3</sup>的 TextRange 对象</th>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_1">N</span></td>
+          <td><span class="hl_1">N</span></td>
+          <td><span class="hl_1">N</span></td>
+        </tr>        
+      </tbody></table>
+      <p class="comment">注1：Y 表示支持该常量、属性或方法，N 表示不支持。</p>
+      <p class="comment">注2：IE6 IE7 IE8 在 TextRange 对象上实现了和 Range 接口相同的 collapse 方法。</p>
+      <p class="comment">注3：扩展成员指表中其它的那些常量、属性或方法，这些成员中的部分在 Range 和 TextRange 中都实现了。</p>
+      
+      <p>MDN 中关于 Range 的详细信息，请参考 MDN DOM：<a href="https://developer.mozilla.org/en/DOM/range">range</a>。</p>
+      <p>关于 TextRange 的详细信息，请参考 MSDN ：<a href="http://msdn.microsoft.com/en-us/library/ms535872(VS.85).aspx">TextRange Object</a>。</p>
+      
+      <h2 id="solutions">解决方案</h2>
+      <p>
+通过浏览器特性检测针对 IE6 IE7 IE8 正确创建 TextRange，对其它浏览器创建 Range。虽然 IE6 IE7 IE8 没有实现 Range 接口，但 TextRange 对象中也提供了许多能够实现类似功能的属性和方法。                                        
+            </p>
+      <p>下表总结了这些属性和方法，它们可能只是在某方面可以实现相同的功能，并不代表这两个方法或属性完全相同。</p>
+      <table class="compare"><tbody>
+        <tr>
+          <th>Range</th>
+          <th>TextRange</th>
+        </tr>
+        <tr>
+          <td>compareBoundaryPoints()</td>
+          <td>compareEndPoints()</td>
+        </tr>
+        <tr>
+          <td>cloneRange()</td>
+          <td>duplicate()</td>
+        </tr>
+        <tr>
+          <td>setStart()</td>
+          <td>moveStart()</td>
+        </tr>
+        <tr>
+          <td>setEnd()</td>
+          <td>moveEnd()</td>
+        </tr>
+        <tr>
+          <td>selectNodeContents()</td>
+          <td>moveToElementText()</td>
+        </tr>
+        <tr>
+          <td>toString()</td>
+          <td>text</td>
+        </tr>
+      </tbody></table>
+      
+      <p>关于上述这些方法及属性的详细描述，请参考 DOM 2 Range <a href="http://www.w3.org/TR/DOM-Level-2-Traversal-Range/ranges.html#Level-2-Range-idl">Interface Range</a> 和 MSDN 中的 <a href="http://msdn.microsoft.com/en-us/library/ms535872(VS.85).aspx">TextRange Object</a>。</p>
+      
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 8.0.552.0 dev<br />
+              Safari 5.0.2(7533.18.5)<br />
+              Operea 10.63
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+              <a href="../../tests/SD9031/createRange.html">createRange.html</a><br />
+              <a href="../../tests/SD9031/testRange.html">testRange.html</a>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-14</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>Range TextRange Selection 范围 文本范围</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

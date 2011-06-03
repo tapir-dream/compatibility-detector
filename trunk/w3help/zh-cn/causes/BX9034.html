@@ -1,0 +1,260 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX9034: 判断浏览器类型或版本时使用的方法不当将导致代码不能按照预期的效果执行</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>由于各浏览器的渲染引擎和脚本引擎的实现存在差异，为保证页面在各浏览器下的最大兼容性，判别浏览器类型或版本就显得非常有必要。但如果因判断方法不当而导致判断失误，将产生预料外的问题。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>该问题将导致脚本不能按照预期的效果执行，甚至出现错误。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <h3>1. 判别浏览器类型或版本的依据</h3>
+      <p>当页面内的代码涉及到各浏览器的特性时，只有知道当前浏览器的类型，我们才能准确的调用对应的接口、使用对应的属性等，以实现所需的功能。</p>
+      <p>判别浏览器类型或版本的方法大至有以下两类：</p>
+      <ol>
+        <li>通过分析 navigator 对象的相关属性。包括 appName、appVersion 和 userAgent。其中 userAgent 使用最广泛。</li>
+        <li>利用特定属性在各浏览器下的支持差异来区分浏览器类型。比如 document.all、window.attachEvent、window.addEventListener、window.opera 等。</li>
+      </ol>
+
+      <h3>2. BOM 中 navigator 对象属性说明</h3>
+      <p>BOM 的全称是 Browser Object Model（浏览器对象模型），是与浏览器相关的一组对象。BOM 是没有相关标准的，每个浏览器都有自己的实现方式。</p>
+      <p>各浏览器下 navigator 对象各属性的返回值：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>appVersion</th>
+          <th>userAgent</th>
+        </tr>
+        <tr>
+          <th>IE6</th>
+          <td>4.0 (compatible; MSIE 6.0; Windows NT 6.1; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0)</td>
+          <td>Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 6.1; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0)</td>
+        </tr>
+        <tr>
+          <th>IE7</th>
+          <td>4.0 (compatible; MSIE 7.0; Windows NT 6.1; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0)</td>
+          <td>Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0)</td>
+        </tr>
+        <tr>
+          <th>IE8</th>
+          <td>4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0)</td>
+          <td>Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0) </td>
+        </tr>
+        <tr>
+          <th>Firefox</th>
+          <td>5.0 (Windows; zh-CN)</td>
+          <td>Mozilla/5.0 (Windows; U; Windows NT 5.1; zh-CN; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2</td>
+        </tr>
+        <tr>
+          <th>Chrome</th>
+          <td>5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/533.3 (KHTML, like Gecko) Chrome/5.0.356.2 Safari/533.3</td>
+          <td>Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US) AppleWebKit/533.3 (KHTML, like Gecko) Chrome/5.0.356.2 Safari/533.3</td>
+        </tr>
+        <tr>
+          <th>Safari</th>
+          <td>5.0 (Windows; U; Windows NT 5.1; zh-CN) AppleWebKit/531.21.8 (KHTML, like Gecko) Version/4.0.4 Safari/531.21.10</td>
+          <td>Mozilla/5.0 (Windows; U; Windows NT 5.1; zh-CN) AppleWebKit/531.21.8 (KHTML, like Gecko) Version/4.0.4 Safari/531.21.10</td>
+        </tr>
+        <tr>
+          <th>Opera</th>
+          <td>9.80 (Windows NT 5.1; U; zh-cn)</td>
+          <td>Opera/9.80 (Windows NT 5.1; U; zh-cn) Presto/2.2.15 Version/10.10</td>
+        </tr>
+      </table>
+      <p>其它的 navigator 属性返回值如下：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE</th>
+          <th>Firefox</th>
+          <th>Chrome</th>
+          <th>Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <th>product</th>
+          <td>无</td>
+          <td>Gecko</td>
+          <td>Gecko</td>
+          <td>Gecko</td>
+          <td>无</td>
+        </tr>
+        <tr>
+          <th>productSub</th>
+          <td>无</td>
+          <td>20100316</td>
+          <td>20100317</td>
+          <td>20100317</td>
+          <td>无</td>
+        </tr>
+        <tr>
+          <th>appName</th>
+          <td>Microsoft Internet Explorer</td>
+          <td>Netscape</td>
+          <td>Netscape</td>
+          <td>Netscape</td>
+          <td>Opera</td>
+        </tr>
+        <tr>
+          <th>language</th>
+          <td>无</td>
+          <td>zh-CN</td>
+          <td>zh-CN</td>
+          <td>zh-CN</td>
+          <td>zh-CN</td>
+        </tr>
+        <tr>
+          <th>userLanguage</th>
+          <td>zh-cn</td>
+          <td>无</td>
+          <td>无</td>
+          <td>无</td>
+          <td>无</td>
+        </tr>
+      </table>
+      <p>总结以上两张表中 navigator 各属性在各浏览器下所呈现的差异，我们发现：</p>
+      <ul>
+        <li>navigator.userAgent 包含的信息最多，最适合用来分析判别浏览器类型和版本。</li>
+        <li>navigator.product 在 Firefox Chrome Safari 下返回值都为 &quot;Gecko&quot; ，其它浏览器下不支持该属性。</li>
+        <li>navigator.appName 在 Firefox Chrome Safari 下返回值都为 &quot;Netscape&quot; 。</li>
+        <li>浏览器语言信息 IE 下使用 navigator.userLanguage ，非 IE 下使用 navigator.language 。假设所有浏览器都为中文版本，在 Firefox Chrome Safari 下返回 &quot;zh-CN&quot; ，IE Opera 下返回 &quot;zh-cn&quot;（注意大小写）。</li>
+      </ul>
+
+      <h3>3. 各种判别方式及可能产生的问题</h3>
+      <p>采用不适当的 navigator 属性来判断浏览器类型或版本，将无法准确区分不同类型的浏览器，如 navigator 的 appName 属性。</p>
+      <p>使用某个或某几个浏览器才支持的属性也能区分浏览器类型，如 window.sessionStorage、window.clipboardData 或 document.all 等。但如果将某一类浏览器一概而论，也可能会出现问题。</p>
+      <p>不管采用哪种方式来判断浏览器的类型，我们的终极目标都是为了获得最大的兼容性。下面，我们列举一些常见的由浏览器类型引起的问题：</p>
+
+      <h4>3.1 仅考虑 IE 的判别</h4>
+<pre>
+var is_ie = navigator.appName.indexOf("Microsoft") != -1;
+if(is_ie){
+  ...  // 针对IE
+}
+</pre>
+      <p>IE Only 的代码，导致非 IE 下相应功能不可用。作者将非 IE 用户做遗弃处理<sup>1</sup>。</p>
+      <p class="comment">注：<br/>1. 有些特性仅有 IE 支持，在这种情况下，以上做法是正确的。</p>
+
+
+      <h4>3.2 非 IE 下一概而论</h4>
+<pre>
+if(document.all){
+  ...  // 针对IE
+}else{
+  ...  // 除IE外一概而论
+}
+</pre>
+      <p>Firefox Chrome Safari Opera 之间彼此也存在兼容性问题，不能一概而论。</p>
+
+      <h4>3.3 使用 navigator.appName 判别浏览器类型</h4>
+<pre>
+if(navigator.appName == "Netscape"){
+  ...  // 针对 Firefox 的代码块
+}else{
+  ...  // 针对 IE 的代码块
+}
+</pre>
+      <p>这种判断粒度仍然太粗，主流浏览器不只是 IE 和 Firefox。</p>
+      <p>并且 Firefox Chrome Safari 下 navigator.appName 值都等于 &quot;Netscape&quot;，类似的情况还包括 navigator.product，它在 Firefox Chrome Safari 下的值都为 &quot;Gecko&quot;。和 3.2 中的问题一样，这几个浏览器之间也存在兼容性问题。</p>
+
+      <h4>3.4 遗漏某些主流浏览器</h4>
+<pre>
+var uA = navigator.userAgent;
+if(uA.indexOf('Opera')!=-1){
+  ...  // 针对 Opera
+}else if(uA.indexOf('Firefox')!=-1){
+  ...  // 针对 Firefox
+}else if(uA.indexOf('MSIE')!=-1){
+  ...  // 针对 IE
+}
+</pre>
+      <p>以上代码将 Chrome Safari 的用户遗弃。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <ol>
+        <li>1、浏览器类型或版本判别推荐采用分析 navigator.userAgent 属性的方式。</li>
+        <li>2、在写代码时，考虑主流浏览器 IE Firefox Chrome Safari Opera 的兼容性。</li>
+      </ol>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-15</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>浏览器 类型 版本 识别 BOM navigator appName userAgent product</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

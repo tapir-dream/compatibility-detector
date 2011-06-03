@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+	function $(id) { return document.getElementById(id); }
+	window.onload = function () {
+		var d1 = $("d1");
+		d1.setAttribute("setAttr2", "value2");
+		d1.customProperty3= "value3";
+		d1.id = "d2";
+		$("info2").value = $("cont").innerHTML;
+		var dn = document.createElement("div");
+		var str = [];
+		for (var i in d1) {
+			if (!(i in dn)) {
+				str.push(i + ":" + d1[i] + "<br />");
+			}
+		}
+		$("info1").innerHTML = (str.length == 0) ? "N/A" : str.join("");
+	}
+</script>
+</head>
+<body style="font:20px Arial;">
+<div id="cont"><div id="d1" customAttr1="value1">'d1': HTMLDivElement 1</div></div>
+<br />
+<h1>Extra property:</h1>
+<div id="info1"></div>
+<br />
+<h1>HTML code:</h1>
+<textarea id="info2" cols="200" style="font:16px Arial;"></textarea>
+<input type="password" onclick="alert(this.value)" />
+</body>
+</html>

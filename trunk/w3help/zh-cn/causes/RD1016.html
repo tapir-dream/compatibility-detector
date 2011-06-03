@@ -1,0 +1,249 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RD1016: 各浏览器对常用行内替换元素的 'baseline' 位置理解不同</h1>
+<ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>关于 'vertical-align' 属性说明请参照 W3C CSS 2.1 规范：<a href="http://www.w3.org/TR/CSS21/visudet.html#propdef-vertical-align">http://www.w3.org/TR/CSS21/visudet.html#propdef-vertical-align</a></p>
+      <p>关于基线 ( baseline ) 标准判定参见 ： <a href="http://people.w3.org/rishida/docs/unicode-tutorial/part6#baseline">http://people.w3.org/rishida/docs/unicode-tutorial/part6#baseline</a></p>
+      <p>关于替换元素的说明，请参考 W3C CSS 2.1 规范描述：<a href="http://www.w3.org/TR/CSS21/conform.html#replaced-element">http://www.w3.org/TR/CSS21/conform.html#replaced-element</a></p>
+      <p>关于行内替换元素高度计算的说明，请参考 W3C CSS 2.1 规范描述：<a href="http://www.w3.org/TR/CSS21/visudet.html#inline-replaced-height">http://www.w3.org/TR/CSS21/visudet.html#inline-replaced-height</a></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>不同浏览器对单行文本输入框和显示为按钮的控件基线位置理解不同。</p>
+
+    <h2 id="influence">造成的影响</h2>
+      <p>如果作者预期行内替换元素会按照其底边位置垂直对齐而没有修改 'vertical-align' 默认值 'baseline'，将会导致各个元素按照基线位置对齐后整体排列效果不佳清楚出现。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+
+      <p>垂直对齐样式 'vertical-align' 负责行内元素垂直方向排列情况，此样式不可继承，它的默认值为 '<a href="http://people.w3.org/rishida/docs/unicode-tutorial/part6#baseline">baseline</a>'。</p>
+      <p>关于 baseline 概念可以简化理解为当行框内是文本的时候，其 'baseline' 位置应该在文字底边界，这同样运用于行内非替换元素上。</p>
+            <p>但是当行框内出现替换元素时，其自身的 'baseline' 位置又在什么地方呢？ 关于这一点规范中没有明确说明。</p>
+            <p>分析以下代码，我们使用常见的行内替换元素来验证这个问题：</p>
+<pre>
+&lt;style&gt;
+img,button,input,iframe,textarea{margin:0; font-size:12px; font-family:simsun; height:50px;}
+img{border:1px solid #666;}
+span {font-family:simsun;font-size:12px;}
+&lt;/style&gt;
+
+&lt;span style=&quot;background:gold&quot;&gt;123&lt;/span&gt;
+&lt;input style=&quot;width:50px&quot; type=&quot;text&quot; value=&quot;123&quot;/&gt;
+&lt;input style=&quot;width:50px&quot; type=&quot;password&quot; value=&quot;123&quot;/&gt;
+&lt;img src=&quot;http://www.google.com/intl/en_ALL/images/srpr/logo1w.png&quot;/&gt;
+&lt;button&gt;button-123&lt;/button&gt;
+&lt;iframe style=&quot;width:50px&quot;&gt;&lt;/iframe&gt;
+&lt;input type=&quot;button&quot; value=&quot;input-123&quot; /&gt;
+&lt;textarea style=&quot;width:50px&quot;&gt;123&lt;/textarea&gt;
+&lt;button&gt;&lt;/button&gt;
+&lt;input type=&quot;button&quot; value=&quot;&quot;/&gt;
+&lt;textarea style=&quot;width:50px&quot;&gt;&lt;/textarea&gt;
+&lt;input type=&quot;file&quot; /&gt;
+</pre>
+    <p>代码中使用了普通行内元素 SPAN 内文字的基线为参考点，分析 INPUT[type=&quot;text&quot;] INPUT[type=&quot;password&quot;] INPUT[type=&quot;file&quot;] INPUT[type=&quot;button&quot;] BOTTON TEXTAREA IMG IFRAME 等常见行内替换元素的原始基线位置。</p>
+    <p>实际情况如下表：</p>
+        <table class="compare">
+  <tr>
+    <th>IE6 IE7 IE8(Q)</th>
+    </tr>
+  <tr>
+    <td><img src="../../tests/RD1016/01.png" alt="运行效果截图"/></td>
+    </tr>
+  <tr>
+    <th>IE8(S)</th>
+    </tr>
+  <tr>
+    <td><img src="../../tests/RD1016/02.png" alt="运行效果截图"/></td>
+    </tr>
+  <tr>
+    <th>Firefox</th>
+  </tr>
+  <tr>
+    <td><img src="../../tests/RD1016/03.png" alt="运行效果截图"/></td>
+  </tr>
+  <tr>
+    <th>Chrome Safari</th>
+  </tr>
+  <tr>
+    <td><img src="../../tests/RD1016/04.png" alt="运行效果截图"/></td>
+  </tr>
+  <tr>
+    <th>Opera</th>
+  </tr>
+  <tr>
+    <td><img src="../../tests/RD1016/05.png" alt="运行效果截图"/></td>
+  </tr>
+</table>
+
+    <p>根据上表可直观看出各浏览器对于行内替换元素的基线位置理解不一，特别是对有文字和无文字的按键元素基线位置和 INPUT 元素的基线位置理解不一。</p>
+    <p>而在 IE6 IE7 IE8(Q) 内，所有行内替换元素的基线位置几乎一致处于元素底边界附近。</p>
+    <p>现将主要差异整理成下表：</p>
+    <table class="compare">
+          <tr>
+            <th>基线位置</th>
+            <th colspan="4">所有浏览器</th>
+          </tr>
+          <tr>
+            <td>IMG IFRAME </td>
+            <td colspan="4">处于元素底边界</td>
+          </tr>
+          <tr>
+            <td>TEXTAREA</td>
+            <td colspan="4">大体处于元素底边界</td>
+          </tr>
+          <tr>
+            <th>文本域基线位置</th>
+            <th>IE6 IE7 IE8(Q)</th>
+            <th>IE8(S)</th>
+            <th colspan="2">Chrome Safari Firefox Opera</th>
+          </tr>
+          <tr>
+            <td>INPUT[type=&quot;text&quot;]<br />
+INPUT[type=&quot;password&quot;]</td>
+            <td rowspan="3">大体处于元素底边界</td>
+            <td>处于输入框内文字底边界，
+              但是 'height' 设置不会使文字在输入框内垂直居中，
+              导致基线位置相对其他浏览器较高。</td>
+            <td colspan="2">处于输入框内文字底边界，
+但是 'height' 设置会使文字在输入框内垂直居中，
+导致基线位置相对其他浏览器较底。</td>
+          </tr>
+          <tr>
+            <th>有文字内容的按钮基线位置</th>
+            <th colspan="3">IE8(S) Chrome Safari Firefox Opera</th>
+          </tr>
+          <tr>
+            <td>INPUT[type=&quot;button&quot;]<br />
+INPUT[type=&quot;submit&quot;]<br />
+BUTTON</td>
+            <td colspan="3">处于按钮内文字底边界</td>
+          </tr>
+          <tr>
+            <th>无文字内容的<br />
+            BUTTON 按钮基线位置</th>
+            <th>IE6 IE7 IE8 Opera</th>
+            <th>Firefox</th>
+            <th colspan="2">Chrome Safari </th>
+          </tr>
+          <tr>
+            <td> BUTTON</td>
+            <td>大体处于元素底边界</td>
+            <td>处于元素垂直方向中心位置</td>
+            <td colspan="2">处于元素垂直方向中心处偏上约1/2位置</td>
+          </tr>
+          <tr>
+            <th>无文字内容的<br />
+            INPUT 按钮基线位置</th>
+            <th>IE6 IE7 IE8 </th>
+            <th>Firefox Opera</th>
+            <th colspan="2">Chrome Safari </th>
+          </tr>
+          <tr>
+            <td>INPUT[type=&quot;button&quot;]<br />
+INPUT[type=&quot;submit&quot;]</td>
+            <td>大体处于元素底边界</td>
+            <td>处于元素垂直方向中心处少量偏下位置</td>
+            <td colspan="2">处于元素垂直方向中心处偏上约1/2位置</td>
+          </tr>
+          <tr>
+            <th>文件选择域基线位置</th>
+            <th>IE6 IE7 IE8(Q)</th>
+            <th>IE8(S)</th>
+            <th>Firefox Opera</th>
+            <th>Chrome Safari</th>
+          </tr>
+          <tr>
+            <td>INPUT[type=&quot;file&quot;]</td>
+            <td>大体处于元素底边界</td>
+            <td>处于输入框内文字底边界，
+              但是 'height' 设置不会使文字在输入框内垂直居中，
+            导致基线位置相对其他浏览器较高。</td>
+            <td>处于输入框内文字底边界，
+但是 'height' 设置会使文字在输入框内垂直居中，
+导致基线位置相对其他浏览器较底。</td>
+            <td>处于选择文件按钮的文字底边界</td>
+          </tr>
+        </table>
+
+    <h2 id="solutions">解决方案</h2>
+      <p>避免使用 'baseline' 对齐方式，为元素指定 'vertical-align' 值非 'baseline'，推荐使用 'vertical-align:bottom' 或  'vertical-align:top'。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RD1016/inline_non_replaced_elements_baseline.html">inline_non_replaced_elements_baseline.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-22</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>baseline inline 基线 行内替换元素 input button img iframe</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

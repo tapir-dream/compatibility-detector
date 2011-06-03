@@ -1,0 +1,310 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RD8027: 各浏览器中 'min-width' 或 'max-width' 值单位为百分比的 IMG 元素的包含块的 'shrink-to-fit' 算法存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <h3>1. IMG 元素宽度算法</h3>
+      <p>IMG 元素为拥有内在宽度的内联替换元素，CSS 2.1 第10章明确规定了内联替换元素的宽度算法：
+      如果元素的 'width' 和 'height' 特性计算值为 'auto' 且元素拥有内在宽度，则使用该内在宽度作为 'width' 的使用值。</p>
+      <p>关于内联替换元素的宽度计算的更多信息，请参考 CSS 2.1 <a href="http://www.w3.org/TR/CSS21/visudet.html#inline-replaced-width">10.3.2 Inline, replaced elements</a>。</p>
+      
+      <h3>2. 'min-width' 和 'max-width'</h3>
+      <p>'min-width' 和 'max-width' 限定内容宽度的范围。定义值如下：</p>
+      <ul>
+        <li>&lt;length&gt;:指定一个固定的最小或最大的使用宽度；</li>
+        <li>&lt;percentage&gt;:指定一个确定使用值的百分比。百分比的计算基于生成框的包含块的宽度。如果包含块的宽度是负值，则其使用值是0。
+        <strong>CSS 2.1 没有定义若包含块的宽度依赖于其内元素的宽度时如何布局；</strong>
+        </li>
+        <li>none:（仅用于'max-width'）对框的宽度没有限制。</li>
+      </ul>
+      
+      <p>下述算法描述了这两个特性如何影响 'width' 特性的使用值：</p>
+      <ol>
+        <li>首先根据 CSS 2.1 <a href="http://www.w3.org/TR/CSS21/visudet.html#Computing_widths_and_margins">10.3 Calculating widths and margins</a> 中定义的规则计算得到一个临时的使用宽度值；</li>
+        <li>如果临时的宽度使用值大于 'max-width' 特性指定的值，则再应用第一条中的规则将 'max-width' 的计算值作为 'width' 特性的计算值；</li>
+        <li>如果结果宽度值小于 'min-width' 特性值，则再应用第一条中的规则将 'min-width' 的值作为 'width' 特性的计算值。</li>
+      </ol>
+      
+      <p>关于 'min-width' 和 'max-width' 的更多信息，请参考 CSS 2.1 <a href="http://www.w3.org/TR/CSS21/visudet.html#min-max-widths">10.4 Minimum and maximum widths: 'min-width' and 'max-width'</a>。</p>
+
+      <h3>3. 'shrink-to-fit' 算法</h3>
+      
+      <p>shrink-to-fit 可以理解为 &quot;收缩至合适&quot; ，代表了浏览器对于计算后宽度为 'auto' 时的非替换浮动元素宽度计算所要遵循的标准。此外除了非替换浮动元素，对非替换绝对定位元素、非替换行内块元素的宽度为 auto 时也遵循此计算方式。</p>
+      <p>根据 W3C CSS2.1 规范中的描述，shrink-to-fit 的宽度计算方法与 'table-layout' 特性为 'auto'（即自动表格布局）时对于单元格的宽度计算方法类似。大致为：</p>
+      <ul>
+        <li>计算格式化内容时除了发生明确的换行外不发生换行的时<span class="hl_4">首选宽度（preferred width）</span>，以及<span class="hl_2">首选最小宽度（preferred minimum width）</span>，比如，尝试所有可能的换行。而 CSS2.1 没有定义精确的算法。</li>
+        <li>其次，在这种情况下，找出<span class="hl_3">可用宽度（available width）</span>，这个宽度为包含块减去 'margin-left'、'border-left-width'、'padding-left'、'padding-right'、'border-right-width'、'margin-right'以及所有相关滚动条的宽度。</li>
+      </ul>
+      <p>综上所述：</p>
+      <pre>shrink-to-fit 的宽度 = min ( max (<span class="hl_2">首选最小宽度</span>, <span class="hl_3">可用宽度</span>) , <span class="hl_4">首选宽度</span>)</pre>
+      <p>关于 shrink-to-fit 的更多资料，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/visudet.html#float-width">10.3.5 Floating, non-replaced elements</a> 中的内容。</p>
+      
+      <h2 id="description">问题描述</h2>
+      <p>当 IMG 元素没有设置 'width' 特性且设置了值单位为百分比的 'min-width' 或 'max-width' 特性，
+      则在各浏览器中该 IMG 元素的包含块的 'shrink-to-fit' 算法存在差异。</p>
+      
+      <h2 id="influence">造成的影响</h2>
+      <p>该问题可能导致在视觉展现上各浏览器存在差异，也可能造成页面布局混乱。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>该问题的核心原因在于各浏览器在对元素采用 'shrink-to-fit' 算法计算宽度的时候，
+      选取的<span class="hl_2">首选最小宽度</span>和<span class="hl_4">首选宽度</span>不同，因此导致了计算结果的差异。</p>
+      
+      <p>对于 IE8(S) Firefox Chrome Safari Opera，主要差异来源于首选最小宽度的取值；而 IE7(S) 则比较特殊，下面会单独讨论它的处理方式。
+        由于 IE6 IE7(Q) IE8(Q) 不支持 'min-width' 和 'max-width' 特性，因此这些浏览器不在本文讨论范围之列。
+      </p>
+      
+      <p>分析以下代码：</p>
+<pre style="height:300px; overflow-y:auto;">
+&lt;!doctype html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;style type="text/css"&gt;
+      .abs {
+        position : absolute;
+      }
+      
+      .cont {
+        width:40px;
+        background:red;
+        padding:5px;
+        position:absolute;
+        left:100px;
+      }
+      
+      .stf {
+        float:left;
+        border:5px solid;
+        padding:5px;
+        background:gold;
+      }
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body style="background:white;font:12px Arial;"&gt;
+  
+&lt;div style="position:absolute;top:0;"&gt;min-width:0%;&lt;/div&gt;
+&lt;div class="cont" style="top:0;"&gt;
+  &lt;div id="stf1" class="stf"&gt;
+    &lt;img id="img1" src="google_small.gif" style="min-width:0%;" /&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div style="position:absolute;top:100px;"&gt;max-width:0%;&lt;/div&gt;
+&lt;div class="cont" style="top:100px;"&gt;
+  &lt;div id="stf2" class="stf"&gt;
+    &lt;img id="img2" src="google_small.gif" style="max-width:0%;" /&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div style="position:absolute;top:200px;"&gt;min-width:50%;&lt;/div&gt;
+&lt;div class="cont" style="top:200px;"&gt;
+  &lt;div id="stf3" class="stf"&gt;
+    &lt;img id="img1" src="google_small.gif" style="min-width:50%;" /&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div style="position:absolute;top:300px;"&gt;max-width:50%;&lt;/div&gt;
+&lt;div class="cont" style="top:300px;"&gt;
+  &lt;div id="stf4" class="stf"&gt;
+    &lt;img id="img2" src="google_small.gif" style="max-width:50%;" /&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div style="position:absolute;top:400px;"&gt;min-width:150%;&lt;/div&gt;
+&lt;div class="cont" style="top:400px;"&gt;
+  &lt;div id="stf5" class="stf"&gt;
+    &lt;img id="img1" src="google_small.gif" style="min-width:150%;" /&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div style="position:absolute;top:500px;"&gt;max-width:150%;&lt;/div&gt;
+&lt;div class="cont" style="top:500px;"&gt;
+  &lt;div id="stf6" class="stf"&gt;
+    &lt;img id="img2" src="google_small.gif" style="max-width:150%;" /&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id="info" style="position:absolute;top:600px;"&gt;&lt;/div&gt;
+&lt;script type="text/javascript"&gt;
+window.onload = function(){
+  var $ = function(id){return document.getElementById(id);};
+  function info(msg){
+    $("info").innerHTML += "computed width : " + msg + "px&lt;br /&gt;"; 
+  }
+  
+  function getComputedStyle(id){
+    return window.getComputedStyle ? window.getComputedStyle($(id),null) : $(id).currentStyle;
+  }
+  
+  var cs1 = getComputedStyle("stf1"), cs2 = getComputedStyle("stf2"), cs3 = getComputedStyle("stf3"),
+    cs4 = getComputedStyle("stf4"), cs5 = getComputedStyle("stf5"), cs6 = getComputedStyle("stf6");
+    
+  info($("stf1").offsetWidth - parseInt(cs1.paddingLeft) - parseInt(cs1.paddingRight) - parseInt(cs1.borderLeftWidth) - parseInt(cs1.borderRightWidth));
+  info($("stf2").offsetWidth - parseInt(cs2.paddingLeft) - parseInt(cs2.paddingRight) - parseInt(cs2.borderLeftWidth) - parseInt(cs2.borderRightWidth));
+  info($("stf3").offsetWidth - parseInt(cs3.paddingLeft) - parseInt(cs3.paddingRight) - parseInt(cs3.borderLeftWidth) - parseInt(cs3.borderRightWidth));
+  info($("stf4").offsetWidth - parseInt(cs4.paddingLeft) - parseInt(cs4.paddingRight) - parseInt(cs4.borderLeftWidth) - parseInt(cs4.borderRightWidth));
+  info($("stf5").offsetWidth - parseInt(cs5.paddingLeft) - parseInt(cs5.paddingRight) - parseInt(cs5.borderLeftWidth) - parseInt(cs5.borderRightWidth));
+  info($("stf6").offsetWidth - parseInt(cs6.paddingLeft) - parseInt(cs6.paddingRight) - parseInt(cs6.borderLeftWidth) - parseInt(cs6.borderRightWidth));
+}
+&lt;/script&gt;
+&lt;/body&gt;&lt;/html&gt;
+</pre>
+
+      <p>以上代码分别测试了 IMG 元素的 'min-width' 和 'max-width' 特性值为 0%、50% 和 150% 的情况下各浏览器如何计算其包含块的宽度，
+      页面底部使用脚本依次得出这些包含块宽度的最终计算值。图片 "google_small.gif" 内在宽度为 114px，DIV.cont 的宽度为 40px，
+      DIV.stf 为浮动元素，它的 'border-width' 和 'padding' 均为 5px，其宽度需要使用 'shrink-to-fit' 算法决定。根据算法公式，我们能得到<span class="hl_3">可用宽度</span>均为 20px。
+      </p>
+      
+      <p>各浏览器中表现如下：</p>
+      <table class="compare"><tbody>
+        <tr>
+          <th>IE8(S) Firefox Opera</th>
+          <th>Chrome Safari</th>
+          <th>IE7(S)</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RD8027/IE8_Firefox_Opera.png" alt="" /></td>
+          <td><img src="../../tests/RD8027/webkit.png" alt="" /></td>
+          <td><img src="../../tests/RD8027/IE7.png" alt="" /></td>
+        </tr>
+      </tbody></table>
+      
+      <p>修改 DIV.cont 的宽度为 200px，重新计算各包含块宽度，这时我们能得到可用宽度为 180px，各浏览器中表现如下：</p>
+      <table class="compare"><tbody>
+        <tr>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+          <th>IE7(S)</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RD8027/nonIE7.png" alt="" /></td>
+          <td><img src="../../tests/RD8027/IE7_2.png" alt="" /></td>
+        </tr>
+      </tbody></table>
+      
+      <p>综合以上测试结果，我们可以得出在 IE8(S) Firefox Chrome Safari Opera 下设置了 'min-width' 或 'max-width' 值单位为百分比的 IMG 元素的包含块的 'shrink-to-fit' 算法：</p>
+      <table class="compare">
+        <tbody>
+          <tr>
+            <th>IE8(S) Firefox Opera</th>
+            <th>Chrome Safari</th>
+          </tr>
+          <tr>
+            <td><strong>min( max(图片内在宽度, 可用宽度), 图片内在宽度)<sup>1</sup></strong></td>
+            <td><strong>min( max(0, 可用宽度), 图片内在宽度)</strong></td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="comment">注1： 本文中可用宽度分别为 20px 和 180px，图片内在宽度为 114px。</p>
+      
+      <p>从源码中我们也可以发现 Webkit 在计算 'shrink-to-fit' 的首选最小宽度的时候，当遇到 IMG 元素的 'min-width' 和 'max-width' 值单位为百分比的时候，
+        会直接将首选最小宽度置为0，这和我们得出的结论是一致的。
+      </p>
+      <p>关键代码位于 RenderImage.cpp 文件的最底部：</p>
+<pre>
+void RenderImage::calcPrefWidths()
+{
+    ASSERT(prefWidthsDirty());
+
+    int borderAndPadding = borderAndPaddingWidth();
+    m_maxPrefWidth = calcReplacedWidth(false) + borderAndPadding;
+
+    if (style()-&gt;maxWidth().isFixed() &amp;&amp; style()-&gt;maxWidth().value() != undefinedLength)
+        m_maxPrefWidth = min(m_maxPrefWidth, style()-&gt;maxWidth().value() + (style()-&gt;boxSizing() == CONTENT_BOX ? borderAndPadding : 0));
+
+    <strong>if (style()-&gt;width().isPercent() || style()-&gt;height().isPercent() || 
+        style()-&gt;maxWidth().isPercent() || style()-&gt;maxHeight().isPercent() ||
+        style()-&gt;minWidth().isPercent() || style()-&gt;minHeight().isPercent()) 
+        m_minPrefWidth = 0;</strong>
+    else
+        m_minPrefWidth = m_maxPrefWidth;
+
+    setPrefWidthsDirty(false);
+}
+</pre>
+      
+      <p>而 IE7(S) 则首先对比 IMG 元素的内在宽度和它的 'min-width'、'max-width'，然后得出一个宽度的计算值，
+      再使用此计算值作为 'shrink-to-fit' 的首选最小宽度和首选宽度参与计算包含块的宽度计算。</p>
+      
+      <h2 id="solutions">解决方案</h2>
+      <p>在包含块的宽度计算需要依赖其内 IMG 元素时，尽量避免给 IMG 元素的 'min-width' 和 'max-width' 特性设置百分比单位的值。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="RD8022">RD8022: 各浏览器中宽度为 0% 的 IMG 元素的包含块的 'shrink-to-fit' 算法存在差异</a></li>
+        <li><a href="RX8017">RX8017: IE 对浮动非替换元素内包含宽度单位为百分比的元素时的 "shrink-to-fit" 宽度算法有误</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.524.0 dev<br />
+              Safari 5.0.2(7533.18.5)<br />
+                            Opera 10.62
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RD8027/IMG_min-max-width_percent.html">IMG_min-max-width_percent.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-21</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>IMG min-width max-width percentage shrink-to-fit</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

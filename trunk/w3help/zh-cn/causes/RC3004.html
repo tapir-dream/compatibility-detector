@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RC3004: 各浏览器中折行的行内元素的背景图片渲染存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 CSS2.1 规范中的描述，'background-image' 特性可以设定元素的背景图片，此特性可应用于所有元素。<br />
+      在 'background-repeat' 特性介绍中提到，作用在行内元素上的 'background-image' 特性的平铺及位置在这个版本的规范中没有定义，未来版本的 CSS 可能会定义行内元素上的 'background-image' 如何平铺及定位。</p>
+      <p>在 CSS3 草案的背景及边框模块定义中新增加了 'box-decoration-break' 特性，若一个框会被分页、分栏打破，或是行内元素被折行，则 'box-decoration-break' 特性指定了这些被打断的框被视作为连续的框还是彼此相对独立的框，由此决定其 border 与 padding 的渲染，而对于背景，定义了背景定位区域 (<a href="http://www.w3.org/TR/css3-background/#background-positioning-area">background positioning area</a>) 如何由这些众多的框中派生以及如何在它们内部渲染。</p>
+      <p>关于 背景 的详细信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/colors.html#background">14.2 The background</a> 及 CSS3 草案 <a href="http://www.w3.org/TR/css3-background/">CSS Backgrounds and Borders Module Level 3</a> 中的内容。</p>
+      
+      <h2 id="description">问题描述</h2>
+      <p>若行内元素设定了背景图片并发生折行，在 IE6 IE7 IE8(Q) 中，由折行形成的若干新的行内框仍然会连续渲染其设定的背景图片；在其他浏览器中，此若干新的行内框会彼此独立渲染器设定的背景图片。</p>
+      
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题会导致背景图片在不同浏览器中出现差异，可能导致依赖背景图片的设计在某些浏览器中异常。</p>
+      
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：<em>inline_bg.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  body { margin:0; font:20px 'Trebuchet MS'; color:white; }
+  .clearfix { zoom:1; overflow:hidden; }
+  .container { width:100px; float:left; background:wheat; }
+  .legend { width:100px; height:100px; float:left; margin-right:5px; background-image:url(bg.gif); line-height:100px; text-align:center; color:wheat; }
+  .legend span { border:3px solid navy; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div class=&quot;clearfix&quot;&gt;
+  &lt;div class=&quot;legend&quot;&gt;&lt;span&gt;LEGEND&lt;/span&gt;&lt;/div&gt;
+  &lt;div class=&quot;container&quot;&gt;
+    &lt;span style=&quot;background-image:url(bg.gif);&quot;&gt;ABCDEF&lt;br /&gt;GHIJKL&lt;br /&gt;MNOPQR&lt;br /&gt;STUVWXYZ&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码左侧为背景图片图例，右侧的 DIV 元素中有一个设定了背景图片的 SPAN 元素，在 SPAN 元素内使用 BR 元素迫使其折行。</p>
+      <p>这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RC3004/bg1.gif" alt="" /></td>
+          <td><img src="../../tests/RC3004/bg2.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>可见，</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8(Q)</em> 中，若行内元素设定了背景图片并发生折行，由折行形成的若干新的行内框仍然会连续渲染其设定的背景图片，仍然表现得像一个单独的框；</li>
+        <li>在 <em>其他浏览器</em> 中，若行内元素设定了背景图片并发生折行，此若干新的行内框会彼此独立渲染器设定的背景图片，表现得像众多独立的行内框。</li>
+      </ul>
+      <p>下面为 SPAN 元素设定 <span class="hl_1">display:inline-block</span>，再观察背景图片的渲染：<em>inline-bg_bfc.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  body { margin:0; font:20px 'Trebuchet MS'; color:white; }
+  .clearfix { zoom:1; overflow:hidden; }
+  .container { width:100px; float:left; background:wheat; }
+  .legend { width:100px; height:100px; float:left; margin-right:5px; background-image:url(bg.gif); line-height:100px; text-align:center; color:wheat; }
+  .legend span { border:3px solid navy; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div class=&quot;clearfix&quot;&gt;
+  &lt;div class=&quot;legend&quot;&gt;&lt;span&gt;LEGEND&lt;/span&gt;&lt;/div&gt;
+  &lt;div class=&quot;container&quot;&gt;
+    &lt;span style=&quot;background-image:url(bg.gif); <span class="hl_1">display:inline-block</span>&quot;&gt;ABCDEF&lt;br /&gt;GHIJKL&lt;br /&gt;MNOPQR&lt;br /&gt;STUVWXYZ&lt;/span&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p><img src="../../tests/RC3004/bg_all.gif" alt="" style="float:left; margin-right:5px;" />此时各浏览器中的运行效果均相同 (如左图)，即在所有浏览器中，由折行形成的若干新的行内框仍然会连续渲染其设定的背景图片。<br />
+      这是由于 <span class="hl_1">display:inline-block</span> 在 IE6 IE7 IE8(Q) 中触发了其 hasLayout 特性 (即使其拥有了布局)，在 其他浏览器 中其创建了新的 block formatting context。此时 SPAN 元素为行内块元素，其内虽然由 BR 元素产生了折行，但这些折行产生的行内框均从属于行内块框内部 (不像普通行内元素折行后会被拆分成若干独立的行内框)，故为其设定背景图片会在其内部所有行内框中连续渲染。</p>
+      <p style="clear:left;">行内元素设定 'background-image' 是 CSS2.1 规范中的盲点。虽然 CSS3 草案中新增了 'box-decoration-break' 特性，但目前所有浏览器均未提供支持。</p>
+      
+      <h2 id="solutions">解决方案</h2>
+      <p>避免为普通行内元素设置 'background-image' 特性，若需要为行内级元素设置背景图片，可以将其转换为行内块元素 <span class="hl_1">display:inline-block</span>。</p>
+      
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td> IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 8.0.552.0 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.63
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RC3004/inline_bg.html">inline_bg.html</a><br />
+            <a href="../../tests/RC3004/inline_bg_bfc.html">inline_bg_bfc.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-19</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>background background-image tile CSS3 背景 图片 inline 行内</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

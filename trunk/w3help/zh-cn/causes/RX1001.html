@@ -1,0 +1,207 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RX1001: IE5.0 IE5.5 IE6 中浮动元素在某些情况下会有双倍外边距</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 W3C CSS2.1 规范中的描述，对于非替换的浮动元素，若 'margin-left' 或 'margin-right' 特性的计算值为 'auto'，则它们的实际使用值为 '0'。</p>
+      <p>除此之外，'margin-left' 与 'margin-right' 特性的计算则采用其自身定义的规范。</p>
+      <p>关于 'margin-left'、'margin-right' 以及 非替换的浮动元素宽度计算 的详细信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/box.html#margin-properties">8.3 Margin properties: 'margin-top', 'margin-right', 'margin-bottom', 'margin-left', and 'margin'</a> 以及 <a href="http://www.w3.org/TR/CSS21/visudet.html#float-width">10.3.5 Floating, non-replaced elements</a> 中的内容。</p>
+      <p></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE5.0 IE5.5 IE6 中，当为一个块级元素同时设置了向左浮动（float:left）及左边距或右边距（'margin-left' | 'margin-right'）后，则该元素的左边距或右边距在某些情况下会是设定值的两倍。同样地，向右浮动（float:right）及右边距（'margin-right'）也存在此现象。</p>
+      <p>这个是 IE 著名的 &quot;双边距Bug&quot;（IE Double Margin Bug）。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>这种双倍边距的怪异现象会对页面造成很多影响，如意外折行、溢出、文字重叠等诸多兼容性问题。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE5.0 IE5.5 IE6</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>首先重现这个 Bug。</p>
+
+      <p>分析以下代码：</p>
+<pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;script&gt;
+  window.onload = function () {
+    document.getElementById("d1").innerHTML = document.getElementById("d1").parentNode.offsetWidth;
+    document.getElementById("d2").innerHTML = document.getElementById("d2").parentNode.offsetWidth;
+  }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body style="font:12px Arial; margin:0;"&gt;
+&lt;div style="width:100px;"&gt;
+  &lt;div style="background:gold; float:left;"&gt;
+    &lt;div id="d1" style="float:left; margin:0 50px; background:olive; width:100px; height:50px;"&gt;&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div style="background:pink; float:left;"&gt;
+    &lt;div id="d2" style="float:right; margin:0 50px; background:deeppink; width:100px; height:50px;"&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码中有两组 DIV 容器，容器内的 DIV 元素分别设置了向左浮动（float:left）与向右浮动（float:right），且左右边距均为 50px（margin:0 50px）。当页面加载完毕后将 DIV 容器的 offsetWidth 显示出来。</p>
+      <p>在各浏览器中打开这个页面效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE5.0 IE5.5 IE6</th>
+          <th>IE7 IE8 Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RX1001/IE5-6_double_1.gif" alt="IE5-6 double margins" /></td>
+          <td><img src="../../tests/RX1001/non_IE5-6_double_1.gif" alt="non IE5-6 double margins" /></td>
+        </tr>
+      </table>
+      <p>从上面的例子与截图可见：</p>
+      <ul>
+        <li>在 <em>IE5.0 IE5.5 IE6</em> 中，当一个块级元素向左浮动时，其左边距会出现双倍于设定的边距值的现象。当一个块级元素向右浮动时，其右边距会出现双倍于设定的边距值的现象。由于深黄色的块级元素为其容器内的最后一个左浮动元素，所以其右边距也会出现双倍于设定的右边距值的现象；</li>
+        <li>在 <em>其他浏览器</em> 中，没有上述的现象，浏览器遵照 W3C 规范对页面元素进行解释及渲染。</li>
+      </ul>
+      <br />
+      <p>触发此 Bug 的条件有 3 个：</p>
+      <ol>
+        <li>若一个元素向左浮动（float:left），且其设置的左边距（'margin-left'）大于其至容器的左侧内边界的距离：<br />
+        <span class="hl_1"><strong>该元素实际的左边距 = 设置的左边距 * 2 - 左边界至容器的距离；</strong></span></li>
+        <li>同样地，若一个元素向右浮动（float:right），且其设置的右边距 （'margin-right'）大于其至容器的右侧内边界的距离：<br />
+        <span class="hl_2"><strong>该元素实际的右边距 = 设置的右边距 * 2 - 右边界至容器的距离；</strong></span></li>
+        <li>若一个元素向左浮动（float:left），这个元素为其父容器的最后一个左浮动元素，且其设置的右边距（'margin-right'）大于其至容器的右侧内边界的距离：<br />
+        <span class="hl_4"><strong>该元素的实际右边距 = 设置的右边距 * 2。</strong></span></li>
+      </ol>
+      <p>下面结合上面的触发条件看一组更加复杂的例子：</p>
+      <pre>&lt;style&gt;
+  .fl { float:left; height:30px; background:gray; }
+  #A { width:90px; margin:0 10px; }
+  #B { width:85px; margin-left:150px; }
+  #C { width:100px; margin-left:100px; }
+&lt;/style&gt;
+&lt;div style="width:600px; height:30px; background:#CCC;"&gt;
+  &lt;div id="A" class="fl"&gt;10 90 10&lt;/div&gt;
+  &lt;div id="B" class="fl"&gt;150 85 0&lt;/div&gt;
+  &lt;div id="C" class="fl"&gt;100 100 0&lt;/div&gt;
+&lt;/div&gt;</pre>
+      <p>测试代码中 DIV 容器中包含了三个 DIV 子元素，这三个子元素均为左浮动元素，且均拥有 'margin-left' 特性。</p>
+      <p>不同的浏览器运行的结果列表如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE5.0<br />IE5.5<br />IE6</th>
+          <td><img src="../../tests/RX1001/IE5-6_double_2.gif" alt="IE5-6 double margins" /></td>
+        </tr>
+        <tr>
+          <th>IE7<br />IE8<br />Firefox<br />Chrome<br />Safari<br />Opera</th>
+          <td><img src="../../tests/RX1001/non_IE5-6_double_2.gif" alt="non IE5-6 double margins" /></td>
+        </tr>
+      </table>
+      <p>在 <em>IE5.0 IE5.5 IE6</em> 中，</p>
+      <ul>
+        <li>【A】的左边距容器的距离为 0，其设置的左边距为 10px，10 > 0。则【A】满足上面的<span class="hl_1">条件1</span>，触发此 Bug。【A】实际的左边距变为 10 * 2 - 0 = 20px。</li>
+        <li>【B】的左边距容器的距离为 120px（20 + 90 + 10），其设置的左边距为 150px，150 > 120。则【B】满足上面的<span class="hl_1">条件1</span>，触发此 Bug。【B】实际的左边距变为150 * 2 - 120 = 180px。</li>
+        <li>【C】的左边距容器的距离为 385px（20 + 90 + 10 + 180 + 85），其设置的左边距为 100px，100 < 285。则【C】不满足触发此 Bug 的条件。【C】实际的左边距仍然为 100px。</li>
+      </ul>
+      <br />
+      <p>上面讨论的都是元素浮动之前为块级元素，下面观察一下 'display' 特性分别为 'inline' 及 'block' 的 SPAN 元素浮动后的情况：</p>
+      <pre>&lt;div style="width:100px; height:20px; background:#ccc;"&gt;100 x 20&lt;/div&gt;
+&lt;span style="float:left; margin-left:100px; width:100px; height:20px; background:gray;"&gt;inline FLOAT&lt;/span&gt;
+&lt;br /&gt;&lt;br /&gt;
+&lt;div style="width:100px; height:20px; background:#ccc;"&gt;100 x 20&lt;/div&gt;
+&lt;span style="float:left; margin-left:100px; width:100px; height:20px; background:gray; display:block"&gt;block FLOAT&lt;/span&gt;</pre>
+      <p>这段代码在不同浏览器中运行效果为：</p>
+      <table class="compare">
+        <tr>
+          <th>IE5.0<br />IE5.5<br />IE6</th>
+          <td><img src="../../tests/RX1001/IE5-6_double_3.gif" alt="IE5-6 double margins" /></td>
+        </tr>
+        <tr>
+          <th>IE7<br />IE8<br />Firefox<br />Chrome<br />Safari<br />Opera</th>
+          <td><img src="../../tests/RX1001/non_IE5-6_double_3.gif" alt="non IE5-6 double margins" /></td>
+        </tr>
+      </table>
+      <p>从上面一组截图中很明显的看出，双边距 Bug 会作用于 'display' 特性为 'block' 的元素，对于 'inline' 的元素不会触发此 Bug。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <ul>
+        <li>尽量避免同时使用 'margin-left' 与 float:left，及 'margin-right' 与 float:right；</li>
+        <li>由于这个 Bug 对于 'display' 特性为 'inline' 的元素不会触发，所以可以通过设置 <strong>display:inline</strong> 消除此 Bug，由于此 Bug 仅在元素浮动时发生，而浮动将使该元素 'display' 特性计算为 'block' 或者 'table'（见 CSS2.1 规范第 <a href="http://www.w3.org/TR/CSS21/visuren.html#dis-pos-flo">9.7 Relationships between 'display', 'position', and 'float'</a> 节），因此可以通过设置 <strong>display:inline</strong> 消除双边距 Bug。</li>
+      </ul>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE5 [Windows 98]<br />
+              IE5.5 [Windows 2000]<br />
+              IE6 [Windows XP]<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 5.0.342.5 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.50
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RX1001/double_margins_1.html">double_margins_1.html</a>
+            <br /><a href="../../tests/RX1001/double_margins_2.html">double_margins_2.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-10</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>IE double margin float 双边距 浮动</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

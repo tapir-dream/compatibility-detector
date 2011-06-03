@@ -1,0 +1,158 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RV1002: IE6 IE7 IE8(Q) 中 'overflow' 特性不为 'visible' 的非定位元素内包含溢出的定位元素时的渲染效果有误</h1>
+  <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>
+        根据 CSS2.1 规范中的描述，在某些情况下，一个框可能会溢出，换句话说，它的部分或者全部内容会出现在框的外部。
+        'overflow' 特性指定了当一个块级元素的内容溢出该元素盒子的时候是否剪裁，它应用在非替换的块级元素、单元格和行内块元素上。<br />
+        'overflow' 特性取值有 'visible'、'hidden'、'scroll' 和 'auto'，默认值为 'visible'；当 'overflow' 取值为 'hidden' 时，元素将剪裁溢出的内容，并且不提供滚动条显示溢出内容；当 'overflow' 取值为 'scroll' 时，元素将剪裁溢出的内容，不管内容是否溢出均会提供滚动机制；当 'overflow' 取值为 'auto' 时，对于溢出的内容用户端应该提供一个滚动机制。
+      </p>
+      
+      <p>一个设置了 position:relative 的元素虽然为定位元素，但其仍然位于普通流中。而一个设置了 position:absolute 或者 position:fixed 的元素则属于定位流中。</p>
+      <p>
+        关于 'overflow' 的详细信息，请参考 W3C CSS 2.1 规范 <a href="http://www.w3.org/TR/CSS21/visufx.html#overflow">11.1.1 Overflow: the 'overflow' property</a> 。
+      </p>
+      
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6(S) IE7(S) 中，若一个 'overflow' 特性不为 'visible' 的非定位元素内包含了可能溢出其的相对定位元素，则溢出部分不会被剪裁。<br />
+      在 IE6(Q) IE7(Q) IE8(Q) 中，若一个 'overflow' 特性不为 'visible' 的非定位元素内包含可能其溢出的绝对定位元素，则仍然会剪裁溢出的绝对定位元素。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题可能造成元素在 IE6(S) IE7(S) 中本应被剪裁的部分仍然可视，从而造成布局差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6(Q) IE7(Q) IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <th>IE6(S) IE7(S)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+<pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  .child { opacity:0.75; filter:alpha(opacity=75); background-image:url(google_small.gif); }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body style=&quot;margin:0;&quot;&gt;
+&lt;div style=&quot;width:100px; height:100px; background:plum; overflow:auto; position:static;&quot;&gt;
+  &lt;div class=&quot;child&quot; style=&quot;width:110px; height:110px; margin:30px 0 0 30px; <span class="hl_1">position:absolute;</span>&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;br /&gt;
+&lt;br /&gt;
+&lt;div style=&quot;width:100px; height:100px; background:plum; overflow:auto; position:static;&quot;&gt;
+  &lt;div class=&quot;child&quot; style=&quot;width:110px; height:110px; margin:30px 0 0 30px; <span class="hl_1">position:relative;</span>&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;br /&gt;
+&lt;br /&gt;
+&lt;div style=&quot;width:100px; height:100px; background:plum; overflow:auto; position:static;&quot;&gt;
+  &lt;div class=&quot;child&quot; style=&quot;width:110px; height:110px; margin:30px 0 0 30px; <span class="hl_1">position:static;</span>&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面的代码分为三组，均为一个 overflow:auto 的非定位元素内包含了一个溢出其生成的包含块的子元素。三组的区别为子元素的 'position' 特性分别为 'absolute'、'relative'、'static'。</p>
+      <p>各浏览器中表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6(Q) IE7(Q) IE8(Q)</th>
+          <th>IE6(S) IE7(S)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RV1002/1.gif" alt="" /></td>
+          <td><img src="../../tests/RV1002/2.gif" alt="" /></td>
+          <td><img src="../../tests/RV1002/3.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>position:relative 与 position:static 的子元素均位于普通流中，其包含块为设置了 overflow:auto 的父元素，所以子元素溢出的部分应该被裁切。而 position:absolute 使子元素脱离普通流，进入定位流，其包含块不再为设置了 overflow:auto 的父元素，则这个绝对定位元素不会被裁切。</p>
+      <p>而在 <em>IE6(Q) IE7(Q) IE8(Q)</em> 中，子元素绝对定位后依然可以被裁切，此时浏览器对绝对定位元素的包含块判断错误。<br />
+      在 <em>IE6(S) IE7(S)</em> 中，一个 'overflow' 特性不为 'visible' 的非定位元素内包含了可能溢出其的相对定位元素时，溢出部分不会被剪裁。</p>
+      
+      
+      
+      
+      
+      <h2 id="solutions">解决方案</h2>
+      <p>根据实际需求可以去掉包含块的 'overflow:hidden' 或采用其他定位方案，避免在 IE 中触发此问题，实现在各浏览器表现一致。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RV1002/overflow_hidden_relative_no_clipped.html">overflow_hidden_relative_no_clipped.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-21</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>overflow hidden position relative hidden 溢出 剪裁 相对定位</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

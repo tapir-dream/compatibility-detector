@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	#d {
+		background-color: black;
+		position: absolute;
+		left: 10px;
+		right: 10px;
+		top: 10px;
+		bottom: 10px;
+		color: white;
+		_width: expression(
+			parseInt(this.offsetParent.currentStyle.width) 
+				- parseInt(this.currentStyle.left) 
+				- parseInt(this.currentStyle.right)
+		);
+		_height: expression(
+			parseInt(this.offsetParent.currentStyle.height) 
+				- parseInt(this.currentStyle.top) 
+				- parseInt(this.currentStyle.bottom)
+		);
+	}
+</style>
+</head>
+<body>
+    <div style="background-color:gray;width:100px;height:100px;position:relative">
+        <div id="d">test</div>
+    </div>
+</body>
+</html>

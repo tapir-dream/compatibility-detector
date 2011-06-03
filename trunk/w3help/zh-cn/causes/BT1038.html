@@ -1,0 +1,114 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BT1038: 只有 IE 支持 IMG INPUT[type=image] 标记内的 lowsrc 属性</h1>
+  <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>在 HTML 4.01 规范定义中，IMG 标记和 INPUT 标记内并没有 lowsrc 属性存在。</p>
+      <p>IMG 标记属性可参考  HTML 4.01 规范 ：  <a href="http://www.w3.org/TR/html401/struct/objects.html#h-13.2">http://www.w3.org/TR/html401/struct/objects.html#h-13.2</a> </p>
+      <p>INPUT 标记属性可参考 HTML 4.01 规范 ：  <a href="http://www.w3.org/TR/html401/interact/forms.html#h-17.4">http://www.w3.org/TR/html401/interact/forms.html#h-17.4</a> </p>
+      <h2 id="description">问题描述</h2>
+      <p>lowsrc 属性是 IE 浏览器的私有扩展，用来在 src 属性内图片尚未加载完成之前使用指定的小尺寸图片暂时替代显示，他可以使用在 IMG 和 INPUT[type=image] 这两个标记中。使用这个属性来显示图片，其他浏览器将不识别；或者在试图为 IMG 和 INPUT[type=image] 标记自定义 HTML 属性时，误用 lowsrc 属性，这将导致 IE 中可以显示图片。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>非 IE 浏览器均不识别 lowsrc 这个私有属性，使用他会造成无法按预期显示图片，由此可能会导致页面布局局部出现错乱。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>lowsrc 属性是 IE 浏览器的扩展属性，具体定义说明可以参考 MSDN：  <a href="http://msdn.microsoft.com/en-us/library/ms534138(VS.85).aspx">http://msdn.microsoft.com/en-us/library/ms534138(VS.85).aspx</a> </p>
+      <p>他对 IMG 和 INPUT[type=image] 标记有效，可以使用如下代码来证实：</p>
+            <pre>
+&lt;h2&gt;IMG lowsrc : &lt;img lowsrc="logo_2.png"&gt;&lt;/h2&gt;
+&lt;h2&gt;INPUT[type=image] lowsrc : &lt;input type="image" lowsrc="logo_2.png" /&gt;&lt;/h2&gt;
+</pre>
+    <p>运行结果汇总如下：</p>
+    <table class="compare">
+          <tr>
+            <th>IE</th>
+            <th>Firefox Safari Chrome Opera </th>
+          </tr>
+          <tr>
+            <td><span class="hl_1">正常显示图片</span></td>
+            <td><span class="hl_2">无法显示图片</span></td>
+          </tr>
+        </table>
+    <p>由表清晰可见， lowsrc 属性在非 IE 浏览器内不被识别。</p>
+    <h2 id="solutions">解决方案</h2>
+      <p>如无特殊应用需求，应避免使用 lowsrc 属性。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.8<br />
+              Chrome 7.0.517.0 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BT1038/lowsrc.html">lowsrc.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-13</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>IMG INPUT[type=image] lowsrc src IE 图片</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

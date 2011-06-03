@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>resizeTo</title>
+<style>
+	html, body { margin:0; padding:0; width:100%; height:100%; font:60px 'Trebuchet MS'; }
+</style>
+<script>
+	window.resizeTo(300, 300);
+	window.onload = window.onresize = function () {
+		document.body.innerHTML = document.body.clientWidth + ', ' + document.body.clientHeight;
+	}
+</script>
+</head>
+<body>
+</body>
+</html>

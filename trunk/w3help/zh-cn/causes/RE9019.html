@@ -1,0 +1,149 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RE9019: Chrome(Q) Safari(Q) Opera(Q) 中明确指定的单元格宽度小于当前列 MCW 时，计算单元格与其他浏览器不同</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <h3>自动表格布局</h3>
+      <p>在 CSS 2.1 规范中自动表格布局规则中，计算每个单元格的最小内容宽度（MCW）：经格式化的内容可以扩展到多行，但是不可以溢出单元格框。如果指定的单元格 'width'（W）大于 MCW ，W 将作为最小单元格宽度。 'auto' 意味着 MCW 为最小单元格宽度。</p>
+      <p>关于自动表格布局的更多信息，请参考 CSS 2.1 规范 <a href="http://www.w3.org/TR/CSS21/tables.html#auto-table-layout">17.5.2.2 Automatic table layout</a> 。</p>
+
+
+      <h2 id="description">问题描述</h2>
+      <p>规范中仅描述了指定单元格 'width'（W）大于 MCW ，W 将作为最小单元格宽度，并没有描述指定的单元格宽度小于当前列 MCW 时，谁作为最小单元格宽度。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>指定的单元格宽度小于当前列 MCW 时， Chrome(Q) Safari(Q) Opera(Q) 计算单元格与其他浏览器不同，会造成布局不一致。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>代码如下：</p>
+<pre>&lt;html&gt;
+&lt;body&gt;
+&lt;table style="width:180px;" cellpadding=0 cellspacing=0&gt;
+&lt;tr&gt;
+  &lt;td style="background:green;"&gt;&lt;div style="width:10px;height:30px;"&gt;&lt;/div&gt;&lt;/td&gt;
+  &lt;td style="background:gold;"&gt;&lt;div style="width:20px;height:30px;"&gt;&lt;/div&gt;&lt;/td&gt;
+  &lt;td style="background:pink;"&gt;&lt;div style="width:30px;height:30px;"&gt;&lt;/div&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+  &lt;td style="background:blue;"&gt;&lt;div style="width:10px;height:30px;"&gt;&lt;/div&gt;&lt;/td&gt;
+  &lt;td style="background:silver"&gt;&lt;div style="width:20px;height:30px;"&gt;&lt;/div&gt;&lt;/td&gt;
+  &lt;td style="background:red;width:10px;"&gt;&lt;div style="width:30px;height:30px;"&gt;&lt;/div&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+      <p>在每个 TD 中都放了设置宽度的 DIV 用来模拟单元格的最小宽度，给最后一个 TD 上明确指定宽度（10px），并使其宽度小于单元格最小宽度。</p>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>Chrome(Q) Safari(Q) Opera(Q)</th>
+          <th>IE Firefox Chrome(S) Safari(S) Opera(S)</th>
+        </tr>
+        <tr>
+          <td>页面截图</td>
+          <td><img src="../../tests/RE9019/01.png" /></td>
+          <td><img src="../../tests/RE9019/02.png" /></td>
+        </tr>
+        <tr>
+          <td>明确指定宽度的 TD 开发者工具下截图</td>
+          <td><img src="../../tests/RE9019/03.png" /></td>
+          <td><img src="../../tests/RE9019/04.png" /></td>
+        </tr>
+        <tr>
+          <td>从左至右 TD 的宽度依次为</td>
+          <td>30px 60px 90px</td>
+          <td>50px 100px 30px</td>
+        </tr>
+      </table>
+      <p>根据现象可以推测，</p>
+      <ul>
+      <li><em>Chrome(Q) Safari(Q) Opera(Q)</em> 中，明确指定宽度的 TD 没有优先级， TD 的计算后宽度 = 单元格的最小宽度比例 * TABLE 的实际宽度。</li>
+      <li><em>IIE Firefox Chrome(S) Safari(S) Opera(S)</em> 中，明确指定宽度的 TD 具有较高的优先级， TD 的计算后宽度等于单元格的最小宽度，其他 TD 的宽度 = 单元格的最小宽度比例 * ( TABLE 的实际宽度 - 明确指定宽度的 TD 的计算后宽度)。</li>
+      </ul>
+      <p class="comment">注：本例子中取值均为整数，是为了清楚的说明这个问题，实际 TD 的计算后宽度可能会有一些偏差。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>避免出现明确指定的单元格宽度小于当前列 MCW 的情况。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.552.0 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.63
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RE9019/specify_TD_width.html">specify_TD_width.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-13</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>自动表格布局 MCW TD width</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

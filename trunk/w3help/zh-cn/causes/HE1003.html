@@ -1,0 +1,331 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HE1003: IE 支持某些非 TD 和 TH 元素上的 noWrap 属性</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>W3C 的 HTML4.01 属性表里 nowrap 一行中，标示的 &quot;相关元素&quot; （Related Elements）为 TD 和 TH。 depr 一列则表明这个属性已经被弃用（deprecated）。所以这是一个不推荐使用的属性，即便要使用，它也应专用于表格单元格元素 TD 与 TH。</p>
+      <p>HTML4.01 规范中也明确说明了 nowrap 属性的意义：nowrap 属性是一个布尔型属性，用于设置当前单元格的文字环绕。目前应使用CSS代替此属性，若使用不当，此属性可能导致单元格过宽。<br />
+      对于 DOM 中 HTMLTableCellElement 对象接口中的 noWrap 属性的意义同上。</p>
+      <p>关于 noWrap 的详细信息，请参考 W3C HTML4.01 规范 <a href="http://www.w3.org/TR/html401/struct/tables.html#adef-nowrap">11.2.6 Table cells</a> 以及 DOM2 (HTML) 规范 <a href="http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-62922045">1.6.4 The HTMLElement interface</a> 中的内容。</p>
+      <p>HTML4.01 属性表，请参考：<a href="http://www.w3.org/TR/html401/index/attributes.html">http://www.w3.org/TR/html401/index/attributes.html</a>。</p>
+      
+      <h2 id="description">问题描述</h2>
+      <p>在 IE 中，不仅 TD 和 TH 元素，其他一些元素也拥有 noWrap 属性。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>各浏览器之间对于 noWrap 属性的应用范围不同，可能导致当使用此属性时，不同浏览器针对空白符的处理会有完全不同的展现效果。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>除 TD 和 TH 元素以外，还支持 BODY、DIV、DD、DT 元素上的 noWrap 属性。</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>查看 MSDN 文档关于 <a href="http://msdn.microsoft.com/en-us/library/ms534196(VS.85).aspx">NOWRAP Attribute | noWrap Property</a> 的介绍：<br />
+      在 HTML 中，nowrap 属性可以作用于 BODY、DD、DT、DIV、TD、TH 元素。而在 DOM 中，HTMLBodyElement、HTMLDDElement、HTMLDivElement、HTMLDTElement、HTMLTableCellElement 这些对象拥有 noWrap 属性。</p>
+      <p>分析以下代码：<em>html_nowrap.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  .nr { background:#ddd; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;table style="width:120px;" border="1"&gt;
+        &lt;tr&gt;
+            &lt;th class="nr" <span class="hl_1">nowrap</span>&gt;TH: &lt;/th&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;td class="nr" <span class="hl_1">nowrap</span>&gt;TD: &lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/table&gt;
+    &lt;div class="nr" style="width:120px;" <span class="hl_1">nowrap</span>&gt;DIV: &lt;/div&gt;
+    &lt;h3 class="nr" style="width:120px;" <span class="hl_1">nowrap</span>&gt;H3: &lt;/h3&gt;
+    &lt;p class="nr" style="width:120px;" <span class="hl_1">nowrap</span>&gt;P: &lt;/p&gt;
+    &lt;dl&gt;
+        &lt;dt id="dt" class="nr" style="width:120px;" <span class="hl_1">nowrap</span>&gt;DT: &lt;/dt&gt;
+        &lt;dd class="nr" style="width:120px;" <span class="hl_1">nowrap</span>&gt;DD: &lt;/dd&gt;
+    &lt;/dl&gt;
+    &lt;script&gt;
+      window.onload = function() {
+        function getComputedStyle($target, styleName) {
+            return document.defaultView ? document.defaultView.getComputedStyle($target, null).getPropertyValue(styleName)
+                    : $target.currentStyle[styleName.replace(/-[a-z]/g, function() {
+                return arguments[0].charAt(1).toUpperCase();
+            })];
+        }
+        var a = document.getElementsByTagName("*"), b, html;
+        for (var i = 0; i &lt; a.length; i++) {
+          if (a[i].className == "nr") {
+            html = "&lt;span&gt;" + getComputedStyle(a[i], "white-space") + "&lt;/span&gt;";
+            a[i].innerHTML += "white-space:" + html;
+            b = a[i].children(0);
+            b.style.color = (b.innerHTML == "nowrap") ? "red" : "blue";
+          }
+        }
+      }
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>以上代码分别测试了 TH、TD、DIV、H3、P、DT、DD 元素的 noWrap 属性，并取得各元素计算后的 'white-space' 特性的值，在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6<sup>1</sup> IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <th>TH TD</th>
+          <td><img src="../../tests/HE1003/tablecell_IE6.gif" alt="IE6 IE7 IE8(Q)" /></td>
+          <td><img src="../../tests/HE1003/tablecell_CR.gif" alt="IE8(S) Firefox Chrome Safari Opera" /></td>
+        </tr>
+        <tr>
+          <th>DIV</th>
+          <td><img src="../../tests/HE1003/div_IE6.gif" alt="IE6 IE7 IE8(Q)" /></td>
+          <td><img src="../../tests/HE1003/div_CR.gif" alt="IE8(S) Firefox Chrome Safari Opera" /></td>
+        </tr>
+        <tr>
+          <th>H3</th>
+          <td><img src="../../tests/HE1003/header_IE6.gif" alt="IE6 IE7 IE8(Q)" /></td>
+          <td><img src="../../tests/HE1003/header_CR.gif" alt="IE8(S) Firefox Chrome Safari Opera" /></td>
+        </tr>
+        <tr>
+          <th>P</th>
+          <td><img src="../../tests/HE1003/p_IE6.gif" alt="IE6 IE7 IE8(Q)" /></td>
+          <td><img src="../../tests/HE1003/p_CR.gif" alt="IE8(S) Firefox Chrome Safari Opera" /></td>
+        </tr>
+        <tr>
+          <th>DT DD</th>
+          <td><img src="../../tests/HE1003/dddt_IE6.gif" alt="IE6 IE7 IE8(Q)" /></td>
+          <td><img src="../../tests/HE1003/dddt_CR.gif" alt="IE8(S) Firefox Chrome Safari Opera" /></td>
+        </tr>
+      </table>
+      <p>通过上例对 'white-space' 特性计算后的值的检测，可以发现所有浏览器均将带有 nowrap 属性的 TD 和 TH 元素的 'white-space' 特性值设定为 nowrap。</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8(Q)</em> 中，nowrap 属性可以用于 TD、TH、DIV、DD、DT 元素；</li>
+        <li>在 <em>IE8(S) Firefox Chrome Safari Opera</em> 中，nowrap 属性只能用于 TD 和 TH 元素。</li>
+      </ul>
+      <p>虽然 IE6 IE7 IE8(Q) 中 nowrap 属性也可以作用于 DIV 等元素，但他们的 'white-space' 特性的计算后的值仍然为 normal。</p>
+      <p class="comment">
+        【注】<br />
+        1. IE6 IE7(Q) IE8(Q) 的截图与 IE7(S) 稍有不同，这是因为它们有 &quot;子元素可以撑大父容器&quot; 的 Bug，但这并不影响浏览器对 nowrap 属性的解释。
+      </p>
+      <p>下面单独测试 BODY 元素的 nowrap 属性：</p>
+      <p>这里将 BODY 元素单独提出来分析，是因为 nowrap 属性在 IE 中拥有继承特性，为 BODY 元素设置 nowrap 属性将会影响到其内子元素的 'white-space' 特性的计算值，即使子元素是 P、H1 这些在 IE 中不具备 nowrap 属性的元素。</p>
+      <p>分析以下代码：<em>html_body_nowrap.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  .nr { background:#ddd; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body style="width:120px;" <span class="hl_1">nowrap</span>&gt;
+    &lt;span&gt;BODY: &lt;/span&gt;
+    &lt;h4 id="h4" class="nr" style="width:120px;"&gt;H4: &lt;/h4&gt;
+    &lt;p id="p" class="nr" style="width:120px;"&gt;P: &lt;/p&gt;
+    &lt;script&gt;
+      window.onload = function() {
+        function $(id) { return document.getElementById(id); }
+        function getComputedStyle($target, styleName) {
+            return document.defaultView ? document.defaultView.getComputedStyle($target, null).getPropertyValue(styleName)
+                    : $target.currentStyle[styleName.replace(/-[a-z]/g, function() {
+                return arguments[0].charAt(1).toUpperCase();
+            })];
+        }
+        document.body.children(0).innerHTML += "white-space:" + getComputedStyle(document.body, "white-space");
+        $("h4").innerHTML += "white-space:" + getComputedStyle($("h4"), "white-space");
+        $("p").innerHTML += "white-space:" + getComputedStyle($("p"), "white-space");
+      }
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码中为 BODY 元素设置了 nowrap 属性，BODY 元素内包含两个块级元素 H4 和 P，这两个元素在所有浏览器中均不具有 nowrap 属性。</p>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6<sup>1</sup> IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/HE1003/body_IE6.gif" alt="IE6 IE7 IE8(Q)" /></td>
+          <td><img src="../../tests/HE1003/body_CR.gif" alt="IE8(S) Firefox Chrome Safari Opera" /></td>
+        </tr>
+      </table>
+      <p>截图中不仅看出 BODY 元素在 <em>IE6 IE7 IE8(Q)</em> 中拥有 nowrap 属性，且这个属性还会对其子元素的 'white-space' 特性产生影响。</p>
+      <br />
+      <p>下面再看看在各浏览器中 TH、TD、DIV、H3、P、DT、DD 元素对应的 DOM 对象的是否拥有合法的 noWrap 属性。</p>
+      <p>分析以下代码：<em>dom_nowrap.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  .nr { background:#ddd; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;table style="width:120px;" border="1"&gt;
+        &lt;tr&gt;
+            &lt;th class="nr"&gt;TH: &lt;/th&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;td class="nr"&gt;TD: &lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/table&gt;
+    &lt;div class="nr" style="width:120px;"&gt;DIV: &lt;/div&gt;
+    &lt;h3 class="nr" style="width:120px;"&gt;H3: &lt;/h3&gt;
+    &lt;p class="nr" style="width:120px;"&gt;P: &lt;/p&gt;
+    &lt;dl&gt;
+        &lt;dt id="dt" class="nr" style="width:120px;"&gt;DT: &lt;/dt&gt;
+        &lt;dd class="nr" style="width:120px;"&gt;DD: &lt;/dd&gt;
+    &lt;/dl&gt;
+    &lt;script&gt;
+      window.onload = function() {
+        var a = document.getElementsByTagName("*"), html;
+        for (var i = 0; i &lt; a.length; i++) {
+          if (a[i].className == "nr") {
+            html = typeof a[i].noWrap != "undefined" ? "Yes" : "No";
+            a[i].noWrap = true;
+            a[i].innerHTML += "DOM noWrap:" + html;
+          }
+        }
+      }
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>若被考察元素的 DOM 对象默认拥有 noWrap 属性，则 typeof 返回的字符串应该为 boolean，否则为 undefined。再设置该对象的 noWrap 属性为 true，若该对象支持 noWrap 属性，则可以看到其内容为空白符不换行的处理效果。</p>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S)</th>
+          <th>Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/HE1003/noWrap_IE6.gif" alt="IE6 IE7 IE8(Q)" /></td>
+          <td><img src="../../tests/HE1003/noWrap_IE8.gif" alt="IE8(S)" /></td>
+          <td><img src="../../tests/HE1003/noWrap_CR.gif" alt="Firefox Chrome Safari Opera" /></td>
+        </tr>
+      </table>
+      <p>忽略 IE8(S)，其他浏览器中对 DOM 对象的 noWrap 属性检测结果与之前为标签设置 nowrap 属性的情况一直。<br />
+      但是在 IE8(S) 中，DIV、DD、DT 元素对应的 DOM 对象的 noWrap 属性 typeof 返回值也为 boolean，而不是非 IE 浏览器中的 undefined，可见在 IE8(S) 中，那些在早期 IE 版本中具备 nowrap 属性的 HTML 元素在其对应的 DOM 对象中的 noWrap 属性仍然为有效的，只不过对其进行设置后并不能影响该元素在 IE8(S) 中的渲染效果。</p>
+      <p>下面还是单独测试 BODY 元素：<em>dom_body_nowrap.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  .nr { background:#ddd; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;p id="p" style="width:120px;" class="nr"&gt;&lt;/p&gt;
+    &lt;script&gt;
+      window.onload = function() {
+        function $(id) { return document.getElementById(id); }
+        var html = typeof document.body.noWrap != "undefined" ? "Yes" : "No";
+        $("p").innerHTML = "BODY: DOM noWrap:" + html;
+        document.body.noWrap = true;
+      }
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S)</th>
+          <th>Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/HE1003/body_noWrap_IE6.gif" alt="IE6 IE7 IE8(Q)" /></td>
+          <td><img src="../../tests/HE1003/body_noWrap_IE8.gif" alt="IE8(S)" /></td>
+          <td><img src="../../tests/HE1003/body_noWrap_CR.gif" alt="Firefox Chrome Safari Opera" /></td>
+        </tr>
+      </table>
+      <p>BODY 元素的测试结果与上例中一致。</p>
+
+
+
+
+      <h2 id="solutions">解决方案</h2>
+      <p>nowrap 属性是被废弃的属性，使用 CSS 规则 white-space:nowrap 代替这个属性。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.6<br />
+              Chrome 6.0.458.1 dev<br />
+              Safari 5.0<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HE1003/html_nowrap.html">html_nowrap.html</a><br />
+            <a href="../../tests/HE1003/html_body_nowrap.html">html_body_nowrap.html</a><br />
+            <a href="../../tests/HE1003/dom_nowrap.html">dom_nowrap.html</a><br />
+            <a href="../../tests/HE1003/dom_body_nowrap.html">dom_body_nowrap.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-13</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>noWrap white-space TABLE DIV 折行 TD TH 单元格</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

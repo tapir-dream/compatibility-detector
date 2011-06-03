@@ -1,0 +1,211 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX9021: IE6 IE7 IE8 对 onreadystatechange 事件的扩充</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+      <h2 id="description">问题描述</h2>
+      <p>onreadystatechange 事件通常用在基于 XMLHttpRequest 对象的 AJAX 应用中，当的该对象的 load state 改变时，会触发此事件。</p>
+      <p>但在 IE 中 onreadystatechange 事件是其私有实现的，用于数据加载的 IMG、SCRIPT 和 LINK 标记，常常被误用 onreadystatechange 事件而导致在非 IE 浏览器中无法得到预期结果。
+      </p>
+      <h2 id="influence">造成的影响</h2>
+      <p>onreadystatechange 事件处理在各浏览器支持不一致，可能会导非预期结果。</p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>
+      onreadystatechange 事件是微软对 IE 浏览器的私有事件扩充，所有元素都存在 onreadystatechange 事件。<br />
+      下列元素对象总可以触发此事件，因为他们均会加载数据：APPLET，DOCUMENT，FRAME，FRAMESET，IFRAME，IMG，LINK，OBJECT，SCRIPT 和 XML 元素。<br />
+      其他元素对象仅当 DHTML Behavior 被追加后会触发 onreadystatechange 事件。
+      </p>
+      <p>其具体信息可以参照 MSDN 说明：<a href="http://msdn.microsoft.com/en-us/library/ms536957(VS.85).aspx">http://msdn.microsoft.com/en-us/library/ms536957(VS.85).aspx</a>。</p>
+      <p>本文中将主要以 IMG、SCRIPT、LINK 这三个元素对象为例来检测浏览器对他们的 onreadystatechange 事件支持程度。 </p>
+      <p>首先，分析以下代码，将 onreadystatechange 事件作为内联事件分别写于 IMG、SCRIPT 和 LINK 标记中：</p>
+<pre>
+&lt;script&gt;
+  function OnStateChangeImage(image) {<br />    document.getElementById ('img-info').innerHTML += '&lt;br /&gt;readyState: ' + image.readyState;<br />  }<br />  function OnStateChangeScript(script) {<br />    document.getElementById ('script-info').innerHTML += '&lt;br /&gt;readyState: ' + script.readyState;<br />  }<br />  function OnStateChangeLink(link) {<br />    document.getElementById ('link-info').innerHTML += '&lt;br /&gt;readyState: ' + link.readyState;<br />  }
+&lt;/script&gt;
+&lt;span id=&quot;link-info&quot; &gt;The link is loading.&lt;/span&gt;&lt;br /&gt;
+&lt;span id=&quot;img-info&quot; &gt;The image is loading.&lt;/span&gt;&lt;br /&gt;
+&lt;span id=&quot;script-info&quot;&gt;The script is loading.&lt;/span&gt;&lt;br /&gt;
+&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;../../../../../css/article.css&quot; onreadystatechange=&quot;OnStateChangeLink(this)&quot; /&gt;
+&lt;img src=&quot;w3c.png&quot;  onreadystatechange=&quot;OnStateChangeImage (this)&quot; /&gt;
+&lt;script src='http://code.jquery.com/jquery-1.4.js' onreadystatechange=&quot;OnStateChangeScript(this)&quot;&gt;&lt;/script&gt;
+</pre>
+      <p>在各浏览器输出如下：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox Safari Chrome Opera</th>
+        </tr>
+        <tr>
+          <th>IMG</th>
+          <td>The image is loading.<br />The image readyState: complete</span></td>
+          <td>The image is loading.</td>
+        </tr>
+        <tr>
+          <th>SCRIPT</th>
+          <td>The script is loading.<br />The script readyState:   loading<br />The script readyState: loaded<br />The script readyState:   complete</td>
+          <td>The scirpt is loading</td>
+        </tr>
+        <tr>
+          <th>LINK</th>
+          <td>The link is loading.<br />The link readyState: complete</td>
+          <td>The link is loading</td>
+        </tr>
+      </table>
+      <p>即：非 IE 浏览器均不支持触发 IMG、SCRIPT 和 LINK 标记的内联 onreadystatechange 事件。</p>
+      <p>让后，下面将分析动态创建的 IMG、SCRIPT 标记的在各浏览器中能否触发 onreadystatechange 事件：</p>
+<pre>
+function loadJS(url) {
+  var domScript = document.createElement('script');
+  domScript.onreadystatechange = function() {
+    var divElement = document.createElement('div');
+    divElement.appendChild(document.createTextNode('readyState:'+ domScript.readyState +' 动态创建的 SCRIPT 标记可以触发 onreadystatechange 事件'));
+    document.body.appendChild(divElement);
+  }
+  domScript.src = url;
+  document.getElementsByTagName('head')[0].appendChild(domScript);
+}
+function loadIMG(url) {
+  var domImage = document.createElement('img');
+  domImage.onreadystatechange = function() {
+    var divElement = document.createElement('div');
+    divElement.appendChild(document.createTextNode('readyState:'+ domImage.readyState +' 动态创建的 IMG 标记可以触发 onreadystatechange 事件'));
+    document.body.appendChild(divElement);
+  }
+  domImage.src = url;
+  document.getElementsByTagName('head')[0].appendChild(domImage);
+}
+function loadCSS(url) {
+  var domLink = document.createElement('link');
+  domLink.onreadystatechange = function() {
+    var divElement = document.createElement('div');
+    divElement.appendChild(document.createTextNode('readyState:'+ domLink.readyState +' 动态创建的 LINK 标记可以触发 onreadystatechange 事件'));
+    document.body.appendChild(divElement);
+  }
+  domLink.rel = 'stylesheet';
+  domLink.type = 'text/css';
+  domLink.href = url;
+  document.getElementsByTagName('head')[0].appendChild(domLink);
+}
+window.onload=function (){
+  //执行动态加载外部 JS 文件
+  loadJS('http://code.jquery.com/jquery-1.4.js');
+  //执行动态加载图片文件
+  loadIMG('w3c.png');
+  //执行动态加载css文件
+  loadCSS('../../../../../css/article.css');
+}
+</pre>
+
+      <p> 各浏览器输出如下：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8</th>
+          <th>Opera</th>
+          <th>Firefox Safari Chrome</th>
+        </tr>
+        <tr>
+          <th>IMG</th>
+          <td>readyState:complete 动态创建的 IMG 标记可以触发 onreadystatechange 事件</td>
+          <td>readyState:undefined 动态创建的 IMG 标记可以触发 onreadystatechange 事件</td>
+          <td>无内容输出</td>
+        </tr>
+        <tr>
+          <th>SCRIPT</th>
+          <td>readyState:loading 动态创建的 SCRIPT 标记可以触发 onreadystatechange 事件<br />
+          readyState:loaded 动态创建的 SCRIPT 标记可以触发 onreadystatechange 事件</td>
+          <td>readyState:loaded 动态创建的 Script 标记可以触发 onreadystatechange 事件</td>
+          <td>无内容输出</td>
+        </tr>
+        <tr>
+          <th>LINK</th>
+          <td>readyState:complete 动态创建的 LINK 标记可以触发 onreadystatechange 事件</td>
+          <td>readyState:undefined 动态创建的 LINK 标记可以触发 onreadystatechange 事件</td>
+          <td>无内容输出</td>
+        </tr>
+      </table>
+      <p>可见，此次测试中，除 IE 浏览器外，Opera 对于动态创建的 IMG、SCRIPT 和 LINK 标记也可以触发 onreadystatechange 事件，但他对不同元素加载过程中触发该事件的频率以及 readyState 状态值的支持细节又不同于 IE。</p>
+      <p class="comment"> 【注】：对于 MSDN 中其他标记或对象在非 IE 浏览器中支持 onreadystatechange 事件的情况，本文将不再一一验证，读者如有兴趣可以自行测试。</p>
+      <h2 id="solutions">解决方案</h2>
+      <p>在现行 W3C 标准规范中仅有 XmlHttpRequest 对象中存在 onreadystatechange 事件 ( 请参考 <a href="http://www.w3.org/TR/XMLHttpRequest/#handler-xhr-onreadystatechange"> XMLHttpRequest</a> 规范 )。</p>
+      <p>对于其他元素或对象请慎用  onreadystatechange 事件，因为他只有 IE 浏览器支持，而 Opera 浏览器则只是部分支持。</p>
+      <p>如果使用 onreadystatechange 是为了处理脚本加载（回调）的问题，请参考 <a href="BX9013">BX9013: 动态引入的外部 JS 文件在各浏览器中的加载顺序不一致</a> 一文“解决方案”中的内容。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="BX9013">BX9013: 动态引入的外部 JS 文件在各浏览器中的加载顺序不一致</a></li>
+      </ul>
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td> IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BX9021/onreadystatechange.html">onreadystatechange.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-30</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>onreadystatechange SCRIPT IMG XmlHttpRequest</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

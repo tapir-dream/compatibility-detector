@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RD5018: Safari Chrome 中元素 'overflow' 值为非默认值时其最后一个内联子元素的半差异高度被忽略</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+    <h2 id="standard_reference">标准参考</h2>
+      <p>关于 Leading and half-leading （差异半差异） 说明请参照 W3C CSS 2.1 规范 10.8.1 节：  <a href="http://www.w3.org/TR/CSS21/visudet.html#leading">http://www.w3.org/TR/CSS21/visudet.html#leading</a> </p>
+
+      <h2 id="description">问题描述</h2>
+      <p>容器高度被明确设定，容器内容高度仅由行高累加决定的情况下，Safari Chrome 中容器元素的 'overflow' 值为非默认值时，其最后一个内联子元素的半差异高度可能会被忽略。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>Safari Chrome 浏览器下 srcollHeight 和 scrollTop 值可能小于其他浏览器。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Chrome Safari</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>这是 Safari Chrome 浏览器的一个特性，当一个元素的 'overflow' 特性值为非默认值（visible）时，
+      这个元素下的最后一个内联子元素的行高中的半差异高度部分将被忽略，此时内联元素里的内容将紧贴父元素的下部内边缘。</p>
+
+      <p>分析以下代码：</p>
+<pre>
+&lt;div style=&quot;background:gold;width:100px;<span class="hl_4">overflow-y:scroll;</span>height:100px;line-height:50px;&quot;&gt;
+    &lt;span style=&quot;font-size:12px;font-family:Verdana,宋体;background:yellow&quot;&gt;AAA&lt;/span&gt;&lt;br /&gt;
+    &lt;span style=&quot;font-size:12px;font-family:Verdana,宋体;background:yellow&quot;&gt;AAA&lt;/span&gt;&lt;br /&gt;
+    &lt;span style=&quot;font-size:12px;font-family:Verdana,宋体;background:yellow&quot;&gt;AAA&lt;/span&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div style=&quot;background:gold;width:100px;line-height:50px;&quot;&gt;
+    &lt;span style=&quot;font-size:12px;font-family:Verdana,宋体;background:yellow&quot;&gt;AAA&lt;/span&gt;&lt;br /&gt;
+    &lt;span style=&quot;font-size:12px;font-family:Verdana,宋体;background:yellow&quot;&gt;AAA&lt;/span&gt;&lt;br /&gt;
+    &lt;span style=&quot;font-size:12px;font-family:Verdana,宋体;background:yellow&quot;&gt;AAA&lt;/span&gt;
+&lt;/div&gt;
+</pre>
+    <p>两个 DIV 容器中拥有数量相同的行内元素，每个之间中用 BR 标记换行显示，这些行内元素的显示高度取决于其行框高度，行框高度取决于行内框设置的 'line-height' 属性值。本例中，行高设置远大于字体的实际高度，父容器的实际高度应该是这些行高的累加。</p>
+    <p>观察实际效果：</p>
+    <table class="compare">
+          <tr>
+            <th>&nbsp;</th>
+            <th> IE6 IE7 IE8 Firefox Opera </th>
+            <th> Chrome Safari </td>
+          </tr>
+          <tr>
+            <th>'overflow:scroll/hidden'</th>
+            <td><img src="../../tests/RD5018/01.gif" alt="运行效果截图" /></td>
+            <td><img src="../../tests/RD5018/02.gif" alt="运行效果截图" /></td>
+          </tr>
+          <tr>
+            <th>'overflow:visible'</th>
+            <td><img src="../../tests/RD5018/03.gif" alt="运行效果截图" /></td>
+            <td><img src="../../tests/RD5018/03.gif" alt="运行效果截图" /></td>
+          </tr>
+        </table>
+        <p>示例中，'line-height' 值设置远大于 'font-size' 值设置，此时文字会垂直居中显示在行内框中，行内框顶边和底边部分将插入半差异，半差异高度是整体行内框高度的一部分，行框将依照行内框高度和垂直对齐方式计算他自身高度。</p>
+        <p>对比表格可以看出 Chrome Safari 中最后一行的行高下半部多出字号的部分高度（<a href="http://www.w3.org/TR/CSS21/visudet.html#leading">半差异高度</a>），在容器是 'overflow:scroll'（或者 'hidden'）的设置下没有体现出来，这部分高度被在计算容器内行框实际高度时被忽略了，导致容器整体高度计算失误。</p>
+        <p> 这样就导致了容器的 ScrollHeight 和最大 ScrollTop 值在 IE Firefox Opera 中较大，在 Chrome Safari 中较小。  </p>
+        <p>&nbsp;</p>
+        <h2 id="solutions">解决方案</h2>
+      <p>为了准确得到容器高度，建议避免使用行高为行内元素指定高度，而应改用块标记，并且明确的指定其 'height' 值。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 5.0.317.2 dev<br />
+              Safari 4.0.4<br />
+                            Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RD5018/webkit_line_height_clip.html">webkit_line_height_clip.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-22</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>overflow inline line-height 溢出 内联元素 行高</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

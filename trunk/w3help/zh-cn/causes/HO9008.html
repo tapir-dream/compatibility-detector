@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HO9008: IE Opera 中可以通过 MAP 元素的 id 属性与 IMG 元素相关联</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 HTML4.01 规范中的描述，MAP 元素的 name 属性指定了一个映射到 IMG 元素的名称。此时，IMG 元素必须通过 usemap 属性匹配关联的 MAP 元素的 name 属性值。</p>
+      <p>关于 MAP 与 IMG 元素的更多内容，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html401/struct/objects.html#h-13.6.1">13.6.1 Client-side image maps: the MAP and AREA elements</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE Opera 中，IMG 元素通过其 usemap 属性可以与 MAP 元素的 id 属性及 name 属性关联，而 Firefox Chrome Safari 中仅限于 MAP 元素的 name 属性。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>若仅为 MAP 元素设置了 id 属性并欲通过 IMG 元素的 usemap 属性使两者关联，则在 Firefox Chrome Safari 中 MAP 元素内定义的超链接将无法响应。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8 Opera</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+<pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body style=&quot;font:16px 'Trebuchet MS';&quot;&gt;
+id=&quot;map1&quot;&lt;br /&gt;
+&lt;img src=&quot;google.gif&quot; border=&quot;0&quot; usemap=&quot;#map1&quot; /&gt;
+&lt;map id=&quot;map1&quot;&gt;
+  &lt;area href=&quot;javascript:void 0;&quot; onclick=&quot;document.getElementById('info1').innerHTML='&lt;span style=\'background:coral\'&gt;OK&lt;/span&gt;';&quot; shape=&quot;rect&quot; coords=&quot;0,0,150,55&quot; /&gt;
+&lt;/map&gt;
+&lt;div id=&quot;info1&quot;&gt;&lt;span style=&quot;background:lightgreen&quot;&gt;Fail&lt;/span&gt;&lt;/div&gt;
+&lt;br /&gt;
+name=&quot;map2&quot;&lt;br /&gt;
+&lt;img src=&quot;google.gif&quot; border=&quot;0&quot; usemap=&quot;#map2&quot; /&gt;
+&lt;map name=&quot;map2&quot;&gt;
+  &lt;area href=&quot;javascript:void 0;&quot; onclick=&quot;document.getElementById('info2').innerHTML='&lt;span style=\'background:coral\'&gt;OK&lt;/span&gt;';&quot; shape=&quot;rect&quot; coords=&quot;0,0,150,55&quot; /&gt;
+&lt;/map&gt;
+&lt;div id=&quot;info2&quot;&gt;&lt;span style=&quot;background:lightgreen&quot;&gt;Fail&lt;/span&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码包含两组，每组均为一个 IMG 元素及一个 MAP 元素，IMG 元素的 usemap 属性值为 &quot;#map&quot;，而两组的区别为 MAP 元素的 id 属性与 name 属性，MAP 元素内的 AREA 元素定义了响应区域。鼠标点击图片。</p>
+      <p>这段代码在不同的浏览器环境中的表现：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE Opera</th>
+          <th>Firefox Chrome Safari</th>
+        </tr>
+        <tr>
+          <th>第一组设定 id 属性，鼠标点击图片后</th>
+          <td><span class="hl_2">可以响应</span></td>
+          <td><span class="hl_1">无法响应</span></td>
+        </tr>
+        <tr>
+          <th>第二组设定 name 属性，鼠标点击图片后</th>
+          <td><span class="hl_2">可以响应</span></td>
+          <td><span class="hl_2">可以响应</span></td>
+        </tr>
+        <tr>
+          <th>截图</th>
+          <td><img src="../../tests/HO9008/map1.gif" alt="" /></td>
+          <td><img src="../../tests/HO9008/map2.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>可见：</p>
+      <p>在 <em>IE Opera</em> 中，仅仅为 MAP 元素设定 id 属性即可使其与设定了相应的 usemap 属性值的 IMG 元素相关联。<br />
+      而所有浏览器均支持 HTML4.01 规范所述，IMG 元素通过 usemap 属性匹配关联的 MAP 元素的 name 属性值。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>若需要 IMG 元素与 MAP 元素相关联，注意通过 IMG 元素的 usemap 属性关联的 MAP 元素的 name 属性的值。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.517.17 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HO9008/map.html">map.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-28</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>IMG MAP name id usemap 关联 图片 链接 区域</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

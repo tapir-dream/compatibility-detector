@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	body { font-family:consolas; }
+</style>
+</head>
+<body>
+<div style="display:table; table-layout:fixed; width:120px;">
+	<div style="display:table-row;">
+		<div style="display:table-cell; border:5px solid plum; padding:5px; background:wheat;">
+			<div id="d1" style="background:#eee;">A</div>
+		</div>
+		<div style="display:table-cell; width:70px; border:5px solid coral; padding:5px; background:wheat;">
+			<div id="d2" style="background:#eee;">B</div>
+		</div>
+	</div>
+</div>
+<div id="info"></div>
+<br />
+<br />
+<div style="display:table; table-layout:fixed; width:120px;" id="table1">
+	<div style="display:table-row;">
+		<div style="display:table-cell; width:30px; border:5px solid plum; background:wheat;" id="td11">A</div>
+		<div style="display:table-cell; width:90px; border:5px solid coral;background:wheat;" id="td12">B</div>
+	</div>
+</div>
+<div id="info1"></div>
+<br />
+<div style="display:table; table-layout:fixed; width:120px;" id="table2">
+	<div style="display:table-row;">
+		<div style="display:table-cell; width:30px; border:5px solid plum; background:wheat;" id="td21">A</div>
+		<div style="display:table-cell; width:70px; border:5px solid coral;background:wheat;" id="td22">B</div>
+	</div>
+</div>
+<div id="info2"></div>
+<br />
+<div style="display:table; table-layout:fixed; width:120px;" id="table3">
+	<div style="display:table-row;">
+		<div style="display:table-cell; width:30px; border:5px solid plum; background:wheat;" id="td31">A</div>
+		<div style="display:table-cell; width:50px; border:5px solid coral;background:wheat;" id="td32">B</div>
+	</div>
+</div>
+<div id="info3"></div>
+<script>
+	function $(id) { return document.getElementById(id); }
+	var w11 = $("td11").clientWidth, 
+		w12 = $("td12").clientWidth, 
+		w21 = $("td21").clientWidth, 
+		w22 = $("td22").clientWidth, 
+		w31 = $("td31").clientWidth, 
+		w32 = $("td32").clientWidth, 
+		wt1 = $("table1").offsetWidth,
+		wt2 = $("table2").offsetWidth;
+		wt3 = $("table3").offsetWidth;
+	$("info").innerHTML = "A:" + $("d1").offsetWidth + "...B:" + $("d2").offsetWidth;
+	$("info1").innerHTML = "A:30/" + w11 + ", B:90/" + w12 + ", TABLE:120/" + wt1;
+	$("info2").innerHTML = "A:30/" + w21 + ", B:70/" + w22 + ", TABLE:120/" + wt2;
+	$("info3").innerHTML = "A:30/" + w31 + ", B:50/" + w32 + ", TABLE:120/" + wt3;
+</script>
+</body>
+</html>

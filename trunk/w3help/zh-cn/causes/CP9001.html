@@ -1,0 +1,189 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">CP9001: Firefox Safari 中对 cookie 中未经编码的中文汉字处理有问题</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 RFC 2965 规范说明了 cookie 的语法格式：</p>
+      <p><cite>The two state management headers, Set-Cookie2 and Cookie, have common syntactic properties involving attribute-value pairs. The following grammar uses the notation, and tokens DIGIT (decimal digits), token (informally, <strong>a sequence of non-special, non-white space characters</strong>), and http_URL from the HTTP/1.1 specification [RFC2616] to describe their syntax.</cite></p>
+      <p>规范中并没有指明 "非特殊、非空白字符" 是否包含中文汉字这类字符。</p>
+      <p>关于 cookie 的详细信息，请参考 <a href="http://www.ietf.org/">IETF</a> 组织制定的 "<a href="http://tools.ietf.org/html/rfc2965">RFC 2965</a>" 规范（HTTP State Management Mechanism）中第 3.1 节的内容。</p>
+      <p></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE Chrome Opera 中，cookie 中可以保存 Unicode 字符；Firefox 则会将中文字符内码将被转换为 Unicode 编码；Safari 会忽略包含中文字符的键值对。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>由于 Firefox 及 Safari 对设置 cookie 中包含中文汉字字符时的处理异常，将导致这两个浏览器在取回 cookie 的内容时，得到的字符串异常。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Firefox</th>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <th>Safari</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>在本地创建一个 Apache 服务器，创建一个静态页面 <em>cookie.html</em> 放在 Web 服务器上。</p>
+
+      <p>代码如下：</p>
+<pre>&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="Content-Type" content="text/html; charset=gb2312" /&gt;
+&lt;style&gt;
+    input { width:80px; height:20px; }
+    button { width:70px; height:20px; }
+    textarea { width: 150px; height:100px; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;input type="text" id="text1" /&gt;&lt;button id="button1"&gt;编码&lt;/button&gt;&lt;br /&gt;
+&lt;input type="text" id="text2" /&gt;&lt;button id="button2"&gt;不编码&lt;/button&gt;&lt;br /&gt;
+&lt;textarea id="ta"&gt;&lt;/textarea&gt;
+&lt;script&gt;
+    function $ ( id ) {
+        return document.getElementById(id);
+    }
+
+    function getCookie ( c_name, dec ) {
+        if ( document.cookie.length &gt; 0 ) {
+            c_start = document.cookie.indexOf(c_name + "=");
+            if ( c_start != -1 ) {
+                c_start = c_start + c_name.length + 1;
+                c_end = document.cookie.indexOf(";", c_start);
+                if ( c_end == -1 ) {
+                    c_end = document.cookie.length;
+                }
+                var ret = document.cookie.substring(c_start, c_end);
+                return ( dec ) ? unescape(ret) : ret;
+            }
+        }
+        return "";
+    }
+
+    function setCookie ( c_name, value, expiredays, enc ) {
+        var exdate = new Date();
+        exdate.setDate(exdate.getDate() + expiredays);
+        var val = ( enc ) ? escape(value) : value;
+        document.cookie = c_name + "=" + val
+            + ((expiredays==null) ? "" : ";expires=" + exdate.toGMTString());
+    }
+
+    $("button1").onclick = function () {
+        setCookie("key1", $("text1").value, 365, true);
+    }
+
+    window.onload = function () {
+        $("text1").value = getCookie("key1", true);
+        $("text2").value = getCookie("key2", false);
+        $("ta").value = document.cookie;
+    }
+
+    $("button2").onclick = function () {
+        setCookie("key2", $("text2").value, 365, false);
+    }
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码中，页面加载后会读取浏览器 cookie 中的内容，将 "key1" 的值先使用 "unescape" 进行解码，之后设置到文本框【text1】中，将 "key2" 的值直接设置到文本框【text2】中。</p>
+      <p>点击按钮【button1】则先将文本框【text1】中的内容通过"escape"编码，然后保存至 cookie 的 "key1" 下；点击按钮【button2】则直接将文本框【text2】中的内容保存至 cookie 的 "key2" 下。</p>
+      <br />
+      <p>在各浏览器中打开服务器中测试代码的地址，如：http://localhost/cookie.htm。页面第一次载入后，两个文本框均为空，此时在两个文本框中均输入一段文字，如 "今天ABC123" 。分别点击两个按钮，再刷新页面。</p>
+      <p>这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE Chrome Opera</th>
+          <th>Firefox</th>
+          <th>Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/CP9001/IE_cookie.gif" alt="IE cookie" /></td>
+          <td><img src="../../tests/CP9001/FF_cookie.gif" alt="FF cookie" /></td>
+          <td><img src="../../tests/CP9001/SF_cookie.gif" alt="SF cookie" /></td>
+        </tr>
+      </table>
+      <p>可见：</p>
+      <ul>
+        <li>在 <em>IE Chrome Opera</em> 中，cookie 中可以保存 Unicode 字符，所以无论保存至 cookie 的字符是否编码，浏览器均能很好的读取出来；</li>
+        <li>在 <em>Firefox</em> 中，未编码的包含有中文汉字字符的 cookie 保存时，中文字符内码将被转换为 Unicode 编码（如“今天”的内码为“4ECA 5929”），英文字符则不受影响，在浏览器读取 cookie 时只识别 ASCII 码，导致 Unicode 编码内的高位丢失，造成取出的内容异常（如“今天”高位字符丢失成为“CA 29”编码，对应 ASCII 字符表显示为“Ê)”）；</li>
+        <li>在 <em>Safari</em> 中，未编码的包含有中文汉字字符的 cookie 保存时，由于 cookie 仅可以保存 ASCII 字符，所以浏览器忽略了包含中文字符的键值对，其未被存入 cookie，导致读取时内容丢失。</li>
+      </ul>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>在设置和读取 cookie 时，始终为字符进行编解码操作，推荐使用 "encodeURIComponent" 和 "decodeURIComponent" 方法做相应编解码工作。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.3<br />
+              Chrome 5.0.375.29 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.52
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/CP9001/cookie.html">cookie.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-06-23</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>cookie character chinese code escape unescape 乱码 中文 汉字 </p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

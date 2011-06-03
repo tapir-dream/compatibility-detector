@@ -1,0 +1,152 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RD8019: 各浏览器对行内元素绝对定位后的静态位置的 'top' 特性计算存在差异，IE6 IE7 IE8(Q) 还会考虑半差异的高度</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 W3C CSS2.1 规范中的描述，'margin-top' 与 'margin-bottom' 特性可以作用于行内非替换元素，但将不会产生效果。而行内非替换元素的 padding、border、margin 并不参与行框高度的计算，其垂直方向的 padding、border、margin 始于其内容区域（content area）的顶部和底部，而不是其行高（'line-height' 特性）。而行高仅用来计算行框的高度。</p>
+      <p>当绝对定位元素的 'top'、'right'、'bottom'、'left' 特性没有设置，为默认的 auto 时，绝对定位的元素可能会被放置在其 &quot;静态位置&quot; 上。 &quot;静态位置&quot; 粗略地说是指元素如果在正常流中的位置。具体来说： &quot;静态位置&quot; 的包含块是若一个元素的 'position' 为 static 、'float' 为 none 时生成元素的第一个框的假想框。而 'top' 特性为 auto 时将以下面的规则计算其值：</p>
+      <pre>静态位置中的 'top' 为包含块的内部顶边到假想框的顶部边距边（top margin-box）的距离。</pre>
+      <p>关于 行内元素 及 静态位置 的更多资料，请参见 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS2/box.html#propdef-margin-top">8.3 Margin properties</a>、<a href="http://www.w3.org/TR/CSS2/visudet.html#leading">10.8.1 Leading and half-leading</a>、<a href="http://www.w3.org/TR/CSS2/visudet.html#inline-non-replaced">10.6.1 Inline, non-replaced elements</a>、<a href="http://www.w3.org/TR/CSS21/visudet.html#abs-non-replaced-height">10.6.4 Absolutely positioned, non-replaced elements</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>对于行内元素绝对定位后静态位置中的 'top' 特性的计算值，IE6 IE7  IE8(Q) 会将其计算为静态位置下 content area 距包含块顶边的距离（即半差异的高度），其他浏览器则计算为 0。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>当包含块的 'line-height' 特性值不为默认的 normal，对其内的行内元素设置了绝对定位后，若没有对其设置 'top'、'left' 等偏移量特性，不同浏览器间对于定位元素的位置计算会产生差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tbody>
+          <tr>
+            <th>IE6 IE7 IE8(Q)</th>
+            <td>&nbsp;</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>结合上述规范内容，我们写一段测试代码：</p>
+      <pre>&lt;div style="font:18px Arial; padding:10px; border:10px solid; line-height:57px; background:#AAA; float:left;"&gt;
+    &lt;div style="background:#DDD;"&gt;&lt;span&gt;Text&lt;/span&gt;&lt;span style="position:absolute; margin:20px 0; border:10px solid; background:#999;"&gt;POS&lt;/span&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+      <p>最外层 DIV 元素设置了 ’line-height:57px‘ ，由于 'line-height' 特性具备继承性，则其内子孙元素均拥有此特性。内部有两个 SPAN 元素，第一个位于普通流中，第二个为绝对定位，但是没有设置其偏移量特性，所以其定位将使用其静态位置，同时此元素设置了上下外边距、边框。</p>
+      <p>若绝对定位的 SPAN 元素位于普通流中，则运行结果应该为：</p>
+      <p style="overflow:hidden; zoom:1;">
+        <img src="../../tests/RD8019/W3C_static.gif" alt="W3C static" style="float:left; margin-right:10px;" />
+        字号为 18px，行高为 57px。而 &quot;非替换元素的边距、边框和边白并不加入行内框高度的计算&quot; ，所以【POS】垂直方向上的 border、margin 的渲染对行框没有任何影响。而行内元素的 'margin-top' 与 'margin-bottom' 不产生效果，则此时垂直方向顶部和底部的 margin-box 与 padding-box 重合。<br />
+        此时根据规范，【POS】的顶部 margin-box 距离其包含块的顶边应该为 &quot;8px&quot; 。
+      </p>
+      <p>下面就分析在各浏览器中行内元素绝对定位后的静态位置的 'top' 特性计算的实际差异。</p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+    body { margin:20px; font:18px Arial; }
+    .container { padding:10px; border:10px solid; line-height:57px; background:#AAA; float:left; }
+    .inline { background:#999; margin:20px 0; border:10px solid; padding:5px; }
+    .pos { position:absolute; }
+&lt;/style&gt;
+
+&lt;div class="container" style="margin-right:10px;"&gt;
+    &lt;span&gt;Text&lt;/span&gt;&lt;span class="inline"&gt;POS&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class="container"&gt;
+    &lt;span&gt;Text&lt;/span&gt;&lt;span class="inline pos"&gt;POS&lt;/span&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>测试代码结构与上一段中的类似，左右两组对行内元素绝对定位前后的位置作对比。</p>
+      <p>这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RD8019/IE6_static.gif" alt="IE6 IE7 IE8(Q)" /></td>
+          <td><img src="../../tests/RD8019/standard_static.gif" alt="IE8(S) Firefox Chrome Safari Opera" /></td>
+        </tr>
+      </table>
+      <ul>
+        <li>在 <em>IE6、IE7、IE8(Q)</em> 中，原行内元素【POS】的 'margin-top' 特性不生效，但变为绝对定位元素后，其 'display' 的最终使用值将会是 'block'，原来的 'margin-top:20px' 则会生效。但是这时【POS】的 border-box 距离其原包含块的顶边不止 20px，而是 38px，这多出的 18px 则是浏览器将 'top' 特性计算为 18px，是其静态位置下 content area 距包含块顶边的距离，刚好是半差异的高度；</li>
+        <li>在 <em>其他浏览器</em> 中，浏览器对 'top' 特性的计算值为 0。</li>
+      </ul>
+      <p>这里可以看到所有浏览器对于 'top' 特性的计算值均与 W3C 规范有出入。</p>
+      <p>对于包含块 'line-height' 特性为默认的 normal 时，各浏览器没有差异。</p>
+
+
+      <h2 id="solutions">解决方案</h2>
+      <p>在使行内元素绝对定位的时候，要注意其行高对静态位置带来的影响，明确设置定位的元素偏移位置。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.8<br />
+              Chrome 6.0.472.0 dev<br />
+              Safari 5.0<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RD8019/inline_abs.html">inline_abs.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-27</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>absolute inline margin border box line-height top 绝对定位 行内 行高 边距</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

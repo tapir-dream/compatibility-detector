@@ -1,0 +1,201 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX8017: 只有 IE Chrome Safari 支持 'zoom' 特性并且他们的具体实现方式不同</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+
+      <h2 id="description">问题描述</h2>
+                <p>CSS 的 'zoom' 特性最初是由 IE 浏览器制定之后被逐步标准化，现在已经出现在 CSS 3.0 规范草案中，现行的 CSS 2.1 规范中不存在。</p>
+            <p>详细资料请参考 MSDN 说明 ： <a href="http://msdn.microsoft.com/en-us/library/ms531189(v=VS.85).aspx">-ms-zoom Attribute | zoom Property</a> 以及 CSS 3.0 规范草案：<a href="http://www.w3.org/TR/css3-transitions/#properties-from-css-">7.1. Properties from CSS</a> </p>
+                <p>例如，一个设置了 'position：absolute' 和 'zoom' 并且边框为可见的 DIV 元素 D，其内包含文字内容 C，当它的 'zoom' 值不断变大时各浏览器中 D 和 C 的变化情况存在差异，可按各浏览器中 D 和 C 的变化方式是否相同将其分为三类，<em>IE6 IE7 IE8(Q)</em>、<em>IE8(S)</em>、<em>Chrome Safari</em>。 </p>
+            <h2 id="influence">造成的影响</h2>
+      <p>由于各浏览器对设置了 'position：absolute' 的元素的 'zoom' 属性的实现有差异，并且 IE 各版本的实现也有差异，这将导致在不同浏览器中的视觉效果有所不同，例如针对某一浏览器或 IE 某一版本布局正常的页面在其他浏览器或 IE 其他版本中可能会导致页面混乱。</p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+            <p>'zoom' 特性不是 W3C 规范中的标准属性，最初为 IE 私有 CSS 属性，目前 Chrome Safari 也很好的支持它，Opera 和 Firefox 不支持此属性。在 IE6 IE7 中一般用此属性来触发 IE 的 'hasLayout' 特性。</p>
+            <p>但 IE6 IE7 IE8 及 Chrome Safari 对此属性的支持情况存在很大的差异。 </p>
+            <p>
+ 'zoom' 特性用来设置或检索对象的缩放比例。设置或更改一个对象的此属性值将导致环绕对象的内容重新流动。虽然此属性不可继承，但它同样会影响对象的子对象。</p>
+      <p>分析并运行以下代码：</p>
+      <pre>
+&lt;style&gt;
+#test {
+    width:50px;
+    height:50px;
+    margin-left:5px;
+    padding:5px;
+    border:5px solid black;
+    position:absolute;
+    left:5px;
+    top:5px;
+    background:gold;
+    zoom:0.5;
+}
+&lt;/style&gt;
+            </pre>
+            <pre>
+&lt;div style="float:left; border:1px #000000 solid;" id="info"&gt;
+  zoom:&lt;span id="zValue"&gt;0.5&lt;/span&gt;&lt;br /&gt;
+  top:&lt;span id="top"/&gt;5px&lt;/span&gt;&lt;br /&gt;
+  left:&lt;span id="left"/&gt;5px&lt;/span&gt;&lt;br /&gt;
+  width:&lt;span id="width"/&gt;50px&lt;/span&gt;&lt;br /&gt;
+  height:&lt;span id="height"/&gt;50px&lt;/span&gt;&lt;br /&gt;
+  margin-left:&lt;span id="margin-left"/&gt;5px&lt;/span&gt;&lt;br /&gt;
+  padding-left:&lt;span id="padding-left"/&gt;5px&lt;/span&gt;&lt;br /&gt;
+  border-left-width:&lt;span id="border-left-width"/&gt;1px&lt;/span&gt;&lt;br /&gt;
+  &lt;input type="button" id="add" value="增加zoom" onClick="addZoom()"&gt;
+&lt;/div&gt;
+&lt;div style="position:relative; float:left;"&gt;
+  &lt;div id="test"&gt;zoom&lt;/div&gt;
+&lt;/div&gt;
+            </pre>
+<pre>
+window.onload=function(){
+  void function(){
+    if(!window.getComputedStyle){
+      window.getComputedStyle=function($target){
+      return $target.currentStyle;
+      };
+    }
+    var $test=document.getElementById("test");
+    var cs=getComputedStyle($test,null);
+    document.getElementById("top").innerHTML=cs.top;
+    document.getElementById("left").innerHTML=cs.left;
+    document.getElementById("width").innerHTML=cs.width;
+    document.getElementById("height").innerHTML=cs.height;
+    document.getElementById("margin-left").innerHTML=cs.marginLeft;
+    document.getElementById("padding-left").innerHTML=cs.paddingLeft;
+    document.getElementById("border-left-width").innerHTML=cs.borderLeftWidth;
+  }();
+
+  window["addZoom"] = function (){
+    var $test=document.getElementById("test");
+    var z=document.getElementById("zValue").innerHTML;
+    $test.style.zoom=document.getElementById("zValue").innerHTML=parseFloat(z)+1;
+    var cs=getComputedStyle($test,null);
+    document.getElementById("top").innerHTML=cs.top;
+    document.getElementById("left").innerHTML=cs.left;
+    document.getElementById("width").innerHTML=cs.width;
+    document.getElementById("height").innerHTML=cs.height;
+    document.getElementById("margin-left").innerHTML=cs.marginLeft;
+    document.getElementById("padding-left").innerHTML=cs.paddingLeft;
+    document.getElementById("border-left-width").innerHTML=cs.borderLeftWidth;
+  }
+}
+</pre>
+
+      <p>以上代码创建了两个 &quot;id&quot; 分别为 &quot;info&quot; 和 &quot;test&quot; 的 DIV 容器和一个 &quot;id&quot; 为 &quot;add&quot; 的 INPUT 标记按钮，并为 'test' 设置了 'position：absolute'  'zoom' 'border' 等属性。</p>
+      <p> &quot;info&quot; 内包含若干 SPAN 元素以便用来显示  &quot;test &quot; 的 'zoom' 属性值变化时  &quot;test &quot; 的其他属性值变化情况。</p>
+      <p>脚本部分为  &quot;add &quot; 的事件处理函数，用来控制  &quot;test &quot; 元素的 'zoom' 属性值变化并将其 'currentStyle' 显示在  &quot;info &quot;元素中。</p>
+      <p> 以上代码在各浏览器中运行后结果如下：</p>
+      <table class="compare">
+                <tr>
+          <th>IE6 IE7 IE8 (Q) <sup>1</sup></th>
+                    <th>IE8 (S) </th>
+                    <th>Chrome Safari</th>
+        </tr>
+        <tr valign="top">
+          <td><img  alt="" src="017/IE6(Q)-0.png"/></td>
+          <td><img  alt="" src="017/IE8(S)-0.png"/></td>
+                    <td><img  alt="" src="017/Chrome0.png"/></td>
+      </tr>
+                 <tr valign="top">
+                    <td><img  alt="" src="017/IE6(Q)-1.png"/></td>
+                   <td><img  alt="" src="017/IE8(S)-1.png"/></td>
+                    <td><img  alt="" src="017/Chrome1.png"/></td>
+        </tr>
+        <tr valign="top">
+                    <td><img  alt="" src="017/IE6(Q)-2.png"/></td>
+                    <td><img  alt="" src="017/IE8(S)-2.png"/></td>
+                    <td><img  alt="" src="017/Chrome2.png"/></td>
+        </tr>
+      </table>
+            <p class="comment">注【1】：在 <em>IE6 (S)  IE7 (S) </em>和 <em>IE6 (Q)  IE7 (Q)  IE8 (Q) </em> 中的渲染效果也存在差异，但是由于 <em>IE6 IE7 IE8</em> 混杂模式下的盒模型 bug (请参考RD8001) 造成的，与 'zoom' 特性无关，所以此处仅为在 <em>IE6 (S)  IE7 (S) </em> 下的截图。</p>
+      <p>通过运行结果截图可知各浏览器对 'zoom' 属性的解析存在差异。</p>
+      <p>首先 <em>IE6 IE7 IE8</em>  的 'zoom' 特性是对最终表现效果进行缩放，并没有改变属性的计算值，Chrome Safari 中是改变了属性的计算值，这就是为什么在 IE 中'info' 内显示的 'test' 的其他属性值始终没有变化的原因<sup>2</sup>。其次对于 'test' 的最终渲染效果产生差异的根本原因为 'zoom' 特性对盒模型作用的部位 (各部位的属性、所包含的子元素及子元素的属性) 不同。</p>
+          <p><em>IE6 IE7 IE8 (Q) </em> 中 'zoom' 特性作用到了 border box 和文字内容上并且没有改变绝对定位 ('positin:absolute') 的位置，IE8(S)  中作用到了 'border-width' 'margin-width' 和文字内容上并且改变了绝对定位的位置<sup>3</sup>，Chrome Safari 是作用在 margin box 和文字内容上并且改变了绝对定位的位置。</p>
+          <p class="comment">
+            注【2】：请观察截图中 <em>IE6 IE7 IE8</em> 与 Chrome Safari 中黑色与蓝色属性值的对比。<br />
+            注【3】：上段代码由于同时设定了 'margin' 和 'position：absolute' 所以并不能直观的看到 'zoom' 对二者的作用情况，但可以删掉其中之一而去单独讨论。</p>
+            <p>另外，在没有设置 'position:absolute' 的情况下 <em>IE6 IE7 IE8</em> 的渲染效果是相同的，但 IE8(S)  同时还作用在 'margin-width' 上。<p>
+      <h2 id="solutions">解决方案</h2>
+                    <p>
+                    由于各浏览器对 'zoom' 的实现上存在差异，并且Firefox Opera 并不支持 'zoom'，所以这里不建议为 'zoom' 设定值大于 1 的值来对元素进行缩放应用。</p>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="RD8001">RD8001: 各浏览器中 'width' 和 'height' 在某些元素上的作用位置有差异</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.517.8 dev<br />
+              Safari 5.0.<br />
+              Opera 10.52</td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BX8017/zoom.html">zoom.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-13</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>zoom position absolute IE Opera Chrome Safari</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

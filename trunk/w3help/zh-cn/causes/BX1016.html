@@ -1,0 +1,124 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+      <h1 class="title">BX1016: Webkit 浏览器中 TD 的 &quot;noWrap&quot; 属性会引起的它里面 MARQUEE 元素宽度计算错误</h1>
+    <!-- toc begin -->
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>在 W3C HTML 4.01 规范中， &quot;nowrap&quot; 属性已经被废弃。&quot;nowrap&quot; 是作用在 TABLE 单元格元素的属性，这个布尔属性告诉用户端禁用此单元格文本自动换行。应使用 CSS 样式代替此属性。并且注明如果使用不慎，这个属性会导致单元格过大。</p>
+      <p>在各浏览器中，均把 &quot;nowrap&quot; 特性转换成 CSS 样式 'white-space:nowrap;' ， 'white-space' 该属性声明了元素内的空白是如何处理的。默认值是 'normal' ，该值告诉用户端，合并一系列的空白，在必要的时换行填充行框。 'nowrap' 该值象 'normal' 那样合并空白，但是阻止文本内的换行。</p>
+      <p>关于 'nowrap' 特性，参见W3C HTML 4.01 中 <a href="http://www.w3.org/TR/html401/struct/tables.html#adef-nowrap">第11.2.6节</a></p>
+      <p>关于 'white-space' 特性，参见W3C CSS 2.1 中 <a href="http://www.w3.org/TR/CSS21/text.html#white-space-model">第16.6节</a></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>Webkit 浏览器中 TD 的 'noWrap' 属性会引起的它里面未设置 'width' 值的 MARQUEE 元素宽度计算错误。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题导致 Webkit 浏览器中 MARQUEE 元素比其他浏览器宽，导致页面布局错误。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Chrome Safari</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+<pre>
+&lt;TABLE border=1 width=100px&gt;
+  &lt;TR &gt;
+    &lt;TD noWrap &gt;&lt;marquee&gt;aaaaa bbbbb ccccc&lt;/marquee&gt;&lt;/TD&gt;
+  &lt;/TR&gt;
+&lt;/TABLE&gt;
+</pre>
+      <p>这段代码在不同的浏览器环境中的表现：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Firefox Opera</th>
+          <th>Chrome Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BX1016/BX1016-1.png" alt=""></td>
+          <td><img src="../../tests/BX1016/BX1016-2.png" alt=""></td>
+        </tr>
+      </table>
+      <p>从上图分析中可以推测，在 Chrome Safari 中原本作用在 TD 上的 &quot;nowrap&quot; 属性似乎作用到了 MARQUEE 元素上，使 MARQUEE 元素内容不换行，撑大了 TD ，最终撑大了 TABLE 。</p>
+      <p>其他浏览器不存在此问题， MARQUEE 元素没有撑大 TD 。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <ul>
+        <li>HTML 4.01 中表示 &quot;nowrap&quot; 属性已经被废弃，使用 'white-space' 样式代替他 。</li>
+        <li>MARQUEE 元素不是 W3C 规范中定义的标签，各浏览器虽然都支持该标签，但是表现不同。若要使用该标签，应给其明确的宽度，达到各浏览器均兼容的效果。</li>
+      </ul>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BX1016/BX1016.html">BX1016.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-30</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>nowrap white-space MARQUEE </p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,254 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RD5017: Safari Chrome 中行框高度计算有误</h1>
+  <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+    <h2 id="standard_reference">标准参考</h2>
+      <p>关于 Line Height （行高）计算说明，请参照 W3C CSS 2.1 规范 10.8 节：   <a href="http://www.w3.org/TR/CSS21/visudet.html#line-height">http://www.w3.org/TR/CSS21/visudet.html#line-height</a> </p>
+      <p>关于 Leading and half-leading （差异半差异） 说明，请参照 W3C CSS 2.1 规范 10.8.1 节： <a href="http://www.w3.org/TR/CSS21/visudet.html#leading"> http://www.w3.org/TR/CSS21/visudet.html#leading</a></p>
+      <p>关于 Inline formatting context （行内格式化上下文）说明，请参照 W3C CSS 2.1 规范 9.4.2 节：   <a href="http://www.w3.org/TR/CSS21/visuren.html#inline-formatting">http://www.w3.org/TR/CSS21/visuren.html#inline-formatting</a> </p>
+      <h2 id="description">问题描述</h2>
+      <p>Webkit 浏览器下行框高度计算还依赖于 'font-size' 属性值，在 'line-height' 属性值明显小于 'font-size' 属性值设置时，将导致实际计算出的行框高度大于其他浏览器。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>在父容器 ‘height’ 值设置为 'auto' 时，父容器高度由其内容高度决定；内容高度又由行框高度计算值决定。 Webkit 浏览器中行框高度计算失误将导致父容器实际高度计算有误。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+<table class="list">
+        <tr>
+          <th>Chrome Safari</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>根据规范相应描述，行框高度计算过程大致如下：</p>
+            <ul>
+              <li>根据 'line-height' 属性计算出每个行内元素的行内框高度；</li>
+                <li>根据 'vertical-align' 属性计算出每个行内框的垂直对齐方式；</li>
+                <li>行框的高度是垂直对齐排列最上面框的定边和最下边框的底边距离；</li>
+                <li>如果行内框字号设置大于行内框的 'line-height' 设置，文字将溢出当前行框，他可能造成多行时文字相互覆盖；</li>
+                <li>每个计算出的行框在垂直高度上排列没有间隙；</li>
+                <li>在没有其他块级内容的情况下，整个容器的高度取决于多个行框累计的高度。</li>
+            </ul>
+        <p>实际中，由于 line-box 不可视，这将使得我们无法直观的看到 line-box 的计算高度。本例中，我们将使用一些 &quot;技巧&quot; 使  line-box 可视化，并可测量，大致思路为：</p>
+        <ul>
+              <li>在一宽度足够大的容器内使用单一行内非替换元素，为其设置 'line-height' 属性，使行内元素产生指定高度的行内框；</li>
+                <li>在单一行内非替元素情况下，容器内行框高度计算会与此单一行内框高度一致；</li>
+                <li>容器在 'height' 值为初始的 'auto' 和 'padding:0' 设定的情况下，高度值会等于内部单一含行框高度；</li>
+                <li>为容器添加背景色，此时背景的范围会与行框高度恰好一致。</li>
+            </ul>
+        <p>根据以上思路编写如下代码，其中 P 标记为容器块，'padding' 属性被这设置为 0； SPAN 标记为行内非替换元素，他将继承容器 P 标记内设置的 ‘line-height’ 和 'font-size' 设定，同时统一字体为 ’simsun‘ 避免出现字体导致高度计算的差异：</p>
+          <pre>
+&lt;h1&gt;第一组&lt;/h1&gt;
+&lt;p style=&quot;padding: 0; line-height: 10px; font-size: 30px; background:silver;  font-family:simsun; &quot;&gt;
+  &lt;span&gt;p[1]: line-height: 10px; font-size: 30px;&lt;/span&gt;
+&lt;/p&gt;
+
+&lt;p style=&quot;padding: 0; line-height: 5px; font-size: 30px; background:silver;  font-family:simsun; &quot;&gt;
+  &lt;span &gt;p[2]: line-height: 5px; font-size: 30px;&lt;/span&gt;
+&lt;/p&gt;
+
+&lt;p style=&quot;padding: 0; line-height: 0px; font-size: 30px; background:silver;  font-family:simsun; &quot;&gt;
+  &lt;span &gt;p[3]: line-height: 0px; font-size: 30px;&lt;/span&gt;
+&lt;/p&gt;
+
+&lt;h1&gt;第二组&lt;/h1&gt;
+&lt;p style=&quot;padding: 0; line-height: 10px; font-size: 12px; background:silver;  font-family:simsun; &quot;&gt;
+  &lt;span&gt;p[4]: line-height: 10px; font-size: 12px;&lt;/span&gt;
+&lt;/p&gt;
+
+&lt;p style=&quot;padding: 0; line-height: 5px; font-size: 12px; background:silver;  font-family:simsun; &quot;&gt;
+  &lt;span&gt;p[5]: line-height: 5px; font-size: 12px;&lt;/span&gt;
+&lt;/p&gt;
+
+&lt;p style=&quot;padding: 0; line-height: 0px; font-size: 12px; background:silver;  font-family:simsun; &quot;&gt;
+  &lt;span&gt;p[6]: line-height: 0px; font-size: 12px;&lt;/span&gt;
+&lt;/p&gt;
+&lt;h1&gt;第三组&lt;/h1&gt;
+&lt;p style=&quot;padding: 0; line-height: 4px; font-size: 5px; background:silver;  font-family:simsun; &quot;&gt;
+  &lt;span&gt;p[7]: line-height: 4px; font-size: 5px;&lt;/span&gt;
+&lt;/p&gt;
+
+&lt;p style=&quot;padding: 0; line-height: 2px; font-size: 5px; background:silver;  font-family:simsun; &quot;&gt;
+  &lt;span&gt;p[8]: line-height: 2px; font-size: 5px;&lt;/span&gt;
+&lt;/p&gt;
+
+&lt;p style=&quot;padding: 0; line-height: 0px; font-size: 5px; background:silver;  font-family:simsun; &quot;&gt;
+  &lt;span&gt;p[9]: line-height: 0px; font-size: 5px;&lt;/span&gt;
+&lt;/p&gt;
+</pre>
+        <p>代码中 P 元素的背景色高度范围恰好表示为 line-box 行高的高度，这里一共有 9 个 P 标记代表不同的行高设置情况，其中每三个一组代表不同的 'font-size' 设置情况。三组中均保证 ‘font-size’ 值比 'line-height' 值高，使文本内容可以溢出 line-box 高度。</p>
+        <p>观察实际效果：</p>
+    <table class="compare">
+          <tr>
+            <th>&nbsp;</th>
+            <th> IE6 IE7 IE8 Firefox Opera            </th>
+          </tr>
+          <tr>
+            <th>第一组</th>
+            <td><img src="../../tests/RD5017/01.png" alt="" /></td>
+          </tr>
+          <tr>
+            <th>第二组</th>
+            <td><img src="../../tests/RD5017/02.png" alt="" /></td>
+          </tr>
+          <tr>
+            <th>第三组</th>
+            <td><img src="../../tests/RD5017/03.png" alt="" /></td>
+          </tr>
+          <tr>
+            <th colspan="2">Safari</th>
+          </tr>
+          <tr>
+            <th>第一组</th>
+            <td><img src="../../tests/RD5017/04.png" alt="" /></td>
+          </tr>
+          <tr>
+            <th>第二组</th>
+            <td><img src="../../tests/RD5017/05.png" alt="" /></td>
+          </tr>
+          <tr>
+            <th>第三组</th>
+            <td><img src="../../tests/RD5017/06.png" alt="" /></td>
+          </tr>
+          <tr>
+            <th colspan="2">Chrome</th>
+          </tr>
+          <tr>
+            <th>第一组</th>
+            <td><img src="../../tests/RD5017/07.png" alt="" /></td>
+          </tr>
+          <tr>
+            <th>第二组</th>
+            <td><img src="../../tests/RD5017/08.png" alt="" /></td>
+          </tr>
+          <tr>
+            <th>第三组</th>
+            <td><img src="../../tests/RD5017/09.png" alt="" /></td>
+          </tr>
+        </table>
+        <p>对照上表，灰色区域等同于 line-box 的实际高度，在 IE6 IE7 IE8 Firefox Opera            浏览器中行 line-box 的高度计算与 'font-size' 设置值无关，进跟其中唯一行内非替换元素 SPAN 的行内框高度有关，此时 'line-height' 值等于  line-box 的计算高度，'line-height' 值缩小直接导致   line-box 计算高度同等变小，这是符合规范描述的计算方法。</p>
+        <p>但是在 Safari  Chrome 中，  line-box 的计算高度还依赖于 'font-size' 值，随着 ‘line-height’值逐步缩小，其变化规律是非线性的，无明显规律可寻。</p>
+        <p>截图测量每个 line-box 高度如下表：</p>
+        <table class="compare">
+          <tr>
+            <th>&nbsp;</th>
+            <th> IE6 IE7 IE8 Firefox Opera </th>
+            <th>Safari</th>
+            <th>Chrome</th>
+          </tr>
+          <tr>
+            <th>第一组</th>
+            <td class="hl_2">p [1] line-box 测量值为 10px<br />
+            p [2] line-box 测量值为 5px<br />
+            p [3] line-box 测量值为 0px</td>
+            <td class="hl_1">p [1] line-box 测量值为 16px<br />
+              p [2] line-box 测量值为 14px<br />
+            p [3] line-box 测量值为 11px</td>
+            <td class="hl_1">p [1] line-box 测量值为 16px<br />
+              p [2] line-box 测量值为 14px<br />
+            p [3] line-box 测量值为 11px</td>
+          </tr>
+          <tr>
+            <th>第二组</th>
+            <td class="hl_2">p [4] line-box 测量值为 10px<br />
+p [5] line-box 测量值为 5px<br />
+p [6] line-box 测量值为 0px</td>
+            <td class="hl_1">p [4] line-box 测量值为 10px<br />
+              p [5] line-box 测量值为 7px<br />
+            p [6] line-box 测量值为 4px</td>
+            <td class="hl_1">p [4] line-box 测量值为 10px<br />
+              p [5] line-box 测量值为 7px<br />
+            p [6] line-box 测量值为 4px</td>
+          </tr>
+          <tr>
+            <th>第三组</th>
+            <td class="hl_2">p [7] line-box 测量值为 4px<br />
+p [8] line-box 测量值为 2px<br />
+p [9] line-box 测量值为 0px</td>
+            <td class="hl_3">p [7] line-box 测量值为 4px<br />
+              p [8] line-box 测量值为 3px<br />
+            p [9] line-box 测量值为 2px</td>
+            <td class="hl_4">p [7] line-box 测量值为 6px<br />
+              p [8] line-box 测量值为 5px<br />
+            p [9] line-box 测量值为 4px</td>
+          </tr>
+        </table>
+        <p>表中明确表示出本例情况，在相同 'line-height' 设置时，Safari Chrome 对 line-box 的计算高度会较其他浏览器大。</p>
+        <p>在字号小于 12px 后，由于 Chrome 中文版自身存在 12px 字号渲染 Bug ，其小于 12px 的字号均用 12px 渲染；这导致之后 line-box 的计算高度又与 Safari 浏览器不同。</p>
+        <p>总之，当某个行内块的 'font-size' 值设置大于实际 line-box 计算高度时，使用 Safari Chrome 将得到与规范算法相比较大的 line-box 计算高度，从而导致包含 line-box 的容器高度计算错误。</p>
+        <h2 id="solutions">解决方案</h2>
+      <p>为了取得正常布局，建议 'line-height' 计算值永远大于 'font-size' 计算值设置。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="BW5006">BW5006: Chrome 中文版配置文件中对最小字体限制为 12px</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 5.0.317.2 dev<br />
+              Safari 4.0.4<br />
+                            Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RD5017/line_box_height.html">line_box_height.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-04</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>line-box line-height height font-size 行高计算 字号</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	div { width:300px; height:100px; background:#eee; font:12px Arial; }
+	.d1 { background:pink; font:18px Arial; }
+	.d2 { background:gold; font:18px Arial; }
+	.d3 { background:plum; font:18px Arial; }
+</style>
+<script>
+	function getClass(obj) {
+		obj.innerHTML = '.className=' + obj.className + 
+			'<br>.getAttribute("class")=' + obj.getAttribute("class") + 
+			'<br>.getAttribute("className")=' + obj.getAttribute("className");
+	}
+	window.onload = function () {
+		var d1 = document.getElementById("d1");
+		var d2 = document.getElementById("d2");
+		var d3 = document.getElementById("d3");
+		d1.className = "d1";
+		d2.setAttribute("class", "d2");
+		d3.setAttribute("className", "d3");
+		getClass(d1);
+		getClass(d2);
+		getClass(d3);
+	}
+</script>
+</head>
+<body>
+	<div id="d1">d1</div>
+	<div id="d2">d2</div>
+	<div id="d3">d3</div>
+</body>
+</html>

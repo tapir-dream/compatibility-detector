@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+	<head>
+		<style type="text/css">
+			.divC {
+				background:yellow;
+			}
+		</style>
+	</head>
+	<body>
+		<span id="oSource">
+			<div
+			   ID="oDiv"
+			   ATTRIBUTE1="true"
+			   ATTRIBUTE2="true"
+			   onclick="alert('click');"
+			   onmouseover="this.style.color='#0000FF';"
+			   onmouseout="this.style.color='#000000';"
+			   style="font-size:20px;"
+			   name="divName"
+			   class="divC"
+			   onXXX="alert('xxx');"
+			>
+			This is a sample <b>DIV</b> element.
+			</div>
+		</span>
+		<div id="info" style="height:100px;"></div>
+		<script type="text/javascript">
+			if(window.Element){
+				!Element.prototype.clearAttributes && (Element.prototype.clearAttributes = function(){
+					var attrs = this.attributes,
+						i = attrs.length - 1;
+					for(;i>=0;i--){
+						var name = attrs[i].name.toLowerCase();
+						if(/id|style/.test(name) || (/on[a-zA-Z]+/.test(name) && typeof this[name] === 'function'))
+							continue;
+						this.removeAttribute(name);
+					}
+				})
+			}
+
+			var div = document.getElementById('oSource').children[0],
+				info = document.getElementById("info");
+			function showAttributes(){
+				var attrs = div.attributes,
+					i = attrs.length - 1,
+					tmp = "";
+				for(;i>=0;i--){
+					var attr = attrs[i];
+					tmp += attr.name + "=" + attr.value + " | "
+				}
+				info.innerHTML = tmp;
+			}
+			function fnClear(){
+				div.clearAttributes();
+			}
+		</script>
+		<button type="button" onclick="fnClear()">clear attributes</button>
+		<button type="button" onclick="showAttributes()">show attributes</button>
+	</body>
+</html>

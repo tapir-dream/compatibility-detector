@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body style="font:12px Consolas; margin:0;">
+<div id="p3" style="background:gold; width:50px; height:50px; min-width:100px; min-height:100px; position:relative;">
+	<div id="c3" style="width:100%; height:100%; background:plum; position:absolute; left:3px; top:3px;"></div>
+</div>
+<br />
+<div id="p4" style="background:gold; width:150px; height:150px; max-width:100px; max-height:100px; position:relative;">
+	<div id="c4" style="width:100%; height:100%; background:plum; position:absolute; left:3px; top:3px;"></div>
+</div>
+<br />
+<div id="p5" style="background:gold; width:50px; height:50px; min-width:100px; min-height:100px; position:relative; padding:10px;">
+	<div id="c5" style="width:100%; height:100%; background:plum; position:absolute; left:3px; top:3px;"></div>
+</div>
+<br />
+<div id="p6" style="background:gold; width:150px; height:150px; max-width:100px; max-height:100px; position:relative; padding:10px;">
+	<div id="c6" style="width:100%; height:100%; background:plum; position:absolute; left:3px; top:3px;"></div>
+</div>
+<script>
+	function $(id) { return document.getElementById(id); }
+	
+	$("c3").innerHTML = "<em>Child:</em>" + $("c3").clientWidth + "*" + $("c3").clientHeight;
+	$("c4").innerHTML = "<em>Child:</em>" + $("c4").clientWidth + "*" + $("c4").clientHeight;
+	$("c5").innerHTML = "<em>Child:</em>" + $("c5").clientWidth + "*" + $("c5").clientHeight;
+	$("c6").innerHTML = "<em>Child:</em>" + $("c6").clientWidth + "*" + $("c6").clientHeight;
+</script>
+</body>
+</html>

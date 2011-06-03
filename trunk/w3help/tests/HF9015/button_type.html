@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	* { margin:0; padding:0; font:16px 'Trebuchet MS'; }
+	button { width:100px; height:40px; }
+</style>
+</head>
+<body>
+<form>
+	<button id="btn" name="btn" value="BUTTON">BUTTON</button><br />
+	<script>
+		if (location.search == '') {
+			document.getElementById('btn').click();
+		}
+		document.write('BUTTON[type]: ' + document.getElementById('btn').type + '<br />');
+		document.write('location.search: ' + location.search + '<br />');
+	</script>
+</form>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RC3002: IE6 不支持 HTML、BODY 以外元素的 background-attachment:fixed</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>如果设置了背景图形（'background-image' 特性），'background-attachment' 特性指定了图形是否相对<a href="http://www.w3.org/TR/CSS21/visuren.html#viewport" title="视口">视口</a>固定（fixed）或随着包含块滚动（'scroll'）。</p>
+      <p>而每一个视图中仅有一个视口，如果有一个元素具备滚动机制（'overflow' 特性设置），固定的背景（background-attachment : fixed）不随元素移动，滚动的背景（background-attachment : scroll）不随滚动条移动。</p>
+      <p>即使图形是固定的，它也只是在元素的背景和边白区域可见。因此，除非图形平铺（background-repeat: repeat），它可能是不可见的。</p>
+      <p>关于 'background-attachment' 特性的详细信息，请参考 CSS 2.1：<a href="http://www.w3.org/TR/CSS21/colors.html#propdef-background-attachment">'background-attachment'</a>。</p>
+      
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 中，为一个非视点元素（HTML、BODY 以外）设置 'background-attachment:fixed'，无任何效果。</p>
+      <h2 id="influence">造成的影响</h2>
+      <p>若为非 BODY、HTML 元素设置 'background-attachment:fixed' 可能会在 IE6 与其他浏览器中产生差异，如造成在非 IE6 浏览器中背景图消失。</p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+<pre>&lt;style&gt;
+    body { margin:0; }
+    span { border:1px solid; float:left; background-image:url(docs_logo_sm.gif); background-attachment:fixed; background-repeat:repeat-y; }
+    p { margin:0; width:40px; height:40px; }
+&lt;/style&gt;
+
+&lt;div style="float:left; width:210px;"&gt;
+    &lt;span&gt;&lt;p&gt;&lt;/p&gt;&lt;/span&gt;
+    &lt;span&gt;&lt;p&gt;&lt;/p&gt;&lt;/span&gt;
+    &lt;span&gt;&lt;p&gt;&lt;/p&gt;&lt;/span&gt;
+    &lt;span&gt;&lt;p&gt;&lt;/p&gt;&lt;/span&gt;
+    &lt;span&gt;&lt;p&gt;&lt;/p&gt;&lt;/span&gt;
+    &lt;span&gt;&lt;p&gt;&lt;/p&gt;&lt;/span&gt;
+    &lt;span&gt;&lt;p&gt;&lt;/p&gt;&lt;/span&gt;
+    &lt;span&gt;&lt;p&gt;&lt;/p&gt;&lt;/span&gt;
+    &lt;span&gt;&lt;p&gt;&lt;/p&gt;&lt;/span&gt;
+    &lt;span&gt;&lt;p&gt;&lt;/p&gt;&lt;/span&gt;
+    &lt;span&gt;&lt;p&gt;&lt;/p&gt;&lt;/span&gt;
+    &lt;span&gt;&lt;p&gt;&lt;/p&gt;&lt;/span&gt;
+    &lt;span&gt;&lt;p&gt;&lt;/p&gt;&lt;/span&gt;
+    &lt;span&gt;&lt;p&gt;&lt;/p&gt;&lt;/span&gt;
+    &lt;span&gt;&lt;p&gt;&lt;/p&gt;&lt;/span&gt;
+    &lt;span&gt;&lt;p&gt;&lt;/p&gt;&lt;/span&gt;
+    &lt;span&gt;&lt;p&gt;&lt;/p&gt;&lt;/span&gt;
+    &lt;span&gt;&lt;p&gt;&lt;/p&gt;&lt;/span&gt;
+    &lt;span&gt;&lt;p&gt;&lt;/p&gt;&lt;/span&gt;
+    &lt;span&gt;&lt;p&gt;&lt;/p&gt;&lt;/span&gt;
+    &lt;span&gt;&lt;p&gt;&lt;/p&gt;&lt;/span&gt;
+    &lt;span&gt;&lt;p&gt;&lt;/p&gt;&lt;/span&gt;
+    &lt;span&gt;&lt;p&gt;&lt;/p&gt;&lt;/span&gt;
+    &lt;span&gt;&lt;p&gt;&lt;/p&gt;&lt;/span&gt;
+    &lt;span&gt;&lt;p&gt;&lt;/p&gt;&lt;/span&gt;
+&lt;/div&gt;</pre>
+      <p>上面代码为每一个 SPAN 元素均设置了背景图片，其中 'background-attachment' 为 'fixed'。这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6</th>
+          <th>IE7 IE8 Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RC3002/dfp5h4pg_1873c2b8pvgz_b.gif" alt="" /></td>
+          <td><img src="../../tests/RC3002/dfp5h4pg_1874fm7695gr_b.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>可见：</p>
+      <ul>
+        <li>在 <strong>IE6</strong> 中，不支持普通元素的 'background-attachment:fixed'（HTML 及 BODY元素支持）；</li>
+        <li>在<strong>其他浏览器</strong>中，支持所有元素的 'background-attachment:fixed'。</li>
+      </ul>
+      <p>CSS 2.1 规范中规定 'background-attachment:fixed' 是针对视点，而一个浏览视图中仅有一个视点，所以无论被设置了 'background-attachment:fixed' 的元素位于页面的哪个位置，其背景图的放置都是相对于视点。</p>
+      <h2 id="solutions">解决方案</h2>
+      <p>避免为非 BODY、HTML 元素设置 'background-attachment:fixed' 特性。</p>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td> IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.6<br />
+              Chrome 6.0.453.1 dev<br />
+              Safari 5.0 <br />
+              Opera 10.60
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RC3002/backatt.html">backatt.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-08</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>background background-attachment fixed 固定 背景 图片</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

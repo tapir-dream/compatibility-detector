@@ -1,0 +1,149 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BT9028: 只有 IE 支持 window.createPopup 方法</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>只有 IE 支持 window.createPopup() 方法。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>该问题将导致在其他浏览器中无法实现预期功能，脚本执行错误等问题。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>使用 window.createPopup() 方法，可以创建一个弹出式（pop-up）的窗口。这是一种典型的用于对话框、消息框和其他临时的窗口。</p>
+      <p>这个方法只有 IE 支持，举例如下：</p>
+<pre>
+&lt;script type="text/javascript"&gt;
+function show_popup() {
+    try {
+  var p = window.createPopup();
+  var pbody = p.document.body;
+  pbody.style.backgroundColor = "lime";
+  pbody.style.border = "solid black 1px";
+  pbody.innerHTML = "This is a pop-up! Click outside to close.";
+  p.show(10, 50, 200, 50, document.body);
+    } catch(err) {
+  document.getElementById("info").innerHTML = err;
+    }
+
+}
+&lt;/script&gt;
+&lt;button onclick="show_popup()"&gt;Create pop-up!&lt;/button&gt;
+&lt;div id="info" style="color:red;"&gt;&lt;/div&gt;
+</pre>
+      <p>
+      如果 window.createPopup() 方法执行出错，错误信息会输出到 info 中。<br />
+      如果执行成功，按钮下方会出现一个带有文字的绿色方块。
+      </p>
+      <p>在各浏览器下的截图（点下 Create pop-up 按钮后的截图）：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <th>Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BT9028/a.jpg" alt="" /></td>
+          <td><img src="../../tests/BT9028/b.jpg" alt="" /></td>
+        </tr>
+        <tr>
+          <th>Firefox</th>
+          <th>Chrome</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BT9028/c.jpg" alt="" /></td>
+          <td><img src="../../tests/BT9028/d.jpg" alt="" /></td>
+        </tr>
+        <tr>
+          <th colspan="2">Opera</th>
+        </tr>
+        <tr>
+          <td colspan="2"><img src="../../tests/BT9028/e.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>关于 createPopup 的更多信息，请参考 MSDN <a href="http://msdn.microsoft.com/en-us/library/ms536392(VS.85).aspx">createPopup Method</a> 和 <a href="http://msdn.microsoft.com/en-us/library/ms535882(v=VS.85).aspx">popup Object</a> 中的内容。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>尽量不要使用 IE 的特性，必须使用弹出窗口时，可以通过脚本使用兼容各浏览器的方式来实现。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BT9028/createPopup.html">createPopup.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-02</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>window createPopup</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

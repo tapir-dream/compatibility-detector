@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head></head>
+<body style="font:16px Arial;">
+<table id="table1" style="white-space:nowrap; width:100px; background:dodgerblue;">
+	<tr>
+		<td id="td1" style="background:lavender;">
+			<div id="div1">Text Text Text Text Text Text Text Text</div>
+		</td>
+	</tr>
+</table>
+<div id="info1"></div>
+<br />
+<table id="table2" style="width:100px; background:dodgerblue;">
+	<tr>
+		<td id="td2" style="white-space:nowrap; background:lavender;">
+			<div id="div2">Text Text Text Text Text Text Text Text</div>
+		</td>
+	</tr>
+</table>
+<div id="info2"></div>
+<br />
+<table id="table3" style="width:100px; background:dodgerblue;">
+	<tr>
+		<td id="td3" style="white-space:nowrap; background:lavender; width:100px;">
+			<div id="div3">Text Text Text Text Text Text Text Text</div>
+		</td>
+	</tr>
+</table>
+<div id="info3"></div>
+<script>
+	window.onload = function() {
+		function $(id) { return document.getElementById(id); }
+		if (!window.getComputedStyle) {
+			window.getComputedStyle = function($target) {
+				return $target.currentStyle;
+			};
+		}
+		$("info1").innerHTML = "<br />TABLE:" + getComputedStyle($("table1"), null).whiteSpace
+			+ "<br />TD:" + getComputedStyle($("td1"), null).whiteSpace
+			+ "<br />DIV:" + getComputedStyle($("div1"), null).whiteSpace;
+		$("info2").innerHTML = "<br />TABLE:" + getComputedStyle($("table2"), null).whiteSpace
+			+ "<br />TD:" + getComputedStyle($("td2"), null).whiteSpace
+			+ "<br />DIV:" + getComputedStyle($("div2"), null).whiteSpace;
+		$("info3").innerHTML = "<br />TABLE:" + getComputedStyle($("table3"), null).whiteSpace
+			+ "<br />TD:" + getComputedStyle($("td3"), null).whiteSpace
+			+ "<br />DIV:" + getComputedStyle($("div3"), null).whiteSpace;
+	}
+</script>
+</body>
+</html>

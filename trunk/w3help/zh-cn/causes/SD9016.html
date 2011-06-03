@@ -1,0 +1,212 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SD9016: Firefox 不支持 DOM 对象的 insertAdjacentHTML 和 insertAdjacentText 方法</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+    <h2 id="standard_reference">标准参考</h2>
+        <p>无。</p>
+
+    <h2 id="description">问题描述</h2>
+    <p>Firefox 不支持 DOM 对象的 insertAdjacentHTML insertAdjacentText 方法。</p>
+
+    <h2 id="influence">造成的影响</h2>
+    <p>使用这两个方法将在 Firefox 浏览器内报错。</p>
+
+    <h2 id="impacted_browsers">受影响的浏览器</h2>
+    <table class="list">
+      <tr>
+        <th>Firefox</th>
+        <td>&nbsp;</td>
+      </tr>
+    </table>
+
+    <h2 id="analysis_of_issues">问题分析</h2>
+    <h3>insertAdjacentHTML 方法</h3>
+    <p>insertAdjacentHTML 方法是比 innerHTML、outerHTML 属性更灵活的插入 HTML 代码的方法。它可以实现在一个 DOM 元素的前面、后面、第一个子元素前面、最后一个子元素后面四个位置，插入指定的 HTML 代码。不是 W3C 标准的 DOM 方法。</p>
+    <p>这个方法最初是由 IE4.0 以上版本实现，为私有特性。详细内容请参见 MSDN 说明：<a href="http://msdn.microsoft.com/en-us/library/ms536452(VS.85).aspx">insertAdjacentHTML Method</a>。</p>
+    <p>W3C 近期在 HTML5 草案中扩展了这个方法，更多详细的信息，请参见 W3C HTML5 草案：<a href="http://www.w3.org/TR/html5/apis-in-html-documents.html#insertadjacenthtml">3.5.7 insertAdjacentHTML()</a>。</p>
+    <p>&nbsp;</p>
+    <p>目前，主浏览器中，只有 Firefox 不支持 insertAdjacentHTML 方法。</p>
+    <pre>&lt;script type=&quot;text/javascript&quot;&gt;
+    window.onload = function() {
+        var ps = document.getElementById(&quot;one&quot;);
+        try {
+            ps.insertAdjacentHTML(&quot;beforeend&quot;, &quot;&lt;span style='background:yellow;'&gt;hi&lt;/span&gt;&quot;);
+        } catch(err) {
+            document.getElementById(&quot;info&quot;).innerHTML = err;
+        }
+
+    }
+&lt;/script&gt;
+
+&lt;p id=&quot;one&quot; style=&quot;background:silver; width:300px;&quot;&gt;
+    this is
+    &lt;i style=&quot;width:100px; background-color:gold;&quot;&gt;another&lt;/i&gt;
+    text
+&lt;/p&gt;
+&lt;div id=&quot;info&quot;&gt;&lt;/div&gt;</pre>
+    <p>测试用例中，页面加载的时候，会执行 one 的 insertAdjacentHTML方法。</p>
+    <p>如果执行期间有JS错误，错误信息会在 info 中输出。</p>
+    <p>如果执行成功，one 元素内容的最后会被加上一个有黄色背景的文本“hi”。</p>
+    <p>在各浏览器下的截图：</p>
+    <table class="compare">
+      <tr>
+        <th>Firefox</th>
+        <th>IE6 IE7 IE8 Chrome Safari Opera</th>
+      </tr>
+      <tr>
+        <td><img src="../../tests/SD9016/01.png" alt="运行效果截图" /></td>
+        <td><img src="../../tests/SD9016/02.png" alt="运行效果截图" /></td>
+      </tr>
+    </table>
+    <p>可见，只有 Firefox 下不支持 insertAdjacentHTML 方法。 </p>
+    <p>&nbsp;</p>
+    <h3>insertAdjacentText 方法</h3>
+    <p>insertAdjacentText 是比 innerText、outerText 属性更灵活的插入文本的方法。它可以实现在一个 DOM 元素的前面、后面、第一个子元素前面、最后一个子元素后面四个位置，插入指定的文本。不是 W3C 标准的 DOM 方法。</p>
+    <p>这个方法是 IE 私有特性。详细内容请参见 MSDN 说明：<a href="http://msdn.microsoft.com/en-us/library/ms536453(VS.85).aspx">insertAdjacentText Method</a>。</p>
+    <p>至今为止 W3C 的 HTML5 草案还未涉及此方法。</p>
+    <p>&nbsp;</p>
+    <p>目前，主浏览器中，只有 Firefox 不支持 insertAdjacentText 方法。</p>
+    <pre>&lt;script type=&quot;text/javascript&quot;&gt;
+    window.onload = function() {
+        var ps = document.getElementById(&quot;one&quot;);
+        try {
+            ps.insertAdjacentText(&quot;beforeend&quot;, &quot;&lt;span style='background:yellow;'&gt;hi&lt;/span&gt;&quot;);
+        } catch(err) {
+            document.getElementById(&quot;info&quot;).innerHTML = err;
+        }
+    }
+&lt;/script&gt;
+
+&lt;p id=&quot;one&quot; style=&quot;background:silver; width:300px;&quot;&gt;
+    this is
+    &lt;i style=&quot;width:100px; background-color:gold;&quot;&gt;another&lt;/i&gt;
+    text
+&lt;/p&gt;
+&lt;div id=&quot;info&quot;&gt;&lt;/div&gt;</pre>
+    <ul>
+      <li>测试用例中，页面加载的时候，会执行 <strong>one</strong> 的 insertAdjacentText 方法。</li>
+      <li>如果执行期间有 JS 错误，错误信息会在 <strong>info</strong> 中输出。</li>
+    </ul>
+    <p>如果执行成功，<strong>one</strong> 元素内容的最后会被加上文本 “&lt;span style='background:yellow;'&gt;hi&lt;/span&gt;”。</p>
+    <p>在各浏览器下的截图：</p>
+    <table class="compare">
+      <tr>
+        <th>Firefox</th>
+        <th>IE6 IE7 IE8 Chrome Safari Opera</th>
+      </tr>
+      <tr>
+        <td><img src="../../tests/SD9016/03.png" alt="运行效果截图" /></td>
+        <td><img src="../../tests/SD9016/04.png" alt="运行效果截图" /></td>
+      </tr>
+    </table>
+    <p>可见，只有 Firefox 下不支持 insertAdjacentText 方法。</p>
+
+    <h2 id="solutions">解决方案</h2>
+    <p> 在 Firefox 中，可通过扩展 HTMLElement 的原型 (prototype) 来实现这两个方法：</p>
+<pre>
+if (typeof(HTMLElement) != "undefined") {
+    HTMLElement.prototype.insertAdjacentElement = function(where, parsedNode) {
+        switch (where) {
+            case "beforeBegin":
+                this.parentNode.insertBefore(parsedNode, this);
+                break;
+            case "afterBegin":
+                this.insertBefore(parsedNode, this.firstChild);
+                break;
+            case "beforeEnd":
+                this.appendChild(parsedNode);
+                break;
+            case "afterEnd":
+                if (this.nextSibling)
+                    this.parentNode.insertBefore(parsedNode, this.nextSibling);
+                else
+                    this.parentNode.appendChild(parsedNode);
+                break;
+        }
+    }
+    HTMLElement.prototype.insertAdjacentHTML = function(where, htmlStr) {
+        var r = this.ownerDocument.createRange();
+        r.setStartBefore(this);
+        var parsedHTML = r.createContextualFragment(htmlStr);
+        this.insertAdjacentElement(where, parsedHTML);
+    }
+    HTMLElement.prototype.insertAdjacentText = function(where, txtStr) {
+        var parsedText = document.createTextNode(txtStr);
+        this.insertAdjacentElement(where, parsedText);
+    }
+}
+</pre>
+
+    <h2 id="see_also">参见</h2>
+    <h3>知识库</h3>
+    <ul class="see_also">
+      <li><a href="#">...</a></li>
+    </ul>
+
+    <h3>相关问题</h3>
+    <ul class="see_also">
+      <li><a href="#">...</a></li>
+    </ul>
+
+    <div class="appendix">
+      <h2>测试环境</h2>
+      <table class="list">
+        <tr>
+          <th>操作系统版本:</th>
+          <td>Windows 7 Ultimate build 7600</td>
+        </tr>
+        <tr>
+          <th>浏览器版本:</th>
+          <td>IE6<br />
+            IE7<br />
+            IE8<br />
+            Firefox 3.6.8<br />
+            Chrome 6.0.472.11 dev<br />
+            Safari 5.0.1<br />
+            Opera 10.60
+          </td>
+        </tr>
+        <tr>
+          <th>测试页面:</th>
+          <td><a href="../../tests/SD9016/insertAdjacentHTML.html">insertAdjacentHTML.html</a><br />
+            <a href="../../tests/SD9016/insertAdjacentText.html">insertAdjacentText.html</a>
+          </td>
+        </tr>
+        <tr>
+          <th>本文更新时间:</th>
+          <td>2010-08-02</td>
+        </tr>
+      </table>
+
+      <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>insertAdjacentHTML insertAdjacentText 插入</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

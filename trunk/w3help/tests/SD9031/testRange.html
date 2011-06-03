@@ -1,0 +1,49 @@
+<script type="text/javascript">
+	var standard = ["startContainer", "startOffset", "endContainer", "endOffset", "collapsed", "commonAncestorContainer",
+			"START_TO_START", "START_TO_END", "END_TO_END", "END_TO_START","setStart", "setEnd", "setStartBefore", 
+			"setStartAfter", "setEndBefore", "setEndAfter", "collapse", "selectNode", "selectNodeContents", "compareBoundaryPoints",
+			"deleteContents", "extractContents", "cloneContents", "insertNode", "surroundContents", "cloneRange", "toString", "detach"],
+		ext = ["compareNode", "comparePoint", "createContextualFragment", "intersectsNode", "isPointInRange", 
+			"getBoundingClientRect", "getClientRects", "NODE_AFTER", "NODE_BEFORE", "NODE_BEFORE_AND_AFTER", "NODE_INSIDE", "expand"],
+		ie = ["boundingHeight", "boundingLeft", "boundingTop", "boundingWidth", "htmlText", 
+			"offsetLeft", "offsetTop", "text", "compareEndPoints", "duplicate", "execCommand", 
+			"execCommandShowHelp", "findText", "getBookmark", "inRange", "isEqual", "move", "moveEnd", 
+			"moveStart", "moveToBookmark", "moveToElementText", "moveToPoint", "parentElement", "pasteHTML", 
+			"queryCommandEnabled", "queryCommandIndeterm", "queryCommandState", "queryCommandSupported", 
+			"queryCommandText", "queryCommandValue", "scrollIntoView", "select", "setEndPoint"],
+		range, i, count = 0, info, setInfo, testRange;
+		
+    window.onload = function() {
+		info = document.getElementById("info"),
+		setInfo = function(msg){info.innerHTML += msg + "<br/>";},
+		testRange = function(member){
+			if(range[member] !== undefined){
+				setInfo(member);
+				count++;
+			}
+		};
+		
+		if(document.createRange)
+			range = document.createRange();
+		else
+			range = document.selection.createRange();
+		
+		setInfo("<strong>标准 Range 接口的常量、属性及方法：</strong>");
+		for(i=0;i<standard.length;i++){
+			testRange(standard[i]);
+		}
+		
+		setInfo("<strong>扩展 Range 接口的常量、属性及方法：</strong>");
+		for(i=0;i<ext.length;i++){
+			testRange(ext[i]);
+		}
+		
+		setInfo("<strong>TextRange 的常量、属性及方法：</strong>");
+		for(i=0;i<ie.length;i++){
+			testRange(ie[i]);
+		}
+		
+		document.getElementById("total").innerHTML = count;
+    }
+</script>
+<div id="info"><strong>Support: <span id="total"></span></strong><br/></div>

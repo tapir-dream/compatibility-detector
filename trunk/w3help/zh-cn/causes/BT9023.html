@@ -1,0 +1,434 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BT9023: IE6 中对 ABBR 元素的相关处理有误</h1>
+<ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>ABBR 标签是个 inline 级别标签，与常见的 SPAN、EM、STRONG 标签在布局上的作用相同。他最初是在 HTML 4.0 中引入的，表示所包含的文本是一个更长的单词或短语的缩写形式，比如 &quot;Inc.&quot;、&quot;etc.&quot;。它还是个语义化标签， 使用该标签包含缩写词语，就能够为浏览器、拼写检查程序、翻译系统以及搜索引擎提供有用的信息。由于定义较早，所有的现代浏览器均支持它。</p>
+      <p>关于 ABBR 的更多详细信，请参考 HTML 4.0 规范  <a href="http://www.w3.org/TR/html4/struct/text.html#edef-ABBR">9.2.1 Phrase elements: EM, STRONG, DFN, CODE, SAMP, KBD, VAR, CITE, ABBR, and ACRONYM</a> 中详细说明。</p>
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 中，无法为 ABBR 标签指定样式，无法通过脚本程序动态修改 ABBR 标签内容。</p>
+      <h2 id="influence">造成的影响</h2>
+          <ul>
+            <li>ABBR 标签只能使用浏览器默认样式，用户定义样式不会生效，可能会导致 IE6 中视觉效果不尽人意或局部布局受到影响；</li>
+      <li>通过相关脚本方法修改 ABBR 标签内容会导致脚本报错。</li>
+          </ul>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+<table class="list">
+        <tr>
+          <th>IE6</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>在页面标签应用中主要涉及 4 种处理：</p>
+      <ul>
+        <li>标签的样式设定</li>
+        <li>标签的动态建立</li>
+        <li>标签的动态修改</li>
+        <li>标签的移除操作</li>
+        </ul>
+        <p>根据这 4 种基本处理，我们建立如下测试代码，分别对静态以及动态建立的 ABBR 标签进行设定样式、修改标签内容、以及移除操作。</p>
+<pre style="height:300px;overflow-y:auto">
+&lt;style&gt;
+abbr,.abbrStyle,#A,#B{font-size:30px; line-height:50px; border:10px solid gray; background:yellow;}
+&lt;/style&gt;
+&lt;script&gt;
+window.onload=function(){
+  function G(s){return document.getElementById(s);}
+  function abbrTagChange(id,type,that,index){
+    var E = G(id);
+    switch(type){
+      case 1:
+        domProcess(E,'createTextNode 方法修改 ABBR 标签内容处理成功',that);
+        break;
+      case 2:
+        innerHTMLProcess(E,'innerHTML 方法修改 ABBR 标签内容处理成功',that);
+        break;
+      case 3:
+        removeElement(E,'ABBR 标签被移除',that,index);
+        break;
+    }
+  }
+
+  function getInnerHTML(E){
+    try{
+      alert(E.innerHTML);
+    }catch(e){
+      alert('读取错误');
+    }
+  }
+
+  function domProcess(E,content,that){
+    try{
+      if (E.firstChild) E.removeChild(E.firstChild);
+      E.appendChild(document.createTextNode(content));
+    }catch(e){
+      that.innerHTML = '修改 ABBR 标签内容出错';
+      that.disabled = 'disabled';
+    }
+  }
+  function innerHTMLProcess(E,content,that){
+    try{
+      E.innerHTML = content;
+    }catch(e){
+      that.innerHTML = '修改 ABBR 标签内容出错';
+      that.disabled = 'disabled';
+    }
+
+  }
+  function removeElement(E,content,that,index){
+    try{
+      document.getElementsByTagName('p')[index].removeChild(E);
+    }catch(e){
+      that.innerHTML = '移除 ABBR 标签出错';
+      that.disabled = 'disabled';
+    }
+  }
+  window['abbrTagChange']=abbrTagChange;
+  window['getInnerHTML']=getInnerHTML;
+
+}
+&lt;/script&gt;
+
+&lt;h2&gt;静态 ABBR 标签处理&lt;/h2&gt;
+&lt;p&gt;&lt;abbr id="A" class="abbrStyle" style="font-size:30px; line-height:50px; border:10px solid gray; background:yellow;"&gt;STATIC ABBR TAG&lt;/abbr&gt;&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;button onclick="abbrTagChange('A',1,this)"&gt;使用 DOM 标准相关方法修改 ABBR 标签内容&lt;/button&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;button onclick="abbrTagChange('A',2,this)"&gt;使用 innerHTML 方法修改 ABBR 标签内容&lt;/button&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;button onclick="getInnerHTML(document.getElementsByTagName('p')[0])"&gt;读出 ABBR 标签实际 DOM 字符串&lt;/button&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;button onclick="abbrTagChange('A',3,this,0)"&gt;从 DOM 树中移除 ABBR 标签&lt;/button&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;使用 document.write 方法建立的 ABBR 标签处理&lt;/h2&gt;
+&lt;p&gt;
+&lt;script id="script"&gt;
+  document.write('&lt;abbr id="B" class="abbrStyle" style="font-size:30px; line-height:50px; border:10px solid gray; background:yellow;"&gt;Document Write ABBR TAG&lt;/abbr&gt;');
+  document.getElementsByTagName('p')[1].removeChild(document.getElementById('script'));
+&lt;/script&gt;
+&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;button onclick="abbrTagChange('B',1,this)"&gt;使用 DOM 标准相关方法修改 ABBR 标签内容&lt;/button&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;button onclick="abbrTagChange('B',2,this)"&gt;使用 innerHTML 方法修改 ABBR 标签内容&lt;/button&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;button onclick="getInnerHTML(document.getElementsByTagName('p')[1])"&gt; 读出 ABBR 标签实际 DOM 字符串 &lt;/button&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;button onclick="abbrTagChange('B',3,this,1)"&gt;从 DOM 树中移除 ABBR 标签&lt;/button&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;使用 innerHTML 方法建立的 ABBR 标签处理&lt;/h2&gt;
+&lt;p&gt;&lt;/p&gt;
+&lt;script&gt;document.getElementsByTagName('p')[2].innerHTML = '&lt;abbr id="C" style="font-size:30px; line-height:50px; border:10px solid gray; background:yellow;"&gt;InnerHTML ABBR TAG&lt;/abbr&gt;'&lt;/script&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;button onclick="abbrTagChange('C',1,this)"&gt;使用 DOM 标准相关方法修改 ABBR 标签内容&lt;/button&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;button onclick="abbrTagChange('C',2,this)"&gt;使用 innerHTML 方法修改 ABBR 标签内容&lt;/button&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;button onclick="getInnerHTML(document.getElementsByTagName('p')[2])"&gt; 读出 ABBR 标签实际 DOM 字符串 &lt;/button&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;button onclick="abbrTagChange('C',3,this,2)"&gt;从 DOM 树中移除 ABBR 标签&lt;/button&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2&gt;使用 createElement 方法建立的 ABBR 标签处理&lt;/h2&gt;
+&lt;p&gt;&lt;/p&gt;
+&lt;script&gt;
+void function (){
+  var E = document.createElement('abbr');
+  E.id = 'D';
+  E.cssText = 'font-size:30px; line-height:50px; border:10px solid gray; background:yellow;'
+  E.appendChild(document.createTextNode('CreateElement ABBR TAG'));
+  document.getElementsByTagName('p')[3].appendChild(E);
+}();
+&lt;/script&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;button onclick="abbrTagChange('D',1,this)"&gt;使用 DOM 标准相关方法修改 ABBR 标签内容&lt;/button&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;button onclick="abbrTagChange('D',2,this)"&gt;使用 innerHTML 方法修改 ABBR 标签内容&lt;/button&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;button  onclick="getInnerHTML(document.getElementsByTagName('p')[3])"&gt; 读出 ABBR 标签实际 DOM 字符串 &lt;/button&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;button onclick="abbrTagChange('D',3,this,3)"&gt;从 DOM 树中移除 ABBR 标签&lt;/button&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</pre>
+        <p>根据测试用例的表现效果，我们将别来阐述实际运行过程中出现的问题。</p>
+        <h3>1、ABBR 标签对用户样式表设置的支持</h3>
+        <p>通过 ID Class Style 选择器为各种方式建立的 ABBR 标签设置样式，结果如下表：</p>
+        <table class="compare">
+              <tr>
+                <th>设置样式</th>
+                <th>IE6</th>
+                <th>IE7 IE8 Firefox Chrome Safari Opera</th>
+              </tr>
+              <tr>
+                <td>静态 ABBR 标签</td>
+                <td><span class="hl_1">ID Class Style 样式设置均无效</span></td>
+                <td><span class="hl_2">样式设置有效</span></td>
+              </tr>
+              <tr>
+                <td><span style="height:300px;overflow-y:auto">document.write 建立的 ABBR 标签</span></td>
+                <td><span class="hl_1">ID Class Style 样式设置均无效</span></td>
+                <td><span class="hl_2">样式设置有效</span></td>
+              </tr>
+              <tr>
+                <td><span style="height:300px;overflow-y:auto">innerHTML 建立的 ABBR 标签</span></td>
+                <td><span class="hl_1">ID Class Style 样式设置均无效</span></td>
+                <td><span class="hl_2">样式设置有效</span></td>
+              </tr>
+              <tr>
+                <td>createElement <span style="height:300px;overflow-y:auto">建立的 ABBR 标签</span></td>
+                <td><span class="hl_2"> 样式设置有效</span></td>
+                <td><span class="hl_2">样式设置有效</span></td>
+              </tr>
+            </table>
+        <p>实际运行后可以发现，IE6 中除最后通过 createElement 方法建立的 ABBR 标签可以被指定样式外，包括写入在页面内的静态标签均不能获得样式。</p>
+          <h3>2、ABBR 标签的 DOM 结构</h3>
+          <p>为避免出现 ABBR 标记不被浏览器识别或解析错误的情况，这里使用各种方法创建 ABBR 标签，标签自身的 DOM 结构汇总在下表。</p>
+          <table class="compare">
+              <tr>
+                <th>读取 DOM 结构字符串</th>
+                <th>IE6</th>
+                <th>IE7 IE8 Firefox Chrome Safari Opera</th>
+              </tr>
+              <tr>
+                <td>静态 ABBR 标签</td>
+                <td><span class="hl_2">DOM 结构正常</span></td>
+                <td><span class="hl_2">DOM 结构正常</span></td>
+              </tr>
+              <tr>
+                <td><span style="height:300px;overflow-y:auto">document.write 建立的 ABBR 标签</span></td>
+                <td><span class="hl_2">DOM 结构正常</span></td>
+                <td><span class="hl_2">DOM 结构正常</span></td>
+              </tr>
+              <tr>
+                <td><span style="height:300px;overflow-y:auto">innerHTML  建立的 ABBR 标签</span></td>
+                <td><span class="hl_1">起始标签丢失</span></td>
+                <td><span class="hl_2">DOM 结构正常</span></td>
+              </tr>
+              <tr>
+                <td>createElement <span style="height:300px;overflow-y:auto">建立的 ABBR 标签</span></td>
+                <td><span class="hl_2"> DOM 结构正常</span></td>
+                <td><span class="hl_2">DOM 结构正常</span></td>
+              </tr>
+            </table>
+          <p>从表中可以明显看出，使用 innerHTML 方法建立的 ABBR 标签其 DOM 结构异常，原本的 <code>&lt;abbr&gt;…….&lt;abbr&gt;</code> 结构变为 <code>…….&lt;abbr&gt;</code> 结构</p> 
+          <p>起始标签  <code>&lt;abbr&gt;</code> 被 IE6 丢失了。</p>
+          <h3>3、使用 DOM 标准方法修改 ABBR 标签内容</h3>
+          <p>现在页面应用程序中，均会存在大量动态修改标签内容的操作，下表汇总了用例中常见 DOM 规范方法对不同创建方式的 ABBR 标签，做内容修改时的运行状况。</p>
+          <table class="compare">
+              <tr>
+                <th> DOM 标准方法修改操作</th>
+                <th>IE6</th>
+                <th>IE7 IE8 Firefox Chrome Safari Opera</th>
+              </tr>
+              <tr>
+                <td>静态 ABBR 标签</td>
+                <td><span class="hl_1">执行错误无法修改</span></td>
+                <td><span class="hl_2">正常执行</span></td>
+              </tr>
+              <tr>
+                <td><span style="height:300px;overflow-y:auto">document.write 建立的 ABBR 标签</span></td>
+                <td><span class="hl_1">执行错误无法修改</span></td>
+                <td><span class="hl_2">正常执行</span></td>
+              </tr>
+              <tr>
+                <td><span style="height:300px;overflow-y:auto">innerHTML  建立的 ABBR 标签</span></td>
+                <td><span class="hl_1">执行错误无法修改</span></td>
+                <td><span class="hl_2">正常执行</span></td>
+              </tr>
+              <tr>
+                <td>createElement <span style="height:300px;overflow-y:auto">建立的 ABBR 标签</span></td>
+                <td><span class="hl_2">正常执行</span></td>
+                <td><span class="hl_2">正常执行</span></td>
+              </tr>
+            </table>
+          <p>这次测试中可发现， IE6 中使用 DOM 标准方法修改 ABBR 标签内容时，在除去使用 createElement 方法创建的标签中均出现执行错误，标签内容无法被修改。</p>
+      <h3>4、使用 innerHTML 方法修改 ABBR 标签内容</h3>
+      <p>上一测试中使用 DOM 常规方法无法修改 IE6 中 ABBR 标签内容，因此本次使用了由 IE 最先实现的非标准 DOM 操作方法 innerHTML 来对标记进行修改。结果汇总如下表：</p>
+        <table class="compare">
+              <tr>
+                <th>innerHTML 方法修改操作</th>
+                <th>IE6</th>
+                <th>IE7 IE8 Firefox Chrome Safari Opera</th>
+              </tr>
+              <tr>
+                <td>静态 ABBR 标签</td>
+                <td><span class="hl_1">执行错误无法修改</span></td>
+                <td><span class="hl_2">正常执行</span></td>
+              </tr>
+              <tr>
+                <td><span style="height:300px;overflow-y:auto">document.write 建立的 ABBR 标签</span></td>
+                <td><span class="hl_1">执行错误无法修改</span></td>
+                <td><span class="hl_2">正常执行</span></td>
+              </tr>
+              <tr>
+                <td><span style="height:300px;overflow-y:auto">innerHTML  建立的 ABBR 标签</span></td>
+                <td><span class="hl_1">执行错误无法修改</span></td>
+                <td><span class="hl_2">正常执行</span></td>
+              </tr>
+              <tr>
+                <td>createElement <span style="height:300px;overflow-y:auto">建立的 ABBR 标签</span></td>
+                <td><span class="hl_2">正常执行</span></td>
+                <td><span class="hl_2">正常执行</span></td>
+              </tr>
+            </table>
+        <p>观看过汇总表后，createElement 方法创建的 ABBR 标签依然可以被正常修改，而其他方法创建的标签依然会导致执行错误发生，与上一 DOM 方法测试时情况相同。</p>
+        <p>这里有一点需要说明的是 <span style="height:300px;overflow-y:auto">innerHTML</span> 方法建立的标签，在 IE6 中已经出现了 DOM 结构错误，这必然会影响 DOM 规范方法以及 innerHTML 方法对其内容的修改。</p>
+        <h3>5、移除 ABBR 标签</h3>
+        <p>最后来看下使用 DOM 标准方法是否可以移除这些 ABBR 标签，同样请观看下表中的运行结果说明。</p>
+        <table class="compare">
+            <tr>
+              <th>移除标签</th>
+              <th>IE6</th>
+              <th>IE7 IE8 Firefox Chrome Safari Opera</th>
+            </tr>
+            <tr>
+              <td>静态 ABBR 标签</td>
+              <td><span class="hl_1">首次移除执行后无响应，DOM 结构存在，执行到第二次移除后出现脚本错误，此时 DOM 结构仍然存在。</span></td>
+              <td><span class="hl_2">正常执行</span></td>
+            </tr>
+            <tr>
+              <td><span style="height:300px;overflow-y:auto">document.write 建立的 ABBR 标签</span></td>
+              <td><span class="hl_1">首次移除执行后无响应，DOM 结构存在，执行到第二次移除后出现脚本错误，此时 DOM 结构仍然存在。</span></td>
+              <td><span class="hl_2">正常执行</span></td>
+            </tr>
+            <tr>
+              <td><span style="height:300px;overflow-y:auto">innerHTML  建立的 ABBR 标签</span></td>
+              <td><span class="hl_1">首次移除执行后无响应，DOM 结构存在，执行到第二次移除后出现脚本错误，此时 DOM 结构仍然存在。</span></td>
+              <td><span class="hl_2">正常执行</span></td>
+            </tr>
+            <tr>
+              <td>createElement <span style="height:300px;overflow-y:auto">建立的 ABBR 标签</span></td>
+              <td><span class="hl_2">正常执行</span></td>
+              <td><span class="hl_2">正常执行</span></td>
+            </tr>
+          </table>
+        <p>移除操作在 IE6 中依然出现了问题，由 createElement 方法建立的 ABBR 标签依然执行无误。而其他方式创建的标签无法被移除。在第一次执行移除操作时，脚本不会出现异常，但是节点还在页面中存在，点击检查 DOM 结构的按键后，可发现其结构存在，说明首次执行没有成功。第二次执行移除后，脚本抛出执行异常，说明节点无法被移除，内容依然在页面中显示并在 DOM 结构中存在。</p>
+        <p>总结以上 5 种情况后可以发现，只要是由 createElement 方法创建的 ABBR 标记均无操作问题。</p>
+        <p>本问题说明原本到此就应结束了，但是在一次无意间的 ABBR 标签创建顺序修改时，笔者发现处于 createElement 方法执行后的其他 ABBR 标记也可以被操作以及设置样式了。这很怪异，于是将测试用例稍作修改，在页面最初执行 createElement 方法创建个空 ABBR 标记对象，然后丢弃他，看这样是否在 IE6 中会影响到其他标记的操作呢？修改部分的代码如下：</p>
+<pre>
+<span class="hl_4">&lt;h1&gt;使用 createElement 方法建立的 ABBR 标记后：&lt;/h1&gt;</span>
+<span class="hl_4">&lt;script&gt;</span>
+<span class="hl_4">void function (){</span>
+<span class="hl_4">  document.createElement('abbr');</span>
+<span class="hl_4">}();</span>
+<span class="hl_4">&lt;/script&gt;</span>
+
+&lt;h2&gt;静态 ABBR 标记处理&lt;/h2&gt;
+&lt;p&gt;&lt;abbr id="A" class="abbrStyle" style="font-size:30px; line-height:50px; border:10px solid gray; background:yellow;"&gt;STATIC ABBR TAG&lt;/abbr&gt;&lt;/p&gt;
+&lt;ul&gt;
+……
+</pre>
+    <p>此时再将开始 5 中运行情况汇总如表：</p>
+    <table class="compare">
+
+          <tr>
+            <th>所有浏览器</th>
+            <th>设置样式</th>
+            <th>读取 DOM 结构字符串</th>
+            <th>DOM 修改操作</th>
+            <th>innerHTML 修改操作</th>
+            <th>移除标签</th>
+          </tr>
+          <tr>
+            <td>静态 ABBR 标签</td>
+            <td><span class="hl_2">样式设置有效</span></td>
+            <td><span class="hl_2">DOM 结构正常</span></td>
+            <td><span class="hl_2">正常执行</span></td>
+            <td><span class="hl_2">正常执行</span></td>
+            <td><span class="hl_2">正常执行</span></td>
+          </tr>
+          <tr>
+            <td><span style="height:300px;overflow-y:auto">document.write 建立的 ABBR 标签</span></td>
+            <td><span class="hl_2">样式设置有效</span></td>
+            <td><span class="hl_2">DOM 结构正常</span></td>
+            <td><span class="hl_2">正常执行</span></td>
+            <td><span class="hl_2">正常执行</span></td>
+            <td><span class="hl_2">正常执行</span></td>
+          </tr>
+          <tr>
+            <td><span style="height:300px;overflow-y:auto">innerHTML 建立的 ABBR 标签</span></td>
+            <td><span class="hl_2">样式设置有效</span></td>
+            <td><span class="hl_2">DOM 结构正常</span></td>
+            <td><span class="hl_2">正常执行</span></td>
+            <td><span class="hl_2">正常执行</span></td>
+            <td><span class="hl_2">正常执行</span></td>
+          </tr>
+          <tr>
+            <td>createElement <span style="height:300px;overflow-y:auto">建立的 ABBR 标签</span></td>
+            <td><span class="hl_2">样式设置有效</span></td>
+            <td><span class="hl_2">DOM 结构正常</span></td>
+            <td><span class="hl_2">正常执行</span></td>
+            <td><span class="hl_2">正常执行</span></td>
+            <td><span class="hl_2">正常执行</span></td>
+          </tr>
+        </table>
+    <p>非常的神奇，在页面最初执行了 createElement 方法创建 ABBR 标记对象后，之前 IE6 下对 ABBR 标签处理问题均得到了解决。由此看来这个问题是 IE6 的 Bug 已经确凿无疑了，庆幸的是 IE7 以及 IE7 的混杂模式中早已将这个 Bug 修复，我们只需对 IE6 中出现的问题执行具体修复策略。</p>
+    <h2 id="solutions">解决方案</h2>
+      <p>如果要在 IE6 中使用 ABBR 标签，可以先通过 IE 条件注释、UA 判端或浏览器特性判断等方式识别出 IE6 后，再通过脚本程序使用 createElement 方法创建出 ABBR 标签的 DOM 对象，即使这个 DOM 对象立即被丢弃也不追加到文档树内，其后的所有 ABBR 标签处理依然不会出现异常。</p>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.544.0 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BT9023/IE6_abbr_tag_exceptions.html">IE6_abbr_tag_exceptions.html</a><br />
+              <a href="../../tests/BT9023/IE6_abbr_tag_exceptions_fix.html">IE6_abbr_tag_exceptions_fix.html</a>
+                        </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-11</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>IE6 ABBR createElement appendChild createTextNode innerHTML runtime error 修改节点 修改内容 运行时错误</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

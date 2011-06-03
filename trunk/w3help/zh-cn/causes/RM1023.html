@@ -1,0 +1,515 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RM1023: 各浏览器在不同文档模式下对包含替换元素的行内框的高度存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 CSS2.1 规范中的描述，被设定了 'position' 特性值为 'relative' 的框的位置会根据其在普通流 (<a href="http://www.w3.org/TR/CSS21/visuren.html#normal-flow">normal flow</a>) 的位置进行计算。然后此框会相对于 (<a href="http://www.w3.org/TR/CSS21/visuren.html#relative-positioning">relative</a>) 它在普通流中的位置进行偏移。如果一个框 B 是相对定位的，则其随后的框的定位计算并不考虑 B 的偏移。<br />
+      <strong>'position:relative' 作用在 table-row-group, table-header-group, table-footer-group, table-row, table-column-group, table-column, table-cell, and table-caption 这些类型元素上的效果并未定义。</strong></p>
+      <p>CSS 中的表格模型基于 HTML4 的表格模型，包括了表格，标题，行，行组，列，列组以及单元格。下列 'display' 特性的值可以将表格语义指派给一个任意的元素：
+      <table class="compare">
+        <tr>
+          <th>'display' 特性的值</th>
+          <th>对应 HTML 中的元素</th>
+        </tr>
+        <tr>
+          <td>table-row</td>
+          <td>TR</td>
+        </tr>
+        <tr>
+          <td>table-row-group</td>
+          <td>TBODY</td>
+        </tr>
+        <tr>
+          <td>table-header-group</td>
+          <td>THEAD</td>
+        </tr>
+        <tr>
+          <td>table-footer-group</td>
+          <td>TFOOT</td>
+        </tr>
+        <tr>
+          <td>table-column</td>
+          <td>COL</td>
+        </tr>
+        <tr>
+          <td>table-column-group</td>
+          <td>COLGROUP</td>
+        </tr>
+        <tr>
+          <td>table-cell</td>
+          <td>TD, TH</td>
+        </tr>
+        <tr>
+          <td>table-caption</td>
+          <td>CAPTION</td>
+        </tr>
+      </table>
+      <p>关于 'position' 特性 及 相对定位 的更多资料，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/visuren.html#choose-position">9.3.1 Choosing a positioning scheme: 'position' property</a> 及 <a href="http://www.w3.org/TR/CSS21/visuren.html#relative-positioning">9.4.3 Relative positioning</a> 中的内容。</p>
+      <p>关于 CSS 表格模型 特性的更多信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/tables.html#table-display">17.2 The CSS table model</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 IE7 IE8(Q) 中，TD/TH 及 TD 元素对设定 'position:relative' 特性及偏移有效，其他均无效；<br />
+      在 IE8(S) 中，TD/TH 及 CAPTION 元素及它们相对于 CSS 中 display 特性值对设定 'position:relative' 特性及偏移有效，其他均无效；<br />
+      在 Firefox 中，除 TABLE 之外的所有表格类元素以及它们相对于 CSS 中 display 特性值对设定 'position:relative' 特性及偏移均无效<br />
+      在 Chrome Safari 中，CAPTION 元素及它相对于 CSS 中 display 特性值 'caption' 对设定 'position:relative' 特性及偏移有效，其他均无效；<br />
+      在 Opera 中，COL、COLGROUP 元素以及它们相对于 CSS 中 display 特性值对设定 'position:relative' 特性及偏移无效，其他均有效。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题可能导致设定了相对定位的符合问题描述的元素的位置在不同浏览器中产生差异，从而影响布局甚至功能实现。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>CSS2.1 规范中直接说明了 <strong>'position:relative' 作用在 table-row-group, table-header-group, table-footer-group, table-row, table-column-group, table-column, table-cell, and table-caption 这些类型元素上的效果并未定义。</strong><br />
+      下面就对 HTML 中除 TABLE 之外的表格类元素 (包括 TD/TH、TR、THEAD、TBODY、TFOOT、COL、COLGROUP、CAPTION) 以及它们相对于 CSS 中 'display' 特性值 (包括 'table-cell'、'table-row'、'table-header-group'、'table-row-group'、'table-footer-group'、'table-column'、'table-column-group'、'table-caption') 对 'position:relative' 的效果进行分析。</p>
+
+      <h3>1. 为 TD 元素设定 'position:relative'</h3>
+      <p>分析以下代码：<em>cell_relative.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  * { margin:0; font:20px/1.5 'Trebuchet MS'; }
+  table { border:5px solid black; background:khaki; }
+  td { border:2px solid navy; background:mistyrose; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;table cellpadding=&quot;2&quot; cellspacing=&quot;5&quot;&gt;
+  &lt;tr&gt;
+    &lt;td&gt;static&lt;/td&gt;
+    &lt;td&gt;static&lt;/td&gt;
+    &lt;td&gt;static&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td&gt;static&lt;/td&gt;
+    &lt;td style=&quot;<span class="hl_1">position:relative;</span> left:30px; top:30px; background:lightskyblue;&quot;&gt;relative&lt;/td&gt;
+    &lt;td&gt;static&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td&gt;static&lt;/td&gt;
+    &lt;td&gt;static&lt;/td&gt;
+    &lt;td&gt;static&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码为中间的 TD 元素设置了 <span class="hl_1">position:relative</span> 以及其偏移。</p>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Opera</th>
+          <th>Firefox Chrome Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RM1024/cell1.gif" alt=""></td>
+          <td><img src="../../tests/RM1024/cell2.gif" alt=""></td>
+        </tr>
+      </table>
+      <p>可见，<em>IE6 IE7 IE8 Opera</em> 中为 TD 元素设定 <span class="hl_1">position:relative</span> 有效。</p>
+      <br />
+      <h3>2. 为 TR 元素设定 'position:relative'</h3>
+      <p>分析以下代码：<em>row_relative.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  * { margin:0; font:20px/1.5 'Trebuchet MS'; }
+  table { border:5px solid black; background:khaki; }
+  td { border:2px solid navy; background:mistyrose; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;table cellpadding=&quot;2&quot; cellspacing=&quot;5&quot;&gt;
+  &lt;tr&gt;
+    &lt;td&gt;static&lt;/td&gt;
+    &lt;td&gt;static&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr style=&quot;<span class="hl_1">position:relative</span> left:30px; top:30px;&quot;&gt;
+    &lt;td style=&quot;background:lightskyblue;&quot;&gt;relative&lt;/td&gt;
+    &lt;td style=&quot;background:lightskyblue;&quot;&gt;relative&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td&gt;static&lt;/td&gt;
+    &lt;td&gt;static&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码为中间的 TR 元素设置了 <span class="hl_1">position:relative</span> 以及其偏移。</p>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q) Opera</th>
+          <th>IE8(S) Firefox Chrome Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RM1024/row1.gif" alt=""></td>
+          <td><img src="../../tests/RM1024/row2.gif" alt=""></td>
+        </tr>
+      </table>
+      <p>可见，<em>IE6 IE7 IE8(Q) Opera</em> 中为 TR 元素设定 <span class="hl_1">position:relative</span> 有效。</p>
+      <br />
+      <h3>3. 为其他表格类元素 COL、COLGROUP、THEAD、TBODY、TFOOT、CAPTION 设定 'position:relative'</h3>
+      <p>分析以下代码：<em>other_relative.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  * { margin:0; font:20px/1.5 'Trebuchet MS'; }
+  table { border:5px solid black; background:khaki; }
+  td { border:2px solid navy; background:mistyrose; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+COL
+&lt;table cellpadding=&quot;2&quot; cellspacing=&quot;5&quot;&gt;
+  &lt;col style=&quot;<span class="hl_1">position:relative</span> left:200px;&quot; /&gt;
+  &lt;tr&gt;
+    &lt;td&gt;COL&lt;/td&gt;
+    &lt;td&gt;COL&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;br /&gt;
+COLGROUP
+&lt;table cellpadding=&quot;2&quot; cellspacing=&quot;5&quot;&gt;
+  &lt;colgroup style=&quot;<span class="hl_1">position:relative</span> left:200px;&quot;&gt;
+    &lt;col /&gt;
+  &lt;/colgroup&gt;
+  &lt;tr&gt;
+    &lt;td&gt;COLGROUP&lt;/td&gt;
+    &lt;td&gt;COLGROUP&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;br /&gt;
+THEAD, TBODY, TFOOT
+&lt;table cellpadding=&quot;2&quot; cellspacing=&quot;5&quot;&gt;
+  &lt;thead style=&quot;<span class="hl_1">position:relative</span> left:100px;&quot;&gt;
+    &lt;tr&gt;
+      &lt;td&gt;THEAD&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody style=&quot;<span class="hl_1">position:relative</span> left:120px;&quot;&gt;
+    &lt;tr&gt;
+      &lt;td&gt;TBODY&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+  &lt;tfoot style=&quot;<span class="hl_1">position:relative</span> left:140px;&quot;&gt;
+    &lt;tr&gt;
+      &lt;td&gt;TFOOT&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tfoot&gt;
+&lt;/table&gt;
+&lt;br /&gt;
+CAPTION
+&lt;table cellpadding=&quot;2&quot; cellspacing=&quot;5&quot;&gt;
+  &lt;caption style=&quot;<span class="hl_1">position:relative</span> left:100px; background:lightskyblue;&quot;&gt;CAPTION&lt;/caption&gt;
+  &lt;tr&gt;
+    &lt;td&gt;table cell&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码为 COL、COLGROUP、THEAD、TBODY、TFOOT、CAPTION 元素设置了 <span class="hl_1">position:relative</span> 以及其偏移。</p>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q) Firefox</th>
+          <th>IE8(S) Chrome Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RM1024/other1.gif" alt=""></td>
+          <td><img src="../../tests/RM1024/other2.gif" alt=""></td>
+          <td><img src="../../tests/RM1024/other3.gif" alt=""></td>
+        </tr>
+      </table>
+      <p>可见，所有浏览器均不支持 COL 与 COLGROUP 元素的 <span class="hl_1">position:relative</span>。<br />
+      <em>IE6 IE7 IE8(Q) Firefox</em> 对 THEAD、TBODY、TFOOT、CAPTION 元素设定 <span class="hl_1">position:relative</span> 均无效。<br />
+      <em>IE8(S) Chrome Safari</em> 对 THEAD、TBODY、TFOOT 元素设定 <span class="hl_1">position:relative</span> 无效，对 CAPTION 元素有效。<br />
+      <em>Opera</em> 对 THEAD、TBODY、TFOOT、CAPTION 元素设定 <span class="hl_1">position:relative</span> 均有效。<br /></p>
+      <br />
+      <h3>4. CSS 中 'display' 特性值为 'table-cell'、'table-row'、'table-header-group'、'table-row-group'、'table-footer-group'、'table-column'、'table-column-group'、'table-caption' 的元素设定 'position:relative'</h3>
+      <p>上面测试的均为 HTML 中原生为表格类的元素，下面将分析通过设定 'display' 特性<sup>1</sup>来模拟表格特性的元素对 'position:relative' 是否有效。</p>
+      <p class="comment">注 1: 由于 IE6 IE7 IE8(Q) 不支持上述 'display' 特性值，故下面将只考虑 IE8(S) 及其他非 IE 浏览器。</p>
+      <p>分析以下代码：<em>dis_relative.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  * { margin:0; padding:0; font:12px/1 'Trebuchet MS'; }
+  h1 { font-weight:bold; border-top:2px solid gray; }
+  .table { display:table; border-spacing:5px; border:5px solid black; background:khaki; }
+  .tr { display:table-row; }
+  .td { display:table-cell; border:2px solid navy; background:mistyrose; padding:2px; }
+  .thead { display:table-header-group; }
+  .tbody { display:table-row-group; }
+  .tfoot { display:table-footer-group; }
+  .caption { display:table-caption; }
+  .col { display:table-column; }
+  .colgroup { display:table-column-group; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div class=&quot;table&quot;&gt;
+  &lt;div class=&quot;tr&quot;&gt;
+    &lt;div class=&quot;td&quot;&gt;table-cell&lt;/div&gt;
+    &lt;div class=&quot;td&quot;&gt;table-cell&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;tr&quot;&gt;
+    &lt;div class=&quot;td&quot; style=&quot;<span class="hl_1">position:relative;</span> left:30px; top:20px; background:lightskyblue;&quot;&gt;table-cell&lt;/div&gt;
+    &lt;div class=&quot;td&quot;&gt;table-cell&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;tr&quot;&gt;
+    &lt;div class=&quot;td&quot;&gt;table-cell&lt;/div&gt;
+    &lt;div class=&quot;td&quot;&gt;table-cell&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div class=&quot;table&quot;&gt;
+  &lt;div class=&quot;tr&quot;&gt;
+    &lt;div class=&quot;td&quot;&gt;table-row&lt;/div&gt;
+    &lt;div class=&quot;td&quot;&gt;table-row&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;tr&quot; style=&quot;<span class="hl_1">position:relative;</span> left:30px; top:20px;&quot;&gt;
+    &lt;div class=&quot;td&quot; style=&quot;background:lightskyblue;&quot;&gt;table-row&lt;/div&gt;
+    &lt;div class=&quot;td&quot; style=&quot;background:lightskyblue;&quot;&gt;table-row&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;tr&quot;&gt;
+    &lt;div class=&quot;td&quot;&gt;table-row&lt;/div&gt;
+    &lt;div class=&quot;td&quot;&gt;table-row&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div class=&quot;table&quot;&gt;
+  &lt;div class=&quot;thead&quot; style=&quot;<span class="hl_1">position:relative;</span> left:80px; top:20px;&quot;&gt;
+    &lt;div class=&quot;tr&quot;&gt;
+      &lt;div class=&quot;td&quot; style=&quot;background:lightskyblue;&quot;&gt;table-header-group&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div class=&quot;table&quot;&gt;
+  &lt;div class=&quot;tbody&quot; style=&quot;<span class="hl_1">position:relative;</span> left:80px; top:20px;&quot;&gt;
+    &lt;div class=&quot;tr&quot;&gt;
+      &lt;div class=&quot;td&quot; style=&quot;background:lightskyblue;&quot;&gt;table-row-group&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div class=&quot;table&quot;&gt;
+  &lt;div class=&quot;tfoot&quot; style=&quot;<span class="hl_1">position:relative;</span> left:80px; top:20px;&quot;&gt;
+    &lt;div class=&quot;tr&quot;&gt;
+      &lt;div class=&quot;td&quot; style=&quot;background:lightskyblue;&quot;&gt;table-footer-group&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div class=&quot;table&quot;&gt;
+  &lt;div class=&quot;caption&quot; style=&quot;<span class="hl_1">position:relative;</span> left:80px; top:20px; background:lightskyblue;&quot;&gt;table-caption&lt;/div&gt;
+  &lt;div class=&quot;tr&quot;&gt;
+    &lt;div class=&quot;td&quot;&gt;table-caption&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div class=&quot;table&quot;&gt;
+  &lt;div class=&quot;col&quot; style=&quot;<span class="hl_1">position:relative;</span> left:200px;&quot;&gt;&lt;/div&gt;
+  &lt;div class=&quot;tr&quot;&gt;
+    &lt;div class=&quot;td&quot;&gt;table-column&lt;/div&gt;
+    &lt;div class=&quot;td&quot;&gt;table-column&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div class=&quot;table&quot;&gt;
+  &lt;div class=&quot;colgroup&quot; style=&quot;<span class="hl_1">position:relative;</span> left:200px;&quot;&gt;
+    &lt;div class=&quot;col&quot;&gt;&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;tr&quot;&gt;
+    &lt;div class=&quot;td&quot;&gt;table-column-group&lt;/div&gt;
+    &lt;div class=&quot;td&quot;&gt;table-column-group&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码上面代码中为 'display' 特性值为 'table-cell'、'table-row'、'table-header-group'、'table-row-group'、'table-footer-group'、'table-column'、'table-column-group'、'table-caption' 的 DIV 元素设置了 <span class="hl_1">position:relative</span> 以及其偏移。</p>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE8(S)</th>
+          <th>Chrome Safari</th>
+          <th>Firefox</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RM1024/dis1.gif" alt=""></td>
+          <td><img src="../../tests/RM1024/dis2.gif" alt=""></td>
+          <td><img src="../../tests/RM1024/dis3.gif" alt=""></td>
+          <td><img src="../../tests/RM1024/dis4.gif" alt=""></td>
+        </tr>
+      </table>
+      <p>可见，CSS 中 'display' 特性值为 'table-cell'、'table-row'、'table-header-group'、'table-row-group'、'table-footer-group'、'table-column'、'table-column-group'、'table-caption' 的元素设定 'position:relative' 与对应的表格类元素设定 'position:relative' 的情况一致。</p>
+      <br />
+      <h3>5. 小结</h3>
+      <p>下面通过表格总结各浏览器对除 TABLE 之外的表格类元素以及它们相对于 CSS 中 'display' 特性值设置相对定位 (<span class="hl_1">position:relative</span>) 特性的支持差异：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S)</th>
+          <th>Chrome Safari</th>
+          <th>Firefox</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <th>TD/TH (display:table-cell)</th>
+          <td><span class="hl_2">有效</span></td>
+          <td><span class="hl_2">有效</span></td>
+          <td><span class="hl_1">无效</span></td>
+          <td><span class="hl_1">无效</span></td>
+          <td><span class="hl_2">有效</span></td>
+        </tr>
+        <tr>
+          <th>TR (display:table-row)</th>
+          <td><span class="hl_2">有效</span></td>
+          <td><span class="hl_1">无效</span></td>
+          <td><span class="hl_1">无效</span></td>
+          <td><span class="hl_1">无效</span></td>
+          <td><span class="hl_2">有效</span></td>
+        </tr>
+        <tr>
+          <th>THEAD (display:table-header-group)</th>
+          <td><span class="hl_1">无效</span></td>
+          <td><span class="hl_1">无效</span></td>
+          <td><span class="hl_1">无效</span></td>
+          <td><span class="hl_1">无效</span></td>
+          <td><span class="hl_2">有效</span></td>
+        </tr>
+        <tr>
+          <th>TBODY (display:table-row-group)</th>
+          <td><span class="hl_1">无效</span></td>
+          <td><span class="hl_1">无效</span></td>
+          <td><span class="hl_1">无效</span></td>
+          <td><span class="hl_1">无效</span></td>
+          <td><span class="hl_2">有效</span></td>
+        </tr>
+        <tr>
+          <th>TFOOT (display:table-footer-group)</th>
+          <td><span class="hl_1">无效</span></td>
+          <td><span class="hl_1">无效</span></td>
+          <td><span class="hl_1">无效</span></td>
+          <td><span class="hl_1">无效</span></td>
+          <td><span class="hl_2">有效</span></td>
+        </tr>
+        <tr>
+          <th>CAPTION (display:table-caption)</th>
+          <td><span class="hl_1">无效</span></td>
+          <td><span class="hl_2">有效</span></td>
+          <td><span class="hl_2">有效</span></td>
+          <td><span class="hl_1">无效</span></td>
+          <td><span class="hl_2">有效</span></td>
+        </tr>
+        <tr>
+          <th>COL (display:table-column)</th>
+          <td><span class="hl_1">无效</span></td>
+          <td><span class="hl_1">无效</span></td>
+          <td><span class="hl_1">无效</span></td>
+          <td><span class="hl_1">无效</span></td>
+          <td><span class="hl_1">无效</span></td>
+        </tr>
+        <tr>
+          <th>COLGROUP (display:table-column-group)</th>
+          <td><span class="hl_1">无效</span></td>
+          <td><span class="hl_1">无效</span></td>
+          <td><span class="hl_1">无效</span></td>
+          <td><span class="hl_1">无效</span></td>
+          <td><span class="hl_1">无效</span></td>
+        </tr>
+      </table>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>由于除 TABLE 之外的表格类元素以及它们相对于 CSS 中 display 特性值设定了相对定位后的效果 CSS2.1 规范中没有明确定义，而各浏览器的实现又存在很大差异。所以应避免为这些元素设定 'position:relative'。<br />
+      若需要实现如冻结表格行或列的效果，可以考虑使用绝对定位其他 TABLE 元素的方式模拟。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6。10<br />
+              Chrome 8.0.552.0 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.63
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RM1024/cell_relative.html">cell_relative.html</a>
+            <br/>
+            <a href="../../tests/RM1024/row_relative.html">row_relative.html</a>
+            <br/>
+            <a href="../../tests/RM1024/other_relative.html">other_relative.html</a>
+            <br/>
+            <a href="../../tests/RM1024/dis_relative.html">dis_relative.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-15</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>position relative 相对 定位 display table row cell td</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

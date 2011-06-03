@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HG2003: META 标签的 content 属性中使用非 ';' 的符号做数据分割时在某些浏览器中不会被识别</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>META 标签位于 HTML 文档的头部，可以提供与页面有关的元信息（meta-information）。一个 META 元素的 http-equiv 属性及 content 属性，组成了 &quot;名称/值&quot; 这种键值对，在服务器在发送实际的文档到浏览器端之前，把 &quot;名称/值&quot; 对添加到发送给浏览器的内容头部。</p>
+      <p>W3C 在规范中特别提到，某些用户端支持通过 META 元素的设置在若干秒内刷新页面，或者使页面跳转到指定的 URI。然而 <strong>W3C 并不推荐用户使用这种方式控制页面跳转</strong>。这可能导致对于某些用户页面不可访问。应使用服务端控制页面的跳转。</p>
+      <p>关于 META 元素的详细信息，请参考 HTML 4.01 规范 <a href="http://www.w3.org/TR/html401/struct/global.html#h-7.4.4">7.4.4</a> 中的内容。</p>
+      <p></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>通过 META 元素可以控制页面定时跳转，对于 http-equiv 属性为 refresh 时对应的 content 属性的值中，跳转时间与跳转 URL 之间需要分隔符分开，如果使用非 ';' 的分隔符时，在某些浏览器下将不能达到期望的效果。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>META 元素控制页面跳转被广泛用于 BBS 等系统中，若在 content 属性中使用了某些浏览器不支持的分割符可能会导致页面在这些浏览器中无法发送跳转。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8 Opera</th>
+          <td>支持 &quot;分号&quot; 和 &quot;空格&quot; 做分隔符。</td>
+        </tr>
+        <tr>
+          <th>Firefox</th>
+          <td>支持 &quot;分号&quot; 、 &quot;逗号&quot; 和 &quot;空格&quot; 做分隔符。</td>
+        </tr>
+        <tr>
+          <th>Chrome Safari</th>
+          <td>支持 &quot;分号&quot; 和 &quot;逗号&quot; 做分隔符。</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>通过 META 元素可以控制页面定时跳转。</p>
+
+      <p>分析以下代码：</p>
+      <p class="hl_4">main.html</p>
+<pre>&lt;iframe src=&quot;<span class="hl_1">metaref1.htm</span>&quot;&gt;&lt;/iframe&gt;&lt;br /&gt;
+&lt;iframe src=&quot;<span class="hl_3">metaref2.htm</span>&quot;&gt;&lt;/iframe&gt;&lt;br /&gt;
+&lt;iframe src=&quot;<span class="hl_2">metaref3.htm</span>&quot;&gt;&lt;/iframe&gt;</pre>
+      <p class="hl_1">metaref1.htm</p>
+<pre>&lt;meta http-equiv=&quot;refresh&quot; content=&quot;<strong>3<span class="hl_1"> </span> url</strong>=http://www.google.cn/intl/zh-CN/images/logo_cn.gif&quot;&gt;</pre>
+      <p class="hl_3">metaref2.htm</p>
+<pre>&lt;meta http-equiv=&quot;refresh&quot; content=&quot;<strong>3<span class="hl_3">,</span> url</strong>=http://www.google.cn/intl/zh-CN/images/logo_cn.gif&quot;&gt;</pre>
+      <p class="hl_2">metaref3.htm</p>
+<pre>&lt;meta http-equiv=&quot;refresh&quot; content=&quot;<strong>3<span class="hl_2">;</span> url</strong>=http://www.google.cn/intl/zh-CN/images/logo_cn.gif&quot;&gt;</pre>
+      <p>主页面<span class="hl_4">main.html</span>中包含三个 IFRAME 元素，分别引入页面 &quot;<span class="hl_1">metaref1.htm</span>&quot; ， &quot;<span class="hl_3">metaref2.htm</span>&quot; 及 &quot;<span class="hl_2">metaref3.htm</span>&quot; 。这三个页面唯一的区别就是 META 元素内的 content 属性中跳转时间及跳转 URL 之间的间隔符。</p>
+      <p>下面在各浏览器中打开<span class="hl_4">main.html</span>观察3秒后 IFRAME 页是否可以正常的跳转到谷歌 logo 的图片地址：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE Opera</th>
+          <th>Chrome Safari</th>
+          <th>Firefox</th>
+        </tr>
+        <tr>
+          <td>第一个IFRAME：空格分割</td>
+          <td><span class="hl_2">跳转</span></td>
+          <td><span class="hl_1">不跳转</span></td>
+          <td><span class="hl_2">跳转</span></td>
+        </tr>
+        <tr>
+          <td>第二个IFRAME：逗号分割</td>
+          <td><span class="hl_1">不跳转</span></td>
+          <td><span class="hl_2">跳转</span></td>
+          <td><span class="hl_2">跳转</span></td>
+        </tr>
+        <tr>
+          <td>第三个IFRAME：分号分割</td>
+          <td><span class="hl_2">跳转</span></td>
+          <td><span class="hl_2">跳转</span></td>
+          <td><span class="hl_2">跳转</span></td>
+        </tr>
+      </table>
+      <p>可以看到，</p>
+      <ul>
+        <li><strong>Chrome  Safari</strong> 对于空格分割跳转时间及跳转 URL 这种写法不予跳转；</li>
+        <li><strong>IE Opera</strong> 对于逗号分割跳转时间及跳转 URL 这种写法不予跳转；</li>
+        <li><strong>Firefox</strong> 对于这三种的写法均会跳转。</li>
+      </ul>
+      <p>通过 WebKit 内核及 Firefox 源代码我们可以看清楚浏览器对于 content 内容的处理：</p>
+      <p><strong>WebKit 内核</strong>：/WebCore/platform/network/HTTPParsers.cpp</p>
+<pre>bool parseHTTPRefresh(const String& refresh, bool fromHttpEquivMeta, double& delay, String& url)
+{
+    int len = refresh.length();
+    int pos = 0;
+
+    if (!skipWhiteSpace(refresh, pos, fromHttpEquivMeta))
+        return false;
+
+    <span class="hl_1">//',' and ';' is acceptable.</span>
+    while (pos != len && refresh[pos] != ',' && refresh[pos] != ';')
+        ++pos;
+    ...
+}</pre>
+      <p><strong>Firefox</strong>：/docshell/base/nsDocShell.cpp</p>
+<pre>nsresult
+nsDocShell::SetupRefreshURIFromHeader(nsIURI * aBaseURI,
+                                      const nsACString & aHeader)
+{
+    ...
+        // skip any remaining whitespace
+        while (iter != doneIterating && nsCRT::IsAsciiSpace(*iter))
+            ++iter;
+
+        <span class="hl_1">// skip ';' or ','</span>
+        if (iter != doneIterating && (*iter == ';' || *iter == ',')) {
+            ++iter;
+        }
+
+        <span class="hl_1">// skip whitespace</span>
+        while (iter != doneIterating && nsCRT::IsAsciiSpace(*iter))
+            ++iter;
+    ...
+}</pre>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>1. 参照 W3C 的建议，使用服务端进行页面跳转。</p>
+
+      <p>2. 使用合法的，所有浏览器均支持的写法：</p>
+      <pre>&lt;meta http-equiv=&quot;refresh&quot; content=&quot;3<span class="hl_2">;</span> url=http://www.google.cn/intl/zh-CN/images/logo_cn.gif&quot;&gt;</pre>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 5.0.342.2 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.50
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HG2003/main.html">main.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-06-21</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>Meta http-equiv refresh URL 跳转</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

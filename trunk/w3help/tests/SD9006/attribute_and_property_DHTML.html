@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	* { font-family:Arial; }
+	div { width:100px; height:100px; background:#eee; font-size:12px; }
+	textarea { width:600px; }
+</style>
+<script>
+	function getStyle(obj) {
+		obj.innerHTML = '.style.cssText=' + (obj.style.cssText).toLowerCase() + 
+			'<br>.getAttribute("style")=' + ("" + obj.getAttribute("style")).toLowerCase();
+	}
+	window.onload = function () {
+		var d = document.getElementById("d");
+		var cont= document.getElementById("cont");
+		var info= document.getElementById("info");
+		var s = 'd.getAttribute("offsetHeight"): ';
+		s += d.getAttribute("offsetHeight") + "\n";
+		d.setAttribute("innerHTML", "other text");
+		info.value = s + cont.innerHTML;
+	}
+</script>
+</head>
+<body>
+	<div id="cont"><div id="d">text text text text text text text</div></div>
+	<textarea id="info"></textarea>
+</body>
+</html>

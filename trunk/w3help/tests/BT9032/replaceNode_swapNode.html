@@ -1,0 +1,43 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<script type="text/javascript">
+if(window.Node){
+	Node.prototype.replaceNode=function($target){
+		return this.parentNode.replaceChild($target,this);
+	}
+	Node.prototype.swapNode=function($target){
+		var $targetParent=$target.parentNode;
+		var $targetNextSibling=$target.nextSibling;
+		var $thisNode=this.parentNode.replaceChild($target,this);
+		$targetNextSibling?$targetParent.insertBefore($thisNode,$targetNextSibling):$targetParent.appendChild($thisNode);
+		return this;
+	}
+}
+</script>
+<script type="text/javascript">
+function replace(){
+	var $list=document.getElementById("list");
+	var $li=document.createElement("li");
+	$li.innerHTML="new item";
+	alert($list.getElementsByTagName("li")[2].replaceNode($li).innerHTML);
+}
+function swap(){
+	var $lists=document.getElementsByTagName("li");
+	alert($lists[0].swapNode($lists[4]).innerHTML);
+}
+</script>
+</head>
+<body>
+	<ul id="list">
+		<li>item 1</li>
+		<li>item 2</li>
+		<li>item 3</li>
+		<li>item 4</li>
+		<li>item 5</li>
+	</ul>
+	<button onclick="replace();">Replacd 'item 3' to 'new item'.</button>
+	<button onclick="swap();">Swap 'item 1' and 'item 5'.</button>
+</body>
+</html>

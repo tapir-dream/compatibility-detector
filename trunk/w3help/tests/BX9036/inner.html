@@ -1,0 +1,11 @@
+<input type="text" id="dialogtext" /><button id="ok">OK!</button>
+<script>
+    document.getElementById("dialogtext").value =
+      window.dialogArguments.document.getElementById("textbox").value;
+    document.getElementById("ok").onclick = function () {
+        window.dialogArguments.updatetext =
+          document.getElementById("dialogtext").value;
+        window.dialogArguments.update();
+        window.close();
+    }
+</script>

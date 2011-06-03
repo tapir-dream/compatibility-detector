@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+</head>
+<body>
+<p>=========分割线============<p>
+<div></div>
+<div></div>
+<div></div>
+<div></div>
+<script type="text/javascript" src="1.js"></script>
+<script type="text/javascript">
+	document.getElementsByTagName("div")[0].innerHTML = "HTML 注释错误之前的 SCRIPT 标记块内脚本程序已运行";
+</script>
+<script type="text/javascript">
+	document.getElementsByTagName("div")[1].innerHTML = "HTML 注释错误之前脚本程序已运行";
+	<!--
+	document.getElementsByTagName("div")[2].innerHTML = "HTML 注释错误之后脚本程序已运行";
+
+</script>
+<script type="text/javascript">
+	document.getElementsByTagName("div")[3].innerHTML = "HTML 注释错误之后的 SCRIPT 标记块内脚本程序已运行";
+</script>
+<p>=========分割线============<p>
+</body>
+</html>

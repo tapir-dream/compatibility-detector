@@ -1,0 +1,126 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BT9035: 只有 IE 和 Opera 的 HTMLDOMNode 有 removeNode 方法</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>只有 IE 和 Opera 的 HTMLDOMNode 有 removeNode 方法，其他浏览器则不支持。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>该问题将造成某些使用本特性设计的功能在非 IE 和 Opera 浏览器中不能实现。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8 Opera</th>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>HTMLDOMNode.removeNode 是 IE 浏览器的特性，Opera 也实现了该方法。</p>
+      <p>该方法的简介如下：</p>
+      <dl>
+        <dt>removeNode</dt>
+        <dd>
+          <pre>oRemoved = object.removeNode( [bRemoveChildren])</pre>
+          将目标节从文档树中删除，返回目标节点。是否删除目标节点的子节点由参数 bRemoveChildren 决定，其默认值为 false，即仅删除目标节点，保留子节点。
+        </dd>
+      </dl>
+      <p>关于 removeNode 的更多信息，请参考 MSDN <a href="http://msdn.microsoft.com/zh-cn/library/ms536708(en-us,VS.85).aspx">removeNode Method</a>。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>不要使用 IE 的特性设计页面代码。</p>
+      <p>或者针对非 IE 浏览器使用标准方法实现，如：</p>
+<pre>
+if(window.Node&&!window.opera){
+  Node.prototype.removeNode=function(removeChildren){
+    if(removeChildren||!this.hasChildNodes()){
+      return this.parentNode.removeChild(this);
+    }
+    var $parent=this.parentNode;
+    var $nextSibling=this.nextSibling;
+    var $childNodes=$parent.removeChild(this).childNodes;
+    while($childNodes.length){
+      $nextSibling?$parent.insertBefore($childNodes[0],$nextSibling):$parent.appendChild($childNodes[0]);
+    }
+    return this;
+  }
+}
+</pre>
+      <p class="comment">注：IE 中没有内置函数 Node，即没有节点的“构造函数”。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BT9035/removeNode.html">removeNode.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-18</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>removeNode</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

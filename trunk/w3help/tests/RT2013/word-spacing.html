@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="gbk" />
+<style>
+	* { margin:0; padding:0; border:0; font:18px 'Trebuchet MS'; }
+	h1 { font-weight:bold; border-bottom:1px solid black; }
+	p span { background:lightsalmon; }
+	div.ws { word-spacing:30px; background:wheat; margin-top:5px; }
+	div.info { background:mintcream; }
+	div span { background:violet; }
+</style>
+<script>
+	function $(id) { return document.getElementById(id); }
+	
+	window.onload = function () {
+		var nbsp_width = $('nbsp_width').previousSibling.offsetWidth,
+			ispace_width = $('ispace_width').previousSibling.offsetWidth,
+			w_spacing = 30,
+			a = [nbsp_width, nbsp_width, nbsp_width, ispace_width, ispace_width],
+			t = [1, 1, 2, 1, 2];
+		$('nbsp_width').appendChild(document.createTextNode('width=' + nbsp_width));
+		$('ispace_width').appendChild(document.createTextNode('width=' + ispace_width));
+		
+		for (var i = 1; i <= 5; i++) {
+			var g1_off = $('g' + i + '_2').getBoundingClientRect().left - $('g' + i + '_1').getBoundingClientRect().right;
+			$('i' + i + '').appendChild(document.createTextNode(g1_off + '=' + a[i - 1] + '*' + t[i - 1] + '+' + w_spacing + '*' + (g1_off - a[i - 1] * t[i - 1]) / w_spacing));
+			$('i' + i + '').style.paddingLeft = $('g' + i + '_1').offsetWidth + 'px';
+		}
+	}
+</script>
+</head>
+<body>
+<p>
+	<span>&nbsp;</span><em id="nbsp_width"></em>
+	<span>　</span><em id="ispace_width"></em>
+</p>
+<br />
+<h1>Space</h1>
+<div class="ws">
+	<span id="g1_1">text</span> <span id="g1_2">text</span>
+</div>
+<div class="info" id="i1"></div>
+<br />
+<h1>Non-breaking space</h1>
+<div class="ws">
+	<span id="g2_1">text</span>&nbsp;<span id="g2_2">text</span>
+</div>
+<div class="info" id="i2"></div>
+<div class="ws">
+	<span id="g3_1">text</span>&nbsp;&nbsp;<span id="g3_2">text</span>
+</div>
+<div class="info" id="i3"></div>
+<br />
+<h1>Ideographic space</h1>
+<div class="ws">
+	<span id="g4_1">text</span>　<span id="g4_2">text</span>
+</div>
+<div class="info" id="i4"></div>
+<div class="ws">
+	<span id="g5_1">text</span>　　<span id="g5_2">text</span>
+</div>
+<div class="info" id="i5"></div>
+</body>
+</html>

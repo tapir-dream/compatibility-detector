@@ -1,0 +1,145 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BT8014: 只有 IE 支持 'writing-mode' 特性</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p><strong>'wirting-mode' 简介</strong></p>
+      <p>在 IE5.5 中就已经有了 'writing-mode' 特性，后续的 IE 版本继续提供了对此特性的支持。但是，各版本之间对此特性的支持也有差异。</p>
+      <p>通过 'writing-mode' 特性可以设置或获取一个元素内容的方向或对齐方式。</p>
+      <p>而且，'writing-mode' 也是在1999年至2001年 CSS3 规范的草案中的特性。但是，后来的草案中，该属性被剔除。所以，本文不对此属性做过多说明。</p>
+
+      <p>关于 'writing-mode' 的详细资料 :
+      <ul>
+        <li>msdn IHTMLSTYLE3：<a href="http://msdn.microsoft.com/en-us/library/aa768697(VS.85).aspx">'writingMode'</a></li>
+        <li>W3C 1999年草案: <a href="http://www.w3.org/TR/1999/WD-i18n-format-19990910/#a2">Vertical Text</a></li>
+        <li>W3C 2001年草案: <a href="http://www.w3.org/TR/2001/WD-css3-text-20010517/#writing-mode">'writing-mode'</a></li>
+        <li>W3C 最新(2007)草案： <a href="http://www.w3.org/TR/css3-text/">http://www.w3.org/TR/css3-text/</a></li>
+      </ul>
+
+      <h2 id="description">问题描述</h2>
+      <p>只有 IE 支持 'writing-mode' 特性。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>这个问题可能引起其他浏览器与 IE6 IE7 IE8 中页面布局的不同，因为文字的排列方式可能会影响其包含块的高度宽度计算。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+<pre>&lt;style&gt;
+.wt {
+  width:300px;
+  border:1px solid red;
+  <span class="hl_1">writing-mode:tb-rl;</span>
+}
+&lt;/style&gt;
+&lt;p class="wt"&gt;How many roads must a man walk down&lt;/p&gt;</pre>
+
+      <p>这段代码在不同的浏览器环境中表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BT8014/BT8014-1.jpg" alt=""></td>
+        </tr>
+        <tr>
+          <th>IE8(S)</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BT8014/BT8014-2.jpg" alt="" /></td>
+        </tr>
+        <tr>
+          <th>Firefox Opera Safari Chrome</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BT8014/BT8014-3.jpg" alt="" /></td>
+        </tr>
+      </table>
+
+
+      <p>可见，在所有版本的 IE 中，文字都是垂直排列的，但是 IE8 的标准模式又跟其他版本在高度的计算上有所不同。</p>
+      <p>除 IE 外，其他浏览器不支持 'writing-mode'，所以把它当作不合法的声明丢弃。</p>
+      <p>这个问题可能引起其他浏览器与 IE 中页面布局的不同，因为文字的排列方式可能会影响其包含块的高度宽度计算。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>其他浏览器中不支持文字的垂直排列，所以，尽量避免使用 IE 中特有的 'writing-mode' 特性。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.6<br />
+              Chrome 6.0.447.0 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BT8014/writing_mode.html">writing_mode.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-06-29</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>wrting-mode tb-rl</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

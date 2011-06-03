@@ -1,0 +1,51 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+</head>
+<script type="text/javascript">
+function $(id){
+	return document.getElementById(id);
+}
+function toggle($target){
+	$target.style.display=$target.offsetWidth?"none":"block";
+}
+</script>
+<body>
+	<h3>1 通过修改容器的 scrollLeft/scrollTop 值测试依赖该容器内文本流定位的 Absolutely positioned element 是否会更新其位置</h3>
+	<div id="container_1" style="width:300px; height:300px; margin:0 auto; border:3px solid gold; overflow:scroll;">
+		<div style="width:600px; height:600px; padding:50px; background:silver;">
+			<div style="width:80px; height:80px; background:blue;"></div>
+			<div id="absolutely_1" style="position:absolute; background:red; width:100px; height:100px;">absolute</div>
+		</div>
+	</div>
+	<div style="width:300px; margin:0 auto;">
+		<button style="height: 100px; float:right;" onclick="toggle($('absolutely_1'));">show/hide Red</button>
+		<button onclick="$('container_1').scrollLeft=0;">Silver.scrollLeft=0</button>
+		<button onclick="$('container_1').scrollLeft=30;">Silver.scrollLeft=30</button>
+		<button onclick="$('container_1').scrollTop=0;">Silver.scrollTop=0</button>
+		<button onclick="$('container_1').scrollTop=30;">Silver.scrollTop=30</button>
+	</div>
+	<h5>1.1 点击左侧按钮或拖动容器的滚动条时，IE6(Q) IE7(Q) IE8(Q) 会实时更新 Red 的位置，其他浏览器则不会。<br/>但点击后，window.onresize 被触发时，IE8(S) Firefox 能够更新。<br/>Firefox 可连击某一个左侧按钮测试，交替点击每个左侧按钮更有趣：Red 的位置被更新为上一次点击左侧按钮时应该在的位置。</h5>
+	<h5>1.2 点击左侧按钮或拖动容器的滚动条后，再点击右侧按钮时，IE6(S) IE7(S) Firefox 会更新 Red 的位置，IE8(S) Chrome Safari Opera(S) 不会更新，Opera(Q) 出现渲染错误。</h5>
+
+	<hr/>
+
+	<h3>2 通过修改容器的 marginLeft/marginTop 值测试依赖该容器内文本流定位的 Absolutely positioned element 是否会更新其位置</h3>
+	<div style="width:300px; height:300px; margin:0 auto; border:3px solid gold; overflow:hidden;">
+		<div id="container_2" style="width:600px; height:600px; padding:50px; background:silver;">
+			<div style="width:80px; height:80px; background:blue;"></div>
+			<div id="absolutely_2" style="position:absolute; background:red; width:100px; height:100px;"></div>
+		</div>
+	</div>
+	<div style="width:400px; margin:0 auto;">
+		<button style="height: 100px; float:right;" onclick="toggle($('absolutely_2'));">show/hide Red</button>
+		<button onclick="$('container_2').style.marginLeft='0';">Silver.style.marginLeft='0'</button>
+		<button onclick="$('container_2').style.marginLeft='-30px';">Silver.style.marginLeft='-30px'</button>
+		<button onclick="$('container_2').style.marginTop='0';">Silver.style.marginTop='0'</button>
+		<button onclick="$('container_2').style.marginTop='-30px';">Silver.style.marginTop='-30px'</button>
+	</div>
+	<h5>2.1 点击左侧按钮时，IE6 IE7 IE8 Firefox Opera Safari 会实时更新 Red 的位置。</h5>
+	<h5>2.2 点击左侧按钮后，再点击右侧按钮时，Chrome 会更新 Red 的位置。</h5>
+</body>
+</html>

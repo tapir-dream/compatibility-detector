@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<style>
+a,acronym,b,bdo,big,cite,code,del,dfn,em,font,i,ins,kbd,label,q,s,samp,small,span,strike,strong,sub,sup,tt,u,var
+{font-size:30px; line-height:50px; border:10px solid #0F0; cursor:pointer;}
+div.info{font-size:12px; line-height:18px; color:#060; background:#EEE;margin:30px 0 30px 0;}
+</style>
+</head>
+<body>
+<script>
+var inlineElements = {
+	'a':'<a></a>',
+	'acronym':'<acronym></acronym>',
+	'b':'<b></b>',
+	'bdo':'<bdo></bdo>',
+	'big':'<big></big>',
+	'cite':'<cite></cite>',
+	'code':'<code></code>',
+	'del':'<del></del>',
+	'dfn':'<dfn></dfn>',
+	'em':'<em></em>',
+	'font':'<font></font>',
+	'i':'<i></i>',
+	'ins':'<ins></ins>',
+	'kbd':'<kbd></kbd>',
+	'label':'<label></label>',
+	'q':'<q></q>',
+	's':'<s></s>',
+	'samp':'<samp></samp>',
+	'small':'<small></small>',
+	'span':'<span></span>',
+	'strike':'<strike></strike>',
+	'strong':'<strong></strong>',
+	'sub':'<sub></sub>',
+	'sup':'<sup></sup>',
+	'tt':'<tt></tt>',
+	'u':'<u></u>',
+	'var':'<var></var>'
+}
+
+function getElementSize(element){
+	return {w:element.offsetWidth,h:element.offsetHeight};
+}
+
+function getStyle(element,styleName){
+	return (element.currentStyle)
+		?  element.currentStyle[styleName.replace(/-[a-z]/g, function() {
+			return arguments[0].charAt(1).toUpperCase();
+		})]
+		: (document.defaultView && document.defaultView.getComputedStyle)
+			? document.defaultView.getComputedStyle(element, null).getPropertyValue(styleName)
+			: null ;
+}
+
+function bindEvent(element,eventName,fn){
+	element["on"+eventName] = fn;
+}
+
+function buildElementInfo(tagName,element){
+	var elementSize = getElementSize(element);
+	document.writeln('<div class="info">');
+	document.writeln(tagName,' 标记的宽为:',elementSize.w,'px; ','标记的高为:',elementSize.w,'px; ', 'display 值为:', getStyle(element,'display'));
+	document.writeln("</div>");
+}
+
+function buildElement(title,type,html){
+	var elementSize,element;
+	document.write(title);
+	for (var i in inlineElements) {
+		document.writeln('<div>');
+		switch(type){
+			case 1:
+				document.writeln(i);
+				document.writeln(" ");
+				break;
+			case 2:
+				document.write(i);
+				break;
+			case 0:
+			case 3:
+				document.writeln(i);
+				break;
+		}
+		document.writeln(inlineElements[i]);
+		document.writeln("其他文本内容……");
+		document.writeln('</div>');
+		element = document.getElementsByTagName(i)[type];
+		element.innerHTML = html;
+		buildElementInfo(i,element);
+		bindEvent(element,"click",(function(i){return function(){alert(i+" 标记被点击")}})(i))
+	}
+}
+
+buildElement('<h2>空行内非替换元素前仅存在唯一空文本节点情况</h2>',0,"");
+buildElement('<h2>空行内非替换元素前存在不唯一空文本节点情况</h2>',1,"");
+buildElement('<h2>空行内非替换元素与前一行内元素紧密相连渲染情况</h2>',2,"");
+buildElement('<h2>有文本内容的行内非替换元素非紧密相连渲染情况</h2>',3,"tag");
+</script>
+</body>
+</html>

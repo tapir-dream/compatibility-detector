@@ -1,0 +1,165 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BW5007: Chrome Safari 中的表单在某些情况下不能够重复提交</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>Form 标记内 action 属性用于定位表单提交的 URL 地址, 具体信息请参考 HTML 4.01 规范 <a href="http://www.w3.org/TR/html401/interact/forms.html#adef-action">17.3 The FORM element - action</a> 中的内容。</p>
+      <p>target 属性用于决定 FORM 标记内表单数据的提交窗口目标，具体信息请参考 HTML 4.01 规范 <a href="http://www.w3.org/TR/html401/types.html#h-6.16">6.16 Frame target names</a> 中的内容。</p>
+      <p>submit button 可用于提交当前表单，他可以由 INPUT BUTTON 标记创建，具体信息请参考 HTML 4.01 规范 <a href="http://www.w3.org/TR/html401/interact/forms.html#submit-button">17.2.1 Control types submit-button</a> 中的内容。</p>
+      <p>HTMLFormElement 的 submit 方法用于表单提交，具体信息请参考 DOM Level-2 规范 <a href="http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-76767676">Interface HTMLFormElement</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>一个表单在一些特定的情况下，在 Chrome Safari 中不能够重复提交。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>本问题将点击“提交表单”按钮后在 Chrome Safari 下无反应。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+      <tr>
+        <th>Safari Chrome</th>
+        <td>&nbsp;</td>
+      </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>Safari 中，满足如下条件时，FORM 不能够重复提交：</p>
+      <ol>
+        <li>FORM 的 &quot;target&quot; 属性设置为 &quot;_blank&quot;。</li>
+        <li>FORM 成功提交后，到再次提交前，其 action 属性的值没有发生变化。</li>
+        <li>FORM 成功提交后，到再次提交前，该页内未发生键盘事件。</li>
+      </ol>
+      <p>Chrome 中，满足如下条件时，FORM 不能够重复提交：</p>
+      <ol>
+        <li>FORM 的 &quot;target&quot; 属性设置为 &quot;_blank&quot;。</li>
+        <li>FORM 成功提交后，到再次提交前，其 action 属性的值没有发生变化。</li>
+        <li>FORM 成功提交后，到再次提交前，该页内未发生键盘事件。</li>
+        <li>FORM 在 IFRAME 中被引入 。</li>
+      </ol>
+      <p class="comment">注：<br/>经测试，FORM 成功提交后，到再次提交前，在文本框中按下 Enter 键提交表单，则可以正常提交。第一次成功提交后，按下任意键，再次提交即可成功。<br/>另外，“提交”可以是点击一个提交按钮，也可以是调用该 FORM 的 submit 方法。</p>
+      <p>分析以下代码：</p>
+<pre>
+&lt;form target=&quot;_blank&quot; action=&quot;http://www.google.cn/search&quot; method=&quot;get&quot;&gt;
+    &lt;input type=&quot;text&quot; name=&quot;q&quot; value=&quot;&quot;&gt;
+    &lt;input type=&quot;submit&quot; value=&quot;Search&quot;/&gt;
+&lt;/form&gt;
+</pre>
+      <p>上述代码符合条件1，先输入 google ，然后点击 Search ，会弹出新页面，返回原页面，同时未发生键盘事件，再次点击 Search 时，在 Safari 和其他浏览器结果如下：</p>
+      <table class="compare">
+      <tr>
+        <th>Safari</th>
+        <th>其他浏览器</th>
+      </tr>
+      <tr>
+        <td>没有弹出新页面</td>
+        <td>弹出新页面</td>
+      </tr>
+      </table>
+
+      <p>在 iframe 中引入上述代码，又会有什么效果呢？看如下代码：</p>
+      <p>iframe.html</p>
+<pre>
+&lt;iframe width=&quot;250&quot; height=&quot;25&quot; frameborder=&quot;0&quot; scrolling=&quot;no&quot; marginheight=&quot;0&quot; marginwidth=&quot;0&quot; src=&quot;form.html&quot;&gt;&lt;/iframe&gt;
+</pre>
+      <p>form.html</p>
+<pre>
+&lt;form target=&quot;_blank&quot; action=&quot;http://www.google.cn/search&quot; method=&quot;get&quot;&gt;
+    &lt;input type=&quot;text&quot; name=&quot;q&quot; value=&quot;&quot;&gt;
+    &lt;input type=&quot;submit&quot; value=&quot;Search&quot;/&gt;
+&lt;/form&gt;
+</pre>
+      <p>重复上述步骤，在 Safari Chrome 和其他浏览器结果如下：</P>
+      <table class="compare">
+      <tr>
+        <th>Safari Chrome</th>
+        <th>其他浏览器</th>
+      </tr>
+      <tr>
+        <td>没有弹出新页面</td>
+        <td>弹出新页面</td>
+      </tr>
+      </table>
+
+      <h2 id="solutions">解决方案</h2>
+      <ul>
+        <li>每次提交表单后都修改 action 属性内的 URL（加入时间戳）。</li>
+        <li>修改 FORM 的 &quot;target&quot; 属性为非 &quot;_blank&quot; 。</li>
+        <li>重复提交前触发键盘事件。</li>
+        <li>使用 ENTER 键进行重复提交。</li>
+      </ul>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 6.0.495.0 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+              <a href="../../tests/BW5007/iframe.html">iframe.html</a><br/>
+              <a href="../../tests/BW5007/form.html">form.html</a>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-28</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>IFRAME FORM submit again 表单 重复提交</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

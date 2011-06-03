@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	body { margin:0; font:14px/1 'Trebuchet MS'; }
+	div.ov { width:150px; height:50px; background:wheat; }
+	div.info { font-size:12px; }
+</style>
+<script>
+	function $(id) { return document.getElementById(id); }
+	window.onload = function () {
+		if (!window.getComputedStyle) {
+			window.getComputedStyle = function ($target) {
+				return $target.currentStyle;
+			};
+		}
+
+		$('i1').innerHTML = 'overflow:' + getComputedStyle($('d1'), null).overflow + '<br />overflow-x:' +
+			getComputedStyle($('d1'), null).overflowX + '<br />overflow-y:' +
+			getComputedStyle($('d1'), null).overflowY;
+		$('i2').innerHTML = 'overflow:' + getComputedStyle($('d2'), null).overflow + '<br />overflow-x:' +
+			getComputedStyle($('d2'), null).overflowX + '<br />overflow-y:' +
+			getComputedStyle($('d2'), null).overflowY;
+		$('i3').innerHTML = 'overflow:' + getComputedStyle($('d3'), null).overflow + '<br />overflow-x:' +
+			getComputedStyle($('d3'), null).overflowX + '<br />overflow-y:' +
+			getComputedStyle($('d3'), null).overflowY;
+		$('i4').innerHTML = 'overflow:' + getComputedStyle($('d4'), null).overflow + '<br />overflow-x:' +
+			getComputedStyle($('d4'), null).overflowX + '<br />overflow-y:' +
+			getComputedStyle($('d4'), null).overflowY;
+	}
+</script>
+</head>
+<body>
+<div id="d1" class="ov" style="overflow:hidden; overflow-y:scroll;">overflow:hidden;<br />overflow-y:scroll;</div>
+<div id="i1" class="info"></div>
+<br />
+<div id="d2" class="ov" style="overflow-y:scroll; overflow:hidden;">overflow-y:scroll;<br />overflow:hidden;</div>
+<div id="i2" class="info"></div>
+<br />
+<div id="d3" class="ov" style="overflow:hidden; overflow-x:scroll;">overflow:hidden;<br />overflow-x:scroll;</div>
+<div id="i3" class="info"></div>
+<br />
+<div id="d4" class="ov" style="overflow-x:scroll; overflow:hidden;">overflow-x:scroll;<br />overflow:hidden;</div>
+<div id="i4" class="info"></div>
+</body>
+</html>

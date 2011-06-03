@@ -1,0 +1,152 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX9048: IE 中 location.reload 方法可以传入 URL 字符串参数使页面进行跳转</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE <sup>1</sup> 浏览器中 loaction.reload 方法的第一个参数内如果传入 URL 字符串则会导致浏览器将页面重定向到指定 URL 而不是刷新当前页面。</p>
+      <p class="comment">【注】：现有 IE9 Beta 版本中同样存在此问题。</p>
+      <h2 id="influence">造成的影响</h2>
+      <p>这个问题会导致 IE 浏览器将用户导向新的 URL 地址，而其他浏览器仅会在当前页刷新，造成严重的用户体验差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>loaction 对象以及其方法属于 BOM ( Browser Object Model ) 范畴，这部分内容至今为止还没有现行规范可以参照，各浏览器都有其私有的实现方式。</p>
+      <p>  loaction 对象的 reload 方法 在 MSDN 与 MDC 中均描述可以传入一个 Boolean 值参数，他决定是否由客户端刷新当前页面。</p>
+      <p>关于 MSDN &nbsp;loaction.reload 方法说明清参照：  <a href="http://msdn.microsoft.com/es-es/library/ms536691(v=VS.85).aspx">reload Method</a>。</p>
+      <p>关于 MDC &nbsp;loaction.reload 方法说明清参照：  <a href="https://developer.mozilla.org/en/DOM/window.location">window.location</a>。<br />
+        </p>
+      <p>      另外在 HTML5 草案中已经试图将 BOM 部分加入规范描述中，可参见 <a href="http://www.w3.org/TR/html5/history.html#the-location-interface">5.4.3 The Location interface</a>。</p>
+      <p>分析以下代码：</p>
+<pre>
+reload 参数：&lt;input value="http://www.google.com/"&gt;&lt;br /&gt;
+&lt;button onclick="location.reload(document.getElementsByTagName('input')[0].value)"&gt;
+使用 location.reload 方法点击此按钮刷新本页 &lt;br /&gt;
+参数为上一个 input 的当前 value 字符串
+&lt;/button&gt;&lt;br /&gt;
+&lt;button onclick="location.reload(1000)"&gt;
+ location.reload(1000)
+&lt;/button&gt;&lt;br /&gt;
+&lt;button onclick=" location.reload(true)"&gt;
+ location.reload(true)
+&lt;/button&gt;&lt;br /&gt;
+&lt;button onclick=" location.reload(false)"&gt;
+ location.reload(false)
+&lt;/button&gt;&lt;br /&gt;
+&lt;button onclick=" location.reload({})"&gt;
+ location.reload({})
+</pre>
+
+    <p>用例中第一个按键点击后使用 location.reload 来刷新本页，其中 reload 方法的参数值来自 INPUT 标记的当前value 属性字符串。根据各浏览器厂商以及 HTML5 草案说明，调用 reload 方法后不管其参数如何都会刷新本页。但是实际情况并非如此，代码中为 reload 方法传入默认的 google.com 地址，并且可以通过修改 INPUT 标记内容达到为这个方法传入不同字符串值的效果。</p>
+    <p>其后的几个按键点击时分别为 reload 方法传入数值、布尔值和对象类型参数值，他们在各浏览器运行结果如下：</p>
+    <table class="compare">
+          <tr>
+            <th>&nbsp;</th>
+            <th>IE</th>
+            <th>Firefox Chrome Safari Opera</th>
+          </tr>
+          <tr>
+            <th> Non-empty string<sup>1</sup></th>
+            <td><span class="hl_1">页面试图跳转</span></td>
+            <td><span class="hl_2">刷新本页</span></td>
+          </tr>
+          <tr>
+            <th> empty string<sup>1</sup></th>
+            <td colspan="2" rowspan="4"><span class="hl_2">刷新本页</span></td>
+          </tr>
+          <tr>
+            <th>Number</th>
+          </tr>
+          <tr>
+            <th>Boolean</th>
+          </tr>
+          <tr>
+            <th>Object</th>
+          </tr>
+        </table>
+    <p class="comment">【注】：这里的非空字符串以及空字符串不包括特殊的值 '' 和 ' '，他们会导致 IE 触发 loaction 为空的另一个特性，这个问题可以参考文章：  <a href="http://www.w3help.org/zh-cn/causes/BX9035">BX9035: IE 中 location=&quot;&quot; 或 location.href=&quot;&quot; 将使页面跳转至当前页面所在根目录</a> </p>
+    <p>通过上可以看出，仅 IE 浏览器中，当 location.reload 方法的第一个实参值不为空字符串时浏览器会试图把这个字符串当做具体 URL 值，并让页面重新定向到该 URL。这是个很有趣的特性，就连 MSDN 的官方文档上也没有提及他。而其他浏览器则都没有呈现出这个特性。</p>
+    <h2 id="solutions">解决方案</h2>
+      <p> 应为空，请避免为 loaction.reload 方法的参数传入非空字符串值。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="http://www.w3help.org/zh-cn/causes/BX9035">BX9035: IE 中 location=&quot;&quot; 或 location.href=&quot;&quot; 将使页面跳转至当前页面所在根目录</a><a href="#"></a></li>
+      </ul>
+
+    <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.544.0 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BX9048/location_reload_method.html">location_reload_method.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-08</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>location reload URL 刷新页面 页面跳转</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

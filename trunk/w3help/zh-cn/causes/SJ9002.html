@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SJ9002: Firefox 对条件判断语句块内的函数声明的处理与其他浏览器有差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <h3>函数声明和函数表达式</h3>
+      <p>定义一个函数有两种途径：函数声明和函数表达式。</p>
+      <dl>
+        <dt>函数声明：</dt>
+        <dd><pre>function Identifier ( FormalParameterList<sup>opt</sup> ) { FunctionBody }</pre></dd>
+        <dt>函数表达式：</dt>
+        <dd><pre>function Identifier<sup>opt</sup> ( FormalParameterList<sup>opt</sup> ) { FunctionBody }</pre></dd>
+      </dl>
+      <p>ECMAScript 根据上下文来区分函数声明和函数表达式，假设 "function test(){}" 是一个表达式的一部分，它就是一个函数表达式，否则它就是一个函数声明。</p>
+      <p>关于函数声明和函数表达式的更多信息，请参考 <a href="http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-262.pdf">ECMAScript 规范</a> <strong>13 Function Definition</strong> 中的内容。</p>
+      <h3>函数声明可以出现的位置</h3>
+      <p>根据 ECMAScript 规范第 13 章 Function Definition 和第 14 章 Program 中的描述，<strong>函数声明</strong>只能出现在 Program（程序，即全局环境）或函数体内。</p>
+      <p>换句话说，<strong>函数声明</strong>不能出现在<strong>块</strong>（ 如 if、while 或 for 语句）中。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>Firefox 的 TraceMonkey 引擎对函数声明的处理与 ECMAScript 规范的要求不符，TraceMonkey 将块中的函数声明作为“函数语句”来处理。而其他浏览器的引擎仍将这类块中的函数声明当作该块之外的函数声明来解析。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>对块语句中的函数声明的处理差异，将导致某些功能不能按照预期实现，甚至代码出错。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Firefox</th>
+          <td></td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>TraceMonkey 将块中的函数声明作为“函数语句”来处理。而其他浏览器的引擎仍将这类块中的函数声明当作该块之外的函数声明来解析。</p>
+      <p>分析以下代码：</p>
+<pre>
+function foo(){
+  if(window===parent){
+    function bar(){alert(1);}
+  }
+  else{
+    function bar(){alert(2);}
+  }
+  bar();
+}
+foo();
+</pre>
+      <p>以上代码中，两个标识符相同的<strong>函数声明</strong>被放在了 if...else... 块中。这不符合规范的约定，但各引擎的处理办法并不相同。</p>
+      <p>TraceMonkey 将这种位于块内的<strong>函数声明</strong>解析为“函数语句”，因此仅能被执行到的那个“函数语句”会生效，而其他浏览器则将二者仍看作当前作用域的函数声明，即不论 if...else... 的哪个分支最终会被执行，后者始终会覆盖前者，作为函数体 foo 内的、标识符为 foo 的函数存在。</p>
+      <p class="comment">注：Firefox 中在 if...else... 中使用函数声明的解析方式，在 MDC 中也有描述，参见：<a href="https://developer.mozilla.org/En/Core_JavaScript_1.5_Reference:Functions#Conditionally_defining_a_function">Conditionally defining a function</a> 。</p>
+      <p>假设以上代码的判断条件 window===parent 为 true，各浏览器下的输出结果，如下表所示：</p>
+      <table class="compare">
+        <tr>
+          <th>Firefox</th>
+          <th>其他浏览器</th>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>2</td>
+        </tr>
+      </table>
+      <p>ECMAScript 规范第 5 版 12 章中的 Note 部分提到，虽然有些实现可以将<strong>函数声明</strong>作为<strong>语句</strong>处理，但这是不提倡的。</p>
+      <p class="comment">注：本文部分内容参考了文章：<a href="http://www.cn-cuckoo.com/wordpress/wp-content/uploads/2009/12/named-function-expressions-demystified.html#jscript-bugs">命名函数表达式探秘</a> 中的内容。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>将条件语句中的函数声明替换为函数表达式，如：</p>
+<pre>
+function foo(){
+  if(window===parent){
+    var bar=function(){alert(1);}
+  }
+  else{
+    var bar=function(){alert(2);}
+  }
+  bar();
+}
+foo();
+</pre>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="#">...</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-09</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>函数声明 函数表达式 语句块 同名函数 Conditionally defining a function</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

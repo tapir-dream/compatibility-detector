@@ -1,0 +1,407 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RM8002: 不能同时在 IE6 IE7 IE8(Q) 中触发 hasLayout 并在其他浏览器中创建 Block Formatting Context 的元素在各浏览器中的表现会有差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p><strong>Block Formatting Context （块格式化上下文）</strong>是 W3C CSS 2.1 规范中的一个概念，它决定了元素如何对其内容进行定位，以及与其他元素的关系和相互作用。 </p>
+      <p>在创建了 Block Formatting Context 的元素中，其子元素会一个接一个地放置。垂直方向上他们的起点是一个包含块的顶部，两个相邻的元素之间的垂直距离取决于 'margin' 特性。在 Block Formatting Context 中相邻的块级元素的垂直边距会折叠（collapse）。 </p>
+      <p>在 Block Formatting Context 中，每一个元素左外边与包含块的左边相接触（对于从右到左的格式化，右外边接触右边），
+        即使存在浮动也是如此（尽管一个元素的内容区域会由于浮动而压缩），除非这个元素也创建了一个新的 Block Formatting Context 。 </p>
+      <p>浮动元素、绝对定位元素、inline-blocks、table-cells、table-captions 以及 'overflow' 值不是 'visible' 的元素，会创建 Block Formatting Context。 </p>
+      
+      <p>关于 Block Formatting Context 的详细信息，请参考 W3C CSS 2.1 <a href="http://www.w3.org/TR/CSS21/visuren.html#block-formatting">9.4.1 Block formatting contexts</a>。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 IE7 IE8(Q) 中没有触发 hasLayout 并在其他浏览器中创建了 Block Formatting Context 的元素的表现会有差异。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>可能造成在不同浏览器下页面布局表现各异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+        </tr>
+      </table>
+
+      <h2>问题分析</h2>
+      <h3>1. IE 专有的 Layout 及 hasLayout 属性</h3>
+      <p>'Layout' 是 IE 的专有概念，它决定了元素如何对其内容进行定位和尺寸计算，与其他元素的关系和相互作用，以及对应用还有使用者的影响。</p>
+      <ul>
+        <li>
+          <span>概念说明：</span>
+          <ul>
+            <li>'Layout' 可以被某些 CSS property（特性）<strong>不可逆的触发</strong>，而某些 HTML 元素本身就具有 layout 。</li>
+            <li>'Layout' 在 IE 中可以通过 hasLayout 属性来判断一个元素是否拥有 layout ，如 object.currentStyle.hasLayout 。</li>
+            <li>
+              'Layout' 是 IE 浏览器渲染引擎的一个内部组成部分。在 IE 浏览器中，一个元素要么自己对自身的内容进行组织和计算大小，
+              要么依赖于包含块来计算尺寸和组织内容。为了协调这两种方式的矛盾，渲染引擎采用了 'hasLayout' 属性，属性值可以为 true 或 false。
+              当一个元素的 'hasLayout' 属性值为 true 时，我们说这个元素有一个布局（layout），或拥有布局。
+            </li>
+          </ul>
+        </li>
+        <li>
+          <span>触发方式：</span>
+          <ul>
+            <li>
+              <span>默认拥有布局的元素：</span>
+<pre>
+&lt;html&gt;, &lt;body&gt;
+&lt;table&gt;, &lt;tr&gt;, &lt;th&gt;, &lt;td&gt;
+&lt;img&gt;
+&lt;hr&gt;
+&lt;input&gt;, &lt;button&gt;, &lt;select&gt;, &lt;textarea&gt;, &lt;fieldset&gt;, &lt;legend&gt;
+&lt;iframe&gt;, &lt;embed&gt;, &lt;object&gt;, &lt;applet&gt;
+&lt;marquee&gt;
+</pre>
+            </li>
+            <li>
+              <span>可触发 hasLayout 的 CSS 特性：</span>
+<pre>
+display: inline-block
+height: (除 auto 外任何值)
+width: (除 auto 外任何值)
+float: (left 或 right)
+position: absolute
+writing-mode: tb-rl
+zoom: (除 normal 外任意值)
+</pre>
+            </li>
+            <li>
+              <span>IE7 还有一些额外的属性(不完全列表)可以触发 hasLayout ：</span>
+<pre>
+min-height: (任意值)
+min-width: (任意值)
+max-height: (除 none 外任意值)
+max-width: (除 none 外任意值)
+overflow: (除 visible 外任意值，仅用于块级元素)
+overflow-x: (除 visible 外任意值，仅用于块级元素)
+overflow-y: (除 visible 外任意值，仅用于块级元素)
+position: fixed
+</pre>
+            </li>
+            <li>
+              IE6 以前的版本（也包括 IE6 及以后所有版本的混杂模式，其实这种混杂模式在渲染方面就相当于 IE 5.5），
+              通过设置任何元素的 'width' 或 'height'（非auto）都可以触发 hasLayout ；
+              但在 IE6 和 IE7 的标准模式中的行内元素上却不行，设置 'display:inline-block' 才可以。
+            </li>
+          </ul>
+        </li>
+      </ul>
+
+      <h3>2. hasLayout 和 block formatting context 的特点</h3>
+      <h4>2.1. 在触发 hasLayout 的元素和创建了 Block Formatting Context 的元素中，浮动元素参与高度的计算</h4>
+      <p><strong>情况1：没有创建 block formatting context 的块级非替换元素，触发了 IE 的 hasLayout。</strong></p>
+      <p>分析以下代码：</p>
+<pre>
+&lt;div style="width:300px;"&gt;
+    &lt;div id="Container" style="background:silver; <span class="hl_4">zoom:1;</span>"&gt;
+        &lt;span id="SPAN1" style="background:gray;"&gt;simple text&lt;/span&gt;
+        &lt;div id="DIV1" style="width:150px; height:50px; background:dimgray;"&gt;in flow&lt;/div&gt;
+        &lt;div id="DIV2" style="<span class="hl_4">float:left;</span> background:gold;"&gt;float:left&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</pre>
+
+      <ul>
+        <li><strong>Container </strong>没有创建 block formatting context。<br />
+          </li>
+        <li><strong>Container</strong> 的<span class="hl_4"> 'zoom:1'</span>设置，是为了触发 IE 中的 <strong>hasLayout</strong>；</li>
+        <li><strong>Container</strong> 的高度值为 auto，并且 'overflow' 的值为默认的 'visible'；<br />
+          </li>
+        <li> <strong>SPAN1</strong> 是一个行内元素， <strong>DIV1</strong> 是一个处于普通流中的块元素；</li>
+        <li> <strong>DIV2</strong> 是一个<strong>浮动</strong>的块级元素。</li>
+      </ul>
+      <p> 根据 CSS2.1 规范第 <a href="http://www.w3.org/TR/CSS21/visudet.html#normal-block" title="10.6.3">10.6.3</a> 部分的高度计算规则，在进行普通流中的块级非替换元素的高度计算时，浮动子元素不参与计算。</p>
+      <p>所以，在进行 <strong>Container</strong> 高度计算时，只受 <strong>SPAN1</strong> 和 <strong>DIV1</strong> 的影响，应该是它们两个的高度之和，所以最终银色部分不应该包含金色的部分。</p>
+
+      <p>这段代码在不同的浏览器环境中表现如下：</p>
+      <table class="compare">
+              <tr>
+                <th>IE6 IE7 IE8(Q)</th>
+                <th>IE8(S) Firefox Chrome Safari Opera</th>
+              </tr>
+              <tr>
+                <td><img src="../../tests/RM8002/01.png" alt="运行效果截图" /></td>
+                <td><img src="../../tests/RM8002/02.png" alt="运行效果截图" /></td>
+              </tr>
+            </table>
+      <p> 去掉 <strong>Container</strong> 的 'zoom:1' 后，各浏览器表现一致：<br />
+        <img src="../../tests/RM8002/02.png" alt="运行效果截图" /></p>
+      <p> 可见，IE 浏览器中，触发 hasLayout 的元素在进行高度计算的时候，其浮动的子元素也会参与运算。</p>
+      <p><strong>情况2：创建了 block formatting context 的块级非替换元素，未触发 IE 的 hasLayout。</strong></p>
+      <p>分析以下代码：</p>
+<pre>
+&lt;div style="width:300px;"&gt;
+    &lt;div id="Container" style="background:silver; overflow:hidden;"&gt;
+        &lt;span id="SPAN1" style="background:gray;"&gt;simple text&lt;/span&gt;
+        &lt;div id="DIV1" style="width:150px; height:50px; background:dimgray;"&gt;in flow&lt;/div&gt;
+        &lt;div id="DIV2" style="float:left; background:gold;"&gt;float:left&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</pre>
+    <ul>
+      <li><strong>Container</strong> 的 <span class="hl_4">'overflow:hidden;'</span> 创建了 block formatting context；<br />
+        </li>
+      <li><strong>Container</strong> 的 <span class="hl_4">'overflow:hidden;'</span>，在 IE6 中未触发 hasLayout，但在 IE7(S) 中触发了 hasLayout；</li>
+      <li><strong>Container</strong> 的高度值为 'auto'；<br />
+        </li>
+      <li><strong>SPAN1</strong> 是一个行内元素，<strong>DIV1</strong> 是一个处于普通流中的块元素；</li>
+      <li><strong>DIV2</strong> 是一个浮动的块级元素。</li>
+      </ul>
+    <p> 根据 CSS2.1 规范第<a href="http://www.w3.org/TR/CSS2/visudet.html#root-height" id="pq_s" title="10.6.7">10.6.7</a>部分的高度计算规则，在计算生成了 block formatting context 的元素的高度时，其浮动子元素应该参与计算。</p>
+    <p>所以，在进行 <strong>Container</strong> 高度计算时，<strong>DIV2</strong> 也应该参与计算，所以最终银色部分应该包含金色的部分。</p>
+    <p>这段代码在不同的浏览器环境中表现如下：( 注意 IE7(S) 此时触发了 hasLayout ) </p>
+    <table class="compare">
+          <tr>
+            <th>IE6 IE7(Q) IE8(Q)</th>
+            <th>IE7(S) IE8(S) Firefox Chrome Safari Opera</th>
+          </tr>
+          <tr>
+            <td><img src="../../tests/RM8002/02.png" alt="运行效果截图" /></td>
+            <td><img src="../../tests/RM8002/01.png" alt="运行效果截图" /></td>
+          </tr>
+        </table>
+    <p> 可见，只要 <strong>Container</strong> 创建了 block formatting context，其浮动子元素就会参与其高度计算（IE7(S) 是由于 hasLayout 导致与其他浏览器的效果相同）。</p>
+
+    <h4>2.2. 与浮动元素相邻的、触发了 hasLayout 的元素或创建了 Block Formatting Context 的元素，都不能与浮动元素相互覆盖</h4>
+    <p><strong>与浮动元素相邻的、触发了 hasLayout 的元素或创建了 block formatting context 的元素，都不能与浮动元素相互覆盖。如果浮动元素的两侧有足够的空间放置该元素，则元素会紧邻浮动元素放置，必要时，该元素的宽度将会被压缩。否则它们可能会定位到浮动元素的下方。</strong></p>
+    <p><strong>情况1：没有创建 block formatting context 的块级非替换元素，触发了 IE 的 hasLayout。</strong></p>
+    <p>分析以下代码：</p>
+<pre>
+&lt;div id="Container" style="border:2px solid gold; width:300px; height:150px;<strong> background:url("grid2a.png") repeat;</strong>"&gt;
+    &lt;div id="DIV1" style="background-color:gold; width:100px; height:100px;<span class="hl_4"> float:left; filter:alpha(opacity=50); opacity: 0.5;</span>"&gt;
+        Float Block
+    &lt;/div&gt;
+    &lt;div id="DIV2" style="background-color:green; <span class="hl_4">zoom:1;</span>"&gt;
+        If I had a single flower for every time I think about you, I could walk forever in my garden.
+    &lt;/div&gt;
+&lt;/div&gt;
+</pre>
+
+    <ul>
+      <li><strong>DIV1 </strong>是一个浮动元素，背景是 50% 的透明</li>
+      <li><strong>DIV2</strong> 的 'zoom:1' 触发了 IE 中的 hasLayout。</li>
+      </ul>
+    <p> 其中，<strong>grid2a.png</strong> 背景是 100px * 100px 的图片： </p>
+    <p><img src="../../tests/RM8002/grid2a.png" alt="" width="81" height="81" /></p>
+    <p>根据 CSS 2.1 9.5 Floats 中的描述，浮动元素会覆盖普通流中的块容器。所以，DIV2 应该有一部分呢被 DIV1 覆盖。</p>
+    <p>这段代码在不同的浏览器环境中表现如下：(忽略 IE 中 3px BUG 的影响)</p>
+    <table class="compare">
+      <tr>
+        <th>IE6 IE7 IE8(Q)</th>
+        <th>IE8(S) Firefox Chrome Safari Opera</th>
+      </tr>
+      <tr>
+        <td><img src="../../tests/RM8002/03.png" alt="运行效果截图" /></td>
+        <td><img src="../../tests/RM8002/04.png" alt="运行效果截图" /></td>
+      </tr>
+        </table>
+    <p><strong><strong>情况2：创建了 block formatting context 的块级非替换元素，未触发 IE 的 hasLayout。</strong></strong></p>
+    <p>分析以下代码：</p>
+<pre>
+&lt;div id="Container" style="border:2px solid gold; width:300px; height:150px;<strong> background:url("grid2a.png") repeat;</strong>"&gt;
+    &lt;div id="DIV1" style="background-color:gold; width:100px; height:100px; <span class="hl_4">float:left; filter:alpha(opacity=50); opacity: 0.5;</span>"&gt;
+        Float Block
+    &lt;/div&gt;
+    &lt;div id="DIV2" style="background-color:green; <span class="hl_4">overflow:hidden;</span>"&gt;
+        If I had a single flower for every time I think about you, I could walk forever in my garden.
+    &lt;/div&gt;
+&lt;/div&gt;
+</pre>
+
+    <ul>
+      <li><strong>DIV1</strong> 是一个浮动元素，背景是50%的透明</li>
+      <li><strong>DIV2</strong> 的 <span class="hl_4">'overflow:hidden;' </span>在 IE6 中未触发 hasLayout，但在 IE7(S) 中触发了 hasLayout。</li>
+    </ul>
+
+    <p>
+      根据 CSS 2.1 9.5 Floats 中的描述，创建了 Block Formatting Context 的元素不能与浮动元素重叠，
+      所以，<strong>DIV2</strong> 应该有一部分被 <strong>DIV1</strong> 覆盖。</p>
+
+    <p>这段代码在不同的浏览器环境中表现如下：( 注意 IE7(S) 此时触发了 hasLayout )</p>
+    <table class="compare">
+          <tr>
+            <th>IE6 IE7(Q) IE8(Q)</th>
+            <th>IE7(S) IE8(S) Firefox Chrome Safari Opera</th>
+          </tr>
+          <tr>
+            <td><img src="../../tests/RM8002/04.png" alt="运行效果截图" /></td>
+            <td><img src="../../tests/RM8002/03.png" alt="运行效果截图" /></td>
+          </tr>
+        </table>
+    <p>&nbsp;</p>
+    <h4>2.3. 触发 hasLayout 的元素和创建了 Block Formatting Context 的元素不会与它们的子元素发生外边距折叠</h4>
+
+    <p><strong>情况1：没有生成 block formatting context 的块级非替换元素，触发了 IE 的 hasLayout。</strong></p>
+    <p>分析以下代码：</p>
+<pre>
+&lt;div id="Container" style="<span class="hl_4">width:300px;</span> border:1px solid gold;"&gt;
+    &lt;div id="DIV1" style="<span class="hl_4">zoom:1;</span> background:darkgray;"&gt;
+        &lt;div id="DIV2" style="<span class="hl_4">margin:30px 0;</span> width:60px;"&gt;content&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</pre>
+
+    <ul>
+      <li><strong>Container</strong> 是宽度为300px，含有 border 的块元素，根据标准，它不会与子元素的 margin 发生空白边折叠。<br />
+        </li>
+      <li><strong>DIV1</strong> 的宽度没有设置，所以宽度等于 <strong>Container</strong> 的宽度。</li>
+      <li><strong>DIV1</strong> 的高度也没有设置，所以其高度取决于其内容的高度。</li>
+      <li><strong>DIV1</strong> 设置了 <span class="hl_4">'zoom:1'</span>，在 IE 中触发了 hasLayout。</li>
+      </ul>
+    <p>根据 CSS 2.1 <a href="http://www.w3.org/TR/CSS21/box.html#collapsing-margins">8.3.1 Collapsing margins</a> 第一条，两个相邻的普通流中的块框在垂直位置的空白边会发生折叠现象。</p>
+    <p> <strong>DIV1</strong> 和 <strong>DIV2</strong> 应该发生空白边折叠，深灰色的 <strong>DIV1</strong> 应该刚好包含 'content' 文本。</p>
+    <p>这段代码在不同的浏览器环境中表现如下：</p>
+    <table class="compare">
+          <tr>
+            <th>IE6 IE7 IE8(Q)</th>
+            <th> IE8(S) Firefox Chrome Safari Opera</th>
+          </tr>
+          <tr>
+            <td><img src="../../tests/RM8002/05.png" alt="运行效果截图" /></td>
+            <td><img src="../../tests/RM8002/06.png" alt="运行效果截图" /></td>
+          </tr>
+        </table>
+    <p> 可见，在 IE 中，触发 hasLayout 的元素，阻止了它自身与子元素间的空白边折叠。 </p>
+    <p><strong>情况2：生成 block formatting context 的块级非替换元素，未触发 IE 的 hasLayout。</strong></p>
+    <p>分析以下代码：</p>
+<pre>
+&lt;div id="Container" style="width:300px; border:1px solid gold;"&gt;
+    &lt;div id="DIV1" style="overflow:hidden; background:darkgray;"&gt;
+        &lt;div id="DIV2" style="margin:30px 0; width:60px;"&gt;content&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</pre>
+    <ul>
+      <li><strong>Container</strong> 是宽度为300px，含有 border 的块元素，根据标准，它不会与子元素的 margin 发生空白边折叠。<br />
+        </li>
+      <li><strong>DIV1</strong> 的宽度没有设置，所以宽度等于 <strong>Container</strong> 的宽度。</li>
+      <li><strong>DIV1</strong> 的高度也没有设置，所以其高度取决于其内容的高度。</li>
+      <li><strong>DIV1</strong> 设置了 <span class="hl_4">'overflow:hidden'</span>，在 IE6 中未触发 hasLayout，但在 IE7(S) 中触发了 hasLayout。</li>
+      </ul>
+    <p>根据 CSS 2.1 <a href="http://www.w3.org/TR/CSS21/box.html#collapsing-margins" >8.3.1 Collapsing margins</a> 第三条，生成 block formatting context 的元素不会和在流中的子元素发生空白边折叠。</p>
+    <p> <strong>DIV1</strong> 和 <strong>DIV2</strong> 不应该发生空白边折叠，深灰色的 <strong>DIV1</strong> 应该撑满 <strong>Container</strong> 。</p>
+    <p>这段代码在不同的浏览器环境中表现如下：( 注意IE7(S) 此时触发了 hasLayout )</p>
+    <table class="compare">
+          <tr>
+            <th>IE6 IE7(Q) IE8(Q)</th>
+            <th> IE7(S) IE8(S) Firefox Chrome Safari Opera</th>
+          </tr>
+          <tr>
+            <td><img src="../../tests/RM8002/06.png" alt="运行效果截图" /></td>
+            <td><img src="../../tests/RM8002/05.png" alt="运行效果截图" /></td>
+          </tr>
+        </table>
+    <p> 可见，在 IE 中，创建了 block formatting context，未触发 hasLayout 的元素，它自身与子元素间的空白边折叠还是会发生。</p>
+
+    <h3>3. hasLayout 和 block formatting context 的异同及可能产生的问题</h3>
+    <h4>3.1. 区别</h4>
+    <ul>
+      <li>在 IE8(S) 之前的版本中，没有规范中提及的 block formatting context 和 Inline formatting context 概念，而是用 hasLayout 来达到相似的目的。</li>
+      <li>在 IE 中可通过设置 'width'、'height'、'min-width'、'min-height'、'max-width'、'max-height'、'zoom'、'writing-mode' 来触发 hasLayout，而这些特性值的设置不能够使元素创建 block formatting context。</li>
+      <li>在 IE 中很多元素默认就是拥有布局的，如 IPUNT, BUTTON, SELECT, TEXTAREA 等，但是这些元素在标准中会形成 <a href="http://www.w3.org/TR/CSS2/visuren.html#inline-formatting">Inline formatting context</a> 。</li>
+      </ul>
+    <h4>3.2. 共同点</h4>
+    <ul>
+      <li>两者都是决定了对内容如何定位及大小计算的规则。</li>
+      <li>两者都决定了与其他元素的相互作用的规则。</li>
+      <li>'table-cell' 和 'table-caption' 既是 hasLayout 的元素，又是可以创建 block formatting context 的元素。</li>
+      <li>浮动元素，绝对定位元素，inline-block 元素以及除 'visible' 外任意值的 overflow(IE7) 在 IE 中可以触发 hasLayout，同时在标准中，又可以创建 block formatting context。</li>
+      </ul>
+
+    <h4>3.3. 可能产生的兼容性问题：</h4>
+    <p> 由于 hasLayout 和 block formatting context 是对一类事物的不同理解，并且他们的启用条件不尽相同，因此如果一个元素设计时，在 IE 早期版本中触发了 hasLayout ，但在其他浏览器中又没有创建 block formatting context，或者相反，一个元素在 IE 早期版本中没有触发 hasLayout ，在其他浏览器中却创建了 block formatting context（如设置了 'overflow:hidden' ），将导致页面布局的重大差异。
+</p>
+    <h2 id="solutions">解决方案</h2>
+      <p>仅当一个元素即在 IE 早期版本中触发了 hasLayout，又在其他浏览器中创建了 block formatting context 时，才能避免上述问题的发生。即同时启用上述两者以保证各浏览器的兼容，或者相反，两者皆不启用。
+      </p>
+          <p>
+          <ol>
+        <li>使元素即生成了 block formatting context，又触发了 hasLayout</li>
+        <ul>
+          <li>对于触发 hasLayout 的元素，通过 CSS 设置，使它产生 block formatting context；</li>
+          <li>生成 block formatting context 但是没有触发 hasLayout 的元素，通过设置 'zoom:1'，使其触发 hasLayout。</li>
+          </ul>
+        <li>使元素即没有触发 hasLayout，又没有创建 block formatting context。</li>
+      </ol>
+          </p>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br/>
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RM8002/hasLayout_1.html">height_of_float_hasLayout.html</a><br />
+                          <a href="../../tests/RM8002/hasLayout_2.html">height_of_float_BFC.html</a><br />
+                            <a href="../../tests/RM8002/hasLayout_3.html">float_overlap_hasLayout.html</a><br />
+                            <a href="../../tests/RM8002/hasLayout_4.html">float_overlap_BFC.html</a><br />
+                            <a href="../../tests/RM8002/hasLayout_5.html">collapsing_hasLayout.html</a><br />
+              <a href="../../tests/RM8002/hasLayout_6.html">collapsing_BFC.html</a>
+                        </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-23</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>hasLayout Block Formatting Context float</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>
+

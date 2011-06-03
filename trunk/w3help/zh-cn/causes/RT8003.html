@@ -1,0 +1,262 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RT8003: 'text-align' 特性在 IE6 IE7 IE8(Q) 中可以影响块级元素的对齐方式，并且在所有浏览器的混杂模式中均不能被 TABLE 元素继承</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 CSS 2.1 规范中的描述，'text-align' 特性描述了一个块的<strong>行内内容</strong>的对齐方式。'text-align' 特性具备继承性，可以应用于块级元素、表格单元格及行内块级元素。</p>
+      <p>也就是说，'text-align' 可以应用到块级元素、表格单元格及行内块级元素上，但仅对它们的<strong>行内内容</strong>起作用。</p>
+      <p>但在更早版本的 CSS 1 规范中却规定，'text-align' 只能应用到块级元素，并且对它们所有的内容都起作用。</p>
+      <p>关于 'text-align' 特性的最初说明请参考 W3C CSS 1 规范：<a href="http://www.w3.org/TR/CSS1/#text-align">5.4.6 'text-align'</a> 中的内容。</p>
+      <p>关于 'text-align' 特性的现行说明请参考 W3C CSS 2.1 规范：<a href="http://www.w3.org/TR/CSS21/text.html#alignment-prop">16.2 Alignment: the 'text-align' property</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>'text-align' 特性在 IE6 IE7 IE8(Q) 中可以影响块级元素的对齐方式，并且在所有浏览器的混杂模式中均不能被 TABLE 元素继承，这是规范版本升级造成的历史遗留问题，最新的 CSS 2.1 规范已不允许 'text-align' 作用于非行内元素，并允许 TABLE 元素继承该特性。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>这个问题将造成页面整体或局部的对齐方式在不同浏览器中出现很大的差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q) Firefox(Q) Chrome(Q) Safari(Q) Opera(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>这是一个 CSS 规范变更导致的问题，较早发布的浏览器并未执行 CSS 2.1 规范，而是执行了 CSS 1 的规范，因此产生了兼容性问题。</p>
+      <h3>1. CSS 1 规范中的 'text-align' 特性</h3>
+      <p>在 CSS 1 规范中说明 'text-align' 仅应用于块级元素，是可继承的。它描述了它所应用到的元素的内容的对齐方式。如下：</p>
+      <table class="list">
+        <tr>
+          <th>Value:</th>
+          <td>left | right | center | justify</td>
+        </tr>
+        <tr>
+          <th>Initial:</th>
+          <td>UA specific</td>
+        </tr>
+        <tr>
+          <th>Applies to:</th>
+          <td>block-level elements</td>
+        </tr>
+        <tr>
+          <th>Inherited:</th>
+          <td>yes</td>
+        </tr>
+        <tr>
+          <th>Percentage values:</th>
+          <td>N/A</td>
+        </tr>
+      </table>
+      <p>也就是说 'text-align' 特性可以应用于<sup>1</sup>所有块级元素，并可以作用于<sup>2</sup>这些块级元素的任何内容<sup>3</sup>。假如有以下代码：</p>
+<pre>
+DIV.center { text-align: center }
+</pre>
+      <p>那么应用上述规则的 DIV 内的所有内容都将居中对齐。</p>
+      <p class="comment">
+        注：<br/>
+        1. “可以<strong>应用</strong>于”是指目标元素能够有该特性，在本文中，一个元素拥有特性 'text-align' 并不会影响其自身的水平对齐方式，而是会影响其中包含的内容。<br />
+        2. “可以<strong>作用</strong>于”是指该特性可以影响到目标元素。<br />
+        3. CSS 1 规范中没有提到 'text-align' 可以作用于表格，实际在目前仍执行 CSS 1 规范的浏览器中，表格不能继承 'text-align' 的设置，但可以单独为表格设置 'text-align'。
+      </p>
+
+      <h3>2. CSS 2.1 规范中的 'text-align' 特性</h3>
+      <p>现行的 CSS 2.1 标准规范，对于 'text-align' 的定义更加清晰明确，其描述了一个块中<strong>行内内容</strong>的对齐方式。作用范围也从块级元素扩展到了表格的单元格及行内块级元素。如下：</p>
+      <table class="list">
+        <tr>
+          <th>Value:</th>
+          <td>left | right | center | justify | inherit</td>
+        </tr>
+        <tr>
+          <th>Initial:</th>
+          <td>a nameless value that acts as 'left' if 'direction' is 'ltr', 'right' if 'direction' is 'rtl'</td>
+        </tr>
+        <tr>
+          <th>Applies to:</th>
+          <td>block-level elements, table cells and inline blocks</td>
+        </tr>
+        <tr>
+          <th>Inherited:</th>
+          <td>yes</td>
+        </tr>
+        <tr>
+          <th>Percentage:</th>
+          <td>N/A</td>
+        </tr>
+        <tr>
+          <th>Media:</th>
+          <td>visual</td>
+        </tr>
+        <tr>
+          <th>Computed value:</th>
+          <td>the initial value or as specified</td>
+        </tr>
+      </table>
+      <p>也就是说 'text-align' 将不再作用于非行内的内容。假如有以下代码：</p>
+<pre>
+DIV.center { text-align: center }
+</pre>
+      <p>那么应用上述规则的 DIV 内的所有<strong>行内内容</strong>都将居中对齐。</p>
+
+      <h3>3. 各浏览器中的差异：</h3>
+      <p>分析以下代码：</p>
+<pre>
+&lt;div style="width:200px; margin:5px 0; background:lightgrey; text-align:center; font:14px Verdana;"&gt;
+  &lt;span&gt;text&lt;/span&gt;
+  &lt;div style="width:150px; background:dimgray;"&gt;
+    &lt;span&gt;text&lt;/span&gt;
+  &lt;/div&gt;
+  &lt;table style="width:100px; background:red; font:14px Verdana;"&gt;
+    &lt;tr&gt;
+      &lt;td&gt;text&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/table&gt;
+&lt;/div&gt;
+</pre>
+      <p>以上代码最外层的 DIV 元素设置了 'text-align:center'，其中嵌套了块级元素、行内元素和表格。并且其中的块级元素和表格都设置了小于最外层 DIV 的宽度。（如果它们的宽度不小于最外层 DIV 的宽度则不能直观的看出它们自身水平对齐的差异。）</p>
+      <p>在各浏览器中的表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE(Q)</th>
+          <td><img src="../../tests/RT8003/ie_quirks.png" alt="snapshot" /></td>
+        </tr>
+        <tr>
+          <th>Firefox(Q) Chrome(Q) Safari(Q) Opera(Q)</th>
+          <td><img src="../../tests/RT8003/other_browsers_quirks.png" alt="snapshot" /></td>
+        </tr>
+        <tr>
+          <th>IE6(S) IE7(S)</th>
+          <td><img src="../../tests/RT8003/ie6_ie7_standards.png" alt="snapshot" /></td>
+        </tr>
+        <tr>
+          <th>IE8(S) Firefox(S) Chrome(S) Safari(S) Opera(S)</th>
+          <td><img src="../../tests/RT8003/other_browsers_standards.png" alt="snapshot" /></td>
+        </tr>
+      </table>
+      <p>可见：</p>
+      <ul>
+        <li>在 IE6 IE7 IE8(Q) 中，'text-align' 特性可以影响块级元素内的所有内容，但在 IE(Q) 中，表格元素并不能继承 'text-align' 特性。</li>
+        <li>在 IE8(S) Firefox(S) Chrome(S) Safari(S) Opera(S) 中，'text-align' 特性仅影响块级元素的行内内容，但同样，在这些浏览器的混杂模式(Q)中，表格元素仍不能继承 'text-align' 特性。</li>
+      </ul>
+      <p>可以总结出以下关于 'text-align' 特性在不同浏览器中的表现的表格：</p>
+      <table class="compare">
+        <tr>
+          <th>浏览器</th>
+          <th>影响块级元素及表格元素</th>
+          <th>可被表格元素继承</th>
+        </tr>
+        <tr>
+          <td>IE(Q)</td>
+          <td><span class="hl_2">是</span></td>
+          <td><span class="hl_1">否</span></td>
+        </tr>
+        <tr>
+          <td>Firefox(Q) Chrome(Q) Safari(Q) Opera(Q)</td>
+          <td><span class="hl_1">否</span></td>
+          <td><span class="hl_1">否</span></td>
+        </tr>
+        <tr>
+          <td>IE6(S) IE7(S)</td>
+          <td><span class="hl_2">是</span></td>
+          <td><span class="hl_2">是</span></td>
+        </tr>
+        <tr>
+          <td>IE8(S) Firefox(S) Chrome(S) Safari(S) Opera(S)</td>
+          <td><span class="hl_1">否</span></td>
+          <td><span class="hl_2">是</span></td>
+        </tr>
+      </table>
+      <p>上述四种情况，只有最后一种符合目前的 CSS 2.1 规范的规定。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>
+            1.避免在包含<em>宽度比自身小的块级元素或表格</em>的元素上设置 'text-align' 特性；<br />
+            2.'text-align' 仅应用于行内元素的水平对齐控制，需要控制块级元素的水平对齐时，建议使用 'margin:0 auto' 来设定块级元素居中对齐，对于 IE(Q) 不支持使用 'margin:0 auto' 来居中块级元素，可以使用 CSS 做单独的处理，居左或居右对齐可以分别使用 'float:left' 或 'float:right' 来实现。<br/>
+            </p>
+            <p>
+        IE(Q) 不支持使用 'margin:0 auto' 来居中块级元素，可以使用以下代码达到同样效果：
+            </p>    
+<pre>
+&lt;div style="width:200px; border:1px solid black; <strong>text-align:center;</strong>"&gt;
+  &lt;div style="width:100px; height:100px; background:lightgrey; <strong>text-align:left;</strong>"&gt;text&lt;/div&gt;
+&lt;/div&gt;
+</pre>
+      </li>
+      </ol>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="HA8001">HA8001: 在 IE6 IE7 IE8(Q) 中 CENTER 元素自身也会居中对齐，在 IE(S) 与 Opera(S) 中还会使其包含的表格中的文本居中对齐</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.68<br />
+              Chrome 6.0.495.0 dev<br />
+              Safari 5.0.4<br />
+              Opera 10.61
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+              <a href="../../tests/RT8003/text_align_standards.html">text_align_standards.html</a><br/>
+              <a href="../../tests/RT8003/text_align_quirks.html">text_align_quirks.html</a><br/>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-20</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>text-align block center 继承 水平对齐 居中 块级元素</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BG1003: Firefox 中 Date.now 方法被重写后 MARQUEE 元素不再滚动</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>Firefox 中的 MARQUEE 元素依赖于原生 JavaScript 的 <strong>Date.now()</strong> 方法。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>若在代码中重写了原生 JavaScript 的 Date 对象，将导致 <strong>Date.now()</strong> 返回的不再是当前时间，这时在 Firefox 中 MARQUEE 元素将失去滚动效果。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Firefox</th>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>MARQUEE 不属于 W3C 规范中的元素，它最初由 IE2.0 引入，目前它已成为事实标准，所有浏览器均支持 MARQUEE 元素。</p>
+      <p>在各浏览器中查看 MARQUEE 元素的对象名称，会发现 Firefox 中与其他浏览器中有所不同：</p>
+<pre>
+&lt;marquee id=&quot;m&quot;&gt;MARQUEE&lt;/marquee&gt;
+&lt;script&gt;
+  alert(document.getElementById(&quot;m&quot;));
+&lt;/script&gt;
+</pre>
+      <table class="compare">
+        <tr>
+          <th>Firefox</th>
+          <th>IE8 Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td>[HTMLDivElement]</td>
+          <td>[HTMLMarqueeElement]</td>
+        </tr>
+      </table>
+      <p>可以得知，MARQUEE 元素在 Firefox 中使用 DIV 元素模拟。在 Mozilla Developer Center 中关于 MARQUEE 元素叙述中特别提到：MARQUEE 元素在 Firefox 中是以 XBL 插件的形式实现的其功能。<br />这个插件地址为：<a href="http://mxr.mozilla.org/firefox/source/layout/style/xbl-marquee/xbl-marquee.xml">mxr.mozilla.org/firefox/source/layout/style/xbl-marquee/xbl-marquee.xml</a>。</p>
+      <p>通过查看代码，可以得知，MARQUEE 元素的功能实现中使用了 JavaScript 原生的 Date 对象的静态方法 'now()'。</p>
+      <p>因此，在 Firefox 中，一旦 Date.now 被改写，MARQUEE 元素的滚动也将受到影响。</p>
+      <p class="comment">Date.now() 为 <a href="http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-262.pdf">ECMAScript V5</a> 中加入的方法（第 15.9.4.4节）。</p>
+      <p>进一步测试如下：</p>
+<pre>
+&lt;style&gt;
+    div { width:200px; background:#DDD; }
+&lt;/style&gt;
+&lt;div id=&quot;d1&quot;&gt;&lt;marquee id=&quot;m1&quot; behavior=&quot;alternate&quot;&gt;111&lt;/marquee&gt;&lt;/div&gt;
+&lt;button id=&quot;b&quot;&gt;Click&lt;/button&gt;
+&lt;div id=&quot;d2&quot;&gt;
+&lt;script&gt;
+    var a = Date.now;
+    Date.now = null;
+    document.getElementById(&quot;b&quot;).onclick = function () {
+        Date.now = a;
+        document.getElementById(&quot;d2&quot;).innerHTML = '&lt;marquee id=&quot;m2&quot;&gt;222&lt;/marquee&gt;';
+    }
+&lt;/script&gt;
+&lt;/div&gt;
+</pre>
+      <p>上面的代码中，页面加载时创建了一个 MARQUEE 元素 <strong>m1</strong>，然后将 “Date.now” 方法赋给变量 “a” 后将 “Date.now” 指向 null。当按下 “Click” 按钮后，恢复原始的 “Date.now”，并再次创建了一个 MARQUEE 元素 <strong>m2</strong>。</p>
+      <p>以上代码在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>Firefox</th>
+          <th>IE Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BG1003/a.gif" alt="" /></td>
+          <td><img src="../../tests/BG1003/b.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>点击 “Click” 按钮后：</p>
+      <table class="compare">
+        <tr>
+          <th>Firefox</th>
+          <th>IE Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BG1003/c.gif" alt="" /></td>
+          <td><img src="../../tests/BG1003/d.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>可见，在将 “Date.now()” 置为 null 后，Firefox 中的 MARQUEE 元素滚动效果消失。而在 Firefox 中恢复原有的 “Date.now()” 之后创建的MARQUEE元素则又可以滚动。</p>
+      </p>再测试一下 Firefox 中 MARQUEE 元素对 Date 对象的依赖性：</p>
+<pre>
+&lt;script&gt;
+    var a = Date.now;
+    Date = null;
+    Date = {};
+    Date.now = a;
+&lt;/script&gt;
+&lt;marquee behavior=&quot;alternate&quot;&gt;111&lt;/marquee&gt;
+</pre>
+      <p>代码中 Date 已经不是 JavaScript 原生的 Date 对象，但 “Date.now()” 仍被保留，此时在 Firefox 中仍然可以使 MARQUEE 元素出现滚动效果。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>MARQUEE 元素为非 W3C 标准元素，应尽量避免使用。同时应尽可能不对原生的 JavaScript 进行修改甚至删除。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BG1003/firefox_marquee_date_now.html">firefox_marquee_date_now.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-14</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>MARQUEE Date now Firefox 字幕 跑马灯</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

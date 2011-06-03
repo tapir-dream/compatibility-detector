@@ -1,0 +1,125 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SD9012: IE6 IE7 IE8 中 getElementsByName 方法的参数不区分大小写</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>document.getElementsByName(elementName) 方法是 HTMLDocument 接口提供的方法，该方法传入的参数应该是目标元素的 name 属性的值：</p>
+<pre>NodeList getElementsByName(in DOMString elementName);</pre>
+      <p>目标元素的 name 是一个大小写敏感的字符串，仅 BUTTON, TEXTAREA, APPLET, SELECT, FORM, FRAME, IFRAME, IMG, A, INPUT, OBJECT, MAP, PARAM, META 元素允许有 name 属性<sup>1</sup>，并且 name 属性可以不是唯一的。</p>
+      <p>关于 getElementsByName 方法的详细信息，请参考 DOM-1-HTML <a href="http://www.w3.org/TR/REC-DOM-Level-1/level-one-html.html#ID-1006298752">Interface HTMLDocument</a> 中的相关内容。</p>
+      <p>关于元素的 name  属性的详细信息，请参考 HTML 4.01 <a href="http://www.w3.org/TR/html401/index/attributes.html">Index of Attributes </a> 中的内容。</p>
+      <p class="comment">注：<br/>1. 在 IE 中，只有这些标签有 'name' 属性时，可以使用 document.getElementsByName(elementName) 方法获取他们创建的 DOM 元素，但在其他浏览器中，有 'name' 属性的其他标签也可以用这种方法获取。即 <code>&lt;DIV name='test'&gt;&lt;DIV&gt;</code> 可以在其他浏览器中通过使用 document.getElementsByName('test')[0] 来获取，但在 IE 中却不行，得到的将是 undefined。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>使用 document.getElementsByName 方法获取页面内的元素时，在 IE6 IE7 IE8 中的 name 是大小写不敏感的。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>如果作为参数的 name 和目标元素的实际 name 的大小写不匹配，在某些浏览器中将无法获取该元素或者得到的元素与预计得到的元素不一致。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+<pre>
+&lt;input name="aa" type="text" value="input1"/&gt;
+&lt;input name="aA" type="text" value="input2"/&gt;
+&lt;input name="Aa" type="text" value="input3"/&gt;
+&lt;script type="text/javascript"&gt;
+  alert(document.getElementsByName("AA").length);
+  alert(document.getElementsByName("aa").length);
+&lt;/script&gt;
+</pre>
+      <p>以上代码中，目标元素的 name 分别为 'aa'，'aA' 和 'Aa'，但在传入 document.getElementsByName 时的参数分别为 'AA' 和 'aa'，在严格区分大小写的情况下，仅 document.getElementsByName("aa") 能获得一个 INPUT 元素。</p>
+      <p>在各浏览器输出如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <th>其他浏览器</th>
+        </tr>
+        <tr>
+          <td>3 3</td>
+          <td>0 1</td>
+        </tr>
+      </table>
+      <p>可见：在 IE6 IE7 IE8 中，使用 document.getElementsByName 获取页面元素时，不区分参数的大小写。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>在使用 document.getElementsByName 方法获取页面元素时，应保证作为参数的 name 与目标元素的实际 name 值完全一致。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="SD9002">SD9002: IE6 IE7 IE8(Q) 中的 getElementById 方法的参数不区分大小写</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 6.0.472.25 dev<br />
+              Safari 5.0<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/SD9012/getElementsByName.html">getElementsByName.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-09</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>getElementByName name  大小写</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

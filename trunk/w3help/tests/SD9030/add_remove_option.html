@@ -1,0 +1,103 @@
+<style type="text/css">select {height:100px;}</style>
+<table>
+	<tbody>
+		<tr>
+			<td>
+				<select id="s1" multiple="multiple">
+					<option value="1">111</option>
+					<option value="2">222</option>
+				</select>
+			</td>
+			<td>
+				<select id="s2" multiple="multiple">
+					<option value="1">111</option>
+				</select>
+			</td>
+			<td>
+				<select id="s3" multiple="multiple">
+					<option value="1">111</option>
+					<option value="2">222</option>
+				</select>
+			</td>
+			<td>
+				<select id="s4" multiple="multiple">
+					<option value="1">111</option>
+				</select>
+			</td>
+			<td>
+				<select id="s5" multiple="multiple">
+					<option value="1">111</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td><button type="button" onclick="remove(1);">select.remove(index)</button></td>
+			<td><button type="button" onclick="remove(2);">select.remove(option)</button></td>
+			<td><button type="button" onclick="remove(3);">options.remove(index)</button></td>
+			<td><button type="button" onclick="remove(4);">options.remove(option)</button></td>
+			<td><button type="button" onclick="remove(5);">options[index] = null</button></td>
+		</tr>
+	</tbody>
+</table>
+
+<div style="border:2px solid;padding:3px;width:800px;" id="info"></div>
+
+<script type="text/javascript">
+	function $(id){return document.getElementById(id);}
+	function newOpt(text, val){return new Option(text, val);}
+	function info(method, msg){$("info").innerHTML += "<strong>" + method + "</strong> : " + msg + "<br />";}
+	
+	//创建n个 OPTION 对象
+	var opt1 = newOpt("select.add(option, null)", 2),
+		opt2 = newOpt("select.add(option)", 2),
+		opt3 = newOpt("options.add(option, null)", 2),
+		opt4 = newOpt("options.add(option)", 2),
+		opt5 = newOpt("options[index] = option", 2),
+		opt6 = newOpt("select.add(option, option)", 2),
+		opt7 = newOpt("select.add(option, index)", 2),
+		opt8 = newOpt("options.add(option, option)", 2),
+		opt9 = newOpt("options.add(option, index)", 2),
+		s1 = $("s1"),
+		s2 = $("s2"),
+		s3 = $("s3"),
+		s4 = $("s4"),
+		s5 = $("s5");
+	
+	//使用n种方法添加 OPTION 到 SELECT 中
+	try { s1.add(opt1, null); } catch(e) { info("select.add(option, null)", e) }
+	try { s2.add(opt2); } catch(e) { info("select.add(option)", e) }
+	try { s3.options.add(opt3, null); } catch(e) { info("options.add(option, null)", e) }
+	try { s4.options.add(opt4); } catch(e) { info("options.add(option)", e) }
+	try { s5.options[1] = opt5; } catch(e) { info("options[index] = option", e) }
+	
+	try { s1.add(opt6, s1.lastChild); } catch(e) { info("select.add(option, option)", e) }
+	try { s1.add(opt7, 1); } catch(e) { info("select.add(option, index)", e) }
+	try { s3.options.add(opt8, s3.lastChild); } catch(e) { info("options.add(option, option)", e) }
+	try { s3.options.add(opt9, 1); } catch(e) { info("options.add(option, index)", e) }
+	
+	function remove(type){
+		var method = "";
+		try {
+			switch(type) {
+				case 1 :
+					method = "s1.remove(0)";
+					break;
+				case 2 :
+					method = "s2.remove(s2.firstChild)";
+					break;
+				case 3 :
+					method = "s3.options.remove(0)";
+					break;
+				case 4 :
+					method = "s4.options.remove(s4.firstChild)";
+					break;
+				case 5 : 
+					method = "s5.options[1] = null";
+					break;
+			}
+			eval(method);
+		} catch (e) {
+			info(method, e);
+		}
+	}
+</script>

@@ -1,0 +1,136 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HJ2001: 各浏览器对 BASE 元素前后的超链接的默认 target 处理存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>在 HTML 中，链接、外部图像、样式表等都是通过指定一个 URI 从外部引入。相对 URI 根据基础 URI 解析，基础 URI 来源广泛，BASE 元素允许作者明确指定文档的基础 URI 。</p>
+      <p>BASE 元素必须出现在 HTML 文档的 HEAD 部分，在任何元素引入外部资源之前定义。 BASE 元素定义的路径信息只影响在文档中的元素出现的 URI 。</p>
+      <p>关于 BASE 元素的更多信息，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html401/struct/links.html#h-12.4">12.4 Path information: the BASE element</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>BASE 元素出现在 BODY 中，且定义了 target 属性，各浏览器表现不一致。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>导致页面中的链接的打开方式不同，造成差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>下面在 BODY 中定义 BASE 标签，且定义 target 属性值是 _blank：</p>
+<pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;body&gt;
+&lt;a href="http://www.w3.org"&gt;before BASE&lt;/a&gt;
+&lt;base target="_blank" /&gt;&lt;br /&gt;
+&lt;a href="http://www.w3.org"&gt;after BASE&lt;/a&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 Opera Firefox</th>
+          <th>IE7 IE8</th>
+          <th>Chrome Safari</th>
+        </tr>
+        <tr>
+          <td>点击 before BASE</td>
+          <td>当前页面打开</td>
+          <td>当前页面打开</td>
+          <td>在新窗口打开</td>
+        </tr>
+        <tr>
+          <td>点击 after BASE</td>
+          <td>在新窗口打开</td>
+          <td>当前页面打开</td>
+          <td>在新窗口打开</td>
+        </tr>
+      </table>
+      <p>可见，</p>
+      <ul>
+      <li><em>IE6 Opera Firefox</em> 中，在 BASE 标签定义前链接在当前页面打开，在定义后在新窗口中打开</li>
+      <li><em>IE7 IE8</em> 中，无论在 BASE 标签定义前还是定义后，都在当前页面打开。</li>
+      <li><em>Chrome Safari</em> 中，无论在 BASE 标签定义前还是定义后，都在新窗口中打开。</li>
+      </ul>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>不要在 HEAD 元素之外定义 BASE 元素，保证各浏览器兼容。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.544.0 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HJ2001/base.html">base.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-08</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>BASE target</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

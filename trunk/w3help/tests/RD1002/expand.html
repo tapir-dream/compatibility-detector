@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style>
+h1 {margin-top: 100px;}
+</style>
+</head>
+<body>
+<h1>1. normal flow</h1>
+<h2>1.1. size specified</h2>
+<div style="width:100px; height:100px; background:silver;">
+  <div style="width:150px; height:150px; background:url(x.gif);"></div>
+</div>
+<br>
+<br>
+<br>
+<h2>1.2. size not specified</h2>
+<div style="width:100px; height:100px;">
+  <div style="background:silver;">
+    <div style="width:150px; height:150px; background:url(x.gif);"></div>
+  </div>
+</div>
+
+<h1>2. floats</h1>
+<div style="width:100px; height:100px; background:silver;">
+  <div style="float:left; width:150px; height:150px; background:url(x.gif);"></div>
+</div>
+
+<h1>3. negative margin</h1>
+<div style="width:100px; height:100px; margin-left:20px; background:silver;">
+  <div style="width:150px; height:150px; margin-left:-20px; background:url(x.gif);"></div>
+</div>
+
+<h1>4. relatively positioned</h1>
+<div style="width:100px; height:100px; background:silver;">
+  <div style="position:relative; left:20px; top:-20px; width:150px; height:150px; background:url(x.gif);"></div>
+</div>
+
+<h1>5. absolutely positioned</h1>
+<div style="width:100px; height:100px; background:silver;">
+  <div style="position:absolute; width:150px; height:150px; background:url(x.gif);"></div>
+</div>
+</body>
+</html>

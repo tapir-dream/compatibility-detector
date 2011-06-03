@@ -1,0 +1,157 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HA8001: 在 IE6 IE7 IE8(Q) 中 CENTER 元素自身也会居中对齐，在 IE(S) 与 Opera(S) 中还会使其包含的表格中的文本居中对齐</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>W3C HTML3.2 规范中对 CENTER 元素的 DTD 定义如下：</p>
+<pre>&lt;!-- CENTER is a shorthand for DIV with ALIGN=CENTER --&gt;
+&lt;!ELEMENT center - - %body.content&gt;</pre>
+      <p>CENTER 元素与 align 属性为 'center' 的 DIV 元素等价，即 CENTER = DIV[align="center"]。此元素最初由 NetScape 正式支持 HTML3.0 中的 DIV 元素之前被引入，在 HTML3.2 中仍然被保留是源于其广泛的使用程度。</p>
+      <p>DIV 元素的 align 属性会控制其内的文本内容的对齐方式。</p>
+      <p>关于 CENTER 元素的详细信息，请参考 HTML3.2 规范 <a href="http://www.w3.org/TR/REC-html32#center">DIV and CENTER</a> 中的内容，以及 HTML4.01 规范 <a href="http://www.w3.org/TR/html401/present/graphics.html#edef-CENTER">15.1.2 Alignment</a> 中的内容。</p>
+      <p></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>CENTER 元素在 IE6 IE7 IE8(Q) 中会使自身也居中对齐，除了上述浏览器，在 IE(S) 与 Opera(S) 中 CENTER 元素还会使其内表格中的单元格内文本居中对齐。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>若在页面中使用了过时的 CENTER 元素进行布局，则可能造成页面整体对齐方式在不同浏览器中出现很大的差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <th>IE8(S) Opera(S)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>HTML3.2 规范中提到 CENTER 元素与 DIV[align="center"] 等价，下面就针对这两种元素进行对比分析。</p>
+
+      <p>分析以下代码：</p>
+<pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  body, table { font:12px Tahoma; color:navy; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div style="width:120px; padding:10px 0; background:mediumblue;"&gt;
+  &lt;<em>center</em> id="d1" style="width:80px; padding:10px 0; background:royalblue;"&gt;
+    &lt;table id="t1" style="width:50px; height:30px; background:lavender;"&gt;
+      &lt;tr&gt;
+        &lt;td&gt;123&lt;/td&gt;
+      &lt;/tr&gt;
+    &lt;/table&gt;
+  &lt;/center&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div style="width:120px; padding:10px 0; background:mediumblue;"&gt;
+  &lt;div id="d2" <em>align="center"</em> style="width:80px; padding:10px 0; background:royalblue;"&gt;
+    &lt;table id="t2" style="width:50px; height:30px; background:lavender;"&gt;
+      &lt;tr&gt;
+        &lt;td&gt;123&lt;/td&gt;
+      &lt;/tr&gt;
+    &lt;/table&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面的代码分为两组，每组中的结构类似。区别为第一组使用 CENTER 元素居中其内元素，第二组使用 align 属性值为“center”的 DIV 元素居中其内文本。</p>
+      <p>这段代码在不同的浏览器环境中的表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6(Q) IE7(Q) IE8(Q)</th>
+          <th>IE6(S) IE7(S)</th>
+          <th>IE8(S) Opera(S)</th>
+          <th>Firefox Chrome Safari Opera(Q)</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/HA8001/center_IE_Q.gif" alt="IE6(Q) IE7(Q) IE8(Q)" /></td>
+          <td><img src="../../tests/HA8001/center_IE67_S.gif" alt="IE6(S) IE7(S)" /></td>
+          <td><img src="../../tests/HA8001/center_IE8_S.gif" alt="IE8(S) Opera(S)" /></td>
+          <td><img src="../../tests/HA8001/center_CR.gif" alt="Firefox Chrome Safari Opera(Q)" /></td>
+        </tr>
+      </table>
+      <p>可见，所有浏览器中，CENTER 元素均可以使其一级块级子元素居中对齐。<br />
+      在 <em>IE6 IE7 IE8(Q)</em> 中，CENTER 元素可以使自身也居中对齐，而 <em>IE(S) Opera(S)</em> 中无论是 CENTER 元素还是设定了 align="center" 的 DIV 元素，其内的文字也会居中对齐。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>避免使用 CENTER 标签，使用 CSS 的 'text-align' 特性来代替。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="RT8003">RT8003: 'text-align' 特性在 IE6 IE7 IE8(Q) 中可以影响块级元素的对齐方式，并且在所有浏览器的混杂模式中均不能被 TABLE 元素继承</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 5.0.356.2 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.50
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HA8001/center.html">center.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-01</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>CENTER text-align text alignment 居中 对齐 文本</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,236 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RX1003: IE6 IE7 IE8(Q) 中 'white-space' 特性在某些情况下不会自动继承</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 CSS2.1 规范中的描述，'white-space' 特性声明了元素内的空白如何处理。</p>
+      <table class="compare">
+        <tr>
+          <th>取值</th>
+          <td>normal | pre | nowrap | pre-wrap | pre-line | inherit</td>
+        </tr>
+        <tr>
+          <th>初始值</th>
+          <td>normal</td>
+        </tr>
+        <tr>
+          <th>作用于</th>
+          <td>所有元素</td>
+        </tr>
+        <tr>
+          <th>继承性</th>
+          <td>可以继承</td>
+        </tr>
+        <tr>
+          <th>百分比</th>
+          <td>N/A</td>
+        </tr>
+      </table>
+      <p>可知，'white-space' 特性可以用作于所有的 HTML 元素，并且默认是具备继承性的。</p>
+      <p>同时，CSS2.1 还规定，用户端必须首先以优先级的顺序基于如下机制为每一个特性分配一个指定值（specified value）：</p>
+      <ul>
+        <li>如果值中包含层叠，则使用层叠；</li>
+        <li>否则，如果特性是可继承的，并且元素不是文档树中的根元素，则使用父元素的计算值；</li>
+        <li>否则，使用特性的初始值（initial value）。每一个特性的初始值在特性的定义中标示。</li>
+      </ul>
+      <p>关于 'white-space' 特性的详细信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/text.html#white-space-prop">16.6 White space: the 'white-space' property</a> 中的内容。</p>
+      <p>关于 指定值 的详细信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/cascade.html#specified-value">6.1.1 Specified values</a> 中的内容。</p>
+      <p></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 IE7 IE8(Q)中，若 TD 元素没有明确设定 'white-space' 特性，其值为继承自其父元素的值，则其内的子元素不再能够自动继承 TD 的 'white-space' 特性。并且若 TD 元素明确设定了 'width' 特性，则 TD 元素本身的 'white-space' 特性自动变为了初始值 'normal'。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>若没有明确地为 TD 元素的子元素设置 'white-space' 特性，可能会在不同浏览器中产生非常大的表格布局差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>根据规范中对于 'white-space' 特性的描述，若为一个 TABLE 元素设置了 <span class="hl_4">white-space:nowrap;</span> ，且其内子元素均没有明确设定 'white-space' 特性，则子元素均会自动继承 TABLE 元素的 <span class="hl_4">white-space:nowrap;</span>。</p>
+
+      <p>分析以下代码：</p>
+<pre>&lt;body style="font:16px Arial;"&gt;
+&lt;table id="table1" style="<span class="hl_4">white-space:nowrap;</span> width:100px; background:dodgerblue;"&gt;
+  &lt;tr&gt;
+    &lt;td id="td1" style="background:lavender;"&gt;
+      &lt;div id="div1"&gt;Text Text Text Text Text Text Text Text&lt;/div&gt;
+    &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;div id="info1"&gt;&lt;/div&gt;
+&lt;script&gt;
+  window.onload = function() {
+    function $(id) { return document.getElementById(id); }
+    if (!window.getComputedStyle) {
+      window.getComputedStyle = function($target) {
+        return $target.currentStyle;
+      };
+    }
+    $("info1").innerHTML = "&lt;br /&gt;TABLE:" + getComputedStyle($("table1"), null).whiteSpace
+      + "&lt;br /&gt;TD:" + getComputedStyle($("td1"), null).whiteSpace
+      + "&lt;br /&gt;DIV:" + getComputedStyle($("div1"), null).whiteSpace;
+  }
+&lt;/script&gt;
+&lt;/body&gt;</pre>
+      <p>上面代码为 TABLE 元素设置了 <span class="hl_4">white-space:nowrap</span>，分别测试了 TABLE 元素、其内部 TD 元素以及 TD 内的 DIV 子元素的 'white-space' 特性计算后的值。</p>
+      <p>这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RX1003/IE67_td_nowrap.gif" alt="IE6/7 IE8(Q) TD nowrap" /></td>
+          <td><img src="../../tests/RX1003/non_IE67_td_nowrap.gif" alt="non IE6/7 IE8(Q) TD nowrap" /></td>
+        </tr>
+      </table>
+      <p>可见，</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8(Q)</em> 中，若 TD 元素没有明确设定 'white-space' 特性，其值使用继承自其父元素的计算值，则其内的子元素不再能够自动继承 TD 的 'white-space' 特性；</li>
+        <li>在 <em>其他浏览器</em> 中，无论何种情况，TD 元素的子元素的 'white-space' 特性仍然具备继承性。</li>
+      </ul>
+      <br />
+      <p>下面为 TD 元素设定一个明确的 <span class="hl_4">white-space:nowrap</span>，查看其自身及其子元素的 'white-space' 特性的值。</p>
+
+      <p>分析以下代码：</p>
+      <pre>&lt;body style="font:16px Arial;"&gt;
+&lt;table id="table2" style="width:100px; background:dodgerblue;"&gt;
+  &lt;tr&gt;
+    &lt;td id="td2" style="white-space:nowrap; background:lavender;"&gt;
+      &lt;div id="div2"&gt;Text Text Text Text Text Text Text Text&lt;/div&gt;
+    &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;div id="info2"&gt;&lt;/div&gt;
+&lt;br /&gt;
+&lt;table id="table3" style="width:100px; background:dodgerblue;"&gt;
+  &lt;tr&gt;
+    &lt;td id="td3" style="white-space:nowrap; background:lavender; width:100px;"&gt;
+      &lt;div id="div3"&gt;Text Text Text Text Text Text Text Text&lt;/div&gt;
+    &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;div id="info3"&gt;&lt;/div&gt;
+&lt;script&gt;
+  window.onload = function() {
+    function $(id) { return document.getElementById(id); }
+    if (!window.getComputedStyle) {
+      window.getComputedStyle = function($target) {
+        return $target.currentStyle;
+      };
+    }
+    $("info2").innerHTML = "&lt;br /&gt;TABLE:" + getComputedStyle($("table2"), null).whiteSpace
+      + "&lt;br /&gt;TD:" + getComputedStyle($("td2"), null).whiteSpace
+      + "&lt;br /&gt;DIV:" + getComputedStyle($("div2"), null).whiteSpace;
+    $("info3").innerHTML = "&lt;br /&gt;TABLE:" + getComputedStyle($("table3"), null).whiteSpace
+      + "&lt;br /&gt;TD:" + getComputedStyle($("td3"), null).whiteSpace
+      + "&lt;br /&gt;DIV:" + getComputedStyle($("div3"), null).whiteSpace;
+  }
+&lt;/script&gt;
+&lt;/body&gt;</pre>
+      <p>上面的代码分为两组，每组中均是为 TD 元素明确的设置了 <span class="hl_4">white-space:nowrap</span> ，区别仅为第一组的 TD 元素没有明确设置 'width' 特性，则为默认的 'auto'。而第二组设置了 TD 元素的 'width' 特性值为 100px。</p>
+      <p>这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RX1003/IE67_td_nowrap_width.gif" alt="IE6/7 IE8(Q) TD nowrap with width" /></td>
+          <td><img src="../../tests/RX1003/non_IE67_td_nowrap_width.gif" alt="non IE6/7 IE8(Q) TD nowrap with width" /></td>
+        </tr>
+      </table>
+      <p>可见：</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8(Q)</em> 中，若 TD 元素明确设定 'width' 特性，则 TD 元素本身的 'white-space' 特性自动变为了初始值 'normal'。同时其内的子元素的 'white-space' 特性也自动变为了初始值 'normal'；</li>
+        <li>在 <em>其他浏览器</em> 中，无论何种情况，TD 元素的子元素的 'white-space' 特性值正常。</li>
+      </ul>
+      <p>在 MSDN 中关于 <a href="http://msdn.microsoft.com/en-us/library/ms534196(VS.85).aspx">NOWRAP Attribute | noWrap Property</a> 的描述中：</p>
+      <pre>Care should be taken when the noWrap property is used in conjunction with the width attribute of table or td elements.
+
+Wordwrap still occurs in a td element that has its WIDTH attribute set to a value smaller than the unwrapped content of the cell, even if the noWrap property is set to true. Therefore, the WIDTH attribute takes precedence over the noWrap property in this scenario.
+
+If a td element has its noWrap set to true and the WIDTH attribute of its table element is set to a smaller dimension than the rendered content of the td element, wordwrap does not occur. In this case, the noWrap setting takes precedence over the WIDTH attribute.</pre>
+      <p>在为 TABLE 或 TD 元素同时设定 noWrap 属性及宽度属性时需小心。若 TD 元素设定的宽度小于其内容不发生换行时的宽度时，即使 TD 元素设定了 white-space:nowrap（或者 nowrap 属性），仍然会发生换行。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>明确地为 TD 的子元素设置 'white-space' 特性，避免使 TD 元素自动继承父元素的 'white-space' 特性。或者避免同时为 TD 元素设置宽度及 white-space:nowrap（或是 nowrap 属性）。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.3<br />
+              Chrome 5.0.396.0 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.53
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RX1003/td_whitespace.html">td_whitespace.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-10</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>white-space nowrap normal inherit 继承 空白 折行</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

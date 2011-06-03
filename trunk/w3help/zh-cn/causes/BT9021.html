@@ -1,0 +1,160 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BT9021: IE 中可以使用 ActiveXObject 创建 Automation 对象，同时该对象的方法及属性名称大小写不敏感</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE 中可以使用 ActiveXObject 创建 Automation 对象，同时该对象得方法及属性名称大小写不敏感。其他浏览器均不支持此技术。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>使用 ActiveXObject 创建自动化对象仅 IE 支持，其他浏览器若运行到这种代码时可能会报错。<br />
+      同时，若在 IE 中使用 ActiveXObject 创建类“XMLHttpRequest”对象后，在调用其方法时没有注意大小写，则会造成尽在 IE 中代码可以正常执行，其他浏览器均会报错。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <h3>1. ActiveXObject 简介</h3>
+      <p>ActiveXObject 为 IE 中的专有对象，这个对象提供了微软专有的“Automation”（自动化）的接口。</p>
+      <p>在 JavaScript 中可以通过 new 运算符使用与其他 JavaScript 对象一样的方式创建自动化对象，其构造器内可以传入两个参数：</p>
+      <pre>function ActiveXObject(ProgID : String [, location : String])</pre>
+      <ul>
+        <li><strong>ProgID</strong>：形式为“serverName.typeName”的字符串，其中 serverName 是提供对象的应用程序的名称，typeName 是要创建的对象的类型或类。此参数为必须的参数；</li>
+        <li><strong>location</strong>：要在其中创建对象的网络访问器的名称。此参数为可选的参数，若创建的对象是本地的，则可以忽略。</li>
+      </ul>
+      <p>值得注意的是，ActiveXObject 对象本身不具有任何内部属性或方法，但可以通过其访问自动化对象的属性和方法。这是该对象与其他 JavaScript 中的对象最大的区别。</p>
+      <p>自动化（Automation）使应用程序能够对另一个应用程序中实现的对象进行操作，或者将对象公开以便可以对其进行操作。自动化客户端是可对属于另一个应用程序的公开对象进行操作的应用程序。公开对象的应用程序称为自动化服务器。客户端通过访问应用程序对象的属性和函数对这些对象进行操作。<br />
+      而当我们使用“new ActiveXObject”创建自动化对象时，浏览器扮演了自动化客户端的角色。</p>
+      <p>自动化客户端借由使用类型库（<a href="http://msdn.microsoft.com/zh-cn/library/cc451472%28v=VS.71%29.aspx">TypeLib</a>）可以用各种语言编写，而自动化服务器提供的属性及方法是 &quot;<em>大小写不敏感</em>&quot; 的。</p>
+      <p>关于 ActiveXObject 及 Automation 的详细信息，请参考 MSDN <a href="http://msdn.microsoft.com/zh-cn/library/6958xykx(VS.80).aspx">ActiveXObject 对象</a> 中的内容。</p>
+      <h3>2. 举例</h3>
+      <p>以下代码通过调用 ActiveXObject 对象构造函数来启动应用程序（在这种情况下为 Microsoft Excel 工作表）。ActiveXObject 允许在代码中引用应用程序。使用下面的示例，可以使用对象变量 ExcelSheet 和其他 Excel 对象（包括应用程序对象和 ActiveSheet.Cells 集合）来访问新对象的属性和方法。</p>
+<pre>
+&lt;script&gt;
+// Declare the variables
+var Excel, Book;
+
+// Create the Excel application object.
+Excel = new ActiveXObject(&quot;Excel.Application&quot;);
+
+// Make Excel visible.
+Excel.Visible = true;
+
+// Create a new work book.
+Book = Excel.Workbooks.Add()
+
+// Place some text in the first cell of the sheet.
+Book.ActiveSheet.Cells(1,1).Value = &quot;This is column A, row 1&quot;;
+
+// Save the sheet.
+Book.SaveAs(&quot;C:\\TEST.XLS&quot;);
+
+// Close Excel with the Quit method on the Application object.
+Excel.Application.Quit();
+&lt;/script&gt;
+</pre>
+      <p>在 IE 中打开测试代码的页面，将启动 Excel（若已安装），创建一个新的工作表，在第 1 行第 1 列处插入一段文字，然后另存为“C:\TEST.XLS”文件，关闭 Excel。</p>
+      <p>上述代码在非 IE 浏览器中将报错，没有任何效果。</p>
+      <h3>3. 一个关于 XMLHttpRequest 对象的例子</h3>
+      <p>下面看一下自动化对象中的 XMLHttpRequest。</p>
+      <p>XMLHttpRequst（简称 XHR）是一组 API 函数集，可被 JavaScript、JScript、VBScript 以及其它浏览器内嵌的脚本语言调用，通过 HTTP 协议在浏览器和 WEB 服务器之间收发 XML 或其它数据，是 AJAX 网页开发技术的重要组成部分。</p>
+      <p>XHR 对象最初由微软公司发明，用于 Outlook Web Access for Microsoft Exchange Server 2000。1999 年，IE5 借由 ActiveX 支持了这个对象。之后，其他浏览器也相继实现了与微软 IXMLHTTPRequest 接口相类似的接口。W3C 与 2006 年 4 月发布了 XMLHttpRequest 对象的草案。在同年 10 月发布的 IE7 中开始提供对 W3C 草案中的 XMLHttpRequest 对象的支持。</p>
+      
+      <p>所以在 IE7 之前版本的 IE 浏览器中，必须通过 &quot;new ActiveXObject(&quot;Msxml2.XMLHTTP&quot;)&quot; 等类似代码创建 XHR 对象。这个对象中的各属性及方法与 W3C 草案中 XMLHttpRequest 对象内的大体一致，如常用的 open、send、setRequestHeader、onreadystatechange 等。</p>
+      <p>在创建跨浏览器的 AJAX 应用时经常会这么写：</p>
+<pre>
+var xmlhttp = null;
+
+if (window.XMLHttpRequest) {  // code for IE7+, Firefox, Chrome, Opera, Safari
+    xmlhttp=new XMLHttpRequest();
+} else {  // code for IE6, IE5
+    xmlhttp=new ActiveXObject(&quot;Microsoft.XMLHTTP&quot;);
+}
+
+xmlhttp.open(&quot;GET&quot;, &quot;1.txt&quot;, false);
+xmlhttp.send(null);
+</pre>
+      <p>若在使用对象 xmlhttp 的方法及属性时不注意大小写，如误写成了 <code>&quot;xmlhttp.OPEN(&quot;GET&quot;, &quot;1.txt&quot;, false);&quot;</code> ，则会造成代码在调用 window.XMLHttpRequest 的浏览器中不能正常运行。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>为了最好的兼容性，应尽量避免使用这种技术，或者在非 IE 浏览器中使用其他的替代技术，如 NPAPI 插件。<br />
+      访问在 IE5 IE6 中使用 ActiveXObject 创建的 &quot;XHR 对象&quot; 的方法和属性时应注意大小写，务必与其他浏览器所支持的 window.XMLHttpRequest 对象中方法和属性的大小写保持一致。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="BX9041">BX9041：各浏览器创建 XMLHttpRequest 对象的方式不同</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.3<br />
+              Chrome 5.0.366.2 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BT9021/activexobject_xmlhttprequest.html">activexobject_xmlhttprequest.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-06</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>ActiveXObject OLE COM Automation 自动化 组件 AJAX 大小写</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

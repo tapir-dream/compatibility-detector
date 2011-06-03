@@ -1,0 +1,163 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HE1001: IE 中单元格的 colspan 属性在某些情况下会影响 TABLE 元素的自动布局</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p><strong>关于表格元素的自动布局</strong></p>
+      <p>在 W3C CSS2.1 文档中，TABLE 元素在自动布局时的列的宽度计算规则是这样的：</p>
+      <ul>
+        <li>1. 计算每一个单元格的最小宽度 (MCW)：经过格式化的内容可能会扩展到很多行，但是不会溢出单元格。如果某列的宽度设置值 (W) 大于 MCW，那么 W 就是单元格的最小宽度。另外，计算每个单元格的“最大”单元格宽度：不换行的将内容格式化，除非有显式的换行。</li>
+        <li>2. 对每一列，根据只占该列的单元格的宽度确定最大最小宽度。最小值是其 MCW 最大的那个单元格的宽度（或列的 'width'，取较大的）。最大值是取最大单元格宽度最大的单元格宽度（或列的 'width'，取较大的）。</li>
+        <li>3. <strong>对于跨越多列的单元格，增加这些列的最小宽度，使它们的和至少跟单元格等宽。对于最大宽度也照样处理。如果可能的话，每个扩展到的列增加的宽度应大致相同。</strong></li>
+        <li>4. 对于每一个宽度值不是 auto 的列组，增加它所跨列的最小宽度，使宽度和至少跟列组的宽度等宽。</li>
+      </ul>
+      <p>其中在第三步，提到了当表格中出现跨越多列的单元格时，它所跨列宽的计算规则：相应的增加所跨列的最小宽度。</p>
+      <p>虽然如此，但是对增加的方式没有明确说明，只是说，如果可能，所跨列增加的宽度应大致相同。</p>
+      <p>因此，对于跨列后的列宽计算方式，在各浏览器也就产生了差异。</p>
+      <p>关于 表格元素的自动布局 的详细信息，请参考 W3C CSS2.1 规范 <a href="http://www.w3.org/TR/CSS2/tables.html#auto-table-layout">17.5.2.2 Automatic table layout</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>单元格的 colspan 属性在 IE 中可能影响 TABLE 元素的自动布局。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题严重时可能会导致页面布局混乱。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>请看以下测试用例。</p>
+
+      <p>分析以下代码：</p>
+<pre>&lt;script type="text/javascript"&gt;
+    window.onload = function() {
+        function $(id) {
+            return document.getElementById(id);
+        }
+
+        $("info").innerHTML = "red cell clientWidth : " + $("td1").clientWidth +
+                "&lt;br/&gt;blue cell clientWidth : " + $("td2").clientWidth +
+                "&lt;br/&gt;gold cell clientWidth : " + $("td3").clientWidth;
+    }
+&lt;/script&gt;
+&lt;table id="<strong>T</strong>" style="color:white;" cellpadding="0" cellspacing="0"&gt;
+    &lt;tr&gt;
+        &lt;td id="<strong>td1</strong>" style="background-color:red;"&gt;td1&lt;/td&gt;
+        &lt;td id="<strong>td2</strong>" style="background-color:blue; width:100px;"&gt;td2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td id="<strong>td3</strong>" style=" background-color:gold; width:300px;" <span class="hl_1">colspan="2"</span>&gt;td3&lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;
+computed clientWidth:
+&lt;div id="info" style="border:1px dashed red; width:300px;"&gt;&lt;/div&gt;</pre>
+      <ul>
+        <li><strong>T</strong> 是一个自动布局的表格，含两行，两列。T 中『cellpadding="0" cellspacing="0"』的设置是为了去除单元格之间 padding 等的影响。</li>
+        <li><strong>td2</strong> 的宽度是100px，大于其内容宽度；</li>
+        <li><strong>td3</strong> 的宽度是300px，大于其内容宽度。</li>
+      </ul>
+      <p>根据 CSS2.1 规范中的描述可知，<strong>td1</strong> 的最终宽度应为 200px。</p>
+      <p>这段代码在不同的浏览器环境中的表现：</p>
+      <table class="compare">
+        <tr>
+          <th>IE</th>
+          <th>Firefox Opera Safari Chrome</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/HE1001/HE1001-1.jpg" alt=""></td>
+          <td><img src="../../tests/HE1001/HE1001-2.jpg" alt=""></td>
+        </tr>
+      </table>
+      <p>可见，在 IE 中，单元格的 <strong>td1</strong> 和 <strong>td2</strong> 宽度被重新分配。</p>
+
+      <p>将 <strong>td2</strong> 的宽度设置 (width:100px;) 去掉后：</p>
+      <table class="compare">
+        <tr>
+          <th>IE Firefox Opera Safari Chrome</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/HE1001/HE1001-3.jpg" alt=""></td>
+        </tr>
+      </table>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>1. 设置 TABLE 的 'table-layout' 特性值为 fixed，使用固定布局的表格元素可避免此问题。</p>
+      <p>2. 单元格所跨过的列的宽度都设置成 auto。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.8<br />
+              Chrome 6.0.472.14 dev<br />
+              Safari 5.0.1<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HE1001/cell_width_colspan.html">cell_width_colspan.html</a><br />
+            <a href="../../tests/HE1001/cell_width_colspan_2.html">cell_width_colspan_2.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-05</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>cell width colspan table</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

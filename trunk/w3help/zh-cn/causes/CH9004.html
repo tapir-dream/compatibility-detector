@@ -1,0 +1,268 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">CH9004: IE Firefox 在进行某些跳转时请求头中不会附加 Referer 字段信息</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 HTTP1.1 规范中的描述，请求头中的 Referer 字段允许用户端为服务端指定得到的请求 URI 的资源地址 (URI)，允许服务端生成资源的反向链接列表，同时也允许追踪维护过时的或者是拼写错误的链接。若一个请求 URI 获得自一个没有自身 URI 的源，则该请求 URI 的 Referer 字段不得被发送，如来自用户键盘的输入。</p>
+      <pre>  Referer = &quot;Referer&quot; &quot;:&quot; ( absoluteURI | relativeURI )</pre>
+      <p>如：Referer: http://www.w3.org/hypertext/DataSources/Overview.html</p>
+      <p>关于 Referer 的更多信息，请参考 Hypertext Transfer Protocol -- HTTP/1.1 规范 <a href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.36">14.36 Referer</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE6 IE7 IE8 始终不在使用 META 元素控制跳转时附加 Referer 字段到请求头中。在普通页面中，当脚本调用 location 对象进行跳转时也不会附加 Referer 字段信息；<br /></li>
+      Firefox 始终不在使用 META 元素控制跳转时附加 Referer 字段到请求头中。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>若服务端依靠请求头中的 Referer 字段信息进行某些操作，则在使用 META 元素进行页面跳转以及脚本 location 对象进行跳转时在某些浏览器中由于无 Referer 字段而产生差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <th>Firefox</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>创建一个 Web 服务器，如 Apache。在服务器上编写一段动态代码，用于输出接收到的请求头的 Referer 字段信息。如：<em>refer.php</em></p>
+<pre>&lt;?php
+  echo '&lt;style&gt;* { font:12px &quot;Trebuchet MS&quot;; }&lt;/style&gt;';
+  echo (isset($_SERVER['HTTP_REFERER'])) ? 'Referer: ' . $_SERVER['HTTP_REFERER'] : 'Referer: N/A';
+?&gt;</pre>
+      <p>本文中将测试 5 种常见的跳转方式，并分别在普通页面及 IFRAME 框架页内测试这些跳转方式下请求头 Referer 字段的发送情况。</p>
+      <p>5 种跳转方式代码：</p>
+      <table class="compare">
+        <tr>
+          <th>anchor.html</th>
+          <td><pre>&lt;a href=&quot;<span class="hl_1">refer.php</span>&quot;&gt;Anchor&lt;/a&gt;</pre></td>
+        </tr>
+        <tr>
+          <th>form_submit.html</th>
+          <td><pre>&lt;body&gt;
+&lt;form action=&quot;<span class="hl_1">refer.php</span>&quot;&gt;&lt;input type=&quot;submit&quot; /&gt;&lt;/form&gt;
+&lt;script&gt;
+  document.forms[0].submit();
+&lt;/script&gt;
+&lt;/body&gt;</pre></td>
+        </tr>
+        <tr>
+          <th>meta.html</th>
+          <td><pre>&lt;meta http-equiv=&quot;refresh&quot; content=&quot;1;url=<span class="hl_1">refer.php</span>&quot;&gt;</pre></td>
+        </tr>
+        <tr>
+          <th>http302.php</th>
+          <td><pre>&lt;?php
+  header('Location: <span class="hl_1">refer.php</span>');
+?&gt;</pre></td>
+        </tr>
+        <tr>
+          <th>location.html</th>
+          <td><pre>&lt;script&gt;location.href=&quot;<span class="hl_1">refer.php</span>&quot;;&lt;/script&gt;</pre></td>
+        </tr>
+        <tr>
+        </tr>
+      </table>
+      <p>测试页面：</p>
+      <table class="compare">
+        <tr>
+          <th>index.html</th>
+          <td><pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;base target=&quot;_blank&quot; /&gt;
+&lt;style&gt;
+  * { margin:0; font:16px 'Trebuchet MS'; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;a href=&quot;anchor.html&quot;&gt;Anchor&lt;/a&gt;&lt;br /&gt;
+&lt;a href=&quot;form_submit.html&quot;&gt;Form submit&lt;/a&gt;&lt;br /&gt;
+&lt;a href=&quot;meta.html&quot;&gt;META&lt;/a&gt;&lt;br /&gt;
+&lt;a href=&quot;302.php&quot;&gt;HTTP 302&lt;/a&gt;&lt;br /&gt;
+&lt;a href=&quot;location.html&quot;&gt;location.href&lt;/a&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre></td>
+        </tr>
+        <tr>
+          <th>iframe.html</th>
+          <td><pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  * { margin:0; font:16px 'Trebuchet MS'; }
+  iframe { width:400px; height:40px; display:block; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;h1&gt;Anchor:&lt;/h1&gt;
+&lt;iframe id=&quot;anchor&quot; name=&quot;anchor&quot; scrolling=&quot;no&quot; frameborder=&quot;0&quot; src=&quot;anchor.html&quot;&gt;&lt;/iframe&gt;
+&lt;h1&gt;Form submit:&lt;/h1&gt;
+&lt;iframe id=&quot;form_submit&quot; name=&quot;form_submit&quot; scrolling=&quot;no&quot; frameborder=&quot;0&quot; src=&quot;form_submit.html&quot;&gt;&lt;/iframe&gt;
+&lt;h1&gt;META:&lt;/h1&gt;
+&lt;iframe id=&quot;meta&quot; name=&quot;meta&quot; scrolling=&quot;no&quot; frameborder=&quot;0&quot; src=&quot;meta.html&quot;&gt;&lt;/iframe&gt;
+&lt;h1&gt;HTTP 302:&lt;/h1&gt;
+&lt;iframe id=&quot;http302&quot; name=&quot;http302&quot; scrolling=&quot;no&quot; frameborder=&quot;0&quot; src=&quot;302.php&quot;&gt;&lt;/iframe&gt;
+&lt;h1&gt;location.href:&lt;/h1&gt;
+&lt;iframe id=&quot;loc&quot; name=&quot;loc&quot; scrolling=&quot;no&quot; frameborder=&quot;0&quot; src=&quot;location.html&quot;&gt;&lt;/iframe&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre></td>
+        </tr>
+      </table>
+      <p>在各浏览器中分别打开上表的 &quot;index.html&quot;、&quot;iframe.html&quot;，对于页面 &quot;anchor.html&quot; 需要用户手动点击超链接。</p>
+      <p>这段代码在不同的浏览器环境中的表现：</p>
+      <table class="compare">
+        <tr>
+          <th colspan="2">&nbsp;</th>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox</th>
+          <th>Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <th rowspan="5">index.html</th>
+          <th>普通超链接 anchor.html</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>表单提交 form_submit.html</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>META 跳转 meta.html</th>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>HTTP 302 跳转 302.php</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>脚本 location.href 跳转 location.php</th>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr style="border-top:3px dashed black;">
+          <th rowspan="5">iframe.html</th>
+          <th>普通超链接 anchor.html</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>表单提交 form_submit.html</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>META 跳转 meta.html</th>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_1">Fail</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>HTTP 302 跳转 302.php</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>脚本 location.href 跳转 location.php</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+      </table>
+      <p>可见，对于普通超链接、表单提交、302 跳转，各浏览器均会在请求头附加 Referer 字段信息，而对于 META 元素控制跳转及通过脚本使用 location 对象进行跳转时：</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8</em> 中，始终不在使用 META 元素控制跳转时附加 Referer 字段到请求头中。在普通页面中，当脚本调用 location 对象进行跳转时也不会附加 Referer 字段信息；</p></li>
+        <li>在 <em>Firefox</em> 中，始终不在使用 META 元素控制跳转时附加 Referer 字段到请求头中；</li>
+        <li>在 <em>Chrome Safari Opera</em> 中，则对于测试的 5 种方式下均会附加 Referer 字段信息。</li>
+      </ul>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>若服务端需要获得正确的 Referer 字段信息，则应采用各浏览器均可以附加 Referer 字段信息的方式进行跳转。如，普通超链接、表单提交、HTTP 302 跳转。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.544.0 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/CH9004/index.html">index.html</a><br />
+            <a href="../../tests/CH9004/iframe.html">iframe.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-11</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>跳转 location href meta 302 referer request http form iframe</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

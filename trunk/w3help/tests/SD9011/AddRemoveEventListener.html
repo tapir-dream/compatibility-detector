@@ -1,0 +1,35 @@
+<button id="add" type="button">add event listener test</button>
+<button id="remove" type="button">remove event listener test</button>
+<div id="info"></div>
+<script type="text/javascript">
+	var add = document.getElementById("add"),
+		remove = document.getElementById("remove"),
+		showMsgA = function(){showMsg("attachEvent")},
+		showMsgB = function(){showMsg("addEventListener")};
+		
+	if(add.attachEvent){
+		add.attachEvent("onclick",showMsgA);
+		remove.attachEvent("onclick",removeE);
+	}
+	
+	if(add.addEventListener){
+		add.addEventListener("click",showMsgB,false);
+		remove.addEventListener("click",removeE,false);
+	}
+	
+	function removeE(){
+		if(add.detachEvent){
+			add.detachEvent("onclick",showMsgA);
+			showMsg("detachEvent");
+		}
+		
+		if(add.removeEventListener){
+			add.removeEventListener("click",showMsgB,false);
+			showMsg("removeEventListener");
+		}
+	}
+	
+	function showMsg(method){
+		document.getElementById("info").innerHTML += ("support " + method + "<br />");
+	}
+</script>

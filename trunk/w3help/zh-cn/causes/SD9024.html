@@ -1,0 +1,525 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SD9024: 各浏览器中 DOM 接口的继承关系存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>DOM Core 及 DOM HTML 规范中明确说明了文档对象模型中各种接口的 IDL (Interface Definition Language) 定义，包括了接口之间的继承关系和接口所具有的属性及方法。<br />
+      其中，DOM Core 规范定义了访问和操作文档对象的一套对象和接口，这其中包含了对 HTML 及 XML 的解析及操作；DOM HTML 规范为 DOM Core 的扩展，描述了 HTML 及 XHTML 的对象的细节。</p>
+      <p>如 HTMLDocument 接口将继承 Document 接口中的所有属性及方法，同时 HTMLDocument 接口也会实现一些自身的属性及方法。</p>
+      <p>下面的表格列举了 DOM Core 及 DOM HTML 规范中描述的接口的继承关系。其中 <strong style="background-color:bisque;">&nbsp;背景色&nbsp;</strong> 代表此接口属于 DOM Core 规范，<strong style="background-color:lightgreen;">&nbsp;背景色&nbsp;</strong> 代表此接口属于 DOM HTML 规范。</p>
+      <table class="compare">
+        <tr>
+          <th>1<br />is the root</th>
+          <th>2<br />inherits from 1</th>
+          <th>3<br />inherits from 2</th>
+          <th>4<br />inherits from 3</th>
+        </tr>
+        <tr>
+          <td colspan="4" style="background-color:bisque;">NodeList</td>
+        </tr>
+        <tr>
+          <td colspan="4" style="background-color:bisque;">NamedNodeMap</td>
+        </tr>
+        <tr>
+          <td colspan="4" style="background-color:bisque;">DOMImplementation</td>
+        </tr>
+        <tr>
+          <td rowspan="62" style="background-color:bisque;">Node</td>
+          <td colspan="3" style="background-color:bisque;">DocumentFragment</td>
+        </tr>
+        <tr>
+          <td rowspan="2" style="background-color:bisque;">CharacterData</td>
+          <td style="background-color:bisque;">Text</td>
+          <td style="background-color:bisque;">CDATASection</td>
+        </tr>
+        <tr>
+          <td colspan="2" style="background-color:bisque;">Comment</td>
+        </tr>
+        <tr>
+          <td colspan="3" style="background-color:bisque;">Attr</td>
+        </tr>
+        <tr>
+          <td colspan="3" style="background-color:bisque;">DocumentType</td>
+        </tr>
+        <tr>
+          <td colspan="3" style="background-color:bisque;">Notation</td>
+        </tr>
+        <tr>
+          <td colspan="3" style="background-color:bisque;">Entity</td>
+        </tr>
+        <tr>
+          <td colspan="3" style="background-color:bisque;">EntityReference</td>
+        </tr>
+        <tr>
+          <td colspan="3" style="background-color:bisque;">ProcessingInstruction</td>
+        </tr>
+        <tr>
+          <td style="background-color:bisque;">Document</td>
+          <td colspan="2" style="background-color:lightgreen;">HTMLDocument</td>
+        </tr>
+        <tr>
+          <td rowspan="52" style="background-color:bisque;">Element</td>
+          <td rowspan="52" style="background-color:lightgreen;">HTMLElement</td>
+          <td style="background-color:lightgreen;">HTMLHtmlElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLHeadElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLLinkElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLTitleElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLMetaElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLBaseElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLIsIndexElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLStyleElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLBodyElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLFormElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLSelectElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLOptGroupElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLOptionElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLInputElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLTextAreaElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLButtonElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLLabelElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLFieldSetElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLLegendElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLUListElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLOListElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLDListElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLDirectoryElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLMenuElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLLIElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLDivElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLParagraphElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLHeadingElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLQuoteElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLPreElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLBRElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLBaseFontElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLFontElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLHRElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLModElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLAnchorElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLImageElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLObjectElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLParamElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLAppletElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLMapElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLAreaElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLScriptElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLTableElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLTableCaptionElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLTableColElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLTableSectionElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLTableRowElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLTableCellElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLFrameSetElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLFrameElement</td>
+        </tr>
+        <tr>
+          <td style="background-color:lightgreen;">HTMLIFrameElement</td>
+        </tr>
+        
+        <tr>
+          <td colspan="4" style="background-color:lightgreen;">HTMLCollection</td>
+        </tr>
+        <tr>
+          <td colspan="4" style="background-color:lightgreen;">HTMLOptionsCollection</td>
+        </tr>
+      </table>
+      <p>关于 DOM Core 及 DOM HTML 中接口的更多信息，请参考 DOM 规范 <a href="http://www.w3.org/TR/DOM-Level-2-Core/core.html">Document Object Model Core</a> 及 <a href="http://www.w3.org/TR/DOM-Level-2-HTML/html.html">Document Object Model HTML</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 IE7 IE8(Q) 中，无法通过脚本检测到 DOM 接口原型，故无法获得其接口继承关系。<br />
+      在 IE8(S) 中，只能检测到部分 DOM 接口原型，但这些原型不可枚举，故无法获得其接口继承关系。<br />
+      在 Firefox 中，部分 DOM 接口原型不可枚举，接口继承关系与 DOM 规范中的描述不符。<br />
+      在 Chrome Safari Opera 中，DOM 接口继承关系遵照了 DOM 规范中的描述。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>若修改了某些较高层的 DOM 接口，如 Document 接口中的 getElementById 方法，则由于继承关系的存在，将会导致 Chrome Safari Opera 中作为 HTMLDocument 接口的实例——document 对象的 getElementById 方法异常。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+<pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div id=&quot;d&quot; style=&quot;display:none;&quot;&gt;DIV element&lt;/div&gt;
+&lt;script&gt;
+  try {
+    Document.prototype.getElementById = function () { return &quot;method getElementById in interface Document modified&quot;; }
+  } catch (ex) {
+    document.write(ex.message + '&lt;br /&gt;');
+  }
+  document.write('getElementById(&quot;d&quot;): ' + document.getElementById(&quot;d&quot;) + '&lt;br /&gt;');
+  try {
+    document.write('HTMLDocument.prototype.getElementById: ' + HTMLDocument.prototype.getElementById);
+  } catch (ex) {
+    document.write(ex.message + '&lt;br /&gt;');
+  }
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码中尝试修改了 Document 接口下的 getElementById 方法，之后检测了 document.getElementById("d") 的返回值以及 HTMLDocument.prototype.getElementById 方法的内容。</p>
+      <p>这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+        </tr>
+        <tr>
+          <td><span style="color:red">'Document' 未定义</span><br />
+            getElementById("d"): [object]<br />
+            <span style="color:red">'HTMLDocument' 未定义</span></td>
+        </tr>
+        <tr>
+          <th>IE8(S)</th>
+        </tr>
+        <tr>
+          <td><span style="color:red">'Document' 未定义</span><br />
+getElementById(&quot;d&quot;): [object HTMLDivElement]<br />
+HTMLDocument.prototype.getElementById: function getElementById() { [native code] }</td>
+        </tr>
+        <tr>
+          <th>Firefox</th>
+        </tr>
+        <tr>
+          <td>getElementById(&quot;d&quot;): [object HTMLDivElement]<br />
+            HTMLDocument.prototype.getElementById: function getElementById() { [native code] }</td>
+        </tr>
+        <tr>
+          <th>Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td>getElementById(&quot;d&quot;): <em>method getElementById in interface Document modified</em><br />
+            HTMLDocument.prototype.getElementById: function () { return &quot;method getElementById in interface Document modified&quot;; }</td>
+        </tr>
+      </table>
+      <p>根据 DOM 规范，document 对象为 HTMLDocument 接口的实例，HTMLDocument 接口继承自 Document 接口，getElementById 方法定义在 Document 接口中。若通过 Document.prototype.getElementById 修改了 getElementById 方法，此时 HTMLDocument 接口中继承自 Document 接口的 getElementById 也会发生变化，则在通过 document.getElementById() 调用 getElementById 方法时将调用修改后的方法。</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8(Q)</em> 中，无法通过脚本获得 Document 及 HTMLDocument 接口原型，故无法修改 Document 接口内部的 getElementById 方法，所以 document.getElementById(&quot;d&quot;) 可以获得 id 属性为 &quot;d&quot; 的 HTMLDivElement 对象，；</li>
+        <li>在 <em>IE8(S)</em> 中，无法通过脚本获得 Document 接口原型，故无法修改 Document 接口内部的 getElementById 方法，所以 document.getElementById(&quot;d&quot;) 可以获得 id 属性为 &quot;d&quot; 的 HTMLDivElement 对象，通过 HTMLDocument.prototype.getElementById 可以看到 document 调用的 getElementById 方法实际上来自 HTMLDocument 接口，但这样并不能证明 HTMLDocument 接口与 Document 接口是否存在继承关系；</li>
+        <li>在 <em>Firefox</em> 中，修改 Document 接口下的 getElementById 方法后依然可以使用 document.getElementById(&quot;d&quot;) 获得 id 属性为 &quot;d&quot; 的 HTMLDivElement 对象。通过 HTMLDocument.prototype.getElementById 可以看到 document 调用的 getElementById 方法实际上来自 HTMLDocument 接口，可见 HTMLDocument 接口与 Document 接口没有继承关系；</li>
+        <li>在 <em>Chrome Safari Opera</em> 中，则是按照 DOM 规范的描述，HTMLDocument 接口继承自 Document 接口。</li>
+      </ul>
+      <br />
+      <p>下面更加详细地测试各浏览器中 DOM 接口的继承关系，以 Node -&gt; Document -&gt; HTMLDocument -&gt; 以及 Node -&gt; Element -&gt; HTMLElement -&gt; HTMLFormElement 为例。</p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body style=&quot;font:24px Consolas;&quot;&gt;
+&lt;script&gt;
+  function $r(str) { document.write(str); }
+  function testDOMObject(objStr, level) {
+    var indent = '', g = 0, s = [];
+    var T = '&lt;strong style=&quot;background-color:lime&quot;&gt;true&lt;/strong&gt;';
+    var F = '&lt;strong style=&quot;background-color:tomato&quot;&gt;false&lt;/strong&gt;';
+    var NA = '&lt;strong style=&quot;background-color:fuchsia&quot;&gt;N/A&lt;/strong&gt;';
+    while (g++ &lt; level) { indent += '&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;'; }
+    try {
+      var o = eval(objStr);
+      s.push(indent + '&lt;strong style=&quot;background-color:greenyellow&quot;&gt;Interface ' + objStr +': ' + o + '&lt;/strong&gt;');
+      s.push('&lt;br /&gt;');
+      try {
+        s.push(indent + objStr + '.prototype: ' + o.prototype);
+      } catch (ex) {
+        s.push(indent + '&lt;strong style=&quot;background-color:coral&quot;&gt;' + objStr + '.prototype: ' + ex.message + '&lt;/strong&gt;');
+      }
+      s.push('&lt;br /&gt;');
+      s.push(indent + objStr + '.prototype.hasOwnProperty(&quot;XXX&quot;): &lt;br /&gt;');
+      var str = [];
+      try {
+        for (var i in o.prototype) {
+          str.push(indent + '&lt;em&gt;' + i + '&lt;/em&gt;: ' + ((o.prototype.hasOwnProperty(i)) ? T : F) + '&lt;br /&gt;');
+        }
+      } catch (ex) { }
+      s.push(((str.length &gt; 0) ? str.join('') : indent + NA));
+    } catch (ex) {
+      s.push(indent + '&lt;strong style=&quot;background-color:coral&quot;&gt;Interface ' + objStr + ': ' + ex.message + '&lt;/strong&gt;');
+    }
+    s.push('&lt;br /&gt;&lt;br /&gt;');
+    return s.join('');
+  }
+  var objHTMLDocument = ['Node', 'Document', 'HTMLDocument'];
+  var objHTMLFormElement = ['Node', 'Element', 'HTMLElement', 'HTMLFormElement'];
+  for (var i in objHTMLDocument) {
+    $r(testDOMObject(objHTMLDocument[i], i));
+  }
+  for (var i in objHTMLFormElement) {
+    $r(testDOMObject(objHTMLFormElement[i], i));
+  }
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>在各浏览器中运行上面代码之后可以得到：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S)</th>
+          <th>Firefox</th>
+          <th>Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <th style="text-align:left;">Node 接口</th>
+          <td><span class="hl_1">No</span></td>
+          <td><span class="hl_1">No</span></td>
+          <td><span class="hl_2">Yes</span></td>
+          <td><span class="hl_2">Yes</span></td>
+        </tr>
+        <tr>
+          <th style="text-align:left;">　　Document 接口</th>
+          <td><span class="hl_1">No</span></td>
+          <td><span class="hl_1">No</span></td>
+          <td><span class="hl_2">Yes</span></td>
+          <td><span class="hl_2">Yes</span></td>
+        </tr>
+        <tr style="background-color:wheat;">
+          <th style="text-align:left; background-color:wheat;">　　Document 接口继承自 Node 接口</th>
+          <td><span class="hl_1">No</span></td>
+          <td><span class="hl_1">No</span></td>
+          <td><span class="hl_1">No</span></td>
+          <td><span class="hl_2">Yes</span></td>
+        </tr>
+        <tr>
+          <th style="text-align:left;">　　　　HTMLDocument 接口</th>
+          <td><span class="hl_1">No</span></td>
+          <td><span class="hl_2">Yes</span></td>
+          <td><span class="hl_2">Yes</span></td>
+          <td><span class="hl_2">Yes</span></td>
+        </tr>
+        <tr style="background-color:wheat;">
+          <th style="text-align:left; background-color:wheat;">　　　　HTMLDocument 接口继承自 Document 接口</th>
+          <td><span class="hl_1">No</span></td>
+          <td><span class="hl_1">No</span></td>
+          <td><span class="hl_1">No</span></td>
+          <td><span class="hl_2">Yes</span></td>
+        </tr>
+        <tr>
+          <th style="text-align:left;">　　Element 接口</th>
+          <td><span class="hl_1">No</span></td>
+          <td><span class="hl_2">Yes</span></td>
+          <td><span class="hl_2">Yes</span></td>
+          <td><span class="hl_2">Yes</span></td>
+        </tr>
+        <tr style="background-color:wheat;">
+          <th style="text-align:left; background-color:wheat;">　　Element 接口继承自 Node 接口</th>
+          <td><span class="hl_1">No</span></td>
+          <td><span class="hl_1">No</span></td>
+          <td><span class="hl_1">No</span></td>
+          <td><span class="hl_2">Yes</span></td>
+        </tr>
+        <tr>
+          <th style="text-align:left;">　　　　HTMLElement 接口</th>
+          <td><span class="hl_1">No</span></td>
+          <td><span class="hl_1">No</span></td>
+          <td><span class="hl_2">Yes</span></td>
+          <td><span class="hl_2">Yes</span></td>
+        </tr>
+        <tr style="background-color:wheat;">
+          <th style="text-align:left; background-color:wheat;">　　　　HTMLElement 接口继承自 Element 接口</th>
+          <td><span class="hl_1">No</span></td>
+          <td><span class="hl_1">No</span></td>
+          <td><span class="hl_2">Yes</span></td>
+          <td><span class="hl_2">Yes</span></td>
+        </tr>
+        <tr>
+          <th style="text-align:left;">　　　　　　HTMLFormElement 接口</th>
+          <td><span class="hl_1">No</span></td>
+          <td><span class="hl_2">Yes</span></td>
+          <td><span class="hl_2">Yes</span></td>
+          <td><span class="hl_2">Yes</span></td>
+        </tr>
+        <tr style="background-color:wheat;">
+          <th style="text-align:left; background-color:wheat;">　　　　　　HTMLFormElement 接口继承自 HTMLElement 接口</th>
+          <td><span class="hl_1">No</span></td>
+          <td><span class="hl_1">No</span></td>
+          <td><span class="hl_1">No</span></td>
+          <td><span class="hl_2">Yes</span></td>
+        </tr>
+      </table>
+      <p>可见只有 Chrome Safari Opera 中，DOM 接口的继承关系遵照了 DOM 规范中的描述。</p>
+      
+      
+      
+      
+
+      <h2 id="solutions">解决方案</h2>
+      <p>由于各浏览器中 DOM 接口实现的不一致性，这里建议应尽量避免修改浏览器脚本引擎内 DOM 接口的原生方法。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td> IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.9<br />
+              Chrome 7.0.517.0 dev<br />
+              Safari 5.0.1<br />
+              Opera 10.61
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/SD9024/get.html">get.html</a><br />
+            <a href="../../tests/SD9024/inherit.html">inherit.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-08</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>DOM Core HTML Document HTMLDocument Element interface inherit</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

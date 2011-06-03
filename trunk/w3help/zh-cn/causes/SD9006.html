@@ -1,0 +1,555 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SD9006: IE 混淆了 DOM 对象属性（property）及 HTML 标签属性（attribute），造成了对 setAttribute、getAttribute 的不正确实现</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 DOM (Core) Level 1 规范中的描述，getAttribute 与 setAttribute 为 Element 接口下的方法，其功能分别是通过 &quot;name&quot; 获取和设置一个元素的属性（attribute）值。getAttribute 方法会以字符串的形式返回属性值，若该属性没有设定值或缺省值则返回空字符串。setAttribute 方法则无返回值。
+      <br />在 DOM Level 2 规范中，则更加明确了 getAttribute 与 setAttribute 方法参数中的 &quot;name&quot; 的类型为 DOMString，setAttribute 方法参数中的 &quot;value&quot; 的类型为 DOMString，getAttribute 的返回值类型也为 DOMString。</p>
+      <pre>DOMString  getAttribute(in DOMString name);
+void    setAttribute(in DOMString name, in DOMString value) raises(DOMException);</pre>
+      <p>HTML 文档中的 DOM 对象的属性（property）被定义在 DOM (HTML) 规范中。这个规范中明确定义了 document 对象以及所有标准的 HTML 元素所对应的 DOM 对象拥有的属性及方法。
+      <br />因为在早期的 <a href="http://www.w3.org/TR/DOM-Level-2-HTML/glossary.html#dt-DOM-Level-0">DOM Level 0</a> 阶段，某些 HTML 标签的属性会将其值暴露给对应的 DOM 对象的属性，如 HTML 元素的 id 属性与其对应的 DOM 对象的 id 属性会保持一种同步关系，然而这种方式目前已经废弃，这是由于它不能被扩展到所有可能存在的 XML 的属性名称。W3C 建议使用 DOM (Core) 中 Element 接口上定义的通用方法去获取（getting）、设置（setting）及删除（removing）元素的属性。</p>
+      <p>举例来说，在一个 HTML 文档中存在一个 SPAN 元素，根据 DOM (HTML) 规范，SPAN 元素在页面中生成一个相对应的对象，这个对象派生自 HTMLElement 接口，而 HTMLElement 接口则继承自 Element 接口。HTMLElement 接口中包含 id 属性。我们可以通过 HTMLElement 接口中的 id 属性获得这个元素的标识符，而通过 Element 接口中的 getAttibute 方法传入参数 &quot;id&quot; 同样可以获得标识符。
+      <br />虽然这两种方式可以获得相同的值，但是却有着天壤之别。从规范层面上看，getAttribute 方法所属的 DOM (Core) 规范定义了访问和操作文档对象的一套对象和接口，这其中包含了对 HTML 及 XML 的解析及操作；HTMLElement 接口中 id 属性所属的 DOM (HTML) 规范为 DOM (Core) 的扩展，描述了 HTML 及 XHTML 的对象的细节。而从 HTML 文档代码的层面上看，一个元素的标记中的 HTML 属性（attribute）与其对应的 DOM 对象的属性（property）也是完全不同的两个概念。</p>
+
+      <p>关于 getAttribute 与 setAttribute 的详细信息，请参考 DOM (Core) <a href="http://www.w3.org/TR/REC-DOM-Level-1/level-one-core.html">Level 1</a> 及 <a href="http://www.w3.org/TR/DOM-Level-2-Core/core.html">Level 2</a> 中的内容。</p>
+      <p>关于 HTML DOM 对象 的详细信息，请参考 DOM (HTML) <a href="http://www.w3.org/TR/DOM-Level-2-HTML/html.html">Document Object Model HTML</a>，特别是 <a href="http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-642250288">1.6.1. Property Attributes</a> 中的内容。</p>
+      <h2 id="description">问题描述</h2>
+      <p>IE6 IE7 IE8(Q) 混淆了 DOM 对象的属性（property）及 HTML 标签属性（attribute）这两个概念。其对于 getAttribute 及 setAttribute 方法的实现与 HTML DOM 对象的属性的 getter 与 setter 操作等价，这个错误的实现方式导致了一系列的兼容性问题。而在 IE8(S) 中，导致的大多数兼容性问题已不存在，但是仍然可以通过 &quot;Element.PropertyName&quot; 访问到这个 HTML 元素的自定义属性。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <ul>
+        <li>IE 各版本中可以通过 &quot;Element.PropertyName&quot; 访问 HTML 元素的自定义属性；</li>
+        <li>IE 各版本中可以通过 &quot;Element.getAttribute(&quot;value&quot;)&quot; 及 &quot;Element.setAttribute(&quot;value&quot;, &quot;XXX&quot;)&quot; 获取和设置 INPUT 文本框的实时输入的值（即 HTMLInputElement 对象的 value 属性，也叫做 <a href="http://www.w3.org/TR/html401/interact/forms.html#current-value">current value</a>）；</li>
+        <li>IE6 IE7 IE8(Q) 中无法通过 &quot;Element.setAttribute(&quot;class&quot;, &quot;AttributeValue&quot;)&quot; 设置元素的 class 属性，而需要使用 &quot;Element.setAttribute(&quot;className&quot;, &quot;AttributeValue&quot;)&quot;；</li>
+        <li>IE6 IE7 IE8(Q) 中无法通过 &quot;Element.setAttribute(&quot;style&quot;, &quot;AttributeValue&quot;)&quot; 设置元素的 style 属性，通过 &quot;Element.getAttribute(&quot;style&quot;)&quot; 得到的不是元素的 style 属性的字符串值，而是一个对象；</li>
+        <li>IE6 IE7 IE8(Q) 中无法通过诸如 &quot;Element.setAttribute(&quot;onclick&quot;, &quot;alert('ok')&quot;)&quot; 为元素绑定事件；</li>
+        <li>IE6 IE7 IE8(Q) 中可以通过诸如 &quot;Element.getAttribute(&quot;offsetHeight&quot;)&quot; 的方式获得元素的一些 DOM 属性的值，也可以通过诸如 &quot;Element.setAttibute(&quot;innerHTML&quot;, &quot;AttributeValue&quot;)&quot; 的方式设置元素的一些非只读 DOM 属性的值。</li>
+      </ul>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <th>IE8(S)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>在 MSDN 中的一篇名为 &quot;<a href="http://msdn.microsoft.com/en-us/library/dd347148(v=VS.85).aspx">Attribute Differences in Internet Explorer 8</a>&quot; 的一篇官方文档中提到，由于 DOM 属性（文中称作 &quot;DOM attribute&quot; ）通常与其所对应的 HTML 属性（文中称作 &quot;content attribute&quot; ）<strong>同名</strong>，因此常常被认为这两个 &quot;属性&quot; 的值是相同的。例如 DOM 中 BODY 对象的 background 属性（property）看上去似乎与 HTML 文档中 BODY 元素的 background 属性（attribute）的值相同。在早期版本的 IE 浏览器中， &quot;property&quot; 的值与分配给元素 &quot;attribute&quot; 的值相同，而同时 &quot;property&quot; 的值也以元素 &quot;attribute&quot; 的值为基础，因此，这两个值之间在术语上已变得含糊不清。</p>
+      <p>对于绝大多数 &quot;property&quot; 与 &quot;attribute&quot; 在名称及值类型上是统一的。但也有一些特例，</p>
+      <ul>
+        <li>在 HTML 标签中使用 class 属性指定元素使用的 CSS 类，但在 DOM 对象中由于 class 是 ECMAScript 的保留字，所以改用 className 属性。</li>
+        <li>HTML 标签中使用 style 属性指定元素的内联样式，但在 DOM 对象中虽然也存在 style 属性，但这个 style 属性是一个对象 CSSStyleDeclaration，而不是 DOMString。</li>
+        <li>而对于那些事件，则在 HTML 标签中使用字符串指定，在 DOM 对象中确是一个 function 对象。</li>
+      </ul>
+      <p>接下来通过代码分析 IE 由于混淆 DOM 对象的属性（property）及 HTML 属性（attribute）导致的常见的兼容性问题。</p>
+      <br />
+      <h3>1. IE 各版本中可以通过 "Element.PropertyName" 访问 HTML 元素的自定义属性</h3>
+      <p>代码 <strong>custom_attributes_and_properties.html</strong>：</p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;script&gt;
+  function $(id) { return document.getElementById(id); }
+  window.onload = function () {
+    var d1 = $(&quot;d1&quot;);
+    <span class="hl_2">d1.setAttribute(&quot;<em>setAttr2</em>&quot;, &quot;value2&quot;);</span>
+    <span class="hl_4">d1.<em>customProperty3</em> = &quot;value3&quot;;</span>
+    <span class="hl_3">d1.<em>id</em> = &quot;d2&quot;</span>;
+    var dn = document.createElement(&quot;div&quot;);
+    var str = [];
+    $(&quot;info2&quot;).value = $(&quot;cont&quot;).innerHTML;
+    for (var i in d1) {
+      if (!(i in dn)) {
+        str.push(i + &quot;:&quot; + d1[i] + &quot;&lt;br /&gt;&quot;);
+      }
+    }
+    $(&quot;info1&quot;).innerHTML = (str.length == 0) ? &quot;N/A&quot; : str.join(&quot;&quot;);
+  }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body style=&quot;font:20px Arial;&quot;&gt;
+&lt;div id=&quot;cont&quot;&gt;&lt;div id=&quot;d1&quot; <span class="hl_1"><em>customAttr1</em>=&quot;value1&quot;</span>&gt;'d1': HTMLDivElement 1&lt;/div&gt;&lt;/div&gt;
+&lt;br /&gt;
+&lt;h1&gt;Extra property:&lt;/h1&gt;
+&lt;div id=&quot;info1&quot;&gt;&lt;/div&gt;
+&lt;br /&gt;
+&lt;h1&gt;HTML code:&lt;/h1&gt;
+&lt;textarea id=&quot;info2&quot; cols=&quot;200&quot; style=&quot;font:16px Arial;&quot;&gt;&lt;/textarea&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码中，DIV 元素【d1】在其 HTML 标签上出现了 1 个自定义属性（attribute）——<span class="hl_1"><em>customAttr1</em></span>。页面加载完成后，使用 setAttribute 方法为【d1】的标签上设置了 <span class="hl_2"><em>setAttr2</em></span> 属性，为【d1】对应的 HTMLDivElement 对象设置了 <span class="hl_4"><em>customProperty3</em></span> 属性，为【d1】对应的对象设置了 <span class="hl_3"><em>id</em></span> 属性。<br />
+      然后，通过 &quot;for..in&quot; 遍历【d1】对应的 HTMLDivElement 对象内的属性（property），为了方便观察，特地通过与一个新创建的 HTMLDivElement 对象做比较，过滤了两者重复的对象属性，只显示出与新创建的 HTMLDivElement 对象存在差异的属性及属性值。</p>
+      <p>这段代码在不同的浏览器环境中的表现：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <th>Extra property</th>
+          <td><span class="hl_1"><em>customAttr1</em>:value1</span><br />
+<span class="hl_2"><em>setAttr2</em>:value2</span><br />
+<span class="hl_4"><em>customProperty3</em>:value3</span>
+</td>
+          <td><span class="hl_4"><em>customProperty3</em>:value3</span></td>
+        </tr>
+        <tr>
+          <th>HTML code</th>
+          <td>&lt;DIV <span class="hl_3"><em>id</em>=&quot;d2&quot;</span>  <span class="hl_1"><em>customAttr1</em>=&quot;value1&quot;</span> <span class="hl_2"><em>setAttr2</em>=&quot;value2&quot;</span> <span class="hl_4"><em>customProperty3</em>=&quot;value3&quot;</span>&gt;'d1': HTMLDivElement 1&lt;/DIV&gt;</td>
+          <td>&lt;div <span class="hl_3"><em>id</em>=&quot;d2&quot;</span>  <span class="hl_1"><em>customattr1</em>=&quot;value1&quot;</span> <span class="hl_2"><em>setattr2</em>=&quot;value2&quot;</span>&gt;'d1': HTMLDivElement 1&lt;/div&gt;</td>
+        </tr>
+      </table>
+      <p>在解析 HTML 文档时，<em>所有版本的 IE</em> 中自定义的 HTML 标签属性成为了该元素对应的 DOM 对象中的属性，这使得可以通过 &quot;d1.customAttr1&quot; 或者 &quot;d1[&quot;customAttr1&quot;]&quot; 获取的到这个自定义 HTML 属性的值。在使用 setAttribute 方法为元素的标签设置自定义 HTML 属性后，该元素对应的 DOM 对象上也会自动绑定上这个属性名及其属性值。同时，在为元素对应的 DOM 对象设置了一个属性后，其在 HTML 文档中对应的元素的 HTML 标签上也会出现这个自定义的属性名及其属性值。<br />
+      而在 <em>Firefox Chrome Safari Opera</em> 中，可以看到元素的 HTML 标签属性（attribute）和元素对应的 DOM 对象属性（property）是清晰地被分开的。</p>
+      <p>根据规范，HTMLDivElement 接口继承自 HTMLElement，实现了 HTMLDivElement 接口的对象（即 HTML 文档中 DIV 元素所对应的 DOM 对象）拥有 HTMLElement 接口中定义的所有属性（id、title、lang、dir、className 属性）及方法，以及其私有的 align 属性。【d1】最初在其 HTML 标签代码中有 <span class="hl_3"><em>id</em></span> 及 <span class="hl_1"><em>customAttr1</em></span> 两个属性，根据 DOM 规范，DIV 元素的 id 属性是会将其暴露给其对应的 HTMLDivElement 对象的 id 属性的，此时这两个层面的 id 属性会保持同步，即浏览器在解析 HTML 文档时，会将【d1】标签内的 id 属性及其值绑定至【d1】所对应的 DOM 对象上；同时当设置其 DOM 对象的 id 属性时，【d1】的 HTML 标签上的 id 属性也会随着发生变化。<br />
+      <span class="hl_1"><em>customAttr1</em></span> 为自定义属性，DOM 规范中所有的实现接口中均不包含这个属性。这时由于不存在 DOM 规范中所描述的绑定关系，浏览器会认为 <span class="hl_1"><em>customAttr1</em></span> 属性仅为这个 DOM 对象上的一个普通属性，和其对应的 HTML 文档中的标签属性没有任何关系。所以为 DOM 对象设置一个自定义属性不会对 HTML 文档产生任何效果。<br />
+      <span class="hl_2"><em>setAttr2</em></span> 属性同样为自定义属性，同样不存在 DOM 规范中所描述的绑定关系，使用 setAttribute 方法设置的 <span class="hl_2"><em>setAttr2</em></span> 属性仅仅是为【d1】的 HTML 标签上设置了一个自定义的 HTML 属性，这个操作只影响 HTML 文档内容，不应对 DOM 对象自身产生作用。</p>
+      <p>本例中，可以认为 IE 沿用了 W3C 规范中明确弃用的做法，将 HTML 规范中未定义的自定义属性也“暴露”给了对应的 DOM 对象，使得 HTML 元素的自定义属性与对应的 DOM 对象的自定义属性也会像规定中定义了绑定关系的那些标准属性一样可以保持着一种同步关系。</p>
+      <br />
+      <h3>2. IE 各版本中可以通过 &quot;Element.getAttribute(&quot;value&quot;)&quot; 及 &quot;Element.setAttribute(&quot;value&quot;, &quot;XXX&quot;)&quot; 获取和设置 INPUT 元素的实时输入的值</h3>
+      <p>代码 <strong>attribute_and_property_value.html</strong>：</p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  input, textarea { font:12px consolas; width:400px; }
+&lt;/style&gt;
+&lt;script&gt;
+  function $(id) { return document.getElementById(id); }
+  function addInputEvent(elem, handler, useCapture) {
+    elem.addEventListener ? elem.addEventListener(&quot;input&quot;, handler, false) :
+      elem.attachEvent(&quot;onpropertychange&quot;, handler);
+  }
+  window.onload = function () {
+    var psw = $(&quot;psw&quot;), cont = $(&quot;cont&quot;), ta = $(&quot;ta&quot;), txt;
+    var inputing = function () {
+      txt = cont.innerHTML + '\npsw.value:' + psw.value + '\npsw.getAttribute(&quot;value&quot;):' + psw.getAttribute(&quot;value&quot;);
+      ta.value = txt;
+      
+    }
+    addInputEvent(psw, inputing);
+    inputing();
+  }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div id=&quot;cont&quot;&gt;&lt;input id=&quot;psw&quot; type=&quot;text&quot; value=&quot;old value&quot; /&gt;&lt;/div&gt;
+  &lt;textarea id=&quot;ta&quot; style=&quot;height:100px;&quot;&gt;&lt;/textarea&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码中 INPUT 文本框的 value 初始值为 &quot;old value&quot;，当在文本框内输入字符时，会在其下方实时显示 INPUT 文本框的 HTML 标签代码，以及其 DOM 对象的 value 属性值和 getAttribute("value") 得到的值。</p>
+      <p>这段代码在不同的浏览器环境中的表现：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <th>初始状态：<em>&quot;<span class="hl_1">old value</span>&quot;</em></th>
+          <td>&lt;INPUT id=psw value=&quot;<span class="hl_1">old value</span>&quot; type=text&gt;<br />
+psw.value:<span class="hl_1">old value</span><br />
+psw.getAttribute(&quot;value&quot;):<span class="hl_1">old value</span></td>
+          <td>&lt;input id=&quot;psw&quot; type=&quot;text&quot; value=&quot;<span class="hl_1">old value</span>&quot;&gt;<br />
+psw.value:<span class="hl_1">old value</span><br />
+psw.getAttribute(&quot;value&quot;):<span class="hl_1">old value</span></td>
+        </tr>
+        <tr>
+          <th>清空文本框：<em>&quot;<span class="hl_2"></span>&quot;</em></th>
+          <td>&lt;INPUT id=psw type=text <span class="hl_2"></span>&gt;<br />
+psw.value:<span class="hl_2"></span><br />
+psw.getAttribute(&quot;value&quot;):<span class="hl_2">null</span></td>
+          <td>&lt;input id=&quot;psw&quot; type=&quot;text&quot; value=&quot;<span class="hl_1">old value</span>&quot;&gt;<br />
+psw.value:<span class="hl_2"></span><br />
+psw.getAttribute(&quot;value&quot;):<span class="hl_1">old value</span></td>
+        </tr>
+        <tr>
+          <th>输入新值：<em>&quot;<span class="hl_4">12345</span>&quot;</em></th>
+          <td>&lt;INPUT id=psw value=<span class="hl_4">12345</span> type=text&gt;<br />
+psw.value:<span class="hl_4">12345</span><br />
+psw.getAttribute(&quot;value&quot;):<span class="hl_4">12345</span></td>
+          <td>&lt;input id=&quot;psw&quot; type=&quot;text&quot; value=&quot;<span class="hl_1">old value</span>&quot;&gt;<br />
+psw.value:<span class="hl_4">12345</span><br />
+psw.getAttribute(&quot;value&quot;):<span class="hl_1">old value</span></td>
+        </tr>
+      </table>
+      <p>根据 DOM Level 2 HTML 规范中的描述，当 INPUT 元素 type 属性为 &quot;text&quot;、&quot;file&quot; 或 &quot;password&quot; 时，其对应的 HTMLInputElement 对象的 value 属性代表了这个控件 &quot;<a href="http://www.w3.org/TR/html401/interact/forms.html#current-value">当前值</a>&quot;，修改这个属性会改变控件的 &quot;当前值&quot;，但是并不会改变其 HTML 标签上的 value 属性。<br />
+      根据 HTML4.01 规范中的描述，一个 INPUT 元素 HTML 标签上的 value 属性指定了这个控件的 &quot;<a href="http://www.w3.org/TR/html401/interact/forms.html#initial-value">初始值</a>&quot;。最初的 &quot;当前值&quot; 会采用 &quot;初始值&quot;。<br />
+      即，对于本例中的 INPUT 元素，其 HTML 标签内的 value 属性为 &quot;<span class="hl_1">old value</span>&quot;，则初始值为 &quot;<span class="hl_1">old value</span>&quot;，而最初的 &quot;当前值&quot; 也为 &quot;<span class="hl_1">old value</span>&quot;。在用户改变 INPUT 文本框的内容时，&quot;当前值&quot; 发生变化，此时这个 INPUT 文本框对应的 DOM 对象的 value 属性也随着 &quot;当前值&quot; 而变化，但并不会影响到文本框的 HTML 标签上的 value 属性。</p>
+      <p>可以看到在 <em>Firefox Chrome Safari Opera</em> 中，在 INPUT 元素的输入新的 &quot;当前值&quot; 尽可以改变文本框对应的 DOM 对象的 value 属性。而在 <em>IE</em> 中，HTML 标签的 value 属性也会跟随 &quot;当前值&quot; 的变化而变化。</p>
+      <p>所以，只有在 IE 中可以通过 getAttribute("value") 可以获取到 INPUT 文本框内的实时内容。</p>
+      <br />
+      
+      <h3>3. IE6 IE7 IE8(Q) 中无法通过 "Element.setAttribute("class", "AttributeValue")" 设置元素的 class 属性</h3>
+      <p>代码 <strong>attribute_and_property_class.html</strong>：</p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  div { width:300px; height:100px; background:#eee; font:12px Arial; }
+  .d1 { background:pink; font:18px Arial; }
+  .d2 { background:gold; font:18px Arial; }
+  .d3 { background:plum; font:18px Arial; }
+&lt;/style&gt;
+&lt;script&gt;
+  function getClass(obj) {
+    obj.innerHTML = '.className=' + obj.className + 
+      '&lt;br&gt;.getAttribute(&quot;class&quot;)=' + obj.getAttribute(&quot;class&quot;) + 
+      '&lt;br&gt;.getAttribute(&quot;className&quot;)=' + obj.getAttribute(&quot;className&quot;);
+  }
+  window.onload = function () {
+    var d1 = document.getElementById(&quot;d1&quot;);
+    var d2 = document.getElementById(&quot;d2&quot;);
+    var d3 = document.getElementById(&quot;d3&quot;);
+    d1.className = &quot;d1&quot;;
+    d2.setAttribute(&quot;class&quot;, &quot;d2&quot;);
+    d3.setAttribute(&quot;className&quot;, &quot;d3&quot;);
+    getClass(d1);
+    getClass(d2);
+    getClass(d3);
+  }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div id=&quot;d1&quot;&gt;d1&lt;/div&gt;
+  &lt;div id=&quot;d2&quot;&gt;d2&lt;/div&gt;
+  &lt;div id=&quot;d3&quot;&gt;d3&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码中分别使用 obj.className = "XXX"、obj.setAttribute("class", "XXX")、obj.setAttribute("className", "XXX") 试图为【d1】、【d2】、【d3】设置一个 CSS 的 class。然后对于这三个 DIV 元素再使用 obj.className、obj.getAttribute("class")、obj.getAttribute("className") 得到它们的返回值。</p>
+      <p>这段代码在不同的浏览器环境中的表现：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/SD9006/class1.gif" alt="IE6 IE7 IE8(Q)" /></td>
+          <td><img src="../../tests/SD9006/class2.gif" alt="IE8(S) Firefox Chrome Safari Opera" /></td>
+        </tr>
+      </table>
+      <p>可以看到，在 <em>IE8(S) Firefox Chrome Safari Opera</em> 中，结果符合规范。而在 <em>IE6 IE7 IE8(Q)</em> 中，无法通过 setAttribute 和 getAttribute 方法通过传入 class 参数做为属性名来设置及获取元素的 class 属性，而必须通过传入 className 参数。在其他浏览器中，传入 className 参数仅仅是为元素的 HTML 标签设置与获取一个自定义的 className 属性的值。</p>
+      <br />
+      
+      <h3>4. IE6 IE7 IE8(Q) 中无法通过 "Element.setAttribute("style", "AttributeValue")" 设置元素的 style 属性</h3>
+      <p>代码 <strong>attribute_and_property_style.html</strong>：</p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  * { font-family:Arial; }
+  div { width:400px; height:100px; background:#eee; font-size:12px; margin-bottom:1px; }
+&lt;/style&gt;
+&lt;script&gt;
+  function getStyle(obj) {
+    obj.innerHTML = '.style.cssText=' + (obj.style.cssText).toLowerCase() + 
+      '&lt;br&gt;.getAttribute(&quot;style&quot;)=' + (&quot;&quot; + obj.getAttribute(&quot;style&quot;)).toLowerCase();
+  }
+  window.onload = function () {
+    var d1 = document.getElementById(&quot;d1&quot;);
+    var d2 = document.getElementById(&quot;d2&quot;);
+    var styleText = &quot;background-color:rgb(51, 204, 204); font-size:16px&quot;;
+    d1.style.cssText = styleText;
+    d2.setAttribute(&quot;style&quot;, styleText);
+    getStyle(d1);
+    getStyle(d2);
+  }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div id=&quot;d1&quot;&gt;d1&lt;/div&gt;
+  &lt;div id=&quot;d2&quot;&gt;d2&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码中分别使用 obj.style.cssText = "XXX"、obj.setAttribute("style", "XXX") 试图为【d1】、【d2】设置一个内联样式。然后对于这两个 DIV 元素再使用 obj.style.cssText、obj.getAttribute("style") 得到它们的返回值。</p>
+      <p>这段代码在不同的浏览器环境中的表现：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/SD9006/style1.gif" alt="IE6 IE7 IE8(Q)" /></td>
+          <td><img src="../../tests/SD9006/style2.gif" alt="IE8(S) Firefox Chrome Safari Opera" /></td>
+        </tr>
+      </table>
+      <p>可以看到，在 <em>IE8(S) Firefox Chrome Safari Opera</em> 中，结果符合规范。而在 <em>IE6 IE7 IE8(Q)</em> 中，无法通过 setAttribute 和 getAttribute 方法通过传入 style 参数做为属性名来设置及获取元素的 style 属性中的内联样式，getAttribute("style") 返回的是一个 CSSStyleDeclaration 对象。</p>
+      <br />
+      
+      <h3>5. IE6 IE7 IE8(Q) 中无法通过诸如 "Element.setAttribute("onclick", "alert('ok')")" 为元素绑定事件</h3>
+      <p>代码 <strong>attribute_and_property_event.html</strong>：</p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  * { font:12px Consolas; }
+  button, textarea { width:700px; }
+&lt;/style&gt;
+&lt;script&gt;
+  function $(id) { return document.getElementById(id); }
+  function getOnclick(index) {
+    $(&quot;d&quot; + index).value = $(&quot;cont&quot; + index).innerHTML;
+  }
+  window.onload = function () {
+    var b1 = $(&quot;b1&quot;);
+    var b2 = $(&quot;b2&quot;);
+    var cont1 = $(&quot;cont1&quot;);
+    var cont2 = $(&quot;cont2&quot;);
+    var s1 = $(&quot;s1&quot;);
+    var s2 = $(&quot;s2&quot;);
+    var funcStr1 = &quot;$('s1').innerHTML='set string&lt;br&gt;get '+typeof this.getAttribute('onmouseover')&quot;;
+    var funcStr2 = &quot;$('s2').innerHTML='set function&lt;br&gt;get '+typeof this.getAttribute('onmouseover')&quot;;
+    b1.setAttribute(&quot;onclick&quot;, funcStr1);
+    b2.setAttribute(&quot;onclick&quot;, new Function(funcStr2));
+    b1.click();
+    b2.click();
+  }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div id=&quot;cont1&quot;&gt;&lt;button id=&quot;b1&quot; type=&quot;button&quot; onmouseover=&quot;&quot;&gt;&quot;$('s1').innerHTML='trigger'&quot;&lt;/button&gt;&lt;/div&gt;&lt;span id=&quot;s1&quot;&gt;N/A&lt;/span&gt;&lt;br /&gt;
+  &lt;br /&gt;&lt;br /&gt;
+  &lt;div id=&quot;cont2&quot;&gt;&lt;button id=&quot;b2&quot; type=&quot;button&quot; onmouseover=&quot;&quot;&gt;function () { $('s2').innerHTML='trigger' }&lt;/button&gt;&lt;/div&gt;&lt;span id=&quot;s2&quot;&gt;N/A&lt;/span&gt;&lt;br /&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码中分别使用 obj.setAttribute("onclick", "[code]"、obj.setAttribute("onclick", function () { [code] }) 试图为【b1】、【b2】设置一个内联事件。然后触发这两个 BUTTON 元素的 click 事件。</p>
+      <p>这段代码在不同的浏览器环境中的表现：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <th>b1.setAttribute("onclick", "$('s1').innerHTML='trigger'");</th>
+          <td>N/A</td>
+          <td>set string<br />get string</td>
+        </tr>
+        <tr>
+          <th>b2.setAttribute("onclick", function () { $('s2').innerHTML='trigger' });</th>
+          <td>set function<br />get function</td>
+          <td>N/A</td>
+        </tr>
+      </table>
+      <p>可以看到，在 <em>IE8(S) Firefox Chrome Safari Opera</em> 中，结果符合规范。而在 <em>IE6 IE7 IE8(Q)</em> 中，无法通过 setAttribute 方法传入一段代码字符串设置一个元素的内联事件，而必须传入一个 function 类型的对象；获取一个已有的内联事件的属性值也是 function 类型，而不是规范中的字符串类型。</p>
+      <br />
+      
+      <h3>6. IE6 IE7 IE8(Q) 中可以通过诸如 "Element.getAttribute("offsetHeight")" 的方式获得元素的一些 DOM 属性的值，也可以通过诸如 "Element.setAttibute("innerHTML", "AttributeValue")" 的方式设置元素的一些非只读 DOM 属性的值</h3>
+      <p>代码 <strong>attribute_and_property_DHTML.html</strong>：</p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  * { font-family:Arial; }
+  div { width:100px; height:100px; background:#eee; font-size:12px; }
+  textarea { width:600px; }
+&lt;/style&gt;
+&lt;script&gt;
+  function getStyle(obj) {
+    obj.innerHTML = '.style.cssText=' + (obj.style.cssText).toLowerCase() + 
+      '&lt;br&gt;.getAttribute(&quot;style&quot;)=' + (&quot;&quot; + obj.getAttribute(&quot;style&quot;)).toLowerCase();
+  }
+  window.onload = function () {
+    var d = document.getElementById(&quot;d&quot;);
+    var cont= document.getElementById(&quot;cont&quot;);
+    var info= document.getElementById(&quot;info&quot;);
+    var s = 'd.getAttribute(&quot;offsetHeight&quot;): ';
+    s += d.getAttribute(&quot;offsetHeight&quot;) + &quot;\n&quot;;
+    d.setAttribute(&quot;innerHTML&quot;, &quot;other text&quot;);
+    info.value = s + cont.innerHTML;
+  }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div id=&quot;cont&quot;&gt;&lt;div id=&quot;d&quot;&gt;text text text text text text text&lt;/div&gt;&lt;/div&gt;
+  &lt;textarea id=&quot;info&quot;&gt;&lt;/textarea&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+、      <p>这段代码在不同的浏览器环境中的表现：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <th>d.getAttribute(&quot;offsetHeight&quot;)</th>
+          <td>100</td>
+          <td>null</td>
+        </tr>
+        <tr>
+          <th>d.setAttribute("innerHTML", "other text");</th>
+          <td>&lt;DIV id=d&gt;other text&lt;/DIV&gt;</td>
+          <td>&lt;div id="d" innerhtml="other text"&gt;text text text text text text text&lt;/div&gt;</td>
+        </tr>
+      </table>
+      <p>可以看到，在 <em>IE8(S) Firefox Chrome Safari Opera</em> 中，由于【d】的 HTML 标签中没有 &quot;offsetHeight&quot; 属性，所以 getAttribute("offsetHeight") 根据规范要求返回了 null；setAttribute("innerHTML", "other text") 则为【d】的 HTML 标签上设置了一个 innerHTML 属性，值为 other text。<br />
+      而在 <em>IE6 IE7 IE8(Q)</em> 中，&quot;offsetHeight&quot; 属性返回了【d】元素对应的 DOM 对象中的 offsetHeight 属性的值；setAttribute("innerHTML", "other text") 则相当于调用了 d.innerHTML = "other text"，所以【d】的 HTML 标签上并没有出现 innerHTML 属性及其值。</p>
+      <br />
+      
+      <p>通过上述几个测试样例，可以看到 <em>IE6 IE7 IE8(Q)</em> 中，Element.getAttribute("attrName") 与 Element.attrName 等效，Element.setAttribute("attrName, "XXX") 与 Element.attrName = "XXX" 等效。<em>IE8(S)</em> 修复了由 getAttribute、setAttribute 方法所带来的大多数兼容性问题，但并没有改变 IE 本身对于 DOM 对象的属性（property）及 HTML 标签属性（attribute）相互混淆的错误设计，对于表单元素的 value 属性以及自定义 HTML 属性仍然保持与 IE6 IE7 相同的现象。</p>
+      <p>结合这些测试结果，列表如下：</p>
+      <table class="compare">
+        <tr>
+          <th>执行的代码</th>
+          <th>在 IE6 IE7 IE8(Q) 中实际等效代码</th>
+          <th>在 IE8(S) 中实际等效代码</th>
+          <th>在 Firefox Chrome Safari Opera 中实际等效代码</th>
+        </tr>
+        <tr>
+          <th>d1.getAttribute(&quot;class&quot;)</th>
+          <td>d1[&quot;class&quot;]</td>
+          <td colspan="2">d1.getAttribute(&quot;class&quot;)</td>
+        </tr>
+        <tr>
+          <th>d1.setAttribute(&quot;class&quot;, &quot;XXX&quot;)</th>
+          <td>d1[&quot;class&quot;] = &quot;XXX&quot;</td>
+          <td colspan="2">d1.setAttribute(&quot;class&quot;)</td>
+        </tr>
+        <tr>
+          <th>d1.getAttribute(&quot;className&quot;)</th>
+          <td>d1.className</td>
+          <td colspan="2">d1.getAttribute(&quot;className&quot;)</td>
+        </tr>
+        <tr>
+          <th>d1.setAttribute(&quot;className&quot;, &quot;XXX&quot;)</th>
+          <td>d1.className = &quot;XXX&quot;</td>
+          <td colspan="2">d1.setAttribute(&quot;className&quot;, &quot;XXX&quot;)</td>
+        </tr>
+        <tr>
+          <th>d1.getAttribute(&quot;style&quot;)</th>
+          <td>d1.style</td>
+          <td colspan="2">d1.getAttribute(&quot;style&quot;)</td>
+        </tr>
+        <tr>
+          <th>d1.setAttribute(&quot;style&quot;, &quot;XXX&quot;)</th>
+          <td>操作无效</td>
+          <td colspan="2">d1.setAttribute(&quot;style&quot;, &quot;XXX&quot;)</td>
+        </tr>
+        <tr>
+          <th>d1.getAttribute(&quot;onclick&quot;)</th>
+          <td>d1.onclick</td>
+          <td colspan="2">d1.getAttribute(&quot;onclick&quot;)</td>
+        </tr>
+        <tr>
+          <th>d1.setAttribute(&quot;onclick&quot;, &quot;XXX&quot;)</th>
+          <td>d1.onclick = &quot;XXX&quot;</td>
+          <td colspan="2">d1.setAttribute(&quot;onclick&quot;, &quot;XXX&quot;)</td>
+        </tr>
+        <tr>
+          <th>d1.setAttribute(&quot;innerHTML&quot;, &quot;XXX&quot;)</th>
+          <td>d1.innerHTML = &quot;XXX&quot;</td>
+          <td colspan="2">d1.setAttribute(&quot;innerHTML&quot;, &quot;XXX&quot;)</td>
+        </tr>
+        <tr>
+          <th>d1.getAttribute(&quot;offsetHeight&quot;)</th>
+          <td>d1.offsetHeight</td>
+          <td colspan="2">d1.getAttribute(&quot;offsetHeight&quot;)</td>
+        </tr>
+        <tr>
+          <th>d1.setAttribute(&quot;value&quot;, &quot;XXX&quot;)</th>
+          <td colspan="2">d1.value = &quot;XXX&quot;</td>
+          <td>d1.setAttribute(&quot;value&quot;, &quot;XXX&quot;)</td>
+        </tr>
+        <tr>
+          <th>d1.getAttribute(&quot;id2&quot;)</th>
+          <td colspan="2">d1.id2</td>
+          <td>d1.getAttribute(&quot;id2&quot;)</td>
+        </tr>
+      </table>
+      <p></p>
+
+      <h2 id="solutions">解决方案</h2>
+      <ul>
+        <li>避免使用 &quot;Element.setAttribute(&quot;style&quot;, &quot;XXX&quot;)&quot; 在所有浏览器中设置元素的 style 属性，可以改用符合规范的 &quot;Element.style.cssText = &quot;XXX&quot;&quot;；</li>
+        <li>避免使用 &quot;Element.setAttribute(&quot;class&quot;, &quot;XXX&quot;)&quot; 在所有浏览器中设置元素的 class 属性，可以改用符合规范的 &quot;Element.className = &quot;XXX&quot;&quot;；</li>
+        <li>避免使用诸如 &quot;Element.setAttribute(&quot;onclick&quot;, &quot;alert('ok')&quot;)&quot; 为元素绑定事件，可以使用符合规范的 Element.onclick = function () { [code] } 或 IE 的 attachEvent 方法等；</li>
+        <li>避免使用诸如 &quot;Element.getAttibute(&quot;innerHTML&quot;)&quot; 的方式获取 innerHTML 属性值；</li>
+        <li>针对表单元素，使用 Element.value 获取控件的 &quot;当前值&quot;，而不要用 getAttribute(&quot;value&quot;) 获取；</li>
+        <li>针对自定义的 HTML 属性，一律使用 getAttribute 方法获取属性值。</li>
+      </ul>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.8<br />
+              Chrome 7.0.503.0 dev<br />
+              Safari 5.0.1<br />
+              Opera 10.61
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/SD9006/custom_attributes_and_properties.html">custom_attributes_and_properties.html</a><br />
+            <a href="../../tests/SD9006/attribute_and_property_value.html">attribute_and_property_value.html</a><br />
+            <a href="../../tests/SD9006/attribute_and_property_class.html">attribute_and_property_class.html</a><br />
+            <a href="../../tests/SD9006/attribute_and_property_style.html">attribute_and_property_style.html</a><br />
+            <a href="../../tests/SD9006/attribute_and_property_event.html">attribute_and_property_event.html</a><br />
+            <a href="../../tests/SD9006/attribute_and_property_DHTML.html">attribute_and_property_DHTML.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-30</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>getAttribute setAttribute attribute property DOM style className innerHTML binding event</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RN5001: Chrome Safari 中 '@charset' 声明的位置错误将导致其后的一个规则集无效</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>CSS 2.1 规范中有以下描述：</p>
+      <ul>
+        <li>At-rules 以关键字 '@' 开始，标识符紧随其后（即 '@' 与标识符之间不允许有任何内容）。</li>
+        <li>一个 At-rule 包含直到下一个分号 (;) 或下一个块（一对可匹配的大括号间的内容）间的所有内容，以二者中先出现的为准。</li>
+        <li>@charset 规则必须出现在样式表的最开始，它前边不能有任何字符。用户代理（即浏览器）必须忽略任何不是在样式表最开始的 @charset 规则。</li>
+      </ul>
+      <p>关于上述内容的详细信息，请参考 CSS 2.1 规范 <a href="http://www.w3.org/TR/CSS21/syndata.html#at-rules">4.1.5 At-rules</a> 和 <a href="http://www.w3.org/TR/CSS21/syndata.html#charset">4.4 CSS style sheet representation</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 Chrome Safari 中，如果一段 CSS 代码（无论是外部文件还是页内嵌入）的 '@charset' 规则之前有非空白字符或注释的内容存在，那么该规则之后的一个规则集将失效。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>该问题将造成页面效果在 Chrome Safari 中与预期的效果不符。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Chrome Safari</th>
+        </tr>
+        <tr>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>根据 CSS 2.1 规范的描述，当一个 '@charset' 规则没有出现在样式表的最开始时，浏览器应该忽略该规则。</p>
+      <p>但在 Chrome Safari 中，如果 '@charset' 规则之前有非空白字符或注释的内容存在，那么该规则之后的一个规则集将失效。</p>
+      <p>举例如下：</p>
+      <p>HTML 代码（编码为 UTF-8）：</p>
+<pre>
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8"/&gt;
+&lt;link rel="stylesheet" type="text/css" href="css.css" media="all" /&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;@charset&lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+      <p>以上页面引入的 css.css 的代码（编码为 UTF-8）：</p>
+<pre>
+h1{width:100px; height:100px; background:red;}
+@charset "UTF-8";
+h1{background:blue;}
+h1{font:bold 12px/100px Verdana; color:white;}
+</pre>
+      <p>以上代码在各浏览器中表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>Chrome Safari</th>
+          <th>其他浏览器</th>
+        </tr>
+        <tr>
+          <td><img width="100" height="100" src="001/1.png" alt="snapshot" /></td>
+          <td><img width="100" height="100" src="001/2.png" alt="snapshot" /></td>
+        </tr>
+      </table>
+      <p>可见，Chrome Safari 中的样式集 'h1{background:blue;}' 没有生效。</p>
+      <p>该问题在 CSS 代码写在页内的情况下表现相同。</p>
+      <p>将 '@charset "UTF-8";' 之前的 'h1{width:100px; height:100px; background:red;}' 替换为一个 At-rule 如另一个 '@charset "UTF-8"'，表现相同。如：</p>
+<pre>
+@charset "UTF-8";
+
+<span class="hl_1">@charset "UTF-8";</span>
+
+<span class="hl_3">h1{</span>
+  <span class="hl_3">background:blue;</span>
+<span class="hl_3">}</span>
+
+h1{
+  width:100px;
+  height:100px;
+  font:bold 12px/100px Verdana;
+}
+</pre>
+      <p>以上代码在 Chrome Safari 中，<span class="hl_1">标记为这个颜色的部分</span>触发此问题，导致<span class="hl_3">标记为这个颜色的部分</span>被忽略。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>要使用 '@charset' 规则，请确保将其放在样式表的最开始，前边不能有任何字符。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+        <tr>
+          <th>操作系统版本:</th>
+          <td>Windows 7 Ultimate build 7600</td>
+        </tr>
+        <tr>
+          <th>浏览器版本:</th>
+          <td>
+            IE6<br />
+            IE7<br />
+            IE8<br />
+            Firefox 3.6<br />
+            Chrome 4.0.302.3 dev<br />
+            Safari 4.0.4
+          </td>
+        </tr>
+        <tr>
+          <th>测试页面:</th>
+          <td>
+            <a href="../../tests/RN5001/css_via_an_external_style_sheet.html">css_via_an_external_style_sheet.html</a><br />
+            <a href="../../tests/RN5001/css_within_the_html_document.html">css_within_the_html_document.html</a>
+          </td>
+        </tr>
+        <tr>
+          <th>本文更新时间:</th>
+          <td>2010-08-03</td>
+        </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>CSS @charset 规则集失效</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RM1010: IE6 IE7 IE8(Q) 中元素的 'padding-top' 遇到 'clear' 特性在某些情况下复制到 'padding-bottom'</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无</p>
+      <h2 id="description">问题描述</h2>
+      <p>IE 中触发了 hasLayout 的容器同时使用 'clear' 特性清除浮动在某些情况下导致 'padding-top' 渲染异常。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题会导致出现多余的 'padding-bottom' 间隙。</p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>测试代码：</p>
+<pre>
+&lt;div id=&quot;d&quot; style=&quot;background:#CCC; width:100px; border:5px solid black; padding-top:10px;&quot;&gt;
+  &lt;div style=&quot;float:left; width:50px; height:50px; background:#666;&quot;&gt;FLOAT&lt;/div&gt;
+  &lt;div style=&quot;clear:left; background:#999;&quot;&gt;&lt;/div&gt;
+  &lt;div style=&quot;float:left; width:50px; height:50px; background:#666;&quot;&gt;FLOAT&lt;/div&gt;
+  &lt;div style=&quot;clear:left; background:#999;&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+</pre>
+      <p>上面代码中，容器【d】宽度为100px，有10px的 'padding-top'，其内依次包含了一个左浮动 DIV、一个清除 DIV、一个左浮动 DIV、一个清除 DIV。<br />
+        则此时在各浏览器中的运行效果如下：</p>
+      <p>各浏览器表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE(Q) FIrefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RM1010/1_1.gif" alt="" /></td>
+          <td><img src="../../tests/RM1010/1_2.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>可见：</p>
+      <ul>
+        <li>在 IE6 IE7 IE8(Q) 中，容器【d】的 'padding-top:10px' 由于某种原因复制到了其他区域，且无法探测出多余的两处10px间隙作用于哪一个元素； </li>
+        <li>在 IE(Q) FIrefox Chrome Safari Opera 中，按照W3C规范对代码进行了解释。</li>
+      </ul>
+      <p>与 hasLayout 的关系：</p>
+      <p>测试代码：</p>
+<pre>
+&lt;div style=&quot;background:#CCC; border:5px solid black; padding-top:10px;&quot;&gt;
+  &lt;div style=&quot;float:left; width:50px; height:50px; background:#666; padding:0; margin:0;&quot;&gt;FLOAT&lt;/div&gt;
+  &lt;div style=&quot;clear:left; background:#999; padding:0; margin:0;&quot;&gt;&lt;/div&gt;
+  &lt;div style=&quot;float:left; width:50px; height:50px; background:#666;&quot;&gt;FLOAT&lt;/div&gt;
+  &lt;div style=&quot;clear:left; background:#999; padding:0;&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div style=&quot;background:#CCC; zoom:1; border:5px solid black; padding-top:10px;&quot;&gt;
+  &lt;div style=&quot;float:left; width:50px; height:50px; background:#666; padding:0; margin:0;&quot;&gt;FLOAT&lt;/div&gt;
+  &lt;div style=&quot;clear:left; background:#999; padding:0; margin:0;&quot;&gt;&lt;/div&gt;
+  &lt;div style=&quot;float:left; width:50px; height:50px; background:#666;&quot;&gt;FLOAT&lt;/div&gt;
+  &lt;div style=&quot;clear:left; background:#999; padding:0;&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+</pre>
+      <p>上面代码结构与第一节中的相同，第一组取消了 &quot;width:100px&quot; ，即在 IE6 IE7 IE8(Q)中无法触发容器的 hasLayout 特性；第二组在第一组的基础上增加了'zoom:1' ，即在 IE6 IE7 IE8(Q) 中重新触发了容器的 hasLayout 特性。则此时在各浏览器中的运行效果如下：</p>
+<table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) FIrefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RM1010/2_2.gif" alt="" /></td>
+          <td><img src="../../tests/RM1010/2_1.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>可见，这种情况出现在 IE6 IE7 IE8(Q)中容器触发了 hasLayout 特性且容器内使用了 &quot;clear&quot; 特性清除浮动时产生，此时容器的 &quot;padding-top&quot; 特性有可能在容器内一些区域被复制，从而出现多余间距。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p> 
+                方案1.不触发容器的 hasLayout 特性；<br />
+                方案2. 若容器触发了hasLayout 特性，尽量不为其设置 'padding-top' 特性；<br />
+                方案3. 若容器触发了hasLayout 特性，且必须为容器设置 'padding-top' 特性，可以考虑使用 ':after' 的清除方式。 
+          </p>
+          <p>针对方案3的参考代码如下：</p>
+<pre>&lt;style&gt;
+  #d:after { display:block; content:&quot;&quot;; height:0; clear:both; }
+&lt;/style&gt;
+&lt;div id=&quot;d&quot; style=&quot;background:#CCC; width:100px; border:5px solid black; padding-top:20px;&quot;&gt;
+    &lt;div style=&quot;float:left; width:50px; height:50px; background:#666; padding:0; margin:0;&quot;&gt;FLOAT&lt;/div&gt;
+&lt;/div&gt;</pre>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4 <br />
+                            Opera 10.60</td>
+  </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RM1010/padding_top_and_clear.html">padding_top_and_clear.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-06-18</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>float clear container hasLayout padding-top 清除 浮动 边白 容器</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

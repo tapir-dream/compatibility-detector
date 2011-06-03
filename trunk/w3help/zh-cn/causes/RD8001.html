@@ -1,0 +1,208 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RD8001: 各浏览器中 'width' 和 'height' 在某些元素上的作用位置有差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 CSS 2.1 规范的描述，可以通过给一个元素设置 'width' 和 'height' 以定义其<strong>内容尺寸</strong>，即这个尺寸是作用在该元素的 content box 上的。</p>
+      <p>表格元素 TABLE 是一个特例，表格的内容区域是由其 border box 决定的，因此在 TABLE 上设置的 'width' 和 'height' 将作用在其 border box 上。</p>
+      <p>以上提到的 content box 和 border box 是盒模型中的概念，请参考 CSS 2.1 规范 <a href="http://www.w3.org/TR/CSS21/box.html">8 Box model</a> 中的内容。</p>
+      <p>关于 'width' 和 'height' 的更多信息，请参考 CSS 2.1 规范 <a href="http://www.w3.org/TR/CSS21/visudet.html#the-width-property">10.2 Content width: the 'width' property</a> 和 <a href="http://www.w3.org/TR/CSS21/visudet.html#the-height-property">10.5 Content height: the 'height' property</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>如果一个页面使浏览器工作在混杂模式下，那么当给一个设置了 'padding' 或 'border-width' 的非替换元素设置 'width' 或 'height' 以控制其尺寸时，这个元素在 IE 和其他览器中的实际尺寸将是不同的。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>这个问题将导致页面中的小部分区域、甚至整体区域在某些浏览器中的布局发生混乱。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器的混杂模式 (Q)</th>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>当给一个元素设置 'width' 或 'height' 时，他们在不同的浏览器中作用到盒模型的位置是不同的。</p>
+      <p>具体差异请参考下表：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6(Q) IE7(Q) IE8(Q)</th>
+          <th>Firefox(Q) Opera(Q) Safari(Q) Chrome(Q)</th>
+          <th>IE6(S) IE7(S) IE8(S) Firefox(S) Opera(S) Safari(S) Chrome(S)</th>
+        </tr>
+        <tr>
+          <td>非替换元素 (DIV/H1/P/UL/LI...)</td>
+          <td><span class="hl_3">border box</span></td>
+          <td><span class="hl_2">content box</span></td>
+          <td><span class="hl_2">content box</span></td>
+        </tr>
+        <tr>
+          <td>IMG</td>
+          <td><span class="hl_2">content box</span><sup>1</sup></td>
+          <td><span class="hl_2">content box</span></td>
+          <td><span class="hl_2">content box</span></td>
+        </tr>
+        <tr>
+          <td>TABLE</td>
+          <td><span class="hl_3">border box</span></td>
+          <td><span class="hl_3">border box</span></td>
+          <td><span class="hl_3">border box</span></td>
+        </tr>
+        <tr>
+          <td>HR/BUTTON/INPUT[type=button/submit/reset]<sup>2</sup></td>
+          <td><span class="hl_3">border box</span></td>
+          <td><span class="hl_3">border box</span></td>
+          <td><span class="hl_3">border box</span></td>
+        </tr>
+        <tr>
+          <td>INPUT[type=text]/TEXTAREA</td>
+          <td><span class="hl_3">border box</span></td>
+          <td><span class="hl_3">border box</span></td>
+          <td><span class="hl_2">content box</span></td>
+        </tr>
+        <tr>
+          <td>IFRAME</td>
+          <td><span class="hl_1">padding box</span></td>
+          <td><span class="hl_2">content box</span></td>
+          <td><span class="hl_2">content box</span><sup>3</sup></td>
+        </tr>
+      </table>
+      <p class="comment">
+      【注】<br />
+      1. IMG 元素在 IE6(Q) IE7(Q) IE8(Q) 下无法设置 'padding'，其值永远为 0。也就是说，IMG 元素的盒模型在这些浏览器中，其 padding box 与其 content box 是重合的。<br />
+      2. 和 TABLE 元素一样，目前所有的主流浏览器也都认为 HR/BUTTON/INPUT[type=button/submit/reset] 元素的内容区域是由 border box 决定的，因此在这些元素上设置的 'width' 和 'height' 将作用在这些元素的 border box 上。<br />
+      3. IFRAME 元素在 IE6(S) 下有一个 Bug，该元素实际使用的 'padding-right' 和 'padding-bottom' 的值将分别多出其 'border-right-width' 和 'border-bottom-width' 的值的 2 倍。
+      </p>
+
+
+      <p>从上表可以看出，'width'、'height' 应用到不同的元素时，其作用位置有以下几处差异：</p>
+
+      <h3>1. 在非替换元素上的差异</h3>
+      <p>当给一个非替换元素设置 'width'、'height' 时，它们在 <em>IE6(Q) IE7(Q) IE8(Q)</em> 中被作用到了该元素的 border box，也就是说在这些浏览器中，'width'、'height' 并不被认为是“内容尺寸”。</p>
+      <p>这个差异的影响范围很广，常被称为“<strong>IE盒模型Bug</strong>”。只要一个页面使浏览器运行在混杂模式 (Q) 下，在 IE 和非 IE 浏览器中的页面布局都可能产生较大差异。</p>
+      <p>请参考下图：</p>
+      <p><img width="600" height="295" src="001/box_model.png" alt="box_model" /></p>
+      <p>也就是说，在 <em>IE6(Q) IE7(Q) IE8(Q)</em> 下，设置的 'width' 和 'height' 将包含该元素的内容尺寸 + 'padding' 尺寸 + 'border-width' 尺寸。</p>
+      <p>该问题在 IE6(S) 中被修复。</p>
+
+      <h3>2. 在 INPUT[type=text]/TEXTAREA 元素上的差异</h3>
+      <p>当给一个 INPUT[type=text]/TEXTAREA 元素设置 'width'、'height' 时，它们在所有浏览器的混杂模式 (Q) 中都被作用到了 border box，而在所有浏览器的标准模式 (S) 中则作用到了 content box。</p>
+      <p>由于一个页面要么触发标准模式 (S)，要么触发混杂模式 (Q)，因此这个差异并不会引起兼容性问题。（排除 IE 的 DTD 解析问题，详细信息请参阅“参见”一节的内容。）</p>
+
+      <h3>3. 在 IFRAME 元素上的差异</h3>
+      <p>当给一个 IFRAME 元素设置 'width'、'height' 时，它们在 <em>IE6(Q) IE7(Q) IE8(Q)</em> 中被作用到了 padding box。</p>
+      <p>与第一点相同，只要一个页面使浏览器运行在混杂模式 (Q) 下，在 IE 和非 IE 浏览器中的页面布局都可能产生布局及尺寸差异，当然，这个可能性较小，因为很少需要给一个 IFRAME 设置 'padding'。</p>
+
+      <h2 id="solutions">解决方案</h2>
+            <p>可以通过使用能触发标准模式下 (S) 的 DTD 或使用 CSS 3 的新特性 box-sizing。</p>
+      <h3>1. 使用能触发标准模式 (S) 的 DTD</h3>
+      <p>此问题引起的差异集中在各浏览器的混杂模式 (Q) 之间，当给同一个元素设置 'width'、'height' 时，它们的应用位置在所有浏览器的标准模式 (S) 中全部一致。因此要避免受此问题的影响，最好的方式就是使用能触发标准模式 (S) 的 DTD，如：</p>
+<pre>&lt;!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0//EN"&gt;</pre>
+<pre>&lt;!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"&gt;</pre>
+<pre>&lt;!DOCTYPE html&gt;</pre>
+      <p>关于DTD与渲染模式的关系，请参考 <a href="http://hsivonen.iki.fi/doctype/">http://hsivonen.iki.fi/doctype/</a> 中的内容。</p>
+
+      <h3>2. 使用 CSS 3 的新特性：box-sizing</h3>
+      <p>我们在开发过程中发现，有时候，如对页面中的大块区域进行布局时，将 'width' 和 'height' 作用到 border-box 是更灵活易用的，但 CSS 2.1 规范却规定了他们只能作用在 content-box 上。考虑到这个问题，CSS 3 草案中引入了一个新的特性：'box-sizing'。我们可以根据需要，通过给 'box-sizing' 设置不同的值来选择 'width' 和 'height' 的作用位置。</p>
+      <p>目前的主流浏览器都支持这个特性，在各浏览器中的特性名如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE 8, Opera 8.5+</th>
+          <td>box-sizing</td>
+        </tr>
+        <tr>
+          <th>Firefox 1+</th>
+          <td>-moz-box-sizing</td>
+        </tr>
+        <tr>
+          <th>Safari 3+, Chrome</th>
+          <td>-webkit-box-sizing</td>
+        </tr>
+      </table>
+      <p>'box-sizing' 有两个可选值：</p>
+      <dl>
+        <dt>content-box</dt>
+        <dd>和 CSS 2.1 中的定义保持一致，在一个元素上定义的 'width' 和 'height'（以及他们的 min/max 特性）将决定该元素的 content box 的尺寸。<br />该元素的 'padding' 和 'border' 在定义的 'width' 和 'height' 之外呈现。</dd>
+        <dt>border-box</dt>
+        <dd>在一个元素上定义的 'width' 和 'height'（以及他们的 min/max 特性）将决定该元素的 border box 的尺寸。<br />该元素的 'padding' 和 'border' 在定义的 'width' 和 'height' 之内呈现。</dd>
+      </dl>
+      <p>关于 'box-sizing' 的更多信息，请参考 CSS3 草案 <a href="http://www.w3.org/TR/css3-ui/#box-sizing">7.1. 'box-sizing' property</a> 中的内容。</p>
+      <p>如果一个页面是在 <em>IE6(Q) IE7(Q) IE8(Q)</em> 的基础上设计的，即在有 IE 盒模型 Bug 时页面布局良好，但在其他浏览器中无 IE 盒模型 Bug 时布局混乱，又不想重构页面，那么简单快速的修复方式是通过设置 'box-sizing' 的值为 'border-box' 来使其他浏览器的尺寸作用位置与 <em>IE6(Q) IE7(Q) IE8(Q)</em> 相同。如：</p>
+<pre>* {
+box-sizing:border-box;
+-moz-box-sizing:border-box;
+-webkit-box-sizing:border-box;
+}</pre>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="HG8001">HG8001: DTD 之前的非空白字符在某些情况下会使该 DTD 失效</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RD8001/box_model.html">box_model.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-05-19</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>width height padding border-width box-sizing content-box border-box IE盒模型BUG</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+	function $(id) { return document.getElementById(id); }
+	
+	if (!window.getComputedStyle) {
+		window.getComputedStyle = function ($target) {
+			return $target.currentStyle;
+		};
+	}
+
+	window.onload = function () {
+		$('info').innerHTML = 'Height of "display:list-item": ' + $('dis_li').clientHeight;
+	}
+</script>
+</head>
+<body style="margin:0; font:14px 'Trebuchet MS';">
+<div style="background:greenyellow; float:left; border:5px solid black; padding:5px;">
+	<div id="dis_li" style="display:list-item; width:200px; background:seagreen; list-style-type:disc;"></div>
+</div>
+<div id="info" style="clear:left;"></div>
+</body>
+</html>

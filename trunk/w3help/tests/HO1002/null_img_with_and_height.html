@@ -1,0 +1,22 @@
+
+<html>
+    <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    </head>
+    <body>
+	<img /><br />
+	<script>
+	    var imgElment = document.getElementsByTagName('img')[0];
+	    try{
+		document.write('offsetHeight:',imgElment.offsetHeight,"px;");
+	    }catch(e){
+		document.write('offsetHeight: 0px;');
+	    }
+	    try{
+		document.write(' offsetWidth:',imgElment.offsetWidth,"px");
+	    }catch(e){
+		document.write(' offsetWidth: 0px');
+	    }
+	</script>
+    </body>
+</html>

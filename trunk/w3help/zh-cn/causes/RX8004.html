@@ -1,0 +1,156 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RX8004: 非 IE 浏览器中 'margin' 特性对 TABLE 元素的 align 属性会有影响</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 HTML4.01 规范中的描述，TABLE 元素的 align 属性，这个属性可以取 'left'、'center'、'right' 三个值。它指定了 TABLE 元素在文档中的位置，三个属性值分别对应 '居左'、'居中'、'居右'，描述的是 TABLE 元素自身相对于其父容器的对齐方式。<br />
+      同时，<strong>align 属性已被废弃。</strong>不赞成使用。</p>
+      <p>关于 TABLE 元素的 align 属性 的详细信息，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html401/struct/tables.html#adef-align-TABLE">11.2.1 The TABLE element</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 IE7 IE8 中，CSS 的 'margin' 特性不会影响 TABLE 元素的 align=&quot;center&quot; 设定的居中对齐效果；<br />
+      在其他浏览器中，TABLE 元素的 align=&quot;center&quot; 被理解为 margin-left:auto | margin-right:auto，单独定义的 'margin' 特性将覆盖由 TABLE 元素的 align 属性转换生成的 'margin' 特性的值，从而使 TABLE 元素失去原有的居中效果。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>不合理地为 TABLE 元素同时使用 align=&quot;center&quot; 及 'margin' 特性，将使 TABLE 元素在非 IE 浏览器中失去居中效果，从而造成布局差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Firefox Chrome Safari Opera</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+
+      <p>分析以下代码：</p>
+<pre>&lt;div id="d" style="width:300px; height:50px; background:thistle;"&gt;
+  &lt;table id="t" cellspacing="0" style="width:200px; border:3px solid black; <span class="hl_1">margin:0 20px;</span>" <span class="hl_2">align="center"</span>&gt;
+    &lt;tr&gt;
+      &lt;td style="background:wheat;"&gt;Text Text Text Text Text Text&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/table&gt;
+&lt;/div&gt;</pre>
+      <p>TABLE 元素【t】的 align 属性为 <span class="hl_2">center</span>，但又设置了 CSS 的 <span class="hl_1">margin:0 20px</span>。</p>
+      <p>这段代码在各浏览器环境内运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RX8004/IE_margin_on_table.gif" alt="IE margin on table" /></td>
+          <td><img src="../../tests/RX8004/non_IE_margin_on_table.gif" alt="non-IE margin on table" /></td>
+        </tr>
+      </table>
+      <p>可见：</p>
+      <ul>
+        <li>在 <em>IE</em> 中，<span class="hl_1">margin:0 20px</span> 并没有对 <span class="hl_2">align=&quot;center&quot;</span> 造成影响，TABLE 元素仍然居中对齐；</li>
+        <li>在 <em>其他浏览器</em> 中，<span class="hl_1">margin:0 20px</span> 使原本居中对齐的 TABLE 元素不再居中，而是位于距离其父容器左边界 20px 的位置。</li>
+      </ul>
+      <p>TABLE 元素是块级元素，W3C 规范中指出块级元素的水平居中可利用 'margin-left' 和 'margin-right' 设置值为 'auto' 值来实现，详细请参考 CSS2.1 规范第 <a href="http://www.w3.org/TR/CSS21/visudet.html#blockwidth">10.3.3 Block-level, non-replaced elements in normal flow</a> 节，以及 <a href="http://www.w3.org/Style/Examples/007/center">CSS: Centering Things</a>。</p>
+      <p>通过查看浏览器的开发人员工具可以得到，在 <em>Chrome Safari Opera</em> 中，均将 TABLE 元素的 align=&quot;center&quot; 转换为 CSS 的 margin-left:auto 及 margin- right:auto。而显式设置的 'margin' 特性会将浏览器经由 align=&quot;center&quot; 转换而来的 'margin' 特性的值覆盖，导致了 TABLE 元素无法居中对齐。</p>
+      <br />
+      <h3>引申阅读</h3>
+      <p>Firefox 虽然无法查看转换后的CSS，但是可以通过其源代码找到转换过程：</p>
+      <p><strong>Firefox 3.6</strong>：<em>/content/html/content/src/nsHTMLTableElement.cpp</em></p>
+      <pre>static void
+MapAttributesIntoRule(const nsMappedAttributes* aAttributes,
+                      nsRuleData* aData)
+{
+    ...
+      const nsAttrValue* value = aAttributes->GetAttr(nsGkAtoms::align);
+
+      if (value && value->Type() == nsAttrValue::eEnum) {
+        if (value->GetEnumValue() == <em>NS_STYLE_TEXT_ALIGN_CENTER</em> ||
+            value->GetEnumValue() == NS_STYLE_TEXT_ALIGN_MOZ_CENTER) {
+          nsCSSRect& margin = aData->mMarginData->mMargin;
+          if (margin.mLeft.GetUnit() == eCSSUnit_Null)
+            <span class="hl_4">margin.mLeft.SetAutoValue();</span>
+          if (margin.mRight.GetUnit() == eCSSUnit_Null)
+            <span class="hl_4">margin.mRight.SetAutoValue();</span>
+        }
+      }
+    ...
+}</pre>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>由于 TABLE 元素的 align 属性已经被 W3C 废弃，所以在考虑 TABLE 元素对齐问题上应避免使用 align 属性，而改用 CSS。</p>
+      <ul>
+        <li>使用CSS的 float:left 代替 align=&quot;left&quot;；</li>
+        <li>使用CSS的 float:right 代替 align=&quot;right&quot;；</li>
+        <li>使用CSS的 margin-left:auto 及 margin-right:auto 代替 align=&quot;center&quot;。</li>
+      </ul>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.2<br />
+              Chrome 5.0.356.2 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RX8004/margin_on_table.html">margin_on_table.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-06-24</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>align center margin auto float 居中 对齐 边距 浮动</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

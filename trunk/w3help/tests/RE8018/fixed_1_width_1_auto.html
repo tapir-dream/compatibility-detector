@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	body { font-family:consolas; }
+	table { table-layout:fixed; width:120px; }
+	td { background:wheat; padding:5px; }
+	td div { background:#eee; }
+</style>
+</head>
+<body>
+<table cellspacing="0" cellpadding="0">
+	<tr>
+		<td id="td1" style="border:5px solid plum;">
+			<div id="d1">A</div>
+		</td>
+		<td id="td2" style="width:70px; border:5px solid coral;">
+			<div id="d2">B</div>
+		</td>
+	</tr>
+</table>
+<div id="info"></div>
+<script>
+	function $(id) { return document.getElementById(id); }
+	$("info").innerHTML = "A:" + $("d1").offsetWidth + "...B:" + $("d2").offsetWidth;
+</script>
+</body>
+</html>

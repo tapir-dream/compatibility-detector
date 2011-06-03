@@ -1,0 +1,139 @@
+ <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HF9015: IE6 IE7 IE8(Q) 中 BUTTON 元素的 type 属性默认值不是 submit</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 HTML4.01 规范中的描述，BUTTON 元素创建一个类似 INPUT 元素类型为 button 的按钮控件，但 BUTTON 元素拥有更丰富的呈现效果，如可以在按钮上加入图片等等。<br />
+      BUTTON 元素同样拥有 type 属性，其取值为 submit、button、reset，分别对应提交按钮、普通按钮、重置按钮。其中 submit 为 type 属性的缺省值。</p>
+      <p>关于 BUTTON 元素的更多信息，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html401/interact/forms.html#edef-BUTTON">17.5 The BUTTON element</a> 中的内容。</p>
+      <p></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 IE7 IE8(Q) 中 BUTTON 元素 type 属性的默认值不是规范规定的 submit 而是 button，则默认没有设定 type 属性时的 BUTTON 元素将创建一个普通按钮，而不是提交按钮。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>这会导致按钮的类型在不同浏览器之间出现差异，若按钮位于表单中，则在 IE8(S) 及其他非 IE 浏览器中，点击这种没有设定 type 属性的按钮会触发表单提交事件。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>根据问题描述构建如下测试样例：<em>button_type.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  * { margin:0; padding:0; font:16px 'Trebuchet MS'; }
+  button { width:100px; height:40px; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;form&gt;
+  &lt;button id=&quot;btn&quot; name=&quot;btn&quot; value=&quot;BUTTON&quot;&gt;BUTTON&lt;/button&gt;&lt;br /&gt;
+  &lt;script&gt;
+    if (location.search == '') {
+      document.getElementById('btn').click();
+    }
+    document.write('BUTTON[type]: ' + document.getElementById('btn').type + '&lt;br /&gt;');
+    document.write('location.search: ' + location.search + '&lt;br /&gt;');
+  &lt;/script&gt;
+&lt;/form&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>页面中一个默认的 FORM 元素中有一个没有设定 type 属性的 BUTTON 元素，触发 BUTTON 元素的 click 事件，并通过脚本获取 BUTTON 元素的 type 属性值及通过测试页面 location.search 属性值判断页面是否发生了跳转。</p>
+      <p>这段代码在各浏览器中运行效果为：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/HF9015/type1.gif" alt="" /></td>
+          <td><img src="../../tests/HF9015/type2.gif" alt="" /></td>
+        </tr>
+      </table>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8(Q)</em> 中，BUTTON 元素 type 属性的缺省值为 button，不是规范中规定的 submit，这导致未设定 type 属性的 BUTTON 元素此时是一个普通按钮，默认不具备提交功能；</li>
+        <li>在 <em>IE8(S) Firefox Chrome Safari Opera</em> 中，BUTTON 元素 type 属性的缺省值为 submit，与规范描述相符，所以未设定 type 属性的 BUTTON 元素此时是一个提交按钮，点击该按钮会触发其所在表单的提交事件。</li>
+      </ul>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>在使用 BUTTON 元素时应明确的为其设定 type 属性，避免因为浏览器默认属性值不同导致按钮类型出现差异。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.544.17 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HF9015/button_type.html">button_type.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-26</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>BUTTON type submit</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

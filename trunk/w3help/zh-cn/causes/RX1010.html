@@ -1,0 +1,114 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RX1010: IE6(Q) IE7(Q) IE8(Q) 中给 IMG 元素设置 'padding' 无效</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+    <h2 id="standard_reference">标准参考</h2>
+    <p>根据 CSS 2.1 规范对 'padding' 特性的描述，'padding' 特性可以应用于 'display' 特性设定为 table-row-group、table-header-group、table-footer-group、table-row、table-column-group、table-colum 以外的所有元素。</p>
+    <p>关于 'padding' 特性的更多资料，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/box.html#propdef-padding">8.4 Padding properties</a> 中的内容。</p>
+
+    <h2 id="description">问题描述</h2>
+    <p>IE 混杂模式(Q) 中给 IMG 元素设置 'padding' 特性无效。</p>
+
+    <h2 id="influence">造成的影响</h2>
+    <p>此问题将导致 IMG 元素的盒模型渲染在 IE 混杂模式中与其他浏览器有区别，从而造成布局差异。</p>
+
+    <h2 id="impacted_browsers">受影响的浏览器</h2>
+    <table class="list">
+      <tr>
+        <th>IE6(Q) IE7(Q) IE8(Q)</th>
+        <td>&nbsp;</td>
+      </tr>
+    </table>
+
+    <h2 id="analysis_of_issues">问题分析</h2>
+    <p>根据 W3C 规范可以肯定 'padding' 特性能够作用于 IMG 元素，分析以下代码：</p>
+    <pre>&lt;img style="padding:20px; background:gold" src="http://www.w3.org/2008/site/images/logo-w3c-mobile-lg" /&gt;</pre>
+
+    <p>代码中为 IMG 标记设置了上、右、下、左 4 个方向的 'padding'，如果其生效，金色的背景会被显示出来。实际在各浏览器下的截图：</p>
+    <table class="compare">
+      <tr>
+        <th>IE6(Q) IE7(Q) IE8(Q)</th>
+        <th>IE6(S) IE7(S) IE8(S) Firefox Chrome Safari Opera</th>
+      </tr>
+      <tr>
+                <td><img src="../../tests/RX1010/02.png" alt="运行效果截图" /></td>
+                <td><img src="../../tests/RX1010/01.png" alt="运行效果截图" /></td>
+      </tr>
+    </table>
+    <p>事实可见，在 <em>IE6(Q) IE7(Q) IE8(Q)</em> 中没有遵循规范定义，'padding' 特性设置在 IMG 元素中不起作用。</p>
+
+    <h2 id="solutions">解决方案</h2>
+    <p>使用标准模式。<br />
+    在 <em>IE6(Q) IE7(Q) IE8(Q)</em> 中如需为 IMG 元素设置 'padding' 特性，需要在 IMG 元素外加一层容器标签，为该标签设置 'padding'。</p>
+
+    <h2 id="see_also">参见</h2>
+    <h3>知识库</h3>
+    <ul>
+      <li><a href="#">...</a></li>
+    </ul>
+    <h3>相关问题</h3>
+    <ul>
+      <li><a href="#">...</a></li>
+    </ul>
+
+    <div class="appendix">
+      <h2>测试环境</h2>
+      <table class="list">
+        <tr>
+          <th>操作系统版本:</th>
+          <td>Windows 7 Ultimate build 7600</td>
+        </tr>
+        <tr>
+          <th>浏览器版本:</th>
+          <td>
+            IE6<br />
+            IE7<br />
+            IE8<br />
+            Firefox 3.6.8<br />
+            Chrome 6.0.472.11 dev<br />
+            Safari 5.0.1<br />
+            Opera 10.60
+          </td>
+        </tr>
+        <tr>
+          <th>测试页面:</th>
+          <td><a href="../../tests/RX1010/img_padding.html">img_padding.html</a></td>
+        </tr>
+        <tr>
+          <th>本文更新时间:</th>
+          <td>2010-07-30</td>
+        </tr>
+      </table>
+
+      <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>IMG padding padding-box 图片 边白</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

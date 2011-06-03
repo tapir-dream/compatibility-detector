@@ -1,0 +1,58 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<style>
+    input { width:80px; height:20px; }
+    button { width:70px; height:20px; }
+    textarea { width: 150px; height:100px; }
+</style>
+</head>
+<body>
+<input type="text" id="text1" /><button id="button1">编码</button><br />
+<input type="text" id="text2" /><button id="button2">不编码</button><br />
+<textarea id="ta"></textarea>
+<script>
+    function $ ( id ) {
+        return document.getElementById(id);
+    }
+    
+    function getCookie ( c_name, dec ) {
+        if ( document.cookie.length > 0 ) {
+            c_start = document.cookie.indexOf(c_name + "=");
+            if ( c_start != -1 ) {
+                c_start = c_start + c_name.length + 1;
+                c_end = document.cookie.indexOf(";", c_start);
+                if ( c_end == -1 ) {
+                    c_end = document.cookie.length;
+                }
+                var ret = document.cookie.substring(c_start, c_end);
+                return ( dec ) ? unescape(ret) : ret;
+            }
+        }
+        return "";
+    }
+
+    function setCookie ( c_name, value, expiredays, enc ) {
+        var exdate = new Date();
+        exdate.setDate(exdate.getDate() + expiredays);
+        var val = ( enc ) ? escape(value) : value;
+        document.cookie = c_name + "=" + val
+            + ((expiredays==null) ? "" : ";expires=" + exdate.toGMTString());
+    }
+    
+    $("button1").onclick = function () {
+        setCookie("key1", $("text1").value, 365, true);
+    }
+    
+    window.onload = function () {
+        $("text1").value = getCookie("key1", true);
+        $("text2").value = getCookie("key2", false);
+        $("ta").value = document.cookie;
+    }
+    
+    $("button2").onclick = function () {
+        setCookie("key2", $("text2").value, 365, false);
+    }
+</script>
+</body>
+</html>

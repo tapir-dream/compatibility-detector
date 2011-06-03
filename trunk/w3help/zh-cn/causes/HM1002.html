@@ -1,0 +1,284 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HM1002: 各浏览器对 'marginwidth' 和 'marginheight' 属性的错误设定值的处理不同</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>对于 &quot;marginheight&quot; 和 &quot;marginwidth&quot; ，在 W3C HTML4.01 规范的 <a href="http://www.w3.org/TR/html401/index/attributes.html">Attributes</a> 列表中指出这两个属性可应用在 <em>FRAME 和 IFRAME</em> 上。</p>
+      <p>W3C HTML4.01 规范中对这两个属性的描述如下：
+      <ul>
+        <li> marginheight:用来指定框架的内容区域与框架内边框之间的上下空白距离大小。这个属性值必须是大于零（pixels）的，它的默认值依赖于客户端； </li>
+        <li> marginwidth:用来指定框架的内容区域与框架内边框之间的左右空白距离大小。这个属性值必须是大于零（pixels）的，它的默认值依赖于客户端。 </li>
+      </ul>
+      <h2 id="description">问题描述</h2>
+      <p>当 &quot;marginwidth&quot; 和 &quot;marginheight&quot; 属性值被设定为小于零或其他非法值时，各浏览器对其处理不同。</p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <h2 id="influence">造成的影响</h2>
+      <h3>一、HTML 中 &quot;marginwidth&quot; 和 &quot;marginheight&quot; 属性与 CSS 中 <em>'margin-top' 'margin-bottom' 'margin-right' 'margin-left'</em> 特性的对应关系</h3>
+      <p>分析我们以下代码：</p>
+      <p>Margin_Correct.html</p>
+      <pre>
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  body{background:wheat;}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;iframe src=&quot;margin_sub.html&quot; scrolling=&quot;no&quot; <span class="hl_4">marginheight=&quot;10&quot; marginwidth=&quot;10&quot;</span>
+style=&quot;background:#FF0000;border:#000000 1px solid;width:200px;&quot;&gt;&lt;/iframe&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+    </pre>
+      <p>margin_sub.html</p>
+      <pre>
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  * {font:16px 'Trebuchet MS';}
+  body{background:#FFFF00;}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body &gt;
+&lt;script&gt;
+  if (!window.getComputedStyle) {
+    window.getComputedStyle = function ($target) {
+      return $target.currentStyle;
+    };
+  }
+        document.open();
+        document.write(&quot;&lt;div&gt;margin-top:&quot;+getComputedStyle(document.body, null).marginTop+&quot;&lt;/div&gt;&quot;);
+        document.write(&quot;&lt;div&gt;margin-bottom:&quot;+getComputedStyle(document.body, null).marginBottom+&quot;&lt;/div&gt;&quot;);
+        document.write(&quot;&lt;div&gt;margin-left:&quot;+getComputedStyle(document.body, null).marginLeft+&quot;&lt;/div&gt;&quot;);
+        document.write(&quot;&lt;div&gt;margin-right:&quot;+getComputedStyle(document.body, null).marginRight+&quot;&lt;/div&gt;&quot;);
+        document.close();
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+    </pre>
+      <p>以上代码在父页面 Margin_Correct.html 中通过 IFRAME 标记设置了所嵌入页面 margin_sub.html 中的 &quot;marginwidth&quot; 和 &quot;marginheight&quot; 属性值，然后在 margin_sub.html 中获得该页面的 <em>'margin-top' 'margin-bottom' 'margin-right' 'margin-left'</em> 特性值，其在各浏览器中的运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Firefox Chrome Safari Opera</th>
+          <th>IE6 IE7 IE8 Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <th>margin-top</th>
+          <td>10px<br/>
+          </td>
+        </tr>
+        <tr>
+          <th>margin-bottom</th>
+          <td>10px</td>
+        </tr>
+        <tr>
+          <th>margin-left</th>
+          <td>10px</td>
+        </tr>
+        <tr>
+          <th>margin-right</th>
+          <td>10px</td>
+        </tr>
+      </table>
+      <p>结合运行结果和标准参考中对规范的解析可知此时的 <em>'margin-top' 'margin-bottom' 'margin-right' 'margin-left'</em> 特性值分别为 margin_sub.html 页面与包含它的框架的上下左右边框之间的空白距离，从而验证了 &quot;marginwidth&quot; 和 &quot;marginheight&quot; 属性值对应着 CSS 中的 <em>'margin-top' 'margin-bottom' 'margin-right' 'margin-left'</em> 特性值。</p>
+      <h3>二、各浏览器对 &quot;marginwidth&quot; 和 &quot;marginheight&quot; 的错误设定值的处理情况</h3>
+      <p>由上文可知， &quot;marginwidth&quot; 和 &quot;marginheight&quot; 属性值对应着 CSS 中的 <em>'margin-top' 'margin-bottom' 'margin-right' 'margin-left'</em> 特性值。</p>
+      <p>如果， &quot;marginwidth&quot; 和 &quot;marginheight&quot; 属性未设置，那么各浏览器中将采用各自的默认 'margin' 值，他们如下：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE(S) Chrome Safari Firefox Opera</th>
+        </tr>
+        <tr>
+          <th>margin-top</th>
+          <td> 15px</td>
+          <td> 8px</td>
+        </tr>
+        <tr>
+          <th>margin-bottom</th>
+          <td>15px</td>
+          <td>8px</td>
+        </tr>
+        <tr>
+          <th>margin-left</th>
+          <td>10px</td>
+          <td>8px</td>
+        </tr>
+        <tr>
+          <th>margin-right</th>
+          <td>10px</td>
+          <td>8px</td>
+        </tr>
+      </table>
+      <p>在知晓各浏览器 'margin' 默认值设定情况下，我们来看各浏览器针对  &quot;marginwidth&quot; 和 &quot;marginheight&quot; 错误值处理。 </p>
+      <h4>1、将 &quot;marginwidth&quot; 和 &quot;marginheight&quot; 属性值设定为负数，修改上述代码中的高亮部分为如下所示：</h4>
+      <p><span class="hl_4">marginheight=&quot;-1&quot; marginwidth=&quot;-1&quot;</span></p>
+      <p>运行修改后的测试例子，其运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th></th>
+          <th>IE6 IE7 IE8 Firefox Opera</th>
+          <th>Chrome Safari</th>
+        </tr>
+        <tr>
+          <th>margin-top</th>
+          <td> 0px</td>
+          <td> 8px</td>
+        </tr>
+        <tr>
+          <th>margin-bottom</th>
+          <td>0px</td>
+          <td>8px</td>
+        </tr>
+        <tr>
+          <th>margin-left</th>
+          <td>0px</td>
+          <td>8px</td>
+        </tr>
+        <tr>
+          <th>margin-right</th>
+          <td>0px</td>
+          <td>8px</td>
+        </tr>
+      </table>
+      <p> 从运行结果可以看出修改后的代码：</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8 Firefox Opera</em> 中，运行结果既不是设定值也不是浏览器的默认值而是0，这说明这些浏览器将这两个属性的错误值 &quot;-1&quot; 首先修复为 &quot;0&quot; ，当作用在 CSS 的 'margin' 特性时，导致 <em>'margin-top' 'margin-bottom' 'margin-right' 'margin-left'</em> 特性值均被设置为 0 ，他们覆盖了浏览器默认。所以这可以理解为这些浏览器存在  &quot;marginwidth&quot; 和 &quot;marginheight&quot; 值设置为负数时，存在将负数值修复为可用值 0 的情况。</li>
+        <li> <em>Chrome Safari</em> 中，最终 'margin' 值为浏览器默认值。这说明  &quot;marginwidth&quot; 和 &quot;marginheight&quot; 值设置为负数时，浏览器忽略了存在错误值的属性，其值无法对应到 CSS 的 'margin' 中，导致浏览器使用默认 'margin' 值来显示页面。</li>
+      </ul>
+      <p>&nbsp;</p>
+      <h4>2、将 &quot;marginwidth&quot; 和 &quot;marginheight&quot; 属性值设定为非数字的非法字符，修改上述代码中的高亮部分为如下所示：</h4>
+      <p><span class="hl_4">marginheight=&quot;a&quot; marginwidth=&quot;a&quot;</span></p>
+      <p>运行修改后的测试例子，其运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8(Q)<sup>1</sup></th>
+          <th>Chrome Safari</th>
+          <th>IE8(S)<sup>2</sup> Firefox</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <th>margin-top</th>
+          <td> 15px</td>
+          <td> 0px</td>
+          <td> 8px</td>
+          <td> 5px</td>
+        </tr>
+        <tr>
+          <th>margin-bottom</th>
+          <td>15px</td>
+          <td>0px</td>
+          <td>8px</td>
+          <td>5px</td>
+        </tr>
+        <tr>
+          <th>margin-left</th>
+          <td>10px</td>
+          <td>0px</td>
+          <td>8px</td>
+          <td>5px</td>
+        </tr>
+        <tr>
+          <th>margin-right</th>
+          <td>10px</td>
+          <td>0px</td>
+          <td>8px</td>
+          <td>5px</td>
+        </tr>
+      </table>
+      <p>从运行结果可以得知：</p>
+      <ul>
+        <li> <em>IE6 IE7 IE8 Firefox</em> 中，&quot;marginwidth&quot; 和 &quot;marginheight&quot; 值设置为非数值时，览器忽略了存在错误值的属性，其值无法对应到 CSS 的 'margin' 中，导致浏览器使用默认 'margin' 值来显示页面。</li>
+        <li><em>Chrome Safari </em> 中，浏览器将 &quot;marginwidth&quot; 和 &quot;marginheight&quot;的非数值赋值错误修复，使他的的设置值为 0 ，并将浏览器默认 'margin' 值覆盖。</li>
+        <li><em>Opera</em> 中，也遵守了类似 <em>Chrome Safari </em> 的修复情况。但不同的是，<em>Opera</em> 将非数值赋值错误修复为设置值 5px ，并将浏览器默认 'margin' 值覆盖。</li>
+      </ul>
+      <p  class="comment"> 注【1】：这里的混杂模式是指 margin_sub.html 处于混杂模式下；</br>
+        注【2】：这里的标准模式是指 margin_sub.html 处于标准模式下。 </p>
+      <p  class="comment">&nbsp;</p>
+      <p>综合上所述，各浏览器对 &quot;marginwidth&quot; 和 &quot;marginheight&quot; 的错误设定值的处理不同，会导致较大渲染差异。</p>
+      <h2 id="solutions">解决方案</h2>
+      <p>在使用 &quot;marginwidth&quot; 和 &quot;marginheight&quot; 时应严格遵照规范中的描述，要对其设定大于等于零的数值。</p>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td> IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.544.0 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62</td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HM1002/Margin_Correct.html">Margin_Correct.html</a><br/>
+              <a href="../../tests/HM1002/margin_wrong1(S).html">margin_wrong1(S).html</a><br/>
+              <a href="../../tests/HM1002/margin_wrong1(Q).html">margin_wrong1(Q).html</a><br/>
+              <a href="../../tests/HM1002/margin_wrong2(S).html">margin_wrong2(S).html</a><br/>
+              <a href="../../tests/HM1002/margin_wrong2(Q).html">margin_wrong2(Q).html</a><br />
+              <span class="comment">【注】：本页中测试连接部分所标注的文档模式均指 margin_sub.html 所处于的文档模式。</br>
+              </span><br/>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-08</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>marginwidth marginheight margin iframe frame</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script>
+	function clicked(i, o) {
+		document.getElementById('info' + i).innerHTML += o.tagName + ' Tag Clicked.<br />';
+	}
+</script>
+</head>
+<body style="font:14px Arial;">
+<div>
+	MAP 位于 A 之外，请点击图片：<br />
+	<a href="#" onclick="clicked(1, this)">
+		<img src="Chrome1.png" usemap="#Map1" onclick="clicked(1, this)" />
+	</a>
+	<map name="Map1" onclick="clicked(1, this)">
+		<area shape="rect" coords="0,0,90,90" onclick="clicked(1, this)">
+	</map>
+</div>
+<div id="info1"></div>
+<br />
+<div>
+	MAP 位于 A 之内，请点击图片：<br />
+	<a href="#" onclick="clicked(2, this)">
+		<img src="Chrome1.png" usemap="#Map2" onclick="clicked(2, this)" />
+		<map name="Map2" onclick="clicked(2, this)">
+			<area shape="rect" coords="0,0,90,90" onclick="clicked(2, this)">
+		</map>
+	</a>
+</div>
+<div id="info2"></div>
+</body>
+</html>

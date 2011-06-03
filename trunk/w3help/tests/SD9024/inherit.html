@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body style="font:24px Consolas;">
+<script>
+	function $r(str) { document.write(str); }
+	function testDOMObject(objStr, level) {
+		var indent = '', g = 0, s = [];
+		var T = '<strong style="background-color:lime">true</strong>';
+		var F = '<strong style="background-color:tomato">false</strong>';
+		var NA = '<strong style="background-color:fuchsia">N/A</strong>';
+		while (g++ < level) { indent += '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'; }
+		try {
+			var o = eval(objStr);
+			s.push(indent + '<strong style="background-color:greenyellow">Interface ' + objStr +': ' + o + '</strong>');
+			s.push('<br />');
+			try {
+				s.push(indent + objStr + '.prototype: ' + o.prototype);
+			} catch (ex) {
+				s.push(indent + '<strong style="background-color:coral">' + objStr + '.prototype: ' + ex.message + '</strong>');
+			}
+			s.push('<br />');
+			s.push(indent + objStr + '.prototype.hasOwnProperty("XXX"): <br />');
+			var str = [];
+			try {
+				for (var i in o.prototype) {
+					str.push(indent + '<em>' + i + '</em>: ' + ((o.prototype.hasOwnProperty(i)) ? T : F) + '<br />');
+				}
+			} catch (ex) { }
+			s.push(((str.length > 0) ? str.join('') : indent + NA));
+		} catch (ex) {
+			s.push(indent + '<strong style="background-color:coral">Interface ' + objStr + ': ' + ex.message + '</strong>');
+		}
+		s.push('<br /><br />');
+		return s.join('');
+	}
+	var objHTMLDocument = ['Node', 'Document', 'HTMLDocument'];
+	var objHTMLFormElement = ['Node', 'Element', 'HTMLElement', 'HTMLFormElement'];
+	for (var i in objHTMLDocument) {
+		$r(testDOMObject(objHTMLDocument[i], i));
+	}
+	for (var i in objHTMLFormElement) {
+		$r(testDOMObject(objHTMLFormElement[i], i));
+	}
+</script>
+</body>
+</html>

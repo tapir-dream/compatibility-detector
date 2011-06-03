@@ -1,0 +1,308 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX2004: 浏览器后退按钮在各浏览器中的行为在某种情况下不一致</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>后退按钮的差异。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>点击后退按钮可能失效。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <h3>一、浏览器后退操作</h3>
+      <p>
+      各浏览器下，都有前进/后退的操作按钮，一般情况下的表现都是一致的。但是，当页面上存在某些特殊的操作时，将会导致各浏览器下，后退的结果不一致。<br/>
+      下面将列举一些导致后退操作不一致的情况，详见下一小节。
+      </p>
+
+      <h3>二、差异及可能产生的问题</h3>
+      <p>
+      影响各浏览器下，回退操作不一致的情况有：window.open 操作，动态改变 IFRAME 的 src 属性操作， location.href 赋值操作。下面将一一给予重现、说明。
+      </p>
+      <p>
+        <strong>1、window.open 操作影响回退</strong><br/>
+        Chrome 下，使用 window.open 方法打开新页面，新页面的地址信息不会记录到浏览历史记录中。<br/>
+        请观察如下代码：
+      </p>
+      <pre>
+&lt;script type=&quot;text/javascript&quot;&gt;
+function windowOpen(){
+    window.open('page-03.html', '_self');
+}
+&lt;/script&gt;
+&lt;input type=&quot;button&quot; value=&quot;window.open&quot; onclick=&quot;windowOpen()&quot; /&gt;
+      </pre>
+      <p>
+      注：以上源码在 page-02 中。浏览器的初始页面为 page-01，输入 page-02 的 url 地址导航到 page-02，然后点击 page-02 页面中的 INPUT[ value = &quot;window.open&quot; ] 按钮，页面导航 到page-03。整个过程如下图所示：<br/>
+      <img src="../../tests/BX2004/1.png" alt="运行效果截图"/><br/>
+      此时，点击浏览器上的后退按钮，观察各浏览器下的回退结果，汇总如下：
+      </p>
+
+      <p>列举差异的表格：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE</th>
+          <th>Firefox</th>
+          <th>Safari</th>
+          <th>Opera</th>
+          <th>Chrome</th>
+        </tr>
+        <tr>
+          <th>点击后退按钮浏览器回到的页面</th>
+          <td>page-02</td>
+          <td>page-02</td>
+          <td>page-02</td>
+          <td>page-02</td>
+          <td class="hl_2">page-01</td>
+        </tr>
+      </table>
+
+      <p>
+      由上表可知，Chrome 浏览历史记录中，未记录用 window.open 打开的页面地址信息。它的回退如下图所示：<br/><br/>
+      <img src="../../tests/BX2004/2.png" alt="运行效果截图"/>
+      </p>
+
+      <p>
+        <strong>2、动态改变 IFRAME 元素的地址操作，影响回退</strong>
+        Chrome 的早先版本和 Safari，对页面中 IFRAME 的地址变化，不做浏览历史记录。<br/>
+        请观察如下代码：
+      </p>
+<pre>
+&lt;script type=&quot;text/javascript&quot;&gt;
+function changeIframeSrc(){
+    var _iframe = document.getElementById('_iframe');
+    _iframe.src = 'page-04.html';
+}
+&lt;/script&gt;
+&lt;input type=&quot;button&quot; value=&quot;changeIframeSrc&quot; onclick=&quot;changeIframeSrc()&quot; /&gt;
+
+&lt;iframe id=&quot;_iframe&quot; src=&quot;page-03.html&quot;&gt;&lt;/iframe&gt;
+</pre>
+      <p>
+注：以上源码在 page-02 中。浏览器的初始页面为 page-01 ，输入 page-02 的 url 地址导航到 page-02，然后点击 page-02 页面中的 INPUT[value=&quot;changeIframeSrc&quot;] 按钮，页面中的 IFRAME 由 page-03 导航到 page-04 。整个过程如下图所示：<br/><br/>
+      <img src="../../tests/BX2004/3.png" alt="运行效果截图"/>
+      </p>
+      <p>
+      此时，点击浏览器上的后退按钮，观察各浏览器下的回退结果，汇总如下：
+      </p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE Firefox Opera</th>
+          <th>Safari</th>
+          <th>Chrome5.0.375.7 dev</th>
+          <th>Chrome4.1.249.1042 (42199)</th>
+        </tr>
+        <tr>
+          <th>点击后退按钮浏览器回到的页面</th>
+          <td>page-02</td>
+          <td>page-01</td>
+          <td>page-02</td>
+          <td>page-01</td>
+        </tr>
+      </table>
+      <p>
+      从上表可知，Chrome 的早先版本和 Safari，对页面中 IFRAME 的地址变化，不做浏览历史记录。它的回退如下图所示：<br/>
+      <br/>
+      <img src="../../tests/BX2004/4.png" alt="运行效果截图"/>
+      </p>
+      <p>
+        <strong>3、直接执行 window.location 赋值操作影响回退</strong><br/>
+        在页面加载后，直接执行 window.location 赋值操作。Firefox Opera Chrome 下将不对执行操作的页面做浏览历史记录；IE 下可回退到执行操作的页面，但又马上自动导航；Safari 下的情况比较特殊，将在下一小节单独说明。
+        请观察如下代码：
+      </p>
+<pre>
+&lt;script type=&quot;text/javascript&quot;&gt;
+window.location = &quot;page-03.html&quot;
+或
+window.location.href = &quot;page-03.html&quot;
+&lt;/script&gt;
+</pre>
+
+      <p>
+      注：以上源码在 page-02 中。浏览器的初始页面为 page-01，输入 page-02 的 url 地址导航到 page-02，接着执行如上代码，页面自动被导航到 page-03。整个过程如下图 所示：<br/>
+      <img src="../../tests/BX2004/5.png" alt="运行效果截图"/><br/>
+      此时，点击浏览器上的后退按钮，观察各浏览器下的回退结果，汇总如下：
+      </p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE</th>
+          <th>Firefox Opera Chrome</th>
+          <th>Safari</th>
+        </tr>
+        <tr>
+          <th>点击后退按钮浏览器回到的页面</th>
+          <td>先退回到page-02然后又导航到page-03</td>
+          <td>page-01</td>
+          <td>Safari下情况比较特殊下一小节中单独讨论</td>
+        </tr>
+      </table>
+
+      <p>
+      由上表可见，直接执行 window.location 赋值，各浏览器下的回退结果差异较大。它们的回退请参见下图所示：<br/>
+      <img src="../../tests/BX2004/6.png" alt="运行效果截图"/><br/>
+      另，如果 &quot;window.location&quot; 赋值操作不是在页面载入后自动执行的话，所有浏览器下的回退结果将一致，请观察如下实例：
+      </p>
+<pre>
+&lt;script type=&quot;text/javascript&quot;&gt;
+function locationHref(){
+    window.location = &quot;page-03.html&quot;;
+}
+&lt;/script&gt;
+&lt;input type=&quot;button&quot; value=&quot;location.href&quot; onclick=&quot;locationHref()&quot; /&gt;
+</pre>
+      <p>此时，单击回退按钮，所有浏览器下，都将回退到 page-02，如下图所示：<br/>
+      <img src="../../tests/BX2004/7.png" alt="运行效果截图"/>
+      </p>
+
+      <h3>4、Safari下直接执行 window.location 赋值的情况比较特殊</h3>
+      <p>
+      Safari 下，直接执行 window.location=URL 赋值，然后点击浏览器的后退按钮，它的效果和执行代码所在的位置有关系。如果该代码出现在 IFRAME 元素之后时，效果将同 IE（后退到 page-02，然后又自动导航到 page-03），如果该代码前无 IFRAME 元素，则退回到 page-02，且代码之后的元素不被解析。具体请看下面分解。
+      </p>
+
+<pre>
+...
+&lt;body&gt;
+
+&lt;iframe id=&quot;_iframe&quot; src=&quot;page-04.html&quot;&gt;&lt;/iframe&gt;
+
+&lt;script type=&quot;text/javascript&quot;&gt;
+window.location = &quot;page-03.html&quot;;
+&lt;/script&gt;
+
+&lt;/body&gt;
+</pre>
+      <p>
+注： 以上源码在 page-02 中。浏览器的初始页面为 page-01，输入 page-02 的 url 地址导航到 page-02，接着执行如上代码，页面自动被导航到 page-03。整个过程如下图 所示：<br/>
+      <img src="../../tests/BX2004/8.png" alt="运行效果截图"/>
+      </p>
+
+      <p>此时，点击浏览器上的后退按钮，观察 Safari 下的回退结果：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>Safari</th><th>备注</th>
+        </tr>
+        <tr>
+          <th>点击后退按钮浏览器回到的页面</th>
+          <td>先退回到page-02然后又导航到page-03</td>
+          <td>效果同IE</td>
+        </tr>
+      </table>
+
+      <p>修改如上代码（去掉 IFRAME 元素），如下：</p>
+<pre>
+...
+&lt;body&gt;
+11111
+&lt;script type=&quot;text/javascript&quot;&gt;
+window.location = &quot;page-03.html&quot;;
+&lt;/script&gt;
+22222
+&lt;/body&gt;
+</pre>
+      <p>此时，点击浏览器上的后退按钮，观察 Safari 下的回退情况：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>Safari</th><th>备注</th>
+        </tr>
+        <tr>
+          <th>点击后退按钮浏览器回到的页面</th>
+          <td>page-02</td>
+          <td>此时页面上的内容为：<br/>
+            11111<br/>
+            注意：22222 未显示（在window.location=URL后的代码不被解析）</td>
+        </tr>
+      </table>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>
+      以上所提到的情况，我们应该尽量避免，我们期望随着各浏览器新版本的发布，相应的问题也能得到修复，如 Chrome 的新版本就修复了 IFRAME 地址改变不记录历史记录的问题。<br/>
+      另外，如果有必要，可考虑在服务端进行地址跳转。
+      </p>
+
+     <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+                            Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>&nbsp;</td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-12</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>window location open 返回 iframe src</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

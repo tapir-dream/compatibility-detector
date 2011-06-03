@@ -1,0 +1,350 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX1053: 各浏览器对 window.open() 的窗口特征 sFeatures 参数支持程度存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+      <h2 id="description">问题描述</h2>
+      <p>使用 window.open 方法可以弹出一个新窗口，其中 open 方法的 sFeatures 参数选项在各浏览器中支持程度不一，这有可能导致同样的代码使各浏览器中弹出窗口形式产生巨大差异。</p>
+      <h2 id="influence">造成的影响</h2>
+      <p>会造成不同浏览器中打开的窗口位置、尺寸出现差异；以及是否有地址栏、菜单栏、状态栏、滚动条和是否全屏等表现形式存在出入。</p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>open 方法属于 window 对象，他用来打开一个新浏览器窗口， 其中window 对象又隶属 BOM (Browser Object Model) 范畴。遗憾的是 BOM 还没有被标准化，它由各个浏览器厂商制定，因此会出现实差异。</p>
+      <p>时至今日，HTML5 规范草案中已经开始标准化 BOM，window 对象也在草案之中，草案中对 open 方法的形参数 <code>window.open([ url [,target[,features[,replace]]]]) </code> 做了简要列举与介绍。但是在讲到 features 时仅写着&quot;该参数功能说明忽略&quot;，具体参数功能尚不可知。</p>
+      <p>在可查找到的浏览器厂商官方 developer 站点中， 仅有 mozilla MDC 以及 micorsoft MSDN 写有对 open 方法 features 参数说明的。其中，MDC 介绍非常简洁，仅说明参数格式，而 MSDN 中 采用了详细的参数格式和可选键值对说明，对于选项值以及选项的默认值本文将不再罗列，读者可以参看下方的 MSDN 文档说明。</p>
+      <p>Firefox 中 window.open 方法的详细说明请参看 MDC ：<a href="https://developer.mozilla.org/en/DOM/window.open">window.open</a></p>
+      <p>IE 中 window.open 方法的详细说明请参看 MSDN ：<a href="http://msdn.microsoft.com/en-us/library/ms536651(v=VS.85).aspx">open Method</a></p>
+      <p>本文中将采用 MSDN 中列举的 features 参数选项作为评测标准，并构造以下测试代码：</p>
+<pre style="height:300px; overflow-y:auto;">
+&lt;script&gt;
+function openW3C(sFeatures){
+  window.open(&quot;http://www.w3.org/&quot;,&quot;&quot;,sFeatures,false);
+}
+&lt;/script&gt;
+&lt;h2&gt;请在各浏览器内依次点击下列按键，根据显示效果来判断 window.open 方法是否支持某项特性设定。&lt;/h2&gt;
+
+channelmode sFeatures: &lt;button onclick=&quot;openW3C('channelmode=no')&quot;&gt;channelmode=no&lt;/button&gt;
+&lt;button onclick=&quot;openW3C('channelmode=no')&quot;&gt;channelmode=yes&lt;/button&gt;&lt;br /&gt;
+
+directories sFeatures:&lt;button onclick=&quot;openW3C('directories=no')&quot;&gt;directories=no&lt;/button&gt;
+&lt;button onclick=&quot;openW3C('directories=yes')&quot;&gt;directories=yes&lt;/button&gt;&lt;br /&gt;
+
+fullscreen sFeatures:&lt;button onclick=&quot;openW3C('fullscreen=no')&quot;&gt;fullscreen=no&lt;/button&gt;
+&lt;button onclick=&quot;openW3C('fullscreen=yes')&quot;&gt;fullscreen=yes&lt;/button&gt;&lt;br /&gt;
+
+location sFeatures:&lt;button onclick=&quot;openW3C('location=no')&quot;&gt;location=no&lt;/button&gt;
+&lt;button onclick=&quot;openW3C('location=yes')&quot;&gt;location=yes&lt;/button&gt;&lt;br /&gt;
+
+menubar sFeatures:&lt;button onclick=&quot;openW3C('menubar=no')&quot;&gt;menubar=no&lt;/button&gt;
+&lt;button onclick=&quot;openW3C('menubar=yes')&quot;&gt;menubar=yes&lt;/button&gt;&lt;br /&gt;
+
+resizable sFeatures:&lt;button onclick=&quot;openW3C('resizable=no')&quot;&gt;resizable=no&lt;/button&gt;
+&lt;button onclick=&quot;openW3C('resizable=yes')&quot;&gt;resizable=yes&lt;/button&gt;&lt;br /&gt;
+
+scrollbars sFeatures:&lt;button onclick=&quot;openW3C('scrollbars=no')&quot;&gt;scrollbars=no&lt;/button&gt;
+&lt;button onclick=&quot;openW3C('scrollbars=yes')&quot;&gt;scrollbars=yes&lt;/button&gt;&lt;br /&gt;
+
+status sFeatures:&lt;button onclick=&quot;openW3C('status=no')&quot;&gt;status=no&lt;/button&gt;
+&lt;button onclick=&quot;openW3C('status=yes')&quot;&gt;status=yes&lt;/button&gt;&lt;br /&gt;
+
+titlebar sFeatures:&lt;button onclick=&quot;openW3C('titlebar=no')&quot;&gt;titlebar=no&lt;/button&gt;
+&lt;button onclick=&quot;openW3C('titlebar=yes')&quot;&gt;titlebar=yes&lt;/button&gt;&lt;br /&gt;
+
+toolbar sFeatures:&lt;button onclick=&quot;openW3C('toolbar=no')&quot;&gt;toolbar=no&lt;/button&gt;
+&lt;button onclick=&quot;openW3C('toolbar=yes')&quot;&gt;toolbar=yes&lt;/button&gt;&lt;br /&gt;
+
+top sFeatures:&lt;button onclick=&quot;openW3C('top=10')&quot;&gt;top=10&lt;/button&gt;&lt;br /&gt;
+
+left sFeatures:&lt;button onclick=&quot;openW3C('left=10')&quot;&gt;left=10&lt;/button&gt;&lt;br /&gt;
+
+width sFeatures:&lt;button onclick=&quot;openW3C('width=100')&quot;&gt;width=100&lt;/button&gt;&lt;br /&gt;
+
+height sFeatures:&lt;button onclick=&quot;openW3C('height=100')&quot;&gt;height=100&lt;/button&gt;&lt;br /&gt;
+
+top and left sFeatures:&lt;button onclick=&quot;openW3C('top=20,left=20')&quot;&gt;top and left is 20&lt;/button&gt;&lt;br /&gt;
+
+width and height sFeatures:&lt;button onclick=&quot;openW3C('width=100,height=100')&quot;&gt;width and height is 100&lt;/button&gt;&lt;br /&gt;
+
+top and left and width and height sFeatures:&lt;button onclick=&quot;openW3C('top=200,left=200,width=200,height=200')&quot;&gt;top and left and width and height is 200&lt;/button&gt;
+</pre>
+
+      <p><span class="hl_2">由于各浏览器有不同的弹出窗口自动处理机制，为了不影响测试准确性，在运行测试代码之前因将所有浏览设置为可以打开弹出窗口。</span></p>
+      <p>各浏览器运行结果汇总：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6</th>
+          <th>IE7</th>
+          <th>IE8</th>
+          <th>Firefox</th>
+          <th>Safari</th>
+          <th>Chrome</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <th>channelmode</th>
+          <td><span class="hl_4">不支持</span></td>
+          <td><span class="hl_4">不支持</span></td>
+          <td><span class="hl_4">不支持</span></td>
+          <td><span class="hl_4">不支持</span></td>
+          <td><span class="hl_4">不支持</span></td>
+          <td><span class="hl_4">不支持</span></td>
+          <td><span class="hl_4">不支持</span></td>
+        </tr>
+        <tr>
+          <th>directories</th>
+          <td><span class="hl_4">不支持</span></td>
+          <td><span class="hl_4">不支持</span></td>
+          <td><span class="hl_4">不支持</span></td>
+          <td><span class="hl_4">不支持</span></td>
+          <td><span class="hl_4">不支持</span></td>
+          <td><span class="hl_4">不支持</span></td>
+          <td><span class="hl_4">不支持</span></td>
+        </tr>
+        <tr>
+          <th>fullscreen</th>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_4">不支持</span></td>
+          <td><span class="hl_4">不支持</span></td>
+          <td><span class="hl_4">不支持</span></td>
+          <td><span class="hl_4">不支持</span></td>
+        </tr>
+        <tr>
+          <th>location</th>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_4">不支持</span><sup>7</sup></td>
+          <td><span class="hl_2">支持</span><sup>2</sup></td>
+          <td><span class="hl_4">不支持</span><sup>7</sup></td>
+          <td><span class="hl_2">支持</span><sup>8</sup></td>
+        </tr>
+        <tr>
+          <th>menubar</th>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span><sup>1</sup></td>
+          <td><span class="hl_2">支持</span><sup>1</sup></td>
+          <td><span class="hl_2">支持</span><sup>1</sup></td>
+          <td><span class="hl_2">支持</span><sup>1</sup></td>
+          <td><span class="hl_4">不支持</span><sup>9</sup></td>
+          <td><span class="hl_4">不支持</span><sup>9</sup></td>
+        </tr>
+        <tr>
+          <th>resizable</th>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_4">不支持</span><sup>10</sup></td>
+          <td><span class="hl_4">不支持</span><sup>10</sup></td>
+          <td><span class="hl_4">不支持</span><sup>10</sup></td>
+          <td><span class="hl_4">不支持</span><sup>10</sup></td>
+        </tr>
+        <tr>
+          <th>scrollbars</th>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_4">不支持</span><sup>11</sup></td>
+          <td><span class="hl_4">不支持</span><sup>11</sup></td>
+          <td><span class="hl_2">支持</span></td>
+        </tr>
+        <tr>
+          <th>status</th>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span><sup>12</sup></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_4">不支持</span><sup>13</sup></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_4">不支持</span><sup>13</sup></td>
+          <td><span class="hl_4">不支持</span><sup>13</sup></td>
+        </tr>
+        <tr>
+          <th>titlebar</th>
+          <td><span class="hl_4">不支持</span></td>
+          <td><span class="hl_4">不支持</span></td>
+          <td><span class="hl_4">不支持</span></td>
+          <td><span class="hl_4">不支持</span></td>
+          <td><span class="hl_4">不支持</span></td>
+          <td><span class="hl_4">不支持</span></td>
+          <td><span class="hl_4">不支持</span></td>
+        </tr>
+        <tr>
+          <th>toolbar</th>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span><sup>2</sup></td>
+          <td><span class="hl_4">不支持</span><sup>14</sup></td>
+          <td><span class="hl_4">不支持</span><sup>14</sup></td>
+        </tr>
+        <tr>
+          <th>top</th>
+          <td><span class="hl_2">支持</span><sup>3</sup></td>
+          <td><span class="hl_2">支持</span><sup>1</sup></td>
+          <td><span class="hl_2">支持</span><sup>3</sup></td>
+          <td><span class="hl_2">支持</span><sup>4</sup></td>
+          <td><span class="hl_2">支持</span><sup>4</sup></td>
+          <td><span class="hl_4">不支持</span><sup>5</sup></td>
+          <td><span class="hl_4">不支持</span><sup>5</sup></td>
+        </tr>
+        <tr>
+          <th>left</th>
+          <td><span class="hl_2">支持</span><sup>3</sup></td>
+          <td><span class="hl_2">支持</span><sup>1</sup></td>
+          <td><span class="hl_2">支持</span><sup>3</sup></td>
+          <td><span class="hl_2">支持</span><sup>4</sup></td>
+          <td><span class="hl_2">支持</span><sup>4</sup></td>
+          <td><span class="hl_4">不支持</span><sup>5</sup></td>
+          <td><span class="hl_4">不支持</span><sup>5</sup></td>
+        </tr>
+        <tr>
+          <th>width</th>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_4">不支持</span><sup>6</sup></td>
+          <td><span class="hl_2">支持</span></td>
+        </tr>
+        <tr>
+          <th>height</th>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_4">不支持</span><sup>6</sup></td>
+          <td><span class="hl_2">支持</span></td>
+        </tr>
+        <tr>
+          <th>top  left</th>
+          <td><span class="hl_2">支持</span><sup>3</sup></td>
+          <td><span class="hl_2">支持</span><sup>4</sup></td>
+          <td><span class="hl_2">支持</span><sup>3</sup></td>
+          <td><span class="hl_2">支持</span><sup>4</sup></td>
+          <td><span class="hl_2">支持</span><sup>4</sup></td>
+          <td><span class="hl_4">不支持</span><sup>5</sup></td>
+          <td><span class="hl_4">不支持</span><sup>5</sup></td>
+        </tr>
+        <tr>
+          <th>width  height</th>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span><sup>4</sup></td>
+          <td><span class="hl_2">支持</span><sup>1</sup></td>
+          <td><span class="hl_2">支持</span></td>
+        </tr>
+        <tr>
+          <th>top  left  width  height</th>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span><sup>4</sup></td>
+          <td><span class="hl_2">支持</span><sup>3</sup></td>
+          <td><span class="hl_2">支持</span><sup>4</sup></td>
+          <td><span class="hl_2">支持</span><sup>4</sup></td>
+          <td><span class="hl_2">支持</span><sup>3</sup></td>
+          <td><span class="hl_2">支持</span><sup>4</sup></td>
+        </tr>
+      </table>
+      <p>上表中为各个浏览器对 features 各参数选项的支持程度，其中需要特殊说明的如下：</p>
+      <ul>
+        <li>【标注1】：IE7 IE8 Firefox Chrome Safari 中，当 &quot;menubar&quot; 选项为 &quot;yes&quot; 时，默认不显示菜单栏，需要按 ALT 键后菜单栏才可显示；相反当 &quot;menubar&quot; 选项为 &quot;no&quot; 时，即使按了 ALT 键也不会显示菜单栏。</li>
+        <li>【标注2】：Safari 中，开启 &quot;location&quot; 选项与开启 &quot;toolbar&quot; 选项时显示效果一致。</li>
+        <li>【标注3】：IE6 IE8 Chrome 中，使用 &quot;top&quot; 和 &quot;left&quot; 定位，如果出现设定的的坐标值过大，弹出窗口将可能显示在屏幕可视范围外。</li>
+        <li>【标注4】：IE7 Firefox Safari Opera 中，使用 &quot;top&quot; 和 &quot;left&quot; 定位，如果出现设定的的坐标值过大，窗口会自动调整 &quot;top&quot; 与 &quot;left&quot; 值，确保窗口正常显示在屏幕可视区域内。</li>
+        <li>【标注5】：Chrome Opera 中，不支持在没有设定 &quot;width&quot; 与 &quot;height&quot; 值的情况下独立使用 &quot;left&quot; 和 &quot;top&quot;，此时 &quot;left&quot; &quot;top&quot; 设定值均不生效。</li>
+        <li>【标注6】：Chrome 中，不支持在没有设定 &quot;left&quot; 和 &quot;height&quot; 值的情况下独立使用 &quot;width&quot; 与 &quot;height&quot;，此时 &quot;width&quot; &quot;height&quot; 设定值均不生效。结合【标注5】说明可知，在 Chrome 中弹出窗口不论想要设定宽高或位置中的一个或几个值，都必须将他们全部赋值，否则都将不起作用。</li>
+        <li>【标注7】：Firefox Chrome 中，地址栏会始终显示。</li>
+        <li>【标注8】：Opera 中，地址栏默认不显示，但可以点击页面最上方横条使他显示出来，设置 &quot;location=yes&quot; 后地址栏会自动显示出来。</li>
+        <li>【标注9】：Chrome Opera 中，不论 &quot;menubar&quot; 值如何设置，永远不显示菜单栏。</li>
+        <li>【标注10】：Firefox Safari Chrome Opera 中，无论 &quot;resizable&quot;值如何设置，窗口永远可由用户调整大小。</li>
+        <li>【标注11】：Safari Chrome 中，在页面存在滚动条的情况下，无论 &quot;scrollbars&quot;值如何设置，滚动条始终可见。</li>
+        <li>【标注12】：IE7 在 Windows XP SP3 系统中默认可以支持  &quot;status &quot; 参数隐藏状态栏；而在 Windows Vista 系统默认环境下不支持  &quot;status &quot; 参数，状态栏始终可见。这与两个系统中默认的 IE7 小版本号不同有关，前者版本号较低，后者版本号较高。</li>
+        <li>【标注13】：Firefox 中，无论 &quot;status&quot; 值如何设置，状态栏始终可见，而 Chrome Opera 中，则与前者相反，状态栏始终不可见。</li>
+        <li>【标注14】： Chrome Opera 中，无论 &quot;toolbar&quot; 值如何设置，始终不显示工具栏。</li>
+      </ul>
+      <p>综上所述，可见 window.open 方法的 sFeatures 参数支持程度存在巨大差异，使用时须谨慎为之。</p>
+      <h2 id="solutions">解决方案</h2>
+      <p>建议在使用 window.open 方法的 sFeatures 参数时，推荐如下配置字符串，可确保所有浏览器表现基本一致：<br />
+       &quot; <code>top=nInt,left=nInt,width=nInt,height=nInt,location=yes,menubar=no,resizable=yes,scrollbars=yes,status=no,toolbar=no</code> &quot;
+      </p>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td> IE6 （Window xp sp3）<br />
+              IE7 （Window xp sp3）<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 8.0.552.0 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.63</td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BX1053/window_open_features_param.html">window_open_features_param.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-13</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>window open features channelmode directories fullscreen location menubar resizable scrollbars status titlebar toolbar top left width height</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

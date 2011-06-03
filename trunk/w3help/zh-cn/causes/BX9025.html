@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX9025: 新版本的浏览器都已经不支持古老的 document.layers</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无</p>
+      <h2 id="description">问题描述</h2>
+      <p> document.layers 属性是古老的 Netscape 浏览器私有的，这个浏览器早已被淘汰，新版本的浏览器都已经不兼容他的私有属性值。</p>
+      <h2 id="influence">造成的影响</h2>
+      <ol>
+        <li>浏览器判断此属性诞生之后，经常和 doucment.all 共同用来判断浏览器类型，用来区分 Netscape 浏览器和 IE 浏览器，进而写出兼容 IE 和 NetScape 的代码。所以，容易出问题的都是较早实现的网站，这些网站用 document.layers 判断 Netscape 浏览器，对 NetScape 浏览器进行特殊的设置。现在 document.layers 已经不起作用，所以在所有浏览器中，针对 NetScape 浏览器做的设置就不会执行，造成跟 IE 浏览器的差异。</li>
+        <li>获取元素 document.layers 是一个元素的集合，所以，较早的网站中有利用 document.layers 获取元素的做法，所以在现代浏览器中，此段代码不会再起作用并且会报错。 </li>
+      </ol>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>document.layers 属性是从 JavaScript 1.2 开始引入的，从 Netscape 4.x 开始专有的属性。</p>
+      <p>它是一个代表所有由拥有定位属性元素的集合。通常是用 DIV 或 其专有的 LAYER 对象的 id 属性值来获得元素引用，但是这里面不包含除此以外的其它元素。</p>
+      <p>Netscape 6.0 以后放弃了 layers 特征。 现在所有浏览器都已经不再支持。 </p>
+      <p>分析以下代码：</p>
+<pre>
+&lt;script type=&quot;text/javascript&quot;&gt;
+  window.onload = function() {
+    document.getElementById('info').innerHTML = document.layers;
+  }
+&lt;/script&gt;
+&lt;div id=&quot;info&quot;&gt;&lt;/div&gt;
+</pre>
+      <p>上述代码可以将 document.layers 对象输出到 ID 为 info 的 DIV 标记的文本节点中。<br />
+        所有浏览器中都输出了：undefined，可见，所有浏览器都已经不再支持这个属性。</p>
+      <h2 id="solutions">解决方案</h2>
+      <ol>
+        <li>用其他方式判断浏览器类型，避免使用 document.layers 属性；</li>
+      <li>利用 getElementById() 函数获取元素 。</li>
+      </ol>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.2<br />
+              Safari 4.0.4<br />
+              Chrome 5.0.375.7 dev<br />
+              Opera 10.51</td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BX9025/document_layers.html">document_layers.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-15</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>document layers Netscape</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

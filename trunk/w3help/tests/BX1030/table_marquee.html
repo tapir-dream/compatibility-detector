@@ -1,0 +1,66 @@
+<style>
+	* { font:12px Arial; }
+	marquee { background:#aaa; height:30px; vertical-align:top; }
+	table { table-layout:auto; }
+</style>
+<script>
+	window.onload = function () {
+		var m = document.getElementsByTagName("marquee");
+		for (var i = 0, j = m.length; i < j; i++) {
+			var n = m[i].parentNode.parentNode.nextElementSibling || m[i].parentNode.parentNode.nextSibling;
+			var o = n.firstElementChild || n.firstChild;
+			o.innerHTML = m[i].offsetWidth + "px";
+		}
+	}
+</script>
+<table style="border:1px solid black; width:50px;" cellspacing="0" cellpadding="0">
+    <tr>
+        <td>
+            <marquee direction="up" scrolldelay="30" scrollamount="1">
+                <div style="width:100px; background:#eee;">MARQUEE - DIV</div>
+            </marquee>
+        </td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+    </tr>
+</table>
+<br />
+<table style="border:1px solid black; width:50px;" cellspacing="0" cellpadding="0">
+    <tr>
+        <td>
+            <marquee direction="right" scrolldelay="30" scrollamount="1">
+                <div style="width:100px; background:#eee;">MARQUEE - DIV</div>
+            </marquee>
+        </td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+    </tr>
+</table>
+<br />
+<table style="border:1px solid black; width:50px;" cellspacing="0" cellpadding="0">
+    <tr>
+        <td>
+            <marquee direction="down" scrolldelay="30" scrollamount="1">
+                <div style="width:100px; background:#eee;">MARQUEE - DIV</div>
+            </marquee>
+        </td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+    </tr>
+</table>
+<br />
+<table style="border:1px solid black; width:50px" cellspacing="0" cellpadding="0">
+    <tr>
+        <td>
+            <marquee direction="left" scrolldelay="30" scrollamount="1">
+                <div style="width:100px; background:#eee;">MARQUEE - DIV</div>
+            </marquee>
+        </td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+    </tr>
+</table>

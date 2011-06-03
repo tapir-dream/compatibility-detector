@@ -1,0 +1,32 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<style>
+	* { font:12px Arial; }
+</style>
+</head>
+<body>
+<table>
+<script>
+	for (var i = -5; i <= 10; i++) {
+		document.write('<tr><td id="a' + (i / 2) + '"></td><td><span id="s' + (i / 2) + '" style="background:#DDD;letter-spacing:' + (i / 2) + 'px">letter-spacing</span></td><td id="c' + (i / 2) + '"></td></tr>');
+	}
+
+	window.onload = function() {
+		function $(id) { return document.getElementById(id); }
+		if (!window.getComputedStyle) {
+			window.getComputedStyle = function($target){
+				return $target.currentStyle;
+			};
+		}
+		for (var i = -5; i <= 10; i++) {
+			document.getElementById("a" + (i / 2)).innerHTML = (i / 2);
+			document.getElementById("c" + (i / 2)).innerHTML = getComputedStyle(document.getElementById("s" + (i / 2))).letterSpacing;
+		}
+	}
+</script>
+</table>
+</body>
+</html>
+</body>
+</html>

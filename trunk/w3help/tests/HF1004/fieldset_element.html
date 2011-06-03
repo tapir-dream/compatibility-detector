@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+</head>
+<body>
+<fieldset style="width:150px;">
+	FIELDSET ELement
+</fieldset>
+<span style="border:1px solid gray;padding:0 5px;background:gold;">
+	Span Element
+</span>
+<br />
+<script type="text/javascript">
+ function getStyle(elem, name) {
+	if (elem.style[name]) {
+		return elem.style[name];
+	} else if (elem.currentStyle) {
+		return elem.currentStyle[name];
+	} else if (document.defaultView && document.defaultView.getComputedStyle) {
+		name = name.replace(/([A-Z])/g, "-$1");
+		name = name.toLowerCase();
+		var s = document.defaultView.getComputedStyle(elem, "");
+		return s && s.getPropertyValue(name);
+	} else {
+		return null;
+	}
+}
+document.write("fieldset display is " , getStyle(document.getElementsByTagName("fieldset")[0],"display"));
+</script>
+</body>
+</html>

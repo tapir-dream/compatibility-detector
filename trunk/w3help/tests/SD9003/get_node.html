@@ -1,0 +1,34 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+</head>
+<body>
+<!--测试元素-->
+<div id="a"> <div>div</div> <span id="b">span</span> <span>span</span> </div>
+<!--脚本输出-->
+<pre>
+<script>
+//获取父元素。
+var $a=document.getElementById("a");
+//测试 childNodes。
+var nodeList=$a.childNodes;
+var string="";
+for(var i=0;i<nodeList.length;i++)string+=nodeList[i].nodeType;
+document.writeln("nodeList: "+string);
+//测试 firstChild。
+document.writeln("firstChild: "+$a.firstChild.nodeType);
+//测试 lastChild。
+document.writeln("lastChild: "+$a.lastChild.nodeType);
+//获取子元素。
+var $b=document.getElementById("b");
+//测试 previousSibling。
+document.writeln("previousSibling: "+$b.previousSibling.nodeType);
+//测试 nextSibling。
+document.writeln("nextSibling: "+$b.nextSibling.nodeType);
+//显示 innerHTML。
+alert("|"+$a.innerHTML+"|");
+</script>
+</pre>
+</body>
+</html>

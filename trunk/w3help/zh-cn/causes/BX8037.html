@@ -1,0 +1,194 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX8037: 溢出定位流的不可视元素，其包含块的滚动条生成差异</h1>
+      <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>关于 ‘overflow’ 的特性说明请参考 W3C CSS 2.1 规范：  <a href="http://www.w3.org/TR/CSS21/visufx.html#overflow">http://www.w3.org/TR/CSS21/visufx.html#overflow</a> </p>
+      <h2 id="description">问题描述</h2>
+      <p>当绝对定位元素的偏移位置位于其包含块的可视范围之外时，如果这个元素由于某种原因造成视觉上不可见（如零宽高），它将不会触发父元素的有效 'Scroll' 值。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>在 Firefox 和 IE8(S) 内会造成滚动条无效。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE8(S) Firefox</th>
+          <td>宽度溢出不会使父容器的滚动条设置有效。</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p><strong>这个问题实质上是由于各个浏览器采用了不同的渲染优化策略导致。</strong></p>
+
+      <p>分析以下代码：</p>
+<pre>
+&lt;!--A组 宽度溢出--&gt;
+&lt;div style=&quot; position:absolute; width:100px; height:100px; overflow: scroll; background:#CCC&quot;&gt;
+    &lt;div style=&quot;<span class="hl_1">width:1000px;</span> background:red; position:absolute; &quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;&lt;br /&gt;
+&lt;!--B组 定位流方向上溢出--&gt;
+&lt;div style=&quot;position:absolute; width:100px; height:100px; overflow: scroll; background:#CCC&quot;&gt;
+    &lt;div style=&quot;<span class="hl_4">left:200px;</span> background:red; position:absolute; &quot;&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+
+      <p>两个定位流中的块元素，其处于绝对定位流中的子元素均溢出容器。第一个子元素从宽度上溢出容器，另一个从定位流方向上溢出父容器。</p>
+      <p>A 组第一个 DIV 标记内的绝对定位元素虽然设置了宽度，但是没有显式性的设置高度，高度值将使用 'auto' —— 即由内容实际高度决定。现实中这是个空标记，他没有实际内容，最终元素高度为0。 </p>
+      <p>B 组第一个 DIV 标记内的绝对定位元素依然是个空标记，最终高度依然是0。同时他是定位流中非替换元素，没有设置宽度，根据 shrink-to-fit 规则计算其宽度依然为0。</p>
+      <p>由于宽或高为0，因此他们连个具有共同的特性——在渲染层面其子元素均不可视。</p>
+      <p>这段代码在不同的浏览器环境中的表现：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th> IE8(S) Firefox </th>
+          <th>Chrome Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <th>
+            A<br />
+            <br />
+            <br />
+            <br />
+            <br />
+            B<br />
+          </th>
+          <td><img src="../../tests/BX8037/04.gif" alt="运行效果截图" /></td>
+          <td><img src="../../tests/BX8037/01.gif" alt="运行效果截图" /></td>
+          <td><img src="../../tests/BX8037/02.gif" alt="运行效果截图" /></td>
+          <td><img src="../../tests/BX8037/03.gif" alt="运行效果截图" /></td>
+        </tr>
+      </table>
+      <p>在这四组对照中，可以发现 IE8(S) Firefox  Chrome Safari 浏览器在 A 组第一个子绝对定位元素宽度超出父容器后，没有使父容器产生实质的滚动条状态。</p>
+      <p>即是说，当不可视的绝对定位元素从宽度方向上溢出其处于绝对定位流内的容器之后，IE8(S) Firefox Chrome Safari 的渲染引擎将会把该元素移出渲染流不做渲染，以加快渲染速度。 </p>
+      <p>而 Opera 浏览器的渲染引擎则没有做这些渲染效率优化工作，导致父容器可以正确计算子元素溢出容器后的宽度，从而产生实质的滚动条。</p>
+      <p>此外，在 B 组中 Chrome Safari Opera 浏览器第二个不可视的子绝对定位元素在定位流中溢出父容器后，产生了实质滚动条。这说明他们的渲染引擎没有对此情况作优化处理，依然会进行实质性的渲染工作即使该元素已经不可视。</p>
+      <p>对照全部在 B 组中的 IE 系列浏览器和 Firfox 浏览器，可以看出这种情况下，他们均会将实际上已经不可视的元素移出渲染流不做渲染，以加快渲染速度。</p>
+      <p>最后再看 A 组中 IE6 IE7 IE8(Q) 的特殊表现，这里由于 IE6 IE7 IE8(Q) 浏览器在默认情况下会给空 DIV 元素设置一个默认高度最小值和最小默认行高值以及最小默认字号值。</p>
+      <p>现将测试代码稍作修改，以便在 IE6 IE7 IE8(Q) 中得到一个不可视的宽度溢出元素。</p>
+<pre>
+&lt;div style=&quot; position:absolute; width:100px; height:100px; overflow: scroll; background:#CCC&quot;&gt;
+    &lt;div style=&quot;width:1000px; background:red; <span class="hl_1">height:0; line-height:0; font-size:0;</span> <span class="hl_4">overflow:hidden;</span>&quot;&gt; &lt;/div&gt;
+&lt;/div&gt;
+</pre>
+      <p>此时运行结果如下：</p>
+      <table class="compare">
+            <tr>
+              <th>&nbsp;</th>
+              <th>IE6(Q) IE7(Q) IE8(Q)</th>
+              <th> IE6(S) IE7(S) IE8(S) </th>
+            </tr>
+            <tr>
+              <th>A<br />
+                  <br />
+                  <br />
+                  <br />
+                  <br />
+                B<br /></th>
+              <td><img src="../../tests/BX8037/05.gif" alt="运行效果截图" /></td>
+              <td><img src="../../tests/BX8037/01.gif" alt="运行效果截图" /></td>
+            </tr>
+          </table>
+      <p>根据上表可以看出现在情况已经很明确了：</p>
+          <p>所有 IE 浏览器在标准模式下对不可视元素宽度溢出情况均做了渲染优化，不将其加入渲染流中，因此父元素无法产生设置的滚动条。</p>
+          <p>所有 IE 浏览器在混杂模式下无论如何设置都不可将空 DIV 通过设置宽高等手段变为实际渲染时不可视，因此宽度可以在渲染时被计算，使父元素产生滚动条。</p>
+      <p><strong>高度方向上溢出容器情况</strong></p>
+          <p>现在有必要在前面分析的基础上加入对高度方向上溢出容器的测试，分析以下代码：</p>
+<pre>
+&lt;div style=&quot; position:absolute; width:100px; height:100px; overflow: scroll; background:#CCC&quot;&gt;
+    &lt;div style=&quot;<span class="hl_1">height:1000px;</span> background:red; <span class="hl_2">width: 0px;</span>&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+</pre>
+      <p>此时运行结果如下：</p>
+      <table class="compare">
+            <tr>
+              <th>IE6 IE7 IE8(Q) Safari Chrome Firefox Opera</th>
+              <th>  IE8(S) </th>
+            </tr>
+            <tr>
+              <td><img src="../../tests/BX8037/06.gif" alt="运行效果截图" /></td>
+              <td><img src="../../tests/BX8037/07.gif" alt="运行效果截图" /></td>
+            </tr>
+          </table>
+      <p>由表可见，当不可视元素的宽度溢出容器后，除 IE8(S) 外，其他浏览器都没有对此情况做渲染优化，因此处于定位流中的父元素产生了实质的垂直滚动条。</p>
+          <p>IE8(S) 则是在宽度高度上都对不可视元素溢出容器在渲染流层面做了优化，溢出元素被移出渲染流，不影响父容器布局计算。</p>
+          <p><strong>补充说明—— 对于不可视的绝对定位元素，WebKit 内核与 Gecko 内核生成滚动机制的差异：</strong></p>
+          <p>在 Gecko 内核中，若一个元素及其子元素在实际显示中不可视，也就是说其宽度和高度至少有一个为0，则在视觉上这个元素也不占有任何空间。其内核渲染计算中，其包含块在计算内核对象 nsScrollPortView 的 ContainerSize 的值时，如果不可视元素的绝对定位元素在其包含块尺寸计算时被忽略，所以此时浏览器不会为包含块生成滚动机制。.</p>
+          <p>在 WebKit 内核中，以绝对定位元素通过 top 特性迫使其在垂直方向位于其包含块的可视范围之外的情况为例，渲染引擎会通过调用 lowestPosition 方法计算出盒子的底边位置，在其中参考了绝对定位元素的垂直位置的相对偏移，但并没有对绝对定位元素是实际可视作判断，所以此时浏览器会为该元素启动滚动机制。
+          <h2 id="solutions">解决方案</h2>
+      <p>避免在定位流内出现不可视元素且溢出父容器。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.53
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BX8037/position_subElment_overflow_scroll.html">position_subElment_overflow_scroll.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-06</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>absolute positioned 绝对定位 滚动条 包含块 scrollbar containing block width height</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HY8002: IE6 IE7 IE8(Q) 中同一元素重复定义的 style 属性会被合并</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>HTML 代码中元素的某个属性应在其所在元素标签内具备唯一性，如我们不应该为一个元素定义两个同名属性。</p>
+      <p>关于 HTML 属性的详细信息，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html4/intro/sgmltut.html#h-3.2.2">3.2.2</a> 中的内容。</p>
+      <p></p>
+
+      <h2 id="description">问题描述</h2>
+      <p><em>IE6 IE7 IE8(Q)</em> 中会自动合并元素重复的 &quot;style&quot; 属性。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>对于 &quot;style&quot; 属性，由于 <em>IE6 IE7 IE8(Q)</em> 中的特有现象，当我们因为比如输入了多个 &quot;style &quot;属性定义元素的内联 CSS 后，会导致与其他浏览器中的 CSS 渲染差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>下面代码 DIV 元素的 &quot;id&quot; &quot;name&quot; &quot;title&quot; 属性均定义了两次：</p>
+<pre>&lt;div id=&quot;d&quot; id=&quot;div&quot; name=&quot;dn&quot; name=&quot;divn&quot; title=&quot;dt&quot; title=&quot;divt&quot;&gt;123&lt;/div&gt;</pre>
+      <ul>
+        <li>分别使用 document.getElementById(&quot;d&quot;) 及 document.getElementById(&quot;div&quot;) 检测，则仅 document.getElementById(&quot;d&quot;) 返回了该元素的 DOM 对象，而d ocument.getElementById(&quot;div&quot;) 返回undefined；</li>
+        <li>同样的对于 name 属性，使用 document.getElementById(&quot;d&quot;).getAttribute(&quot;name&quot;) 返回的也是前者的属性值；</li>
+        <li>title 属性则更明显了，当我们将鼠标移至 DIV 上时，弹出的 &quot;dt&quot; 提示框已经告诉我们前者定义的属性值有效。</li>
+      </ul>
+      <p>以上代码在所有浏览器中表现均一致。</p>
+      <p>再看一看对于重复定义的class属性：</p>
+<pre>&lt;style&gt;
+    .dc {font-size:24px;}
+    .divc {text-decoration:underline;}
+&lt;/style&gt;
+
+&lt;div class=&quot;dc&quot; class=&quot;divc&quot;&gt;123&lt;/div&gt;</pre>
+      <p>各浏览器的处理结果相同，DIV 中的文字均变为了24px，且均没有出现下划线。与上一节的结论相同，对于 &quot;class&quot; 属性，仍然是前面先定义的属性值有效。</p>
+      <p>下面测试 &quot;style&quot; 属性：</p>
+<pre>&lt;div style=&quot;background:#999;&quot; style=&quot;background:red; color:#fff; border:1px solid black;&quot;&gt;123&lt;/div&gt;</pre>
+      <p>DIV 元素内含有两个重复的 &quot;style&quot; 属性，第一个中写入 CSS 展现灰色背景黑色文字，第二个则是红色背景白色文字。</p>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/HY8002/screenshot1.gif" alt="screen shot 1" /></td>
+          <td><img src="../../tests/HY8002/screenshot2.gif" alt="screen shot 2" /></td>
+        </tr>
+      </table>
+      <p>可以很清楚的看到在 <em>IE6 IE7 IE8(Q)</em> 中，浏览器会将重复的 &quot;style&quot; 属性合并，而对于 &quot;style&quot; 属性中重复的 CSS 样式属性，则采用前面的 &quot;style&quot; 属性定义。</p>
+      <p><em>IE8(S) Firefox Chrome Safari Opera</em> 中，则与前面的结论一致，只有第一个 &quot;style&quot; 属性中的 CSS 代码有效。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>不要依赖 IE 的容错机制，避免重复定义 HTML 元素属性。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 5.0.342.2 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.50
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HY8002/duplicate_style_definitions.html">duplicate_style_definitions.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-06-21</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>属性 HTML attribute style CSS 重复定义</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

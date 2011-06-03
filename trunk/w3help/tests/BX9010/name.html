@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+	function $(id) { return document.getElementById(id); }
+	window.onload = function () {
+		var tags = ['IFRAME', 'SCRIPT', 'STYLE', 'A', 'ABBR', 'ACRONYM', 'ADDRESS', 'AREA', 'B', 'BDO', 'BIG', 'BLOCKQUOTE', 'BR', 'BUTTON', 'CAPTION', 'CENTER', 'CITE', 'CODE', 'COL', 'COLGROUP', 'DD', 'DEL', 'DIR', 'DIV', 'DFN', 'DL', 'DT', 'EM', 'FIELDSET', 'FONT', 'FORM', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'HR', 'I', 'IMG', 'INPUT', 'INS', 'ISINDEX', 'KBD', 'LABEL', 'LEGEND', 'LI', 'LINK', 'MAP', 'MENU', 'META', 'OBJECT', 'OL', 'OPTGROUP', 'OPTION', 'EMBED', 'P', 'PARAM', 'PRE', 'Q', 'S', 'SAMP', 'SCRIPT', 'SELECT', 'SMALL', 'SPAN', 'STRIKE', 'STRONG', 'STYLE', 'SUB', 'SUP', 'TABLE', 'TBODY', 'TD', 'TEXTAREA', 'TFOOT', 'TH', 'THEAD', 'TITLE', 'TR', 'TT', 'U', 'UL', 'VAR', 'XMP'] ;
+		var n_res1 = [], n_res2 = [], b, o, o2, c;
+		for (var i = 0, j = tags.length; i < j; i++) {
+			b = tags[i];
+			o = (document.all)
+				? document.createElement('<' + b + ' name="n_' + i + '">')
+				: document.createElement(b);
+			o.name = "n_" + i;
+			o2 = o.cloneNode(false);
+			document.body.appendChild(o);
+			document.body.appendChild(o2);
+			c = function () { try { return eval("n_" + i); } catch(e) { return false } }();
+			(c)	? n_res1.push(b + "[" + c + ":" + eval("n_" + i).length + "]") : n_res2.push(b);
+			document.body.removeChild(o);
+			document.body.removeChild(o2);
+		}
+		$("mode").innerHTML = (document.compatMode.toLowerCase().indexOf("css1") < 0) ? "Quirks Mode" : "Standards Mode";
+		$("name_ok").innerHTML = n_res1.join("<br>");
+		$("name_fail").innerHTML = n_res2.join(", ");
+	}
+</script>
+</head>
+<body style="font:16px/1.5 Arial;">
+	<div>
+		<h3 id="mode"></h3>
+		<h1>by name, OK</h1>
+		<div id="name_ok"></div>
+		<h1>by name, Fail</h1>
+		<div id="name_fail"></div>
+	</div>
+</body>
+</html>

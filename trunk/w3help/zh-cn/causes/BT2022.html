@@ -1,0 +1,102 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BT2022: 只有 IE 支持 OBJECT 元素的 onerror 事件</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>onerror 事件不是 W3C 规范中的标准事件，且只有 IE 支持 OBJECT 元素的 onerror 事件。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>若在 OBJECT 元素上使用 onerror 事件，则该事件只在 IE 中可能被触发。<br />
+      如使用了 ActiveX，在其 OBJECT 元素上使用了 onerror 事件以便在 ActiveX 插件无法正常运行时显示错误提示信息，而由于非 IE 浏览器不支持此事件且也不支持 ActiveX 技术，则此时在这些浏览器中也无法显示出错误提示信息。如：</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>W3C <a href="http://www.w3.org/TR/html401/interact/scripts.html#h-18.2.3">HTML4.01 规范第 18.2.3 节</a> 介绍了 HTML 中的内在事件（Intrinsic events），其中并没有 onerror 事件。</p>
+      <p>onerror 事件为 IE 专有，可以作用于 INPUT、IMG、OBJECT、SCRIPT、STYLE 等元素，这些元素对象加载错误时将触发此事件。<br />更多参见 MSDN：<a href="http://msdn.microsoft.com/en-us/library/cc197053(VS.85).aspx">onerror Event</a>。</p>
+      <p>分析以下代码：</p>
+      <pre>&lt;object classid=&quot;1&quot; <span class="hl_1">onerror=&quot;alert('err')&quot;</span>&gt;&lt;/object&gt;</pre>
+      <p>上面代码中 OBJECT 元素的 classid 属性设置了一个错误的 clsid 值，则仅在IE中 onerror 事件被触发，弹出了提示框，其他浏览器均没有任何反应。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>避免使用非标准的 onerror 事件。对于 OBJECT 元素可以通过对客户端浏览器类型进行判断，来达到有好地提示错误的效果。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td> IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.3<br />
+              Chrome 5.0.375.17 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.51
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BT2022/object_onerror.html">object_onerror.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-16</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>OBJECT onerror event 错误 事件</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

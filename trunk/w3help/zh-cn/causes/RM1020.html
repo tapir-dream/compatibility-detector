@@ -1,0 +1,188 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RM1020: 依据行内元素作为包含块的绝对定位子元素的位置在各浏览器中有差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>在 W3C CSS 2.1 规范中定义包含块的定义4中，有如下描述：如果元素是绝对定位元素( position:absolute )，包含块是最近的祖先元素(祖先元素的定位方式是 absolute 、 refaltive 或 fixed )，如果祖先元素是行内级元素，包含块依靠祖先的 'dircetion' 特性，如果 direction:ltr ，则包含块的 left 和 top 是祖先元素生成的第一个框的 left 和 top ，包含块的 bottom 和 right 是祖先元素生成的最后一个框的 bottom 和 right 。也就说是不管祖先元素的边界形状如何，计算后的包含块绝对是一个矩形，并且这个矩形的上<strong>下左右边界值都有可能是负值</strong>。</p>
+      <P>关于包含块的详细描述，参见 <a href="http://www.w3.org/TR/CSS21/visudet.html#containing-block-details">css 2.1 10.1 包含块定义</a> 。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>包含块是行内元素，行内元素的绝对定位子元素位置，在各浏览器有差异。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>包含块是行内元素，行内元素的绝对定位子元素依据行内元素使用 left top right bottom 定位时，各浏览器对包含块的位置计算不同，导致页面布局出现差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+            <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <h3>1.当行内元素包含块的宽度是负值</h3>
+      <p>包含块是行内元素，且包含块的宽度是负值(行内元素的第一个框的起始位置位于最后一个框结束位置的右侧，这时包含块为负值)。</p>
+      <p>分析以下代码：</p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /&gt;
+&lt;/head&gt;
+&lt;style&gt;
+&lt;/style&gt;
+&lt;body&gt;
+&lt;div id="C" style="width:200px;background:silver;"&gt;
+kkkkkkkkkkkk
+  &lt;span id="A" style="position:relative;background:gold;font-family:consolas;font-size:30px;"&gt;
+   口口口口
+    &lt;div style="top:0;left:0;position:absolute; background: red; font-size:12px;"&gt;tl&lt;/div&gt;
+    &lt;div style="top:0;right:0;position:absolute; background: blue; font-size:12px;"&gt;tr&lt;/div&gt;
+    &lt;div style="bottom:0;left:0;position:absolute; background: red; font-size:12px;"&gt;bl&lt;/div&gt;
+    &lt;div style="bottom:0;right:0;position:absolute; background: blue; font-size:12px;"&gt;br&lt;/div&gt;
+  &lt;/span&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+      <p>上面代码中设置 DIV 宽度、字母和汉字是为了营造行内元素包含块 ( A ) <strong>宽度是负值</strong>的情况，这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7(Q) IE8(Q)</th>
+          <th>IE7(S)</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RM1020/IE6IE7IE801.png" alt="IE6(Q)(S) IE7(Q) IE8(Q)" /></td>
+          <td><img src="../../tests/RM1020/IE7.png" alt="IE7(S)" /></td>
+        </tr>
+        <tr>
+          <th>IE8(S) Chrome Safari Opera</th>
+          <th>Firefox</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RM1020/IE8ChromeSafariOpera.png" alt="IE8(S) Chrome Safari Opera" /></td>
+          <td><img src="../../tests/RM1020/Firefox01.png" alt="Firefox" /></td>
+        </tr>
+      </table>
+      <p>可见，根据上左、上右、下左、下右四个方向的测试情况可以推测：</p>
+      <ul>
+          <li>在 <em>IE6 IE7(Q) IE8(Q)</em> 中，行内元素的定位子元素的 top left ，是根据行内元素生成的第一个框的 top left 定位， right bottom 依据行内元素的定位没有根据规范中描述定位。</li>
+          <li>在 <em>IE7(S)</em> 中，行内元素的定位子元素的 top left ，是根据行内元素生成的第一个框的 top left 定位， right bottom 是根据行内元素生成的最后一个框的 right bottom 定位，根据测量发现包含块的宽度是负值，且该负值等于行内元素生成的第一个框的起始位置开始减去行内元素生成的最后一个框的结束位置，符合 W3C 规范。</li>
+          <li>在 <em>IE8(S) Chrome Safari Opera </em> 中，行内元素的定位子元素的 top left ，是根据行内元素生成的第一个框的 top left 定位，行内元素的定位子元素的 right bottom 在 top left 的左边，由此可推测包含块的宽度是 0 。</li>
+          <li>在 <em>Firefox </em> 中，行内元素四个方向的定位子元素是根据行内元素生成的第一个框定位。</li>
+      </ul>
+      <h3>2.当行内元素包含块的宽度是正值</h3>
+      <p>行内元素包含块没有折行，这时行内元素包含块的宽度是正值。</p>
+      <p>分析以下代码：</p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /&gt;
+&lt;/head&gt;
+&lt;style&gt;
+&lt;/style&gt;
+&lt;body&gt;
+&lt;div style="width:150px;background:silver;"&gt;
+kkkkkk
+  &lt;span style="position:relative;background:gold;font-family:consolas;font-size:30px;"&gt;
+   口口
+    &lt;div style="top:0;left:0;position:absolute; background: red; font-size:12px;"&gt;tl&lt;/div&gt;
+    &lt;div style="top:0;right:0;position:absolute; background: blue; font-size:12px;"&gt;tr&lt;/div&gt;
+    &lt;div style="bottom:0;left:0;position:absolute; background: red; font-size:12px;"&gt;bl&lt;/div&gt;
+    &lt;div style="bottom:0;right:0;position:absolute; background: blue; font-size:12px;"&gt;br&lt;/div&gt;
+  &lt;/span&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+      <p>这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6(Q)(S) IE7(Q) IE8(Q)</th>
+          <th>IE7(S) IE8(S) Chrome Safari Opera</th>
+          <th>Firefox</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RM1020/IE6IE7IE802.png" alt="IE6(Q)(S) IE7(Q) IE8(Q)" /></td>
+          <td><img src="../../tests/RM1020/IE7IE8ChromeSafariOpera.png" alt="IE7(S) IE8(S) Chrome Safari Opera" /></td>
+          <td><img src="../../tests/RM1020/Firefox02.png" alt="Firefox" /></td>
+        </tr>
+      </table>
+      <p>可见，由于行内元素的包含块是正值，没有折行，所以行内元素生成的第一个框和最后一个框重合，此时仅<em> IE7(S) IE8(S) Chrome Safari Opera</em> 是符合规范。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>各浏览器对于行内元素的包含块范围计算有误，因此建议，应尽可能避免将行内元素边界作为计算包含块边界的情况出现。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.9<br />
+              Chrome 7.0.517.5 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62<br />
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+            <a href="../../tests/RM1020/inlinecontainer_neg.html">inlinecontainer_neg.html</a><br/ >
+            <a href="../../tests/RM1020/inlinecontainer_pos.html">inlinecontainer_pos.html</a>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-15</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>position absolute containing block inline   edges top bottom left right 包含块 边界 行内元素 负值</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

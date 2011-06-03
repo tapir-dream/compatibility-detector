@@ -1,0 +1,412 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RM8001: 各浏览器对 'display' 特性值的支持程度不同</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据现行 CSS 2.1 规范描述，'display' 特性用来决定元素所生成控制框的类型， 通常设置值为 'block'、'inline' 或 'none'，全部值包括：</p>
+      <p> inline | block | list-item | run-in | inline-block | table | inline-table | table-row-group | table-header-group | table-footer-group | table-row | table-column-group | table-column | table-cell | table-caption | none | inherit </p>
+
+      <p>关于 'display' 特性的详细信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/visuren.html#display-prop">9.2.4 The 'display' property</a> 中的内容。</p>
+      <p>但是，老旧的 <a href="http://www.w3.org/TR/CSS1/#display">CSS 1</a> 规范中，'display' 特性值仅包括：  block | inline | list-item | none  </p>
+      <p>由此可见，两个时期的规范对 'display' 特性的值支持程度存在很大差异。</p>
+      <p>当 CSS 特性以及特性值出现书写错误，导致非法值或未知属性产生，客户端浏览器将必须忽略带有未知属性或非法值的样式声明。</p>
+      <p>具体信息可参考 CSS 2.1 规范： <a href="http://www.w3.org/TR/CSS21/syndata.html#parsing-errors">4.2 Rules for handling parsing errors</a></p>
+      <p>这种情况在遵循 CSS 1 规范的浏览器中就可能会出现，那些在 CSS 1 中没有定义的 'display' 设定值会被当做非法值对待，因而遭到浏览器忽略。</p>
+      <h2 id="description">问题描述</h2>
+      <p> 因 IE6 IE7 IE8(Q) 中遵循老旧的 CSS 1 规范，当 ‘display’ 特性设定值为非 'inline'、'block'、'none'、'inline-block'、'list-item' 时，'display' 特性设置将遭到忽略。</p>
+      <p>Opera 不支持非 CAPTION 元素的 'display:table-caption' 特性值设置，Firefox 不支持 'display:run-in' 设置，这些特性值设置也均将遭到忽略。</p>
+      <h2 id="influence">造成的影响</h2>
+      <p>设置不被支持的 'display' 值，不仅不会达到预期效果，严重情况下的还会大面积影响布局。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>'display' 特性的值，伴随着 CSS 规范诞生以来，一直在不断的补充。规范的修订与各个厂商的浏览器开发时段并行，这就导致了不同时段，不同厂商的不同版本浏览器对此特性值支持程度存在差异。我们构造以下代码来检测现阶段 'display' 特性值的支持情况：</p>
+<pre style="height:300px;overflow-y:auto">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8"/&gt;
+&lt;style&gt;
+div { font:'Tahoma,14px/2';border:5px solid gray;margin:10px;}
+&lt;/style&gt;
+&lt;script&gt;
+window.onload=function(){
+  function getDisplayValues(){
+    return {
+      'inline':'inline',
+      'block':'block',
+      'table':'table',
+      'inline-table':'inline-table',
+      'table-row-group':'table-row-group',
+      'table-header-group':'table-header-group',
+      'table-footer-group':'table-footer-group',
+      'table-row':'table-row',
+      'table-column-group':'table-column-group',
+      'table-column':'table-column',
+      'table-cell':'table-cell',
+      'table-caption':'table-caption',
+      'none':'none',
+      'list-item':'list-item',
+      'run-in':'run-in',
+      'inline-block':'inline-block',
+      'inherit':'inherit'
+    }
+  }
+  function getHTMLElement(tagName){
+    return document.createElement(tagName);
+  }
+  function patchComputedStyle(){
+    if(!window.getComputedStyle){
+      window.getComputedStyle=function($target){
+        return $target.currentStyle;
+      };
+    }
+  }
+  function setDisplayStyleValue(element,value){
+    try{
+      element.style['display'] = value;
+    }catch(e){
+      return ;
+    }
+  }
+  function setElementText(element,setValue,computedValue){
+    element.appendChild(
+      document.createTextNode(
+        'Setting Value is: $setValue , Computed display style value is : $computedValue'
+        .replace(/\$setValue/,setValue)
+        .replace(/\$computedValue/,computedValue)
+    ));
+    if (detectorInherit(setValue)){
+      setValue = getComputedStyle(element.parentNode,null).display;
+    }
+
+    element.style['background'] = (setValue === computedValue) ? '' : 'red';
+
+  }
+  function appendElement(parentElement,childElement){
+    parentElement.appendChild(childElement);
+  }
+
+  function buildElement(key,value){
+    var divElement = getHTMLElement('div');
+    setDisplayStyleValue(divElement,value);
+    appendElement(document.body,divElement);
+    setElementText(divElement,value, getComputedStyle(divElement,null).display);
+    divElement = null;
+  }
+  function buildElementOfInherit(key,value){
+    var parentDivElement = getHTMLElement('div'),
+    childDivElement = getHTMLElement('div');
+    setDisplayStyleValue(parentDivElement,'inline');
+    setDisplayStyleValue(childDivElement,value);
+    appendElement(parentDivElement,childDivElement);
+    appendElement(document.body,parentDivElement);
+    setElementText(childDivElement,value, getComputedStyle(childDivElement,null).display);
+    parentDivElement = null;
+    childDivElement = null;
+  }
+
+  function detectorInherit(value){
+    return 'inherit' === value;
+  }
+  function buildTest(){
+    var displayValues = getDisplayValues();
+    for (var key in displayValues){
+      if (detectorInherit(displayValues[key]))
+        buildElementOfInherit(key,displayValues[key]);
+      else
+        buildElement(key,displayValues[key]);
+    }
+  }
+  patchComputedStyle();
+  buildTest();
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+
+      <p>代码中依次创建 DIV 标记，并赋予各个 'display' 值，通过得到计算后 'display' 样式值与设置值比较是否一致的方式，来确定各个浏览器是否支持某个 'display' 特性值。<br />
+      </p>
+      <p>各浏览器支持情况如下：</p>
+      <table class="compare">
+              <tr>
+                <th>display</th>
+                <th>IE6</th>
+                <th>IE7</th>
+                <th>IE8(Q)</th>
+                <th>IE8(S)</th>
+                <th>Firefox</th>
+                <th>Chrome</th>
+                <th>Safari</th>
+                <th>Opera</th>
+              </tr>
+              <tr>
+                <th>inline</th>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+              </tr>
+              <tr>
+                <th>block</th>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+              </tr>
+              <tr>
+                <th>table</th>
+                <td><span class="hl_1">N</span><sup>1</sup></td>
+                <td><span class="hl_1">N</span><sup>1</sup></td>
+                <td><span class="hl_1">N</span><sup>1</sup></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+              </tr>
+              <tr>
+                <th>inline-table</th>
+                <td><span class="hl_1">N</span><sup>1</sup></td>
+                <td><span class="hl_1">N</span><sup>1</sup></td>
+                <td><span class="hl_1">N</span><sup>1</sup></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+              </tr>
+              <tr>
+                <th>table-caption</th>
+                <td><span class="hl_1">N</span><sup>1</sup></td>
+                <td><span class="hl_1">N</span><sup>1</sup></td>
+                <td><span class="hl_1">N</span><sup>1</sup></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_3">N</span><sup>6</sup></td>
+              </tr>
+              <tr>
+                <th>table-cell</th>
+                <td><span class="hl_1">N</span><sup>1</sup></td>
+                <td><span class="hl_1">N</span><sup>1</sup></td>
+                <td><span class="hl_1">N</span><sup>1</sup></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+              </tr>
+              <tr>
+                <th>table-row-group</th>
+                <td><span class="hl_1">N</span><sup>1</sup></td>
+                <td><span class="hl_1">N</span><sup>1</sup></td>
+                <td><span class="hl_1">N</span><sup>1</sup></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+              </tr>
+              <tr>
+                <th>table-row</th>
+                <td><span class="hl_1">N</span><sup>1</sup></td>
+                <td><span class="hl_1">N</span><sup>1</sup></td>
+                <td><span class="hl_1">N</span><sup>1</sup></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+              </tr>
+              <tr>
+                <th>table-header-group</th>
+                <td><span class="hl_3">N</span><sup>2</sup></td>
+                <td><span class="hl_3">N</span><sup>2</sup></td>
+                <td><span class="hl_3">N</span><sup>2</sup></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+              </tr>
+              <tr>
+                <th>table-footer-group</th>
+                <td><span class="hl_3">N</span><sup>2</sup></td>
+                <td><span class="hl_3">N</span><sup>2</sup></td>
+                <td><span class="hl_3">N</span><sup>2</sup></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+              </tr>
+              <tr>
+                <th>list-item</th>
+                <td><span class="hl_2">Y</span><sup>3</sup></td>
+                <td><span class="hl_2">Y</span><sup>3</sup></td>
+                <td><span class="hl_2">Y</span><sup>3</sup></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+              </tr>
+              <tr>
+                <th>run-in</th>
+                <td><span class="hl_1">N</span></td>
+                <td><span class="hl_1">N</span></td>
+                <td><span class="hl_1">N</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_1">N</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+              </tr>
+              <tr>
+                <th>inline-block</th>
+                <td><span class="hl_3">N</span><sup>4</sup></td>
+                <td><span class="hl_3">N</span><sup>4</sup></td>
+                <td><span class="hl_3">N</span><sup>4</sup></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+              </tr>
+              <tr>
+                <th>inherit</th>
+                <td><span class="hl_1">N</span></td>
+                <td><span class="hl_1">N</span></td>
+                <td><span class="hl_1">N</span></td>
+                <td><span class="hl_3">Y</span><sup>5</sup></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+              </tr>
+              <tr>
+                <th>none</th>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+                <td><span class="hl_2">Y</span></td>
+              </tr>
+            </table>
+      <p class="comment">【注】：设置 'display:none' 特性值的元素在所有浏览器中均不可视，说明均没有被渲染，样式设置有效。</p>
+      <p class="comment">【注】：表中蓝色背景文字表示浏览器对某特性设置支持，但存在实际表现不同于现行 CSS 2.1 规范描述，或存在浏览器厂商文档，已明表示与规范内同名属性作用不同的情况。</p>
+      <p>综合上表可知，'display' 设置值 'inline'、'block'、'list-item'、'none' 在所有浏览器中均被支持（恰好是 CSS 1 规范定义的全部 'display' 特性可选值）。</p>
+      <p>对于其他特性值，仅用以上测试代码无法将细节差异体现，本文中针对各种差异追加如下说明：</p>
+      <ul>
+              <li>【差异】1：IE6 IE7 IE8(Q) 中，尽管 TABLE 以及隶属于表格的相关元素布局效果与其他浏览器无明显差异；但是他们的默认 'display' 特性计算值均为 'block' ，为其他标记设置表格相关的 'display' 特性值：'table', 'inline-table', 'table-row-group', 'table-column', 'table-column-group','table-row', 'table-cell', 'table-caption' 均无效。</li>
+        <li><span class="hl_3">【差异】2</span>： IE6 IE7 IE8(Q) 中，可以为元素设置 'table-header-group'、'table-footer-group' 值不会产生异常，并且样式计算值也为 'table-header-group'、'table-footer-group'，说明设置有效。但是，需要注意这些浏览器内 'table-header-group' 与 'table-footer-group' 样式默认作用的元素 THEARD 和 TFOOT ，他们默认 'display' 特性计算值却均为 'block'。<br />
+          另外，由于 HTML 4.01 规范内对 TABLE 标记的嵌套规则约束（<code>&lt;!ELEMENT TABLE - -
+          (CAPTION?, (COL*|COLGROUP*), THEAD?, TFOOT?, TBODY+)</code>&gt;），加上 TABLE 显示有关的 'table', 'inline-table', 'table-row-group', 'table-column', 'table-column-group','table-row', 'table-cell', 'table-caption' 样式特性不被支持。<br />
+          因此，如在 TABLE 标签内使用违反嵌套规则的标记，均会触发浏览器修复机制将错误嵌套修正，这会导致 'table-header-group'、'table-footer-group' 特性值设置无法被完全验证是有效的。</li>
+        <li>【差异】3： IE6 IE7 IE8(Q) 中，LI 元素的默认 'display' 特性值为 'block' 不是 'list-item'，但他们的显示效果一致。IE8(S) 中已经解决这个问题，LI 元素的默认 'display' 特性值恢复为  'list-item'。</li>
+        <li><span class="hl_3">【差异】4</span>：IE6 IE7 IE8(Q) 中，'display:inline-block' 特性值含义与 CSS 2.1 规范描述不同。对照 <a href="http://msdn.microsoft.com/en-us/library/ms530751(VS.85).aspx">MSDN</a> 描述以及 <a href="http://www.w3.org/TR/CSS1/#display">CSS 1</a>、<a href="http://www.w3.org/TR/2008/REC-CSS2-20080411/visuren.html#propdef-display">CSS 2</a> 历史规范，'display:inline-block' 最初由 IE 5.5 开始支持，直至 CSS 2.1 规范中才加入了此特性值。因此在这些古老版本 IE 浏览器中，'display:inline-block' 特性值设置不能将块元素转变为行内块，他的作用为触发 IE 的 <a href="http://msdn.microsoft.com/en-us/library/bb250481(VS.85).aspx">hasLayout</a> 特性，使元素拥有布局特性。<br />
+          如果将他用在行内元素上，可以使行内元素拥有布局，以便使宽高等无法作用在行内元素上的样式特性生效。对于块元素，他仅触发了布局特性，还要将块元素的 'display' 特性值设定为 'inline' 才可以获得类似规范描述的 'inline-block' 布局效果。</li>
+          <li>【差异】5：IE8(S) 中，不支持用户使用 'display:inherit' 特性值继承 inline 元素的默认 'display' 值。<br />
+            详细情况可以参考本站文章：<a href="RA8001">RA8001:IE6 IE7 IE8(Q) 不支持 CSS 特性的 'inherit' 值及 IE8(S) Opera 对此特性值的支持缺陷</a></li>
+          <li>【差异】6：Opera 中，'display:table-caption' 特性值不能被设置，但 CAPTION 元素的默认 'display' 值为 'display:table-caption'。</li>
+      </ul>
+      <p class="comment">【注】：由于各版本 IE 浏览器开发时间跨越了 CSS 1.0 规范标准现行与 CSS 2.1 规范标准制定时段，使得这些浏览器支持 CSS 1 规范至 CSS 2.1 规范内的全部或部分内容，从而导致了特性值支持的上的不同差异。</p>
+      <h2 id="solutions">解决方案</h2>
+          <p>
+      尽量仅使用所有浏览器都支持的 'display' 特性值：'inline'、'block'、'list-item'、'none'。在 IE6 IE7 IE8(Q) 中实现块元素的 'display:inline-block' 特性值支持，需要先将块元素设置为行内元素，并设置可以在 IE6 IE7 IE8(Q) 内触发 haslayout 特性的专有特性 'zoom:1'。行内元素实现 'display:inline-block' 特性值支持只需直接设置此特性值或同样使用 'zoom:1' 即可。
+      </p>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li>...</li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="RA8001">RA8001: IE6 IE7 IE8(Q) 不支持 CSS 特性的 'inherit' 值及 IE8(S) Opera 对此特性值的支持缺陷</a></li>
+          <li><a href="RM1019">RM1019: IE6 IE7 IE8(Q) Firefox 不支持 'display:run-in'</a></li>
+      </ul>
+
+    <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br/>
+              IE7<br/>
+              IE8<br/>
+              Firefox 3.6.10<br/>
+              Chrome 8.0.552.5 dev<br/>
+              Safari 5.0.2<br />
+              Opera 10.63
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RM8001/display.html">display.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-21</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>display inline  block  list-item  run-in  inline-block  table  inline-table  table-row-group  table-header-group  table-footer-group  table-row  table-column-group  table-column  table-cell  table-caption  none  inherit </p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

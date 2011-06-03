@@ -1,0 +1,152 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BT9027: 只有 IE 支持 DHTML Behaviors 及相关方法</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>DHTML Behaviors 是 IE 特有的，其他浏览器并不支持。如果在页面中使用了这一特性，在非 IE 浏览器中将无法得到预期的结果。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>部分功能无法实现，如非 IE 浏览器不能通过 JavaScript 代码设置浏览器的主页。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>DHTML Behaviors 是 IE 5.5 中引入的新功能之一。DHTML Behaviors 是指封装了特定的功能或行为的组件，当它应用到一个标准的 HTML 元素时，可以增强该元素的默认行为。</p>
+      <p>
+      WEB 开发者可以使用 HTC 来引入 DHTML Behaviors，如通过 CSS 以 '<span class="hl_1">behavior:url(xxx.htc)</span>' 的方式向 HTML 元素添加行为。<br />
+      或者使用 <span class="hl_1">Element.addBehavior("xxx.htc")</span> 及 <span class="hl_1">Element.removeBehavior("xxx.htc")</span> 动态的为一个 HTML 元素添加或删除行为。
+      </p>
+      <p>在 Behaviors 中有些行为被实现为 IE 浏览器的一部分，这部分的行为我们称之为<strong>默认行为</strong>。</p>
+      <p>homePage 行为就是这些<strong>默认行为</strong>之一，包含了关于用户主页的相关信息。它对应用的对象提供了如下方法：</p>
+      <table class="compare">
+        <tr>
+          <th>方法</th>
+          <th>描述</th>
+        </tr>
+        <tr>
+          <td>isHomePage</td>
+          <td>判断给定的URL地址，是否是当前客户端主页</td>
+        </tr>
+        <tr>
+          <td>navigateHomePage</td>
+          <td>导航到当前浏览器的主页</td>
+        </tr>
+        <tr>
+          <td>setHomePage</td>
+          <td>设置指定的URL为主页</td>
+        </tr>
+      </table>
+      <p>我们可以通过两种方式，来应用 homePage 行为到一个元素，如下：</p>
+      <p>方式一：通过样式</p>
+<pre>&lt;ELEMENT style="behavior:url('#default#homePage')"&gt;</pre>
+      <p>方式二：通过脚本<p/>
+<pre>object.style.behavior = "url('#default#homePage')"</pre>
+      <p>或</p>
+<pre>object.addBehavior("#default#homePage")</pre>
+      <p>下面请看一个使用 homePage 行为，在 IE 下实现设为首页的案例。</p>
+<pre>
+&lt;a href="#" style="behavior:url(#default#homepage);" onclick="setHP(this)"&gt;设为首页&lt;/a&gt;
+
+&lt;script type="text/javascript"&gt;
+function setHP(o){
+  try{    <span class="hl_3">// For IE.</span>
+    o.setHomePage("http://xxx.xxx.xxx/");
+  }
+  catch(e){  <span class="hl_3">// For others.</span>
+    alert("您的浏览器不支持该操作，请手动设置！");
+  }
+}
+&lt;/script&gt;
+</pre>
+      <p>该代码只在 IE 下可以弹出设置首页对话框，在其他浏览器中将显示 alert 中的信息。</p>
+      <p>
+      关于 Behaviors 的详细信息，请参考 MSDN <a href="http://msdn.microsoft.com/en-us/library/ms531079%28v=VS.85%29.aspx">Introduction to DHTML Behaviors</a> 及 <a href="http://msdn.microsoft.com/en-us/library/ms532147(v=VS.85).aspx">Using DHTML Behaviors</a> 中的内容。<br/>
+      关于 HTC 的详细信息，请参考 MSDN <a href="http://msdn.microsoft.com/en-us/library/ms532146(v=VS.85).aspx">Using HTML Components to Implement DHTML Behaviors in Script</a> 中的内容。<br/>
+      关于默认行为的更多信息，请参考 MSDN <a href="http://msdn.microsoft.com/en-us/library/ms531081%28v=VS.85%29.aspx">Default Behaviors Reference</a> 中的内容。<br/>
+      </p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>1. 避免使用 IE 的特性。</p>
+      <p>2. 必须使用时，要处理好非 IE 不支持这些特性时的情况，给出友好的提示信息。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.8<br />
+              Chrome 6.0.472.14 dev<br />
+              Safari 5.0.1<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>无</td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-09</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>DHTML Behaviors HTC homePage isHomePage navigateHomePage setHomePage</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

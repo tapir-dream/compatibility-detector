@@ -1,0 +1,181 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RD8008: IE6 IE7(Q) IE8(Q) 绝对定位元素无法根据其四个方向的偏移量自动计算其尺寸</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 W3C CSS2.1 规范中规定了非替换绝对定位元素的宽度计算，其中提到：</p>
+      <pre>The constraint that determines the used values for these elements is:
+<pre>'left' + 'margin-left' + 'border-left-width' + 'padding-left' + 'width' + 'padding-right' + 'border-right-width' + 'margin-right' + 'right' = width of containing block</pre>
+Otherwise, set 'auto' values for 'margin-left' and 'margin-right' to 0, and pick the one of the following six rules that applies.
+...
+<strong>5. 'width' is 'auto', 'left' and 'right' are not 'auto', then solve for 'width'</strong></pre>
+      <p>绝对定位元素的宽度计算遵从上面引用框中的等式。但除去下列情况之外：</p>
+      <ul>
+        <li>'left'、'width'、'right' 三个值均是 &quot;auto&quot; </li>
+        <li>'left'、'width'、'right' 三个值均不是 &quot;auto&quot; </li>
+      </ul>
+      <p>第五条规则指出，<strong>'width' 为 &quot;auto&quot; ，'left'、'right' 不是 &quot;auto&quot; ，则计算 'width' 的值。</strong></p>
+      <p>对于非替换绝对定位的高度计算，也有类似的限制：</p>
+      <pre>For absolutely positioned elements, the used values of the vertical dimensions must satisfy this constraint:
+<pre>'top' + 'margin-top' + 'border-top-width' + 'padding-top' + 'height' + 'padding-bottom' + 'border-bottom-width' + 'margin-bottom' + 'bottom' = height of containing block</pre>
+Otherwise, pick the one of the following six rules that applies.
+...
+<strong>5. 'height' is 'auto', 'top' and 'bottom' are not 'auto', then 'auto' values for 'margin-top' and 'margin-bottom' are set to 0 and solve for 'height'</strong></pre>
+      <p>即 <strong>'height' 为 &quot;auto&quot; ，'top'、'bottom' 不是 &quot;auto&quot; ，则 'margin-top'、'margin-bottom' 为 0，计算 'height' 的值。</strong></p>
+      <p>关于 非替换绝对定位元素的宽度及高度计算 的更多信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/visudet.html#abs-non-replaced-width">10.3.7</a> 和 <a href="http://www.w3.org/TR/CSS21/visudet.html#abs-non-replaced-height">10.6.4</a>。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE6 及 IE7/8 的混杂模式下，非替换绝度定位元素当指定了 'left' 及 'right'，而 'width' 为默认值 &quot;auto&quot; 。此时浏览器无法正确地计算出 'width' 的值，对于高度的计算也是如此。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题可能导致绝对定位元素的宽度和高度在 IE6 IE7(Q) IE8(Q) 中与其他浏览器有很大的差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tbody>
+          <tr>
+            <td>IE6 IE7(Q) IE8(Q)</td>
+            <td>无法根据绝对定位元素四个方向的偏移量自动计算其尺寸</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>在 IE6 IE7(Q) IE8(Q) 中，若一个非替换绝对定位元素没有显式设定 'width' 和 'height' 特性，则其无法如规范所述根据其四个方向的偏移量自动计算其尺寸。</p>
+      <p>分析以下代码：</p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div style="background:gray; width:100px; height:100px; position:relative;"&gt;
+        &lt;div id="d" style="background:black; <span class="hl_1">position:absolute; left:10px; right:10px; top:10px; bottom:10px;</span> color:white;"&gt;test&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码中，一个 'position' 为 relative 的 100x100 的灰色背景 DIV 元素内包含一个黑色背景的 DIV 元素【d】，【d】为非替换绝对定位元素，其 'top'、'right'、'bottom'、'left' 均为 10px，且没有显式的设置 'width' 及 'height'。</p>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7(Q) IE8(Q)</th>
+          <th>IE7(S) IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RD8008/pos_IE6.gif" alt="IE6 IE7(Q) IE8(Q)" /></td>
+          <td><img src="../../tests/RD8008/pos_IE78.gif" alt="IE7(S) IE8(S) Firefox Chrome Safari Opera" /></td>
+        </tr>
+      </table>
+      <ul>
+        <li>在 <em>IE6 IE7(Q) IE8(Q)</em> 中，当指定了 'left' 及 'right'，而 'width' 为默认值 &quot;auto&quot; 。此时浏览器无法正确地计算出 'width' 的值，导致【d】的宽度为 shrink-to-fit 宽度。对于高度的计算也是如此；</li>
+        <li>在 <em>其他浏览器</em> 中，宽度和高度根据设定的 'top'、'right'、'bottom'、'left' 的值计算而来，符合 W3C 对非替换绝对定位元素的宽度和高度计算要求。</li>
+      </ul>
+
+
+      <h2 id="solutions">解决方案</h2>
+      <p>若能为非替换绝对定位元素设定固定的宽度及高度，则尽量不使用此方式自动计算绝对定位元素的 'width' 及 'height'；若无法避免使用此方式，则可以通过判断浏览器，仅在 IE6 中使用 CSS Expression 控制绝对定位元素的宽度及高度。</p>
+            <p>使用 CSS Expression 控制绝对定位元素的宽度及高度的参考代码如下：</p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  #d {
+    background-color: black;
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    top: 10px;
+    bottom: 10px;
+    color: white;
+    _width: expression(
+      parseInt(this.offsetParent.currentStyle.width)
+        - parseInt(this.currentStyle.left)
+        - parseInt(this.currentStyle.right)
+    );
+    _height: expression(
+      parseInt(this.offsetParent.currentStyle.height)
+        - parseInt(this.currentStyle.top)
+        - parseInt(this.currentStyle.bottom)
+    );
+  }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div style="background-color:gray;width:100px;height:100px;position:relative"&gt;
+        &lt;div id="d"&gt;test&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.2<br />
+              Chrome 5.0.360.4 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RD8008/pos_auto.html">pos_auto.html</a><br />
+            <a href="../../tests/RD8008/pos_auto_fix_IE6.html">pos_auto_fix_IE6.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-06</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>position absolute 绝对定位 left right top bottom width height</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,247 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SD9017: Firefox 不支持 DOM 对象的 outerHTML、innerText、outerText 属性</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>Firefox 不支持 DOM 对象的 outerHTML innerText outerText 属性。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>在 Firefox 中使用 outerHTML、innerText、outerText 属性会使脚本程序报错。</p>
+      
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Firefox</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <h3>outerHTML</h3>
+      <p>outerHTML 最初是由 IE 浏览器实现的私有属性，详细内容请参见 MSDN 说明：<a href="http://msdn.microsoft.com/en-us/library/ms534310(VS.85).aspx">outerHTML Property</a>。</p>
+      <p>W3C 的 HTML5 规范草案中也新加入了这个属性，它描述的是元素本身以及它的内容。当用一个字符串设置 DOM 元素的这个属性时，字符串会被当作 HTML 代码来渲染并替换这个 DOM 元素。详细内容请参见 HTML5 草案说明：<a href="http://www.w3.org/TR/html5/apis-in-html-documents.html#outerhtml">3.5.6 outerHTML</a>。</p>
+      <p>目前，主流浏览器中，只有 Firefox 不支持 outerHTML 属性。</p>
+      <pre>&lt;script type=&quot;text/javascript&quot;&gt;
+    window.onload = function() {
+        document.getElementById(&quot;one&quot;).outerHTML = &quot;&lt;div style='width:100px;height:100px; background-color:silver;'&gt;&lt;/div&gt;&quot;;
+    }
+&lt;/script&gt;
+
+&lt;p id=&quot;one&quot; style=&quot;background-color:gold;&quot;&gt;
+    TEXT
+&lt;/p&gt;</pre>
+            <p>测试用例中，页面加载的时候会执行对 <strong>one</strong> 的 outerHTML 属性的赋值。</p>
+            <p>根据 HTML5 规范草案和 MSDN 说明，<strong>one</strong> 元素会被 outerHTML 属性的值替代，表达式右边的字符串会被当作 HTML 代码渲染。因此，金色背景的 TEXT 文本会被一个银色的正方形所替代。</p>
+            <p>在各浏览器下的截图：</p>
+            <table class="compare">
+        <tr>
+          <th>Firefox</th>
+          <th>IE6 IE7 IE8 Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/SD9017/01.png" alt="运行效果截图"/></td>
+          <td><img src="../../tests/SD9017/02.png" alt="运行效果截图"/></td>
+        </tr>
+            </table>
+            <p>可见，只有 Firefox 下不支持 outerHTML 属性。</p>
+            <br />
+            <h3>innerText</h3>
+            <p>innerText 最初是由 IE4.0 浏览器实现的私有属性，它描述的是元素的内容。当用一个字符串设置 DOM 元素的这个属性时，字符串会被当作文本替换 DOM 元素的原有内容。</p>
+            <p>详细内容请参见 MSDN 说明：<a href="http://msdn.microsoft.com/en-us/library/ms533899(VS.85).aspx">innerText Property</a>。</p>
+            <p>现有 W3C 标准中的没有定义这个属性。</p>
+            <p>虽然不是标准属性，但是大多浏览器都对它提供了支持，目前主流浏览器中只有 Firefox 不支持该属性。</p>
+            <pre>&lt;script type=&quot;text/javascript&quot;&gt;
+    window.onload = function() {
+        var ps = document.getElementById(&quot;one&quot;);
+        ps.innerText = &quot;&lt;span&gt;hi&lt;/span&gt;&quot;;
+    }
+&lt;/script&gt;
+
+&lt;p id=&quot;one&quot; style=&quot;background:silver; width:300px;&quot;&gt;
+    this is
+    &lt;i style=&quot;width:100px; background-color:gold;&quot;&gt;another&lt;/i&gt;
+    text
+&lt;/p&gt;</pre>
+            <p>测试用例中，页面加载的时候会执行对 <strong>one</strong> 的 innerText 属性的赋值。<strong>one</strong> 元素的内容应该被 innerText 的文本替代。</p>
+            <p>在各浏览器下的截图：</p>
+            <table class="compare">
+        <tr>
+          <th>Firefox</th>
+          <th>IE6 IE7 IE8 Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/SD9017/03.png" alt="运行效果截图"/></td>
+          <td><img src="../../tests/SD9017/05.png" alt="运行效果截图"/></td>
+        </tr>
+      </table>
+            <p>可见，只有 Firefox 下不支持 innerText 属性。</p>
+            <br />
+            <h3>outerText</h3>
+            <p>outerText 最初是由 IE4.0 浏览器实现的私有属性，它描述的是元素的内容。当用一个字符串设置 DOM 元素的这个属性时，字符串会被当作文本替换 DOM 元素的原有内容。</p>
+            <p>详细内容请参见 MSDN 说明：<a href="http://msdn.microsoft.com/en-us/library/ms534311(VS.85).aspx">outerText Property</a>。</p>
+            <p>现有 W3C 标准中的没有定义这个属性。</p>
+            <p>虽然不是标准属性，但是大多浏览器都对它提供了支持，目前主流浏览器中只有 Firefox 不支持该属性。</p>
+            <pre>&lt;script type=&quot;text/javascript&quot;&gt;
+    window.onload = function() {
+        var ps = document.getElementById(&quot;one&quot;);
+        ps.outerText = &quot;&lt;span&gt;hi&lt;/span&gt;&quot;;
+    }
+&lt;/script&gt;
+
+&lt;p id=&quot;one&quot; style=&quot;background:silver; width:300px;&quot;&gt;
+    this is
+    &lt;i style=&quot;width:100px; background-color:gold;&quot;&gt;another&lt;/i&gt;
+    text
+&lt;/p&gt;</pre>
+      <p>测试用例中，页面加载的时候会执行对 <strong>one</strong> 的 outerText 属性的赋值。<strong>one</strong> 元素的内容及其本身应该被 outerText 的文本替代。</p>
+      <p>在各浏览器下的截图：</p>
+      <table class="compare">
+        <tr>
+          <th>Firefox</th>
+          <th>IE6 IE7 IE8 Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/SD9017/03.png" alt="运行效果截图"/></td>
+          <td><img src="../../tests/SD9017/04.png" alt="运行效果截图"/></td>
+        </tr>
+      </table>
+      <p>可见，只有 Firefox 下不支持 outerText 属性。</p>
+      
+      <h2 id="solutions">解决方案</h2>
+      <p>在 Firefox 中，可通过扩展 HTMLElement 的原型 (prototype) 来实现相关属性。</p>
+      <ol>
+        <li>扩展 Firefox 中 DOM 元素的 outerHTML 属性：<br />
+                <pre>if (typeof(HTMLElement) != "undefined") {
+   HTMLElement.prototype.__defineSetter__("outerHTML", function(s) {
+        var r = this.ownerDocument.createRange();
+        r.setStartBefore(this);
+        var df = r.createContextualFragment(s);
+        this.parentNode.replaceChild(df, this);
+        return s;
+    });
+   HTMLElement.prototype.__defineGetter__("outerHTML", function(){
+        var a = this.attributes, str = "&lt;" + this.tagName, i = 0;
+        for (; i &lt; a.length; i++)
+            if (a[i].specified)
+                str += " " + a[i].name + '="' + a[i].value + '"';
+        if (!this.canHaveChildren)
+            return str + " /&gt;";
+        return str + "&gt;" + this.innerHTML + "&lt;/" + this.tagName + "&gt;";
+    });
+
+    HTMLElement.prototype.__defineGetter__("canHaveChildren", function(){
+        return !/^(area|base|basefont|col|frame|hr|img|br|input|isindex|link|meta|param)$/.test(this.tagName.toLowerCase());
+    });
+}
+</pre>
+        </li>
+        <li>扩展 Firefox 中 DOM 元素的 innerText 属性：<br />
+          <pre>if (!!document.getBoxObjectFor || window.mozInnerScreenX != null) {
+    HTMLElement.prototype.__defineSetter__("innerText", function(sText) {
+        var parsedText = document.createTextNode(sText);
+        this.innerHTML = "";
+        this.appendChild(parsedText);
+        return parsedText;
+    });
+    HTMLElement.prototype.__defineGetter__("innerText", function() {
+        var r = this.ownerDocument.createRange();
+        r.selectNodeContents(this);
+        return r.toString();
+    });
+}</pre>
+        </li>
+        <li>扩展 Firefox 中 DOM 元素的 outerText 属性：<br />
+          <pre>if (!!document.getBoxObjectFor || window.mozInnerScreenX != null) {
+    HTMLElement.prototype.__defineSetter__("outerText", function(sText) {
+        var parsedText = document.createTextNode(sText);
+        this.parentNode.replaceChild(parsedText, this);
+        return parsedText;
+    });
+    HTMLElement.prototype.__defineGetter__("outerText", function() {
+        var r = this.ownerDocument.createRange();
+        r.selectNodeContents(this);
+        return r.toString();
+    });
+}
+</pre>
+        </li>
+      </ol>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.8<br />
+              Chrome 6.0.472.11 dev<br />
+              Safari 5.0.1<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/SD9017/outerHTML.html">outerHTML.html</a><br />
+                          <a href="../../tests/SD9017/innerText.html">innerText.html</a><br />
+                            <a href="../../tests/SD9017/outerText.html">outerText.html</a>
+                        </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-06</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>innerText outerText outerHTML</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

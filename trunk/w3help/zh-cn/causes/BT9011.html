@@ -1,0 +1,218 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BT9011: 只有 IE 支持 CSS Filter</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>Filter 为微软的专有技术，并被应用到 IE4.0 及以上的 IE 浏览器中，所以只有 IE 支持。其他浏览器中对 Filter 无任何效果。调用 Filter 对应的 DOM 对象将会出错。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>若仅仅考虑 IE 浏览器而使用了 Filter 技术，则在其他浏览器中不会有任何效果展现，并且 Filter 可通过 Element.style.filter 读写，但也只有 IE 支持，在其他浏览器中会报错导致 JavaScript 代码停止运行。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE4.0 及以上版本的 IE 浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>IE4.0 以上版本的 IE 浏览器中可以通过 CSS 在网页中应用多种多媒体样式的视觉效果，这就是微软的 Filter 技术。随着 IE 版本的增加，并在各版本中不断的加强 Filter 效果。通过将 Filter 与脚本的结合，可以在页面中实现各种复杂的特效，如半透明、阴影、投影、遮罩、模糊、渐变、波浪、图片翻转等效果。</p>
+      <p>关于 Filter 的列表，请参见 MSDN：<a href="http://msdn.microsoft.com/zh-cn/library/ms532853(v=VS.85).aspx">Visual Filters and Transitions Reference</a>。</p>
+      <p>Filter 通过 'filter' 特性在 HTML 元素上生效。'filter' 特性的值为一组类似函数调用的字符串。可以如其他 CSS 特性一样定义在 style 属性中。</p>
+      <pre>&lt;ELEMENT STYLE=&quot;filter: progid:DXImageTransform.Microsoft.filtername(sProperties)&quot; &gt;</pre>
+      <p>同时，也可以在一个 'filter' 特性内设置多组不同的 Filter，以空白符相隔。</p>
+      <pre>&lt;ELEMENT STYLE=&quot;filter: progid:DXImageTransform.Microsoft.filtername(sProperties) progid:DXImageTransform.Microsoft.filtername2(sProperties)&quot; &gt;</pre>
+      <p>关于 Filter 的更多资料，请参考 MSDN <a href="http://msdn.microsoft.com/en-us/library/ms532849%28VS.85%29.aspx">Filters and Transitions</a> 中的内容。</p>
+      <br />
+      <p>许多 Filter 中的特效均已进入了 CSS3 草案，并在新版的非 IE 浏览器中得到了很好的支持。下面列举几个简单的范例：</p>
+      <h3>1. 半透明效果：</h3>
+      <pre>&lt;body style=&quot;margin:20px;&quot;&gt;
+&lt;div style=&quot;background:gold; width:200px; display:table; font:18px 'Trebuchet MS';&quot;&gt;
+  &lt;div style=&quot;background:gray; <span class="hl_1">filter:alpha(opacity=50);</span> margin:10px -10px; position:relative; zoom:1;&quot;&gt;filter:alpha(opacity=50);&lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div style=&quot;background:gold; width:200px; display:table; font:18px 'Trebuchet MS';&quot;&gt;
+  &lt;div style=&quot;background:gray; <span class="hl_2">opacity:0.5;</span> margin:10px -10px; position:relative; zoom:1;&quot;&gt;opacity:0.5;&lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div style=&quot;background:gold; width:200px; display:table; font:18px 'Trebuchet MS';&quot;&gt;
+  &lt;div style=&quot;background:gray;  <span class="hl_1">filter:alpha(opacity=50);</span>  <span class="hl_2">opacity:0.5;</span> margin:10px -10px; position:relative; zoom:1;&quot;&gt;filter:alpha(opacity=50); opacity:0.5;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/body&gt;</pre>
+      <p>这段代码在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BT9011/opacity_IE.gif" alt="IE6 IE7 IE8" /></td>
+          <td><img src="../../tests/BT9011/opacity_non_IE.gif" alt="Firefox Chrome Safari Opera" /></td>
+        </tr>
+      </table>
+      <p>IE 使用 <span class="hl_1">'filter:alpha(opacity=50);'</span> 通过 Filter 的 alpha 通道滤镜使元素半透明，但元素必须触发 hasLayout 特性。<br />
+      非 IE 浏览器使用 <span class="hl_2">'opacity:0.5;'</span> 这个 CSS3 草案中的 'opacity' 特性使元素半透明。</p>
+      <p>所以同时使用 <span class="hl_1">'filter:alpha(opacity=50);'</span>  <span class="hl_2">opacity:0.5;</span> 即可保证在所有浏览器中呈现出半透明效果。</p>
+      <br />
+      <h3>2. 文字阴影效果：</h3>
+      <pre>&lt;div style=&quot;font:bold 24px 'Trebuchet MS'; position:relative; height:30px; background:#ddd;&quot;&gt;
+  &lt;span style=&quot;position:absolute; z-index:1; color:#666; <span class="hl_1">filter:shadow(color=#666666, direction=135, strength=1) progid:DXImageTransform.Microsoft.Blur(pixelRadius=2, direction=135);</span>&quot;&gt;filter:shadow(...);&lt;/span&gt;
+  &lt;span style=&quot;position:absolute; z-index:2;&quot;&gt;filter:shadow(...);&lt;/span&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div style=&quot;font:bold 24px 'Trebuchet MS'; position:relative; <span class="hl_2">text-shadow: #666 3px 3px 3px;</span> height:30px; background:#ddd;&quot;&gt;
+  text-shadow:...;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div style=&quot;font:bold 24px 'Trebuchet MS'; position:relative; <span class="hl_2">text-shadow: #666 3px 3px 3px;</span> height:30px; background:#ddd;&quot;&gt;
+  &lt;span style=&quot;position:absolute; z-index:1; color:#666; display:none; display:block\9; <span class="hl_1">filter:shadow(color=#666666, direction=135, strength=1) progid:DXImageTransform.Microsoft.Blur(pixelRadius=2, direction=135);</span>&quot;&gt;text-shadow:...; filter:shadow(...);&lt;/span&gt;
+  &lt;span style=&quot;position:absolute; z-index:2;&quot;&gt;text-shadow:...; filter:shadow(...);&lt;/span&gt;
+&lt;/div&gt;</pre>
+      <p>这段代码在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BT9011/shadow_IE.gif" alt="IE6 IE7 IE8" /></td>
+          <td><img src="../../tests/BT9011/shadow_non_IE.gif" alt="Firefox Chrome Safari Opera" /></td>
+        </tr>
+      </table>
+      <p>IE 使用 <span class="hl_1">'filter:shadow(color=#666666, direction=135, strength=1) progid:DXImageTransform.Microsoft.Blur(pixelRadius=2, direction=135);'</span> 通过 Filter 的 调用了 shadow 和 Blur 两组滤镜使元素产生了文字阴影效果，同样地，元素必须触发 hasLayout 特性。<br />
+      非 IE 浏览器使用 <span class="hl_2">'text-shadow: #666 3px 3px 3px;'</span> 这个 CSS3 草案中的 'text-shadow' 特性使元素半透明。</p>
+      <p>所以同时结合使用这里方式即可保证在所有浏览器中呈现出文字阴影效果。</p>
+      <br />
+      <h3>3. 旋转效果：</h3>
+      <pre>&lt;div style=&quot;font:bold 14px/100% 'Trebuchet MS'; width:100px; height:100px; background:#ddd; <span class="hl_1">filter:progid:DXImageTransform.Microsoft.BasicImage(rotation=3);</span>&quot;&gt;filter:&lt;br /&gt;...BasicImage&lt;br /&gt;(rotation=3);&lt;/div&gt;
+&lt;br /&gt;
+&lt;div style=&quot;font:bold 14px/100% 'Trebuchet MS'; width:100px; height:100px; background:#ddd; <span class="hl_2">-webkit-transform:rotate(-90deg); -moz-transform:rotate(-90deg); -o-transform:rotate(-90deg);</span>&quot;&gt;transform:&lt;br /&gt;rotate&lt;br /&gt;(-90deg);&lt;/div&gt;
+&lt;br /&gt;
+&lt;div style=&quot;font:bold 14px/100% 'Trebuchet MS'; width:100px; height:100px; background:#ddd; <span class="hl_1">filter:progid:DXImageTransform.Microsoft.BasicImage(rotation=3);</span> <span class="hl_2">-webkit-transform:rotate(-90deg); -moz-transform:rotate(-90deg); -o-transform:rotate(-90deg);</span>&quot;&gt;filter:&lt;br /&gt;...BasicImage&lt;br /&gt;(rotation=3);&lt;br /&gt;transform:&lt;br /&gt;rotate&lt;br /&gt;(-90deg);&lt;/div&gt;
+</pre>
+      <p>这段代码在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BT9011/rorate_IE.gif" alt="IE6 IE7 IE8" /></td>
+          <td><img src="../../tests/BT9011/rorate_non_IE.gif" alt="Firefox Chrome Safari Opera" /></td>
+        </tr>
+      </table>
+      <p>IE 使用 <span class="hl_1">'filter:progid:DXImageTransform.Microsoft.BasicImage(rotation=3);'</span> 通过 Filter 的 调用了 BasicImage 滤镜使元素产生了旋转效果，同样地，元素必须触发 hasLayout 特性。<br />
+      非 IE 浏览器分别使用了各自的私有 CSS 特性 <span class="hl_2">'-webkit-transform:rotate(-90deg); -moz-transform:rotate(-90deg); -o-transform:rotate(-90deg);'</span> 来完成这个效果。</p>
+      <p>对于选择 90 度的倍数的情况使用 BasicImage 滤镜即可，但对于旋转任意角度则需要借助功能更多的 Matrix 滤镜。<br />
+      Matrix 滤镜在旋转方面需要用到 M11 M12 M21 M22 四个参数，分别代表 cos(旋转的角度)、-sin(旋转的角度)、sin(旋转的角度)、cos(旋转的角度)。但这里需要注意的是 IE 中旋转的中心点会发生变化。</p>
+      <p>例如需要一个 DIV 元素顺时针旋转 45 度，则可以编写一下代码：</p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  body { margin: 0; }
+  .rorate {
+    position: absolute;
+    left: 100px;
+    top: 100px;
+    left: 80px\9;
+    top: 80px\9;
+    width: 100px;
+    height: 100px;
+    background: red;
+    filter:progid:DXImageTransform.Microsoft.Matrix(M11=0.7,M12=-0.7,M21=0.7,M22=0.7,SizingMethod=&quot;auto expand&quot;);
+    -moz-transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+  }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div class=&quot;rorate&quot;&gt;123&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      
+      <p>所以同时结合使用这里方式即可保证在所有浏览器中呈现出旋转效果。</p>
+
+
+
+      <h2 id="solutions">解决方案</h2>
+      <p>由于 CSS Filter 是 IE 特有的技术，其他浏览器均不支持，所以为了最大的兼容性及标准化，应尽量避免为 IE 单独使用 Filter，如需要其某些特效，应同时考虑其他浏览器，利用非 IE 浏览器对 CSS3 草案的良好支持保证最好的兼容性。<br />
+      若需要通过脚本对 Filter 对象进行操作，则应做好浏览器判断，仅在 IE 中进行此项操作，避免其他非 IE 浏览器因为脚本出错导致异常。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.2<br />
+              Chrome 5.0.356.2 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BT9011/filter.html">filter.html</a><br />
+            <a href="../../tests/BT9011/rotate.html">rotate.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-09</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>CSS Filter CSS3 opacity rorate shadow 半透明 阴影 旋转</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX9014: document.write 方式引入外部 JS 文件导致脚本程序执行顺序不同以及 DOM 树更新延迟问题</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>关于 document.write 方法请参考标准文档：DOM Level 2 HTML 规范 <a href="http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-75233634">1.5. Objects related to HTML documents</a>。</p>
+      <h2 id="description">问题描述</h2>
+      <p>当脚本中存在以 document.write 的方式向页面内写入内容时，各浏览器对于执行各个线程的顺序可能不一致。</p>
+      <h2 id="influence">造成的影响</h2>
+      <p>此现象造成在各浏览器里，某些需要延后执行的代码被立即执行，导致程序出错。</p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>由于 W3C DOM 标准文档中，没有明确说明使用 document.write 方法外引 JS 文件后，被引用脚本文件内继续重复使用  document.write 引用其他外部脚本文件时的执行顺序问题，因而导致实际环境中各个浏览器具体实现不一。</p>
+      <p>我们来分析以下代码 A：</p>
+<pre>&lt;script&gt;
+document.write(&quot;before write h1.js&quot;+&quot;&lt;br/&gt;&quot;);
+document.write(&quot;&lt;script  src='h&quot; + &quot;1.js'&gt;&lt;\/script&gt;&quot;);
+document.write(&quot;after write h1.js&quot; +&quot;&lt;br/&gt;&quot;);
+&lt;/script&gt;</pre>
+
+<pre>/* h1.js */
+document.write(&quot;This is h1.js&quot;+&quot;&lt;br/&gt;&quot;);</pre>
+<p>即在一个 SCRIPT 标签内，通过 document.write 的方式向文档输入内容，并在其间引入 JS 文件 A，A 内也包含 document.write，意在向文档输出某些内容。<br />各浏览器表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <th>执行输出顺序</th>
+          <td>before write h1.js<br />after write h1.js<br />This is h1.js</td>
+          <td>before write h1.js<br />This is h1.js<br />after write h1.js</td>
+        </tr>
+      </table>
+      <p>即 IE 是在当前 SCRIPT 标记内所有的 document.write 向文档中输出内容完成后，再处理以 document.write 方式引入的 JS 文件内的 document.write 写入流。</p>
+      <p>对于其他浏览器，则根据代码执行顺序依次处理 document.write 方式写入的内容。</p>
+      <p>&nbsp;</p>
+      <p>此外，使用 document.write 方式写入 JavaScript 内容后，非 IE Opera 浏览器并不会立即更新 DOM 树。</p>
+      <p>分析以下下代码 B：</p>
+<pre>&lt;script&gt;
+document.write('&lt;script src=&quot;a.js&quot;&gt;&lt;\/script&gt;');
+document.write('&lt;DIV id=&quot;d1&quot;&gt;&lt;/DIV&gt;');
+alert(document.getElementById('d1')===null);
+&lt;/script&gt;</pre>
+
+<pre>/* a.js */
+//可以不包含代码</pre>
+<p>示例脚本通过 document.write 的方式向文档输入其他的 SCRIPT 标记引入其他 JS 文件以及其他内容。立即写入一个 DIV 标记后通过 getElementById 方法得到该元素的 DOM 引用。<br />各浏览器表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Opera</th>
+          <th>Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td>false</td>
+          <td>true</td>
+        </tr>
+      </table>
+      <p>对于以上测试代码，IE Opera 表现为在执行到语句 &quot;document.write('&lt;DIV id=&quot;d1&quot;&gt;&lt;/DIV&gt;');&quot; 后立即更细了文档的 DOM 结构（向文档内插入了 ID 为 d1 的 DIV 标记）。</p>
+      <p>而在其他浏览器里，在当前 SCRIPT 标记的执行流运行完成后，才更新文档的 DOM 结构。</p>
+
+     <h2 id="solutions">解决方案</h2>
+         <p>如果外部引用的 JS 文件内程序，要求在执行顺序上一致，请避免使用 document.write 语句引入的 JS 程序文件中再次使用他来加载外部 JS 文件。</p>
+         <p>可以参考 <a href="BX9013"> 动态引入的外部 JS 文件在各浏览器中的执行顺序不一致</a> 文章内解决方案。</p>
+         <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="BX9013">BX9013: 动态引入的外部 JS 文件在各浏览器中的加载顺序不一致</a></li>
+      </ul>
+    <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td> IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4 </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+              <a href="../../tests/BX9014/document_write_js_file.html">document_write_js_file.html </a><br />
+              <a href="../../tests/BX9014/dom_tree_update.html">dom_tree_update.html</a>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-06</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>documen.wirte SCRIPT 延迟执行 DOM 树更新 </p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

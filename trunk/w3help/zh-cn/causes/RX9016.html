@@ -1,0 +1,378 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RX9016: 各浏览器对 IMAGE 元素的支持存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>在 CSS 中，模式匹配 (pattern matching) 规则决定了文档树 (<a href="http://www.w3.org/TR/CSS21/conform.html#doctree">document tree</a>) 中的元素应该会应用何种样式规则。这些模式 (pattern) 又称作选择子 (selector)。 选择子中文档语言元素名的是否大小写敏感取决于文档语言。如，在 HTML 中，元素名是大小写无关的，但是在 XML 中，它们是大小写相关的。</p>
+      <p>下表总结了 CSS2.1 中选择子的语法：</p>
+      <table class="compare">
+        <tr>
+          <th>模式 (Pattern)</th>
+          <th>含义 (Meaning)</th>
+        </tr>
+        <tr>
+          <td>*</td>
+          <td>匹配任意元素。</td>
+        </tr>
+        <tr>
+          <td>E</td>
+          <td>匹配任意 E 元素 (类型为 E 的元素)。</td>
+        </tr>
+        <tr>
+          <td>E F</td>
+          <td>匹配任意为 E 元素的后代子孙元素的 F 元素。</td>
+        </tr>
+        <tr>
+          <td>E &gt; F</td>
+          <td>匹配任意为 E 元素的子元素的 F 元素。</td>
+        </tr>
+        <tr>
+          <td>E:first-child</td>
+          <td>匹配为父元素的第一个子元素的 E 元素。</td>
+        </tr>
+        <tr>
+          <td>E:link<br />E:visited</td>
+          <td>若 E 是一个超链接且目标还未被访问 (:link) 或是已经被访问 (:visited) 时，匹配 E 元素。</td>
+        </tr>
+        <tr>
+          <td>E:active<br />E:hover<br />E:focus</td>
+          <td>匹配当前用户行为中的 E 元素。</td>
+        </tr>
+        <tr>
+          <td>E:lang(c)</td>
+          <td>若为 (人类) 语言 c 时，匹配 E 元素。</td>
+        </tr>
+        <tr>
+          <td>E + F</td>
+          <td>匹配任意紧邻 E 元素的兄弟元素 F。</td>
+        </tr>
+        <tr>
+          <td>E[foo]</td>
+          <td>匹配任意设定了 &quot;foo&quot; 属性 (无论为何值) 的 E 元素。</td>
+        </tr>
+        <tr>
+          <td>E[foo=&quot;warning&quot;]</td>
+          <td>匹配任意设定了 &quot;foo&quot; 属性值为 &quot;warning&quot; 的 E 元素。</td>
+        </tr>
+        <tr>
+          <td>E[foo~=&quot;warning&quot;]</td>
+          <td>匹配任意设定了 &quot;foo&quot; 属性，且属性值为一组由空格分隔的列表，其中之一为 &quot;warning&quot; 的 E 元素。</td>
+        </tr>
+        <tr>
+          <td>E[lang|=&quot;en&quot;]</td>
+          <td>匹配任意设定了 &quot;lang&quot; 属性，且属性值为一组由连接符 (-) 分隔的列表，以 &quot;en&quot; 作为起始的 E 元素。</td>
+        </tr>
+        <tr>
+          <td>DIV.warning</td>
+          <td><em>语言特性</em>。(在 HTML 中，与 DIV[class~=&quot;warning&quot;] 等价。</td>
+        </tr>
+        <tr>
+          <td>E#myid</td>
+          <td>匹配任意 E 为 &quot;myid&quot; 的 E 元素。</td>
+        </tr>
+      </table>
+      <p>类型选择子 (<a href="http://www.w3.org/TR/CSS21/selector.html#type-selectors">type selector</a>) 匹配文档语言元素类型的名称。一个类型选择子匹配文档树中该元素类型的每一个实例。下面的规则匹配文档树中所有的 H1 元素：<br />
+      <code>h1 { font-family: sans-serif }</code></p>
+      <p>根据 W3C DOM Level2 Core 规范中的描述，Document 接口下的 createElement 方法可以创建一个元素节点对象实例。它可以传入一个字符串参数 tagName，在 HTML 中，这个参数可以是任何形式，必须是映射到可由 DOM 实现的符合规范的大写形式。即，tagName 应为一个合法的标签名。</p>
+      <p>若 tagName 中出现不合法的字符，则应抛出 INVALID_CHARACTER_ERR 异常。</p>
+      <p>Document 接口下均包含的 getElementsByTagName 方法可以返回所有给定标签名 (tag name) 的元素 (<a href="http://www.w3.org/TR/DOM-Level-2-Core/core.html#ID-745549614">Elements</a>) 在文档树中按照前续遍历顺序组成的一个节点列表 (<a href="http://www.w3.org/TR/DOM-Level-2-Core/core.html#ID-536297177">NodeList</a>)。而 Element 接口下的此方法则是对应在相应的元素树 (Element tree) 下遍历子孙元素 (<a href="http://www.w3.org/TR/DOM-Level-2-Core/glossary.html#dt-descendant">descendant Element</a>)。<br />
+      getElementsByTagName 方法的唯一参数 name 类型为 <a href="http://www.w3.org/TR/DOM-Level-2-Core/core.html#DOMString">DOMString</a>，用于指定需要去遍历匹配的标签名称，&quot;*&quot; 代表匹配所有标签。</p>
+      <p>关于 选择子 (Selector) 的更多资料，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/selector.html">5 Selectors</a> 中的内容。</p>
+      <p>关于 createElement 方法的更多资料，请参考 DOM Level2 Core 规范 <a href="http://www.w3.org/TR/DOM-Level-2-Core/core.html#ID-2141741547">Interface Document</a> 的内容。</p>
+      <p>关于 getElementsByTagName 方法的更多资料，请参考 DOM Level2 Core 规范 <a href="http://www.w3.org/TR/DOM-Level-2-Core/core.html#ID-A6C9094">Interface Document</a> 及 <a href="http://www.w3.org/TR/DOM-Level-2-Core/core.html#ID-1938918D">Interface Element</a> 的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE Opera 中会将 image 选择器解释为 IMG 选择器，其他浏览器不存在此问题。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>使用 image 选择器，在 IE Opera 中会作用在 IMG 标签上，导致和其他浏览器 IMG 标签样式不同。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>在 HTML4.01 规范的属性表 (<a href="http://www.w3.org/TR/html401/index/attributes.html">Index of Attributes</a>) 中并不存在 <strong>IMAGE</strong> 元素。<br />
+      下面将分别测试 HTML 文档代码中 <strong>IMAGE</strong> 元素，CSS 代码中使用 <strong>IMAGE</strong> 作为类型选择子，以及通过脚本获取和创建 <strong>IMAGE</strong> 元素在各浏览器中的支持情况。</p>
+      <h3>1. HTML 代码中的 <strong>IMAGE</strong> 元素</h3>
+      <p>首先检测直接写在 HTML 文档代码中 <strong>IMAGE</strong> 元素的处理：<em>image_element.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;script&gt;
+  function $(id) { return document.getElementById(id); }
+  
+  window.onload = function () {
+    $('i1').appendChild(document.createTextNode('after: ' + $('p1').innerHTML.toLowerCase()));
+    $('i2').appendChild(document.createTextNode('after: ' + $('p2').innerHTML.toLowerCase()));
+  }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body style=&quot;font:14px 'Trebuchet MS';&quot;&gt;
+  &lt;p id=&quot;p1&quot;&gt;&lt;img src=&quot;google.gif&quot; /&gt;&lt;/p&gt;
+  &lt;div id=&quot;i1&quot;&gt;before: &amp;lt;img src=&amp;quot;google.gif&amp;quot; /&amp;gt;&lt;br /&gt;&lt;/div&gt;
+  &lt;br /&gt;
+  &lt;p id=&quot;p2&quot;&gt;<span class="hl_1">&lt;image src=&quot;google.gif&quot; /&gt;</span>&lt;/p&gt;
+  &lt;div id=&quot;i2&quot;&gt;before: &amp;lt;image src=&amp;quot;google.gif&amp;quot; /&amp;gt;&lt;br /&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上述代码中直接在 HTML 源代码中写入了 <span class="hl_1">&lt;image src=&quot;google.gif&quot; /&gt;</span>。</p>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>所有浏览器</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RX9016/image_ele.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>可见，所有浏览器对于 HTML 文档代码中的 <strong>IMAGE</strong> 元素都会将其转换为 IMG 元素。这一点不存在差异。 </p>
+<br />
+      <h3>2. CSS 代码中使用 <strong>IMAGE</strong> 作为类型选择子</h3>
+      <p>分析以下代码：<em>image_type_selector.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  * { margin:0; vertical-align:bottom; }
+  <span class="hl_1">image</span> { border:2px solid blue; }
+  p <span class="hl_1">image</span> { border-bottom:5px solid brown; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body style=&quot;font:14px 'Trebuchet MS';&quot;&gt;
+  &lt;p id=&quot;p1&quot;&gt;&lt;img src=&quot;google.gif&quot; /&gt;&lt;/p&gt;
+  &lt;br /&gt;
+  &lt;p id=&quot;p2&quot;&gt;<span class="hl_1">&lt;image src=&quot;google.gif&quot; /&gt;</span>&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上述代码中包含了一个 IMG 元素及一个 IMAGE 元素，在 STYLE 元素声明的 CSS 代码中，定义了 <span class="hl_1">image</span> 与 <span class="hl_1">p  image</span> 规则。</p>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Opera</th>
+          <th>Firefox Chrome Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RX9016/image_sel1.gif" alt="" /></td>
+          <td><img src="../../tests/RX9016/image_sel2.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>根据 CSS2.1 规范的定义，选择子 <span class="hl_1">image</span> 会匹配所有 <strong>IMAGE</strong> 元素。而根据上一节的测试结果，本节中的测试样例在所有被测浏览器中最终生成的文档树为 P 元素内各包含一个 IMG 元素，不再存在有 <strong>IMAGE</strong> 元素。</p>
+      <p>通过截图可知，</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8 Opera</em> 中，选择子 <span class="hl_1">image</span> 对于 IMG 元素及由 <strong>IMAGE</strong> 转为的 IMG 元素均匹配成功；</li>
+        <li>在 <em>Firefox Chrome Safari</em> 中，选择子 <span class="hl_1">image</span> 匹配失败，浏览器完全存照 CSS2.1 规范中的描述处理。</li>
+      </ul>
+      <br />
+      <h3>3. 使用 createElement 方法创建 <strong>IMAGE</strong> 元素</h3>
+      <p>分析以下代码：<em>image_createElement.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;script&gt;
+  function $(id) { return document.getElementById(id); }
+  
+  window.onload = function () {
+    var image = document.createElement('<span class="hl_1">image</span>');
+    image.setAttribute('src', 'google.gif');
+    document.body.appendChild(document.createTextNode('tagName of image: ' + image.tagName));
+    $('d').appendChild(image);
+    document.body.appendChild(document.createElement('br'));
+    document.body.appendChild(document.createTextNode($('d').innerHTML));
+  }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body style=&quot;font:14px 'Trebuchet MS';&quot;&gt;
+document.createElement('image'):&lt;br /&gt;
+&lt;div id=&quot;d&quot;&gt;&lt;/div&gt;
+&lt;br /&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上述代码通过 createElement 方法创建了一个 DOM 对象，为其设定了 src 属性，并将其插入到文档树中。最后通过脚本获取到这个创建的元素在文档树中的 HTML 代码。</p>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <th>Chrome Safari Opera</th>
+          <th>Firefox</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RX9016/image_ce1.gif" alt="" /><sup>1</sup></td>
+          <td><img src="../../tests/RX9016/image_ce2.gif" alt="" /></td>
+          <td><img src="../../tests/RX9016/image_ce3.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>根据 DOM Level 2 规范的定义，document.createElement('<span class="hl_1">image</span>') 会创建一个标签名为 <strong>IMAGE</strong> 的 DOM 对象。在一般情况下，若 createElement 方法传入了一个非法的 HTML 标签名时，各浏览器均会生成一个自定义标签所对应的对象。</p>
+      <p>而通过截图可知，</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8 Chrome Safari Opera</em> 中，创建的 tagName 为 <span class="hl_1">image</span> 的对象的 tagName 属性返回 IMG，即在 createElement 方法创建这个对象时，浏览器已经将其转换为 HTML 中的 IMG 元素，故为其设定 src 属性即引入了属性值 URI 中的资源，将其追加到文档树中后可以看到图片；</li>
+        <li>在 <em>Firefox</em> 中，创建的 tagName 为 <span class="hl_1">image</span> 的对象的 tagName 属性返回 <strong>IMAGE</strong>，即 Firefox 中此时得到的是一个自定义标签的对象，所以将其追加到文档树中后无法显示任何图片，仅仅是多了一个标签名为 <strong>IMAGE</strong> 的自定义标签。这一点与 DOM 规范中的描述相符。</li>
+      </ul>
+      <p class="comment">注 1: 忽略 IE 与其他浏览器对于文档树中的元素属性的差异。</p>
+      <br />
+      <h3>4. 使用 getElementsByTagName 方法获取 <strong>IMAGE</strong> 元素</h3>
+      <p>分析以下代码：<em>image_getElementsByTagName.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;script&gt;
+  function $(id) { return document.getElementById(id); }
+  
+  window.onload = function () {
+    $('info').appendChild(document.createTextNode(&quot;IMAGE elements: &quot; + document.getElementsByTagName('<span class="hl_1">image</span>').length));
+    $('info').appendChild(document.createElement('br'));
+    $('info').appendChild(document.createTextNode(&quot;IMG elements: &quot; + document.getElementsByTagName('img').length));
+  }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body style=&quot;font:14px 'Trebuchet MS';&quot;&gt;
+&lt;img src=&quot;google.gif&quot; /&gt;
+&lt;image src=&quot;google.gif&quot; /&gt;
+&lt;div id=&quot;info&quot;&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上述代码中包含了一个 IMG 元素及一个 IMAGE 元素，而根据第一节的测试结果，本节中的测试样例在所有被测浏览器中最终生成的文档树为两个 IMG 元素，不再存在有 <strong>IMAGE</strong> 元素。</p>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 Firefox Chrome Safari</th>
+          <th>IE8 Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RX9016/image_get1.gif" alt="" /></td>
+          <td><img src="../../tests/RX9016/image_get2.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>根据 DOM Level 2 规范的定义，document.getElementsByTagName('<span class="hl_1">image</span>') 会返回文档树中所有标签名为 <strong>IMAGE</strong> 的 DOM 对象组成的节点列表。</p>
+      <p>而通过截图可知，</p>
+      <ul>
+        <li>在 <em>IE6 IE7 Firefox Chrome Safari</em> 中，文档树中已不存在 <strong>IMAGE</strong> 元素，故无法通过 getElementsByTagName 方法获取到标签名为 <strong>IMAGE</strong> 的对象，这一点与 DOM 规范相符；</li>
+        <li>在 <em>IE8 Opera</em> 中，通过 getElementsByTagName 方法传入 IMG 与 <strong>IMAGE</strong> 作为标签名参数均可以获得到页面中所有 IMG 及由 <strong>IMAGE</strong> 转为的 IMG 元素所组成的节点列表。</li>
+      </ul>
+      <br />
+      <p>下面通过表格总结一下 <strong>IMAGE</strong> 元素在各浏览器中的支持情况：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7</th>
+          <th>IE8</th>
+          <th>Firefox</th>
+          <th>Chrome Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <th>转换为 IMG 元素</th>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+        </tr>
+        <tr>
+          <th>识别 CSS <strong>image</strong> 选择子</th>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_1">不支持</span></td>
+          <td><span class="hl_1">不支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+        </tr>
+        <tr>
+          <th>通过 document.createElement('<strong>image</strong>') 创建 IMG 元素并引入图片</th>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_1">不支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+        </tr>
+        <tr>
+          <th>通过 getElementsByTagName('<strong>image</strong>') 获取 IMG 元素对象</th>
+          <td><span class="hl_1">不支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+          <td><span class="hl_1">不支持</span></td>
+          <td><span class="hl_1">不支持</span></td>
+          <td><span class="hl_2">支持</span></td>
+        </tr>
+      </table>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>严格按照 CSS2.1 及 DOM 规范的规定书写代码，避免作为 CSS 选择子以及在脚本中需要传入 HTML 标签名的方法中使用 <strong>IMAGE</strong> 关键字。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.11<br />
+              Chrome 8.0.552.11 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.63
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RX9016/image_element.html">image_element.html</a><br />
+            <a href="../../tests/RX9016/image_type_selector.html">image_type_selector.html</a><br />
+            <a href="../../tests/RX9016/image_createElement.html">image_createElement.html</a><br />
+            <a href="../../tests/RX9016/image_getElementsByTagName.html">image_getElementsByTagName.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-25</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>image img getElementsByTagName createElement selector 选择 图片</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

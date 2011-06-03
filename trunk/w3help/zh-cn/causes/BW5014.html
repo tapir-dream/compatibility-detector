@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BW5014: Chrome 中弹出的 SELECT 元素下拉列表菜单在当前页或其内某个子框架页中通过脚本控制页面滚动条发生滚动时会消失</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 Chrome 中，若通过脚本控制当前页或其内某个子框架页的页面滚动条发生滚动，则弹出的 SELECT 元素下拉列表菜单此时会消失。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题可能导致页面中所有 SELECT 元素在 Chrome 中点击后无法正常显示下拉菜单，从而 SELECT 中各项均无法被点击。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Chrome</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>根据问题描述构建如下测试样例：<em>scroll.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;select style=&quot;width:200px; font:12px Arial;&quot;&gt;
+  &lt;option&gt;OPTION&lt;/option&gt;
+&lt;/select&gt;
+&lt;br /&gt;&lt;br /&gt;
+&lt;iframe name=&quot;ifr&quot; frameborder=&quot;0&quot; style=&quot;width:200px; height:100px;&quot;&gt;&lt;/iframe&gt;
+&lt;script&gt;
+window.onload = function () {
+  var x = 0, y = 0, ifr = frames['ifr'];
+  ifr.document.write('&lt;body style=&quot;background:wheat;&quot;&gt;&lt;div style=&quot;width:2000px;height:1000px;&quot;&gt;&lt;/div&gt;&lt;/body&gt;');
+  setInterval(function () {
+    (x &gt;= 2000 && y &gt;= 1000) && (x = 0, y = 0);
+    ifr.scroll(x+=20, y+=10);
+  }, 50);
+}
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>页面中有一个 SELECT 元素及一个 IFRAME 元素，IFRAME 元素内的子框架页生成了页面滚动条，通过脚本调用 window.scroll()<sup>1</sup> 方法使页面滚动条发生滚动，此时点击 SELECT 元素以使其弹出下拉菜单。</p>
+      <p>这段代码在各浏览器中运行效果为：</p>
+      <table class="compare">
+        <tr>
+          <th>Chrome</th>
+          <th>IE6 IE7 IE8 Firefox Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BW5014/sc2.gif" alt="" /></td>
+          <td><img src="../../tests/BW5014/sc1.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>可见，在 Chrome 中，若通过脚本控制 IFRAME<sup>2</sup> 元素内子框架页的页面滚动条发生滚动，则弹出的 SELECT 元素下拉列表菜单此时会消失。</p>
+      <p class="comment">
+        注 1: window.scroll() 与 当前浏览器文档模式下有效的修改页面 scrollTop、scollLeft 均会触发此现象；<br />
+        注 2: 不仅 IFRAME 元素内子框架页面的页面滚动条，SELECT 元素所在页面的页面滚动条通过脚本发生滚动后同样会出现此现象。
+      </p>
+      
+      <h2 id="solutions">解决方案</h2>
+      <p>除非放弃页面滚动条自动滚动的功能，否则目前没有很好的解决方案，此问题需要等待浏览器厂商修复。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="BX9008">BX9008: 各浏览器对于获取文档水平及垂直方向滚动条位置（scrollLeft、scrollTop）时的参考元素存在差异</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.544.0 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BW5014/scroll.html">scroll.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-13</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>SELECT scroll scrollTop scrollLeft 滚动 IFRAME</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

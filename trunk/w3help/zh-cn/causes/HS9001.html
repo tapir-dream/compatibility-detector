@@ -1,0 +1,165 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HS9001: IE Opera 中 src 属性为空的 SCRIPT 元素内的脚本不会被忽略，且内联脚本可以通过修改其所在 SCRIPT 元素的 src 属性引入新的外部脚本文件</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>HTML 4.01 规范中提到，脚本可以定义在页面的 SCRIPT 元素内，或者外部文件中。若 SCRIPT 元素没有设置 src 属性，则用户端<strong>必须</strong>将元素的内容当做脚本去解释。若 src 属性指定了一个 URI，则用户端<strong>必须</strong>忽略元素的内容切通过 URI 获取脚本。</p>
+      <p>关于 SCRIPT 元素的详细信息，请参考 HTML 4.01 规范 <a href="http://www.w3.org/TR/html4/interact/scripts.html#h-18.2.1">18.2.1 The SCRIPT element</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE 和 Opera 中，若 SCRIPT 元素设定了 src 属性但值为空，则其内脚本并不会被忽略，而是可以正常被解释执行。同时，一段内联脚本可以通过修改其所在 SCRIPT 元素的 src 属性引入新的外部脚本文件。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>这个问题将导致部分脚本在 Firefox Chrome Safari 中无法被执行。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8 Opera</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>SCRIPT 元素本身就具有二义性。在其未设置 src 属性的时候，其内的内容作为内联脚本被执行。若设定了一个正确的外部脚本文件 URI，则其内容应被忽略，转而仅执行外部脚本文件中的代码。</p>
+      <p>各浏览器对 src 属性没有设定以及正确的引入了外部脚本文件时的 SCRIPT 元素的处理均相同，但是在设定了 src 属性，但属性值为空的情况，各浏览器中产生了差异。</p>
+      <p>分析以下代码：<em>script_with_empty_src.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body style="font:16px Arial;"&gt;
+&lt;script src=""&gt;
+  document.write('&amp;lt;script src=""&amp;gt; is interpreted.&lt;br /&gt;');
+&lt;/script&gt;
+&lt;script&gt;
+  document.write('&amp;lt;script&amp;gt; is interpreted.&lt;br /&gt;');
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上述代码中包含两个 SCRIPT 元素，其内脚本分别通过 document.write 方法向页面文档流中写入了两段内容。第一个 SCRIPT 元素设定了 src 属性为空字符串，第二段没有设定 src 属性。</p>
+      <p>这段代码在各浏览器中运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Opera</th>
+          <th>Firefox Chrome Safari</th>
+        </tr>
+        <tr>
+          <td>&lt;script src=""&gt; is interpreted.<br />&lt;script&gt; is interpreted.</td>
+          <td>&lt;script&gt; is interpreted.</td>
+        </tr>
+      </table>
+      <p>可见，在 <em>IE Opera</em> 中，设定了值为空<sup>1</sup>的 src 属性内的脚本依然可以被执行，虽然设定了 src 属性，但浏览器并没有将它们忽略。<br />
+      而在 <em>Firefox Chrome Safari</em> 中，浏览器忽略了设定了 src 属性的 SCRIPT 元素内的脚本内容，这一点符合 W3C 规范。</p>
+      <p class="comment">注 1：对于 &ltscript src&gt; 情况相同。</p>
+      <br />
+      <p>下面再看另一种情况，在一个未设定 src 属性的 SCRIPT 元素内的脚本中动态修改这个 SCRIPT 的 src 属性试图引入新的外部脚本文件的情况下，各浏览器的处理同样产生了差异。</p>
+      <p>分析以下代码：<em>inline_script_modifies_its_src_of_tag.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body style="font:16px Arial;"&gt;
+&lt;script&gt;
+  document.write('&amp;lt;script&amp;gt; is interpreted.&lt;br /&gt;');
+  document.getElementsByTagName("script")[0].src = "<em>a.js</em>";
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p><em>a.js</em></p>
+      <pre>document.write('&amp;lt;script src="a.js"&amp;gt; is interpreted.&lt;br /&gt;');</pre>
+      <p>页面中有一个 SCRIPT 元素，其内脚本向页面文档流中写入了一段内容，然后对其所在的 SCRIPT 元素的 src 属性进行了修改，试图引入一个新的外部脚本文件“a.js”，“a.js”内的脚本为向页面文档流内写入另一段内容。</p>
+      <p>这段代码在各浏览器中运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Opera</th>
+          <th>Firefox Chrome Safari</th>
+        </tr>
+        <tr>
+          <td>&lt;script&gt; is interpreted.<br />&lt;script src="a.js"&gt; is interpreted.</td>
+          <td>&lt;script&gt; is interpreted.</td>
+        </tr>
+      </table>
+      <p>可见，在 <em>IE Opera</em> 中，一个未设定 src 属性的 SCRIPT 元素内的脚本中动态修改这个 SCRIPT 的 src 属性成功的引入了一个新的外部脚本文件，并且脚本文件中的脚本可以被解释执行。<br />
+      而在 <em>Firefox Chrome Safari</em> 中，语句 <code>document.getElementsByTagName("script")[0].src = "<em>a.js</em>";</code> 虽然已在在文档树中将 SCRIPT 元素的 src 属性修改，但浏览器并没有真正引入这个外部脚本文件，更没有执行其内的脚本。</p>
+      <p>虽然 HTML 规范中并没有明确说明这种情况下用户端应如何处理，但当动态的为 SCRIPT 元素设定 src 属性引入外部脚本文件后，原 SCRIPT 元素内的脚本内容该如何处理就出现了模糊不清的情况。所以在编写代码时就应当避免在这种歧义的发生。</p>
+      
+
+      <h2 id="solutions">解决方案</h2>
+      <p>不在设定了 src 属性的 SCRIPT 元素内编写脚本。<br />
+      不通过脚本修改当前脚本所在 SCRIPT 元素的 src 属性。<br />
+      以避免歧义的发生。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.8<br />
+              Chrome 6.0.472.25 dev<br />
+              Safari 5.0.1<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HS9001/script_with_empty_src.html">script_with_empty_src.html</a><br />
+            <a href="../../tests/HS9001/inline_script_modifies_its_src_of_tag.html">inline_script_modifies_its_src_of_tag.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-08</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>SCRIPT JavaScript src URI URL 脚本 text content</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

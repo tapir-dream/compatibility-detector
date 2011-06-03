@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RE1005: IE 混杂模式下 TR 元素的最终高度始终不会超过其所有 TD 子元素的高度</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>关于 W3C CSS 2.1 中表格高度计算规范请参考：<a href="http://www.w3.org/TR/CSS21/tables.html#height-layout">http://www.w3.org/TR/CSS21/tables.html#height-layout</a></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE6(Q) IE7(Q) IE8(Q) 中 TR 元素的最终高度始终不会超过其所有 TD 子元素的高度。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>这个现象将造成表格单元格高度的计算差异，若单元格行数较多，可能最终造成表格的总高度在不同浏览器中出现很大的区别。 </p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6(Q) IE7(Q) IE8(Q)</th>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <h3>1. TR 元素的高度计算</h3>
+      <p> TR 元素即 &quot;display:table-row&quot; 的元素，用来作为一行内的单元格的容器。 </p>
+      <p> 在用户端得到一行内的所有单元格后即开始表格行（TR 元素）的计算。根据规范中描述，他的高度为： </p>
+      <p class="hl_1"><strong> &quot;行内各单元格指定了 'height' 特性的最大值&quot;  </strong>和 <strong> &quot;单元格要求的最小高度（MIN） &quot; </strong> 中较大的值。若其 'height' 特性为 'auto'，则计算出的高度为 MIN。</p>
+      <h3>&nbsp;</h3>
+      <h3>2. IE6(Q) IE7(Q) IE8(Q) 中 TR 元素的最终高度始终不会超过其所有 TD 子元素的高度</h3>
+      <p>分析以下代码：</p>
+<pre>
+&lt;table style=&quot;width:200px; border:1px solid black;&quot;&gt;
+  &lt;tr id=&quot;tr1&quot; style=&quot;height:60px;&quot;&gt;
+    &lt;td id=&quot;td1&quot; style=&quot;height:40px; background:#CCC;&quot;&gt;1&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr id=&quot;tr2&quot; style=&quot;height:40px;&quot;&gt;
+    &lt;td id=&quot;td2&quot; style=&quot;height:60px; background:#AAA;&quot;&gt;2&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;script&gt;
+  function $(id) { return document.getElementById(id); }
+  $(&quot;td1&quot;).innerHTML = &quot;TR set=&quot; + $(&quot;tr1&quot;).style.height + &quot; offset=&quot; + $(&quot;tr1&quot;).offsetHeight + &quot;px&quot;
+    + &quot;&lt;br /&gt; TD set=&quot; + $(&quot;td1&quot;).style.height + &quot; offset=&quot; + $(&quot;td1&quot;).offsetHeight + &quot;px&quot;;
+  $(&quot;td2&quot;).innerHTML = &quot;TR set=&quot; + $(&quot;tr2&quot;).style.height + &quot; offset=&quot; + $(&quot;tr2&quot;).offsetHeight + &quot;px&quot;
+    + &quot;&lt;br /&gt; TD set=&quot; + $(&quot;td2&quot;).style.height + &quot; offset=&quot; + $(&quot;td2&quot;).offsetHeight + &quot;px&quot;;
+&lt;/script&gt;
+</pre>
+
+    <p>上面代码的表格中有两行，第一行的 TR 高度设置为 60px，TD 高度设置为 40px。第二行TR高度设置为 40px，TD 高度设置为 60px。</p>
+    <p>这段代码在不同浏览器中运行结果如下：</p>
+    <table class="compare">
+      <tr>
+        <th>IE6(Q) IE7(Q) IE8(Q)</th>
+        <th>IE6(S) IE7(S) IE8(S) Firefox Chrome Safari Opera</th>
+      </tr>
+      <tr>
+        <td><img src="../../tests/RE1005/01.gif" alt="" /></td>
+        <td><img src="../../tests/RE1005/02.gif" alt="" /></td>
+      </tr>
+    </table>
+    <p>可见，对于所有浏览器，当 TR 元素的设定高度小于其 TD 子元素时，TR 元素被 TD 子元素撑大。</p>
+    <p>而当TR元素的设定高度大于其 TD 子元素时：</p>
+    <ul>
+      <li>在 <em><strong>IE6 IE7 IE8(Q)</strong></em> 中， TR 自动适应了 TD 子元素的高度，其设定的高度值无效；</li>
+      <li>在 <em><strong>其他浏览器</strong></em> 中， TD 子元素自动适应了 TR 的高度， TR 元素将 TD 元素拉高。</li>
+    </ul>
+
+    <h2 id="solutions">解决方案</h2>
+      <p>避免为 TR 设置高度。 </p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+                            Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RE1005/ie_tr_height.html">ie_tr_height.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-09</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>float clear 清除浮动 位置</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

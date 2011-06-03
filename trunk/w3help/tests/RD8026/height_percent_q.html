@@ -1,0 +1,68 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script>
+window.onload = function () {
+	function $(id){ return document.getElementById(id);}
+	void function(){
+		$("info1").innerHTML = "计算式：<br/>"
+		+ $("contain1").offsetHeight
+		+ "=" + $("child1").offsetHeight
+		+ '+' + $("child2").offsetHeight
+		+ '+' +$("child3").offsetHeight;
+		
+		$("info2").innerHTML = "计算式：<br/>"
+		+ $("contain2").offsetHeight
+		+ "=" + $("child4").offsetHeight
+		+ '+' + $("child5").offsetHeight
+		+ '+' +$("child6").offsetHeight;
+
+		
+		$("info3").innerHTML = "计算式：<br/>"
+		+ $("contain3").offsetHeight
+		+ "=" + $("child7").offsetHeight
+		+ '+' + $("child8").offsetHeight
+		+ '+' +$("child9").offsetHeight;
+	}();
+}
+</script>
+</head>
+<body style="margin:0; font:12px/2 'Trebuchet MS';">
+<div style="height:100px; background:#999999;margin-bottom:5px;">
+	<div id="cont1" style="width:100px;background:black; float:left;">
+		<div id="contain1" style="height:100%;margin:0 10px;padding:0;">
+			<div id="child1" style="height:50%; background:#CC99FF">block1</div>
+			<div id="child2" style="height:20%; background:yellow;">block2</div>
+            <div id="child3" style="height:30%; background:green;">block3</div>
+		</div>
+	</div>
+    <div style=" float:left;">
+        <div id="info1"></div>
+    </div>
+</div>
+<div style="height:100px; background:#999999;margin-bottom:5px;">
+	<div id="cont2" style="width:100px;background:black; float:left;">
+		<div id="contain2" style="height:100%;margin:0 10px;padding:0;">
+			<div id="child4" style="height:50%; background:#CC99FF; width:100%; display:inline-block;">inline-block1</div>
+			<div id="child5" style="height:20%; background:yellow; width:100%;display:inline-block;">inline-block2</div>
+            <div id="child6" style="height:30%; background:green; width:100%;display:inline-block;">inline-block3</div>
+		</div>
+	</div>
+    <div style=" float:left;">
+        <div id="info2"></div>
+    </div>
+</div>
+<div style="height:100px; background:#999999;margin-bottom:5px;">
+	<div id="cont3" style="width:100px;background:black; float:left;">
+		<div id="contain3" style="height:100%;margin:0 10px;padding:0;">
+			<div id="child7" style="height:50%; background:#CC99FF; display:list-item;">list-item1</div>
+			<div id="child8" style="height:20%; background:yellow; display:list-item;">list-item2</div>
+            <div id="child9" style="height:30%; background:green; display:list-item;">list-item3</div>
+		</div>
+	</div>
+    <div style=" float:left;">
+        <div id="info3"></div>
+    </div>
+</div>
+</body>
+</html>

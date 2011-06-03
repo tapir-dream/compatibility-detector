@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<script>
+	window.onload = function(){
+		document.getElementById('submit').onclick=function(){
+			for (var i = 0, forms = document.forms; forms[i]; forms[i++].submit());
+		};
+	}
+</script>
+</head>
+<body>
+<form method="get" action="receive.html" target="f_1">
+	<input type="text" name="key" value="form1">
+	<input type="submit" />
+</form>
+<form method="get" action="receive.html" target="f_2">
+	<input type="text" name="key" value="form2">
+	<input type="submit" />
+</form>
+<form method="get" action="receive.html" target="f_3">
+	<input type="text" name="key" value="form3">
+	<input type="submit" />
+</form>
+<form method="get" action="receive.html" target="_blank">
+	<input type="text" name="key" value="form4">
+	<input type="submit" />
+</form>
+<form method="get" action="receive.html" target="_blank">
+	<input type="text" name="key" value="form5">
+	<input type="submit" />
+</form>
+<form method="get" action="receive.html" target="_blank">
+	<input type="text" name="key" value="form6">
+	<input type="submit" />
+</form>
+<input id="submit" type="button" value="同时提交表单">
+</body>
+</html>

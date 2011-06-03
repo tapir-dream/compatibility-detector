@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<style>
+img,button,input,iframe,textarea{margin:0; font-size:12px; font-family:simsun; height:50px;}
+img{border:1px solid #666;}
+span {font-family:simsun;font-size:12px;}
+</style>
+<script type="text/javascript">
+	function changeVerticalAlign(s){
+		var elements = document.getElementById("A").getElementsByTagName("*");
+		for (var i = 0, l = elements.length; i < l ;i++ )
+			elements[i]["style"]["verticalAlign"] = s;
+	}
+</script>
+</head>
+<body>
+<div id="A">
+	<span style="background:gold">123</span>
+	<input style="width:50px" type="text" value="123"/>
+	<input style="width:50px" type="password" value="123"/>
+	<img src="http://www.google.com/intl/en_ALL/images/srpr/logo1w.png" alt="运行效果截图"/>
+	<button>button-123</button>
+	<iframe style="width:50px"></iframe>
+	<input type="button" value="input-123" />
+	<textarea style="width:50px">123</textarea>
+	<button></button>
+	<input type="button" value=""/>
+	<textarea style="width:50px"></textarea>
+	<input type="file" />
+</div>
+<br />
+修改垂直对齐方式：
+<button onClick="changeVerticalAlign('baseline')">vertical-align:baseline</button>
+<button onClick="changeVerticalAlign('top')">vertical-align:top</button>
+<button onClick="changeVerticalAlign('middle')">vertical-align:middle</button>
+<button onClick="changeVerticalAlign('bottom')">vertical-align:bottom</button>
+</body>
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX9015: setTimeout 和 setInteval 在各浏览器中被对话框阻塞的情况不同</h1>
+  <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>setTimer 和 setInteval 方法，以及常用的 alert、confirm、prompt 方法均为 BOM ( Browser Object Model ) 范畴，BOM 在现行 W3C 规范中没有描述，标准均由各浏览器厂商自行制定。</p>
+      <p>现有 HTML5 草案中试图将未规范的 BOM 划入规范定义，其中 setTimer 和 setInteval 方法说明可以参考：  <a href="http://www.w3.org/TR/html5/timers.html#timers">http://www.w3.org/TR/html5/timers.html#timers</a> </p>
+      <p>另在 Window 对象的草案中也有相关说明：  <a href="http://www.w3.org/TR/Window/#window-timers">http://www.w3.org/TR/Window/#window-timers</a> </p>
+      <p> 但是，至今为止 alert、confirm、prompt 方法说明还未在规范内出现，他们的作用都是打开一个模态对话框 (  Modal Dialog  )，另一个常用的模态对话框是点击 INPUT[type=file] 标记打开的文件选择对话框，用户只有关闭此对话框后才能继续主窗口上的操作任务。</p>
+      <h2 id="description">问题描述</h2>
+      <p>从现有可查资料推断 setTimer 和 setInteval 方法最早由 IE 浏览器分别在其 3.0 和 4.0 版本中实现，如今所有浏览器均实现了这两个定时器方法。</p>
+      <p> alert、confirm、prompt 方法的最初实现浏览器暂无可查，但是如今所有浏览器都完美支持他们。</p>
+      <p> INPUT[type=file] 标记打开的文件选择对话框在规范内没有明确说明是否应采用模态窗口形式，但所有浏览器均按模态窗口实现。</p>
+      <p>通常来说，模态窗口打开后会阻止其后程序继续运行，直到该窗口被关闭，父窗口内程序才能继续取得运行权。比如表单程序在提交之前存在 alert 语句，那必须等待这个对话框被用户关闭后，表单才可继续提交。</p>
+      <p>但是在使用定时器语句  setTimer 和 setInteval 后，不同浏览器内使用 alert、confirm、prompt 方法和使用 INPUT[type=file] 标记打开的模态窗口中，定时器内程序执行情况将有所不同，他们可能不会被打开的模态对话框阻塞运行。</p>
+      <h2 id="influence">造成的影响</h2>
+            <ol>
+              <li>原本希望持续执行的定时器程序会被某些模态窗口阻塞运行，可能导致与业务逻辑有关的具体计数不正确；</li>
+             <li>原本希望可以被模态窗口阻塞执行的定时器程序，在某些模态窗口打开时会继续运行，这可能导致比预期早执行某些业务逻辑而造成错误。</li>
+            </ol>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <h3>1、单一进程的桌面应用程序使用定时器执行情况</h3>
+      <p>鉴于这个问题所涉及的对象、方法绝大部分未在现行标准规范中详细说明（唯一标准的  INPUT[type=file] 标记在 HTML 4.01 规范中仅说明他的作用是打开一个文件选择对话框）。</p>
+      <p>同时浏览器程序本身就是个桌面应用程序，由此我们首先构建一个 Windows 桌面应用程序来做实际运行情况参照，这个程序使用 Delphi 创建，具体代码请参考 <a href="../../tests/BX9015/Unit_timer.pas">Unit_timer.pas </a>文件，程序运行请点<a href="../../tests/BX9015/Unit_timer.exe">这里</a>。</p>
+    <p>运行此窗口程序后，可以汇总出如下规律：</p>
+    <table class="compare">
+          <tr>
+            <th>&nbsp;</th>
+            <th>Timer</th>
+          </tr>
+          <tr>
+            <th>showMessage</th>
+            <td><span class="hl_2">不被阻塞</span> <sup>1</sup></td>
+          </tr>
+          <tr>
+            <th>openDialog</th>
+            <td><span class="hl_2">不被阻塞</span> <sup>1</sup></td>
+          </tr>
+        </table>
+    <p class="comment">【注1】：在程序执行过程中通过 SPY++ 工具嗅探系统消息，可发现当定时器启动后，定时触发系统的 WM_TIMER 消息，这个消息可以被主窗口接收，因此任何弹出的模态对话框都不能阻塞定时器内程序运行。</p>
+    <p>通过上表可见，在单一进程的应用程序内，如不做特殊处理，模态对话框不会阻塞定时器内程序运行。</p>
+    <h3>2、浏览器内使用定时器执行情况</h3>
+    <p>在了解桌面程序类似情况执行结果后，我们再来看浏览器类似代码的执行状况，分析以下代码：</p>
+<pre>
+&lt;script&gt;
+window.onload = function(){
+  var timerID,
+  msg = document.getElementsByTagName("div")[0],
+  sleep = 300;
+
+  function Run(type){
+    timerID &amp;&amp; clearTimerID(),msg.innerHTML = "";
+    type
+    ? timeout()
+    : timerID = setInterval(function(){echo()},sleep);
+  }
+  function clearTimerID(){
+    clearTimeout(timerID);
+    clearInterval(timerID);
+    timerID = null;
+  }
+  function timeout(){
+    echo();
+    timerID = setTimeout(arguments.callee,sleep);
+  }
+  function echo(){
+    msg.innerHTML += "|";
+    try{
+      console.log(t);
+    }catch(e){}
+  }
+
+  window["timeTest"] = {run: Run,stop:clearTimerID};
+}
+
+&lt;/script&gt;
+&lt;h2&gt;选择运行 setTimeout 或 setInterval &lt;/h2&gt;
+&lt;button onclick="timeTest.run(1)"&gt;运行 setTimeout&lt;/button&gt;
+&lt;button onclick="timeTest.run()"&gt;运行 setInterval&lt;/button&gt;
+&lt;button onclick="timeTest.stop()"&gt;终止运行&lt;/button&gt;
+&lt;h2&gt;选择弹出的对话框类型&lt;/h2&gt;
+&lt;button onclick="alert('alert 对话框')"&gt;alert&lt;/button&gt;
+&lt;button onclick="confirm('confirm 对话框')"&gt;confirm&lt;/button&gt;
+&lt;button onclick="prompt('prompt 对话框')"&gt;prompt&lt;/button&gt;
+&lt;input type="file" /&gt;
+&lt;h2&gt;内容输出区域：&lt;/h2&gt;
+&lt;div&gt;&lt;/div&gt;
+</pre>
+    <p>各浏览器中执行结果如下：</p>
+    <table class="compare">
+          <tr>
+            <th>&nbsp;</th>
+            <th>IE6 Firefox Chrome Safari Opera</th>
+            <th>IE7 IE8</th>
+          </tr>
+          <tr>
+            <th>&nbsp;</th>
+            <th>setTimeout / setInterval</th>
+            <th>setTimeout / setInterval</th>
+          </tr>
+          <tr>
+            <th>alert</th>
+            <td><span class="hl_1">阻塞</span></td>
+            <td><span class="hl_1">阻塞</span></td>
+          </tr>
+          <tr>
+            <th>confirm</th>
+            <td><span class="hl_1">阻塞</span></td>
+            <td><span class="hl_1">阻塞</span></td>
+          </tr>
+          <tr>
+            <th>prompt</th>
+            <td><span class="hl_1">阻塞</span></td>
+            <td><span class="hl_1">阻塞</span></td>
+          </tr>
+          <tr>
+            <th>INPUT [type=file]</th>
+            <td><span class="hl_2">不阻塞</span></td>
+            <td><span class="hl_1">阻塞</span></td>
+          </tr>
+        </table>
+    <p>根据上表可见：</p>
+        <ul>
+          <li>在 <strong><em>所有浏览器</em></strong> 中 alert、confirm、prompt 方法均能阻塞 setTimeout 和 setInterval 定时器运行；</li>
+            <li>在 <strong><em>IE6 Firefox Chrome Safari Opera</em></strong> <sup>2</sup>中，文件选择对话框虽然是模态形式，但不能阻塞定时器执行；</li>
+            <li>在 <strong><em>IE7 IE8</em></strong> 中，文件选择对话框可以阻塞定时器执行。</li>
+          </ul>
+    <p class="comment">【注2】：在 IE9 Preview 4 版本中，文件选择对话框同样不能阻塞定时器执行，他回归了 IE6 执行效果。</p>
+    <p>综上所述，浏览器 BOM 系统内提供的  setTimeout 和 setInterval 定时器以及  alert、confirm、prompt 方法与传统桌面应用程序机制完全不同。他们打开的对话框可以完美阻塞定时器内程序执行。</p>
+    <p>而 INPUT [type=file] 提供的选择文件对话框是调用系统对话框 API 得到的，在 IE7 IE8 中他可能被特殊处理为可以阻塞定时器运行的效果，其他浏览器则没有这个特殊处理。</p>
+    <h2 id="solutions">解决方案</h2>
+      <p>不要期望在各浏览器中由  INPUT [type=file] 提供的打开文件模态对话框可以完美阻止定时器内程序执行。</p>
+      <p>可以在定时器执行程序内针对具体应用加入必要的检测机制，用来确保代码在非阻塞情况下不会提前使用了还不存在的资源而报错。</p>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+    <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td> IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.8<br />
+              Chrome 7.0.517.0 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62</td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BX9015/Unit_timer.pas">Unit_timer.pas </a><br />
+              <a href="../../tests/BX9015/Unit_timer.exe">Unit_timer.ext</a><br />
+                            <a href="../../tests/BX9015/modal_dialog_and_timer.html">modal_dialog_and_timer.html</a>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-13</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>BOM setTimeout setInterval alert confirm prompt file   Modal Dialog 脚本 阻塞</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

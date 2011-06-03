@@ -1,0 +1,331 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RB1006: IE6 IE7 IE8(Q) 中触发了 hasLayout 的元素若包含 TEXTAREA 元素及某些 type 的 INPUT 元素，其 'margin-left' 和 'margin-right' 会与预期不符</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 CSS2.1 规范中的描述，margin 系列特性指定了一个框的 <a href="http://www.w3.org/TR/CSS21/box.html#box-margin-area">margin area</a> 的宽度，盒模型示意图如下：<br />
+      <img src="../../tests/RB1006/boxdim.png" alt="Box Model" /></p>
+      <p>关于 margin 与 盒模型 的更多信息，请参见 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/box.html#box-margin-area">8.1 Box dimensions</a> 和 <a href="http://www.w3.org/TR/CSS21/box.html#margin-properties">8.3 Margin properties</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE6 IE7 IE8(Q) 中，若一个触发了 hasLayout 的元素其内第一个非空白节点 (即 children[0]) 为 TEXTAREA 元素 或者 type 属性值为 text、password、submit、reset、button、file 的 INPUT 元素，并且这个元素设定了 'margin-left'、'margin-right' 特性，则 'margin-left'、'margin-right' 特性指定的值会应用于其相应方向的 padding 上。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题可能导致设定 'margin-left'、'margin-right' 在 IE6 IE7 IE8(Q) 与其他浏览器中产生差异，从而影响布局。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>对于此问题，我们通过以下的测试用例来说明。</p>
+      <p>分析以下代码：</p>
+<pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  * { margin:0; padding:0; font:12px 'Trebuchet MS'; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div style=&quot;width:400px; position:relative;&quot;&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px;&quot;&gt;
+      &lt;input id=&quot;i1&quot; type=&quot;text&quot; value=&quot;text&quot; /&gt;input
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px; text-align:right;&quot;&gt;
+      &lt;input id=&quot;i2&quot; type=&quot;text&quot; value=&quot;text&quot; /&gt;input
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px;&quot;&gt;
+      &lt;input id=&quot;i1&quot; type=&quot;password&quot; value=&quot;password&quot; /&gt;input
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px; text-align:right;&quot;&gt;
+      &lt;input id=&quot;i2&quot; type=&quot;password&quot; value=&quot;password&quot; /&gt;input
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px;&quot;&gt;
+      &lt;input id=&quot;i1&quot; type=&quot;checkbox&quot; value=&quot;checkbox&quot; /&gt;input
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px; text-align:right;&quot;&gt;
+      &lt;input id=&quot;i2&quot; type=&quot;checkbox&quot; value=&quot;checkbox&quot; /&gt;input
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px;&quot;&gt;
+      &lt;input id=&quot;i1&quot; type=&quot;radio&quot; value=&quot;radio&quot; /&gt;input
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px; text-align:right;&quot;&gt;
+      &lt;input id=&quot;i2&quot; type=&quot;radio&quot; value=&quot;radio&quot; /&gt;input
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px;&quot;&gt;
+      &lt;input id=&quot;i1&quot; type=&quot;submit&quot; value=&quot;submit&quot; /&gt;input
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px; text-align:right;&quot;&gt;
+      &lt;input id=&quot;i2&quot; type=&quot;submit&quot; value=&quot;submit&quot; /&gt;input
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px;&quot;&gt;
+      &lt;input id=&quot;i1&quot; type=&quot;image&quot; src=&quot;google_small.gif&quot; /&gt;input
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px; text-align:right;&quot;&gt;
+      &lt;input id=&quot;i2&quot; type=&quot;image&quot; src=&quot;google_small.gif&quot; /&gt;input
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px;&quot;&gt;
+      &lt;input id=&quot;i1&quot; type=&quot;reset&quot; value=&quot;reset&quot; /&gt;input
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px; text-align:right;&quot;&gt;
+      &lt;input id=&quot;i2&quot; type=&quot;reset&quot; value=&quot;reset&quot; /&gt;input
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px;&quot;&gt;
+      &lt;input id=&quot;i1&quot; type=&quot;button&quot; value=&quot;button&quot; /&gt;input
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px; text-align:right;&quot;&gt;
+      &lt;input id=&quot;i2&quot; type=&quot;button&quot; value=&quot;button&quot; /&gt;input
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px;&quot;&gt;
+      &lt;input id=&quot;i1&quot; type=&quot;file&quot; value=&quot;file&quot; style=&quot;width:100px;&quot; /&gt;input
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px; text-align:right;&quot;&gt;
+      &lt;input id=&quot;i2&quot; type=&quot;file&quot; value=&quot;file&quot; style=&quot;width:100px;&quot; /&gt;input
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px;&quot;&gt;
+      &lt;img src=&quot;google_small.gif&quot; /&gt;img
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px; text-align:right;&quot;&gt;
+      &lt;img src=&quot;google_small.gif&quot; /&gt;img
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px;&quot;&gt;
+      &lt;button&gt;button&lt;/button&gt;button
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px; text-align:right;&quot;&gt;
+      &lt;button&gt;button&lt;/button&gt;button
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px;&quot;&gt;
+      &lt;iframe style=&quot;width:100px; height:30px;&quot; src=&quot;google_small.gif&quot;&gt;&lt;/iframe&gt;iframe
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px; text-align:right;&quot;&gt;
+      &lt;iframe style=&quot;width:100px; height:30px;&quot; src=&quot;google_small.gif&quot;&gt;&lt;/iframe&gt;iframe
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px;&quot;&gt;
+      &lt;select style=&quot;width:100px; height:30px;&quot;&gt;&lt;/select&gt;select
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px; text-align:right;&quot;&gt;
+      &lt;select style=&quot;width:100px; height:30px;&quot;&gt;&lt;/select&gt;select
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px;&quot;&gt;
+      &lt;textarea style=&quot;width:100px; height:30px;&quot;&gt;&lt;/textarea&gt;textarea
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px; text-align:right;&quot;&gt;
+      &lt;textarea style=&quot;width:100px; height:30px;&quot;&gt;&lt;/textarea&gt;textarea
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px;&quot;&gt;
+      &lt;object type=&quot;application/x-shockwave-flash&quot; style=&quot;width:100px; height:30px;&quot; data=&quot;clock.swf&quot;&gt;
+        &lt;param name=&quot;src&quot; value=&quot;clock.swf&quot; /&gt;
+      &lt;/object&gt;object
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px; text-align:right;&quot;&gt;
+      &lt;object type=&quot;application/x-shockwave-flash&quot; style=&quot;width:100px; height:30px;&quot; data=&quot;clock.swf&quot;&gt;
+        &lt;param name=&quot;src&quot; value=&quot;clock.swf&quot; /&gt;
+      &lt;/object&gt;object
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px;&quot;&gt;
+      &lt;embed type=&quot;application/x-shockwave-flash&quot; style=&quot;width:100px; height:30px;&quot; src=&quot;clock.swf&quot;&gt;&lt;/embed&gt;embed
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;br /&gt;
+  &lt;div style=&quot;background:wheat;&quot;&gt;
+    &lt;div style=&quot;background:plum; zoom:1; margin:0 50px; text-align:right;&quot;&gt;
+      &lt;embed type=&quot;application/x-shockwave-flash&quot; style=&quot;width:100px; height:30px;&quot; src=&quot;clock.swf&quot;&gt;&lt;/embed&gt;embed
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div style=&quot;position:absolute; top:0; left:99px; background:blue; width:2px; height:1500px;&quot;&gt;&lt;/div&gt;
+  &lt;div style=&quot;position:absolute; top:0; right:99px; background:blue; width:2px; height:1500px;&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码分为若干组，各组中均按照问题描述中的结构编写代码，区别为触发了 hasLayout 的元素内的第一个非空白节点不同。</p>
+      </p>这段代码在不同的浏览器环境中的表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Opera Safari Chrome</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RB1006/01.png" alt=""></td>
+          <td><img src="../../tests/RB1006/02.png" alt=""></td>
+        </tr>
+      </table>
+      <p>然而根据上面的测试代码的结果可见，</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8(Q)</em> 下，触发了 hasLayout 的元素其内第一个非空白节点 (即 children[0]) 为 TEXTAREA 元素 或者 type 属性值为 text、password、submit、reset、button、file 的 INPUT 元素，并且这个元素设定了 'margin-left'、'margin-right' 特性，则 'margin-left'、'margin-right' 特性指定的值会应用于其相应方向的 padding 上。但这块多余的区域并不是 padding。</li>
+        <li>在 <em>IE8(S) Firefox Chrome Safari  Opera</em> 下，浏览器按照 W3C 的规范对代码进行解释，为我们预期的效果。</li>
+      </ul>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>在 INPUT、TEXTAREA 元素之前放一个触发了 hasLayout 的空 SPAN 元素。</p>
+            <p>例如：</p>
+      <pre>&lt;span style=&quot;zoom:1;&quot;&gt;&lt;/span&gt;</pre>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.517.17 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RB1006/IE67_DM.html">IE67_DM.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-25</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>margin hasLayout input textarea</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>
+

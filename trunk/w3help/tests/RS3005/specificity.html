@@ -1,0 +1,24 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</head>
+<body>
+<style type="text/css">
+a {font:bold 50px Verdana;}
+a:visited {color:green;}	/* [0,0,1,1] */
+a:hover {color:blue;}		/* [0,0,1,1] */
+a:active {color:yellow;}	/* [0,0,1,1] */
+a:link {color:red;}		/* [0,0,1,1] */
+</style>
+<!--
+a:focus {color:navy;}		/* [0,0,1,1] */
+div.c1 a {color:black;}		/* [0,0,1,2] */
+div.c1 .c2{color:black;}	/* [0,0,2,1] */
+.c1 a.c2{color:black;}		/* [0,0,2,1] */
+#b1 a{color:black;}		/* [0,1,0,1] */
+-->
+<div id="b1" class="c1">
+	<a class="c2" href="#">text</a>
+</div>
+</body>
+</html>

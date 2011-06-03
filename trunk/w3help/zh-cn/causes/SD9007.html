@@ -1,0 +1,172 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SD9007: IE 对 DOMImplementation 接口的支持程度停留在 DOM 1 Core 阶段</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>DOMImplementation 接口是 DOM 核心的基础接口，在 W3C DOM1 Core中就已定义，此后的 DOM2 Core，DOM3 Core 都对其进行了的扩展。它提供了一系列独立于任何特定 DOM 实例的方法，包括 hasFeature ， createDocument 等。</p>
+      <p></p>
+      <p>W3C DOM1 Core 第一版中关于 DOMImplementation 接口的详细说明，请参见第 <a href="http://www.w3.org/TR/REC-DOM-Level-1/level-one-core.html#ID-BBACDC08">1.2 节</a></p>
+      <p>W3C DOM1 Core 第二版中关于 DOMImplementation 接口的详细说明，请参见第 <a href="http://www.w3.org/TR/REC-DOM-Level-1/level-one-core.html#ID-102161490">1.2 节</a></p>
+      <p>W3C DOM2 Core 中关于 DOMImplementation 接口的详细说明，请参见第 <a href="http://www.w3.org/TR/DOM-Level-2-Core/core.html#ID-102161490">1.2 节</a></p>
+      <p>W3C DOM3 Core 中关于 DOMImplementation 接口的详细说明，请参见第 <a href="http://www.w3.org/TR/DOM-Level-3-Core/core.html#ID-102161490">1.4 节</a></p>
+      <p>关于 implementation 属性，请参考 W3C DOM2 Core 中的 <a href="http://www.w3.org/TR/DOM-Level-2-Core/core.html#i-Document">Document接口</a></p>
+      <p>WebKit 中的 DOMImplementation 接口请参考 <a href="http://developer.apple.com/safari/library/documentation/AppleApplications/Reference/WebKitDOMRef/DOMImplementation_idl/Classes/DOMImplementation/index.html#//apple_ref/js/cl/DOMImplementation">DOMImplementation</a> </p>
+      <p>Firefox 下的 DOMImplementation 接口请参考 <a href="https://developer.mozilla.org/En/DOM/DOMImplementation">DOMImplementation</a> </p>
+      <p>IE 下的 DOMImplementation 接口请参考 <a href="http://msdn.microsoft.com/en-us/library/dd347056%28VS.85%29.aspx">DOMImplementation</a> </p>
+
+      <h2 id="description">问题描述</h2>
+      <p>各浏览器对 DOMImplementation 接口的支持程度不同。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>有些浏览器还在支持它，而有些浏览器则不支持，从而导致浏览器间的兼容性问题。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>通过调用 Document 接口实例的 implementation 属性，可获得 DOMImplementation 接口实例，代码如下：</p>
+<pre>
+document.implementation
+</pre>
+      <p>那么，目前的主流浏览器对 DOMImplementation 接口的支持情况究竟如何呢？参见如下代码：</p>
+
+<pre>
+alert(document.implementation.hasFeature);
+alert(document.implementation.createDocumentType);
+alert(document.implementation.createDocument);
+alert(document.implementation.getFeature);
+</pre>
+      <p>根据以上代码在各浏览器下的表现，汇总结果如下表：
+      <table class="compare">
+        <tr>
+          <th>方法</th>
+          <th>IE</th>
+          <th>Firefox</th>
+          <th>Chrome</th>
+          <th>Safar</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <th>hasFeature</th>
+          <td class="hl_2">支持</td>
+          <td class="hl_2">支持</td>
+          <td class="hl_2">支持</td>
+          <td class="hl_2">支持</td>
+          <td class="hl_2">支持<br />
+          </td>
+        </tr>
+        <tr>
+          <th>createDocumentType</th>
+          <td class="hl_1">不支持</td>
+          <td class="hl_2">支持</td>
+          <td class="hl_2">支持</td>
+          <td class="hl_2">支持</td>
+          <td class="hl_2">支持</td>
+        </tr>
+        <tr>
+          <th>createDocument</th>
+          <td class="hl_1">不支持</td>
+          <td class="hl_2">支持</td>
+          <td class="hl_2">支持</td>
+          <td class="hl_2">支持</td>
+          <td class="hl_2">支持</td>
+        </tr>
+        <tr>
+          <th>getFeature</th>
+          <td class="hl_1">不支持</td>
+          <td class="hl_1">不支持</td>
+          <td class="hl_1">不支持</td>
+          <td class="hl_1">不支持</td>
+          <td class="hl_2">支持</td>
+        </tr>
+        <tr>
+          <th class="hl_4">DOMImplementation 接口的支持程度</th>
+          <td class="hl_4">DOM1</td>
+          <td class="hl_4">DOM2</td>
+          <td class="hl_4">DOM2</td>
+          <td class="hl_4">DOM2</td>
+          <td class="hl_4">DOM3</td>
+        </tr>
+      </table>
+      <p>从上表中，可以清楚的看出， DOMImplementation 接口在各主流浏览器下的支持情况。
+      <p class="comment">注意：以上讨论的方法，都是标准中 DOMImplementation 接口定义的，而实际上某些浏览器可能对 DOMImplementation 接口的实现进行了扩展，如 WebKit 就额外扩展了 “createCSSStyleSheet” 方法。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>避免使用各浏览器支持程度不同的 DOMImplementation 的接口。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/SD9007/DOMImplementation_support.html">DOMImplementation_support.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-26</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>DOMImplementation implementation createDocument</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

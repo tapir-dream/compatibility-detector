@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RN8002: 各浏览器在 HTML 页面与页面中引入的外部 CSS 文件编码不一致时表现不同</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 CSS 2.1 规范的描述，应按照以下优先级来确定一个外部 CSS 文件的编码：</p>
+      <ol>
+        <li>HTTP 响应头中 "Content-Type" 字段的 "charset" 参数指定的编码。</li>
+        <li>BOM 以及/或者 @charset 定义的编码。</li>
+        <li>&lt;link charset=""&gt; 或其他链接机制提供的元数据（如果有的话）指定的编码。</li>
+        <li>引入该 CSS 文件的 HTML 或另一个 CSS 文件（如果有的话）中已确定的编码。</li>
+        <li>如果以上几步都没能确定编码，则假定其编码为 UTF-8。</li>
+      </ol>
+      <p>关于上述内容的详细信息，请参考 CSS 2.1 规范 <a href="http://www.w3.org/TR/CSS21/syndata.html#charset">4.4 CSS style sheet representation</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>如果一个外部 CSS 文件的编码与引入该文件的 HTML 文件的编码不一致，并且没有显式的声明该 CSS 文件的编码，在某些情况下会造成 CSS 的解析错误。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>该问题将造成页面布局在一些浏览器中与预期的效果不符。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+        </tr>
+        <tr>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>对于一个未显式声明编码的 CSS 文件，浏览器会将其编码认为与引入该文件的文件的编码一致。在一些特定的情况下，将造成 CSS 代码解析异常。举例如下：</p>
+      <p>HTML 代码（编码为 UTF-8）：</p>
+<pre>
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8"/&gt;
+&lt;link rel="stylesheet" type="text/css"  href="css.css"/&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;内容文本&lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+      <p>以上页面引入的 css.css 的代码（编码为 GB2312）：</p>
+<pre>
+h1 {
+  margin:0;
+  width:100px;
+  height:100px;
+  background:blue;
+  font:20px/100px "黑体";
+  text-decoration:underline;
+  color:red;
+}
+</pre>
+      <p>假设上述两个文件均为在 HTTP 响应头中设定编码，在各浏览器中表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6</th>
+          <th>其他浏览器</th>
+        </tr>
+        <tr>
+          <td><img width="100" height="100" src="002/1.png" alt="snapshot" /></td>
+          <td><img width="100" height="100" src="002/2.png" alt="snapshot" /></td>
+        </tr>
+      </table>
+      <p>可见，IE6 把 CSS 文件从“黑体”二字到规则结束的样式都没有起作用，其他浏览器中仅“黑体”二字解析错误。</p>
+      <p>产生这种差异的原因是各浏览器对与这种错误的容错方式不同。</p>
+      <p>按照规范的规定，在这种情况下，浏览器会认为 CSS 文件的编码与页面一致，即 UTF-8，但 GB2312 编码下的一个中文字符是 2 个字节，在 UTF-8 编码下则为 3 个字节，在把 GB2312 编码下的“黑体”二字当作 UTF-8 编码的文字来解析的时候，得到的是“����”，这并不是预期的值。正是这个值导致了样式定义在各浏览器中都无法按照预期被解析。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>当 HTML 文件或 CSS 文件要引入一个不同编码的 CSS 文件时，要明确声明被引入的 CSS 文件的编码。</p>
+      <p>如以上的举例，在 CSS 文件的开头加上一行<sup>1</sup>：</p>
+<pre>@charset "GB2312";</pre>
+      <p>或者在各文件的 HTTP 响应头中声明该文件实际使用的编码。</p>
+      <p class="comment">
+        注：<br/>
+        1. 虽然 CSS 2.1 规范也允许在 LINK 标签上添加 'charset' 属性来指定编码，但 IE6 IE7 IE8(Q) 不支持。
+      </p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+        <tr>
+          <th>操作系统版本:</th>
+          <td>Windows 7 Ultimate build 7600</td>
+        </tr>
+        <tr>
+          <th>浏览器版本:</th>
+          <td>
+            IE6<br />
+            IE7<br />
+            IE8<br />
+            Firefox 3.6<br />
+            Chrome 4.0.302.3 dev<br />
+            Safari 4.0.4
+          </td>
+        </tr>
+        <tr>
+          <th>测试页面:</th>
+          <td><a href="#">...</a></td>
+        </tr>
+        <tr>
+          <th>本文更新时间:</th>
+          <td>2010-08-03</td>
+        </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>CSS 编码 外部文件</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

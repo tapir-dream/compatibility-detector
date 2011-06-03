@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RY1001: IE6 IE7 IE8(Q) 会自动修复 'font-family' 特性的值是由一个引号包括了整个字体家族时的错误书写的代码</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p><a title="CSS2.1规范第15.2.2节" href="http://www.w3.org/TR/CSS2/fonts.html#font-family-prop">CSS2.1 规范第 15.2.2 节</a></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 IE7 IE8(Q) 中，当使用一对引号将所有的字体家族名连同分割的逗号全部包含，浏览器会修复此定义错误，多余的引号会被忽略。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>各浏览器内字体不一致。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>当使用一对引号将所有的字体家族名连同分割的逗号全部包含，浏览器会修复此定义错误，多余的引号会被忽略。</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>'font-family' 的值格式为：</p>
+      <p>[[ family-name | generic-family ] [, family-name | generic-family ]* ] | inherit</p>
+      <p>上面的格式代表，font-family 的值可由多个 family-name（字体家族名）及 generic-family（通用家族）构成，中间使用逗号  &quot;," 分割。 </p>
+      <p>例如，包含英文单词并混合了数学符号的文本可能需要两个字体的字体集，一个包含拉丁字母和数字，另外一个包含数学符号。如果文本可能包含拉丁字母，日语字母和数学符号，下面的例子给出一个合适的字体集： </p>
+      <p>BODY { font-family: Baskerville, &quot;Heisi Mincho W3&quot;, Symbol, serif } </p>
+      <p>&quot;Baskerville&quot; 字体（只包含拉丁字母的字体）中包含的字型将提供可用的字型，日文字型将来自 &quot;Heisi Mincho W3&quot; ，而数学符号字型来自 &quot;Symbol&quot;。其它的将来自通用字体家族 'serif'。 </p>
+      <p>对于 family-name（字体家族名），上例中，&quot;Baskerville&quot;，&quot;Heisi Mincho W3&quot; 和 &quot;Symbol&quot; 是字体家族。包含空白的字体名应该用引号分割。如果省略了引号，字体名前或后的任何空白将被忽略，而字体名内的任何空白字符序列将被转换为一个空格。</p>
+      <p>测试代码：</p>
+<pre>
+&lt;style&gt;
+  #d1 {font-family: &quot;Arial, Tahoma&quot;}
+  #d2 {font-family: &quot;Arial, Tahoma&quot;, &quot;Times New Roman&quot;}
+  #d3 {font-family: Arial, Tahoma, &quot;Times New Roman&quot;}
+&lt;/style&gt;
+&lt;div id=&quot;d1&quot;&gt;font-family&lt;/div&gt;
+&lt;div id=&quot;d2&quot;&gt;font-family&lt;/div&gt;
+&lt;div id=&quot;d3&quot;&gt;font-family&lt;/div&gt;
+</pre>
+      <p>以上代码分为三组，区别在 DIV 元素的 CSS 定义中 font-family 的值：</p>
+      <ul>
+        <li>1. 第一组：全部字体家族名被一对引号包含；</li>
+        <li>2. 第二组：前两个字体家族名被一对引号包含后，与第三个用逗号分割；</li>
+        <li>3. 第三组：完全遵照 W3C 规范规定的写法。</li>
+      </ul>
+      <p>根据 W3C CSS2.1 规范对 font-family 的规定，被引号包含的字符串将被认为是一个字体家族，所以上面三组中，DIV 元素的 font-family 分别有一个、两个、三个字体家族定义。</p>
+      <p>以上代码在不同的浏览器环境中的表现：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Safari Chrome</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RY1001/a.gif" alt="运行效果截图" /></td>
+          <td><img src="../../tests/RY1001/b.gif" alt="运行效果截图" /></td>
+        </tr>
+        <tr>
+          <td>实际应用的字体家族：<br />
+            <ul>
+              <li>第一组：Arial</li>
+              <li>第二组：Times New Roman</li>
+              <li> 第三组：Arial</li>
+            </ul></td>
+          <td>实际应用的字体家族：<br />
+            <ul>
+              <li>第一组：浏览器默认字体</li>
+              <li>第二组：Times New Roman</li>
+              <li>第三组：Arial</li>
+            </ul>
+          </td>
+        </tr>
+      </table>
+      <p>可见：</p>
+      <ul>
+        <li>在 IE6 IE7 IE8(Q) 中，
+          <ol>
+            <li>对于第一组，浏览器忽略了最外面的引号，CSS 代码被修复为：‘font-family: Arial, Tahoma’ ，则 DIV 被应用上字体 Arial；</li>
+            <li>对于第二组，&quot;Arial, Tahoma&quot; 后出现了另一个字体家族 &quot;Times New Roman&quot; ，浏览器此时没有对包含 &quot;Arial, Tahoma&quot; 的引号做修复，而是将 &quot;Arial, Tahoma&quot; 看做一种字体家族，由于系统中并没有此字体，所以DIV被应用上字体 &quot;Times New Roman&quot; ；</li>
+          </ol>
+        <li>
+          <p>在其他浏览器中，</p>
+          <ol>
+            <li> 对于第一组，浏览器将整个引号包含的 &quot;Arial, Tahoma&quot; 当做是一种字体家族，而由于系统中并没有此字体，除此之外再没有定义其他有效的字体家族名称，所以 DIV 被应用上各浏览器的默认字体。</li>
+            <li> 对于第二组，处理方式同上面 IE6 IE7 IE8(Q) 中。</li>
+          </ol>
+        </li>
+      </ul>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>这是由于疏忽笔误造成的错误，首先应按照 W3C 规范中的标准写法定义 'font-family' 。而不能利用浏览器对错误代码的容错机制。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td> IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4 </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>&nbsp;</td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-05-19</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>font-family 字体家族 font property quotation mark</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

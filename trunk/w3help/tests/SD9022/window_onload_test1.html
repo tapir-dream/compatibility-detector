@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+</head>
+<body>
+<button onclick="alert(document.body.onload);">查看本页 document.body.onload 事件</button>
+<button onclick="alert(window.onload);">查看本页 window.onload 事件</button>
+<button onclick="alert(window.onload===document.body.onload);">查看document.body.onload 事件与 window.onload 事件是否为同一事件</button>
+<br />
+<script>
+
+document.body.onload = function (){
+	document.getElementById("A").innerHTML = "document.body.onload 被触发";
+}
+window.onload = function (){
+	document.getElementById("B").innerHTML = "window.onload 被触发";
+}
+</script>
+<span id="A" style="background:gold"></span>
+<span id="B" style="background:gray"></span>
+</body>
+</html>

@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<script>
+function $(id) { return document.getElementById(id); }
+for (var i = 100; i <= 900; i+=100) {
+    document.write('<div style="font-weight:' + i + '"><b id="b' + i + '">B{font-weight:<span></span>} </b></div>');
+    document.write('<div style="font-weight:' + i + '"><strong id="strong' + i + '">STRONG{font-weight:<span></span>} </strong></div>');
+    document.write('<div style="font-weight:' + i + '"><h3 id="h3' + i + '">H3{font-weight:<span></span>} </h3></div>');
+    document.write('<table border="1" style="font-weight:' + i + '"><tr><th id="th' + i + '">TH{font-weight:<span></span>}</th></tr></table>');
+	$("b" + i).getElementsByTagName("span")[0].innerHTML = $("b" + i).currentStyle.fontWeight;
+	$("strong" + i).getElementsByTagName("span")[0].innerHTML = $("b" + i).currentStyle.fontWeight;
+	$("h3" + i).getElementsByTagName("span")[0].innerHTML = $("b" + i).currentStyle.fontWeight;
+	$("th" + i).getElementsByTagName("span")[0].innerHTML = $("b" + i).currentStyle.fontWeight;
+}
+</script>

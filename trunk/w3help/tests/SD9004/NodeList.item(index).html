@@ -1,0 +1,15 @@
+<script type="text/javascript">
+    window.onload = function() {
+        var spans = document.getElementsByTagName("span");
+        try {
+            var span2 = spans.item(1);
+            document.getElementById("info").innerHTML = "NodeList.item(index).id: " + span2.id;
+        } catch(err) {
+            document.getElementById("info").innerHTML = "NodeList.item(index): " + err;
+        }
+    }
+</script>
+<span id="span1"></span>
+<span id="span2"></span>
+
+<div id="info"></div>

@@ -1,0 +1,1 @@
+document.write("This is h1.js"+"<br/>");

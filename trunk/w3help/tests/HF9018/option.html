@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	* { margin:0; font-size:12px; font-family:'Trebuchet MS'; }
+	form { width:250px; }
+	form div { overflow:hidden; zoom:1; padding:3px; }
+	form div span { float:right; }
+	form div span em { font-weight:bold; background:coral; padding:2px; }
+	select { width:100px; height:24px; }
+	iframe { width:250px; height:90px; }
+</style>
+</head>
+<body abc>
+<form action="submit.php" target="iframe">
+	<div>
+		<span id="i1"></span>
+		<select id="s1" name="no_value">
+			<option id="o1">no_value</option>
+		</select>
+	</div>
+	<div>
+		<span id="i2"></span>
+		<select id="s2" name="empty_value">
+			<option id="o2" value>empty_value</option>
+		</select>
+	</div>
+	<div>
+		<span id="i3"></span>
+		<select id="s3" name="has_value">
+			<option id="o3" value="has_value">has_value</option>
+		</select>
+	</div>
+</form>
+<iframe name="iframe" frameborder="0"></iframe>
+<script>
+	document.forms[0].submit();
+	document.getElementById('i1').innerHTML = 'value: <em>&nbsp;"' + document.getElementById('s1').value + '"&nbsp;</em>';
+	document.getElementById('i2').innerHTML = 'value: <em>&nbsp;"' + document.getElementById('s2').value + '"&nbsp;</em>';
+	document.getElementById('i3').innerHTML = 'value: <em>&nbsp;"' + document.getElementById('s3').value + '"&nbsp;</em>';
+</script>
+</body>
+</html>

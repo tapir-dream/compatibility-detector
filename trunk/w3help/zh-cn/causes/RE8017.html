@@ -1,0 +1,149 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RE8017: IE Firefox Opera 的混杂模式对于百分比单位高度的单元格内子元素的百分比高度计算错误</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 CSS2.1 规范中关于表格的高度算法中的描述，一旦 UA 获得行内所有单元格，就可以计算 'table-row' 元素框的高度：它是行内指定的 'height' 最大值和单元格要求的最小高度（MIN）的较大者。如果 'table-row' 的 'height' 值为 'auto'，则意味着计算出的高度应为 MIN。MIN 取决于单元格框高度和单元格框的对齐（很类似于行框的高度计算）。如果指定表格行和行组 'height' 的百分比，CSS2.1 并未定义百分比应参照哪个高度。</p>
+      <p>而对于一般元素，当指定一个百分比宽度时，百分比的计算基于生成框的包含块的宽度。如果包含块的高度没有明确指定（如依赖于其内容高度），并且这个元素不是绝对定位的，那么高度计算为 'auto'。</p>
+      <p>关于 表格的高度算法 以及 百分比高度 的详细信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/tables.html#height-layout">17.5.3 Table height algorithms</a> 及 <a href="http://www.w3.org/TR/CSS21/visudet.html#the-height-property">10.5 Content height: the 'height' property</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE Firefox Opera 的混杂模式中，若 TD 元素的高度为百分比，其子元素的高度也为百分比，则其子元素的高度计算将会出现错误。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>若在表格中使用了百分比高度，并且页面运行在混杂模式下，则可能会带来兼容性问题，影响表格最终布局。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6(Q) IE7(Q) IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <th>Firefox(Q) Opera(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+<pre>
+&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; style=&quot;width:100px; border:5px solid black;&quot;&gt;
+    &lt;tr&gt;
+        &lt;td id=&quot;td1-1&quot; style=&quot;width:50%; height:100%; vertical-align:top;&quot;&gt;
+            &lt;div id=&quot;div1-1&quot; style=&quot;height:20px; background:#666;&quot;&gt;&lt;/div&gt;
+            &lt;div id=&quot;div1-2&quot; style=&quot;height:100%; background:#999;&quot;&gt;123&lt;/div&gt;
+        &lt;/td&gt;
+        &lt;td id=&quot;td1-2&quot; style=&quot;width:50%; height:100%;&quot;&gt;
+            &lt;div id=&quot;div1-3&quot; style=&quot;height:50px; background:#DDD;&quot;&gt;&lt;/div&gt;
+        &lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;
+&lt;br /&gt;
+&lt;table cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; style=&quot;width:100px; border:5px solid black;&quot;&gt;
+    &lt;tr&gt;
+        &lt;td id=&quot;td2-1&quot; style=&quot;width:50%; height:100%; vertical-align:top;&quot;&gt;
+            &lt;div id=&quot;div2-1&quot; style=&quot;height:20px; background:#666;&quot;&gt;&lt;/div&gt;
+            &lt;div id=&quot;div2-2&quot; style=&quot;height:50%; background:#999;&quot;&gt;123&lt;/div&gt;
+        &lt;/td&gt;
+        &lt;td id=&quot;td2-2&quot; style=&quot;width:50%; height:100%;&quot;&gt;
+            &lt;div id=&quot;div2-3&quot; style=&quot;height:50px; background:#DDD;&quot;&gt;&lt;/div&gt;
+        &lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;
+</pre>
+      <p>上面代码分为两组，每组均为表格元素分为左右两列，仅一行，其中左列【td1-1】包含两个 DIV 元素，一个【div1-2】高度为 20px，一个【div1-2】高度为百分比单位。右列【td1-2】包含一个 DIV 元素【div1-3】，高度为 50px。两个 TD 元素【td1-1】与【td1-2】的高度均为 100%。两组的区别仅为【div1-2】的百分比高度为 100% 及 50%。</p>
+      <p>这段代码在各浏览器中运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE(Q)</th>
+          <th>Firefox(Q) Opera(Q)</th>
+          <th>IE(S) Firefox(S) Opera(S) Chrome Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RE8017/dfp5h4pg_2010c9d8zsfn_b.gif" alt="" /></td>
+          <td><img src="../../tests/RE8017/dfp5h4pg_2011cr4rvhgx_b.gif" alt="" /></td>
+          <td><img src="../../tests/RE8017/dfp5h4pg_2012ctp3sqgp_b.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>可见，对于最终表格元素的高度计算，各浏览器均计算为 60px。差异出现在对【div1-2】及【div2-2】的高度计算上，</p>
+      <p><img src="../../tests/RE8017/dfp5h4pg_2014d7jtj7fz_b.gif" alt="IE(Q) in developer tool" style="float:left; margin-right:20px;" /></p>
+      <ul>
+        <li>在 <em>IE6(Q) IE7(Q) IE8(Q)</em> 中，如左图所示，浏览器在获得当前行的最大高度 50px 后，【td1-1】与【td1-2】的计算高度均为 50px。此时浏览器将【div1-2】的包含块【td1-1】的计算高度作为其百分比高度的参照值，然而在 IE6(Q) IE7(Q) IE8(Q) 中存在“溢出单元格的内容会被剪裁”的 Bug，所以对于第一组，实际上【div1-2】的高度与 Firefox 中一样高，只是溢出单元格的部分被裁切了而呈现出截图的效果，通过浏览器开发人员工具也可以清楚的看到【div1-2】的实际高度。</li>
+        <li>在 <em>Firefox(Q) Opera(Q)</em> 中，情况与 IE(Q) 中类似，只是浏览器正常的渲染了溢出部分。</li>
+        <li>在 <em>其他浏览器</em> 中，【div1-2】的百分比高度被忽略为 'auto' 处理，所以第一组和第二组在效果是没有任何区别。</li>
+      </ul>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>使用标准模式——&lt;!DOCTYPE html&gt;；尽量避免在表格及块级元素上使用百分比高度。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="RX1002">RX1002: IE6 IE7 IE8(Q) 中从单元格溢出的内容会被自动剪裁</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.3<br />
+              Chrome 6.0.422.0 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.53
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RE8017/td_div_percent_height.html">td_div_percent_height.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-09</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>TD height percent TABLE 表格 单元格 百分比 高度</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

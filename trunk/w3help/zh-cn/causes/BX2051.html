@@ -1,0 +1,190 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX2051: 各浏览器对元素 src 属性中引入了需要登录的 FTP 的 URI 时的处理存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>FTP 是一个 8 位的客户端-服务器协议，能操作任何类型的文件而不需要进一步处理，就像 MIME 或 Unicode 一样。但是，FTP 有着极高的延时，这意味着，从开始请求到第一次接收需求数据之间的时间，会非常长；并且不时的必须执行一些冗长的登录进程。 互联网工程工作小组 IETF</a>在 <a href="http://tools.ietf.org/html/rfc0959">RFC 0959</a> 上定义了 FTP 协议的标准。</p>
+      <p>现在几乎所有的浏览器 (手持设备除外) 都能和FTP服务器创建连接。这使得在FTP上通过一个接口就可以操控远程文件，如同操控本地文件一样。这个功能通过给定一个 FTP 的 URL 实现，形如 <code>ftp://&lt;服务器地址&gt;</code>。是否提供密码是可选择的，如果有密码，则形如 <code>ftp://&lt;username&gt;:&lt;password&gt;@&lt;ftpserveraddress&gt;</code>。</p>
+      
+      <h2 id="description">问题描述</h2>
+      <p>直接使用 <code>ftp://&lt;服务器地址&gt;</code> 登录时，如果远程服务器需要验证用户才能进入，本地浏览器会打开提示窗口提示用户输入用户名及密码。如果，密验证没有通过，则会出现相应的提示信息。</p>
+      <p>同理，当使用 <code>ftp://&lt;username&gt;:&lt;password&gt;@&lt;ftpserveraddress&gt;</code> 方式登录开启用户验证的服务器时，一旦发生用户账户验证失败 (如账户过期以及用户名或密码不正确) 也会出现相应的提示信息。这个提示信息在各个浏览中处理不同。</p>
+      
+      <h2 id="influence">造成的影响</h2>
+      <p>不同浏览器对使用错误 <code>&lt;username&gt;:&lt;password&gt;</code> 登录后本地浏览器报错提示不同。</p>
+      
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <h3>1、直接在地址栏或链接内包含错误的用户名或密码时的表现</h3>
+      <table class="compare">
+        <tr>
+          <th>IE</th>
+          <td><img src="../../tests/BX2051/ie.gif" alt="ie" /></td>
+        </tr>
+        <tr>
+          <th>Firefox  </th>
+          <td><img src="../../tests/BX2051/firefox.gif" alt="firefox" /></td>
+        </tr>
+        <tr>
+          <th>Chrome</th>
+          <td><img src="../../tests/BX2051/chrome.gif" alt="chrome" /></td>
+        </tr>
+        <tr>
+          <th>Safari</th>
+          <td><img src="../../tests/BX2051/safari.gif" alt="safari" /></td>
+        </tr>
+        <tr>
+          <th>Opera</th>
+          <td><img src="../../tests/BX2051/opera.gif" alt="opera" /></td>
+        </tr>
+      </table>
+      <p>直接在地址栏或链接内包含错误的用户名或密码的 FTP 地址：</p>
+      <ul>
+        <li><em>IE6 IE7 IE8 Chrome</em> 会弹出登录窗口提示用户输入正确的用户名和密码；</li>
+        <li><em>Firefox</em> 会直接弹出警告框；</li>
+        <li><em>Safari Opera</em> 则是直接在浏览器页面上显示出错误提示。</li>
+      </ul>
+      <h3>2、元素拥有 &quot;src&quot; 属性时，调用包含错误的用户名或密码的 FTP 地址内容时的表现</h3>
+      <p>以上是由用户点击进入 FTP 时的情况，实际环境中，当标记元素拥有 src 属性时，调用包含错误的用户名或密码的 FTP 地址内容时，各浏览器表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox </th>
+          <th>Chrome</th>
+          <th>Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <th>IMG[src=FTP]</th>
+          <td><span class="hl_2">不警告</span></td>
+          <td><span class="hl_4">警告</span></td>
+          <td><span class="hl_4">警告</span></td>
+          <td><span class="hl_2">不警告</span></td>
+          <td><span class="hl_2">不警告</span></td>
+        </tr>
+        <tr>
+          <th>INPUT[type="image"][src=FTP]</th>
+          <td><span class="hl_2">不警告</span></td>
+          <td><span class="hl_4">警告</span></td>
+          <td><span class="hl_4">警告</span></td>
+          <td><span class="hl_2">不警告</span></td>
+          <td><span class="hl_2">不警告</span></td>
+        </tr>
+        <tr>
+          <th>IFRAME[src=FTP]</th>
+          <td><span class="hl_4">警告</span></td>
+          <td><span class="hl_4">警告</span></td>
+          <td><span class="hl_4">警告</span></td>
+          <td><span class="hl_4">警告</span></td>
+          <td><span class="hl_4">警告</span></td>
+        </tr>
+        <tr>
+          <th>EMBED[src=FTP]</th>
+          <td><span class="hl_2">不警告</span></td>
+          <td><span class="hl_2">不警告</span></td>
+          <td><span class="hl_2">不警告</span></td>
+          <td><span class="hl_2">不警告</span></td>
+          <td><span class="hl_2">不警告</span></td>
+        </tr>
+        <tr>
+          <th>SCRIPT[src=FTP]</th>
+          <td><span class="hl_2">不警告</span></td>
+          <td><span class="hl_4">警告</span></td>
+          <td><span class="hl_4">警告</span></td>
+          <td><span class="hl_2">不警告</span></td>
+          <td><span class="hl_2">不警告</span></td>
+        </tr>
+        <tr>
+          <th>Element {background:url(FTP)}</th>
+          <td><span class="hl_2">不警告</span></td>
+          <td><span class="hl_4">警告</span></td>
+          <td><span class="hl_4">警告</span></td>
+          <td><span class="hl_2">不警告</span></td>
+          <td><span class="hl_2">不警告</span></td>
+        </tr>
+      </table>
+      <p>由上表可知，IFRAME 标记 &quot;src&quot; 属性指向地址实际上等同于上例中的改变窗口页面地址，所有的浏览都会依据上例中出现不同的验证或错误提示。</p>
+      <ul>
+        <li><em>Firefox Chrome</em> 依然会弹出登录窗口提示用户输入正确的用户名和密码；</li>
+        <li><em>IE6 IE7 IE8 Safari Opera</em> 则忽略错误信息。</li>
+      </ul>
+      <p class="comment">【注】：由于暂时无法在当前服务器端搭建符合安全标准的 FTP ，本文不提供可直接使用的测试文件，用户如有兴趣验证文章内容，可尝试在本地搭建 FTP 环境实验。</p>
+      
+      <h2 id="solutions">解决方案</h2>
+      <p>当使用 <code>ftp://&lt;username&gt;:&lt;password&gt;@&lt;ftpserveraddress&gt;</code> 方式登录开启用户验证的服务器时，请务必确保用户账户在有效期内，并且保证用户名密码以及 FTP 服务器地址没有错误。</p>
+      
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 8.0.552.0 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.63</td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>&nbsp;</td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-14</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>FTP URL username password src 协议</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

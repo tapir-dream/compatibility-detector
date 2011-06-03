@@ -1,0 +1,48 @@
+<html>
+<head>
+<style>
+    * { font-size:12px; font-family:Tahoma; margin: 0; }
+    table { border-collapse;collapse; border-top:1px solid black; border-left:1px solid black; }
+    td, th { border-right:1px solid black; border-bottom:1px solid black; }
+</style>
+<script>
+    window.onload = function() {
+        function $(id) {
+            return document.getElementById(id);
+        }
+
+        function $s($target, styleName) {
+            return document.defaultView ? document.defaultView.getComputedStyle($target, null).getPropertyValue(styleName)
+                    : $target.currentStyle[styleName.replace(/-[a-z]/g, function() {
+                return arguments[0].charAt(1).toUpperCase();
+            })];
+        }
+
+        var values = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, "normal", "bold"];
+        
+        var str1 = [];
+        str1.push('<table cellpadding="2" cellspacing="0"><tr><th>V</th><th>P</th><th>B</th><th>L</th></tr>');
+        for (var i = 0, j = values.length; i < j; i++) {
+            var p = values[i];
+            str1.push('<tr><td>' + p + '</td>'
+                + '<td><div id="div' + p + '" style="font-weight:' + p + '"></div></td>'
+                + '<td><div style="font-weight:' + p + '"><span id="span' + p + '" style="font-weight:bolder;"></span></div></td>'
+                + '<td><div style="font-weight:' + p + '"><span id="spanl' + p + '" style="font-weight:lighter;"></span></div></td></tr>');
+        }
+        str1.push('</table>');
+        $("table").innerHTML = str1.join("");
+        
+        for (var i = 0, j = values.length; i < j; i++) {
+            var p = values[i];
+            $("div" + p).innerHTML = $s($("div" + p), "font-weight");
+            $("span" + p).innerHTML = $s($("span" + p), "font-weight");
+            $("spanl" + p).innerHTML = $s($("spanl" + p), "font-weight");
+        }
+        
+    }
+</script>
+</head>
+<body>
+<div id="table"></div>
+</body>
+</html>

@@ -1,0 +1,331 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HY9001: Safari 中错误的注释将导致部分 JavaScript 代码无法执行</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>关于 SCRIPT 标记的 &quot;src&quot; 属性说明请参考 W3C HTML 4.01 规范： <a href="http://www.w3.org/TR/html4/interact/scripts.html#edef-SCRIPT">http://www.w3.org/TR/html4/interact/scripts.html#edef-SCRIPT</a> </p>
+      <p>关于 HTML 注释说明请参考 W3C HTML 4.01 规范：  <a href="http://www.w3.org/TR/html4/intro/sgmltut.html#h-3.2.4">http://www.w3.org/TR/html4/intro/sgmltut.html#h-3.2.4</a> </p>
+
+      <h2 id="description">问题描述</h2>
+      <p>页面中存在外部 Javascript 文件引用时，其它 SCRIPT 标记内脚本程序段使用错误的 HTML 注释将导致此块内所有脚本程序以及此块后 SCRIPT 标记内程序无法运行。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>Safari 浏览器中注释标记后的脚本程序无法被运行。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th> Safari</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>SCRIPT 标记中的 &quot;src&quot; 属性用来引用外部脚本程序文件。</p>
+      <p>HTML 注释以成对的 &lt;!-- 和 --&gt; 方式出现，其间的文字不被渲染引擎渲染出来。如果在 SCRIPT 标记内使用 HTML 注释也不会影响脚本程序解析，这样使用是为了向下兼容不支持 SCRIPT 脚本的老旧浏览器，避免他们将脚本内容渲染到页面中。 </p>
+      <p>外部引用的脚本文件和脚本块标记内的未闭合 HTML 注释标记将结合产生出怪异问题，分析以下代码：</p>
+<pre>
+&lt;p&gt;=========分割线============&lt;p&gt;
+
+&lt;div&gt;&lt;/div&gt;
+&lt;div&gt;&lt;/div&gt;
+&lt;div&gt;&lt;/div&gt;
+&lt;div&gt;&lt;/div&gt;
+<span class="hl_4">&lt;script type=&quot;text/javascript&quot; src=&quot;1.js&quot;&gt;&lt;/script&gt;</span><br />
+
+&lt;script type=&quot;text/javascript&quot;&gt; <span class="hl_3">【 脚本块 A 】</span>
+  document.getElementsByTagName(&quot;div&quot;)[0].innerHTML = &quot;HTML 注释错误之前的 SCRIPT 标记块内脚本程序已运行&quot;;
+&lt;/script&gt;
+
+&lt;script type=&quot;text/javascript&quot;&gt; <span class="hl_3">【 脚本块 B 】</span>
+  document.getElementsByTagName(&quot;div&quot;)[1].innerHTML = &quot;HTML 注释错误之前脚本程序已运行&quot;;
+  <span class="hl_4">&lt;!--</span>
+  document.getElementsByTagName(&quot;div&quot;)[2].innerHTML = &quot;HTML 注释错误之后脚本程序已运行&quot;;
+&lt;/script&gt;
+
+&lt;script type=&quot;text/javascript&quot;&gt; <span class="hl_3">【 脚本块 C 】</span>
+  document.getElementsByTagName(&quot;div&quot;)[3].innerHTML = &quot;HTML 注释错误之后的 SCRIPT 标记块内脚本程序已运行&quot;;
+&lt;/script&gt;
+
+&lt;p&gt;=========分割线============&lt;p&gt;
+</pre>
+      <p>页面中最初引用了外部脚本文件，然后依次执行了脚本块 A B C，其中脚本块 B 中第二行语句开始存在一个 HTML 注释标记。这个注释标记存在疏漏，他没有按照规范使用 --&gt; 字符将本身闭合。</p>
+      <p>此实例在各浏览器内运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE Firefox  Chrome Opera</th>
+          <th> Safari</th>
+        </tr>
+        <tr>
+          <th>脚本块 A</th>
+          <td class="hl_2">正常执行</td>
+          <td class="hl_2">正常执行</td>
+        </tr>
+        <tr>
+          <th>脚本块 B HTML注释语句之前程序</th>
+          <td class="hl_2">正常执行</td>
+          <td class="hl_1">未执行</td>
+        </tr>
+        <tr>
+          <th>脚本块 B HTML注释语句之后程序</th>
+          <td class="hl_2">正常执行</td>
+          <td class="hl_1">未执行</td>
+        </tr>
+        <tr>
+          <th>脚本块 C</th>
+          <td class="hl_2">正常执行</td>
+          <td class="hl_1">未执行</td>
+        </tr>
+        <tr>
+          <th>错误 HTML 注释之后的文档内容</th>
+          <td class="hl_2">正常显示</td>
+          <td class="hl_1">未显示</td>
+        </tr>
+      </table>
+      <p>根据上表可看出，其他浏览器对此种情况均正常处理。</p>
+      <p>仅 Safari 浏览器忽略了存在错误 HTML 注释的脚本块以及其后的脚本块内程序执行，同时位于错误注释后的 HTML 标记以及其内容也被浏览器忽略。</p>
+      <p>&nbsp;</p>
+      <p>根据这个现象，修改代码将错误 HTML 注释标记修正完整：</p>
+<pre>
+&lt;script type=&quot;text/javascript&quot;&gt; 【 脚本块 B 】
+  document.getElementsByTagName(&quot;div&quot;)[1].innerHTML = &quot;HTML 注释之前脚本程序已运行&quot;;
+  &lt;!--
+  document.getElementsByTagName(&quot;div&quot;)[2].innerHTML = &quot;HTML 注释内后脚本程序已运行&quot;;
+ --&gt;
+&lt;/script&gt;
+</pre>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE Firefox  Chrome Opera</th>
+          <th> Safari</th>
+        </tr>
+        <tr>
+          <th>脚本块 A</th>
+          <td class="hl_2">正常执行</td>
+          <td class="hl_2">正常执行</td>
+        </tr>
+        <tr>
+          <th>脚本块 B HTML注释语句之前程序</th>
+          <td class="hl_2">正常执行</td>
+          <td class="hl_2">正常执行</td>
+        </tr>
+        <tr>
+          <th>脚本块 B HTML注释语句内程序</th>
+          <td class="hl_2">正常执行</td>
+          <td class="hl_2">正常执行</td>
+        </tr>
+        <tr>
+          <th>脚本块 C</th>
+          <td class="hl_2">正常执行</td>
+          <td class="hl_2">正常执行</td>
+        </tr>
+        <tr>
+          <th>错误 HTML 注释之后的文档内容</th>
+          <td class="hl_2">正常显示</td>
+          <td class="hl_2">正常显示</td>
+        </tr>
+      </table>
+      <p>当错误的 HTML 注释标记被修复后，所有浏览器执行效果一致。同理，如果将错误的注释标记去掉后，所有浏览器执行效果也将一致。</p>
+      <p>&nbsp;</p>
+      <p>此种情况下，如果在不尝试修复错误标记的前提下将最初的外部脚本程序引用去除，将会怎样？继续尝试修改代码，观察现象：</p>
+<pre>
+&lt;p&gt;=========分割线============&lt;p&gt;
+
+&lt;div&gt;&lt;/div&gt;
+&lt;div&gt;&lt;/div&gt;
+&lt;div&gt;&lt;/div&gt;
+&lt;div&gt;&lt;/div&gt;
+
+&lt;script type=&quot;text/javascript&quot;&gt; <span class="hl_3">【 脚本块 A 】</span>
+  document.getElementsByTagName(&quot;div&quot;)[0].innerHTML = &quot;HTML 注释错误之前的 SCRIPT 标记块内脚本程序已运行&quot;;
+&lt;/script&gt;
+
+&lt;script type=&quot;text/javascript&quot;&gt; <span class="hl_3">【 脚本块 B 】</span>
+  document.getElementsByTagName(&quot;div&quot;)[1].innerHTML = &quot;HTML 注释错误之前脚本程序已运行&quot;;
+  <span class="hl_4">&lt;!--</span>
+  document.getElementsByTagName(&quot;div&quot;)[2].innerHTML = &quot;HTML 注释错误之后脚本程序已运行&quot;;
+&lt;/script&gt;
+
+&lt;script type=&quot;text/javascript&quot;&gt; <span class="hl_3">【 脚本块 C 】</span>
+  document.getElementsByTagName(&quot;div&quot;)[3].innerHTML = &quot;HTML 注释错误之后的 SCRIPT 标记块内脚本程序已运行&quot;;
+&lt;/script&gt;
+
+&lt;p&gt;=========分割线============&lt;p&gt;
+</pre>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE Firefox  Chrome Opera</th>
+          <th> Safari</th>
+        </tr>
+        <tr>
+          <th>脚本块 A</th>
+          <td class="hl_2">正常执行</td>
+          <td class="hl_2">正常执行</td>
+        </tr>
+        <tr>
+          <th>脚本块 B HTML注释语句之前程序</th>
+          <td class="hl_2">正常执行</td>
+          <td class="hl_2">正常执行</td>
+        </tr>
+        <tr>
+          <th>脚本块 B HTML注释语句之后程序</th>
+          <td class="hl_2">正常执行</td>
+          <td class="hl_2">正常执行</td>
+        </tr>
+        <tr>
+          <th>脚本块 C</th>
+          <td class="hl_2">正常执行</td>
+          <td class="hl_2">正常执行</td>
+        </tr>
+        <tr>
+          <th>错误 HTML 注释之后的文档内容</th>
+          <td class="hl_2">正常显示</td>
+          <td class="hl_2">正常显示</td>
+        </tr>
+      </table>
+      <p>外部脚本程序引用去除后，即使脚本块中存在错误的HTML注释语句，整体程序执行与内容渲染均正常。</p>
+      <p>&nbsp;</p>
+      <p>那么，如果将拥有错误语句的内联脚本块放置到外部文件中是否还会存在此问题呢？继续修正代码观察现象：</p>
+<pre>
+&lt;p&gt;=========分割线============&lt;p&gt;
+
+&lt;script type=&quot;text/javascript&quot; src=&quot;1.js&quot;&gt;&lt;/script&gt;
+
+&lt;script type=&quot;text/javascript&quot;&gt; <span class="hl_3">【 脚本块 B 】</span>
+  document.getElementsByTagName(&quot;div&quot;)[0].innerHTML = &quot;HTML 注释错误之前的 SCRIPT 标记块内脚本程序已运行&quot;;
+&lt;/script&gt;
+
+<span class="hl_4">&lt;script type=&quot;text/javascript&quot; src=&quot;2.js&quot;&gt;&lt;/script&gt;</span> <span class="hl_3">【 外部脚本文件B 】</span><br />
+
+&lt;script type=&quot;text/javascript&quot;&gt; <span class="hl_3">【 脚本块 C 】</span>
+  document.getElementsByTagName(&quot;div&quot;)[3].innerHTML = &quot;HTML 注释错误之后的 SCRIPT 标记块内脚本程序已运行&quot;;
+&lt;/script&gt;
+
+&lt;p&gt;=========分割线============&lt;p&gt;
+
+&lt;!-- 2.js 文件 --&gt;
+document.getElementsByTagName(&quot;div&quot;)[1].innerHTML = &quot;外部 JS 文件中 HTML 注释错误之前脚本程序已运行&quot;;
+<span class="hl_4">&lt;!--</span>
+document.getElementsByTagName(&quot;div&quot;)[2].innerHTML = &quot;外部 JS 文件中 HTML 注释错误之后脚本程序已运行&quot;;
+</pre>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE Firefox  Chrome Opera</th>
+          <th> Safari</th>
+        </tr>
+        <tr>
+          <th>脚本块 A</th>
+          <td class="hl_2">正常执行</td>
+          <td class="hl_2">正常执行</td>
+        </tr>
+        <tr>
+          <th>外部脚本文件 B 中 HTML 注释错误之前脚本程序</th>
+          <td class="hl_2">正常执行</td>
+          <td class="hl_2">正常执行</td>
+        </tr>
+        <tr>
+          <th>外部脚本文件 B 中 HTML 注释错误之后脚本程序</th>
+          <td class="hl_2">正常执行</td>
+          <td class="hl_2">正常执行</td>
+        </tr>
+        <tr>
+          <th>脚本块 C</th>
+          <td class="hl_2">正常执行</td>
+          <td class="hl_2">正常执行</td>
+        </tr>
+        <tr>
+          <th>错误 HTML 注释之后的文档内容</th>
+          <td class="hl_2">正常显示</td>
+          <td class="hl_2">正常显示</td>
+        </tr>
+      </table>
+      <p>所有浏览器均运行正常，看来外部脚本文件中存在的错误 HTML 注释并不能触发此问题。</p>
+      <p>&nbsp;</p>
+      <p>综合以上情况，出现此问题的条件如下：</p>
+      <ul>
+        <li>页面中有外部脚本文件引用。</li>
+        <li>外部脚本文件标记之后存在脚本标记块。</li>
+        <li>此脚本块中有未封闭的 HTML 注释标签。</li>
+      </ul>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>SCRIPT 标记内如有 HTML 注释标记，请仔细检查，注意他们的闭合情况。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 6.0.472.11 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.53
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+              <a href="../../tests/HY9001/internal_script_html_comments_error_bug.html">internal_script_html_comments_error_bug.html</a><br />
+              <a href="../../tests/HY9001/external_script_html_comments_error.html">external_script_html_comments_error.html</a>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-29</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>nested comment script html 注释</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

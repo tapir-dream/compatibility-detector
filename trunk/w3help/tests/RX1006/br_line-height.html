@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<style>
+	body { font-family:Arial; }
+	.cont { width:100px; background:sienna; line-height:200%; }
+	.cont br.lh { line-height:2px; overflow:hidden; }
+	.sibling { background:wheat; }
+	.info { font-size:12px; line-height:120%; }
+	.hl { background:gold; }
+</style>
+<script>
+	window.onload = function() {
+		function $(id) { return document.getElementById(id); }
+			if(!window.getComputedStyle){
+				window.getComputedStyle=function($target){
+					return $target.currentStyle;
+				};
+			}
+		}
+		
+		function ptToPx (pt) {
+			return (/pt/gi.test(pt)) ? (parseInt(pt) / 0.75) + "px" : pt;
+		}
+		
+		for (var i = 1; i <= 6; i++) {
+			$('info' + i).innerHTML = 'Container:<span class="hl">'
+				+ $('d' + i).offsetHeight
+				+ 'px</span><br />&nbsp;&nbsp;&nbsp;&nbsp;line-height:'
+				+ ptToPx(getComputedStyle($('d' + i)).lineHeight)
+				+ '<br />BR:<span class="hl">'
+				+ ($('d' + i).offsetHeight - $('d' + i + 's1').offsetHeight - $('d' + i + 's2').offsetHeight)
+				+ 'px</span><br />&nbsp;&nbsp;&nbsp;&nbsp;line-height:'
+				+ ptToPx(getComputedStyle($('br' + i)).lineHeight);
+		}
+	}
+</script>
+
+<div style="float:left; width:120px;">
+	<div id="d4" class="cont" style="font-size:12px;">
+		<div id="d4s1" class="sibling">12px</div>
+		<br id="br4" />
+		<div id="d4s2" class="sibling">12px</div>
+	</div>
+	<div id="info4" class="info"></div>
+	<br />
+	<div id="d5" class="cont" style="font-size:16px;">
+		<div id="d5s1" class="sibling">16px</div>
+		<br id="br5" />
+		<div id="d5s2" class="sibling">16px</div>
+	</div>
+	<div id="info5" class="info"></div>
+	<br />
+	<div id="d6" class="cont" style="font-size:20px;">
+		<div id="d6s1" class="sibling">20px</div>
+		<br id="br6" />
+		<div id="d6s2" class="sibling">20px</div>
+	</div>
+	<div id="info6" class="info"></div>
+</div>
+
+<div style="float:left; width:120px;">
+	<div id="d1" class="cont" style="font-size:12px;">
+		<div id="d1s1" class="sibling">12px</div>
+		<br id="br1" class="lh" />
+		<div id="d1s2" class="sibling">12px</div>
+	</div>
+	<div id="info1" class="info"></div>
+	<br />
+	<div id="d2" class="cont" style="font-size:16px;">
+		<div id="d2s1" class="sibling">16px</div>
+		<br id="br2" class="lh" />
+		<div id="d2s2" class="sibling">16px</div>
+	</div>
+	<div id="info2" class="info"></div>
+	<br />
+	<div id="d3" class="cont" style="font-size:20px;">
+		<div id="d3s1" class="sibling">20px</div>
+		<br id="br3" class="lh" />
+		<div id="d3s2" class="sibling">20px</div>
+	</div>
+	<div id="info3" class="info"></div>
+</div>

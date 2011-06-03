@@ -1,0 +1,121 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RG1002: IE6 IE7 IE8(Q) 中如果列表元素设置 'list-style-type:none' 时不影响 'list-style-position:inside' 设置产生的标记块</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>关于 'list-style-type' 属性说明请参照 W3C CSS 2.1 规范：  <a href="http://www.w3.org/TR/CSS21/generate.html#propdef-list-style-style">http://www.w3.org/TR/CSS21/generate.html#propdef-list-style-type</a> </p>
+      <p>关于 'list-style-position' 属性说明请参照 W3C CSS 2.1 规范：  <a href="http://www.w3.org/TR/CSS21/generate.html#propdef-list-style-position">http://www.w3.org/TR/CSS21/generate.html#propdef-list-style-position</a> </p>
+
+      <h2 id="description">问题描述</h2>
+      <p> IE6 IE7 IE8(Q) 中如果列表元素设置 'list-style-type:none' 时 'list-style-position:inside' 设置产生的标记框不消失，依然占据布局位置。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>会造成 LI 内文字定位不准确。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>首先规范中对 'list-style-position:inside' 设置情况有如下说明：</p>
+      <p class="hl_4"> The marker box is the first inline box in the principal block box, after which the element's content flows.  </p>
+      <p>即此设置会将标记框 (marker box) 产生在行框最前方。之后规范中对 'list-style-type' 的描述有如下一句：</p>
+      <p class="hl_4"> The value 'none' specifies no marker, otherwise there are three types of marker: glyphs, numbering systems, and alphabetic systems. </p>
+      <p> 即当设置 'list-style-style:none' 时没有标记块。</p>
+      <p>综合理解，即当 'list-style-style:none' 和 'list-style-type:none' 样式同时设置时，标记框将不会显示。</p>
+      <p>实际情况又是如何呢，分析以下代码：</p>
+<pre>
+&lt;li style="list-style-type:none; list-style-position:inside; background:#eee"&gt;123&lt;/li&gt;
+</pre>
+    <p>浏览器实际效果如下：</p>
+    <table class="compare">
+          <tr>
+            <th>IE6 IE7 IE8(Q)</th>
+            <th>IE8(S) Safari Chrome Firefox Opera</th>
+          </tr>
+          <tr>
+            <td><img src="../../tests/RG1002/02.gif" alt="运行效果截图" /></td>
+            <td><img src="../../tests/RG1002/01.gif" alt="运行效果截图" /></td>
+          </tr>
+        </table>
+    <p>根据实际情况可以看出，在 IE6 IE7 IE8(Q) 浏览器中 LI 元素内 'list-style-position:inside' 属性设置在行框前的标记框还存在，并没有因为 'list-style-type:none' 样式设置而消失。 </p>
+    <p>IE8(S) 遵循规范修复了这个问题，与 Safari Chrome Firefox Opera 最终渲染表现一致。</p>
+    <h2 id="solutions">解决方案</h2>
+      <p>为了避免此问题，建议在设置 'list-style-type:none' 时仅将 'list-style-position' 属性值设置为默认的 'outside'。 </p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.5.6<br />
+              Chrome 4.0.266.0 dev<br />
+              Safari 4.0.4<br />
+                            Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RG1002/list_marker_box.html">list_marker_box.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-21</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>LI marker list-style-position 列表 标记 空白区域</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

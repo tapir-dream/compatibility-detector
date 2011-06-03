@@ -1,0 +1,17 @@
+<div id="msg"></div>
+<script type="text/javascript">
+	function info(msg){document.getElementById("msg").innerHTML += msg + "<br />"} 
+	try{
+		var a = top.sayHello;
+		info("<strong>top.sayHello : " + a + " </strong>.");
+	}catch(e){
+		info(e);
+	}
+
+	try {
+		var a = top.sayHello();
+		info("<strong>top.sayHello() : " + a + " </strong>.");
+	} catch(e) {
+		info(e);
+	}
+</script>

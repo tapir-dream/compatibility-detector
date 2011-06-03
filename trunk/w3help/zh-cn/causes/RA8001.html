@@ -1,0 +1,154 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" /></head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RA8001: IE6 IE7 IE8(Q) 不支持 CSS 特性的 'inherit' 值及 IE8(S) Opera 对此特性值的支持缺陷</h1>
+  <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p><strong>关于 CSS 中的特性 (property) 值 'inherit'</strong></p>
+      <p>在现行 CSS 2.1 规范被描述中，每一个特性 (property) 可以有一个指定值为 'inherit' ，即，对于给定的元素，该属性和它父元素相对属性的计算值取一样的值。</p>
+      <p>继承值通常只用作后备值，它可以通过显式地设置 'inherit' 而得到加强。</p>
+      <p>关于 'inherit' 的详细信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/cascade.html#value-def-inherit">6.2.1 The 'inherit' value</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>特性值 'inherit' 在 CSS 1 历史规范中并没有被定义，这导致使用历史版本 CSS 规范做参照的老旧浏览器 <em>IE6 IE7 IE8(Q)</em> 中不被支持这个特性值。</p>
+      <p>其他浏览器对默认样式的显式性 'inherit' 存在不同程度的支持缺陷。</p>
+      <h2 id="influence">造成的影响</h2>
+      <p>显式性的使用了特性值 'inherit' 继承原本没有默认可继承性的属性 ，在 IE6 IE7 IE8(Q) 中将无效。IE8(S) 中块级元素无法使用 'inherit' 特性值从行内元素继承默认 'display' 值，这均可能造成严重布局问题。<br />
+      另外，Opera 内使用 'inherit' 值显式性继承 BUTTON 元素默认 'border' 特性值将无效。</p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8 Opera</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>我们构建类似如下测试代码，全面检测 'inherit' 设置值的支持程度，由于代码较长，不在文中整体给出，详细内容见本文结尾处的 <em>测试页面</em>。</p>
+      <pre>
+&lt;div style="border:10px solid red"&gt;
+  &lt;span style="border:inherit;"&gt;border:inherit&lt;/span&gt;
+  Hello!
+&lt;/div&gt;
+&lt;span&gt;
+  &lt;div style="display:inherit;"&gt;div&lt;/div&gt;
+  + span
+&lt;span&gt;
+&lt;em&gt;
+  &lt;div style="display:inherit;"&gt;div&lt;/div&gt;
+  + strong
+&lt;em&gt;
+...
+</pre>
+
+      <p>根据测试页面显示结果，总结出所有浏览器对于 'inherit' 的支持情况，如下表：</p>
+      <table class="compare">
+<tr>
+  <th>&nbsp;</th>
+          <th>IE6</th>
+          <th>IE7</th>
+          <th>IE8(Q)</th>
+          <th>IE8(S)</th>
+          <th>Firefox</th>
+          <th>Safari</th>
+          <th>Chrome</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <th>inherit</th>
+          <td><span class="hl_1">N</span></td>
+          <td><span class="hl_1">N</span></td>
+          <td><span class="hl_1">N</span></td>
+          <td><span class="hl_3">Y</span><sup>1</sup></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_2">Y</span></td>
+          <td><span class="hl_3">Y</span></td>
+    </tr>
+      </table>
+      <p class="comment">【注1】：蓝色文字表示各浏览器对 'inherit' 特性值支持缺陷。</p>
+      <p>对照表格可见， IE6 IE7 IE8(Q) <sup>2</sup>不支持对样式显示性设置 'inherit' 特性值， IE8(S) Firefox Safari Chrome Opera 整体支持对样式显示性设定 'inherit' 特性值。</p>
+      <p>但是其中 IE8(S) 存在较大支持缺陷，Opera 存在较小支持缺馅，他们如下：</p>
+      <ul>
+        <li> IE8(S) 中，块级元素法通过设置 'display:inherit' 特性值，显式性继承绝大部分行内元素的默认 'display' 特性值，但却可以显示性继承 BUTTON 元素的默认 'display' 特性。 </li>
+        <li>Opera 中，P 元素无法通过设置 'border:inherit' 特性值，显式性继承 BUTTON 元素的默认 'border' 特性。</li>
+          </ul>
+      <p class="comment">【注2】：由于仅低版本 IE 浏览器开发时间跨越了 CSS 1.0 规范标准至 CSS 2.1 规范标准制定时段，因此他们对 CSS 2.0 规范中出现的 'inherit' 特性值无法做到预知性支持 。<br />
+        更多 IE CSS 兼容性问题信息，可以参看 MSDN 中 <a href="http://msdn.microsoft.com/en-us/library/cc351024(VS.85).aspx">CSS Compatibility and Internet Explorer</a> 文章描述。</p>
+      <h2 id="solutions">解决方案</h2>
+          <p>使用标准模式渲染页面，并尽量避免使用 'inherit' 值显式性继承样式设定、行内元素的默认 'display' 特性值和 BUTTON 元素默认 'border' 特性值，以兼容个浏览器。</p>
+      <ul>
+        <li>使用标准模式渲染页面；</li>
+        <li> 在 IE6 IE7 退出舞台之前避免使用 'inherit' 值显式性的继承样式设定；</li>
+        <li> 在 IE8 内不使用 'inherit' 值显式性继承行内元素的默认 'display' 特性值；</li>
+        <li>在 Opera 内，不对使用 'inherit' 值显式性继承 BUTTON 元素默认 'border' 特性值。</li>
+      </ul>
+      <h2 id="see_also">参见</h2>
+
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="RM8001">RM8001: 各浏览器对 'display' 特性值的支持程度不同</a></li>
+      </ul>
+
+    <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>IE6<br/>
+IE7<br/>
+IE8<br/>
+Firefox 3.6.10<br/>
+Chrome 8.0.552.5 dev<br/>
+Safari 5.0.2<br />
+Opera 10.63 </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RA8001/inherit.html">inherit.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-21</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>inherit 继承</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

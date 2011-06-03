@@ -1,0 +1,333 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX9007: 获取文档可视尺寸（视口）时在各浏览器中的参考元素有差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+      <h2 id="description">问题描述</h2>
+      <p>不同浏览器对文档实际视口元素的实际参照不同。</p>
+      <h2 id="influence">造成的影响</h2>
+      <p>仅用单一方法获取文档元素的实际高度可能会与视口高度产生混淆。</p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>'scrollHeight' 属性最初有微软在 IE4.0 中引入到其 'DHTML Object Model' 中，根据 MSDN 的描述，'scrollHeight' 是一个只读属性，返回对象内容上边界至下边界之间的垂直高度，即一个元素的实际滚动视野的高度。<br />
+        在 MDC 中有如下描述，一个元素的 'scrollHeight' 是元素的内容（包括根据 'overflow' 特性决定的不可见部分）的高度。若一个元素的内容生成了垂直滚动条，'scrollHeight' 的值等于该元素所需 'clientHeight' 的最小值，以适应不使用垂直滚动条时视点中的所有内容。若一个元素的内容没有生成垂直滚动条，'scrollHeight' 的值等于其 'clientHeight' 的值。</p>
+      <h3>1. 生成了页面垂直滚动条</h3>
+      <p>在页面出现滚动条时，无论哪种文档模式，均可以通过 <em><strong>'document.body.scrollHeight'</strong></em> 获取到页面滚动条的实际高度。</p>
+      <p>分析以下代码 ：</p>
+<pre>&lt;!--iframe.htm--&gt;
+&lt;style&gt;
+  iframe { width:400px; height:80px; margin:0; padding:0; border:0; }
+&lt;/style&gt;
+&lt;table&gt;
+  &lt;tr&gt;
+    &lt;td&gt;
+      &lt;iframe src=&quot;subQ.htm&quot; frameborder=&quot;0&quot;&gt;&lt;/iframe&gt;
+    &lt;/td&gt;
+    &lt;td&gt;
+      &lt;iframe src=&quot;subS.htm&quot; frameborder=&quot;0&quot;&gt;&lt;/iframe&gt;
+    &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;</pre>
+
+<pre>&lt;!DOCTYPE html&gt;
+&lt;!--subS.htm--&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  * { margin:0; padding:0; }
+  #d { background:#DDD; height:100px; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div id=&quot;d&quot;&gt;&lt;/div&gt;
+  &lt;script&gt;
+    document.getElementById(&quot;d&quot;).innerHTML =
+      'document.documentElement.clientHeight:' + document.documentElement.clientHeight+
+      '&lt;br /&gt;document.body.clientHeight:' + document.body.clientHeight +
+      '&lt;br /&gt;document.documentElement.scrollHeight:' + document.documentElement.scrollHeight +
+      '&lt;br /&gt;document.body.scrollHeight:' + document.body.scrollHeight;
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+
+<pre>
+&lt;!--subQ.htm--&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  * { margin:0; padding:0; }
+  #d { background:#DDD; height:100px; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div id=&quot;d&quot;&gt;&lt;/div&gt;
+  &lt;script&gt;
+    document.getElementById(&quot;d&quot;).innerHTML =
+      'document.documentElement.clientHeight:' + document.documentElement.clientHeight+
+      '&lt;br /&gt;document.body.clientHeight:' + document.body.clientHeight +
+      '&lt;br /&gt;document.documentElement.scrollHeight:' + document.documentElement.scrollHeight +
+      '&lt;br /&gt;document.body.scrollHeight:' + document.body.scrollHeight;
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码主页面 &quot;iframe.htm&quot; 中包含两个高度为 80px 的子页面 &quot;subQ.htm&quot; 与 &quot;subS.htm&quot; ，即子页面内视口内容的高度大于其窗口容器的高度，子页面的区别仅为文档模式不同，子页面内清除了所有元素的默认 padding 与 margin ，BODY 中有一个灰色背景的 DIV 元素，高度为 100px ，页面运行时在 DIV[id=&quot;d&quot;] 中显示出下面 4 个返回值：</p>
+      <ul>
+        <li>document.documentElement.clientHeight，HTML 元素的客户区域高度；</li>
+        <li>document.body.clientHeight，BODY 元素的客户区域高度；</li>
+        <li>document.documentElement.scrollHeight，HTML 元素的滚动区域高度；</li>
+        <li>document.body.scrollHeight，BODY 元素的滚动区域高度。</li>
+      </ul>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th></th>
+          <th>IE6(Q) IE7(Q) IE8(Q)</th>
+          <th>IE6(S) Opera(S)</th>
+          <th>IE7(S) IE8(S) Firefox(S) Chrome(S) Safari(S)</th>
+          <th>Firefox(Q) Chrome(Q) Safari(Q) Opera(Q)</th>
+        </tr>
+        <tr>
+          <th>document.documentElement.clientHeight</th>
+          <td>0</td>
+          <td>64</td>
+          <td>80</td>
+          <td>100</td>
+        </tr>
+        <tr>
+          <th>document.body.clientHeight</th>
+          <td>80</td>
+          <td>100</td>
+          <td>100</td>
+          <td>80</td>
+        </tr>
+        <tr>
+          <th>document.documentElement.scrollHeight</th>
+          <td>80</td>
+          <td>100</td>
+          <td>100</td>
+          <td>100</td>
+        </tr>
+        <tr>
+          <th>document.body.scrollHeight</th>
+          <td>100</td>
+          <td>100</td>
+          <td>100</td>
+          <td>100</td>
+        </tr>
+      </table>
+      <p>可见，在生成页面垂直滚动条时，documnt.body.scrollHeight 的返回值均为 100px，差异出现在其他三个属性的返回值上：</p>
+      <ul>
+        <li>在 <strong><em>IE6(Q) IE7(Q) IE8(Q)</em></strong> 中，HTML 文档的根元素为 BODY（参见：<a href="http://msdn.microsoft.com/en-us/library/bb250395%28VS.85%29.aspx#cssenhancements_topic4">http://msdn.microsoft.com/en-us/library/bb250395%28VS.85%29.aspx#cssenhancements_topic4</a>）。所以 document.document.clientHeight 返回值为0，document.body.clientHeight 为 IFRAME 对子页面限制的视口高度 80px。document.documentElement.scrollHeight 的值则不具备意义；</li>
+        <li>在 <strong><em>IE6(S)</em></strong> 中，浏览器同时为 IFRAME 内的子页面生成了水平滚动条，在测试的操作系统中横向滚动条高度为 16px，则 document.documentElement.clientHeight 的值为 80px 减去生成的水平滚动条的高度 16px，为 64px，其他三个值均为 100px；</li>
+        <li>在 <strong><em>Opera(S)</em></strong> 中，虽然没有生成 IE6(S) 中的水平滚动条，但只要 IFRAME 元素的 scrolling 属性不为 &quot;no&quot; ，浏览器在计算 document.documentElement.clientHeight 的值时就会减去可能生成的水平滚动条高度；</li>
+        <li>在 <strong><em>IE7 IE8 Firefox Chrome Safari(S)</em></strong> 中，与 Opera(S) 的区别就是 document.documentElement.clientHeight 的值没有减去水平滚动条的高度，为 80px；</li>
+        <li>在 <strong><em>Firefox Chrome Safari Opera(Q)</em></strong> 中，clientHeight 的两个值互换。</li>
+      </ul>
+      <p>看以看出，在页面出现滚动条时，无论哪种文档模式，均可以通过 'document.body.scrollHeight' 获取到页面滚动条的实际高度。</p>
+      <p>其中特例为：由于 IE 混杂模式下的根元素为 BODY，这里对 BODY 元素设置宽度与高度无效，所以若 BODY 子元素的高度不足以生成页面滚动条时，'document.body.scrollHeight' 获取到的值会和其他浏览器有差异。</p>
+      
+      <h3>2. 没有生成页面垂直滚动条</h3>
+      <p>分析以下代码：<br />
+      </p>
+<pre>
+&lt;!--iframe.htm--&gt;
+&lt;style&gt;
+  iframe { width:400px; height:880px; margin:0; padding:0; border:0; }
+&lt;/style&gt;
+&lt;table&gt;
+  &lt;tr&gt;
+    &lt;td&gt;
+      &lt;iframe src=&quot;subQ.htm&quot; frameborder=&quot;0&quot;&gt;&lt;/iframe&gt;
+    &lt;/td&gt;
+    &lt;td&gt;
+      &lt;iframe src=&quot;subS.htm&quot; frameborder=&quot;0&quot;&gt;&lt;/iframe&gt;
+    &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;</pre>
+
+<pre>&lt;!--subS.htm--&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  * { margin:0; padding:0; }
+  #d { background:#DDD; height:100px; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div id=&quot;d&quot;&gt;&lt;/div&gt;
+  &lt;script&gt;
+    document.getElementById(&quot;d&quot;).innerHTML =
+      'document.documentElement.clientHeight:' + document.documentElement.clientHeight+
+      '&lt;br /&gt;document.body.clientHeight:' + document.body.clientHeight +
+      '&lt;br /&gt;document.documentElement.scrollHeight:' + document.documentElement.scrollHeight +
+      '&lt;br /&gt;document.body.scrollHeight:' + document.body.scrollHeight;
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+
+<pre>&lt;!--subQ.htm--&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  * { margin:0; padding:0; }
+  #d { background:#DDD; height:100px; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;div id=&quot;d&quot;&gt;&lt;/div&gt;
+  &lt;script&gt;
+    document.getElementById(&quot;d&quot;).innerHTML =
+      'document.documentElement.clientHeight:' + document.documentElement.clientHeight+
+      '&lt;br /&gt;document.body.clientHeight:' + document.body.clientHeight +
+      '&lt;br /&gt;document.documentElement.scrollHeight:' + document.documentElement.scrollHeight +
+      '&lt;br /&gt;document.body.scrollHeight:' + document.body.scrollHeight;
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码与上一节中的测试代码类似，区别仅为主页面 &quot;iframe.htm&quot; 中 IFRAME 元素的高度变为 &quot;880px&quot;，即子页面视口内容的高度小于其窗口容器的高度。</p>
+      <p> 在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th></th>
+          <th>IE6(Q)
+            IE7(Q)
+            IE8(Q)</th>
+          <th>IE6(S)
+            IE7(S)</th>
+          <th>IE8(S)
+            Firefox(S)</th>
+          <th>Firefox(Q)</th>
+          <th>Opera(Q)</th>
+          <th>Opera(S)</th>
+          <th>Chrome(Q)
+            Safari(Q)</th>
+          <th>Chrome(S)
+            Safari(S)</th>
+        </tr>
+        <tr>
+          <th>document.documentElement.clientHeight</th>
+          <td>0</td>
+          <td>880</td>
+          <td>880</td>
+          <td>100</td>
+          <td>100</td>
+          <td>864</td>
+          <td>880</td>
+          <td>880</td>
+        </tr>
+        <tr>
+          <th>document.body.clientHeight</th>
+          <td>880</td>
+          <td>100</td>
+          <td>100</td>
+          <td>880</td>
+          <td>864</td>
+          <td>100</td>
+          <td>880</td>
+          <td>100</td>
+        </tr>
+        <tr>
+          <th>document.documentElement.scrollHeight</th>
+          <td>880</td>
+          <td>100</td>
+          <td>880</td>
+          <td>100</td>
+          <td>100</td>
+          <td>100</td>
+          <td>880</td>
+          <td>100</td>
+        </tr>
+        <tr>
+          <th>document.body.scrollHeight</th>
+          <td>100</td>
+          <td>100</td>
+          <td>100</td>
+          <td>880</td>
+          <td>864</td>
+          <td>100</td>
+          <td>880</td>
+          <td>880</td>
+        </tr>
+      </table>
+      <p>本例中，IFRAME 元素内的子页面并没有生成垂直滚动条，此时的 scrollHeight 的值已不具备其实际意义。各浏览器的返回值的差异也较大。</p>
+      <h2 id="solutions">解决方案</h2>
+      <p>当出现页面垂直滚动条的时候尽量使用 'document.body.scrollHeight' 获取页面滚动条的高度。</p>
+      <p>当页面没有生成垂直滚动条时，避免使用 document.documentElement.scrollHeight 及 document.body.scrollHeight 获取某种高度，此时应使用 offsetHeight。</p>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.3<br />
+              Chrome 5.0.366.2 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.51</td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+              <a href="../../tests/BX9007/iframe1.html">iframe1.html</a><br/>
+              <a href="../../tests/BX9007/iframe2.html">iframe2.html</a>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-14</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>scrollHeight 滚动条 高度</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

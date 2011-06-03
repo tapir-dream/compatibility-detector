@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<script>
+window.onload=function (){
+	function getCommandList(){
+		return {'2D-Position':true,
+			'absolutePosition':true,
+			'backColor':'red',
+			'blockDirLTR':'',
+			'blockDirRTL':'',
+			'bold':'true',
+			'browseMode':'',
+			'clearAuthenticationCache':'',
+			'contentReadOnly':false,
+			'copy':'',
+			'createBookmark':'CreateBookmark',
+			'createLink':'http://www.w3c.org',
+			'cut':'',
+			'decreaseFontSize':'',
+			'delete':'true',
+			'dirLTR':'',
+			'dirRTL':'',
+			'editMode':'',
+			'fontName':'simsun',
+			'fontSize':'5',
+			'foreColor':'blue',
+			'formatBlock':'',
+			'enableInlineTableEditing':'true',
+			'enableObjectResizing':'true',
+			'forwardDelete':'true',
+			'heading':'h1',
+			'increaseFontSize':'',
+			'indent':'',
+			'inlineDirLTR':'',
+			'inlineDirRTL':'',
+			'insertButton':'insertButton',
+			'insertFieldset':'insertFieldset',
+			'insertIFrame':'insertIFrame',
+			'insertInputButton':'insertInputButton',
+			'insertInputCheckbox':'insertInputCheckbox',
+			'insertInputFileUpload':'insertInputFileUpload',
+			'insertInputHidden':'insertInputHidden',
+			'insertInputImage':'insertInputImage',
+			'insertInputPassword':'insertInputPassword',
+			'insertInputRadio':'insertInputRadio',
+			'insertInputReset':'insertInputReset',
+			'insertInputSubmit':'insertInputSubmit',
+			'insertInputText':'insertInputText',
+			'insertMarquee':'insertMarquee',
+			'insertBrOnReturn':true,
+			'insertHorizontalRule':'',
+			'insertImage':'http://www.google.cn/intl/zh-CN/images/logos/translate_logo.gif',
+			'insertHTML':'<p>HTML</p>',
+			'insertLineBreak':'true',
+			'insertOrderedList':'insertOrderedList',
+			'insertUnorderedList':'insertOrderedList',
+			'insertParagraph':'insertParagraph',
+			'insertSelectDropdown':'insertParagraph',
+			'insertSelectListbox':'insertParagraph',
+			'insertTextArea':'insertParagraph',
+			'insertText':'Text',
+			'italic':'true',
+			'justifyCenter':'',
+			'justifyLeft':'',
+			'justifyRight':'',
+			'justifyFull':true,
+			'justifyNone':true,
+			'liveResize':true,
+			'multipleSelection':true,
+			'open':'',
+			'overWrite':true,
+			'outdent':'',
+			'paste':'',
+			'playImage':'',
+			'print':'',
+			'redo':'true',
+			'removeFormat':'',
+			'refresh':'',
+			'removeParaFormat':true,
+			'selectAll':'',
+			'saveAs':'',
+			'sizeToControl':'',
+			'sizeToControlHeight':'',
+			'sizeToControlWidth':'',
+			'stop':true,
+			'stopImage':true,
+			'strikeThrough':'',
+			'subscript':'true',
+			'superscript':'true',
+			'unBookmark':'',
+			'underline':'',
+			'undo':'',
+			'unlink':'',
+			'useCSS':true,
+			'hiliteColor':'#ECECEC',
+			'unselect':'',
+			'styleWithCSS':'widht:100px;'
+			};
+	}
+	/*
+	function createTable(sCommands,fn){
+		var tableElement = document.createElement('table'),
+		    tbodyElement = document.createElement('tbody'),
+		    thElement, trElement, tdElement,sHTML;
+
+		trElement = document.createElement('tr');
+		thElement = document.createElement('th');
+		thElement.appendChild(document.createTextNode('sCommands'));
+		trElement.appendChild(thElement);
+		thElement = document.createElement('th');
+		thElement.appendChild(document.createTextNode('support'));
+		trElement.appendChild(thElement);
+		tbodyElement.appendChild(trElement);
+
+		for (var i in sCommands){
+			trElement = document.createElement('tr');
+			tdElement = document.createElement('td');
+			tdElement.appendChild(document.createTextNode(i));
+			trElement.appendChild(tdElement);
+			tdElement = document.createElement('td');
+			tdElement.appendChild(document.createTextNode(fn(i,sCommands[i])));
+			trElement.appendChild(tdElement);
+			tbodyElement.appendChild(trElement);
+		}
+		tableElement.appendChild(tbodyElement);
+		document.body.appendChild(tableElement);
+
+	}
+	*/
+	function createButton(sCommands,fn){
+		var divElement = document.createElement('div');
+		for (var i in sCommands){
+			var buttonElement = document.createElement('button');
+			buttonElement.onclick = (function(sCommand,value){
+					return function (){
+						fn(sCommand,value);
+					};
+				})(i,sCommands[i]);
+
+			buttonElement.appendChild(document.createTextNode(i));
+			divElement.appendChild(buttonElement);
+		}
+		document.body.appendChild(divElement);
+
+	}
+	function buildTest(iframeWindow){
+		createButton(getCommandList(),function(sCommand,value){
+			try{
+				var returnValue = iframeWindow.document.execCommand(sCommand,false,value);
+				setTextValue(iframeWindow,sCommand,(returnValue)?'Y':'N');
+				//initIFrame(iframeWindow);
+				//console.log()
+			}catch(e){
+				setTextValue(iframeWindow,sCommand,'N');
+			}
+		});
+		iframeWindow.document.execCommand('selectAll',false,'');
+
+	}
+	function createIFrameElement(){
+		var iframeElement = document.createElement('iframe');
+		iframeElement.style.cssText = 'width:400px;height:300px;border:1px solid #999';
+		iframeElement.src = 'about:blank';
+		addEvent(iframeElement,'load',run);
+		document.body.children[1].appendChild(iframeElement);
+	}
+
+	function setDesignMode(win){
+		(win.document.designMode)
+		?(win.document.designMode = 'On')
+		:(win.document.body.contentEditable = true);
+	}
+
+	function setTextValue(iframeWindow,sMessage,bStatus){
+		var textAreaElement = document.getElementsByTagName('textarea')[0];
+		textAreaElement.value += sMessage
+			+ ' set is '+ bStatus +':\n'
+			+ iframeWindow.document.body.innerHTML
+			+ '\n\n==============================\n\n';
+		textAreaElement.scrollTop = textAreaElement.scrollHeight;
+	}
+	function initIFrame(iframeWindow){
+		iframeWindow.document.open();
+		iframeWindow.document.writeln('<p><span>test</span> <em>page</em></p>');
+		iframeWindow.document.close();
+	}
+	function run(){
+		var iframeElement = document.getElementsByTagName('iframe')[0];
+		var iframeWindow = iframeElement.contentWindow;
+		removeEvent(iframeElement,'load',arguments.callee);
+		initIFrame(iframeWindow);
+		setDesignMode(iframeWindow);
+		buildTest(iframeWindow);
+	}
+	function addEvent(element,eventName,fn){
+		(element.attachEvent)
+		? (element.attachEvent('on' + eventName,fn))
+		: (element.addEventListener(eventName,fn,false));
+	}
+	function removeEvent(element,eventName,fn){
+		(element.detachEvent)
+  		? (element.detachEvent('on' + eventName, fn))
+		: (element.removeEventListener(eventName,fn,false));
+	}
+	createIFrameElement();
+}
+</script>
+<body>
+<h3>选中左侧的富文本编辑区域，从左到右从上到下依次点击下方功能按键，是否可执行信息将在右侧文本框内输出。</h3>
+<span></span>
+<textarea style="width:500px;height:300px;"></textarea>
+</body>
+</html>

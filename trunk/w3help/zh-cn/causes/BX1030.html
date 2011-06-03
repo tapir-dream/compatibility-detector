@@ -1,0 +1,200 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX1030: IE8(S) Firefox Opera Chrome Safari 在某些情况下计算 MARQUEE 元素的宽度时会参考其子元素的宽度</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>MARQUEE 元素不属于 W3C 规范中的元素，它最初由 IE2.0 引入，是微软为 IE 浏览器发明的特有元素，然而目前所有的主流浏览器均支持 MARQUEE 元素。</p>
+      <p>MARQUEE 元素用来创建一个文字滚动区域，并提供了一些特有的属性、方法及事件。</p>
+      <p>关于 MARQUEE 元素的详细资料，请参考 <a href="http://msdn.microsoft.com/en-us/library/ms535851%28VS.85%29.aspx">MSDN</a>、<a href="https://developer.mozilla.org/en/HTML/Element/marquee">Mozilla Developer Center</a>、<a href="http://developer.apple.com/safari/library/documentation/AppleApplications/Reference/SafariHTMLRef/Articles/HTMLTags.html#//apple_ref/doc/uid/30001262-marquee">Safari Reference Library</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>对于一个 'width' 特性的计算值为 auto 的 MARQUEE 元素，其内包含一个设有较大宽度的块级元素，MARQUEE 元素位于表格内或者 'display' 特性为 table 类型的元素内，则在 IE8(S), Firefox, Opera 中，当 MARQUEE 元素的 direction 属性为 up 或 down（即垂直方向滚动）时，计算的表格单元格的宽度会参考 MARQUEE 内明确设置了宽度的块级元素的宽度。而在 Chrome 和 Safari 中，无论 MARQUEE 元素的 direction 属性为何值（即无论何种滚动方向），计算的表格单元格的宽度始终会参考 MARQUEE 内明确设置了宽度的块级元素的宽度。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>在表格单元格的宽度小于 MARQUEE 元素内确设置了宽度的块级元素的宽度时，将导致表格被成大，造成表格布局的布局出现兼容性问题。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE8(S) Firefox Opera</th>
+          <td>当 MARQUEE 元素的 direction 属性为 up 或 down（即垂直方向滚动）时，计算的表格单元格的宽度会参考 MARQUEE 元素内明确设置了宽度的块级元素的宽度。</td>
+        </tr>
+        <tr>
+          <th>Chrome Safari</th>
+          <td>无论 MARQUEE 元素的 direction 属性为何值（即无论何种滚动方向），计算的表格单元格的宽度始终会参考 MARQUEE 元素内明确设置了宽度的块级元素的宽度。</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+<pre>&lt;style&gt;
+  * { font:12px Arial; }
+  marquee { background:#aaa; height:30px; vertical-align:top; }
+  table {   <span class="hl_3">table-layout:auto;</span><sup>1</sup> }
+&lt;/style&gt;
+&lt;script&gt;
+  window.onload = function () {
+    var m = document.getElementsByTagName("marquee");
+    for (var i = 0, j = m.length; i &lt; j; i++) {
+      var n = m[i].parentNode.parentNode.nextElementSibling || m[i].parentNode.parentNode.nextSibling;
+      var o = n.firstElementChild || n.firstChild;
+      o.innerHTML = m[i].offsetWidth + "px";
+    }
+  }
+&lt;/script&gt;
+&lt;table style="border:1px solid black; <span class="hl_2">width:50px;</span>" cellspacing="0" cellpadding="0"&gt;
+    &lt;tr&gt;
+        &lt;td&gt;
+            &lt;marquee <span class="hl_1">direction="up"</span> scrolldelay="30" scrollamount="1"&gt;
+                &lt;div style="<span class="hl_4">width:100px;</span> background:#eee;"&gt;MARQUEE - DIV&lt;/div&gt;
+            &lt;/marquee&gt;
+        &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;&amp;nbsp;&lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;
+&lt;br /&gt;
+&lt;table style="border:1px solid black; <span class="hl_2">width:50px;</span>" cellspacing="0" cellpadding="0"&gt;
+    &lt;tr&gt;
+        &lt;td&gt;
+            &lt;marquee <span class="hl_1">direction="right"</span> scrolldelay="30" scrollamount="1"&gt;
+                &lt;div style="<span class="hl_4">width:100px;</span> background:#eee;"&gt;MARQUEE - DIV&lt;/div&gt;
+            &lt;/marquee&gt;
+        &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;&amp;nbsp;&lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;
+&lt;br /&gt;
+&lt;table style="border:1px solid black; <span class="hl_2">width:50px;</span>" cellspacing="0" cellpadding="0"&gt;
+    &lt;tr&gt;
+        &lt;td&gt;
+            &lt;marquee <span class="hl_1">direction="down"</span> scrolldelay="30" scrollamount="1"&gt;
+                &lt;div style="<span class="hl_4">width:100px;</span> background:#eee;"&gt;MARQUEE - DIV&lt;/div&gt;
+            &lt;/marquee&gt;
+        &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;&amp;nbsp;&lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;
+&lt;br /&gt;
+&lt;table style="border:1px solid black; <span class="hl_2">width:50px;</span>" cellspacing="0" cellpadding="0"&gt;
+    &lt;tr&gt;
+        &lt;td&gt;
+            &lt;marquee <span class="hl_1">direction="left"</span> scrolldelay="30" scrollamount="1"&gt;
+                &lt;div style="<span class="hl_4">width:100px;</span> background:#eee;"&gt;MARQUEE - DIV&lt;/div&gt;
+            &lt;/marquee&gt;
+        &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt;&amp;nbsp;&lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;
+</pre>
+      <p>上面四组代码的结构完全相同，均为一个宽度为 <span class="hl_2">50px</span> 的两行一列的 TABLE<sup>2</sup> 元素内包含一个没有设置宽度的 MARQUEE 元素，MARQUEE 元素内部包含了一个宽度为 <span class="hl_4">100px</span> 的 DIV 元素。<br />
+      这四组代码中，MARQUEE 元素的 <span class="hl_1">direction 属性为别为 up、right、down、left</span>。<br />
+      页面加载后分别计算出这四个 MARQUEE 元素的 offsetWidth 并显示到第二行的 TD 元素中。</p>
+      <p>这段代码在不同的浏览器环境中表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Opera</th>
+                  <th>Chrome Safari</th>
+        </tr>
+        <tr>
+                  <td><img src="../../tests/BX1030/IE67_marquee.gif" alt="IE6/7, IE8(Q)" /></td>
+          <td><img src="../../tests/BX1030/IE8_FF_OP_marquee.gif" alt="IE8(S), Firefox, Opera" /></td>
+          <td><img src="../../tests/BX1030/CR_SF_marquee.gif" alt="Chrome, Safari" /></td>
+        </tr>
+      </table>
+      <p>TABLE 的宽度计算与一般的块级元素有很大不同，当表格使用自动布局算法时（<span class="hl_3">table-layout:auto</span>），我们为其设置的 'width' 特性并不一定就是其最终计算后的宽度。由于不能使表格内各单元格的内容溢出，表格有可能会被单元格撑大。</p>
+      <p>MARQUEE 元素没有设置宽度，则其 'width' 特性的计算值为默认的 auto，从现象截图中可以看到，</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8(Q)</em> 中，无论 MARQUEE 元素内包含宽度多大的块级元素都不会影响到 TABLE 的布局，此时 MARQUEE 元素的宽度只由其包含块决定。</li>
+        <li>在 <em>Chrome Safari</em> 中，无论 MARQUEE 元素的 direction 属性为何值（即无论何种滚动方向），计算的表格单元格的宽度始终会参考 MARQUEE 元素内明确设置了宽度的块级元素的宽度。</li>
+        <li>在 <em>IE8(S) Firefox Opera</em> 中，当 MARQUEE 元素的 direction 属性为 up 或 down（即垂直方向滚动）时，表现得和 Chrome、Safari 中类似。而当MARQUEE 元素的 direction 属性为 left 或 right（即垂直方向滚动）时，表现得和 IE6、IE7 中类似。</li>
+      </ul>
+      <p class="comment">
+      【注】<br />
+      1. 对于固定布局的表格算法（<span class="hl_3">table-layout:fixed</span>）则各浏览器均不会再参考 MARQUEE 元素的子元素的宽度。<br />
+      2. 此现在在 'display' 特性为 table 的其他非 TABLE 元素中同样存在。
+      </p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>总是为 MARQUEE 元素显式地设定一个宽度。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.3<br />
+              Chrome 6.0.401.1 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BX1030/table_marquee.html">table_marquee.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-30</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>MARQUEE width 宽度 TABLE 表格 cell TD direction left right up down 滚动 方向</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

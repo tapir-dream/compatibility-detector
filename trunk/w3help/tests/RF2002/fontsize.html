@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="gbk" />
+<script>
+	function $(id) { return document.getElementById(id); }
+</script>
+</head>
+<body>
+<div style="float:left; border:1px solid black; font-family:'Arial'; line-height:1.5;">
+<script>
+for (var i = 3; i < 15; i++) {
+	document.write('<div style="overflow:hidden; zoom:1;"><span style="float:left;background:gold;font-size:' + i + 'px"><span id="d' + i + '">永</span></span>\
+		<span id="e' + i + '" style="float:left;"></span></div>');
+	$("e" + i).innerHTML = i + "-" + $("d" + i).offsetWidth;
+}
+</script>
+</div>
+<div style="float:left; border:1px solid black; font-family:'宋体'; line-height:1.5;">
+<script>
+for (var i = 3; i < 15; i++) {
+	document.write('<div style="overflow:hidden; zoom:1;"><span style="float:left;background:gold;font-size:' + i + 'px"><span id="m' + i + '">永</span></span>\
+		<span id="n' + i + '" style="float:left;"></span></div>');
+	$("n" + i).innerHTML = i + "-" + $("m" + i).offsetWidth;
+}
+</script>
+</div>
+</body>
+</html>

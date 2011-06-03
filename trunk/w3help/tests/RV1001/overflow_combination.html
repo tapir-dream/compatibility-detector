@@ -1,0 +1,20 @@
+<script type="text/javascript">
+    window.onload = function() {
+        function $(id) {
+            return document.getElementById(id);
+        }
+        function $s($target, styleName) {
+            var target = document.getElementById($target);
+            return document.defaultView ? document.defaultView.getComputedStyle(target, null).getPropertyValue(styleName)
+                    : target.currentStyle[styleName.replace(/-[a-z]/g, function() {
+                return arguments[0].charAt(1).toUpperCase();
+            })];
+        }
+        $("info1").innerHTML = "overflow-y : " + $s("div1", "overflow-y");
+
+    }
+</script>
+<div id="div1" style="width:200px;height:50px;background:gold;overflow-x:hidden; border:1px solid red;">
+    <div style="width:200px;height:50px;background:silver; margin:20px;"></div>
+</div>
+<div id="info1" class="info"></div>

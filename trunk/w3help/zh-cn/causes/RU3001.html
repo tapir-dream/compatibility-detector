@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RU3001: 只有 IE 和 Opera 支持 'cursor:hand'</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p> 请参见 W3C CSS 2.1中关于 ’cursor‘ 的说明 ： <a href="http://www.w3.org/TR/CSS21/ui.html#propdef-cursor">http://www.w3.org/TR/CSS21/ui.html#propdef-cursor</a></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>'cursor:hand' 特性值是由浏览器厂商设置的扩展样式值，现在只有 IE 和 Opera 支持，并不是 CSS 相关规范中制定的，因此其它浏览器均不支持该特性值。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>使用 'cursor:hand' 样式会导致 Safari Chrome Firefox 浏览器不呈现手型光标。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+              <tr>
+                <th>IE6 IE7 IE8 Opera</th>
+                <td>&nbsp;</td>
+              </tr>
+            </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p> MDSN 中关于 '<a href="http://msdn.microsoft.com/en-us/library/aa358795%28VS.85%29.aspx">cursor</a>' 的说明， 包括一些 W3C 中没有规定的鼠标样式，不仅 IE 支持，其他各浏览器除 Opera 也都支持，具体 value 值如下：</p>
+      <p><strong>value</strong> 有下面的形式：<br />
+      </p>
+      <ul>
+          <li>all-scroll：鼠标样式为中间有一个点，上下左右有四个箭头，表示可以向上下左右滚动( IE6 和更高级版本支持)；</li>
+          <li>col-resize：鼠标样式为中间有两条垂直的竖线，左右有两个箭头，表示列项可以水平调整大小( IE6 和更高级版本支持)；</li>
+          <li>hand：鼠标样式为表示一个链接( 通常是手型 )；</li>
+          <li>no-drop：鼠标样式为一个手型和一个中间有斜线的圆圈，表示在当前鼠标的位置拖动项不能被按下( IE6 和更高级版本支持 )；</li>
+          <li>not-allowed：鼠标样式为一个中间有斜线的圆圈，表示请求不被响应；</li>
+          <li>row-resize：鼠标样式为中间有两条水平的竖线，上下有两个箭头，表示行项可以垂直调整大小( IE6 和更高级版本支持 )；</li>
+          <li>vertical-text：鼠标样式为垂直的I形，表示编辑垂直的文本 ( IE6 和更高级版本支持 )。</li>
+          </ul>
+
+            <p>实际效果如下表：</p>
+            <table class="compare">
+              <tr>
+                <th>&nbsp;</th>
+                <th>IE6 IE7 IE8</th>
+                <th>Firefox Chrome Safari</th>
+              </tr>
+              <tr>
+                <th>all-scroll</th>
+                <td><img src="../../tests/RU3001/01.png" alt="运行效果截图" /></td>
+                <td><img src="../../tests/RU3001/07.png" alt="运行效果截图" /></td>
+              </tr>
+              <tr>
+                <th>col-resize</th>
+                <td><img src="../../tests/RU3001/02.png" alt="运行效果截图" /></td>
+                <td><img src="../../tests/RU3001/14.png" alt="运行效果截图" /></td>
+              </tr>
+              <tr>
+                <th>row-resize</th>
+                <td><img src="../../tests/RU3001/13.png" alt="运行效果截图" /></td>
+                <td><img src="../../tests/RU3001/11.png" alt="运行效果截图" /></td>
+              </tr>
+              <tr>
+                <th>hand</th>
+                <td><img src="../../tests/RU3001/03.png" alt="运行效果截图" /></td>
+                <td><img src="../../tests/RU3001/08.png" alt="运行效果截图" /></td>
+              </tr>
+              <tr>
+                <th>no-drop</th>
+                <td><img src="../../tests/RU3001/06.png" alt="运行效果截图" /></td>
+                <td><img src="../../tests/RU3001/09.png" alt="运行效果截图" /></td>
+              </tr>
+              <tr>
+                <th>not-allowed</th>
+                <td><img src="../../tests/RU3001/04.png" alt="运行效果截图" /></td>
+                <td><img src="../../tests/RU3001/10.png" alt="运行效果截图" /></td>
+              </tr>
+              <tr>
+                <th>vertical-text</th>
+                <td><img src="../../tests/RU3001/05.png" alt="运行效果截图" /></td>
+                <td><img src="../../tests/RU3001/05.png" alt="运行效果截图" /></td>
+              </tr>
+            </table>
+            <p> 可见：</p>
+            <ul>
+              <li>'all-scroll | col-resize | row-resize | not-allowed | vertical-text' 的样式 IE 和 Firefox Chrome Safari 大体类似，但又有少许的不同。</li>
+              <li>'no-drop' 在 IE 下是一个手型和一个小中间有斜线的圆圈，'no-drop' 在 Firefox Chrome Safari 下与 'no-allowed' 相同。</li>
+              <li>'hand' 只有 IE6 IE7 IE8 Opera 支持，其它浏览器都不支持该属性。</li>
+              <li>'Opera' 除了支持 'hand' 样式，其它非 W3C 规定的鼠标样式均不支持。</li>
+            </ul>
+          <h2 id="solutions">解决方案</h2>
+      <p>使用 CSS 规范中定义的 'cursor:  pointer' 样式代替 'cursor:hand' 样式。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>&nbsp;</td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-20</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>cursor hand pointer</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

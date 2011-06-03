@@ -1,0 +1,203 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RD8007: IE Opera 计算 shrink-to-fit 的宽度时会考虑浮动元素的宽度</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>shrink-to-fit 可以理解为 &quot;收缩至合适&quot; ，代表了浏览器对于计算后宽度为 auto 时的非替换浮动元素宽度计算所要遵循的标准。此外除了非替换浮动元素，对非替换绝对定位元素、非替换行内块元素的宽度为 auto 时也遵循此计算方式。<br />
+      根据 W3C CSS2.1 规范中的描述，shrink-to-fit 的宽度计算方法与 'table-layout' 特性为 'auto'（即自动表格布局）时对于单元格的宽度计算方法类似。大致为：</p>
+<ul>
+        <li>计算格式化内容时除了发生明确的换行外不发生换行的时<span class="hl_4">首选宽度（preferred width）</span>，以及<span class="hl_2">首选最小宽度（preferred minimum width）</span>，比如，尝试所有可能的换行。而 CSS2.1 没有定义精确的算法。</li>
+        <li>其次，在这种情况下，找出<span class="hl_3">可用宽度（available width）</span>，这个宽度为包含块减去 'margin-left'、'border-left-width'、'padding-left'、'padding-right'、'border-right-width'、'margin-right'以及所有相关滚动条的宽度。</li>
+      </ul>
+      <p>综上所述：</p>
+      <pre>shrink-to-fit 的宽度 = min ( max (<span class="hl_2">首选最小宽度</span>, <span class="hl_3">可用宽度</span>) , <span class="hl_4">首选宽度</span>)</pre>
+      <p>关于 shrink-to-fit 的更多资料，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/visudet.html#float-width">10.3.5 Floating, non-replaced elements</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE6 IE7 IE8 Opera 中对 shrink-to-fit 计算时会考虑浮动元素的宽度，这其中包含非替换浮动元素、非替换绝对定位元素、为替换行内块元素。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>IE6 IE7 IE8  Opera 中浮动元素参与 shrink-to-fit 宽度计算的特点将可能造成布局上的不兼容。如果页面仅在 IE 中进行调试，则极有可能造成在其他浏览器出现折行、内容丢失等现象。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8 Opera</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>以下按照非替换浮动元素、非替换绝对定位元素、非替换行内块元素分别进行分析。</p>
+      <h3>浮动元素的 shrink-to-fit</h3>
+      <p>分析以下代码：</p>
+      <pre>&lt;style&gt;
+  * { margin:0; padding:0; font:12px Verdana; }
+&lt;/style&gt;
+&lt;div style="width:400px;"&gt;
+  &lt;div id="A" style="float:left; border:5px solid #999;"&gt;
+    &lt;div id="B" style="float:left; width:40px; border:5px solid #666;"&gt;FLOAT&lt;/div&gt;
+    &lt;div id="C" style="border:5px solid; padding:5px; background:red;"&gt;
+      &lt;div id="D" style="float:left; width:30px; background:#888;"&gt;D&lt;/div&gt;
+      &lt;div id="E" style="float:left; width:30px; background:#AAA;"&gt;E&lt;/div&gt;
+      &lt;div id="F" style="float:left; width:30px; background:#CCC;"&gt;F&lt;/div&gt;
+    &lt;/div&gt;
+      &lt;div id="G" style="float:left; width:40px; border:5px solid #666;"&gt;FLOAT&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+      <p>上面代码中，【A】为最外层容器，左浮动，没有设置 'width'，则为默认的 'auto'。<br />
+      【A】中包括一个左浮动元素【B】，一个普通流中的容器【C】，及另一个左浮动元素【G】。其中【C】内又包含了三个左浮动元素【D】、【E】、【F】。</p>
+      <p>在各浏览器中的运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Opera</th>
+          <th>Firefox Chrome Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RD8007/float_stf_IE.gif" alt="IE6 IE7 IE8 Opera" /></td>
+          <td><img src="../../tests/RD8007/float_stf_FF.gif" alt="Firefox Chrome Safari" /></td>
+        </tr>
+      </table>
+      <p>首选根据 W3C 规范计算 <span class="hl_2">首选最小宽度</span>、<span class="hl_3">可用宽度</span>、<span class="hl_4">首选宽度</span> 这三个宽度的值：</p>
+      <ul>
+        <li><span class="hl_4">首选宽度（preferred width）</span>：在【A】中，【B】与【G】脱离了文本流，不再占有空间，【C】位于正常流中，【C】中的三个元素虽均为浮动元素，但【C】仍然具有宽度，为 3 x 30px = 90px，【C】的左右边框宽度为 2 x 5px = 10px，所以首选宽度为 90px + 10px = <span class="hl_4"><em>100px</em></span>；</li>
+        <li><span class="hl_2">首选最小宽度（preferred minimum width）</span>：尝试将【A】的包含块设至最小，此时【A】中可以发生换行的元素均已折行，此时的【A】中最宽的为【B】与【G】的所占宽度，即 2 x 5px + 40px = <span class="hl_2"><em>50px</em></span>；</li>
+        <li><span class="hl_3">可用宽度（available width）</span>：【A】的包含块为 width:400px 的DIV元素，则可用宽度为 <span class="hl_3"><em>400px</em></span>。</li>
+      </ul>
+      <p>下面根据第一节中的等式得出：</p>
+      <pre>shrink-to-fit 的宽度 = min ( max ( <span class="hl_2">50px</span> , <span class="hl_3">400px</span> ) , <span class="hl_4">100px</span> ) = 100px。</pre>
+      <p>即根据 W3C 规范【A】的宽度应该为 100px。<br />
+      而本例中：</p>
+      <ul>
+        <li><em>Firefox Chrome Safari</em> 的计算正确，【A】的宽度为 100px；</li>
+        <li><em>IE Opera</em> 在计算首选宽度时，已脱离文本流的浮动元素的宽度也参与到宽度计算中。</li>
+      </ul>
+      <br />
+      <h3>绝对定位元素的 shrink-to-fit</h3>
+      <p>分析以下代码：</p>
+      <pre>&lt;div style="position:absolute; padding:5px; background:#CCC;"&gt;
+    &lt;div style="float:left; width:50px; height:50px; background:#777;"&gt;POS&lt;/div&gt;
+    &lt;div style="background:#AAA;"&gt;IN-FLOW&lt;/div&gt;
+&lt;/div&gt;</pre>
+      <p>上面代码中，一个 'width' 为默认的 auto 的绝对定位元素中包含一个 50x50 的左浮动元素及一个普通流中的块级元素。</p>
+      <p>在各浏览器中的运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Opera</th>
+          <th>Firefox Chrome Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RD8007/pos_stf_IE.gif" alt="IE6 IE7 IE8 Opera" /></td>
+          <td><img src="../../tests/RD8007/pos_stf_FF.gif" alt="Firefox Chrome Safari" /></td>
+        </tr>
+      </table>
+      <p>与上节相同，绝对定位元素的 shrink-to-fit 的宽度 = min ( max ( 【IN-FLOW】的宽度 , 包含块的宽度 ) , 【IN-FLOW】的宽度 ) = 【IN-FLOW】的宽度，即 56px。</p>
+      <p>这里可以看到 IE6 IE7 IE8 Opera  对于 'shrink-to-fit' 仍然考虑浮动元素所占宽度。</p>
+      <br />
+      <h3>行内块元素的 shrink-to-fit</h3>
+      <p>分析以下代码：</p>
+      <pre>&lt;style&gt;
+    * { margin:0; padding:0; font:12px Verdana; }
+    .ib { display:inline-block; }
+    html* .ib { display:inline; }
+&lt;/style&gt;
+
+&lt;div class="ib" style="padding:5px; background:#CCC;"&gt;
+    &lt;div style="float:left; width:50px; height:50px; background:#777;"&gt;POS&lt;/div&gt;
+    &lt;div style="background:#AAA;"&gt;IN-FLOW&lt;/div&gt;
+&lt;/div&gt;</pre>
+      <p>上面代码中，一个 'width' 为默认的 auto 的绝对定位元素中包含一个 50x50 的左浮动元素及一个普通流中的块级元素。</p>
+      <p>在各浏览器中的运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Opera</th>
+          <th>Firefox Chrome Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RD8007/pos_stf_IE.gif" alt="IE6 IE7 IE8 Opera" /></td>
+          <td><img src="../../tests/RD8007/pos_stf_FF.gif" alt="Firefox Chrome Safari" /></td>
+        </tr>
+      </table>
+      <p>IE6 IE7 IE8(Q) 不支持 'display:inline-block'，但是 'display:inline-block' 会触发该元素的 hasLayout 特性，之后再为其设置 'display:inline' 后即可达到类似 CSS 中' display:inline-block' 的效果。</p>
+      <p>与第一节相同，行内元素的 shrink-to-fit 的宽度 = min ( max ( 【IN-FLOW】的宽度 , 包含块的宽度 ) , 【IN-FLOW】的宽度 ) = 【IN-FLOW】的宽度，即 56px。</p>
+      <p>IE6 IE7 IE8 Opera 对于 'shrink-to-fit' 仍然考虑浮动元素所占宽度。</p>
+
+
+
+      <h2 id="solutions">解决方案</h2>
+      <p>尽量为非替换浮动元素、非替换绝对定位元素、非替换行内块元素显式地设置一个宽度，防止浏览器在 'width:auto' 时对于 shrink-to-fit 的宽度计算方式不同造成布局上的差异。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="./RM8001">IE6 IE7 IE8(Q) 不支持 'display' 的替代值</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.3<br />
+              Chrome 5.0.375.7 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RD8007/float_stf.html">float_stf.html</a><br />
+            <a href="../../tests/RD8007/pos_stf.html">pos_stf.html</a><br />
+            <a href="../../tests/RD8007/ib_stf.html">ib_stf.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-20</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>float shrink-to-fit width 宽度 浮动 缩 minimum absolute inline-block</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

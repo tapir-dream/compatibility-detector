@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	.nr { background:#ddd; }
+</style>
+</head>
+<body>
+    <table style="width:120px;" border="1">
+        <tr>
+            <th class="nr">TH: </th>
+        </tr>
+        <tr>
+            <td class="nr">TD: </td>
+        </tr>
+    </table>
+    <div class="nr" style="width:120px;">DIV: </div>
+    <h3 class="nr" style="width:120px;">H3: </h3>
+    <p class="nr" style="width:120px;">P: </p>
+    <dl>
+        <dt id="dt" class="nr" style="width:120px;">DT: </dt>
+        <dd class="nr" style="width:120px;">DD: </dd>
+    </dl>
+    <script>
+    	window.onload = function() {
+	    	var a = document.getElementsByTagName("*"), html;
+	    	for (var i = 0; i < a.length; i++) {
+	    		if (a[i].className == "nr") {
+	    			html = typeof a[i].noWrap != "undefined" ? "Yes" : "No";
+	    			a[i].noWrap = true;
+	    			a[i].innerHTML += "DOM noWrap:" + html;
+	    		}
+	    	}
+	    }
+    </script>
+</body>
+</html>

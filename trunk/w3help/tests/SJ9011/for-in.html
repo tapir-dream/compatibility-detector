@@ -1,0 +1,25 @@
+<script type="text/javascript">
+	window.onload = function(){
+		var obj = {
+			city: "Beijing",
+			12: 12,
+			7: 7,
+			0: 0,
+			"-2": -2,
+			"age": 15,
+			"-3.5": -3.5,
+			7.7: 7.7,
+			_: "___",
+			online: true,
+			3: 3,
+			"23": "23",
+			"44": 44
+		},
+		info = document.getElementById("info"), key;
+		
+		for(key in obj){
+			info.innerHTML += key + " : " + obj[key] + "<br/>";
+		}
+	}
+</script>
+<div id="info"></div>

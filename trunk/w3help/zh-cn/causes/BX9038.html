@@ -1,0 +1,161 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX9038: Chrome Safari Opera 中文档树的最终生成会早于通过静态方式引入的外部 CSS 资源加载完毕</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+      
+      <h2 id="description">问题描述</h2>
+      <p>在 Chrome Safari Opera 中，外部 CSS 文件并不会影响文档树的生成。在 IE Firefox 中，文档树会在外部 CSS 文件加载完毕之后创建完毕。</p>
+      
+      <h2 id="influence">造成的影响</h2>
+      <p>若页面中有加载较慢的 CSS 外部文件，且在 window.onload 事件之前以及文档数建立完毕之后这段时间内获取某些在 CSS 文件中被设定了样式的元素的 CSS 特性值，在不同浏览器中可能产生差异。</p>
+      
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Chrome Safari Opera</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>CSS2.1 规范，一旦用户端解析了一个文档并且创建了文档树 (<a href="http://www.w3.org/TR/CSS2/conform.html#doctree">document tree</a>)，它必须为文档树中的每一个元素指定其每一个 CSS 特性。更多信息参见：CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/cascade.html#value-stages">6.1 Specified, computed, and actual values</a> 中的内容。</p>
+      <p>W3C 的规范中并没有明确说明具体何时文档树创建完毕，换句话说，没有提及文档树建立完成的标志，CSS 等外部文件的加载会不会影响到文档树的建立完毕时刻。</p>
+      <p>为了达到延迟 CSS 文件下载的效果，这里通过 PHP 在服务端将代码阻塞 5 秒。</p>
+      <p>分析以下代码：<em>cssjs.htm</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;script&gt;
+  var t1 = new Date().getTime();
+&lt;/script&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  body { font-family:Consolas; }
+  #test { font-size:48px; }
+&lt;/style&gt;
+&lt;link id=&quot;css&quot; href=&quot;css.php&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot; /&gt;
+&lt;/head&gt; 
+&lt;body&gt; 
+&lt;div id=&quot;test&quot; style=&quot;line-height:2; border:10px solid black; float:left;&quot;&gt;Test&lt;/div&gt; 
+&lt;div id=&quot;info&quot; style=&quot;clear:left;&quot;&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;script&gt;
+  function $(id) { return document.getElementById(id); }
+
+  if (!window.getComputedStyle) {
+    window.getComputedStyle = function($target){
+      return $target.currentStyle;
+    };
+  }
+  
+  window.onload=function () {
+    var t3 = new Date().getTime();
+    var c = getComputedStyle($(&quot;test&quot;), null).fontSize;
+    $(&quot;info&quot;).innerHTML += '&lt;br /&gt;window.onload: &lt;span style=&quot;font-size:' + c + '&quot;&gt;' + c + '&lt;/span&gt; [' + parseInt((t3 - t1) / 1000) + 's]';
+    
+  }
+  
+  var t2 = new Date().getTime();
+  var c = getComputedStyle($(&quot;test&quot;), null).fontSize;
+  $(&quot;info&quot;).innerHTML += '&lt;br /&gt;DOMContentLoaded: &lt;span style=&quot;font-size:' + c + '&quot;&gt;' + c + '&lt;/span&gt; [' + parseInt((t2 - t1) / 1000) + 's]';
+&lt;/script&gt;
+&lt;/html&gt;</pre>
+      <p>服务端代码：<em>css.php</em></p>
+      <pre>&lt;?php
+  header('Content-Type:text/css; charset=&quot;gb2312&quot;');
+  sleep(5);
+  echo &quot;* { margin:0px; padding:0px; }&quot;;
+  echo &quot;#test { font-size:24px; }&quot;;
+?&gt;</pre>
+      <p>上面页面 <em>cssjs.htm</em> 通过 LINK 元素加载了一个外部 CSS 文件 <em>css.php</em>，此文件中的 #test 的 'font-size' 特性值为 48px，CSS 文件会被阻塞 5 秒，分别在文档树建立完毕时以及 window.onload 事件中检测 #test 的 'font-size' 特性的计算值，以及粗略计算从页面加载至这两个时刻所花费的时间。</p>
+      <p>各浏览器中执行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Firefox</th>
+          <th>Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BX9038/css1.gif" alt="" /></td>
+          <td><img src="../../tests/BX9038/css2.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>可见，在 <em>Chrome Safari Opera</em> 中，被阻塞的 CSS 外部文件并不会影响页面文档树的生成。文档树在 CSS 外部文件加载完毕之前就创建完毕。<br />
+      而在 IE Firefox 中，文档树会等待 CSS 外部文件加载完毕之后才真正的创建完毕。</p>
+      <p>在 window.onload 事件触发后，所有浏览器均可以得到在 CSS 外部文件中定义的样式信息。</p>
+      
+      <h2 id="solutions">解决方案</h2>
+      <p>在文档树加载完成时，获得元素的实际计算后样式并不一定正确，建议获得或处理元素计算后样式的代码应写在 window.onload 事件中。</p>
+      
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.9<br />
+              Chrome 7.0.517.0 dev<br />
+              Safari 5.0.1<br />
+              Opera 10.62
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+              <a href="../../tests/BX9038/cssjs.htm">cssjs.htm</a>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-13</td>
+          </tr>
+        </table>
+        
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>css js external file load 加载 document tree 文档树</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

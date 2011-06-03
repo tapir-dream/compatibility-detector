@@ -1,0 +1,173 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HF2016: 对于 SELECT 元素在使用 OPTGROUP 元素对 OPTION 元素进行分组时，OPTION 元素分组中下拉列表项的缩进不同</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>SELECT 元素用来实现一个下拉列表，而 <em>OPTGROUP OPTION</em> 用来对 SELECT 元素中的下拉列表项进行逻辑分组，并且所有的 OPTGROUP 元素必须在 SELECT 元素中直接指定，分组不允许嵌套。</p>
+      <p>关于 <em>SELECT OPTGROUP OPTION</em> 可以参考 W3C HTML4.1 中 <a href="http://www.w3.org/TR/html401/interact/forms.html#h-17.6">17.6 The SELECT, OPTGROUP, and OPTION elements</a> 的描述。</p>
+      <h2 id="description">问题描述</h2>
+      <p>对于 SELECT 元素在使用 OPTGROUP 元素对 OPTION 元素进行分组时，在各浏览器中由 OPTGROUP 元素创建的缩进量不同，这会导致未具体设定宽度的替换元素根据内在宽度显示后，各浏览器中显示效果不一。</p>
+      <h2 id="influence">造成的影响</h2>
+      <p>在没有给 SELECT 元素设定具体宽度的情况下，由于 OPTGROUP 元素创建的缩进量不同，会导致各浏览器中 SELECT 元素实际显示宽度不一，有可能使页面局部布局产生差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+<pre>
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;&lt;/title&gt;
+&lt;style type="text/css"&gt;
+  option, <span class="hl_4">optgroup</span>, select {
+  font-family:Arial;
+  font-size:12px;
+  }
+<span class="hl_4">optgroup</span>{
+  padding:0;margin:0;
+}
+&lt;/style&gt;
+&lt;script&gt;
+window.onload=function(){
+  $("info").innerHTML="selecter1："+$("selecter1").offsetWidth+"px&lt;br/&gt;"
+                        +"selecter2："+$("selecter2").offsetWidth+"px&lt;br/&gt;"
+                        +"缩进值："+($("selecter2").offsetWidth-$("selecter1").offsetWidth)+"px";
+}
+function $(id){return document.getElementById(id);}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body style="font-family:Arial, Helvetica, sans-serif;font-size:12px;"&gt;
+&lt;select  id="selecter1"&gt;
+        &lt;option&gt;H2SO4&lt;/option&gt;
+        &lt;option&gt;盐酸&lt;/option&gt;
+        &lt;option&gt;硝酸&lt;/option&gt;
+        &lt;option&gt;H2S&lt;/option&gt;
+        &lt;option&gt;碳酸&lt;/option&gt;
+        &lt;option&gt;硼酸&lt;/option&gt;
+&lt;/select&gt;
+&lt;select  id="selecter2"&gt;
+    &lt;optgroup label="强酸"&gt;
+        &lt;option&gt;H2SO4&lt;/option&gt;
+        &lt;option&gt;盐酸&lt;/option&gt;
+        &lt;option&gt;硝酸&lt;/option&gt;
+    &lt;/optgroup&gt;
+    &lt;optgroup label="弱酸"&gt;
+        &lt;option&gt;H2S&lt;/option&gt;
+        &lt;option&gt;碳酸&lt;/option&gt;
+        &lt;option&gt;硼酸&lt;/option&gt;
+    &lt;/optgroup&gt;
+&lt;/select&gt;
+&lt;div id="info"&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+      <p>以上代码中创建了两个个 SELECT 元素，其中 &quot;selecter1&quot; 元素是没有设置分组的，其作用是用来做为在各浏览器中的参考，然后利用 OPTGROUP 元素对 &quot;selecter2&quot; 元素中的 OPTION 元素进行分组，最后获得这两个 SELECT 元素的差值，此差值即为此例中 &quot;selecter2&quot; 元素分组后产生的缩进值。</p>
+      <p>同时 OPTGROUP 元素的 'padding' 和 'margin' 特性值均设置为 0 ，用此尝试避免 OPTGROUP 元素本身会存在浏览器默认样式，使其内的 OPTION 元素定位产生差异。</p>
+      <p>在各浏览器中的运行结果截图如下：</p>
+      <table class="compare"><tbody>
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S)</th>
+          <th>Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/HF2016/IE6.png" alt="" /></td>
+          <td><img src="../../tests/HF2016/IE8(S).png" alt="" /></td>
+          <td><img src="../../tests/HF2016/Safari.png" alt="" /></td>
+        </tr>
+        <tr>
+          <th>Firefox Chrome</th>
+          <th>Opera</th>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td><img src="../../tests/HF2016/Firefox.png" alt="" /></td>
+          <td><img src="../../tests/HF2016/Opera.png" alt="" /></td>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <p>从运行结果截图中可知，即使将 OPTGROUP 元素中的 'padding' 和  'margin' 特性值设定为 0，各浏览器中 OPTGROUP 元素内的 OPTION 标记的缩进量依旧都不相同。</p>
+      <h2 id="solutions">解决方案</h2>
+      <p>无法避免 OPTGROUP 元素产生的缩进值不同问题。但是可以通过为 SELECT 元素设定具体宽度，达到不因此问题影响布局的目的。</p>
+      <p>如果确实需要精确控制选项组布局，只能有过使用脚本语言构造自定义选择框才能实现。</p>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="HF1017">HF1017: Firefox 中 OPTION 元素可以应用其设定的宽度并撑大其所在 SELECT 元素</a></li>
+      </ul>
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 8.0.552.11 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+              <a href="../../tests/HF2016/optgroup.html">optgroup.html</a>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-13</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>SELECT OPTION OPTGROUP </p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,389 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX1022: 各浏览器对遇到中文标点符号时折行的处理有差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无</p>
+      <h2 id="description">问题描述</h2>
+      <p>制作中文页面并使用标点符号时，不同浏览器对于中文标点的折行判定条件有差异。</p>
+      <h2 id="influence">造成的影响</h2>
+      <p> 由于不同浏览器对于中文标点的折行条件有差异，若在对段落文字进行排版布局时，过分依赖当前段落文字自动计算的尺寸可能会产生折行差异，最终可能导致文字布局存在少许差异。 </p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p><strong>1. 中文标点书写规范</strong></p>
+      <p>标点符号是辅助文字记录语言的符号，是书面语的有机组成部分，用来表示停顿、语气以及词语的性质和作用。 </p>
+      <p>中文标点分为 &quot;<strong>点号</strong>&quot; 与 &quot;<strong>标号</strong>&quot; 两大类：</p>
+      <ul>
+        <li><strong>点号</strong>的作用在于点断，主要表示说话时的停顿和语气。<br />
+          点号又分为句末点号和句内点号。句末点号用在句末，有句号【。】、问号【？】、叹号【！】3种，表示句末的停顿，同时表示句子的语气。<br />
+          句内点号用在句内，有逗号【，】、顿号【、】、分号【；】、冒号【：】4种，表示句内的各种不同性质的停顿；</li>
+        <li><strong>标号</strong>的作用在于标明，主要标明语句的性质和作用。<br />
+          常用的标号有9种，即：引号【 &quot;XX&quot; ‘XX’】、括号【（XX）】、破折号【——】、省略号【……】、着重号、连接号、间隔号、书名号和专名号。</li>
+      </ul>
+      <p><strong> 中文标点书写时在行内的位置</strong></p>
+      <ul>
+        <li>句号、问号、叹号、逗号、顿号、分号和冒号一般占一个字的位置，不出现在一行之首；</li>
+        <li>引号、括号、书名号的前一半不出现在一行之末，后一半不出现在一行之首；</li>
+        <li>破折号和省略号都占两个字的位置，中间不能断开。连接号和间隔号一般占一个字的位置。这四种符号上下居中；</li>
+        <li>着重号、专名号和浪线式书名号标在字的下边，可以随字移行。</li>
+      </ul>
+      <p><strong>2. 各浏览器对中文标点自动折行的规则差异</strong></p>
+      <p>分析如下代码：</p>
+<pre>
+&lt;style&gt;
+  .c { float:left; }
+  .d { width:24px; background:#DDD; font:12px 宋体; float:left; margin:5px 10px 0 0; display:inline; }
+&lt;/style&gt;
+&lt;h1&gt;标号：&lt;/h1&gt;
+&lt;div style=&quot;width:640px; overflow:hidden;&quot;&gt;
+&lt;div class=&quot;c&quot;&gt;
+  &lt;div class=&quot;d&quot;&gt;你。你好&lt;/div&gt;
+  &lt;div class=&quot;d&quot;&gt;你好。你&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;c&quot;&gt;
+  &lt;div class=&quot;d&quot;&gt;你？你好&lt;/div&gt;
+  &lt;div class=&quot;d&quot;&gt;你好？你&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;c&quot;&gt;
+  &lt;div class=&quot;d&quot;&gt;你！你好&lt;/div&gt;
+  &lt;div class=&quot;d&quot;&gt;你好！你&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;c&quot;&gt;
+  &lt;div class=&quot;d&quot;&gt;你，你好&lt;/div&gt;
+  &lt;div class=&quot;d&quot;&gt;你好，你&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;c&quot;&gt;
+  &lt;div class=&quot;d&quot;&gt;你、你好&lt;/div&gt;
+  &lt;div class=&quot;d&quot;&gt;你好、你&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;c&quot;&gt;
+  &lt;div class=&quot;d&quot;&gt;你；你好&lt;/div&gt;
+  &lt;div class=&quot;d&quot;&gt;你好；你&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;c&quot;&gt;
+  &lt;div class=&quot;d&quot;&gt;你：你好&lt;/div&gt;
+  &lt;div class=&quot;d&quot;&gt;你好：你&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;h1&gt;标号：&lt;/h1&gt;
+&lt;div style=&quot;width:175px; overflow:hidden;&quot;&gt;
+&lt;div class=&quot;c&quot;&gt;
+  &lt;div class=&quot;d&quot;&gt;你 &quot;你好&lt;/div&gt;
+  &lt;div class=&quot;d&quot;&gt;你好 &quot;你&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;c&quot;&gt;
+  &lt;div class=&quot;d&quot;&gt;你&quot; 你好&lt;/div&gt;
+  &lt;div class=&quot;d&quot;&gt;你好&quot; 你&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;c&quot;&gt;
+  &lt;div class=&quot;d&quot;&gt;你‘你好&lt;/div&gt;
+  &lt;div class=&quot;d&quot;&gt;你好‘你&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;c&quot;&gt;
+  &lt;div class=&quot;d&quot;&gt;你’你好&lt;/div&gt;
+  &lt;div class=&quot;d&quot;&gt;你好’你&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;c&quot;&gt;
+  &lt;div class=&quot;d&quot;&gt;你（你好&lt;/div&gt;
+  &lt;div class=&quot;d&quot;&gt;你好（你&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;c&quot;&gt;
+  &lt;div class=&quot;d&quot;&gt;你）你好&lt;/div&gt;
+  &lt;div class=&quot;d&quot;&gt;你好）你&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;c&quot;&gt;
+  &lt;div class=&quot;d&quot;&gt;你《你好&lt;/div&gt;
+  &lt;div class=&quot;d&quot;&gt;你好《你&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;c&quot;&gt;
+  &lt;div class=&quot;d&quot;&gt;你》你好&lt;/div&gt;
+  &lt;div class=&quot;d&quot;&gt;你好》你&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;c&quot; style=&quot;width:190px;&quot;&gt;
+  &lt;div class=&quot;d&quot; style=&quot;width:48px; margin-right:5px;&quot;&gt;你好……你好&lt;/div&gt;
+  &lt;div class=&quot;d&quot; style=&quot;width:48px; margin-right:5px;&quot;&gt;你好你……好&lt;/div&gt;
+  &lt;div class=&quot;d&quot; style=&quot;width:48px;&quot;&gt;你好你好……&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;c&quot; style=&quot;width:190px;&quot;&gt;
+  &lt;div class=&quot;d&quot; style=&quot;width:48px; margin-right:5px;&quot;&gt;你好——你好&lt;/div&gt;
+  &lt;div class=&quot;d&quot; style=&quot;width:48px; margin-right:5px;&quot;&gt;你好你——好&lt;/div&gt;
+  &lt;div class=&quot;d&quot; style=&quot;width:48px;&quot;&gt;你好你好——&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</pre>
+      <p>上面代码测试了一些常用的中文标点符号可能出现在行框一行的结尾或者开头时浏览器对其折行的处理情况。这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>所有浏览器</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BX1022/01.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p> 可见，对于<em> &quot;标号&quot; </em>，<em><strong>所有浏览器</strong></em>的处理均相同，即标号可以出现在行的结尾，但不能出现在行的开头。 </p>
+      <p>下面继续对<em>点号</em>进行测试，其结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE</th>
+          <th>Firefox</th>
+          <th>Safari  Chrome Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BX1022/02.gif" alt="" /></td>
+          <td><img src="../../tests/BX1022/03.gif" alt="" /></td>
+          <td><img src="../../tests/BX1022/04.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p> 可见，对于<em> &quot;点号&quot; </em>：</p>
+      <ul>
+        <li>在 <em>IE</em> 中，允许引号、括号、书名号的前一半出现在行的开头，允许引号、括号、书名号的后一半出现在行的结尾；允许省略号出现在行的结尾，但不允许省略号出现在行的开头，且省略号为两个字符，这两个字符之间不可分割；允许破折号出现在行的几位，但不允许破折号出现在行的开头，且破折号为两个字符，这两个字符之间可以分割；</li>
+        <li>在 <em>Chrome Safari Opera</em> 中，无论引号的前一半还是后一半一律不允许出现在行的开头与结尾；允许括号、书名号的前一半出现在行的开头，允许括号、书名号的后一半出现在行的结尾；允许省略号、破折号出现在行的开头和结尾，且省略号与破折号为两个字符，这两个字符之间不可以分割；</li>
+        <li>在 <em>Firefox</em> 中，引号、括号、书名号的情况与IE类似，省略号、破折号的情况与 Chrome 类似。</li>
+      </ul>
+      <p> 【注】本文讨论的情况均为中文标点符号在连续的上下文之间的情况，不包含：
+      <ul class="catelist">
+        <li>强行使标点符号位于行的开头；</li>
+        <li>强行使标点符号位于行的结尾；</li>
+        <li>使用禁止换行或者强制换行等。</li>
+      </ul>
+      <p>下面列表说明各浏览器对常用中文标点符号的折行条件：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox</th>
+          <th>Chrome</th>
+          <th> Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <th>句号</th>
+          <td>。</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+        </tr>
+        <tr>
+          <th>问号</th>
+          <td>？</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+        </tr>
+        <tr>
+          <th>叹号</th>
+          <td>!</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+        </tr>
+        <tr>
+          <th>逗号</th>
+          <td>，</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+        </tr>
+        <tr>
+          <th>顿号</th>
+          <td>、</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+        </tr>
+        <tr>
+          <th>分号</th>
+          <td>；</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+        </tr>
+        <tr>
+          <th>冒号</th>
+          <td>：</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+        </tr>
+        <tr>
+          <th>前双引号</th>
+          <td> &quot;</td>
+          <td class="hl_2">行开头</td>
+          <td class="hl_2">行开头</td>
+          <td class="hl_1">禁止行开头与结尾</td>
+          <td class="hl_1">禁止行开头与结尾</td>
+          <td class="hl_1">禁止行开头与结尾</td>
+        </tr>
+        <tr>
+          <th>后双引号</th>
+          <td>&quot; </td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+          <td class="hl_1">禁止行开头与结尾</td>
+          <td class="hl_1">禁止行开头与结尾</td>
+          <td class="hl_1">禁止行开头与结尾</td>
+        </tr>
+        <tr>
+          <th>前单引号</th>
+          <td>‘</td>
+          <td class="hl_2">行开头</td>
+          <td class="hl_2">行开头</td>
+          <td class="hl_1">禁止行开头与结尾</td>
+          <td class="hl_1">禁止行开头与结尾</td>
+          <td class="hl_1">禁止行开头与结尾</td>
+        </tr>
+        <tr>
+          <th>后单引号</th>
+          <td>’</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+          <td class="hl_1">禁止行开头与结尾</td>
+          <td class="hl_1">禁止行开头与结尾</td>
+          <td class="hl_1">禁止行开头与结尾</td>
+        </tr>
+        <tr>
+          <th>左括号</th>
+          <td>（</td>
+          <td class="hl_2">行开头</td>
+          <td class="hl_2">行开头</td>
+          <td class="hl_2">行开头</td>
+          <td class="hl_2">行开头</td>
+          <td class="hl_2">行开头</td>
+        </tr>
+        <tr>
+          <th>右括号</th>
+          <td>）</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+        </tr>
+        <tr>
+          <th>左书名号</th>
+          <td>《</td>
+          <td class="hl_2">行开头</td>
+          <td class="hl_2">行开头</td>
+          <td class="hl_2">行开头</td>
+          <td class="hl_2">行开头</td>
+          <td class="hl_2">行开头</td>
+        </tr>
+        <tr>
+          <th>右书名号</th>
+          <td>》</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+          <td>行结尾</td>
+        </tr>
+        <tr>
+          <th>省略号</th>
+          <td>……</td>
+          <td>行结尾</td>
+          <td class="hl_3">行开头 行结尾</td>
+          <td class="hl_3">行开头 行结尾</td>
+          <td class="hl_3">行开头 行结尾</td>
+          <td class="hl_3">行开头 行结尾</td>
+        </tr>
+        <tr>
+          <th>破折号</th>
+          <td>——</td>
+          <td>行结尾</td>
+          <td class="hl_3">行开头 行结尾</td>
+          <td class="hl_3">行开头 行结尾</td>
+          <td class="hl_3">行开头 行结尾</td>
+          <td class="hl_3">行开头 行结尾</td>
+        </tr>
+      </table>
+      <h2 id="solutions">解决方案</h2>
+      <p> 对段落文字排版时须谨慎，注意标点符号的位置。如果不好控制文字内容，可以使用Javascript根据文字内容所占的高度动态缩改文字内容。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td> IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4 <br />
+                            Opera 10.60</td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BX1001/box_model.html">box_model.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-06-18</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p> wrap 标点 中文 折行 点号 标号</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

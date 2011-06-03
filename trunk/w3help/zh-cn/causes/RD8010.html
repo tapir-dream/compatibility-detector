@@ -1,0 +1,142 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RD8010: IE6 IE7(Q) IE8(Q) 不支持 'min-width' 和 'max-width' 特性</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>'min-width' 和 'max-width' 限定内容宽度的范围。定义值如下：</p>
+      <ul>
+        <li>&lt;length&gt;:指定一个固定的最小或最大的使用宽度；</li>
+        <li>&lt;percentage&gt;:指定确定计算值的百分比。百分比的计算基于生成框的包含块的宽度。如果包含块的宽度是负值，计算值是0。</li>
+        <li>none:（仅用于'max-width'）对框的宽度没有限制。</li>
+      </ul>
+      <p>'min-width' 和 'max-width' 设定负值是不合法的</p>
+      <p>关于 'min-width' 和 'max-width' 的更多信息，请参考 CSS 2.1 <a href="http://www.w3.org/TR/CSS21/visudet.html#min-max-widths">10.4 Minimum and maximum widths: 'min-width' and 'max-width'</a>。</p>
+      <p>这两个特性是有 CSS 2.0 规范提出的，在之前的 CSS 1 规范中并没有他们。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE6 IE7(Q) IE8(Q)不支持 'min-width' 和 'max-width' 特性。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>在 IE6 IE7(Q) IE8(Q) 中使用 'min-width' 和 'max-width' 特性无效。</p>
+
+      <h2 id="impacted_browsers">受响的浏览器</h2>
+      <table class="list">
+        <tbody>
+          <tr>
+            <th>IE6 IE7(Q) IE8(Q)</th>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+<pre>
+&lt;style type="text/css"&gt;
+#minWidth{
+  min-width: 100px;
+  width: 50px;
+  height: 50px;
+  background-color: gold;
+  margin:10px;
+}
+#maxWidth{
+  max-width: 50px;
+  width: 100px;
+  height: 100px;
+  background-color: silver;
+  margin:10px;
+}
+&lt;/style&gt;
+&lt;div id="minWidth"&gt;&lt;/div&gt;
+&lt;div id="maxWidth"&gt;&lt;/div&gt;
+</pre>
+      <p>在各浏览器中效果如下：</p>
+      <table class="compare">
+                <tr>
+                    <th>IE6(S)(Q) IE7(Q) IE8(Q)</th>
+                    <th>其他浏览器</th>
+                </tr>
+                <tr>
+                    <td><img src="../../tests/RD8010/RD8010-1.png" alt=""></td>
+                    <td><img src="../../tests/RD8010/RD8010-2.png" alt=""></td>
+                </tr>
+            </table>
+      <p>可见，IE6 IE7(Q) IE8(Q) 下 DIV 的内容宽度是 'width' 的值，而不是 'min-width' 和 'max-width' 的值。</p>
+      <p>其他浏览器，当 'width' 的值小于 'min-width' 值时，实际值是 'min-width' 值；当 'width' 的值大于 'max-width' 值时，实际值是 'max-width' 值。</p>
+      <p> IE6 的开发时间早于 CSS 2.0 版本成文时间，这导致了 IE6 中不可能预知未来提前支持  'min-width' 'max-width' 等 CSS 2.0 后才有的规范内容，这个问题是典型的规范变迁以及浏览器开发时间不同步造成的历史遗留问题。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>使用 Javascript 实现 'min-width' 和 'max-width' 特性功能。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br/>
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RD8010/RD8010.html">RD8010.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-20</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>min-width max-width</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

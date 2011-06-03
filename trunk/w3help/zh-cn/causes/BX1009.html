@@ -1,0 +1,227 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX1009: 各浏览器在宽度不够时不会对连续的全角空格进行折行处理存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 Unicode 5.2.0 标准文档中的描述，空格字符（Space Characters）有多种，如最常见的 U+0020 空格（SPACE），经常被使用的不断行空格 U+00A0（NO-BREAKING SPACE，即 &amp;nbsp;）等等。<strong>在表意文字中，U+3000（IDEOGRAPHIC SPACE）即表意空格则由于其宽度与其他表意文字等宽而被广泛使用。</strong></p>
+      <p>关于 U+3000 IDEOGRAPHIC SPACE 及 全角（Full-width）字符 的更多资料，请参考 <a href="http://www.unicode.org/versions/Unicode5.2.0/">Unicode 5.2.0</a> 标准 <a href="http://www.unicode.org/versions/Unicode5.2.0/ch06.pdf">Chapter 6 Writing Systems and Punctuation</a>、<a href="http://www.unicode.org/charts/PDF/U3000.pdf">CJK Symbols and Punctuation</a> 及 <a href="http://www.unicode.org/reports/tr11/tr11-19.html">UAX #11 EAST ASIAN WIDTH</a> 中的内容。</p>
+      <p>根据 CSS2.1 规范中的描述，当一个行内框的宽度超出了行框的宽度，这个行内框会被分割为若干个框分布到若干个行框上。如果行内框无法被分割（如包含单独字符，或者<strong>当前语言指定的断词规则不允许中断</strong>，再或者被设置了值为 'nowrap' 或 'pre' 的 'white-space' 特性），此时的行内框会溢出行框。</p>
+      <p>关于 行内格式化 的更多资料，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/visuren.html#inline-formatting">9.4.2 Inline formatting context</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE 和 Firefox 在宽度不够时不会对连续的全角空格进行折行处理，此时因超宽而可能溢出行框的连续的全角空格在 IE6 IE7 IE8(Q) 中将被容器剪裁，在 IE8(S) Firefox 中将溢出容器。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>这个现象可能造成连续的全角空格在 IE 和 Firefox 中不会自动打破行框折行至新的行上，从而导致文本布局差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <th>IE8(S)</th>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <th>Firefox</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>字符“<span class="hl_1">　</span>”，即表意空格（Ideographic Space），也可以叫全角空格（Full-width Space），对应的 HTML 实体字符为“<span class="hl_1">&amp;#12288</span>”。在相同的等宽中文字体下，全角空格的宽度与普通汉字的宽度相等。</p>
+      <p>关于“空格”的更多信息，请参考 <a href="http://zh.wikipedia.org/zh-cn/空格">http://zh.wikipedia.org/zh-cn/空格</a>。</p>
+      <p>分析以下代码：<em>full-width_space.html</em></p>
+      <pre>&lt;body&gt;
+  &lt;div style="width:100px; background:gray; font:16px/2 Arial;&quot;&gt;
+    &lt;span style="background:blue;&quot;&gt;<em>　　　　　　　　　　　</em><strong>&lt;/span&gt;<span class="hl_2"> </span>&lt;/div&gt;</strong>
+  &lt;br /&gt;
+  &lt;div style="width:100px; background:gray; font:16px/2 Arial;&quot;&gt;
+    &lt;span style="background:blue;&quot;&gt;<em>　　　　　　　　　　　</em><strong>&lt;/span&gt;&lt;/div&gt;</strong>
+&lt;/body&gt;</pre>
+      <p>测试代码分为上下两组，每组均为一个宽度为 100px 的 DIV 元素内包含一个蓝色背景的 SPAN 元素，SPAN 元素的内容文本为 10 个<strong>全角空格（U+3000）</strong>。两组的区别为第一组中 SPAN 元素的结束标签与其父元素 DIV 的结束标签之间存在空白符，而第二组中则为紧密相连。</p>
+      <p>这段代码在各浏览器中效果为：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S)</th>
+          <th>Firefox</th>
+          <th>Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BX1009/fw_1.gif" alt="IE6 IE7 IE8(Q)" /></td>
+          <td><img src="../../tests/BX1009/fw_2.gif" alt="IE8(S)" /></td>
+          <td><img src="../../tests/BX1009/fw_3.gif" alt="Firefox" /></td>
+          <td><img src="../../tests/BX1009/fw_4.gif" alt="Chrome Safari Opera" /></td>
+        </tr>
+      </table>
+      <p>从截图中可见，<em>Chrome Safari Opera</em> 中全角空格被视同与普通的中文汉字一样对待。</p>
+      <p>而 <em>IE6 IE7 IE8(Q)<sup>1</sup></em> 中全角空格没有折行，并且被包含块将可能溢出行框的部分裁切。</p>
+      <p>在 <em>Firefox</em> 中全角空格不会折行，溢出行框及包含块。</p>
+      <p>在 <em>IE8(S)<sup>2</sup></em> 中情况比较特殊，若 SPAN 元素与父元素的结束标签之间存在空白符，则表现得与 Firefox 中类似，若两个结束标签紧密相连则整个 SPAN 元素丢失，没有被正确渲染出来。</p>
+      <p class="comment">
+        注 1：若为第二组的 SPAN 元素设置 border、padding 则 SPAN 元素不再被剪裁。<br />
+        注 2：若为第二组的 SPAN 元素设置 border、padding 则 SPAN 元素不再消失。
+      </p>
+      <br />
+      <p>下面为 SPAN 元素之前增加一个其他的行内级元素：<em>fw_space_2.html</em></p>
+      <pre>&lt;body style="font:12px/2 Consolas;"&gt;
+&lt;div style="background:gray; width:120px; padding:10px 0;"&gt;
+    &lt;span style="display:inline-block; width:120px; background:bisque;"&gt;123&lt;/span&gt;
+    &lt;span style="background:skyblue;"&gt;　　　　　&lt;/span&gt;
+&lt;/div&gt;
+&lt;br/&gt;
+&lt;div style="background:gray; width:120px; padding:10px 0;"&gt;
+    &lt;span style="display:inline-block; width:120px; background:bisque;"&gt;123&lt;/span&gt;
+    &lt;span style="background:violet;"&gt;一二三四五&lt;/span&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div style="background:gray; width:120px; padding:10px 0;"&gt;
+    &lt;span style="display:inline-block; width:80px; background:bisque;"&gt;123&lt;/span&gt;
+    &lt;span style="background:skyblue;"&gt;　　　　　&lt;/span&gt;
+&lt;/div&gt;
+&lt;br/&gt;
+&lt;div style="background:gray; width:120px; padding:10px 0;"&gt;
+    &lt;span style="display:inline-block; width:80px; background:bisque;"&gt;123&lt;/span&gt;
+    &lt;span style="background:violet;"&gt;一二三四五&lt;/span&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div style="background:gray; width:120px; padding:10px 0;"&gt;
+    &lt;span style="display:inline-block; width:40px; background:bisque;"&gt;123&lt;/span&gt;
+    &lt;span style="background:skyblue;"&gt;　　　　　&lt;/span&gt;
+&lt;/div&gt;
+&lt;br/&gt;
+&lt;div style="background:gray; width:120px; padding:10px 0;"&gt;
+    &lt;span style="display:inline-block; width:40px; background:bisque;"&gt;123&lt;/span&gt;
+    &lt;span style="background:violet;"&gt;一二三四五&lt;/span&gt;
+&lt;/div&gt;
+&lt;/body&gt;</pre>
+      <p>这段代码在各浏览器中效果为：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S)</th>
+          <th>Firefox</th>
+          <th>Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BX1009/i_fw_a_1.gif" alt="IE6 IE7 IE8(Q)" /></td>
+          <td><img src="../../tests/BX1009/i_fw_a_2.gif" alt="IE8(S)" /></td>
+          <td><img src="../../tests/BX1009/i_fw_a_3.gif" alt="Firefox" /></td>
+          <td><img src="../../tests/BX1009/i_fw_a_3.gif" alt="Chrome Safari Opera" /></td>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BX1009/i_fw_b_1.gif" alt="IE6 IE7 IE8(Q)" /></td>
+          <td><img src="../../tests/BX1009/i_fw_b_2.gif" alt="IE8(S)" /></td>
+          <td><img src="../../tests/BX1009/i_fw_b_3.gif" alt="Firefox" /></td>
+          <td><img src="../../tests/BX1009/i_fw_b_4.gif" alt="Chrome Safari Opera" /></td>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BX1009/i_fw_c_1.gif" alt="IE6 IE7 IE8(Q)" /></td>
+          <td><img src="../../tests/BX1009/i_fw_c_1.gif" alt="IE8(S)" /></td>
+          <td><img src="../../tests/BX1009/i_fw_c_1.gif" alt="Firefox" /></td>
+          <td><img src="../../tests/BX1009/i_fw_c_1.gif" alt="Chrome Safari Opera" /></td>
+        </tr>
+      </table>
+      <p>这组截图中得到的结论与之前的相符，
+      <ul>
+        <li>IE 中连续的全角空格无论是其整体还是部分均不会折行至新行上，且 IE6 IE7 IE8(Q) 中溢出包含块行框的部分会被剪裁。</p>
+        <li>Firefox 中连续的全角空格始终作为一个不可分割的整体存在，其内部不会被打断。</li>
+      </ul>
+      <br />
+      <p>下面通过一组动画更清晰的观察此现象：<em>fw_ani.html</em></p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S)</th>
+          <th>Firefox</th>
+          <th>Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BX1009/fw_a1.gif" alt="IE6 IE7 IE8(Q)" /></td>
+          <td><img src="../../tests/BX1009/fw_a2.gif" alt="IE8(S)" /></td>
+          <td><img src="../../tests/BX1009/fw_a3.gif" alt="Firefox" /></td>
+          <td><img src="../../tests/BX1009/fw_a4.gif" alt="Chrome Safari Opera" /></td>
+        </tr>
+      </table>
+      
+
+      <h2 id="solutions">解决方案</h2>
+      <p>使用 &amp;nbsp; 代替全角空格（U+3000）。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.8<br />
+              Chrome 6.0.472.14 dev<br />
+              Safari 5.0.1<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BX1009/full-width_space.html">full-width_space.html</a><br />
+            <a href="../../tests/BX1009/fw_space_2.html">fw_space_2.html</a><br />
+            <a href="../../tests/BX1009/fw_ani.html">fw_ani.html</a>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-04</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>full-width IDEOGRAPHIC space 空格 全角 表意 字符 character</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

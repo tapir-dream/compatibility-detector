@@ -1,0 +1,158 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX9031: IE 和 Chrome 支持通过 EMBED 元素嵌入 MP3 格式文件</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>对于通过 EMBED 元素嵌入 MP3 格式文件，IE 借由 Windows 系统中的 Media Player 插件来提供支持，Chrome 则对 MP3 等媒体提供了 HTML5 草案中相关元素的原生支持。其他浏览器均不支持此方式。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>若直接使用 EMBED 元素播放 MP3 格式文件，则可能造成某些浏览器由于缺少插件而无法播放。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE</th>
+          <td>借由 Windows 系统中的 Media Player 插件来提供支持</td>
+        </tr>
+        <tr>
+          <th>Chrome</th>
+          <td>对 MP3 等媒体提供了 HTML5 草案中相关元素的原生支持</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>各浏览器对于 EMBED 元素嵌入 MP3 文件的支持情况：</p>
+      <p>测试样例：</p>
+      <pre>&lt;embed type=&quot;audio/mpeg&quot; src=&quot;XXX&quot; style=&quot;width:400px; height:100px; border:3px solid black;&quot; /&gt;</pre>
+      <p>上面代码使用了 EMBED 元素，设置其 type 属性为 audio/mpeg，通过 src 属性引入了一个 MP3 格式文件。</p>
+      <p>这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <td><img src="../../tests/BX9031/a.gif" alt="IE6 IE7 IE8" /></td>
+        </tr>
+        <tr>
+          <th>Firefox</th>
+          <td><img src="../../tests/BX9031/b.gif" alt="Firefox" /></td>
+        </tr>
+        <tr>
+          <th>Chrome</th>
+          <td><img src="../../tests/BX9031/c.gif" alt="Chrome" /></td>
+        </tr>
+        <tr>
+          <th>Safari<sup>1</sup></th>
+          <td><img src="../../tests/BX9031/d.gif" alt="Safari" /></td>
+        </tr>
+        <tr>
+          <th>Opera</th>
+          <td><img src="../../tests/BX9031/e.gif" alt="Opera" /></td>
+        </tr>
+      </table>
+      <p class="comment">
+        1. 测试选用的是没有附带 QuickTime 的 Safari。
+      <p>
+      <ul>
+        <li><em>IE</em> 使用 Windows 系统中自带的 Media Player 的 ActiveX 插件播放 MP3 文件； </li>
+        <li><em>Chrome</em> 为 MP3 创建出了其原生的播放组件；</li>
+        <li><em>Firefox Safari Opera</em> 默认则不支持 MP3，提示需要安装插件，见下表：<br /><br />
+          <table class="compare">
+            <tr>
+              <th>Firefox</th>
+              <td><img src="../../tests/BX9031/f.gif" alt="Firefox" /></td>
+            </tr>
+            <tr>
+              <th>Safari</th>
+              <td><img src="../../tests/BX9031/g.gif" alt="Safari" /></td>
+            </tr>
+            <tr>
+              <th>Opera</th>
+              <td><img src="../../tests/BX9031/h.gif" alt="Opera" /></td>
+            </tr>
+          </table>
+        </li>
+      </ul>
+      <p>上表中的三种浏览器分别可以根据各自的提示信息成功的下载相应浏览器所需要的插件。<br />
+      Firefox 和 Opera 安装 QuickTime 或者 Media Player Plugin for Firefox 均可使其支持通过插件成功地播放 MP3。<br />
+      而 Safari 则是由于 QuickTime 与其同为 Apple 公司的产品，Safari 下载分为了两种版本，一种附带有 QuickTime，一种没有附带，若用户直接安装了附带 QuickTime 插件的 Safari 浏览器，则可以顺利地直接播放 MP3 及各类媒体文件。</p>
+
+      <h5>Chrome对MP3的原生支持</h5>
+      <p>Chrome 会将如上面测试代码中的 EMBED 元素动态生成为 VIDEO 元素，形如：</p>
+      <pre>&lt;video controls=&quot;&quot; name=&quot;media&quot; src=&quot;&quot;/&gt;</pre>
+      <p>而 VIDEO 元素为 HTML5 草案中的元素，它可以引入 W3C 标准中的一些媒体格式，如 OGG、OGV 等。<br />
+      参见：<a href="http://dev.w3.org/html5/spec/video.html">http://dev.w3.org/html5/spec/video.html</a>。</p>
+      <p>Chrome 对 VIDEO 元素提供了原生的支持，会为其生成一个播放组件，且 Chrome 支持使用 VIDEO 元素引入 MP3 格式文件。</p>
+      <p>除了 Chrome Opera 也对 HTML5 的 VIDEO 元素提供了原生支持，但是音频格式暂不支持 MP3。且 Opera 在面对 type 为 audio/mpeg 的 EMBED 元素时，也无法将其自动转换为 VIDEO 元素。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>在 HTML5 尚未制定完成且普及时，使用 Flash 播放 MP3 文件，以保证最大的兼容性。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows XP Professional SP3 简体中文版</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>IE6<br />
+                IE7<br />
+                IE8<br />
+                Firefox 3.6.3<br />
+                Chrome 6.0.408.0 dev<br />
+                Safari 4.0.5 (without QuickTime)<br />
+                Opera 10.53</td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BX9031/embed_mp3.html">embed_mp3.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-11</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>EMBED MP3 audio VIDEO</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+</head>
+<body>
+	<a onclick="window.close();return false;" href="javascript:void(0)">close window</a>
+	<br/><br/>
+	<a onclick="window.open('#')" href="javascript:void(0)">JS : window.open('#')</a>
+	<br/><br/>
+	<a onclick="window.showModalDialog('#')" href="javascript:void(0)">JS : window.showModalDialog('#')</a>
+	<br/><br/>
+	<a href="#" target="_blank">link(or Press ctrl)</a>
+	<br/><br/>
+	<div id="info"></div>
+	<script>
+		window.onload = function() {
+			document.getElementById("info").innerHTML = "window.opener : " + window.opener;
+		}
+	</script>
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX9029: IE 和 Firefox 可以通过特定方法使 innerHTML 方法载入的 SCRIPT 标签中的 JavaScript 代码在页面加载后也可以执行</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 W3C HTML4.01 规范中的描述，SCRIPT 标签内的 &quot;脚本&quot; 只会在页面加载时执行一次，或者通过绑定事件实现在页面加载后脚本能够重复地执行。</p>
+      <p>defer 属性是 SCRIPT 元素的特有属性，这是一个布尔型属性，它通知用户端这段脚本中不会生产文档内容（如 &quot;documnet.write&quot; ），所以不必现在立即执行，一般的拥有 defer 属性的 SCRIPT 元素中的脚本会较晚的被执行。</p>
+      <p>关于 SCRIPT 元素的详细资料，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html401/interact/scripts.html">18</a> 中的内容。</p>
+      <p>关于 defer 属性的详细资料，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html401/interact/scripts.html#adef-defer">18.2.1</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 IE7 IE8 中，当使用 innerHTML 方法插入脚本时，SCRIPT 元素必须设置 defer 属性。<br />
+      在 Firefox 中，先将被插入 HTML 代码的元素从其父元素中移除，然后使用 innerHTML 插入包含 SCRIPT 元素的代码，最后将这个元素恢复至原父元素中，则经过此操作后 SCRIPT 中的脚本可以被执行。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>若利用某些浏览器的特性迫使通过 innerHTML 方法载入的 SCRIPT 标签内的脚本执行已达到某些目的，则在 IE、Firefox 之外的浏览器中脚本将不被执行，从而造成各种兼容性问题。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <td>使用 innerHTML 方法插入脚本时，SCRIPT 元素必须设置 defer 属性。</td>
+        </tr>
+        <tr>
+          <th>Firefox</th>
+          <td>先将被插入 HTML 代码的元素从其父元素中移除，然后使用innerHTML插入包含SCRIPT元素的代码，最后将这个元素恢复至原父元素中，则经过此操作后SCRIPT中的脚本可以被执行。</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>所有浏览器中，默认情况下通过 innerHTML 方法动态插入到页面中的 SCRIPT 标签中的脚本代码均不能被执行。</p>
+      <p>分析以下代码：</p>
+<pre>
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div id="d"&gt;Some text&lt;/div&gt;
+&lt;script&gt;
+    var a = "&lt;div&gt;a DIV&lt;/div&gt;&lt;script&gt;alert('alert');&lt;\/script&gt;";
+    document.getElementById("d").innerHTML = a;
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+      <p>上面代码中 DIV 元素【d】的初始内容为 &quot;Some text&quot; ，随后通过 innerHTML 方法将【d】中内容替换为一个 DIV 元素及一个 SCRIPT 元素，SCRIPT 元素内包含一段 JavaScript 脚本。</p>
+      <p>这段代码在所有浏览器中均没有执行 SCRIPT 元素中的脚本。<br />
+      这是因为根据 W3C 规范，SCRIPT 标签中所指的脚本仅在浏览器第一次加载页面时对其进行解析并执行其中的脚本代码，所以通过 innerHTML 方法动态插入到页面中的 SCRIPT 标签中的脚本代码在所有浏览器中默认情况下均不能被执行。</p>
+      <br />
+      <p>下面分析 IE 中使 innerHTML 插入 HTML 代码的脚本执行的特殊方法及其 Bug：</p>
+      <p>MSDN 中关于 <a href="http://msdn.microsoft.com/en-us/library/ms533897%28VS.85%29.aspx">innerHTML</a> 方法中提到：</p>
+      <p><strong>当使用 innerHTML 方法插入脚本时，SCRIPT 元素必须设置 defer 属性。</strong></p>
+      <table class="compare">
+        <tr>
+          <th>defer1.html</th>
+        </tr>
+        <tr>
+          <td>
+<pre>
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;script <span class="hl_1">defer</span>&gt;
+  alert("with defer, run later.");
+  document.write("with defer, run later.");
+&lt;/script&gt;
+&lt;script&gt;
+  alert("without defer, run immediately.");
+  document.write("without defer, run immediately.");
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+          </td>
+        </tr>
+        <tr>
+          <th>defer2.html</th>
+        </tr>
+        <tr>
+          <td>
+<pre>
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;script <span class="hl_1">defer</span> src=&quot;<em>defer.js</em>&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;<em>normal.js</em>&quot;&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+          </td>
+        </tr>
+        <tr>
+          <td><em>defer.js</em><pre>alert(&quot;with defer, run later.&quot;);
+document.write(&quot;with defer, run later.&quot;);</pre></td>
+        </tr>
+        <tr>
+          <td><em>normal.js</em><pre>alert(&quot;without defer, run immediately.&quot;);
+document.write(&quot;without defer, run immediately.&quot;);</pre></td>
+        </tr>
+      </table>
+      <p>上例中两段测试代码中在各浏览器中运行效果如下：</p>
+<table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE</th>
+          <th>Firefox</th>
+          <th>Chrome, Safari, Opera</th>
+        </tr>
+        <tr>
+          <td>defer1.html</td>
+          <td>alert顺序：<span class="hl_4">without defer, run immediately.</span> -&gt; <span class="hl_1">with defer, run later.</span><br />
+          页面输出：with defer, run later.</td>
+          <td colspan="2">alert顺序：<span class="hl_1">with defer, run later.</span> -&gt; <span class="hl_4">without defer, run immediately.</span><br />
+          页面输出：with defer, run later. without defer, run immediately. </td>
+        </tr>
+        <tr>
+          <td>defer2.html</td>
+          <td>alert顺序：<span class="hl_4">without defer, run immediately.</span> -&gt; <span class="hl_1">with defer, run later.</span><br />
+          页面输出：with defer, run later.</td>
+          <td>alert顺序：<span class="hl_4">without defer, run immediately.</span> -&gt; <span class="hl_1">with defer, run later.</span><br />
+          页面输出：without defer, run immediately. </td>
+          <td>alert顺序：<span class="hl_1">with defer, run later.</span> -&gt; <span class="hl_4">without defer, run immediately.</span><br />
+          页面输出：with defer, run later. without defer, run immediately. </td>
+        </tr>
+      </table>
+      <p>由上表可知，</p>
+      <ul>
+        <li>IE 对于 SCRIPT 元素内的脚本即由 SCRIPT 元素引入的脚本文件均具备延迟运行的效果。</li>
+        <li>Firefox 仅对通过 SCRIPT 元素引入的脚本文件具有延迟运行效果。但会忽略 document.write 语句。</li>
+        <li>Chrome Safari Opera 不支持 defer 属性。</li>
+      </ul>
+      <p>分析以下代码：</p>
+<pre>
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div id="d1"&gt;&lt;/div&gt;
+&lt;div id="d2"&gt;&lt;/div&gt;
+&lt;script&gt;
+    var a1 = "<em>&lt;div&gt;a1&lt;/div&gt;</em>&lt;script <span class="hl_1">defer</span>&gt;alert('a1');&lt;\/script&gt;";
+    var a2 = "&lt;script <span class="hl_1">defer</span>&gt;alert('a2');&lt;\/script&gt;"
+    document.getElementById("d1").innerHTML = a1;
+    document.getElementById("d2").innerHTML = a2;
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+      <p>上面代码中分别往【d1】和【d2】中通过 innerHTML 插入了一段 HTML 代码，且均包含有 SCRIPT 标签，SCRIPT 标签设置了 defer 属性。区别为【d1】中插入的 HTML 代码比【d2】中在最开始多了一个 DIV 元素。</p>
+      <p>在 IE 中只弹出了 &quot;a1&quot; 提示框，即只有字符串 &quot;a1&quot; 中的脚本执行。这是 IE 的一个 Bug，当 SCRIPT 元素为插入字符串的第一个元素时，即使按照 MSDN 所述为 SCRIPT 元素增加了 defer 属性后，该 SCRIPT 及之后的 SCRIPT 元素内的脚本也无法执行。</p>
+      <p>所以通常为了使 innerHTML 插入的脚本能够在 IE 中正常执行，经常会在欲插入的 HTML 代码字符串的最开始增加一个不可见的元素。如：</p>
+<pre><span class="hl_2">&lt;span style="display:none;"&gt;span&lt;/span&gt;</span>&lt;script <span class="hl_1">defer</span>&gt;alert('a1');&lt;\/script&gt;</pre>
+      <br />
+      <p>接下来再看看 Firefox 中使 innerHTML 中的脚本执行的特殊方法：</p>
+      <p>分析以下代码：</p>
+<pre>&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div id="d1"&gt;&lt;/div&gt;
+&lt;script&gt;
+    var a1 = "&lt;script&gt;alert('a1');&lt;\/script&gt;";
+    var d1 = document.getElementById("d1");
+    var sib = d1.nextSibling;
+    var pn = d1.parentNode;
+    <span class="hl_2">pn.removeChild(d1);</span>
+    d1.innerHTML = a1;
+    if (sib) {
+        <span class="hl_2">pn.insertBefore(d1, sib);</span>
+    } else {
+        <span class="hl_2">pn.appendChild(d1);</span>
+    }
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+      <p>上面代码中，字符串 &quot;a1&quot; 中包含 SCRIPT 元素，接下来将待插入 HTML 代码的 DIV 元素【d1】从其父元素中移除，然后通过 innerHTML 将 &quot;a1&quot; 中的 HTML 代码插入到【d1】中，最后再将【d1】恢复至其原父元素中。</p>
+      <p>这段代码在 Firefox 中也成功的使 SCRIPT 中的脚本执行。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>上面提到的 IE 及 Firefox 中使通过 innerHTML 方法动态插入的 SCRIPT 元素中脚本执行的方法均比较特殊，是利用了浏览器的 Bug，或者是利用了浏览器提供的特性。而 innerHTML 方法只是用来插入 HTML 代码，并不能使其中包含的脚本代码执行。</p>
+      <p>为了达到最好的兼容性，应避免利用浏览器特性及 Bug 使 innerHTML 插入的 SCRIPT 中的代码执行。所以上述 IE 和 Firefox 中的方法不可行。同时这种做法具有安全隐患。</p>
+      <p>对于可控来源的动态脚本，使用 createElement 创建 SCRIPT 元素并追加至页面的文档树中，以保证动态脚本的执行。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.3<br />
+              Chrome 5.0.375.17 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BX9029/defer1.html">defer1.html</a><br />
+            <a href="../../tests/BX9029/defer2.html">defer2.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-16</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>innerHTML 动态 加载 JavaScript SCRIPT defer 脚本</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

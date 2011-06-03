@@ -1,0 +1,150 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX2032: 某些情况下浏览器不按照 &quot;target&quot; 属性所指目标打开协议链接</h1>
+
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>有关协议方面内容请参见 Internet 工程任务组 (Internet Engineering Task Force) IEF 提供的标准文档：<a href="http://www.ietf.org/rfc/rfc1738.txt">http://www.ietf.org/rfc/rfc1738.txt</a>。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在使用常用连接伪协议 &quot;javascript:&quot;、&quot;mailto:&quot;、 &quot;view-source:&quot;、&quot;custom:&quot;  时，不同浏览器可能按照不同的方式，打开链接，而不按照 &quot;target&quot; 属性所指目标完成工作。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>若超链接链入了上述伪协议，且其 &quot;target&quot; 为  &quot;_blank&quot;，不同浏览器在不同伪协议下并不会都在新窗口内打开链接。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p><strong>关于协议的简要描述</strong></p>
+      <p>维基百科中对协议的定义是：&quot;在两个计算端点之间建立或控制连接、通信或数据传输的约定或标准&quot; 。实际上这些端点可以是两个单独的计算机，也可以是一个计算机中两个单独的点。例如，从内存读取数据时，计算机必须访问硬盘上的存储区，通过数据总线将数据转移到内存，然后再将其传送至处理器。在每个端点，数据必须具有某种形式，以便发送方和接收方都能够恰当地处理数据。在最底层，数据就是一堆比特位的集合。只有在某个上下文中理解，这些比特集合才具有含义。如果发送方和接收方端点不能就上下文达成一致，那么被传输的数据就是无意义的。因此，协议是数据传输的基础。 </p>
+      <p> 我们常用类型的协议包括：IP，TCP，HTTP，FTP，mailto，Telnet，POP3，SOAP，SMTP，SSH 等。 </p>
+      <p> 协议的运作，必须由特定的处理器与之关联。该处理器可以是软件程序，硬件，或软硬件结合体。 </p>
+      <p> 还有一些非标准的协议，我们有时候将他们称作伪协议。如：查看指定URL源代码的  &quot;view-source:URL&quot; ，运行 JavaScript 脚本的  &quot;javascript:&quot; ，以及一些在客户端自定义的伪协议，如腾讯 QQ 产品自定义的  &quot;tencent:&quot;  伪协议。 </p>
+      <p>某些情况下浏览器可能不按照 target 属性所指目标打开协议链接。分析以下代码：</p>
+<pre>&lt;base target=&quot;_blank&quot; /&gt;
+&lt;a href=&quot;javascript:&quot;&gt;javascript:&lt;/a&gt;&lt;br /&gt;
+&lt;a href=&quot;mailto:&quot;&gt;mailto:&lt;/a&gt;&lt;br /&gt;
+&lt;a href=&quot;view-source:&quot;&gt;view-source:&lt;/a&gt;&lt;br /&gt;
+&lt;a href=&quot;custom:&quot;&gt;custom:&lt;/a&gt;</pre>
+      <p>上面代码分别测试了常用的  &quot;javascript:&quot;  、  &quot;mailto:&quot;  、  &quot;view-source&quot;  ，以及自定义协议  &quot;custom:&quot; 。使用 BASE 元素使页面的所有 A 元素默认目标均为新页面。</p>
+      <p>这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th></th>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox</th>
+          <th>Chrome</th>
+          <th>Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <th>javascript:</th>
+          <td class="hl_4">打开新页面</td>
+          <td class="hl_4">打开新页面</td>
+          <td class="hl_3">不开新页面</td>
+          <td class="hl_3">不开新页面</td>
+          <td class="hl_4">打开新页面</td>
+        </tr>
+        <tr>
+          <th>mailto:</th>
+          <td class="hl_3">不开新页面</td>
+          <td class="hl_3">不开新页面</td>
+          <td class="hl_4">打开新页面</td>
+          <td class="hl_3">不开新页面</td>
+          <td class="hl_3">不开新页面</td>
+        </tr>
+        <tr>
+          <th>view-source:</th>
+          <td class="hl_4">打开新页面</td>
+          <td class="hl_4">打开新页面</td>
+          <td class="hl_4">打开新页面</td>
+          <td class="hl_3">不开新页面</td>
+          <td class="hl_3">不开新页面</td>
+        </tr>
+        <tr>
+          <th>custom:</th>
+          <td class="hl_4">打开新页面</td>
+          <td class="hl_4">打开新页面</td>
+          <td class="hl_4">打开新页面</td>
+          <td class="hl_3">不开新页面</td>
+          <td class="hl_3">不开新页面</td>
+        </tr>
+      </table>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>为保证各浏览器的兼容性，尽量不为这些协议设置 &quot;target&quot; 目标为  &quot;_blank&quot;  。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.3<br />
+              Chrome 6.0.408.1 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.53</td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BX2032/pseudo_agreement.html">pseudo_agreement.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-15</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>协议 伪协议 mailto view-source javascript tencent protocol pseudo</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

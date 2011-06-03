@@ -1,0 +1,203 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RD1012: 不同浏览器内 'line-height' 样式设置会影响不同行内替换元素的显示高度</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>关于替换元素的说明，请参考 W3C CSS 2.1 规范描述：<a href="http://www.w3.org/TR/CSS21/conform.html#replaced-element">http://www.w3.org/TR/CSS21/conform.html#replaced-element</a></p>
+
+      <p>关于行内替换元素的高度计算的说明，请参考 W3C CSS 2.1 规范描述：<a href="http://www.w3.org/TR/CSS21/visudet.html#inline-replaced-height">http://www.w3.org/TR/CSS21/visudet.html#inline-replaced-height</a></p>
+      <p>关于行高设定的说明，请参考 W3C CSS 2.1 规范描述：  <a href="http://www.w3.org/TR/CSS21/visudet.html#propdef-line-height">http://www.w3.org/TR/CSS21/visudet.html#propdef-line-height</a> </p>
+      <h2 id="description">问题描述</h2>
+      <p>不同浏览器内 'line-height' 样式设置会影响 INPUT BUTTON 元素的显示高度。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p> INPUT[type=text]、INPUT[type=password]、INPUT[type=button]、INPUT[type=file]、input[type=submit] 和 BUTTON 标记设置 'line-height' 后，在各浏览器下显示高度不一致。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>根据行内替换元素的高度计算的说明，如果 'height' 为 'auto' ，则计算值为替换元素的内在高度。</p>
+      <p>在行高部分，规范说明中提及 ”行高所指定的高度用于行框的高度计算，但需除去行内替换元素，其高度设定来自于 ‘height’ 属性设置“ 。</p>
+      <p>在这两条中均没有明确提到，如果设置行高是否会影响其内在高度的计算。</p>
+      <p></p>
+      <p>分析以下代码：</p>
+<pre>
+&lt;input style=&quot;line-height:50px;&quot; type=&quot;radio&quot; /&gt;
+&lt;input style=&quot;line-height:50px;&quot; type=&quot;checkbox&quot; /&gt;
+&lt;input style=&quot;line-height:50px; width:30px; &quot; type=&quot;text&quot; value=&quot;123&quot;/&gt;
+&lt;select style=&quot;line-height:50px; &quot;&gt;&lt;/select&gt;
+&lt;input style=&quot;line-height:50px;&quot; type=&quot;button&quot; value=&quot;input&quot;/&gt;
+&lt;input style=&quot;line-height:50px;&quot; type=&quot;submit&quot; value=&quot;submit&quot;/&gt;
+&lt;button style=&quot;line-height:50px;&quot;&gt;button&lt;/button&gt;
+&lt;input style=&quot;line-height:50px;&quot; type=&quot;file&quot; /&gt;
+&lt;textarea style=&quot;line-height:50px width:30px;&quot;&gt;&lt;/textarea&gt;
+&lt;iframe style=&quot;line-height:50px; width:30px;&quot; src=&quot;about:blank&quot;&gt;&lt;/iframe&gt;
+&lt;img style=&quot;line-height:50px;&quot; src =&quot;logo-w3c-mobile-lg.png&quot; /&gt;
+&lt;object style=&quot;line-height:50px; width:30px; background:red&quot; data=&quot;about:blank&quot;&gt;&lt;/object&gt;
+</pre>
+
+      <p>此间别将所有常见行内替换元素 INPUT、BUTTON、TEXTAREA、SELECT、IFRAME、IMG、OBJECT 的行高均设置为 50px，观察其在各浏览器中的显示效果如下表：</p>
+<table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RD1012/01.png" alt="运行效果截图" /></td>
+        </tr>
+        <tr>
+          <th>IE8(S)</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RD1012/02.png" alt="运行效果截图" /></td>
+        </tr>
+        <tr>
+          <th>Firefox</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RD1012/03.png" alt="运行效果截图" /></td>
+        </tr>
+        <tr>
+          <th>Chrome Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RD1012/04.png" alt="运行效果截图" /></td>
+        </tr>
+        <tr>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RD1012/05.png" alt="运行效果截图" /></td>
+        </tr>
+      </table>
+      <p>上表中可以直观看出各浏览器中为行内替换元素设置 'line-height' 属性后，对各元素内在高度理解存在差异。</p>
+      <p>我们将这些差异汇总成表：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox</th>
+          <th>Opera</th>
+          <th>Chrome Safari</th>
+        </tr>
+        <tr>
+          <th>INPUT[type=&quot;radio&quot;]<br />
+            INPUT[type=&quot;checkbox&quot;]</th>
+          <td colspan="4">内在高度不受行高影响。</td>
+        </tr>
+
+        <tr>
+          <th>INPUT[type=&quot;text&quot;]<br />
+            INPUT[type=&quot;password&quot;]</th>
+          <td><strong>内在高度不受行高影响，
+            行高作用于元素内部导致文字不在可视区域内出现。</strong></td>
+          <td colspan="2" rowspan="3">内在高度不受行高影响，行高也不作用于元素内部文字中。</td>
+          <td><em>内在高度受行高影响，元素高度被改变，同时行高也作用于元素内部文字中。</em></td>
+        </tr>
+        <tr>
+          <th>INPUT[type=&quot;button&quot;]<br />
+          INPUT[type=&quot;submit&quot;]</th>
+          <td><em>内在高度受行高影响，元素高度被改变，同时行高也作用于元素内部文字中</em>。</td>
+          <td rowspan="2">内在高度不受行高影响，行高也不作用于元素内部文字中。</td>
+        </tr>
+        <tr>
+          <th>INPUT[type=&quot;file&quot;]</th>
+          <td>内在高度不受行高影响，行高也不作用于元素内部文字中。</td>
+          </tr>
+        <tr>
+          <th>BUTTON</th>
+          <td><em>内在高度受行高影响，元素高度被改变，同时行高也作用于元素内部文字中。</em></td>
+          <td>内在高度不受行高影响，行高也不作用于元素内部文字中。</td>
+          <td><em>内在高度受行高影响，元素高度被改变，同时行高也作用于元素内部文字中。</em></td>
+          <td><em>内在高度受行高影响，元素高度被改变，同时行高也作用于元素内部文字中。</em></td>
+        </tr>
+        <tr>
+          <th>SELECT<br />
+            TEXTAREA<br />
+            IFRAME<br />
+            IMG<br />
+            OBJECT</th>
+          <td colspan="4">内在高度不受行高影响。</td>
+        </tr>
+      </table>
+      <p>根据汇总表可以断定，不同浏览器中 'inline-height' 属性值设置对行内替换元素 INPUT[type=text]、INPUT[type=password]、INPUT[type=button]、INPUT[type=file]、input[type=submit] 和 BUTTON 标记的内在高度计算有影响，会导致实际显示效果不一。其他常用行内元素 INPUT[type=radio]、
+INPUT[type=checkbox]、SELECT、TEXTAREA、IFRAME、IMG、OBJECT 则无此问题。</p>
+      <h2 id="solutions">解决方案</h2>
+      <p>尽量避免使用 'line-height' 为 INPUT[type=text]、INPUT[type=password]、INPUT[type=button]、INPUT[type=file]、input[type=submit] 和 BUTTON 标记设置 ‘line-height’，而应改用规范内说明的 'height' 属性。 </p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RD1012/inline_replaced_elements_and_line_height.html">inline_replaced_elements_and_line_height.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-22</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>INPUT BUTTON height line-height 高度 行高 inline replaced elements 行内替换元素</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

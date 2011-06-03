@@ -1,0 +1,150 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RX3011: 各浏览器中 FONT 元素的颜色设置在某些情况下会作用到由其祖先级元素设定的装饰线的颜色</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 HTML 4.01 规范中的描述，FONT 元素属于字体修饰元素（Font modifier elements），用来改变其内容的字体家族、字体大小及字体颜色，包含三个定义的属性：</p>
+      <ul>
+        <li>size 属性：设置字体大小，可以是绝对值（取值范围：整数 1~7，代表 7 个等级），也可以是相对值（如 +3、-1）；</li>
+        <li>color 属性：设置字体颜色，color 类型；</li>
+        <li>face 属性：设置字体家族，是一组由逗号分割的字体名称列表。</li>
+      </ul>
+      <p>目前，FONT 元素连同其上述三个属性均被废弃。W3C 建议使用 CSS 属性来代替它们。</p>
+      <p>关于 FONT 元素的更多信息，请参考 HTML 4.01 规范 <a href="http://www.w3.org/TR/html401/present/graphics.html#h-15.2.2">15.2.2 Font modifier elements: FONT and BASEFONT</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>
+        在 IE6 IE7 IE8(Q) Firefox(Q) Opera(Q) 中，FONT 元素的 color 属性指定的颜色可以覆盖由其祖先元素生成的 'text-decoration' 修饰效果的颜色。<br />
+        在 Chrome(Q) Safari(Q) 中，FONT 元素的 CSS 'color' 特性指定的颜色可以将由其祖先元素生成的 'text-decoration' 修饰效果的颜色覆盖。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题不会造成布局上的差异，但会影响 'text-decoration' 特性渲染的文字修饰效果。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>首先分析 FONT 元素的 color 属性对其祖先元素的影响：</p>
+      <pre>&lt;p style="font:32px Arial; text-decoration:underline; color:blue;"&gt;
+  in P
+  &lt;font color="red"&gt;text in FONT&lt;/font&gt;
+&lt;/p&gt;</pre>
+      <p>上面代码中，P 元素包含 FONT 元素，其中 P 元素设置了文字修饰下划线且前景色为蓝色，FONT 元素通过 color 属性设置了红色前景色。</p>
+      <p>这段代码在各浏览器环境内运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE8(S) Firefox(S) Opera(S) Chrome(S) Safari(S)</th>
+          <th>IE6 IE7 IE8(Q) Firefox(Q) Opera(Q) Chrome(Q) Safari(Q)</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RX3011/font_1.gif" alt="IE8(S) Firefox(S) Opera(S) Chrome(S) Safari(S)" /></td>
+          <td><img src="../../tests/RX3011/font_2.gif" alt="IE6 IE7 IE8(Q) Firefox(Q) Opera(Q) Chrome(Q) Safari(Q)" /></td>
+        </tr>
+      </table>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8(Q) Firefox(Q) Opera(Q) Chrome(Q) Safari(Q)</em> 中，位于 P 元素内的 FONT 元素的 color 属性可以将由 P 元素生成的 'text-decoration' 修饰效果的颜色覆盖；</li>
+        <li>在 <em>其他浏览器</em> 中，FONT 元素的 color 属性仅仅作用于其内的文本上，并不会影响 P 元素的 'text-decoration' 特性渲染的修饰效果的颜色。</li>
+      </ul>
+      <p>下面分析 FONT 元素的设置 CSS 'color' 特性对其祖先元素的影响：</p>
+      <pre>&lt;p style="font:32px Arial; text-decoration:underline; color:blue;"&gt;
+  in P
+  &lt;font style="color:red;"&gt;text in FONT&lt;/font&gt;
+&lt;/p&gt;</pre>
+      <p>上面代码中，FONT 元素的 color 属性变成了 CSS 的 'color' 特性。</p>
+      <p>这段代码在各浏览器环境内运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Firefox Opera Chrome(S) Safari(S)</th>
+          <th>Chrome(Q) Safari(Q)</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RX3011/font_1.gif" alt="IE6 IE7 IE8 Firefox Opera Chrome(S) Safari(S)" /></td>
+          <td><img src="../../tests/RX3011/font_2.gif" alt="Chrome(Q) Safari(Q)" /></td>
+        </tr>
+      </table>
+      <ul>
+        <li>在 <em>Chrome(Q) Safari(Q)</em> 中，位于 P 元素内的 FONT 元素的 CSS 'color' 特性可以将由 P 元素生成的 'text-decoration' 修饰效果的颜色覆盖；</li>
+        <li>在 <em>其他浏览器</em> 中，不会出现这种现象。</li>
+      </ul>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>FONT 元素本身是废弃元素，并且其所有属性均已不推荐使用，应避免使用 FONT 元素。<br />
+      FONT 元素的 size、color、face 属性可以分别使用 SPAN 元素搭配 'font-size'、'color'、'font-family' 这几个 CSS 特性实现相同的效果。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.2<br />
+              Chrome 5.0.356.2 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RX3011/font_q.html">font_q.html</a><br />
+            <a href="../../tests/RX3011/font_s.html">font_s.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-26</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>FONT underline 字体 下划线</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

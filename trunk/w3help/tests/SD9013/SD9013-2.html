@@ -1,0 +1,10 @@
+<script language="javascript">
+window.onload = function() {
+	document.getElementById("div1").onscroll = function() {
+		document.getElementById("info").innerHTML = 'OK';
+	};
+}
+</script>
+<div id="div1" style="width:100px; height:100px;border:1px solid red; overflow:scroll;">
+    <div id="info" style="height:3000px; width:20px;background:green;"></div>
+</div>

@@ -1,0 +1,149 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BT9024: IE 中可以使用 classid 与 codebase 属性结合完成下载、安装和使用 ActiveX 插件</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>OBJECT 元素定义了一个嵌入的对象。其引入的初衷是取代 IMG 和 APPLET 元素。不过由于安全等各方面原因以及缺乏浏览器支持，这一初衷并未实现。浏览器的对象支持依赖于对象类型。然而，即便是相同的对象类型，各主流浏览器也都使用了不同的代码来加载。</p>
+      <p>classid 属性用于指定对象实现的 URI 地址。它可能用来替代或者配合 data 属性，这由引入的对象决定。</p>
+      <p>codebase 属性指定了一个为 classid、data、archive 属性的相对 URI 提供基本路径。缺省情况下，这个值为当前文档的基本 URI。</p>
+      <p>type 属性定义被定义在 data 属性中指定的文件中出现的数据的 MIME 类型。</p>
+      <p>关于 OBJECT 元素及其属性的详细信息，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html401/struct/objects.html#h-13.3">13.3 Generic inclusion: the OBJECT element</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>只有 IE 中可以使用 classid 与 codebase 属性结合完成下载、安装和使用 ActiveX 插件。</p>
+      <p>而即使使用了在 Chrome 与 Safari 中同样支持的利用 classid 属性引入 Media Player 插件，但同时又设置了 type 属性为 application/x-oleobject，则这时仅仅在 IE 中可以正常地引入插件</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>该问题将造成插件在某些浏览器中不能正常使用。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <h3>1. IE 对于 classid 的理解</h3>
+      <p>IE 对于 classid 属性有自己的解释方式：类标识符（class identifier）。格式形如：clsid:XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX。类标识符由 ActiveX 组件注册在 Windows 的系统注册表中。<br />
+codebase 属性则为该类标识符所对应的 ActiveX 插件的 URI 地址。一般是一个 .cab 安装包。<br />
+由于 IE 支持 OLE 技术，所以在其 type 属性的类型列表中支持一种其专有的 application/x-oleobject 类型。</p>
+      <p>更多信息请参考 MSDN <a href="http://msdn.microsoft.com/en-us/library/ms533559(v=VS.85).aspx">CLASSID Attribute | classid Property</a> 和 <a href="http://msdn.microsoft.com/en-us/library/aa378911(VS.85).aspx">Class Identifier</a> 中的内容。</p>
+
+      <h3>2. classid 与 codebase 属性混合使用的情况</h3>
+      <p>分析以下代码：</p>
+<pre>&lt;object width=&quot;100&quot; height=&quot;100&quot; classid=&quot;clsid:78ABDC59-D8E7-44D3-9A76-9A0918C52B4A&quot; codebase=&quot;downloader.cab#version=1,0,0,0&quot;&gt;&lt;/object&gt;</pre>
+      <p>代码中 OBJECT 元素设置了 classid 及 codebase 属性，这两个属性对应的是一个 ActiveX 插件。</p>
+      <p>在各浏览器中运行这个页面，而非 IE 浏览器没有任何反应。只有 IE 中可以弹出如下的下载及安装提示：</p>
+      <p><img src="../../tests/BT9024/IE_codebase.gif" alt="IE codebase" /></p>
+      <p>可见，在非 IE 浏览器中无法支持这种插件引入方式。</p>
+
+      <h3>3. 各浏览器对 application/x-oleobject 类型的支持</h3>
+      <p>分析以下代码：</p>
+<pre>
+&lt;div style=&quot;width:180px; height:100px; background:gray;&quot;&gt;
+  &lt;object id=&quot;oo&quot; style=&quot;width:100%; height:100%;&quot;
+    classid=&quot;clsid:6BF52A52-394A-11d3-B153-00C04F79FAA6&quot;
+    <span class="hl_4">type=&quot;application/x-oleobject&quot;</span>&gt;
+  &lt;/object&gt;
+&lt;/div&gt;
+</pre>
+      <p>上面代码创建了一个 OBJECT 元素，OBJECT 元素通过 classid 定义其嵌入对象为 Windows 下的 Media Player，并设置了其 type 属性为 application/x-oleobject。</p>
+      <p>这段代码在各浏览器中运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <th>Chrome</th>
+          <th>Safari</th>
+          <th>Firefox Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BT9024/oleobject_IE.gif" alt="IE application/x-oleobject" /></td>
+          <td><img src="../../tests/BT9024/oleobject_CR.gif" alt="Chrome application/x-oleobject" /></td>
+          <td><img src="../../tests/BT9024/oleobject_SF.gif" alt="Safari application/x-oleobject" /></td>
+          <td><img src="../../tests/BT9024/oleobject_FF.gif" alt="Firefox, Opera application/x-oleobject" /></td>
+        </tr>
+      </table>
+      <p>可见：</p>
+      <ul>
+        <li>Chrome 和 Safari，支持通过 OBJECT 的 classid 属性的某些特有值引入一些特性插件，如 Media Player、Flash等，而对于这种 application/x-oleobject 类型，则也无法识别，所以 OBJECT 元素被渲染出来，但提示下载符合 type 属性指定类型的插件。</li>
+        <li>Firefox 和 Opera 无法支持这种利用 classid 属性引入插件的方式，则根本没有渲染 OBJECT 元素。</li>
+        <li>仅 IE 支持 type 为 &quot;application/x-oleobject&quot;  这种 MIME，成功引入 Media Player 插件。</li>
+      </ul>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>ActiveX 为微软专有技术，仅被 Windows 中的 IE 支持。所以若希望这类组件可以运行于多种浏览器，则需要使用其他非 IE 支持的 NPAPI 重新设计在这种接口下的插件。以保证最好的兼容性。</p>
+      <p>type=&quot;application/x-oleobject&quot; 这种仅 IE 支持的类型也应避免使用。在页面中引入媒体文件，可以考虑使用 Flash，或者合理的利用 IE 对 Media Player 的支持及其其他浏览器对 HTML5 的新标签 VIDEO 与 AUDIO 元素的支持在不同浏览器中达到相类似的效果。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.3<br />
+              Chrome 6.0.422.0 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.53
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BT9024/oleobject.html">oleobject.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-09</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>OBJECT Media Player classid 插件 application oleobject codebase</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

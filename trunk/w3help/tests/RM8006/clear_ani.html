@@ -1,0 +1,21 @@
+<html>
+<head>
+</head>
+<body>
+<div style="border:5px solid black;">
+    <div style="background:#777; width:100px; height:30px; float:left;">H:30px</div>
+    <div style="background:#999; width:100px; height:40px; float:left; border:5px solid #333; margin-bottom:10px;">H:40px</div>
+    <div style="background:#AAA; clear:left; border:5px solid #666;" id="d">CLEAR margin-top:<span id="s">80px</span></div>
+</div>
+<script>
+    var d = document.getElementById("d");
+    var s = document.getElementById("s");
+    var m = 80;
+    setInterval(function () {
+        s.innerHTML = m + "px";
+        d.style.marginTop = m-- + "px";
+        (m == -40) && (m = 80);
+    }, 80);
+</script>
+</body>
+</html>

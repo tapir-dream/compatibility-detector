@@ -1,0 +1,10 @@
+<script type="text/javascript">
+    window.onload = function() {
+        document.getElementById("one").onmousewheel = function() {
+            document.getElementById("info").innerHTML="It worked";
+        }
+    }
+</script>
+<div id="one" style="width:100px; height:100px; overflow:auto; background-color:gold;">
+</div>
+<div id="info"></div>

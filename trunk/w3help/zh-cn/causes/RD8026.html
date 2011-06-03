@@ -1,0 +1,233 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RD8026: 各浏览器对于未明确设定高度的包含块内包含百分比单位高度的块级元素或行内块元素的高度计算存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+            <p>根据 CSS2.1 规范中的描述，'height' 特性当指定百分比的值时，其百分比将参照其 <a href="http://www.w3.org/TR/CSS21/visuren.html#containing-block">包含块</a> 的生成框高度进行计算，但当包含框未设置明确高度时，并且在设置了百分比高度的元素没有设置绝对定位的情况下将忽略该百分比高度的设定值，而改用其 'content box' 的高度。</p>
+      <p>关于 'height' 的更多信息，请参考 CSS 2.1 规范  <a href="http://www.w3.org/TR/CSS21/visudet.html#the-height-property">10.5 Content height: the 'height' property</a> 中的内容。</p>
+      <h2 id="description">问题描述</h2>
+      <p>各浏览器对于未明确设定高度的包含块内包含百分比单位高度的块级元素的高度计算存在差异。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>由于各浏览器对于未明确设定高度的包含块内设置百分比单位高度的块级元素的高度计算存在差异，将造成不同浏览器中的渲染效果不同并影响依赖此高度值的其他操作结果存在差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tbody>
+          <tr>
+            <th>所有浏览器</th>
+            <td>&nbsp;</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+<pre>
+window.onload = function () {
+  function $(id){ return document.getElementById(id);}
+  void function(){
+    $("info1").innerHTML = "计算式：&lt;br/&gt;"
+    + $("contain1").offsetHeight
+    + "=" + $("child1").offsetHeight
+    + '+' + $("child2").offsetHeight
+    + '+' +$("child3").offsetHeight;
+    
+    $("info2").innerHTML = "计算式：&lt;br/&gt;"
+    + $("contain2").offsetHeight
+    + "=" + $("child4").offsetHeight
+    + '+' + $("child5").offsetHeight
+    + '+' +$("child6").offsetHeight;
+
+    
+    $("info3").innerHTML = "计算式：&lt;br/&gt;"
+    + $("contain3").offsetHeight
+    + "=" + $("child7").offsetHeight
+    + '+' + $("child8").offsetHeight
+    + '+' +$("child9").offsetHeight;
+  }();
+}
+</pre>
+          <pre>
+&lt;body style="margin:0; font:12px/2 'Trebuchet MS';"&gt;
+&lt;div <span class="hl_5">id="display_block"</span> style="height:100px; background:#999999;margin-bottom:5px;"&gt;
+  &lt;div id="cont1" style="width:100px;background:black; float:left;"&gt;
+    &lt;div id="contain1" style="margin:0 10px;padding:0;"&gt;
+                    &lt;div id="child1" style="height:50%; background:#CC99FF"&gt;block1&lt;/div&gt;
+                    &lt;div id="child2" style="height:20%; background:yellow;"&gt;block2&lt;/div&gt;
+                    &lt;div id="child3" style="height:30%; background:green;"&gt;block3&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+    &lt;div style=" float:left;"&gt;
+        &lt;div id="info1"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;div <span class="hl_5">id="display_inline-block"</span> style="height:100px; background:#999999;margin-bottom:5px;"&gt;
+  &lt;div id="cont2" style="width:100px;background:black; float:left;"&gt;
+    &lt;div id="contain2" style="margin:0 10px;padding:0;"&gt;
+                    &lt;div id="child4" style="height:50%; background:#CC99FF; width:100%; display:inline-block;"&gt;inline-block1&lt;/div&gt;
+                    &lt;div id="child5" style="height:20%; background:yellow; width:100%;display:inline-block;"&gt;inline-block2&lt;/div&gt;
+                    &lt;div id="child6" style="height:30%; background:green; width:100%;display:inline-block;"&gt;inline-block3&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+    &lt;div style=" float:left;"&gt;
+        &lt;div id="info2"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;div <span class="hl_5">id="display_list-item"</span> style="height:100px; background:#999999;margin-bottom:5px;"&gt;
+  &lt;div id="cont3" style="width:100px;background:black; float:left;"&gt;
+    &lt;div id="contain3" style="margin:0 10px;padding:0;"&gt;
+                    &lt;div id="child7" style="height:50%; background:#CC99FF; display:list-item;"&gt;list-item1&lt;/div&gt;
+                    &lt;div id="child8" style="height:20%; background:yellow; display:list-item;"&gt;list-item2&lt;/div&gt;
+                    &lt;div id="child9" style="height:30%; background:green; display:list-item;"&gt;list-item3&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+    &lt;div style=" float:left;"&gt;
+        &lt;div id="info3"&gt;&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;/body>
+            </pre>
+      <p>以上代码中设置了字号和行高分别为12px和12px*2<sup>1</sup>，主要分为三个 DIV 包含块，其 id 分别为： display_block、display_inline-block、display_list-item。</p>
+          <p>
+          下面以第一个 DIV（id="display_block"） 包含块为例，该包含块设置了固定高度（'height:100px'）， 其内主要包含的四个（&quot;contain1&quot;<sup>2</sup> &quot;child1&quot; &quot;child2&quot; &quot;child3&quot;）DIV，并通过脚本将这四个 DIV（&quot;contain&quot; &quot;child1&quot; &quot;child2&quot; &quot;child3&quot;）元素的高度值（offsetHeight<sup>3</sup>）及他们之间的关系显示出来。</p>
+      <p>在不同浏览器中运行结果截图如下 (<em>表一</em>) ：</p>
+      <table class="compare" style="text-align:center; vertical-align:top;">
+               <tr>
+          <th>IE6 IE7 IE8 Firefox(S) Chrome(S) Safari(S) Opera</th>
+                    <th>Chrome(Q) Safari(Q) Firefox(Q)</th>
+        </tr>
+        <tr>
+                    <td><img src="../../tests/RD8026/IE6 IE7 IE8 Firefox(S) Chrome(S) Safari(S) Opera.png" alt="IE6(S)IE7(S)IE8(S)Chrome(S)Opera" /></td>
+                <td><img src="../../tests/RD8026/Chrome(Q)Firefox(Q)Safari(Q).png" alt="Chrome(Q) Safari(Q) Firefox(Q)" /></td>
+        </tr>
+      </table>
+            <p class="comment">
+            注【1】：由于 Chrome（中文版） 中对于字号小于12px的文字自动转换为12px，这里明确固定的字号及行高是为了避免产生其他差异的干扰以便于针对此问题进行各浏览器间的对比。<br /> 
+            注【2】：&quot;contain1&quot; 元素未设置 'height' 属性值，此时他的 'height' 属性值为 'auto'，如果将 'height' 设置为固定值（非百分比数值）那么将不会产生浏览器差异，但若设置为百分比高度时除上述差异外，在 <em>IE6(Q) IE7(Q) IE8(Q)</em> 中还会产生新的差异，此差异会在稍后说明。<br /> 
+            注【3】：'offsetHeight' 用于获取元素的高度，它获得的是 'border-edge' 的高度，本代码中由于没有设置 'border-width' 'margin-top' 'margin-bottom' 'padding' 属性的值，所以通过 'offsetHeight' 属性获得的便是该元素的 'margin box' 的高度，关于 'offsetHeight' 的相关内容请参考 CSSOM View Module 中的 <a href="http://www.w3.org/TR/cssom-view/#offset-attributes">8.1 The offsetParent, offsetTop, offsetLeft, offsetWidth, and offsetHeight attributes</a>。
+            </p>
+      <p>根据 CSS2.1 规范中的描述，当 'height' 特性指定为百分比的值时，其百分比将参照其包含块的生成框高度进行计算，但由于上述代码中的 &quot;contain1&quot; 元素的包含块未明确设定高度 ('auto')，那么其子元素的高度计算将忽略其百分比高度的设定值，而是设定为 'auto'，即为其内容 ( content box ) 的高度，本例中也就是<span class="hl_2">行高*n（line-height*n）</span><sup>4</sup>。综上所述，依照规范中的描述 &quot;contain1&quot; 的高度计算式应为：<span class="hl_2">72=24+24+24</span>。
+          </p>
+            <p>从运行结果截图中的计算式可见：</p>
+            <ul>
+            <li>在 <em>IE6 IE7 IE8 Firefox(S) Chrome(S) Safari(S) Opera</em> 中是按照规范中的描述进行高度计算的；</li>
+            <li>在 <em>Chrome(Q) Safari(Q) Firefox(Q)</em> 中将 &quot;contain1&quot; 包含框的高度解析为其父包含框的高度（100px），所以会出现 &quot;contain1&quot; 元素的高度计算式为：<span class="hl_1">100=50+20+30</span>，这与规范中的描述不符。</li>
+            </ul>
+          <p class="comment">
+            注【4】：&quot;n&quot; 为行数。
+          </p>
+            <p>
+            下面针对注解【2】中当 &quot;contain1&quot; &quot;contain2&quot; &quot;contain3&quot; 的高度为百分比时的情况，对上述代码增加 &quot;contain1&quot;  &quot;contain2&quot; &quot;contain3&quot; 元素的高度设定如下：<br/>
+    <pre>
+&lt;div id=&quot;contain1&quot; style=&quot;<span class="hl_3">height:100%;</span><sup>5</sup> background:red; margin:0 10px;padding:0&quot;&gt;
+
+&lt;div id=&quot;contain2&quot; style=&quot;<span class="hl_3">height:100%;</span>background:red; margin:0 10px;padding:0&quot;&gt;
+
+&lt;div id=&quot;contain3&quot; style=&quot;<span class="hl_3">height:100%;</span>background:red; margin:0 10px;padding:0&quot;&gt;</pre>
+          <p><span class="comment">注【5】：这里的 'height' 属性值设定为 '100%' 是为了与修改之前的运行结果做对比，也可以设定为其他值，只不过所有运行结果都会产生相应的变化，但对高度的计算过程仍符合本文后续内容的描述。</span></p>
+            <p>在各浏览器中的运行结果截图如下 (<em>表二</em>) ：</p>
+            <table class="compare"  style="text-align:center;vertical-align:top;">
+                <tr>
+          <th>IE6(S) IE7(S) IE8(S) Firefox(S) Chrome(S) Safari(S) Opera</th>
+                    <th>Chrome(Q) Safari(Q) Firefox(Q)</th>
+                    <th>IE6(Q) IE7(Q) IE8(Q)</th>
+                </tr>
+        <tr>
+          <td><img src="../../tests/RD8026/IE6 IE7 IE8 Firefox(S) Chrome(S) Safari(S) Opera.png" alt="" /></td>
+                    <td><img src="../../tests/RD8026/Chrome(Q)Firefox(Q)Safari(Q).png" alt="" /></td>
+                <td><img src="../../tests/RD8026/IE6(Q)IE7(Q)IE8(Q).png" alt="" /></td>
+        </tr>
+      </table>
+          <p>下面仍以第一个 DIV（id=&quot;display_block&quot;） 包含块为例进行分析，对照<em>表一</em>与<em>表二</em>，可以发现是否设置 'height:100%' 特性值，对于 <em>Chrome(Q) Safari(Q) Firefox(Q)</em> 中高度计算无影响，它们还是依照 &quot;contain1&quot; 元素包含框的高度设定自身高度值；另外对于 <em>IE6(S) IE7(S) IE8(S) Firefox(S) Chrome(S) Safari(S) Opera</em> 中高度计算也无影响，由于此处 &quot;contain1&quot; 元素的 'margin-top' 'margin-bottom' 'padding-top' 'padding-bottom' 都是0，'height:100%' 即为元素本身的 "content box" 高度，所以它们依然是遵照规范定义来计算实际高度的。</p>
+          <p>这里唯一的区别就是  <em>IE6(Q) IE7(Q) IE8(Q)</em> 中高度的计算结果有变化，它们的计算式为：<span class="hl_1">84=36+24+24</span>，其运算过程如下：<br />
+          </p>
+          <ol style="list-style-type:disc;">
+            <li>按照规范中的描述得到计算式：<span class="hl_2">72=24+24+24</span>；</li>
+            <li>由步骤一可知，按照规范描述计算后 &quot;contain1&quot; 元素的高度<span class="hl_4">h=72px</span>，再利用 &quot;h&quot; 的值分别重新计算出 &quot;child1&quot; 的高度<span class="hl_4">h1=72*50%=36px</span>，&quot;child2&quot; 的高度<span class="hl_4">h2=72*20%=14px（此处取整）</span>，&quot;child3&quot; 的高度<span class="hl_4">h3=72*30%=22px（此处取整）</span>；</li>
+            <li>这里以 &quot;h1&quot; 为例，若 &quot;h1&quot; 小于步骤一中按照规范描述计算的到的 &quot;child1&quot; 的高度 &quot;H1&quot;，则 &quot;child1&quot; 的最终高度为 &quot;H1&quot;，若 &quot;h1&quot; 大于等于 &quot;H1&quot;，则 &quot;child1&quot; 的最终高度为 &quot;h1&quot;；
+            </li>
+            <li>按照步骤三的方法计算出 &quot;child2&quot; &quot;child3&quot; 的最终高度分别为：22px、22px，对这三者的最终高度求和即为 &quot;contain1&quot; 元素的最终高度，得到计算式：<span class="hl_1">84=36+24+24</span>。</li>
+            </ol>
+            <p>
+            对于 'display:inline-block' 和 'display:list-item' 的高度计算情况与上述分析相同，可参照代码进行测试与理解。
+            </p>
+      <h2 id="solutions">解决方案</h2>
+      <p>要对设置有百分比高度的块级元素的包含块设置明确的 'height' 属性值。</p>
+      
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.517.8 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RD8026/height_auto_q.html">height_auto_q.html</a><br />
+              <a href="../../tests/RD8026/height_auto_s.html">height_auto_s.html</a>
+                <br />
+              <a href="../../tests/RD8026/height_percent_q.html">height_percent_q.html</a><br />
+              <a href="../../tests/RD8026/height_percent_s.html">height_percent_s.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-21</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p> height  containing block inline-block list-item percent 包含块 宽度 高度 百分比</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

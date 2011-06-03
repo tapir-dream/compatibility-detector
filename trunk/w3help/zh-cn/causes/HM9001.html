@@ -1,0 +1,876 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HM9001: Chrome Safari Firefox 中 IFRAME 元素在文档树中发生变化后父子页面间的某些交互方式会失效</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>Chrome  Safari 子页面中使用 frames 集合获取其父页面中通过 innerHTML 移动位置后的 IFRAME 元素得到的对象类型为 HTMLIFrameElement，而不是正常的 Window，这将导致其下的 document 等子对象无法访问。<br />
+      Firefox 中，子页面中获取在 window.onload 中移动位置后的 IFRAME 元素 window 对象内的一些子对象可能出错。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>触发此问题后会影响 IFRAME 内外页面的交互，可能造成各种兼容性问题。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Chrome Safari Firefox</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>window 对象中的 frames 集合可以返回当前 window 中的子框架列表，这是一个类似数组的集合对象。可以通过整型下标或者子框架元素的 name 属性获取到该集合内对应的子框架 window 对象。</p>
+      <p>IFRAME 元素对应的 DOM 对象为 HTMLIframeElement，各浏览器均支持 HTMLIframeElement 接口中的 contentWindow 属性，这个属性返回 IFRAME 引入子页面的 window 对象。</p>
+      <p>假设在当前父页面中存在一个 id 和 name 属性为 &quot;ifr&quot; 的 IFRAME 对象，则可以通过 window.frames[&quot;ifr&quot;] 或者 document.getElementById(&quot;ifr&quot;).contentWindow 这两组方法获取到 IFRAME 引入页面的 window 对象。这两种方法在所有主流浏览器中均有很好的兼容性。但是却并不符合 W3C 规范。其中 window.frames 集合算 DOM Level 0 范畴，而 contentWindow 属性为 IE5.5 引入。</p>
+      <p>关于 window.frames 集合的相信资料，请参考：<a href="http://msdn.microsoft.com/en-us/library/ms537459(v=VS.85).aspx">MSDN</a>、<a href="https://developer.mozilla.org/en/window.frames">Mozilla Developer Center</a>、<a href="http://developer.apple.com/safari/library/documentation/AppleApplications/Reference/WebKitDOMRef/DOMWindow_idl/Classes/DOMWindow/index.html#//apple_ref/js/data/DOMWindow/frames">Safari Refernece Library</a>。</p>
+      <p>关于 contentWindow 属性的详细资料，请参考：<a href="http://msdn.microsoft.com/en-us/library/ms533692(VS.85).aspx">MSDN</a>、<a href="https://developer.mozilla.org/en/HTML/Element/iframe">Mozilla Developer Center</a>、<a href="http://developer.apple.com/safari/library/documentation/AppleApplications/Reference/WebKitDOMRef/HTMLIFrameElement_idl/Classes/HTMLIFrameElement/index.html#//apple_ref/js/data/HTMLIFrameElement/contentWindow">Safari Refernece Library</a>。</p>
+      <p>下面分 4 种情况测试当 IFRAME 元素在文档树中发生变化对 IFRAME 内外的子页面与父页面交互的影响。</p>
+      <ol>
+        <li>window.onload 之前，通过 innerHTML 方法改变 IFRAME 元素在文档树中的位置：<strong><em>main1.html</em></strong>。</li>
+        <li>window.onload 之前，通过 removeChild、AppendChild 方法改变 IFRAME 元素在文档树中的位置：<strong><em>main2.html</em></strong>。</li>
+        <li>window.onload 之后，通过 innerHTML 方法改变 IFRAME 元素在文档树中的位置：<strong><em>main3.html</em></strong>。</li>
+        <li>window.onload 之后，通过 removeChild、AppendChild 方法改变 IFRAME 元素在文档树中的位置：<strong><em>main4.html</em></strong>。</li>
+      </ol>
+      <p>测试代码如下：</p>
+      <table class="compare">
+        <tr>
+          <td>
+            <strong><em>main1.html</em></strong>
+<pre>
+&lt;style&gt;
+    iframe { width:450px; height:1800px; }
+&lt;/style&gt;
+before window.onload, innerHTML
+&lt;div id=&quot;div1&quot;&gt;
+    &lt;iframe id=&quot;ifr1&quot; name=&quot;ifr1&quot; src=&quot;<em>sub.html</em>&quot;&gt;&lt;/iframe&gt;
+    &lt;iframe id=&quot;ifr2&quot; name=&quot;ifr2&quot; src=&quot;<em>0.html</em>&quot;&gt;&lt;/iframe&gt;
+&lt;/div&gt;
+&lt;div id=&quot;div2&quot;&gt;
+&lt;/div&gt;
+&lt;script&gt;
+    function $(id) {
+        return document.getElementById(id);
+    }
+
+    $(&quot;div2&quot;).innerHTML = $(&quot;div1&quot;).innerHTML;
+    $(&quot;div1&quot;).innerHTML = &quot;&quot;;
+&lt;/script&gt;
+</pre>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <strong><em>main2.html</em></strong>
+<pre>
+&lt;style&gt;
+    iframe { width:450px; height:1800px; }
+&lt;/style&gt;
+before window.onload, appendChild
+&lt;div id=&quot;div1&quot;&gt;
+    &lt;iframe id=&quot;ifr1&quot; name=&quot;ifr1&quot; src=&quot;<em>sub.html</em>&quot;&gt;&lt;/iframe&gt;
+    &lt;iframe id=&quot;ifr2&quot; name=&quot;ifr2&quot; src=&quot;<em>0.html</em>&quot;&gt;&lt;/iframe&gt;
+&lt;/div&gt;
+&lt;div id=&quot;div2&quot;&gt;
+&lt;/div&gt;
+&lt;script&gt;
+    function $(id) {
+        return document.getElementById(id);
+    }
+
+    var iframe1 = $(&quot;div1&quot;).children[0];
+    var iframe2 = $(&quot;div1&quot;).children[1];
+    $(&quot;div1&quot;).removeChild(iframe1);
+    $(&quot;div1&quot;).removeChild(iframe2);
+    $(&quot;div2&quot;).appendChild(iframe1);
+    $(&quot;div2&quot;).appendChild(iframe2);
+&lt;/script&gt;
+</pre>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <strong><em>main3.html</em></strong>
+<pre>
+&lt;style&gt;
+    iframe { width:450px; height:1800px; }
+&lt;/style&gt;
+after window.onload, innerHTML
+&lt;div id=&quot;div1&quot;&gt;
+    &lt;iframe id=&quot;ifr1&quot; name=&quot;ifr1&quot; src=&quot;<em>sub.html</em>&quot;&gt;&lt;/iframe&gt;
+    &lt;iframe id=&quot;ifr2&quot; name=&quot;ifr2&quot; src=&quot;<em>0.html</em>&quot;&gt;&lt;/iframe&gt;
+&lt;/div&gt;
+&lt;div id=&quot;div2&quot;&gt;
+&lt;/div&gt;
+&lt;script&gt;
+    function $(id) {
+        return document.getElementById(id);
+    }
+
+    window.onload = function () {
+        $(&quot;div2&quot;).innerHTML = $(&quot;div1&quot;).innerHTML;
+        $(&quot;div1&quot;).innerHTML = &quot;&quot;;
+    }
+&lt;/script&gt;
+</pre>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <strong><em>main4.html</em></strong>
+<pre>
+&lt;style&gt;
+    iframe { width:450px; height:1800px; }
+&lt;/style&gt;
+after window.onload, appendChild
+&lt;div id=&quot;div1&quot;&gt;
+    &lt;iframe id=&quot;ifr1&quot; name=&quot;ifr1&quot; src=&quot;<em>sub.html</em>&quot;&gt;&lt;/iframe&gt;
+    &lt;iframe id=&quot;ifr2&quot; name=&quot;ifr2&quot; src=&quot;<em>0.html</em>&quot;&gt;&lt;/iframe&gt;
+&lt;/div&gt;
+&lt;div id=&quot;div2&quot;&gt;
+&lt;/div&gt;
+&lt;script&gt;
+    function $(id) {
+        return document.getElementById(id);
+    }
+
+    window.onload = function () {
+        var iframe1 = $(&quot;div1&quot;).children[0];
+        var iframe2 = $(&quot;div1&quot;).children[1];
+        $(&quot;div1&quot;).removeChild(iframe1);
+        $(&quot;div1&quot;).removeChild(iframe2);
+        $(&quot;div2&quot;).appendChild(iframe1);
+        $(&quot;div2&quot;).appendChild(iframe2);
+    }
+&lt;/script&gt;
+</pre>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <strong><em>sub.html</em></strong>
+<pre>
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+    * { font:12px Arial; }
+    body { margin:0; }
+    span { font-weight:bold; }
+    .g { color:green; }
+    .r { color:red; }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;dl&gt;
+&lt;script&gt;
+  function myEval (code) {
+    var script = document.createElement(&quot;script&quot;);
+    script.text = &quot;var ret =&quot; + code;
+    document.body.appendChild(script);
+    var x = ret;
+    document.body.removeChild(script);
+    return x;
+  }
+
+    function tryObj (obj_text) {
+        var ok = '&lt;span class=&quot;g&quot;&gt;OK&lt;/span&gt;';
+        var fail = '&lt;span class=&quot;r&quot;&gt;FAIL&lt;/span&gt;'
+        try {
+            var f = &quot;&quot;;
+            var ev = myEval(obj_text);
+            try {
+              f = ev.toString();
+            } catch(e) {
+              f = &quot;&quot;;
+            }
+            return ev ? ok + &quot; &quot; + f : fail + &quot; &quot; + f;
+        } catch(e) {
+          return fail + &quot; &quot; + f;
+        }
+    }
+
+    var arr = [
+        'parent',
+        'parent.document',
+        'parent.document.getElementById(&quot;ifr1&quot;)',
+        'parent.document.getElementById(&quot;ifr1&quot;).contentWindow',
+        'parent.document.getElementById(&quot;ifr1&quot;).contentWindow.document',
+        'parent.document.getElementById(&quot;ifr1&quot;).contentWindow.history',
+        'parent.document.getElementById(&quot;ifr1&quot;).contentWindow.location',
+        'parent.document.getElementById(&quot;ifr1&quot;).contentWindow.navigator',
+        'parent.document.getElementById(&quot;ifr1&quot;).contentWindow.screen',
+        'parent.document.getElementById(&quot;ifr1&quot;).contentWindow.alert',
+        'parent.document.getElementById(&quot;ifr2&quot;)',
+        'parent.document.getElementById(&quot;ifr2&quot;).contentWindow',
+        'parent.document.getElementById(&quot;ifr2&quot;).contentWindow.document',
+        'parent.document.getElementById(&quot;ifr2&quot;).contentWindow.history',
+        'parent.document.getElementById(&quot;ifr2&quot;).contentWindow.location',
+        'parent.document.getElementById(&quot;ifr2&quot;).contentWindow.navigator',
+        'parent.document.getElementById(&quot;ifr2&quot;).contentWindow.screen',
+        'parent.document.getElementById(&quot;ifr2&quot;).contentWindow.alert',
+        'parent.frames',
+        'parent.frames[&quot;ifr1&quot;]',
+        'parent.frames[&quot;ifr1&quot;].document',
+        'parent.frames[&quot;ifr1&quot;].history',
+        'parent.frames[&quot;ifr1&quot;].location',
+        'parent.frames[&quot;ifr1&quot;].navigator',
+        'parent.frames[&quot;ifr1&quot;].screen',
+        'parent.frames[&quot;ifr1&quot;].alert',
+        'parent.frames[&quot;ifr2&quot;]',
+        'parent.frames[&quot;ifr2&quot;].document',
+        'parent.frames[&quot;ifr2&quot;].history',
+        'parent.frames[&quot;ifr2&quot;].location',
+        'parent.frames[&quot;ifr2&quot;].navigator',
+        'parent.frames[&quot;ifr2&quot;].screen',
+        'parent.frames[&quot;ifr2&quot;].alert'
+    ];
+    for (var i in arr) {
+        document.write('&lt;dt&gt;' + arr[i] + ':&lt;/dt&gt;');
+        document.write('&lt;dd&gt;' + tryObj(arr[i]) + '&lt;/dd&gt;');
+    }
+&lt;/script&gt;
+&lt;/dl&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+          </td>
+        </tr>
+        <tr>
+          <td><strong><em>0.html</em></strong><pre>&lt;html&gt;&lt;/html&gt;</pre></td>
+        </tr>
+      </table>
+      <p>上面代码中有 4 个主页面 <strong><em>main1.html</em></strong>、<strong><em>main2.html</em></strong>、<strong><em>main3.html</em></strong>、<strong><em>main4.html</em></strong>，分别对应本文分析的 4 中情况，每组代码均包含两个 DIV 元素【div1】与【div2】，其中初始状态【div1】包含 IFRAME 元素【ifr1】及【ifr2】，【div2】中为空。<br />
+      【ifr1】引入了子页面 &quot;sub.html&quot;  ，【ifr2】引入了子页面 &quot;0.html&quot;  。通过 JavaScript 将【div1】中的【ifr1】及【ifr2】移动到【div2】内。但是 4 个主页面采取了不同的移动方式。</p>
+      <p>子页面中，分别判断了 33 个对象的状态，若存在该对象，则显示“OK&quot; 及对象类型，否则显示 &quot;FAIL&quot; 。</p>
+      <p>在本地构建 Web 服务器<sup>1</sup>，将测试代码放入服务器进行测试。</p>
+      <table class="compare">
+        <tr>
+          <th rowspan="2">&nbsp;</th>
+          <th colspan="3">window.onload 之前，通过 innerHTML 方法改变 IFRAME 元素在文档树中的位置</th>
+          <th colspan="3">window.onload 之前，通过 removeChild、AppendChild 方法改变 IFRAME 元素在文档树中的位置</th>
+          <th colspan="3">window.onload 之后，通过 innerHTML 方法改变 IFRAME 元素在文档树中的位置</th>
+          <th colspan="3">window.onload 之后，通过 removeChild、AppendChild 方法改变 IFRAME 元素在文档树中的位置</th>
+        </tr>
+        <tr>
+          <th>IE6 IE7 IE8 Opera</th>
+          <th>Firefox</th>
+          <th>Chrome Safari</th>
+          <th>IE6 IE7 IE8 Opera</th>
+          <th>Firefox</th>
+          <th>Chrome Safari</th>
+          <th>IE6 IE7 IE8 Opera</th>
+          <th>Firefox</th>
+          <th>Chrome Safari</th>
+          <th>IE6 IE7 IE8 Opera</th>
+          <th>Firefox</th>
+          <th>Chrome Safari</th>
+        </tr>
+        <tr>
+          <th>parent</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.document</th>
+          <td><span class="hl_2">OK</span></td>
+            <td><span class="hl_2">OK</span></td>
+            <td><span class="hl_2">OK</span></td>
+            <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.document .getElementById(&quot;ifr1&quot;)</th>
+          <td><span class="hl_2">OK</span></td>
+            <td><span class="hl_2">OK</span></td>
+            <td><span class="hl_2">OK</span></td>
+            <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.document .getElementById(&quot;ifr1&quot;).contentWindow</th>
+          <td><span class="hl_2">OK</span></td>
+            <td><span class="hl_2">OK</span></td>
+            <td><span class="hl_2">OK</span></td>
+            <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.document .getElementById( &quot;ifr1&quot;) .contentWindow.document</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.document .getElementById(&quot;ifr1&quot;) .contentWindow.history</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.document .getElementById(&quot;ifr1&quot;) .contentWindow.location</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.document .getElementById(&quot;ifr1&quot;) .contentWindow.navigator</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.document .getElementById(&quot;ifr1&quot;) .contentWindow.screen</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.document .getElementById(&quot;ifr1&quot;) .contentWindow.alert</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.document .getElementById(&quot;ifr2&quot;)</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.document .getElementById(&quot;ifr2&quot;) .contentWindow</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.document .getElementById(&quot;ifr2&quot;) .contentWindow.document</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.document .getElementById(&quot;ifr2&quot;) .contentWindow.history</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.document .getElementById(&quot;ifr2&quot;) .contentWindow.location</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.document .getElementById(&quot;ifr2&quot;) .contentWindow.navigator</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.document .getElementById(&quot;ifr2&quot;) .contentWindow.screen</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.document .getElementById(&quot;ifr2&quot;) .contentWindow.alert</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.frames</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.frames[&quot;ifr1&quot;]</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span><sup>2</sup></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span><sup>2</sup></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.frames[&quot;ifr1&quot;].document</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.frames[&quot;ifr1&quot;].history</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.frames[&quot;ifr1&quot;].location</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.frames[&quot;ifr1&quot;].navigator</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.frames[&quot;ifr1&quot;].screen</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.frames[&quot;ifr1&quot;].alert</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.frames[&quot;ifr2&quot;]</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span><sup>2</sup></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span><sup>2</sup></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.frames[&quot;ifr2&quot;].document</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.frames[&quot;ifr2&quot;].history</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.frames[&quot;ifr2&quot;].location</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.frames[&quot;ifr2&quot;].navigator</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.frames[&quot;ifr2&quot;].screen</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>parent.frames[&quot;ifr2&quot;].alert</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+      </table>
+      <p class="comment">
+        注1. Chrome 中认为本地页面为跨域，IFRAME 元素父子页面之间的脚本交互是不安全的，会在控制台提示错误：Unsafe JavaScript attempt to access frame with URL [XXX] from frame with URL [XXX]. Domains, protocols and ports must match.<br />
+        注2. 与其他浏览器不同，Chrome 和 Safari 此时虽然返回一个有效对象，但此对象类型不是 [window] 而是 [HTMLIframeElement]。
+      </p>
+      <p>从上表中的结果可见，通过 document.getElementById(&quot;IFRAME&quot;).contentWindow 的方式获取 IFRAME 元素引入子页面的 window 对象，各浏览器均没有任何问题。而 window.frames 方式则产生了差异：<p>
+      <ol>
+        <li>window.onload 之前，通过 innerHTML 方法改变 IFRAME 元素在文档树中的位置：<br />
+          <ul>
+            <li>在 <em>IE6 IE7 IE8 Firefox Opera</em> 中，子页面均可以获得移动后的【ifr1】及【ifr2】相关对象；</li>
+            <li>在 <em>Chrome Safari</em> 中，虽然可以获取到父页面的【ifr1】及【ifr2】相关对象，但是与 IE Firfox Opera 中不同，该对象类型为 &quot;HTMLIframeElement&quot; ，而不是 &quot;Window&quot; ，所以该对象的子对象无法获取。</li>
+          </ul>
+        </li>
+        <li>window.onload 之前，通过 removeChild、AppendChild 方法改变 IFRAME 元素在文档树中的位置：<br />
+          <ul>
+            <li>各浏览器中，子页面均可以获得移动后的【ifr1】及【ifr2】相关对象。</li>
+          </ul>
+        </li>
+        <li>window.onload 之后，通过 innerHTML 方法改变 IFRAME 元素在文档树中的位置：<br />
+          <ul>
+            <li>在 <em>IE6 IE7 IE8 Opera</em> 中，子页面均可以获得移动后的【ifr1】及【ifr2】相关对象；</li>
+            <li>在 <em>Firefox</em> 中，在 window.onload 中移动 IFRAME 却使 IFRAME 的 window 对象中  &quot;document&quot; 对象失效；</li>
+            <li>在 <em>Chrome Safari</em> 中，虽然可以获取到父页面的【ifr1】及【ifr2】相关对象，但是与 IE Firefox Opera 中不同，该对象类型为 &quot;HTMLIframeElement&quot; ，而不是 &quot;Window&quot; ，所以该对象的子对象无法获取。</li>
+          </ul>
+        </li>
+        <li>window.onload 之后，通过 removeChild、AppendChild 方法改变 IFRAME 元素在文档树中的位置：<br />
+          <ul>
+            <li>在 <em>IE6 IE7 IE8 Opera Chrome Safari</em> 中，子页面均可以获得移动后的【ifr1】及【ifr2】相关对象；</li>
+            <li>在 <em>Firefox</em> 中，在 window.onload 中移动 IFRAME 却使 IFRAME 的 window 对象中“document&quot; 对象失效。</li>
+          </ul>
+        </li>
+      </ol>
+      <p>可见，对于 window.frames 方式，使用情况 2，即 window.onload 之前，通过 removeChild、AppendChild 方法改变 IFRAME 元素在文档树中的位置不会出现兼容性问题。</p>
+
+
+      <h2 id="solutions">解决方案</h2>
+      <p>根据上面所得的结果，推荐使用 document.getElementById(&quot;IFRAME&quot;).contentWindow.document 获取 IFRAME 元素内页面的 document 对象，且对于在文档树中移动位置后的 IFRAME 元素也有很好的兼容性。同时应避免对跨域的父子页面交互。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.7<br />
+              Chrome 6.0.472.0 dev<br />
+              Safari 5.0<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HM9001/main1.html">main1.html</a><br />
+            <a href="../../tests/HM9001/main2.html">main2.html</a><br />
+            <a href="../../tests/HM9001/main3.html">main3.html</a><br />
+            <a href="../../tests/HM9001/main4.html">main4.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-22</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>IFRAME parent frames collection 文档树 移动 交互 contentWindow</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html id="i_HTML">
+<head id="i_HEAD">
+<style id="i_STYLE">
+</style>
+<script id="i_SCRIPT">
+	function $(id) { return document.getElementById(id); }
+	window.onload = function () {
+		var els = document.getElementsByTagName("*");
+		var i_res1 = [], i_res2 = [], a, b;
+		for (var i = 0, j = els.length; i < j; i++) {
+			a = els[i];
+			if (a.id.indexOf("i_") < 0) { continue; }
+			b = a.tagName.toUpperCase();
+			(function () { try { return eval("i_" + b); } catch(e) { return false; } }())
+				? ((b == "IFRAME") ? i_res1.push(b + ((eval("i_" + b).tagName) ? "[HTMLIFrameElement]" : "[window]")) : i_res1.push(b))
+				: i_res2.push(b);
+		}
+		$("mode").innerHTML = (document.compatMode.toLowerCase().indexOf("css1") < 0) ? "Quirks Mode" : "Standards Mode";
+		$("id_ok").innerHTML = i_res1.join("<br>");
+		$("id_fail").innerHTML = i_res2.join(", ");
+	}
+</script>
+</head>
+<body id="i_BODY" style="font:16px/1.5 Arial;">
+	<iframe id="i_IFRAME" src="" style="display:none;"></iframe>
+	<div>
+		<h3 id="mode"></h3>
+		<h1>by id, OK</h1>
+		<div id="id_ok"></div>
+		<h1>by id, Fail</h1>
+		<div id="id_fail"></div>
+	</div>
+</body>
+</html>

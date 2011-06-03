@@ -1,0 +1,128 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX9041: 各浏览器创建 XMLHttpRequest 对象的方式不同</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>XMLHttpRequest 对象可以实现以客户端脚本发送 HTTP 请求。</p>
+      <p>关于 XMLHttpRequest 的更多信息，请参考 <a href="http://www.w3.org/TR/XMLHttpRequest/">XMLHttpRequest</a> 规范。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>各浏览器通过 XMLHttpRequest 对象可以实现以客户端脚本发送 HTTP 请求，在 IE6 中这个对象是以 ActiveXObject 创建的（这种方式创建的对象的方法及属性名是大小写不敏感的），在其他浏览器中则可以直接使用 XMLHttpRequest 构造器创建。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>若编写 Ajax 应用时没有考虑到在各浏览器中创建 XMLHttpRequest 对象的差异，将造成代码在某些浏览器中不能正常运行。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <h3>1. Ajax 简介</h3>
+      <p>Ajax 的全称是  Asynchronous JavaScript and XML 的简称，该技术在 1998 年前后得到了应用。允许客户端脚本发送 HTTP 请求（XMLHTTP）的第一个组件由 Outlook Web Access 小组写成。该组件原属于微软 Exchange Server，并且迅速地成为了 Internet Explorer 4.0 的一部分。</p>
+      <p>Ajax 这个词由《<a href="http://www.adaptivepath.com/ideas/essays/archives/000385.php">Ajax: A New Approach to Web Applications</a>》一文所创，该文的迅速流传提高了人们使用该项技术的意识。另外，对Mozilla/Gecko的支持使得该技术走向成熟，变得更为易用。</p>
+      <p class="comment">注：本段文字摘录于<a href="http://zh.wikipedia.org/zh/Ajax">维基百科-Ajax</a>。</p>
+
+      <h3>2. 各浏览器中创建 XMLHttpRequest 对象的方法</h3>
+      <p>在 IE7 之前，使用 Ajax 所必须的 XMLHttpRequest 对象是通过如 "new ActiveXObject("Microsoft.XMLHTTP")" 等一系列创建 XMLHttp 自动化对象的方式来完成的。该对象中与 window.XMLHttpRequest 对象内的各属性及方法大体一致。</p>
+      <p>在 IE7 IE8 中，同时支持着两种创建 XMLHttpRequest 对象的方法，一种为 IE 独有的 ActiveXObject 创建的自动化对象，另一种为更加标准及通用的 window.XMLHttpRequest 对象。</p>
+      <p>而在其他浏览器中，只支持使用标准的 window.XMLHttpRequest 来创建。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>判断浏览器版本，使用不同的 XMLHttpRequest 对象创建方式。如：</p>
+<pre>
+funciton getXHR(){
+  var xhrObj;
+  try {
+    xhrObj = new XMLHttpRequest();
+  } catch (e) {
+    var aTypes = ["Msxml2.XMLHTTP.6.0", "Msxml2.XMLHTTP.3.0", "Msxml2.XMLHTTP", "Microsoft.XMLHTTP"];
+    var len = aTypes.length;
+    for (var i = 0; i &lt; len; i++) {
+      try {
+        xhrObj = new ActiveXObject(aTypes[i]);
+      } catch (e) {
+        continue;
+      }
+      break;
+    }
+  }
+  finally {
+    return xhrObj;
+  }
+}
+</pre>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="BT9021">BT9021：IE 中可以使用 ActiveXObject 创建 Automation 对象，同时该对象的方法及属性名称大小写不敏感</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.3<br />
+              Chrome 6.0.422.0 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.53
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>&nbsp;</td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-06</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>Ajax XMLHttpRequest ActiveXObject</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

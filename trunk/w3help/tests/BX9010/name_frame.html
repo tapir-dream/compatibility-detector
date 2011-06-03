@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+	window.onload = function () {
+		var n_res1 = [];
+		var n_frameset = function () { try { return fr; } catch(e) { return false; } }();
+		var n_frame = function () { try { return f; } catch(e) { return false; } }();
+		(n_frameset)
+			? (n_res1.push("FRAMESET" + ((n_frameset.tagName) ? "[HTMLFrameSetElement]" : ((n_frameset.location) ? "[window]" : ""))))
+			: n_res1.push("FRAMESET:N/A");
+		(n_frame)
+			? (n_res1.push("FRAME" + ((n_frame.tagName) ? "[HTMLFrameElement]" : ((n_frame.location) ? "[window]" : ""))))
+			: n_res1.push("FRAME:N/A");
+		alert("by name:\n" + n_res1.join("\n") + "\nlength:" + ((n_frame) ? n_frame.length : 0));
+	}
+</script>
+</head>
+<frameset name="fr" cols="25%,75%">
+	<frame name="f" src="" />
+	<frame name="f" src="" />
+</frameset>
+</html>

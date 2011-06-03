@@ -1,0 +1,13 @@
+<script type="text/javascript">
+    window.onload = function() {
+        var spans = document.getElementsByTagName("span");
+        var span2 = spans[1];
+        var span3 = spans["span3"];
+        document.getElementById("info").innerHTML = "<br/>NodeList[index].id: " + span2.id + "<br/>NodeList[name].id: " + span3.id;
+    }
+</script>
+<span id="span1"></span>
+<span id="span2"></span>
+<span id="span3"></span>
+
+<div id="info"></div>

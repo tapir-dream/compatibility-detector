@@ -1,0 +1,149 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RM1025: Chrome Safari 认为 'float:center' 是合法值且其计算值为 'none'</h1>
+<ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 CSS 2.1 规范标准，’float‘ 特性可以拥有的值为 'left'| 'right' | 'none' | 'inherit' ，默认值为 ’none'。</p>
+      <p>具体信息可参考：<a href="http://www.w3.org/TR/CSS21/visuren.html#propdef-float">9.5.1 Positioning the float: the 'float' property</a></p>
+      <p>如果 CSS 特性以及特性值出现书写错误，导致非法值或未知属性产生，客户端浏览器将必须忽略带有未知属性或非法值的样式声明。</p>
+      <p>具体信息可参考 CSS 2.1 规范：  <a href="http://www.w3.org/TR/CSS21/syndata.html#parsing-errors">4.2 Rules for handling parsing errors</a> </p>
+      <p>因此，如果 'float' 特性设置中出现除  'left'| 'right' | 'none' | 'inherit' 以外的值，此 'float' 样式声明将被浏览器忽略。</p>
+      <h2 id="description">问题描述</h2>
+      <p>在 Safari Chrome 等使用 webkit 渲染引擎的浏览器中，'float:center' 是合法值，他等同于 'float:none' 设置，而其他浏览器则认为 ‘float’ 特性中 'center' 是个非法值，遵循规范应忽略此处的 'float' 特性设置。</p>
+
+        <h2 id="influence">造成的影响</h2>
+      <p>可能造成页面局部布局错位，以及使用脚本得到某布局块计算后样式时，webkit 渲染引擎浏览器结果与其他浏览器不符，使具体程序出现意料外的 Bug。</p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Chrome Safari</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>根据规范定义，’float‘ 特性可以拥有的值为 'left'| 'right' | 'none' | 'inherit' ，并没有 'center'。</p>
+      <p>浏览器如果遇到错误的 CSS 特性值会将此样式忽略，但在使用 webkit 渲染引擎的 Safari Chrome 浏览器中，'float:center' 这个不合法值被特意修正为合法值 'none'。</p>
+      <p>这个问题出现在 webkit 源文件 <em>CSSParser.cpp</em> 中，问题部分如下：</p>
+<pre>
+bool CSSParser::parseValue(int propId, bool important)
+{
+    ...
+        case CSSPropertyFloat: // left | right | none | inherit + <span class="hl_4">center for buggy CSS</span>
+        if (id == CSSValueLeft || id == CSSValueRight ||
+             id == CSSValueNone || <span class="hl_4">id == CSSValueCenter</span>)
+            validPrimitive = true;
+        break;
+    ...
+}
+</pre>
+    <p>通过源代码可看出，webkit 中特意在 'float' 特性可用值中加入 'center'，用以修复页面作者误用 'center' 值时产生的 Bug。 </p>
+    <p>分析如下代码：</p>
+<pre>
+&lt;style&gt;
+p {<span class="hl_4">float:right;</span>color:#EEE;}
+&lt;/style&gt;
+&lt;script&gt;
+window.onload=function(){
+  var pElement = document.getElementsByTagName('p')[0];
+  if(!window.getComputedStyle){
+    window.getComputedStyle=function($target){
+      return $target.currentStyle;
+    };
+  }
+  pElement.appendChild(
+    document.createTextNode('float:'
+      + ( getComputedStyle(pElement,null)['cssFloat'] || getComputedStyle(pElement,null)['styleFloat'] )
+    )
+  );
+}
+&lt;/script&gt;
+
+&lt;p style="<span class="hl_4">float:center;</span>background:gray;"&gt;&lt;/p&gt;
+</pre>
+    <p>样式文件中首选为 P 标记制指定了 'float:right' 样式，其后的内联 "style" 属性又试图将之前定义的 'float' 特性值覆盖为 'center'。由于 'cetner' 特性值不合法，浏览器将忽略整个 'float' 样式。这样此例中 P 标记计算后样式应为最初定义的 ‘float:right’。</p>
+    <p>各浏览器运行结果如下：</p>
+    <table class="compare">
+          <tr>
+            <th>&nbsp;</th>
+            <th>IE Firefox Opera</th>
+            <th>Chrome Safari</th>
+          </tr>
+          <tr>
+            <th>P</th>
+            <td><span class="hl_2">'float:right'</span></td>
+            <td><span class="hl_1">'float:none'</span></td>
+          </tr>
+        </table>
+    <p>可见，实际应用中，'center' 值的确被 Safari Chrome 认为合法，并将其解析为 'float:none' 值。</p>
+    <h2 id="solutions">解决方案</h2>
+      <p>避免使用非法的 'float' 特性值。</p>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td> IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 8.0.552.0 dev<br />
+              Safari 5.0.2 <br />
+              Opera 10.63</td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RM1025/webkit_float_center.html">webkit_float_center.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-18</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>float left right none inherit center Rules for handling parsing errors webkit </p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+</head>
+<body>
+<table style="width:200px; border:1px solid black;">
+    <tr id="tr1" style="height:60px;">
+        <td id="td1" style="height:40px; background:#CCC;">1</td>
+    </tr>
+    <tr id="tr2" style="height:40px;">
+        <td id="td2" style="height:60px; background:#AAA;">2</td>
+    </tr>
+</table>
+<script>
+    function $(id) { return document.getElementById(id); }
+    $("td1").innerHTML = "TR set=" + $("tr1").style.height + " offset=" + $("tr1").offsetHeight + "px"
+        + "<br /> TD set=" + $("td1").style.height + " offset=" + $("td1").offsetHeight + "px";
+    $("td2").innerHTML = "TR set=" + $("tr2").style.height + " offset=" + $("tr2").offsetHeight + "px"
+        + "<br /> TD set=" + $("td2").style.height + " offset=" + $("td2").offsetHeight + "px";
+</script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX2003: 特定的 URL 伪协议需安装提供该协议的特定软件才有效</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+
+      <p>
+      关于协议注册的更多信息，请参考如下链接：
+      </p>
+      <ol>
+        <li><a href="http://msdn.microsoft.com/en-us/library/aa767914%28VS.85%29.aspx">Registering an Application to a URL Protocol</a></li>
+        <li><a href="http://kb.mozillazine.org/Register_protocol">mozilla Register protocol</a></li>
+      </ol>
+
+      <h2 id="description">问题描述</h2>
+      <p>特定的 URL 伪协议需安装特定软件才有效。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>特定的协议某些浏览器不支持。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <h3>一、关于协议的简要描述</h3>
+      <p>
+      百科全书对协议的定义是：&quot;在两个计算端点之间建立或控制连接、通信或数据传输的约定或标准&quot; 。实际上这些端点可以是两个单独的计算机，也可以是一个计算机中两个单独的点。
+      </p>
+      <p>
+      例如，从内存读取数据时，计算机必须访问硬盘上的存储区，通过数据总线将数据转移到内存，然后再将其传送至处理器。在每个端点，数据必须具有某种形式，以便发送方和接收方都能够恰当地处理数据。在最底层，数据就是一堆比特位的集合。只有在某个上下文中理解，这些比特集合才具有含义。如果发送方和接收方端点不能就上下文达成一致，那么被传输的数据就是无意义的。因此，协议是数据传输的基础。
+      </p>
+
+      <p>
+      我们常用类型的协议包括：IP TCP HTTP FTP Telnet POP3 SOAP SMTP SSH 等。<br/>
+
+      协议的运作，必须由特定的处理器与之关联。该处理器可以是软件程序，硬件，或软硬件结合体。<br/>
+
+      在 Windows 系统中，协议和它的处理器之间的关系，由注册表描述。也就是说，在一个协议可用前，我们必须先在注册表中注册，以描述该协议关联的处理器。<br/>
+
+      如下，是一个 &quot;.reg&quot; 文件，它描述了 &quot;foo&quot; URL协议，以及它的处理器 &quot;program.exe&quot;。
+      </p>
+
+      <pre>
+REGEDIT4
+
+[HKEY_CLASSES_ROOT\foo]
+@=&quot;URL:foo Protocol&quot;
+&quot;URL Protocol&quot;=&quot;&quot;
+
+[HKEY_CLASSES_ROOT\foo\shell]
+
+[HKEY_CLASSES_ROOT\foo\shell\open]
+
+[HKEY_CLASSES_ROOT\foo\shell\open\command]
+@=&quot;\&quot;C:\\Program Files\\Application\\program.exe\&quot; \&quot;%1\&quot;&quot;
+
+      </pre>
+
+      <p>
+      双击运行该 &quot;.reg&quot; 文件，即可注册 &quot;foo&quot; URL协议。类似此类自定义的，非公共（如: HTTP ）的协议，我们称之为伪协议。如果是自定义的 URL 协议，我们可称之为 URL 伪协议。
+      </p>
+
+      <h3>二、差异及可能产生的问题</h3>
+      <p>
+      协议 &quot;tencent://&quot; 和 &quot;msnim:chat&quot; 是安装了 QQ 或 MSN 应用程序后，注册到本地系统的 URL 伪协议。要使其能正常运行，需在本地系统安装 QQ 或 MSN 应用程序。<br/>
+      请参考上一章中关于 URL 伪协议的说明，再观察如下腾讯的 Tencent://Message 协议的注册表文件（&quot;.reg&quot;）
+      </p>
+
+      <pre>
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\Tencent]
+@=&quot;TencentProtocol&quot;
+&quot;URL Protocol&quot;=&quot;D:\\Program Files\\Tencent\\QQ\\Timwp.exe&quot;
+
+[HKEY_CLASSES_ROOT\Tencent\DefaultIcon]
+@=&quot;D:\\Program Files\\Tencent\\QQ\\Timwp.exe,1&quot;
+
+[HKEY_CLASSES_ROOT\Tencent\shell]
+
+[HKEY_CLASSES_ROOT\Tencent\shell\open]
+
+[HKEY_CLASSES_ROOT\Tencent\shell\open\command]
+@=&quot;\&quot;D:\\Program Files\\Tencent\\QQ\\Timwp.exe\&quot; \&quot;%1\&quot;&quot;
+</pre>
+
+      <p>
+      在浏览器地址栏中输入 &quot;tencent://message/?uin=123&quot;，要打开本地 QQ 聊天窗口，首先是要在注册表中找到 &quot;Tencent&quot; 协议，然后调用 Timwp.exe 文件，并传入参数（ uin=123 ），如果 QQ 帐号有效则弹出 QQ 聊天窗口。<br/>
+
+      根据以上的分析，要想打开 &quot;tencent://&quot; 之类的协议地址，必须要在本地安装相应的应用程序，以注册相关的协议，否则无法打开。
+      </p>
+
+
+
+      <h2 id="solutions">解决方案</h2>
+
+      <p>
+      某些协议是由特定的厂商自定义的，如：&quot;tencent://&quot; 和 &quot;msnim:chat&quot; 之类，需安装特定的客户端软件以注册该类伪协议，方可正常使用。例如，安装 QQ 或 MSN 应用程序。
+      </p>
+
+     <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-06-18</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>协议 伪协议 URL  encent msnim:chat</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

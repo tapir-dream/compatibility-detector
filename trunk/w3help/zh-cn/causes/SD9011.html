@@ -1,0 +1,712 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SD9011: 事件模型在各浏览器中存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>
+        根据 W3C DOM 2 Events 描述，EventTarget 接口被所有支持 DOM 事件模型的节点（Node）实现。
+        该接口提供了 'addEventListener' 和 'removeEventListener' 方法，用来绑定或解绑一个 EventListeners 接口到一个 EventTarget。
+      </p>
+
+      <p>
+        DOM 2 Events 中定义了 Event 接口，用来提供事件的上下文信息，它提供了若干标准属性和方法。
+        实现 Event 接口的对象一般作为第一个参数传入事件处理函数，以用来提供当前事件相关的一些信息。
+      </p>
+
+      <p>
+        DOM 2 事件模型允许 DOM 实现支持事件的多模块，如果有必要，事件模型允许附加新的事件模块。
+        为了共同使用性的目的，DOM 会定义一个包含低级别的，依赖设备的事件模块、一个 UI 逻辑事件模块和一个文档变化事件模块的 UI 事件模块。
+        第三方实现（比如浏览器厂商）在定义一个新类型事件的时候，事件名称一定不能使用大小写无关的 'DOM' 字符串作开头，该前缀是为未来的 DOM 事件模块保留的。
+      </p>
+
+      <p>DOM 2 已经定义了一个 UI 事件类型模块和一个鼠标事件类型的模块，它们分别对应 UIEvent 和 MouseEvent 接口。
+      这两个接口提供了若干标准属性和方法，以获知事件发生时的一些信息。</p>
+
+      <p>关于 EventTarget 接口的详细信息，请参考 DOM 2 Events <a href="http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-registration">1.3. Event listener registration</a>。</p>
+      <p>关于 Event 接口的详细信息，请参考 DOM 2 Events <a href="http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-interface">1.4. Event interface</a>。</p>
+      <p>关于事件模块的详细信息，请参考 DOM 2 Events <a href="http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-eventgroupings">1.6. Event module definitions</a>。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>各浏览器对元素绑定、解绑事件监听器的方法，事件对象的获取，以及 Event 对象的实现上存在差异。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>如果使用某浏览器特有的事件相关的属性及方法编写代码，则可能造成兼容性问题，导致代码报错，功能失效。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <h3>1. 只有 IE Opera 支持使用 'attachEvent' 和 'detachEvent' 方法绑定和解绑事件监听器</h3>
+      <p>
+        根据 DOM 2 Events 中描述，节点使用 'addEventListener' 和 'removeEventListener' 方法绑定和解绑事件监听器，但 IE6 IE7 IE8 不支持这两个方法，
+        而使用 'attachEvent' 和 'detachEvent' 方法作为替代方案，Opera 两类方法都支持。Chrome Safari Firefox 只支持标准方法。
+      </p>
+      <p>分析以下代码：</p>
+<pre>
+&lt;button id="add" type="button"&gt;add event listener test&lt;/button&gt;
+&lt;button id="remove" type="button"&gt;remove event listener test&lt;/button&gt;
+&lt;div id="info"&gt;&lt;/div&gt;
+&lt;script type="text/javascript"&gt;
+  var add = document.getElementById("add"),
+    remove = document.getElementById("remove"),
+    showMsgA = function(){showMsg("attachEvent")},
+    showMsgB = function(){showMsg("addEventListener")};
+
+  if(add.attachEvent){
+    add.attachEvent("onclick",showMsgA);
+    remove.attachEvent("onclick",removeE);
+  }
+
+  if(add.addEventListener){
+    add.addEventListener("click",showMsgB,false);
+    remove.addEventListener("click",removeE,false);
+  }
+
+  function removeE(){
+    if(add.detachEvent){
+      add.detachEvent("onclick",showMsgA);
+      showMsg("detachEvent");
+    }
+
+    if(add.removeEventListener){
+      add.removeEventListener("click",showMsgB,false);
+      showMsg("removeEventListener");
+    }
+  }
+
+  function showMsg(method){
+    document.getElementById("info").innerHTML += ("support " + method + "&lt;br /&gt;");
+  }
+&lt;/script&gt;
+</pre>
+
+      <p>依次点击 'add event listener test' >> 'remove event listener test' >> 'add event listener test'，测试各浏览器对这些方法的支持，结果如下：</p>
+      <table class="compare">
+        <tbody>
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <td><img src="../../tests/SD9011/addRemoveEventListener_ie.png" alt="" /></td>
+        </tr>
+        <tr>
+          <th>Opera</th>
+          <td><img src="../../tests/SD9011/addRemoveEventListener_opera.png" alt="" /></td>
+        </tr>
+        <tr>
+          <th>Chrome Safari Firefox</th>
+          <td><img src="../../tests/SD9011/addRemoveEventListener_others.png" alt="" /></td>
+        </tr>
+        </tbody>
+      </table>
+
+      <p>关于 'addEventListener' 和 'attachEvent' 有几点需要注意：</p>
+      <ul>
+        <li>IE 不支持在捕获阶段触发事件监听器，'attachEvent' 方法没有提供参数说明是否响应在捕获阶段触发的事件；</li>
+        <li>'addEventListener' 和 'attachEvent' 都可以注册多个事件监听器；</li>
+        <li>在 Firefox Chrome Safari Opera 中给同一事件注册同一个事件监听器多次，重复注册的会被丢弃；而在 IE 中重复注册的事件监听器会被重复执行多次；</li>
+        <li>当给同一元素注册了多个事件监听器的时候，IE6 IE7 的事件监听器执行顺序是随机的，IE8 是倒序的，Firefox Chrome Safari Opera 是顺序的；</li>
+        <li>当元素注册的事件监听器中有非法的事件监听器时（非函数），在 IE Firefox 中会抛出异常，而在 Chrome Safari Opera 中则会忽略非法的事件监听器，继续执行其他的事件监听器。</li>
+      </ul>
+
+      <h3>2. 各浏览器获取事件对象的差异</h3>
+      <p>DOM 2 Events 中规定使用事件监听器的第一个参数作为事件对象，而 IE Opera Chrome Safari 还支持通过 window.event 获取事件对象。</p>
+      <p>分析以下代码：</p>
+<pre>
+&lt;button type="button" id="attach"&gt;attachEvent&lt;/button&gt;
+&lt;button type="button" id="addE"&gt;addEventListener&lt;/button&gt;
+&lt;button type="button" id="byclick"&gt;onClick&lt;/button&gt;
+&lt;br /&gt;
+INFO :
+&lt;div id="info"&gt;&lt;/div&gt;
+
+&lt;script type="text/javascript"&gt;
+  function $(id){return document.getElementById(id);}
+  var attach = $("attach"),
+    addE = $("addE"),
+    byClick = $("byclick");
+
+  attach.attachEvent &amp;&amp; attach.attachEvent("onclick", handler);
+  addE.addEventListener &amp;&amp; addE.addEventListener("click", handler, false);
+  byClick.onclick = handler;
+
+  function handler(){
+    var src = window === this ? window.event.srcElement : this, type = src.innerHTML;
+    window.event &amp;&amp; showMsg(window.event.type, type + " + window.event");
+    arguments[0] &amp;&amp; showMsg(arguments[0].type, type + " + arguments[0]");
+  }
+  function showMsg(type, msg){
+    $("info").innerHTML += (msg + "(type : " + type + ")&lt;br /&gt;");
+  }
+&lt;/script&gt;
+</pre>
+
+      <p>以上代码组合不同的事件监听器绑定方式和事件对象获取方法，测试各浏览器的支持程度。</p>
+      <p>依次点击 'attachEvent' &gt;&gt; 'addEventListener' &gt;&gt; 'onClick'，结果如下：</p>
+      <table class="compare"><tbody>
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <td><img src="../../tests/SD9011/getEventObject_ie.png" /></td>
+        </tr>
+        <tr>
+          <th>Chrome Safari</th>
+          <td><img src="../../tests/SD9011/getEventObject_webkit.png" /></td>
+        </tr>
+        <tr>
+          <th>Opera</th>
+          <td><img src="../../tests/SD9011/getEventObject_opera.png" /></td>
+        </tr>
+        <tr>
+          <th>Firefox</th>
+          <td><img src="../../tests/SD9011/getEventObject_firefox.png" /></td>
+        </tr>
+      </tbody></table>
+
+      <p>汇总测试结果如下表：<sup>1</sup></p>
+      <table class="compare">
+        <tr>
+          <th>事件对象获取方式</th>
+          <th>IE6 IE7 IE8</th>
+          <th>Chrome Safari</th>
+          <th>Opera</th>
+          <th>Firefox</th>
+        </tr>
+        <tr>
+          <th>window.event</th>
+          <td>Y</td>
+          <td>Y</td>
+          <td>Y</td>
+          <td>N</td>
+        </tr>
+        <tr>
+          <th>arguments[0]</th>
+          <td>Y<sup>2</sup></td>
+          <td>Y</td>
+          <td>Y</td>
+          <td>Y</td>
+        </tr>
+      </table>
+      <p class="comment">注1： Y 表示支持该事件对象获取方式，N 表示不支持。</p>
+      <p class="comment">注2： 部分支持。</p>
+
+      <p>从上表出可以看出：</p>
+      <ul>
+        <li>只有在使用 attachEvent 方法注册事件监听器的时候，IE 才支持使用事件监听器传入的第一个参数作为事件对象的方式；</li>
+        <li>Chrome Safari Opera 两种获取事件对象的方式都支持；</li>
+        <li>Firefox 只支持获取事件对象的标准方式。</li>
+      </ul>
+
+      <h3>3. 各浏览器中事件对象的属性和方法的差异</h3>
+      <p>
+        IE 对事件对象的标准属性和方法支持有限，针对大部分属性和方法，IE 都提供了一套替代非标准的替代方案；
+        而 Firefox Chrome Safari Opera 除了全面支持事件对象的标准属性和方法外，还在不同程度上支持了 IE 提供的非标准替代方案。
+      </p>
+
+      <p>以下代码检测了 Event、UIEvent、MouseEvent 接口以及事件对象的非标准属性在各浏览器下的支持程度：</p>
+
+<pre>
+&lt;button type="button" id="iEvent"&gt;Interface Event&lt;/button&gt;
+&lt;button type="button" id="iUIMouse"&gt;Interface UIEvent &amp; MouseEvent&lt;/button&gt;
+&lt;input type="text" id="nosK" /&gt;
+&lt;p id="wrap" style="border:3px solid;padding:5px;width:500px;"&gt;&lt;a id="nosCM" href="#"&gt;&lt;img src="google.gif" alt="IE"/&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;br /&gt;
+&lt;table border="1"&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Interface Event&lt;/th&gt;
+      &lt;td id="einfo"&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Interface UIEvent&lt;br/&gt;&amp;&lt;br/&gt;MouseEvent&lt;/th&gt;
+      &lt;td id="minfo"&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Non-standard&lt;br/&gt;&amp;&lt;br/&gt;click&lt;/th&gt;
+      &lt;td id="ncinfo"&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Non-standard&lt;br/&gt;&amp;&lt;br/&gt;mouseover mouseout&lt;/th&gt;
+      &lt;td id="nminfo"&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;Non-standard&lt;br/&gt;&amp;&lt;br/&gt;keyCode&lt;/th&gt;
+      &lt;td id="nkinfo"&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;script type="text/javascript"&gt;
+  function $(id){return document.getElementById(id);}
+  function addEvent(elem, type, handler, useCapture){
+    elem.addEventListener ? elem.addEventListener(type, handler, useCapture) :
+      elem.attachEvent("on" + type, handler);
+  }
+
+  addEvent($("iEvent"), "click", handleEvent, false);
+  addEvent($("iUIMouse"), "click", handleUIMouse, false);
+
+  addEvent($("nosCM"), "click", handleNoSClick, false);
+  addEvent($("wrap"), "click", function(){alert("P tag.");}, false);
+
+  addEvent($("nosCM"), "mouseover", handldNoSMouse, false);
+  addEvent($("nosCM"), "mouseout", handldNoSMouse, false);
+
+  addEvent($("nosK"), "keydown", handleNoSKey, false);
+  addEvent($("nosK"), "keypress", handleNoSKey, false);
+  addEvent($("nosK"), "keyup", handleNoSKey, false);
+
+  function handleEvent(e){
+    e = e || window.event;
+    var props = {
+      type : "type",
+      target : "target",
+      currentTarget : "currentTarget",
+      eventPhase : "eventPhase",
+      bubbles : "bubbles",
+      cancelable : "cancelable",
+      timeStamp : "timeStamp",
+      initEvent : "initEvent",
+      preventDefault : "preventDefault",
+      stopPropagation : "stopPropagation"
+    };
+
+    showMsg(props, e, $("einfo"));
+  }
+
+  function handleUIMouse(e){
+    e = e || window.event;
+    var props = {
+      view : "view",
+      detail : "detail",
+      initUIEvent : "initUIEvent",
+      screenX: "screenX",
+      screenY : "screenY",
+      clientX : "clientX",
+      clientY : "clientY",
+      ctrlKey : "ctrlKey",
+      shiftKey : "shiftKey",
+      altKey : "altKey",
+      metaKey : "metaKey",
+      button : "button",
+      relatedTarget : "relatedTarget",
+      initMouseEvent : "initMouseEvent"
+    }
+    showMsg(props, e, $("minfo"));
+  }
+
+  function handleNoSClick(e){
+    e = e || window.event;
+    e.returnValue = false;
+    e.cancelBubble = true;
+
+    var props = {
+      cancelBubble : "cancelBubble",
+      offsetX : "offsetX",
+      offsetY : "offsetY",
+      returnValue : "returnValue",
+      srcElement : "srcElement",
+      x : "x",
+      y : "y"
+    };
+
+    showMsg(props, e, $("ncinfo"));
+  }
+
+  function handldNoSMouse(e){
+    e = e || window.event;
+    var props = {
+      fromElement : "fromElement",
+      toElement : "toElement"
+    };
+    showMsg(props, e, $("nminfo"));
+  }
+
+  function handleNoSKey(e){
+    e = e || window.event;
+    $("nkinfo").innerHTML += "&lt;strong&gt;" + e.type + "&lt;/strong&gt; : " + e.keyCode + "&lt;br/&gt;";
+  }
+
+  function showMsg(props, e, info){
+    var tmp = "", p, val;
+    with(e){
+      for(p in props) {
+        try{
+          val = eval(props[p]) + " [" + typeof eval(props[p]) + "]";
+        } catch (e) {
+          val = undefined;
+        }
+        tmp += "&lt;strong&gt;" + p + "&lt;/strong&gt; : " + val + "&lt;br /&gt;"
+      }
+    }
+    info.innerHTML = tmp;
+  }
+&lt;/script&gt;
+</pre>
+
+      <p>执行以上测试代码，分别点击 'Interface Event' 按钮、'Interface UIEvent & MouseEvent' 按钮和图片，鼠标移到图片上再移开，在文本框中输入 'a'，得到结果整理如下表：<sup>3</sup></p>
+
+      <table class="compare"><tbody>
+        <tr>
+          <th>Interface & Non-standard</th>
+          <th>Property & method</th>
+          <th>IE6 IE7 IE8</th>
+          <th>Chrome Safari Opera</th>
+          <th>Firefox</th>
+        </tr>
+        <tr>
+          <th rowspan="10">Interface Event</th>
+          <th>type</th>
+          <td>Y</td>
+          <td>Y</td>
+          <td>Y</td>
+        </tr>
+        <tr>
+          <th>target</th>
+          <td>N</td>
+          <td>Y</td>
+          <td>Y</td>
+        </tr>
+        <tr>
+          <th>currentTarget</th>
+          <td>N</td>
+          <td>Y</td>
+          <td>Y</td>
+        </tr>
+        <tr>
+          <th>eventPhase</th>
+          <td>N</td>
+          <td>Y</td>
+          <td>Y</td>
+        </tr>
+        <tr>
+          <th>bubbles</th>
+          <td>N</td>
+          <td>Y</td>
+          <td>Y</td>
+        </tr>
+        <tr>
+          <th>cancelable</th>
+          <td>N</td>
+          <td>Y</td>
+          <td>Y</td>
+        </tr>
+        <tr>
+          <th>timeStamp</th>
+          <td>N</td>
+          <td>Y</td>
+          <td>Y</td>
+        </tr>
+        <tr>
+          <th>initEvent</th>
+          <td>N</td>
+          <td>Y</td>
+          <td>Y</td>
+        </tr>
+        <tr>
+          <th>preventDefault</th>
+          <td>N</td>
+          <td>Y</td>
+          <td>Y</td>
+        </tr>
+        <tr>
+          <th>stopPropagation</th>
+          <td>N</td>
+          <td>Y</td>
+          <td>Y</td>
+        </tr>
+        <tr>
+          <th rowspan="3">Interface UIEvent</th>
+          <th>view</th>
+          <td>N</td>
+          <td>Y</td>
+          <td>Y</td>
+        </tr>
+        <tr>
+          <th>detail</th>
+          <td>N</td>
+          <td>Y</td>
+          <td>Y</td>
+        </tr>
+        <tr>
+          <th>initUIEvent</th>
+          <td>N</td>
+          <td>Y</td>
+          <td>Y</td>
+        </tr>
+        <tr>
+          <th rowspan="11">Interface MouseEvent</th>
+          <th>screenX</th>
+          <td>Y</td>
+          <td>Y</td>
+          <td>Y</td>
+        </tr>
+        <tr>
+          <th>screenY</th>
+          <td>Y</td>
+          <td>Y</td>
+          <td>Y</td>
+        </tr>
+        <tr>
+          <th>clientX</th>
+          <td>Y</td>
+          <td>Y</td>
+          <td>Y</td>
+        </tr>
+        <tr>
+          <th>clientY</th>
+          <td>Y</td>
+          <td>Y</td>
+          <td>Y</td>
+        </tr>
+        <tr>
+          <th>ctrlKey</th>
+          <td>Y</td>
+          <td>Y</td>
+          <td>Y</td>
+        </tr>
+        <tr>
+          <th>shiftKey</th>
+          <td>Y</td>
+          <td>Y</td>
+          <td>Y</td>
+        </tr>
+        <tr>
+          <th>altKey</th>
+          <td>Y</td>
+          <td>Y</td>
+          <td>Y</td>
+        </tr>
+        <tr>
+          <th>metaKey</th>
+          <td>N</td>
+          <td>Y</td>
+          <td>Y</td>
+        </tr>
+        <tr>
+          <th>button</th>
+          <td>Y</td>
+          <td>Y</td>
+          <td>Y</td>
+        </tr>
+        <tr>
+          <th>relatedTarget</th>
+          <td>N</td>
+          <td>Y</td>
+          <td>Y</td>
+        </tr>
+        <tr>
+          <th>initMouseEvent</th>
+          <td>N</td>
+          <td>Y</td>
+          <td>Y</td>
+        </tr>
+        <tr>
+          <th rowspan="10">Non-standard</th>
+          <th>cancelBubble</th>
+          <td>Y</td>
+          <td>Y</td>
+          <td>Y</td>
+        </tr>
+        <tr>
+          <th>offsetX</th>
+          <td>Y</td>
+          <td>Y</td>
+          <td>N</td>
+        </tr>
+        <tr>
+          <th>offsetY</th>
+          <td>Y</td>
+          <td>Y</td>
+          <td>N</td>
+        </tr>
+        <tr>
+          <th>returnValue</th>
+          <td>Y</td>
+          <td>Y</td>
+          <td>N</td>
+        </tr>
+        <tr>
+          <th>srcElement</th>
+          <td>Y</td>
+          <td>Y</td>
+          <td>N</td>
+        </tr>
+        <tr>
+          <th>x</th>
+          <td>Y</td>
+          <td>Y</td>
+          <td>N</td>
+        </tr>
+        <tr>
+          <th>y</th>
+          <td>Y</td>
+          <td>Y</td>
+          <td>N</td>
+        </tr>
+        <tr>
+          <th>fromElement</th>
+          <td>Y</td>
+          <td>Y</td>
+          <td>N</td>
+        </tr>
+        <tr>
+          <th>toElement</th>
+          <td>Y</td>
+          <td>Y</td>
+          <td>N</td>
+        </tr>
+        <tr>
+          <th>keyCode</th>
+          <td>Y</td>
+          <td>Y</td>
+          <td>Y</td>
+        </tr>
+      </tbody></table>
+
+      <p class="comment">注3： Y 代表事件对象支持该属性或方法，N 代表不支持。</p>
+
+      <p>从上表中可以看出：</p>
+      <ul>
+        <li>IE 支持事件对象的所有非标准属性，不支持除 'type' 外 Event 接口的所有方法属性及方法，不支持 UIEvent 接口的所有属性和方法，不支持 MouseEvent 接口的 'metaKey'、'relatedTarget' 属性和 'initMouseEvent' 方法；</li>
+        <li>Chrome Safari Opera 支持事件对象的所有标准及非标准的属性和方法；</li>
+        <li>Firefox 支持事件对象的所有标准属性和方法，但仅支持非标准属性中的 'cancelBubble' 和 'keyCode'。</li>
+      </ul>
+
+      <p>需要注意的是：</p>
+      <ul>
+        <li>Firefox 不支持事件对象的 'returnValue' 属性，测试样例中虽然显示 'returnValue' 值为 false，但这仅仅是因为给事件对象添加了 'returnValue' 属性，并没有起到取消事件默认动作的作用，这从地址栏可以看出，多了 '#' 号，这是 A 标签的 'href' 属性造成的。</li>
+        <li>各浏览器对 Event 接口的 'timeStamp' 属性返回值都不同。</li>
+      </ul>
+
+      <p>关于 IE 实现的事件对象非标准的属性及方法的详细信息，请参考 MSDN <a href="http://msdn.microsoft.com/en-us/library/ms535863(VS.85).aspx">event Object</a>。</p>
+      <p>关于 Firefox 对事件对象实现的详细信息，请参考 MDC <a href="https://developer.mozilla.org/cn/DOM/event">event</a>。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <h3>1. 使用特性判断创建无兼容性问题的事件监听器绑定和解绑函数</h3>
+      <p>如：</p>
+<pre>
+function addEvent(elem, type, handler, useCapture){
+  elem.addEventListener ? elem.addEventListener(type, handler, useCapture) :
+    elem.attachEvent("on" + type, handler);
+}
+
+function removeEvent(elem, type, handler, useCapture){
+  elem.removeEventListener ? elem.removeEventListener(type, handler, useCapture) :
+    elem.detachEvent("on" + type, handler);
+}
+</pre>
+
+      <h3>2. 使用特性判断获得有效的事件对象</h3>
+      <p>在事件监听器中判断传入的第一个参数或 window.event 是否有效，如：</p>
+<pre>
+function handler(e){
+  e = e || window.event;
+}
+</pre>
+      <h3>3. 使用特性判断使用与标准对应的非标准方法及属性</h3>
+      <p>尽管 IE 对事件对象的标准属性和方法支持有限，但它自己实现的事件模型也基本能够替代或实现标准属性或方法的功能。</p>
+      <p>下表总结了部分与标准事件对象对应的，或可以实现标准属性或方法功能的非标准属性：</p>
+      <table class="compare">
+        <tr>
+          <th>Standard</th>
+          <th>Non-standard</th>
+        </tr>
+        <tr>
+          <td>target</td>
+          <td>srcElement</td>
+        </tr>
+        <tr>
+          <td>preventDefault()</td>
+          <td>returnValue</td>
+        </tr>
+        <tr>
+          <td>stopPropagation()</td>
+          <td>cancelBubble</td>
+        </tr>
+        <tr>
+          <td>relatedTarget</td>
+          <td>fromElement toElement</td>
+        </tr>
+      </table>
+
+      <p>另，标准的 'clientX' 属性和非标准的 'x' 属性作用是相同的，同样 'clientY' 和 'y' 也是。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.8<br />
+              Chrome 6.0.490.1 dev<br />
+              Safari 5.0.1(7533.17.8)<br />
+              Opera 10.61
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+              <a href="../../tests/SD9011/AddRemoveEventListener.html">AddRemoveEventListener.html</a><br />
+              <a href="../../tests/SD9011/getEventObject.html">getEventObject.html</a><br />
+              <a href="../../tests/SD9011/EventObject.html">EventObject.html</a>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-17</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>Event UIEvent MouseEvent addEventListener removeEventListener attachEvent detachEvent window.event 事件模型</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

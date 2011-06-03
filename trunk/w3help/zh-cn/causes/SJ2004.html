@@ -1,0 +1,120 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SJ2004: 各浏览器中 Date 对象的 toLocaleString 方法的返回值不一致</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 <a href="http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-262.pdf">ECMAScript 规范</a> <strong>15.9.5.5 Date.prototype.toLocaleString()</strong> 中的描述，'toLocaleString' 返回的字符串的内容是由 ECMA Script 的具体实现决定的，但都应该返回一个易读的、当前区域广为流行的一种表示时间的字符串。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>Date 对象的 toLocaleString 方法在各浏览器下的返回值存在格式上的差异。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>该问题将造成返回字符串的格式及长度不一致。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>假设当前时间为 <strong>2009 年 12 月 29 日 12:00:16</strong>，地点为 <strong>中国 北京</strong>，测试以下代码：</p>
+<pre>alert(new Date().toLocaleString());</pre>
+      <p>各浏览器下的输出结果，如下表所示：</p>
+      <table class="compare">
+        <tr>
+          <th>IE Firefox</th>
+          <td>2009年12月29日 12:00:16<sup>1</sup></td>
+        </tr>
+        <tr>
+          <th>Chrome</th>
+          <td>Tue Dec 29 2009 12:00:16 GMT+0800 (China Standard Time)</td>
+        </tr>
+        <tr>
+          <th>Safari</th>
+          <td>Tuesday, December 29, 2009 12:00:16</td>
+        </tr>
+        <tr>
+          <th>Opera</th>
+          <td>2009-12-29 12:00:16</td>
+        </tr>
+      </table>
+      <p>可见：不能保证 Date.prototype.toLocaleString() 在各浏览器下返回相同的字符串。</p>
+      <p class="comment">注：<br/>1. IE 和 Firefox 返回的字符串与 Windows 的“控制面板 - 时钟、语言和区域”的设置有关。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>要获得相同格式的时间字符串，请不要使用 Date.prototype.toLocaleString() 方法，可以通过分别使用 getFullYear、getMonth、getDate 和 getDay 分别获得各关键字符串并拼装。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="SJ9010">SJ9010: 各浏览器中 Date 对象的 getYear 方法的返回值不一致</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="#">...</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-09</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>Date toLocaleString</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

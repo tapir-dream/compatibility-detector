@@ -1,0 +1,279 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SD9003: IE 在创建 DOM 树时会忽略某些空白字符</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>Node（节点）不仅包括元素节点，也包含文本节点、注释节点、属性节点等等，节点的类型可以使用 nodeType 来区分。</p>
+      <p>在 HTML 源代码中，位于标签之内以及标签之间的文本（包括空白字符）将被创建为文本节点。</p>
+      <p>关于 Node 的更多信息，请参考 <a href="http://www.w3.org/TR/REC-DOM-Level-1/level-one-core.html#ID-1950641247">DOM-1 Core Interface Node</a> 及 <a href="http://www.w3.org/TR/DOM-Level-2-Core/core.html#ID-1950641247">DOM-2 Core Interface Node</a> 中的内容。</p>
+      <p>关于 Text 的更多信息，请参考 <a href="http://www.w3.org/TR/DOM-Level-2-Core/core.html#ID-1312295772">DOM-2 Core Interface Text</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE 在创建 DOM 树时，会忽略某些空白字符，因此会比其他浏览器少创建一些文本节点。反过来说，同样的一篇文档，其他浏览器将比 IE 多创建一些文本节点。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>用户针对 IE 设计的脚本如果使用节点对象的 nodeList、firstChild、lastChild、previousSibling 或 nextSibling 方法，可能会因为此问题而无法在其他浏览器中达到相同的目的，如脚本执行出错，或对错误的目标对象进行了操作。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+<pre>
+...
+<strong>&lt;!--测试元素--&gt;</strong>
+<span class="hl_4">&lt;div id="a"&gt;<span class="hl_1"> </span><span class="hl_2">&lt;div&gt;div&lt;/div&gt;</span><span class="hl_1"> </span><span class="hl_2">&lt;span id="b"&gt;span&lt;/span&gt;</span><span class="hl_1"> </span><span class="hl_2">&lt;span&gt;span&lt;/span&gt;</span><span class="hl_1"> </span>&lt;/div&gt;</span>
+<strong>&lt;!--脚本输出--&gt;</strong>
+&lt;pre&gt;
+&lt;script&gt;
+<strong>//获取父元素。</strong>
+var $a=document.getElementById("a");
+<strong>//测试 childNodes。</strong>
+var nodeList=$a.childNodes;
+var string="";
+for(var i=0;i&lt;nodeList.length;i++)string+=nodeList[i].nodeType;
+document.writeln("nodeList: "+string);
+<strong>//测试 firstChild。</strong>
+document.writeln("firstChild: "+$a.firstChild.nodeType);
+<strong>//测试 lastChild。</strong>
+document.writeln("lastChild: "+$a.lastChild.nodeType);
+<strong>//获取子元素。</strong>
+var $b=document.getElementById("b");
+<strong>//测试 previousSibling。</strong>
+document.writeln("previousSibling: "+$b.previousSibling.nodeType);
+<strong>//测试 nextSibling。</strong>
+document.writeln("nextSibling: "+$b.nextSibling.nodeType);
+<strong>//显示 innerHTML。</strong>
+alert("|"+$a.innerHTML+"|");
+&lt;/script&gt;
+&lt;/pre&gt;
+...
+</pre>
+      <p>注意以上代码，外层 DIV 标签内的各标签间有空格符。空格符被标记为<span class="hl_1">红色</span>。</p>
+      <p>根据规范中的描述，脚本的预计输出情况如下：</p>
+      <p>
+      第一行输出应该是“nodeList: 3131313”，因为该元素内的节点共有 7 个：3 个元素节点穿插在 4 个文本节点之间。<br />
+      第二行输出应该是“firstChild: 3”，第一个节点是文本节点。<br />
+      第三行输出应该是“lastChild: 3”，最后一个节点也是文本节点。<br />
+      第四行输出应该是“previousSibling: 3”。本次的目标元素（SPAN[id=b]）的前一个节点是文本节点。<br />
+      第五行输出应该是“nextSibling: 3”，原因同上。<br />
+      </p>
+      <p>这段代码在不同的浏览器环境中的表现：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE</th>
+          <th>其他浏览器</th>
+        </tr>
+        <tr>
+          <th>nodeList:</th>
+          <td>11313</td>
+          <td>3131313</td>
+        </tr>
+        <tr>
+          <th>firstChild:</th>
+          <td>1</td>
+          <td>3</td>
+        </tr>
+        <tr>
+          <th>lastChild:</th>
+          <td>3</td>
+          <td>3</td>
+        </tr>
+        <tr>
+          <th>previousSibling:</th>
+          <td>1</td>
+          <td>3</td>
+        </tr>
+        <tr>
+          <th>nextSibling:</th>
+          <td>3</td>
+          <td>3</td>
+        </tr>
+      </table>
+      <p>最后弹出 DIV[id=a] 元素的 innerHTML 为：</p>
+      <table class="compare">
+        <tr>
+          <th>IE</th>
+          <td>
+<pre>|&lt;DIV&gt;div&lt;/DIV&gt;&lt;SPAN id=b&gt;span&lt;/SPAN&gt; &lt;SPAN&gt;span&lt;/SPAN&gt; |</pre>
+          </td>
+        </tr>
+        <tr>
+          <th>其他浏览器:</th>
+          <td>
+<pre>| &lt;div&gt;div&lt;/div&gt; &lt;span id="b"&gt;span&lt;/span&gt; &lt;span&gt;span&lt;/span&gt; |</pre>
+          </td>
+        </tr>
+      </table>
+      <p>对原代码中的“测试元素部分”进行改动后（将其中第二个 SPAN 更换为 DIV 元素）：</p>
+<pre>
+...
+<strong>&lt;!--测试元素--&gt;</strong>
+<span class="hl_4">&lt;div id="a"&gt;<span class="hl_1"> </span><span class="hl_2">&lt;div&gt;div&lt;/div&gt;</span><span class="hl_1"> </span><span class="hl_2">&lt;span id="b"&gt;span&lt;/span&gt;</span><span class="hl_1"> </span><span class="hl_3">&lt;div&gt;div&lt;/div&gt;</span><span class="hl_1"> </span>&lt;/div&gt;</span>
+...
+</pre>
+      <p>再次测试，各浏览器表现如下：<br />
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <th>nodeList:</th>
+          <td>1131</td>
+          <td>3131313</td>
+        </tr>
+        <tr>
+          <th>firstChild:</th>
+          <td>1</td>
+          <td>3</td>
+        </tr>
+        <tr>
+          <th>lastChild:</th>
+          <td>1</td>
+          <td>3</td>
+        </tr>
+        <tr>
+          <th>previousSibling:</th>
+          <td>1</td>
+          <td>3</td>
+        </tr>
+        <tr>
+          <th>nextSibling:</th>
+          <td>3</td>
+          <td>3</td>
+        </tr>
+      </table>
+      <p>最后弹出 DIV[id=a] 元素的 innerHTML 为：</p>
+      <table class="compare">
+        <tr>
+          <th>IE</th>
+          <td>
+<pre>
+|&lt;DIV&gt;div&lt;/DIV&gt;&lt;SPAN id=b&gt;span&lt;/SPAN&gt;
+
+&lt;DIV&gt;div&lt;/DIV&gt;|
+</pre>
+          </td>
+        </tr>
+        <tr>
+          <th>其他浏览器:</th>
+          <td>
+<pre>| &lt;div&gt;div&lt;/div&gt; &lt;span id="b"&gt;span&lt;/span&gt; &lt;div&gt;div&lt;/div&gt; |</pre>
+          </td>
+        </tr>
+      </table>
+      <p>可见：IE 在生成 DOM 树时，忽略了一些空白字符，从而比其他浏览器少创建了一些文本节点。这导致在使用 nodeList、firstChild、lastChild、previousSibling 或 nextSibling 方法时，在 IE 和其他浏览器中得到的结果不一致。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <h3>1. 没有必要时尽量去掉各标签之间的空白字符。</h3>
+      <p>因为页面脚本多是对“元素节点”进行操作，因此只要保证各元素之间没有文本节点（即源代码中的标签之间没有空白字符——包括空格符、换行符、制表符），就能使上述各属性在各浏览器中的行为一致。如：</p>
+<pre>
+&lt;div id="a"&gt;&lt;div&gt;div&lt;/div&gt;&lt;span id="b"&gt;span&lt;/span&gt;&lt;span&gt;span&lt;/span&gt;&lt;/div&gt;
+</pre>
+      <p>另外，使用脚本创建并顺次添加的元素，他们本身就是紧密相联的，各元素之间并没有文本节点，因此这种情况也不必担心上述兼容性问题，如：</p>
+<pre>
+...
+var $a=document.createElement("div");
+...
+var $b=document.createElement("div");
+...
+document.body.appendChild($a);
+document.body.appendChild($b);
+...
+$a.nextSibling.className="foo";
+...
+</pre>
+      <p>上述代码中，'$a.nextSibling' 在所有浏览器中都将是 $b。</p>
+      <h3>2. 在获取节点时做类型判断。</h3>
+      <p>无法保证各元素之间没有文本节点时，则需要在针对节点的操作上添加类型判断，如：</p>
+<pre>
+function getPreviousElementSibling ($target) {
+  var $previousNode = $target.previousSibling;
+  while ($previousNode &amp;&amp; $previousNode.nodeType!=1) {
+    $previousNode = $previousNode.previousSibling;
+  }
+  return $previousNode;
+}
+</pre>
+      <p>另外，在非IE中，还可以使用 <a href="http://dev.w3.org/2006/webapi/ElementTraversal/publish/ElementTraversal.html#interface-elementTraversal">Element Traversal Specification</a> 草案中提到的 <a href="http://dev.w3.org/2006/webapi/ElementTraversal/publish/ElementTraversal.html#attribute-previousElementSibling">previousElementSibling</a> 和 <a href="http://dev.w3.org/2006/webapi/ElementTraversal/publish/ElementTraversal.html#attribute-nextElementSibling">nextElementSibling</a> 获取元素节点，例如：以 <strong>Element</strong>.nextElementSibling 取得与元素 <strong>Element</strong> 的相邻的下一个元素节点。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/SD9003/get_node.html">get_node.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-09</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>childNodes firstChild lastChild previousSibling nextSibling 空白节点</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

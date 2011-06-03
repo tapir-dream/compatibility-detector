@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+</head>
+<body>
+<script type="text/javascript">
+    window.onload = function() {
+        var ps = document.getElementById("one");
+        try {
+            ps.insertAdjacentHTML("beforeend", "<span style='background:yellow;'>hi</span>");
+        } catch(err) {
+            document.getElementById("info").innerHTML = err;
+        }
+
+    }
+</script>
+
+<p id="one" style="background:silver; width:300px;">
+    this is
+    <i style="width:100px; background-color:gold;">another</i>
+    text
+</p>
+<div id="info"></div>
+</body>
+</html>

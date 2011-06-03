@@ -1,0 +1,168 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" /></head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RE1012: IE6 IE7 IE8(Q) Firefox(Q) Opera(Q) 中在分离边框模型中空单元格的边框某些情况下会消失</h1>
+<ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE6 IE7  IE8(Q) Firefox(Q) Opera(Q) 中空单元格的边框某些情况下会消失。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>IE6 IE7  IE8(Q) Firefox(Q) Opera(Q) 中的这种现象可能导致表格中空单元格的边框甚至是其所占空间，而与其他浏览器出现差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6
+            IE7
+            IE8(Q)
+            Firefox(Q)
+            Opera(Q)
+          </th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>TABLE 元素 'border-collapse' 特性的默认值为 'separate'，即表格为分离边框模型，本文的分析也是基于这个模型。</p>
+      <p>分析以下代码：</p>
+      <pre>&lt;style&gt;
+table { border:5px solid #555; }
+td { border:5px solid #999; background:#CCC;  }
+&lt;/style&gt;
+&lt;table class=&quot;tb&quot; cellpadding=&quot;0&quot; cellspacing=&quot;5&quot;&gt;
+&lt;tr&gt;
+<span class="hl_4">&lt;td&gt;&lt;/td&gt;</span>
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&amp;nbsp;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+</pre>
+      <p>上面代码中，创建了一个 TABLE 元素，包含两行一列，其中第一行中的 TD 元素是一个空单元格，第二行的包含 &quot;&amp;nbsp;&quot;。TD 元素设置了边框。</p>
+      <p>在各浏览器中的运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6(Q) IE7(Q) IE8(Q)</th>
+          <th>IE6(S) IE7(S)</th>
+          <th>Firefox(Q) Opera(Q)</th>
+          <th>IE8(S) Firefox(S) Opera(S) Chrome Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RE1012/a.gif" alt="IE6(Q) IE7(Q) IE8(Q)" /></td>
+          <td><img src="../../tests/RE1012/b.gif" alt="IE6(S) IE7(S)" /></td>
+          <td><img src="../../tests/RE1012/c.gif" alt="Firefox(Q) Opera(Q)" /></td>
+          <td><img src="../../tests/RE1012/d.gif" alt="IE8(S) Firefox(S) Opera(S) Chrome Safari" /></td>
+        </tr>
+      </table>
+      <p>第一行中的 TD 元素为空单元格，内容宽度和高度均为 0，由于每个方向设置了 5px 的边框，所以其实际高度为 10px。可以看到，</p>
+      <ul>
+        <li>在 <em>IE6(Q) IE7(Q) IE8(Q)</em> 中，空单元格（empty cell）的边框会消失，但是其所占据的空间仍然存在，高度仍然为 10px；</li>
+        <li>在 <em>IE6(S) IE7(S)</em> 中，空单元格的边框消失，但是其所占据的空间发生了变化，高度变为了 1px；</li>
+        <li>在 <em>Firefox(Q) Opera(Q)</em> 中，空单元格的边框消失，其所占空间也没有变化，但是与 IE(Q) 中不同的是，原 border 应该占据的空间渲染上了 TD 元素设置的背景；</li>
+        <li>在 <em>IE8(S) Firefox(S) Opera(S) Chrome Safari</em> 中，空单元格的边框正常显示，符合 W3C 规范。</li>
+            </ul>
+
+          <p>下面我们来分析 IE6 IE7 IE8 中，空单元格边框和占据空间变化的问题。</p>
+          <p>如果将空 TD 部分的代码稍作修改，在 TD 内加入其他空元素如 DIV 元素使 TD 本身不为空节点，但是这个在 TD 内的元素不触发 IE 的 hasLayout<sup>1</sup> 特性，代码片段如下：</p>
+          <pre>&lt;td&gt;<span class="hl_4">&lt;div&gt;&lt;/div&gt;</span>&lt;/td&gt;</pre>
+         <p class="comment"> 【注】：hasLayout 特性是 IE 渲染引擎特有的概念，某些 HTML 元素本身即存在这个特性（如 BODY 元素），另外不天生具备此特性的元素则可以由某些 CSS 样式设置触发该特性。在 IE6 IE7 中 hasLayout 特性会带来很多与规范描述不符的 IE 特有 BUG。关于 hasLayout 特性更详细的描述可以参考 MSDN 中 <a href="http://msdn.microsoft.com/en-us/library/bb250481(VS.85).aspx">&quot;HasLayout&quot; Overview</a> 一节。 </p>
+         <p>观看 IE6 IE7 IE8 实际运行效果：</p>
+         <table class="compare">
+           <tr>
+             <th>IE6(Q) IE7(Q) IE8(Q)</th>
+             <th>IE6(S) IE7(S)</th>
+             <th>IE8(S)</th>
+           </tr>
+           <tr>
+             <td><img src="../../tests/RE1012/a.gif" alt="IE6(Q) IE7(Q) IE8(Q)" /></td>
+             <td><img src="../../tests/RE1012/b.gif" alt="IE6(S) IE7(S)" /></td>
+             <td><img src="../../tests/RE1012/d.gif" alt="IE8(S)" /></td>
+           </tr>
+         </table>
+         <p>实际结果表面，TD 内加入其没有触发 hasLayout 的空元素后，IE6 IE7 IE8 浏览器渲染效果上一测试结果相同中空 TD 表现相同。</p>
+         <p>再将代码稍许修改，为 TD 内的 DIV 元素触发 hasLayout 特性：</p>
+         <pre>&lt;td&gt;<span class="hl_4">&lt;div style=&quot;width:100%&quot;&gt;&lt;/div&gt;</span>&lt;/td&gt;</pre>
+         <p>观看 IE6 IE7 IE8 实际运行效果：</p>
+         <table class="compare">
+           <tr>
+             <th>IE6 IE7 IE8</th>
+           </tr>
+           <tr>
+             <td><img src="../../tests/RE1012/d.gif" alt="IE8(S)" /></td>
+           </tr>
+         </table>
+         <p>此时，IE6 IE7 IE8 在两种文档模式下均显示正常。</p>
+         <p>通过这个现象我们可以推断出，IE6 IE7 IE8 浏览器中只有 TD 元素内存在文本内容，或者 TD 元素内存在触发了 hasLayout 特性的空元素才会正常渲染 TD 宽高、背景、边框内容。</p>
+         <h2 id="solutions">解决方案</h2>
+          <p>如果需要为单元格加入背景、边框或者需要使用他的高度占位时，应避免出现空单元格，请在 TD 标记内使用 &quot;&amp;nbsp;&quot; 创建一个空格字符内容，以便强迫 TD 元素正常渲染。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera
+            10.51</td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RE1012/emptycell_border.html">emptycell_border.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-16</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>TABLE cell border 消失 边框 表格 单元格 空 empty cell</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

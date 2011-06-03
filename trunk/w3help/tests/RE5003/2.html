@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	body { margin:0; }
+	* { font:20px 'Trebuchet MS'; }
+</style>
+<script>
+	function $(id) { return document.getElementById(id); }
+	window.onload = function () {
+		$('info').appendChild(document.createTextNode('TD width: ' + $('td').offsetWidth));
+	}
+</script>
+</head>
+<body>
+<table cellpadding="0" cellspacing="10" style="width:200px; border:10px solid black;">
+	<tr>
+		<td id="td" style="background:gold; width:50%;">Some text</td>
+		<td style="background:gray;"></td>
+	</tr>
+</table>
+<div id="info"></div>
+</body>
+</html>

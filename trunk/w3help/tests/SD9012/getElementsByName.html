@@ -1,0 +1,28 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+</head>
+<body>
+<h1>name=aa</h1>
+<input name="aa" type="text" value="input1"/>
+<h1>name=aA</h1>
+<input name="aA" type="text" value="input2"/>
+<h1>name=Aa</h1>
+<input name="Aa" type="text" value="input3"/>
+<script type="text/javascript">
+	var msg='';
+	var nAA=document.getElementsByName("AA");
+	msg+='通过 getElementsByName("AA") 获得的 NodeList 信息如下:\nlength:'+nAA.length;
+	for(var i=0;i<nAA.length;i++){
+		msg+='\n['+i+']\tname='+nAA[i].name+'\tvalue='+nAA[i].value;
+	}
+	var naa=document.getElementsByName("aa");
+	msg+='\n\n通过 getElementByName("aa") 获取的 NodeList 信息如下:\nlength:'+naa.length;
+	for(var i=0;i<naa.length;i++){
+		msg+='\n['+i+']\tname='+naa[i].name+'\tvalue='+naa[i].value;
+	}
+	alert(msg);
+</script>
+</body>
+</html>

@@ -1,0 +1,216 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RB8004: IE6 IE7 IE8(Q) 中浮动元素和绝对定位元素某些情况下会影响普通流中毗邻 'margin' 的折叠</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据规范中的描述，表述 'margin' 折叠意味着两个或多个框（可能相邻也可能嵌套）的相邻的 'margin'（其间没有 'padding' 或 'border' 间隔）重合在一起而形成一个单一的 'margin' 。 </p>
+      <p>在CSS 2.1中，水平 'margin' 永远不折叠</p>
+      <p>垂直 'margin' 重合有以下几种情况：</p>
+      <ul>
+        <li>普通流中两个或多个块框相邻的垂直 'margin' 会折叠。</li>
+        <li>浮动框和其它框之间的垂直 'margin' 不折叠(浮动框与浮动框内的浮动框 'margin' 不折叠)。</li>
+        <li>BFC<sup>1</sup>框之间垂直 'margin' 不折叠( BFC 框与 BFC 框内的 BFC 框垂直 'margin' 不折叠)。</li>
+        <li>绝对定位框之间 'margin' 不折叠(绝对定位框与绝对定位框内的绝对定位框 'margin' 不折叠)。</li>
+        <li>inline-block框之间 'margin' 不折叠( 'inline-block' 框与 'inline-block' 框内的 'inline-block' 框 'margin' 不折叠)。</li>
+        <li>如果框的 'margin-top' 和 'margin-bottom' 都与其他框毗邻，那很可能发生折叠，框的位置由折叠后决定。</li>
+          <ul>
+            <li>如果元素的 'margin-top' 与父元素的 'margin-top' 折叠，那么元素的 'border-top' 边距和父元素的 'border-top' 边距一样。</li>
+            <li>否则，要么元素的父元素没有参与 'maring' 折叠，要么只有父元素的 'margin-bottom' 折叠。如果元素有一个非0的 'border-bottom' 时，元素的 'border-top' 边距和父元素的 'border-top' 边距一样。</li>
+        </ul>
+        <li>根元素框的 'margin' 不折叠</li>
+      </ul>
+            <p class="comment">注1：BFC 表示创建了block formatting context的框</p>
+
+            <p>标准中，没有明确浮动元素和绝对定位元素不在普通流中的元素对普通流中元素外边距折叠的影响。</p>
+            <p>但是，根据标准中的说法，浮动元素和定位元素不会影响普通流中的元素的定位，就像它们不存在一样。所以，他们是不应该影响普通流中元素毗邻的外边距折叠。</p>
+      <p>关于 'margin' 折叠的详细信息，请参考 W3C CSS2.1 规范 ：<a href="http://www.w3.org/TR/CSS2/box.html#collapsing-margins">8.3.1 Collapsing margins </a> 中的内容。</p>
+      <p>关于浮动元素的详细信息，请参考 W3C CSS2.1 规范：<a href="http://www.w3.org/TR/CSS21/visuren.html#floats">W3C CSS 2.1 9.5 Floats</a> 中的内容。</p>
+      <p>关于绝对定位元素的详细信息，请参考 W3C CSS2.1 规范：<a href="http://www.w3.org/TR/CSS21/visuren.html#absolute-positioning">9.6 Absolute positioning</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE6 IE7 IE8(Q) 中浮动元素和定位元素某些情况下会影响普通流中毗邻 'margin' 的折叠</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>严重的情况下会破坏整体布局</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+
+      <h3>1. 普通流中子元素和父元素毗邻 'margin' 的折叠</h3>
+            <p><strong>1.1 在 IE 中浮动元素可能阻止毗邻父子 'margin' 的折叠 </strong></p>
+      <p>分析以下代码：</p>
+<pre>&lt;div style=&quot;border:3px solid silver; width:300px;&quot;&gt;
+    &lt;div id=&quot;<strong>container</strong>&quot; style=&quot;background-color: blue;&quot;&gt;
+        &lt;div style=&quot;<span class="hl_1">float:left;</span> background-color: green;&quot;&gt;above&lt;/div&gt;
+        &lt;div id=&quot;<strong>DIV</strong>&quot; style=&quot;margin:30px 0; background-color:gold;&quot;&gt;content&lt;/div&gt;
+        &lt;div style=&quot;<span class="hl_1">float:right;</span> background-color: green;&quot;&gt;below&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</pre>
+      <ul>
+        <li><strong>DIV</strong> 的前后都有一个浮动元素，因为浮动元素不在普通流中，所以，<strong>DIV</strong> 和 <strong>container</strong> 的 'margin' 是相邻的。</li>
+        <li>为避免 IE 中 hasLayout 的 bug，<strong>DIV</strong> 和 <strong>container</strong> 都没有触发 hasLayout。</li>
+                <li>最外层的 <strong>DIV</strong> 设置了 border，是为了避免 BODY 元素的 'margin' 对 <strong>DIV</strong> 和 <strong>container</strong> 外边距折叠的影响。</li>
+                <li>如果能看到 <span style="background:blue; color:white;">蓝色</span>部分，表明 <strong>DIV</strong> 和 <strong>container</strong> 没有发生 'margin' 折叠。</li>
+            </ul>
+      <p>根据 CSS2.1 规范中的描述可知，<strong>DIV</strong> 和 <strong>container</strong> 会发生 'margin' 折叠。</p>
+      <p>这段代码在不同的浏览器环境中的表现：</p>
+      <table class="compare">
+                <tr>
+                    <th>IE6 IE7 IE8(Q)</th>
+                    <th>IE8(S) Firefox Opera Safari Chrome</th>
+                </tr>
+                <tr>
+                    <td><img src="../../tests/RB8004/IE_parent_sub_affected_by_floats.png" alt=""></td>
+                    <td><img src="../../tests/RB8004/noIE_parent_sub_affected_by_floats.png" alt=""></td>
+                </tr>
+            </table>
+            <p>可见，在 <em>IE6 IE7 IE8(Q)</em> 中，浮动元素会阻止普通流中毗邻的父子 'margin' 的折叠。</p>
+            <p>另外，在 <em>IE6 IE7 IE8(Q)</em> 中，below 浮动元素下出现了奇怪的空白，将最外层的 <strong>DIV</strong> 元素的高度撑大，而且，这个空白的高度等于 <strong>DIV</strong> 的 'margin' 的大小，因为本测试关注点是 <strong>DIV</strong> 和<strong> container</strong> 的 'margin' 折叠，所以，不对此现象做分析。</p>
+
+          <p><strong>1.2 在 IE 中绝对定位元素可能阻止父子元素相邻 'margin' 的折叠</strong></p>
+
+            <p>分析如下代码：</p>
+<pre>&lt;div style=&quot;border:3px solid silver; width:300px;&quot;&gt;
+    &lt;div id=&quot;<strong>container</strong>&quot; style=&quot;background-color: blue;&quot;&gt;
+        &lt;div style=&quot;<span class="hl_1">position:absolute;</span> background-color: green;&quot;&gt;above&lt;/div&gt;
+        &lt;div id=&quot;<strong>DIV</strong>&quot; style=&quot;margin:30px 0; background-color:gold;&quot;&gt;content&lt;/div&gt;
+        &lt;div style=&quot;<span class="hl_1">position:absolute;</span> background-color: green;&quot;&gt;below&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</pre>
+            <ul>
+                <li><strong>DIV</strong> 的前后都有一个绝对定位元素，因为绝对定位元素不在普通流中，所以，<strong>DIV</strong> 和 <strong>container</strong> 的 'margin' 是相邻的。</li>
+                <li>为避免 IE 中 hasLayout 的 bug，<strong>DIV</strong> 和 <strong>container</strong> 都没有触发 hasLayout。</li>
+                <li>最外层的 <strong>DIV</strong> 设置了 'border'，是为了避免 BODY 元素的 'margin' 对 <strong>DIV</strong> 和 <strong>container</strong> 外边距折叠的影响。</li>
+                <li>如果能看到 <span style="background:blue; color:white;">蓝色</span>部分，表明 <strong>DIV</strong> 和 <strong>container</strong> 没有发生 'margin' 折叠。</li>
+            </ul>
+
+            <p>根据 CSS2.1 规范中的描述可知，<strong>DIV</strong> 和 <strong>container</strong> 会发生 'margin' 折叠。</p>
+            <p>这段代码在不同的浏览器环境中的表现：</p>
+            <table class="compare">
+                <tr>
+                    <th>IE6 IE7 IE8(Q)</th>
+                    <th>IE8(S) Firefox Opera Safari Chrome</th>
+                </tr>
+                <tr>
+                    <td><img src="../../tests/RB8004/IE_parent_sub_affected_by_absolutly_positioned_element.png" alt=""></td>
+                    <td><img src="../../tests/RB8004/noIE_parent_sub_affected_by_absolutly_positioned_element.png" alt=""></td>
+                </tr>
+            </table>
+
+            <h3>2. 普通流中兄弟节点毗邻 'margin' 的折叠</h3>
+            <p><strong>在 <em>IE6 IE7(Q) IE8(Q)</em> 中，浮动元素可能会阻止普通流中毗邻 'margin' 的折叠。</strong></p>
+
+            <p>分析如下代码：</p>
+<pre>&lt;div style=&quot;border:3px solid silver; width:300px;&quot;&gt;
+    &lt;div id=&quot;<strong>DIV1</strong>&quot; style=&quot;margin-bottom:50px; background-color:gold;&quot;&gt;above&lt;/div&gt;
+    &lt;div id=&quot;<strong>Float</strong>&quot; style=&quot;<span class="hl_1">float:left;</span> background-color: green; width:100%;&quot;&gt;Float&lt;/div&gt;
+    &lt;div id=&quot;<strong>DIV2</strong>&quot; style=&quot;margin-top:50px; background-color:gold;&quot;&gt;below&lt;/div&gt;
+&lt;/div&gt;</pre>
+            <ul>
+                <li><strong>DIV1</strong> 和 <strong>DIV2</strong> 有相邻的 'margin' ，都是 50px，它们中间被浮动元素 <strong>Float</strong> 隔开。</li>
+                <li><strong>Float</strong> 是 300px，跟包含块的长度相同，只有它足够长，才能彻底的将 <strong>DIV1</strong> 和 <strong>DIV2</strong> 分隔开。</li>
+            </ul>
+
+            <p>根据 W3C 标准，<strong>DIV1</strong> 和 <strong>DIV2</strong> 应该发生 'margin' 折叠，因为它们会认为不在普通流中的 <strong>Float</strong> 不存在。</p>
+            <p>这段代码在不同的浏览器环境中的表现(忽略 IE 中的盒模型 bug)：</p>
+      <table class="compare">
+                <tr>
+                    <th>IE6 IE7(Q) IE8(Q)</th>
+                    <th>IE7(S) IE8(S) Firefox Opera Safari Chrome</th>
+                </tr>
+                <tr>
+                    <td><img src="../../tests/RB8004/IE_siblings_affected_by_floats.png" alt=""></td>
+                    <td><img src="../../tests/RB8004/noIE_siblings_affected_by_floats.png" alt=""></td>
+                </tr>
+            </table>
+            <p>可见，在 <em>IE6 IE7(Q) IE8(Q)</em> 中， 'margin' 毗邻的兄弟节点之间的浮动元素可能会阻止它们的 'margin' 折叠。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>
+            1. 根据具体需求，调整 'margin' 的位置和大小；<br />
+            2. 使用 CSS hack 设置 IE 中的 'margin' 大小，以避免 IE 跟其他浏览器的布局差异。
+            </p>
+
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.6<br />
+              Chrome 6.0.447.0 dev<br />
+              Safari 5.0<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+                            <a href="../../tests/RB8004/parent_sub_affected_by_floats.html">parent_sub_affected_by_floats.html</a><br/>
+                            <a href="../../tests/RB8004/parent_sub_affected_by_absolutly_positioned_element.html">parent_sub_affected_by_absolutly_positioned_element.html</a><br/>
+                            <a href="../../tests/RB8004/siblings_affected_by_floats.html">siblings_affected_by_floats.html</a><br/>
+                        </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-22</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>margin collapse float absolute position</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

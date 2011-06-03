@@ -1,0 +1,195 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">CH9003: IE6 和 Chrome 未按预期方式处理 content-type 为 application/rss+xml 的内容</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p><strong>content-type</strong> 用于定义用户的浏览器或相关设备如何显示将要加载的数据，或者如何处理将要加载的数据，此属性的值可以查看 MIME 类型。</p>
+      <p>MIME (Multipurpose Internet Mail Extensions，多用途互联网邮件扩展) 是描述消息内容类型的因特网标准。MIME 消息能包含文本、图像、音频、视频以及其他应用程序专用的数据。</p>
+      <p><strong>content-type</strong> 一般以下面的形式出现：</p>
+      <p><code>Content-Type: [<em>type</em>]/[<em>subtype</em>]; parameter</code></p>
+      <p><em>type</em> 有下面的形式：</p>
+      <ul>
+        <li>Text：用于标准化地表示的文本信息，文本消息可以是多种字符集和或者多种格式的；</li>
+        <li>Multipart：用于连接消息体的多个部分构成一个消息，这些部分可以是不同类型的数据；</li>
+        <li>Application：用于传输应用程序数据或者二进制数据；</li>
+        <li>Message：用于包装一个E-mail消息；</li>
+        <li>Image：用于传输静态图片数据；</li>
+        <li>Audio：用于传输音频或者音声数据；</li>
+        <li>Video：用于传输动态影像数据，可以是与音频编辑在一起的视频数据格式。</li>
+      </ul>
+      <p><strong>subtype</strong> 用于指定 type 的详细形式。“type/subtype”配对的集合和与此相关的参数。下面是最经常用到的一些 MIME 类型：</p>
+      <ul>
+        <li>text/html（HTML 文档）；</li>
+        <li>text/plain（纯文本）；</li>
+        <li>text/css（CSS 样式表）；</li>
+        <li>image/gif（GIF 图像）；</li>
+        <li>image/jpeg（JPG 图像）；</li>
+        <li>application/x-javascript（JavaScript 脚本）；</li>
+        <li>application/x-shockwave-flash（Flash）；</li>
+        <li>application/x- www-form-urlencoded（使用 HTTP 的 POST 方法提交的表单）；</li>
+        <li><span class="hl_1">application/rss+xml（RSS）；</span></li>
+        <li>multipart/form-data（同上，但主要用于表单提交时伴随文件上传的场合）。</li>
+      </ul>
+      <p>关于 <strong>content-type</strong> 的详细信息，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html4/types.html#h-6.7">6.7 Content types (MIME types)</a> 中的内容。</p>
+      <p>关于 MIME 的相信信息，请参考 <a href="http://www.ietf.org/">IETF</a> 的 <a href="http://tools.ietf.org/html/rfc2045">[RFC2045]</a> 及 <a href="http://tools.ietf.org/html/rfc2046">[RFC2046]</a> 规范。</p>
+      <p>更多的 MIME 类型参见：<a href="http://www.utoronto.ca/webdocs/HTMLdocs/Book/Book-3ed/appb/mimetype.html">http://www.utoronto.ca/webdocs/HTMLdocs/Book/Book-3ed/appb/mimetype.html</a>。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE6 不支持 RSS，使用浏览器打开响应头为 application/rss+xml 的内容会当做二进制文件而提示下载；Chrome 会将 application/rss+xml 以纯文本处理而显示出源代码。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>由于浏览器对 RSS 缺乏支持，可能导致浏览者无法正常读取到 RSS 内容。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6</th>
+          <td>不支持 RSS，使用浏览器打开响应头为 application/rss+xml 的内容会当做二进制文件而提示下载。</td>
+        </tr>
+        <tr>
+          <th>Chrome</th>
+          <td>将 application/rss+xml 以纯文本处理而显示出源代码。</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>创建一个 Web 服务器，如 Apache。在服务器上编写一段动态代码 "<em>news.php</em>"，如：</p>
+
+<pre>&lt;?php
+    header('Content-Type: <strong>application/rss+xml</strong>');
+?&gt;
+&lt;rss version="2.0"&gt;
+    &lt;channel&gt;
+        &lt;title&gt;Google&lt;/title&gt;
+        &lt;link&gt;http://www.google.cn&lt;/link&gt;
+        &lt;description&gt;Google&lt;/description&gt;
+        &lt;pubDate&gt;Fri, 12 Mar 2010 09:00:00 GMT&lt;/pubDate&gt;
+        &lt;language&gt;zh-CN&lt;/language&gt;
+        &lt;image&gt;
+            &lt;link&gt;http://www.google.cn&lt;/link&gt;
+            &lt;url&gt;http://www.google.cn/logos/arborday10-hp.gif&lt;/url&gt;
+            &lt;title&gt;Google&lt;/title&gt;
+        &lt;/image&gt;
+        &lt;item&gt;
+            &lt;title&gt;今天是植树节&lt;/title&gt;
+            &lt;link&gt;http://www.google.cn&lt;/link&gt;
+            &lt;category&gt;&lt;![CDATA[Test]]&gt;&lt;/category&gt;
+            &lt;description&gt;&lt;![CDATA[&lt;h3&gt;植树节简介&lt;/h3&gt;“植树节”是一些国家以法律形式规定的以宣传森林效益，并动员群众参加义务造林为活动内容的节日。按时间长短可分为植树日、植树周或植树月，总称植树节。通过这种活动，激发人们爱林、造林的感情，提高人们对森林功用的认识，促进国土绿化，达到爱林护林和扩大森林资源、改善生态环境的目的。 为了动员全民植树而规定的节日。中国曾于1915年由政府颁令规定清明节为植树节即3月12日。后来到了1928年的4月7日，民国政府颁布了植树令：以后旧历清明植树节应改为总理逝世几年植树式。”民国政府之所以颁布这道令，是因为孙先生幼年就对“树艺牧畜”十分热爱的缘故。他在海外留学时，经常利用假期回故乡种植桑树。1979年2月23日，第五届全国人大常务委员会第六次会议决定，仍以3月12日为中国的植树节，以鼓励全国各族人民植树造林，绿化祖国，改善环境，造福子孙后代。]]&gt;&lt;/description&gt;
+            &lt;pubDate&gt;Fri, 12 Mar 2010 09:57:43 GMT&lt;/pubDate&gt;
+            &lt;guid&gt;http://www.google.cn&lt;/guid&gt;
+        &lt;/item&gt;
+    &lt;/channel&gt;
+&lt;/rss&gt;</pre>
+      <p>客户端创建 RSS 链接文档 "<em>rss.html</em>"：</p>
+      <pre>&lt;link rel="alternate" type="<strong>application/rss+xml</strong>" title="RSS" href="news.php" /&gt;
+&lt;a href="news.php"&gt;订阅新闻&lt;/a&gt;</pre>
+      <p>浏览器中打开服务器地址中的“rss.html”，比如： http://localhost/rss.html</p>
+      <p>在 <em>IE7/8</em> 中点击 RSS 图标 <img src="../../tests/CH9003/rsslogo.gif" style="vertical-align:middle" alt="IE RSS Logo" />，在 <em>其他浏览器</em> 中点击“订阅新闻”超链接：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6</th>
+          <td><img src="../../tests/CH9003/IE6_rss.gif" alt="IE6 RSS support" /></td>
+        </tr>
+        <tr>
+          <th>IE7/8</th>
+          <td><img src="../../tests/CH9003/IE_rss.gif" alt="IE7/8 RSS support" /></td>
+        </tr>
+        <tr>
+          <th>Firefox</th>
+          <td><img src="../../tests/CH9003/FF_rss.gif" alt="Firefox RSS support" /></td>
+        </tr>
+        <tr>
+          <th>Chrome</th>
+          <td><img src="../../tests/CH9003/CR_rss.gif" alt="Chrome RSS support" /></td>
+        </tr>
+        <tr>
+          <th>Safari</th>
+          <td><img src="../../tests/CH9003/SF_rss.gif" alt="Safari RSS support" /></td>
+        </tr>
+        <tr>
+          <th>Opera</th>
+          <td><img src="../../tests/CH9003/OP_rss.gif" alt="Opera RSS support" /></td>
+        </tr>
+      </table>
+      <p>可见：</p>
+      <ul>
+        <li>在 <em>IE6</em> 中，浏览器不支持 RSS，对于 content-type 为 "application/rss+xml" 的 HTTP 响应头，浏览器将其当做二进制文件提供下载；</li>
+        <li>在 <em>Chrome</em> 中，浏览器将 content-type 为 "application/rss+xml" 的 HTTP 响应头作为纯文本处理，则 RSS 代码被显示出来，出现此原因也是由于浏览器原生不支持 RSS；</li>
+        <li>在 <em>IE7/8</em> 中，浏览器根据页面中的 <code>&lt;link rel=&quot;alternate&quot; type=&quot;application/rss+xml&quot; title=&quot;RSS&quot; href=&quot;news.php&quot; /&gt;</code> 自动探测出 RSS 信息后，RSS 图标会变为可用，点击后可显示 RSS 信息。但直接打开 RSS 的 URL 也会像 IE6 中一样提示下载；</li>
+        <li>在 <em>其他浏览器</em> 中，则根据各自浏览器对于 RSS 的默认样式渲染 RSS 数据。</li>
+      </ul>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>各浏览器对于 RSS 的支持及渲染方式为浏览器各自实现导致，故无法通过常规办法使各浏览器达到一致的效果，对于暂不支持 RSS 的浏览器应给予提示。Chrome 可通过安装扩展插件实现此功能。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 5.0.342.2 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.50
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/CH9003/rss.html">rss.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-02</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>content-type rss 文档类型 xml atom 订阅</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

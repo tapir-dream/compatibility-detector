@@ -1,0 +1,234 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX9036: Opera 和 Chrome 对模态对话框（showModalDialog）的支持有缺陷，且非 IE 浏览器均不支持非模态对话框（showModelessDialog）</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p><strong>模态对话框</strong> 和 <strong>非模态对话框</strong> 的概念来自于 GUI 程序，实际上这两种对话框仍然是窗口的一种。</p>
+      <ul>
+        <li><strong>模态对话框</strong>在打开后会阻断其父窗口接受键盘及鼠标消息，并且使父窗口是去焦点。只有当用户关闭当前的模态对话框后，父窗口才可再次得到焦点以及恢复各种消息。典型的模态对话框有：打开/另存为对话框；</li>
+        <li><strong>非模态对话框</strong>则不会阻断其父窗口接受键盘及鼠标消息，其父窗口仍然可以获得焦点。典型的非模态对话框有：查找/搜索对话框。</li>
+      </ul>
+      <p>window.<strong>showModalDialog</strong> 方法不是 W3C 规范中的方法，其最初由 IE4 引入，用来创建一个模态对话框，并在其中显示 HTML 页面。其格式为：</p>
+      <pre>vReturnValue  = object.<strong>showModalDialog</strong>(sURL [, vArguments] [, sFeatures])</pre>
+      <p>三个参数分别为：对话框加载的 HTML 页面的 URL、传入对话框页面的参数，控制对话框展现效果的参数。</p>
+      <p>其中可在对话框页面中通过 document.arguments 获得 vArguments 传入的参数的内容。</p>
+      <p>在 Firefox 3 中，也实现了对 window.showModalDialog 方法，其调用方式与IE类似，只是有个别参数没有实现。</p>
+      <p>关于 showModalDialog 方法的详细信息，请参考 <a href="http://msdn.microsoft.com/en-us/library/ms536759(VS.85).aspx">MSDN</a> 及 <a href="https://developer.mozilla.org/En/DOM/Window.showModalDialog">Mozilla Developer Center</a> 中的内容。</p>
+      <p>window.<strong>showModelessDialog</strong> 方法也不是 W3C 规范中的方法，其最初由 IE5 引入，用来创建一个非模态对话框，并在其中显示 HTML页面。其格式为：</p>
+      <pre>vReturnValue  = object.<strong>showModelessDialog</strong>(sURL [, vArguments] [, sFeatures])</pre>
+      <p>使用方法与 showModalDialog 类似。</p>
+      <p>关于 showModelessDialog 方法的详细信息，请参考 <a href="http://msdn.microsoft.com/en-us/library/ms536761(VS.85).aspx">MSDN</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>目前 Firefox 与 Safari 实现了与 IE 非常接近的 showModalDialog 方法，Chrome 中则是将其当做 window.open 方法处理，Opera 中暂时不支持此方法。<br />对于 showModelessDialog 方法，目前仅 IE 支持。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>若在脚本代码中使用了 showModalDialog 与 showModelessDialog 方法，则可能会导致运行效果不是预期效果，甚至可能导致代码报错。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Firefox Safari</th>
+          <td>不支持 showModelessDialog 方法。</td>
+        </tr>
+        <tr>
+          <th>Chrome</th>
+          <td>将 showModalDialog 方法当做 window.open 方法处理，不支持 showModelessDialog 方法。</td>
+        </tr>
+        <tr>
+          <th>Opera</th>
+          <td>不支持 showModalDialog 与 showModelessDialog 方法。</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>首先分析各浏览器对 showModalDialog 方法的支持情况。</p>
+
+      <p>分析以下代码：</p>
+      <p><em>modaldialog.html</em></p>
+<pre>&lt;input type= &quot;text &quot; id= &quot;textbox &quot; value= &quot;defaultValue &quot; /&gt;&lt;br /&gt;
+&lt;button id= &quot;open1 &quot;&gt;Open ModalDialog&lt;/button&gt;
+&lt;script&gt;
+    var updatetext =  &quot; &quot;;
+    function update() {
+        document.getElementById( &quot;textbox &quot;).value = updatetext;
+    }
+
+    document.getElementById( &quot;open1 &quot;).onclick = function () {
+        window.showModalDialog( &quot;inner.html &quot;, window);
+    }
+&lt;/script&gt;</pre>
+      <p><em>inner.html</em></p>
+      <pre>&lt;input type= &quot;text &quot; id= &quot;dialogtext &quot; /&gt;&lt;button id= &quot;ok &quot;&gt;OK!&lt;/button&gt;
+&lt;script&gt;
+    document.getElementById( &quot;dialogtext &quot;).value =
+      window.dialogArguments.document.getElementById( &quot;textbox &quot;).value;
+    document.getElementById( &quot;ok &quot;).onclick = function () {
+        window.dialogArguments.updatetext =
+          document.getElementById( &quot;dialogtext &quot;).value;
+        window.dialogArguments.update();
+        window.close();
+    }
+&lt;/script&gt;</pre>
+      <p>上面代码中，<em>modaldialog.html</em> 使用 window.showModalDialog 方法创建模态对话框，载入 <em>inner.html</em>，并传入 <em>modaldialog.html</em> 页面的 window 对象。<br />
+      页面 <em>inner.html</em>，打开后，文本框 INPUT[id= &quot;dialogtext &quot;] 的 value 初始值为页面 <em>modaldialog.html</em> 中文本框 INPUT[id= &quot;textbox &quot;] 的 value 值，当改变 INPUT[id= &quot;dialogtext &quot;] 的 value 值并点击  &quot;OK &quot; 按钮后，模态对话框关闭，页面 <em>modaldialog.html</em> 中文本框 INPUT[id= &quot;textbox &quot;] 的 value 值将变为模态对话框内文本框中的字符串。</p>
+      <p>这段代码在不同的浏览器环境中的表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8 Firefox Safari</th>
+          <th>Chrome</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <th>window.showModalDialog 返回值 = function</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+        </tr>
+        <tr>
+          <th>弹出对话框</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+        </tr>
+        <tr>
+          <th>对话框为模态对话框</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+        </tr>
+        <tr>
+          <th>对话框与父窗口通过 arguments 的交互</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+        </tr>
+      </table>
+      <p>可见，各浏览器的 window 对象中均包含 showModalDialog 方法，且均返回 <code>function () { [native code] }</code>。</p>
+      <ul>
+        <li>在 <em>IE Firefox Safari</em> 中，对 showModalDialog 支持较好，弹出的窗口为模态对话框，父窗口失去焦点，且通过 arguments 参数，父窗口与模态对话框直接成功完成数据交互；</li>
+        <li>在 <em>Chrome</em> 中，虽然通过 showModalDialog 成功弹出了对话框，但此对话框并不是模态的，父窗口仍然可以获得焦点，且数据交互失败，很类似于 window.open 方法；</li>
+        <li>在 <em>Opera</em> 中，虽然 window.showModalDialog 返回为真，但弹不出对话框，也不能实现其功能。</li>
+      </ul>
+      <br />
+      <p>下面分析各浏览器对 showModelessDialog 方法的支持情况。</p>
+      <p><em>modelessdialog.html</em></p>
+      <pre>&lt;input type=&quot;text&quot; id=&quot;textbox&quot; value=&quot;defaultValue&quot; /&gt;&lt;br /&gt;
+&lt;button id=&quot;open1&quot;&gt;Open ModelessDialog&lt;/button&gt;
+&lt;script&gt;
+    var updatetext =  &quot;&quot;;
+    function update() {
+        document.getElementById(&quot;textbox&quot;).value = updatetext;
+    }
+    document.getElementById(&quot;open1&quot;).onclick = function () {
+        window.showModelessDialog(&quot;inner.html&quot;, window);
+    }
+&lt;/script&gt;</pre>
+        <p><em>inner.html</em></p>
+      <pre>&lt;input type=&quot;text&quot; id=&quot;dialogtext&quot; /&gt;&lt;button id=&quot;ok&quot; &gt;OK!&lt;/button&gt;
+&lt;script&gt;
+    document.getElementById(&quot;dialogtext&quot;).value =
+      window.dialogArguments.document.getElementById( &quot;textbox&quot;).value;
+    document.getElementById(&quot;ok&quot;).onclick = function () {
+        window.dialogArguments.updatetext =
+          document.getElementById(&quot;dialogtext&quot;).value;
+        window.dialogArguments.update();
+        window.close();
+    }
+&lt;/script&gt;</pre>
+      <p>上面代码和上一段的类似，只不过将 showModalDialog 方法换成了 showModelessDialog 方法。</p>
+      <p>这段代码在不同的浏览器环境中的表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <th>window.showModelessDialog 返回值 = function</th>
+          <td><span class="hl_2">OK</span></td>
+          <td><span class="hl_1">FAIL</span></td>
+        </tr>
+      </table>
+      <p>showModelessDialog 方法目前仅被 IE 支持，在其他浏览器中 window.showModelessDialog 均返回  &quot;undefined &quot; 。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>showModalDialog 方法与 showModelessDialog 方法均不被 W3C 支持，虽然 showModalDialog 方法目前已比较广泛的被支持，但还是应避免使用它。因为模态对话框会阻塞父窗口的输入，使其是去焦点，这将对用户体验不利。</p>
+      <ul>
+        <li>对于 showModalDialog 方法可以使用模拟模态对话框的方式，比如通过半透明 DIV 元素遮住页面主体，在其之上显示  &quot;对话框 &quot; 内容。</li>
+        <li>对于 showModelessDialog 方法可以使用 window.open 代替。</li>
+      </ul>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 5.0.356.2 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.50
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BX9036/modaldialog.html">modaldialog.html</a><br />
+            <a href="../../tests/BX9036/modelessdialog.html">modelessdialog.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-10</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>dialog 对话框 modal modeless 模态 window 窗口</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

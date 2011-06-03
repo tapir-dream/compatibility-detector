@@ -1,0 +1,122 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RX1002: IE6 IE7 IE8(Q) 中从单元格溢出的内容会被自动剪裁</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 CSS2.1 规范中的描述，在表格算法中，在固定布局（table-layout:fixed）情况下可能出现单元格的内容因宽度不够溢出单元格的情况。如果单元格内容出现溢出，则<strong>根据单元格的 'overflow' 特性决定是否剪裁溢出的内容</strong>。</p>
+      <p>关于固定表格布局的详细信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/tables.html#fixed-table-layout">17.5.2.1 Fixed table layout</a> 中的内容。</p>
+      <p></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>对于溢出单元格的内容，IE6 IE7 IE8 混杂模式始终会对溢出部分进行隐藏，而不考虑单元格的 'overflow' 特性，就好像单元格始终设置了 &quot;overflow:hidden&quot; 一样。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>若表格中的单元格存在内容溢出情况，则在 IE6 IE7 IE8 混杂模式中由于浏览器始终裁切溢出内容会使得布局不被破坏，但是在其他浏览器中，溢出的内容可能与其他单元格的内容发生重叠。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>创造一个使表格中单元格内容溢出的情况。本例使用 &quot;table-layout:fixed&quot; 。</p>
+
+      <p>分析以下代码：</p>
+<pre>&lt;table border="1" style="table-layout:fixed; width:80px;"&gt;
+  &lt;tr&gt;
+    &lt;td&gt;&lt;div style="width: 120px; height:30px; background:#CCC;"&gt;&lt;/div&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;</pre>
+      <p>上面代码中，宽度为 80px 的表格为固定布局，其内单元格中包含了一个宽度为 120px 的 DIV 元素。</p>
+      <p>在各浏览器中的运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RX1002/IE6_7_cell_overflow.gif" alt="IE6/7, 8(Q) table cell overflow" /></td>
+          <td><img src="../../tests/RX1002/other_cell_overflow.gif" alt="other browser table cell overflow" /></td>
+        </tr>
+      </table>
+      <p>单元格元素 'overflow' 特性的默认值为 'visible'，则默认情况下当出现单元格中的内容宽度超出单元格时，浏览器应该正常地使该元素超宽部分溢出单元格。</p>
+      <p>而 <em>IE6 IE7 IE8(Q)</em> 中，浏览器没有考虑单元格的 'overflow' 特性，而始终裁切溢出单元格的内容，这违背了 W3C 规范。</p>
+      <p class="comment">注：在 IE6 IE7 IE8(Q) 中，如果一个 TABLE 的 'table-layout' 特性的值为 'fixed'，并且 TABLE 没有明确设定宽度，则此时并不会对 TABLE 使用自动表格布局。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>遵照 W3C 规范所描述的，为单元格元素设置 &quot;overflow:hidden&quot; ，在所有浏览器中均会裁切溢出单元格的内容。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="RE1008">RE1008: IE6 IE7 IE8(Q) 中固定表格布局下的 TABLE 元素 'width' 特性为 'auto' 时不会将其当作自动表格布局处理</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.3<br />
+              Chrome 5.0.375.9 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RX1002/table_cell_overflow.html">table_cell_overflow.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-10</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>TABLE cell overflow hidden 溢出 单元格 表格</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

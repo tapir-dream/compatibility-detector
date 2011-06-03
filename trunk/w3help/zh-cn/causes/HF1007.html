@@ -1,0 +1,128 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HF1007: Firefox 中 TEXTAREA 元素根据 'rows' 设置值生成的实际行数为设置值 + 1</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 W3C HTML 4.01 规范中的描述，TEXTAREA 元素的 <strong>rows</strong> 属性指定了可视文本的行数。用户应该被允许输入更多行的文本，但当内容超出可视区域时，用户端应该为文本内容提供类似滚动机制。</p>
+      <p>关于 <strong>&quot;rows&quot;</strong> 属性的详细信息，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html401/interact/forms.html#adef-rows-TEXTAREA">17.7</a> 中的内容。</p>
+      <p></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>Firefox 对 TEXTAREA 元素的 &quot;<strong>rows&quot;</strong> 属性解释有误，实际显示的 TEXTAREA 元素的行数会比设置的属性值多 &quot;1&quot; 。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>当仅仅为 TEXTAREA 元素设置 &quot;<strong>rows&quot;</strong> 属性以控制其高度时，在 Firefox 中无法得到预期的效果。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Firefox</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>本例创建了三个 TEXTAREA 元素：</p>
+<pre>&lt;textarea rows="0"&gt;1
+2&lt;/textarea&gt;
+&lt;textarea rows="1"&gt;1&lt;/textarea&gt;
+&lt;textarea rows="5"&gt;1
+2
+3
+4
+5&lt;/textarea&gt;</pre>
+      <p>根据 HTML4.01 规范中的描述可知，上述代码中的第二个及第三个 TEXTAREA 元素的可视行数应该分别为 &quot;2行&quot; 和 &quot;5行&quot; 。</p>
+      <p>代码在不同的浏览器环境中的表现：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <th>Chrome Safari</th>
+          <th>Opera</th>
+          <th>Firefox</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/HF1007/IE_textarea_rows.gif" alt="运行效果截图" /></td>
+          <td><img src="../../tests/HF1007/CR_textarea_rows.gif" alt="运行效果截图" /></td>
+          <td><img src="../../tests/HF1007/OP_textarea_rows.gif" alt="运行效果截图" /></td>
+          <td><img src="../../tests/HF1007/FF_textarea_rows.gif" alt="运行效果截图" /></td>
+        </tr>
+      </table>
+      <p>从截图中很明显地看出，Firefox 中，TEXTAREA 元素的可视行数均比其他浏览器多一行，且当 <strong>&quot;rows&quot;</strong> 属性不存在或者为非自然数时，各浏览器对 <strong>&quot;rows&quot;</strong> 属性的默认值均是 &quot;2&quot; ，Firefox 则正好多一行为 &quot;3&quot; 。</p>
+      <p>这是 Firefox 的一个经典 Bug，已经存在很长时间，参见官方站点说明：<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=33654">https://bugzilla.mozilla.org/show_bug.cgi?id=33654</a>。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>当我们仅仅为 TEXTAREA 元素设置 &quot;<strong>rows&quot;</strong> 属性以控制其高度时，在 Firefox 中无法得到我们预期的效果。且其他浏览器对 <strong>&quot;rows&quot;</strong> 属性设置的元素高度也不尽相同，这一点 W3C 没有明确规范 <strong>&quot;rows&quot;</strong> 属性计算高度时的具体算法。</p>
+      <p>如果要精确控制 TEXTAREA 元素的尺寸（高度）时，请避免使用 <strong>&quot;rows&quot;</strong> 属性改用 CSS 相关设定，以保证所有浏览器拥有统一的视觉样式。</p>
+
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 5.0.342.2 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.50
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HF1007/textarea_rows.html">textarea_rows.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-02</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>Firefox TEXTAREA rows Bug 行 文本</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

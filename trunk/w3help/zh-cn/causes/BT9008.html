@@ -1,0 +1,263 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BT9008: 只有 IE 和 Opera 支持使用 currentStyle 获取 HTMLElement 的计算后的样式</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>DOM-2 Style 描述了在 ViewCSS 接口中使用 getComputedStyle 获取一个元素计算后的样式（即受该元素的<strong>默认样式</strong>、<strong>HTML 属性</strong>、<strong>样式表规则</strong>和<strong>行内样式</strong>影响后的最终计算样式）的方法，其语法为：</p>
+<pre>
+CSSStyleDeclaration getComputedStyle(in Element elt, in DOMString pseudoElt);
+</pre>
+      <p>
+      该方法的第一个参数为要获取计算后的样式的目标元素，第二个参数为伪元素。该方法返回一个 CSSStyleDeclaration 对象，通过 CSSStyleDeclaration 可以获取该元素的某种样式计算后的值。<br />
+      关于 getComputedStyle 的详细信息，请参考 DOM-2 Style <a href="http://www.w3.org/TR/DOM-Level-2-Style/css.html#CSS-ViewCSS">Interface ViewCSS</a> 中的内容。<br />
+      关于 CSSStyleDeclaration 的详细信息，请参考 DOM-2 Style <a href="http://www.w3.org/TR/DOM-Level-2-Style/css.html#CSS-CSSStyleDeclaration">Interface CSSStyleDeclaration</a> 中的内容。
+      </p>
+
+      <h2 id="description">问题描述</h2>
+      <p>只有 IE 和 Opera 支持使用 currentStyle 获取 HTMLElement 的计算后的样式，其他浏览器中不支持。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>该问题将造成某些使用本特性设计的功能在非 IE 和 Opera 浏览器中不能实现。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8 Opera</th>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>获取元素计算后的样式在各浏览器中的实现有差异，IE 和 Opera 中可以直接使用 HTMLElement.currentStyle 来获取，但其他浏览器不支持，除 IE 外，其他浏览器都使用了 W3C 标准提倡的 getComputedStyle 方法来实现这个功能。</p>
+      <h3>1. currentStyle</h3>
+      <p>HTMLElement.currentStyle 是 IE 的特性，Opera 也实现了该特性。</p>
+      <p>运行以下代码：</p>
+<pre>
+typeof document.body.currentStyle
+</pre>
+      <p>在各浏览器下的结果：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Opera</th>
+          <th>Firefox Safari Chrome</th>
+        </tr>
+        <tr>
+          <td>object</td>
+          <td>undefined</td>
+        </tr>
+      </table>
+      <p>HTMLElement.currentStyle 返回一个 currentStyle 对象，通过该对象的属性，可以获取该元素的某种样式计算后的值：</p>
+      <ul>
+        <li>
+        在 currentStyle 对象中获取 CSS 样式的值时，要使用该样式的脚本名称，而不是该样式在 CSS 规则中的本来名称，如 'list-style-type' 要写为 'listStyleType'。<br />
+        关于 currentStyle 的更多信息，请参考 MSDN <a href="http://msdn.microsoft.com/en-us/library/ms528441(VS.85).aspx">currentStyle Object</a> 中的内容。
+        </li>
+      </ul>
+<pre>
+&lt;!DOCTYPE HTML&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8"/&gt;
+&lt;style type="text/css"&gt;
+body {
+  color: blue;
+}
+h1 {
+  font-size: 18px;
+}
+&lt;/style&gt;
+&lt;script type="text/javascript"&gt;
+window.onload=function(){
+  var $header=document.getElementById("header");
+  alert($header.currentStyle.fontWeight);
+  alert($header.currentStyle.fontSize);
+  alert($header.currentStyle.color);
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1 id="header" style="color:red;"&gt;Header 1&lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+      <p>在各浏览器下的结果：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Opera</th>
+          <th>Firefox Safari Chrome</th>
+        </tr>
+        <tr>
+          <td>
+          700<br />
+          18px<br />
+          red
+          </td>
+          <td>脚本出错</td>
+        </tr>
+      </table>
+      <p>可见，Firefox Chrome Safari 不支持 currentStyle。</p>
+
+      <h3>2. getComputedStyle</h3>
+      <p>getComputedStyle 是 W3C 建议的方式，目前，Firefox Chrome Safari Opera 均实现了这一方法，调用 window.getComputedStyle 即可使用此方法。</p>
+      <p>运行以下代码：</p>
+<pre>
+typeof window.getComputedStyle;
+</pre>
+      <p>在各浏览器下的结果：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox Safari Chrome Opera</th>
+        </tr>
+        <tr>
+          <td>undefined</td>
+          <td>function</td>
+        </tr>
+      </table>
+      <p>getComputedStyle 返回一个 CSSStyleDeclaration 对象，通过该对象的属性或 'getPropertyValue' 方法，可以获取该元素的某种样式计算后的值：</p>
+      <ul>
+        <li>在 CSSStyleDeclaration 对象中通过属性获取 CSS 样式的值时，要使用该样式的脚本名称，而不是该样式在 CSS 规则中的本来名称，如 'list-style-type' 要写为 'listStyleType'。</li>
+        <li>在 CSSStyleDeclaration 对象中通过 'getPropertyValue' 方法获取 CSS 样式的值时，要使用该样式在 CSS 规则中的本来名称，如 'list-style-type'、'font-weight' 等。</li>
+        <li>
+        getComputedStyle 方法的第一个参数为要获取计算后的样式的目标元素，第二个参数为期望的伪元素，如 ':after'，':first-letter' 等，而不是伪类如 ':hover' 等。在 Firefox 中，第二个参数是必须的，如果没有期望的伪元素要设置为 'null'，这与规范的要求相符。在 Chrome Safari Opera 中，第二个参数如果为 'null' 则可以省略。<br />
+        关于 Firefox 中对 getComputedStyle 的支持情况，请参考 MDC <a href="https://developer.mozilla.org/en/DOM/window.getComputedStyle">window.getComputedStyle</a> 中的内容。
+        </li>
+      </ul>
+<pre>
+&lt;!DOCTYPE HTML&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8"/&gt;
+&lt;style type="text/css"&gt;
+body {
+  color: blue;
+}
+h1 {
+  font-size: 18px;
+}
+&lt;/style&gt;
+&lt;script type="text/javascript"&gt;
+window.onload=function(){
+  var $header=document.getElementById("header");
+  alert(getComputedStyle($header,null).fontWeight);
+  alert(getComputedStyle($header,null).fontSize);
+  alert(getComputedStyle($header,null).color);
+}
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1 id="header" style="color:red;"&gt;Header 1&lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+      <p class="comment">
+      注：<br />
+      1. 以上代码中的 getComputedStyle($header,null).<em>fontWeight</em> 可以替换为 getComputedStyle($header,null).<em>getPropertyValue("font-weight")</em>。<br />
+      2. 某些浏览器的早期版本可能要使用 <em>document.defaultView.getComputedStyle</em> 来代替 <em>getComputedStyle</em> 方法。
+      </p>
+      <p>在各浏览器下的结果：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox Safari Chrome</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <td>脚本出错</td>
+          <td>
+          bold<br />
+          18px<br />
+          rgb(255, 0, 0)
+          </td>
+          <td>
+          700<br />
+          18px<br />
+          #ff0000
+          </td>
+        </tr>
+      </table>
+      <p>可见，IE6 IE7 IE8 不支持 getComputedStyle，Opera 的返回值与 Firefox Safari Chrome 有差异。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>要获取元素的某种样式计算后的值，请考虑所有浏览器的兼容性情况。如使用以下代码给不支持 getComputedStyle 的 IE 提供与其他浏览器相同的函数：</p>
+<pre>
+if(!window.getComputedStyle){
+  window.getComputedStyle=function($target){
+    return $target.currentStyle;
+  };
+}
+</pre>
+      <p>然后在代码中使用 getComputedStyle(in Element elt, in DOMString pseudoElt) 来获取计算后的样式。但要注意：IE 中无法获取伪元素的计算样式。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BT9008/get_computed_style.html">get_computed_style.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-18</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>currentStyle defaultView getComputedStyle getPropertyValue</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

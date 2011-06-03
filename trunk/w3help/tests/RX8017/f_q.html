@@ -1,0 +1,47 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<script>
+	window.onload = function () {
+		function $(id) { return document.getElementById(id); }
+		$("info1").innerHTML = $("sub11").offsetWidth + "+" + $("sub12").offsetWidth + "/" + $("cont1").offsetWidth;
+		$("info2").innerHTML = $("sub21").offsetWidth + "+" + $("sub22").offsetWidth + "/" + $("cont2").offsetWidth;
+		$("info3").innerHTML = $("sub31").offsetWidth + "+" + $("sub32").offsetWidth + "/" + $("cont3").offsetWidth;
+	}
+</script>
+</head>
+<body style="font:16px/1.5 宋体; margin:0;">
+<div style="width:150px; background:#ddd; overflow:hidden;">
+	<div id="cont1" style="float:left; background:khaki; word-wrap:break-word; word-break:break-all;">
+		<div id="sub11" style="width:40%; background:cornflowerblue; float:left;">
+			<span style="background:lavender;">XXXXXXXXXX</span>
+		</div><br /><div id="sub12" style="width:30%; background:chocolate; float:left;">
+			<span style="background:wheat;">XXXXXXXXXX</span>
+		</div>
+	</div>
+	<div id="info1" style="font:12px Arial; clear:both;"></div>
+</div>
+<br />
+<div style="width:160px; background:#ddd; overflow:hidden;">
+	<div id="cont2" style="float:left; background:khaki; word-wrap:break-word; word-break:break-all;">
+		<div id="sub21" style="width:40%; background:cornflowerblue; float:left;">
+			<span style="background:lavender;">XXXXXXXXXX</span>
+		</div><br /><div id="sub22" style="width:30%; background:chocolate; float:left;">
+			<span style="background:wheat;">XXXXXXXXXX</span>
+		</div>
+	</div>
+	<div id="info2" style="font:12px Arial; clear:both;"></div>
+</div>
+<br />
+<div style="width:170px; background:#ddd; overflow:hidden;">
+	<div id="cont3" style="float:left; background:khaki; word-wrap:break-word; word-break:break-all;">
+		<div id="sub31" style="width:40%; background:cornflowerblue; float:left;">
+			<span style="background:lavender;">XXXXXXXXXX</span>
+		</div><br /><div id="sub32" style="width:30%; background:chocolate; float:left;">
+			<span style="background:wheat;">XXXXXXXXXX</span>
+		</div>
+	</div>
+	<div id="info3" style="font:12px Arial; clear:both;"></div>
+</div>
+</body>
+</html>

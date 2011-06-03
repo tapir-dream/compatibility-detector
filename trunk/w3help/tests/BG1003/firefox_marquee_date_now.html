@@ -1,0 +1,23 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<style>
+    div { width:200px; background:#DDD; }
+</style>
+</head>
+<body>
+<div id="d1"><marquee id="m1" behavior="alternate">111</marquee></div>
+<button id="b">Click</button>
+<div id="d2">
+<script>
+    var a = Date.now;
+    Date.now = null;
+    document.getElementById("b").onclick = function () {
+        Date.now = a;
+        document.getElementById("d2").innerHTML = '<marquee id="m2">222</marquee>';
+    }
+</script>
+</div>
+</body>
+</html>

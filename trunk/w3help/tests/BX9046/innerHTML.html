@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	* { font:12px/1.5 'Trebuchet MS'; }
+	table { border-collapse:collapse; }
+	table td { border:1px solid black; }
+</style>
+<script src="tags.js"></script>
+<script>
+	function $(id) { return document.getElementById(id); }
+	window.onload = function () {
+		var b, o, c = {}, d;
+		for (var i = 0, j = tags.length; i < j; i++) {
+			b = tags[i];
+			var ifr = document.createElement('iframe');
+			ifr.style.display = 'none';
+			document.body.appendChild(ifr);
+			ifr.contentWindow.document.open();
+			ifr.contentWindow.document.write(htmls[i]);
+			d = ifr.contentWindow.document;
+			ifr.contentWindow.document.close();
+			if (b == 'PARAM') {
+				o = d.getElementById('tmp');
+			} else {
+				if (b != 'TITLE') {
+					o = d.getElementById('tmp');
+				} else {
+					d = d.body.getElementsByTagName('*');
+					for (var m = 0, n = d.length; m < n; m++) {
+						if (d[m].getAttribute('id') == 'tmp' || b == 'TITLE' ) {
+							o = d[m];
+							break;
+						}
+					}
+				}
+			}
+			c[b] = function () {
+				try {
+					o.innerHTML = '';
+					return '<div style="background:lightgreen; padding:3px;">OK</div>';
+				} catch (ex) {
+					return '<div style="background:coral; padding:3px;">' + ex.message + '</div>';
+				}
+			}();
+			document.body.removeChild(ifr);
+		}
+		document.body.innerHTML = '';
+		var table = document.createElement('table');
+		table.cellSpacing = 0;
+		table.cellPadding = 0;
+		for (var i = 0, j = tags.length; i < j; i++) {
+			var row = table.insertRow(i);
+			var cell1 = row.insertCell(0);
+			cell1.style.textAlign = 'right';
+			cell1.style.padding = '3px';
+			var cell2 = row.insertCell(1);
+			cell1.innerHTML = tags[i];
+			cell2.innerHTML = c[tags[i]];
+		}
+		document.body.appendChild(table);
+	}
+</script>
+</head>
+<body style="font:12px 'Trebuchet MS';">
+</body>
+</html>

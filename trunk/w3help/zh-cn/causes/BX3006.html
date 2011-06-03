@@ -1,0 +1,153 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX3006: 各浏览器对 TABLE、TH、TD 元素的 bordercolor 属性的处理有差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+      
+      <h2 id="description">问题描述</h2>
+      <p>IE Chrome Safari 中 TABLE 元素设置 borderColor 属性将使表格本身与其内单元格的边框颜色均应用上 borderColor 指定的颜色；<br />
+      Firefox 中该属性则只能作用在表格边框；<br />Opera 中不支持这个属性。</p>
+      
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题会导致各浏览器中表格边框样式会有差异。</p>
+      
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>MSDN 中关于 borderColor 属性的说明请参照：<a href="http://msdn.microsoft.com/en-us/library/ms533517(VS.85).aspx">BORDERCOLOR Attribute | borderColor Property</a>。</p>
+      <p>Safari Reference Library 中关于 borderColor 属性的说明请参照：<a href="http://developer.apple.com/safari/library/documentation/appleapplications/reference/safarihtmlref/Articles/Attributes.html#//apple_ref/doc/uid/TP40008058-bordercolor">bordercolor</a>。</p>
+      <h3>1. TABLE 元素 borderColor 属性的渲染差异</h3>
+      <p>分析以下代码：</p>
+<pre>
+&lt;table cellspacing="5" bordercolor="red" border="1"&gt;
+  &lt;tr&gt;
+    &lt;td&gt;bordercolor="red"&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+</pre>
+      <p>上面代码中包含一个 TABLE 元素，设置了 bordercolor="red" 后，在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Chrome Safari</th>
+          <th>Firefox</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <th><img src="../../tests/BX3006/a.gif" alt="" /></th>
+          <th><img src="../../tests/BX3006/b.gif" alt="" /></th>
+          <th><img src="../../tests/BX3006/c.gif" alt="" /></th>
+        </tr>
+      </table>
+      <p>可见：</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8 Chrome Safari</em> 浏览器中，TABLE 元素的 bordercolor 属性中所设定的颜色值可以同时作用于表格及其内部单元格的边框；</li>
+        <li>在 <em>Firefox</em> 中，bordercolor 属性值作用于表格边框；</li>
+        <li>在 <em>Opera</em> 中，bordercolor 属性不被支持。</li>
+      </ul>
+      <h3>2. TD、TH 元素 borderColor 属性的渲染差异</h3>
+      <p>分析以下代码：</p>
+<pre>
+&lt;table cellspacing="5" border="1"&gt;
+  &lt;tr&gt;
+    &lt;th bordercolor="red"&gt;bordercolor="red"&lt;/th&gt;
+    &lt;td bordercolor="blue"&gt;bordercolor="blue"&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+</pre>
+      <p>上面代码中 TD、TH 元素设置了 bordercolor 属性。在各浏览器中效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <th>Chrome Safari Firefox Opera</th>
+        </tr>
+        <tr>
+          <th><img src="../../tests/BX3006/d.gif" alt="" /></th>
+          <th><img src="../../tests/BX3006/e.gif" alt="" /></th>
+        </tr>
+      </table>
+      <p>可见：</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8</em> 中，TD、TH 元素的 bordercolor 属性中所设定的颜色值有效；</li>
+        <li>在 <em>其他浏览器</em> 中，TD、TH 元素的 bordercolor 属性不被支持。</li>
+      </ul>
+      
+      <h2 id="solutions">解决方案</h2>
+      <p>在 W3C HTML4 属性表中没有找到 bordercolor 属性，可见这并不是 W3C 规范中的标准属性，各浏览器根据各自的理解实现了该属性的渲染方式，应避免使用这种非标准属性。</p>
+      <p>若需要设置表格及单元格的边框，应使用 CSS 的 'border' 系列特性。</p>
+      
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.2<br />
+              Chrome 5.0.360.0 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.51</td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>无。</td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-09</td>
+          </tr>
+        </table>
+        
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>TABLE borderColor 边框 颜色</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HT1003: Chrome 和 Safari 中 BR 元素前的空白符不会被忽略</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>W3C 规定 &quot;ASCII 空格&quot; 、 &quot;ASCII 制表符&quot; 、 &quot;ASCII 换行符&quot; 等属于空白符（white space），对于多个连续的空白符，浏览器将对他们进行合并。</p>
+      <p>BR 元素会在当前行强制插入一个换行符，这个换行符也是空白符的一种。 HTML 规范中并没有明确规定 BR 元素前后出现的空白符应如何处理。</p>
+      <p>关于 空白符 的详细信息，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html401/struct/text.html#h-9.1">9.1</a> 及 <a href="http://www.w3.org/TR/html401/struct/text.html#h-9.3.2.1">9.3.2</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>Chrome 和 Safari 中 BR 元素前的空白符不会被忽略，多余的空白符将被压缩为一个空白符并渲染到 BR 元素之前的行中。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>这个现象可能造成在 Chrome 和 Safari 中出现多余空白符占有位置，从而影响到容器的宽度或者行内元素的对齐效果。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>Chrome Safari</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+      <pre>&lt;style&gt;
+  p { margin:0; float:left; margin-right:5px; border:3px solid black; font:64px/1.5 Simsun; }
+&lt;/style&gt;
+&lt;div style="zoom:1; overflow:hidden;"&gt;
+  &lt;p style="text-align:right;"&gt;
+    &lt;span style="background:#ddd;"&gt;A&lt;/span&gt;&lt;br /&gt;&lt;span style="background:#eee;"&gt;B&lt;/span&gt;
+  &lt;/p&gt;
+  &lt;p style="text-align:center;"&gt;
+    &lt;span style="background:#ddd;"&gt;A&lt;/span&gt;&lt;br /&gt;&lt;span style="background:#eee;"&gt;B&lt;/span&gt;
+  &lt;/p&gt;
+  &lt;p style="text-align:left;"&gt;
+    &lt;span style="background:#ddd;"&gt;A&lt;/span&gt;&lt;br /&gt;&lt;span style="background:#eee;"&gt;B&lt;/span&gt;
+  &lt;/p&gt;
+&lt;/div&gt;
+&lt;div style="zoom:1; overflow:hidden; margin-top:10px;"&gt;
+  &lt;p style="text-align:right;"&gt;
+    &lt;span style="background:#ddd;"&gt;A&lt;/span&gt; <span class="hl_4"> </span> &lt;br /&gt;&lt;span style="background:#eee;"&gt;B&lt;/span&gt;
+  &lt;/p&gt;
+  &lt;p style="text-align:center;"&gt;
+    &lt;span style="background:#ddd;"&gt;A&lt;/span&gt; <span class="hl_4"> </span> &lt;br /&gt;&lt;span style="background:#eee;"&gt;B&lt;/span&gt;
+  &lt;/p&gt;
+  &lt;p style="text-align:left;"&gt;
+    &lt;span style="background:#ddd;"&gt;A&lt;/span&gt; <span class="hl_4"> </span> &lt;br /&gt;&lt;span style="background:#eee;"&gt;B&lt;/span&gt;
+  &lt;/p&gt;
+&lt;/div&gt;</pre>
+      <p>测试代码分为上下两组，每组均有三个 P 元素，其中依次包含一个 SPAN 元素、一个 BR 元素、一个 SPAN 元素。三个 P 元素分别设置了文本居左对齐、居中对齐、居左对齐。<br />
+      两组的区别为第二组中 BR 元素之前存在空白符。</p>
+      <p>这段代码在各浏览器中效果为：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Firefox Opera</th>
+          <th>Chrome Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/HT1003/space_br1.gif" alt="IE6 IE7 IE8 Firefox Opera" /></td>
+          <td><img src="../../tests/HT1003/space_br2.gif" alt="Chrome Safari" /></td>
+        </tr>
+      </table>
+      <p>从截图中可见，<em>Chrome Safari</em> 没有忽略 BR 元素之前的空白符。而 <em>其他浏览器</em> 则将其忽略。</p>
+      <p>下面这组代码可以更清晰的展现这个现象：</p>
+      <pre>&lt;style&gt;
+  p { margin:0; float:left; margin-right:5px; border:3px solid black; font:64px/1.5 Simsun; }
+&lt;/style&gt;
+&lt;div style="zoom:1; overflow:hidden; margin-top:10px;"&gt;
+  &lt;p id="p" style="text-align:right;"&gt;
+    &lt;span style="background:#ddd;"&gt;TEXT_A&lt;/span&gt; <span class="hl_4"> </span> &lt;br /&gt;&lt;span style="background:#eee;"&gt;TEXT_B&lt;/span&gt;
+  &lt;/p&gt;
+&lt;/div&gt;
+&lt;script&gt;
+  var p = document.getElementById('p'), k = 300;
+  setInterval(function () {
+    p.style.width = k-- + 'px';
+    (k &lt; 150) && (k = 300);
+  }, 20);
+&lt;/script&gt;</pre>
+      <p>上面代码动态的调整容器【p】的宽度，通过动画可以看到仅当容器的宽度不够容纳子元素时，Chrome Safari 才会忽略 BR 元素之前的空白符。</p>
+      <p><img src="../../tests/HT1003/br_ani.gif" alt="BR Animation" /></p>
+
+
+
+      <h2 id="solutions">解决方案</h2>
+      <p>删除 BR 元素之前多余的空白符。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.8<br />
+              Chrome 6.0.472.0 dev<br />
+              Safari 5.0<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HT1003/space_before_br.html">space_before_br.html</a><br />
+            <a href="../../tests/HT1003/br_ani.html">br_ani.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-28</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>BR break empty white space 空白符 对齐 换行</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

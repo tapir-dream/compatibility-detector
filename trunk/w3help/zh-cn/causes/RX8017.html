@@ -1,0 +1,311 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RX8017: IE 对浮动非替换元素内包含宽度单位为百分比的元素时的 'shrink-to-fit' 宽度算法有误</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 CSS2.1 规范中的描述，在对以 &quot;百分比&quot; 为单位的 'width' 特性值的计算时，&quot;百分比&quot; 的计算基于生成框的<strong>包含块</strong>的宽度。若其包含块的宽度依赖其自身宽度，则由此产生的布局在 CSS2.1 中没有定义。</p>
+      <p>而对于浮动非替换元素，当浮动元素的 'width' 特性为 &quot;auto&quot; 时，浮动非替换元素宽度计算要遵循 &quot;shrink-to-fit&quot; 算法。下面详细介绍 &quot;shrink-to-fit&quot; 算法的细节：</p>
+      <ul>
+        <li>&quot;shrink-to-fit&quot; 的宽度计算方法与 'table-layout' 特性为 'auto'（即自动表格布局）时对于单元格的宽度计算方法类似。大致为：</li>
+          <ol>
+            <li>计算格式化内容时除了发生明确的换行外不发生换行的时<span class="hl_1">首选宽度</span>（preferred width），以及<span class="hl_2">首选最小宽度</span>（preferred minimum width），比如，尝试所有可能的换行。而 CSS2.1 没有定义精确的算法。</li>
+            <li>其次，在这种情况下，找出<span class="hl_4">可用宽度</span>（available width），这个宽度为包含块减去 'margin-left'、'border-left-width'、'padding-left'、 'padding-right'、'border-right-width'、'margin-right' 以及所有相关滚动条的宽度。</li>
+          </ol>
+        <li>然后得到公式： <strong>&quot;shrink-to-fit&quot; 的宽度 = min ( max ( <span class="hl_2">首选最小宽度</span>, <span class="hl_4">可用宽度</span> ) , <span class="hl_1">首选宽度</span> )</strong></li>
+      </ul>
+      <p>关于 'width' 特性及 &quot;shrink-to-fit&quot; 的详细信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/visudet.html#the-width-property">10.2 Content width: the 'width' property</a> 及 <a href="http://www.w3.org/TR/CSS21/visudet.html#float-width">10.3.5 Floating, non-replaced elements</a> 中的内容。</p>
+      <p></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>CSS2.1 规范中并没有明确说明对于应用 &quot;shrink-to-fit&quot; 算法计算宽度的元素内包含 'width' 特性单位为 &quot;百分比&quot; 的元素时究竟应该如何计算父子元素的宽度。但 IE 在此类情况下，对于宽度的计算与规范中明确说明的规定有明显出入，导致计算的宽度与其他浏览器有很大的差异。且与文档模式有关。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>对 &quot;shrink-to-fit&quot; 算法差别可能导致不同浏览器之间浮动元素的宽度有很大的差异，影响到页面布局。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6(Q) IE7(Q) IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <th>IE6(S)</th>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <th>IE7(S)</th>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <th>IE8(A)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>本文中所阐述的问题比较复杂，所以先将问题分为三类：</p>
+      <ol>
+        <li>子元素的宽度之和<strong>小于</strong>其包含块的宽度</li>
+        <li>子元素的宽度之和<strong>等于</strong>其包含块的宽度</li>
+        <li>子元素的宽度之和<strong>大于</strong>其包含块的宽度</li>
+      </ol>
+      <p>分析以下代码：<em>all.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8" /&gt;
+&lt;script&gt;
+  window.onload = function () {
+    function $(id) { return document.getElementById(id); }
+    $("info1").innerHTML = $("sub11").offsetWidth + "+" + $("sub12").offsetWidth + "/" + $("cont1").offsetWidth;
+    $("info2").innerHTML = $("sub21").offsetWidth + "+" + $("sub22").offsetWidth + "/" + $("cont2").offsetWidth;
+    $("info3").innerHTML = $("sub31").offsetWidth + "+" + $("sub32").offsetWidth + "/" + $("cont3").offsetWidth;
+  }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body style="font:16px/1.5 宋体; margin:0;"&gt;
+&lt;div style="width:200px; background:#ddd; overflow:hidden;"&gt;
+  &lt;div id="cont1" style="<span class="hl_1">float:left;</span> background:khaki; word-wrap:break-word; word-break:break-all;"&gt;
+    &lt;span id="sub11" style="<span class="hl_4">width:40%;</span> background:cornflowerblue; <em>display:inline-block;</em>"&gt;
+      &lt;span style="background:lavender;"&gt;XXXXXXXXXX&lt;/span&gt;
+    &lt;/span&gt;&lt;span id="sub12" style="<span class="hl_4">width:30%;</span> background:chocolate; <em>display:inline-block;</em>"&gt;
+      &lt;span style="background:wheat;"&gt;XXXXXXXXXX&lt;/span&gt;
+    &lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div id="info1" style="font:12px Arial; clear:both;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div style="width:200px; background:#ddd; overflow:hidden;"&gt;
+  &lt;div id="cont2" style="<span class="hl_1">float:left;</span> background:khaki; word-wrap:break-word; word-break:break-all;"&gt;
+    &lt;span id="sub21" style="<span class="hl_4">width:40%;</span> background:cornflowerblue; <em>display:inline-block;</em>"&gt;
+      &lt;span style="background:lavender;"&gt;XXXXXXXXXX&lt;/span&gt;
+    &lt;/span&gt;&lt;span id="sub22" style="<span class="hl_4">width:60%;</span> background:chocolate; <em>display:inline-block;</em>"&gt;
+      &lt;span style="background:wheat;"&gt;XXXXXXXXXX&lt;/span&gt;
+    &lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div id="info2" style="font:12px Arial; clear:both;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div style="width:200px; background:#ddd; overflow:hidden;"&gt;
+  &lt;div id="cont3" style="<span class="hl_1">float:left;</span> background:khaki; word-wrap:break-word; word-break:break-all;"&gt;
+    &lt;span id="sub31" style="<span class="hl_4">width:80%;</span> background:cornflowerblue; <em>display:inline-block;</em>"&gt;
+      &lt;span style="background:lavender;"&gt;XXXXXXXXXX&lt;/span&gt;
+    &lt;/span&gt;&lt;span id="sub32" style="<span class="hl_4">width:90%;</span> background:chocolate; <em>display:inline-block;</em>"&gt;
+      &lt;span style="background:wheat;"&gt;XXXXXXXXXX&lt;/span&gt;
+    &lt;/span&gt;
+  &lt;/div&gt;
+  &lt;div id="info3" style="font:12px Arial; clear:both;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面三组代码中，均存在一个未设置 'width' 特性的<span class="hl_1">浮动非替换</span>元素，则其宽度计算遵照 &quot;shrink-to-fit&quot; 算法，通过为其设置 word-wrap:break-word; word-break:break-all; 使其子元素可以按照单独字母折行。浮动元素的包含块宽度为 200px，其内均包含了两个宽度单位为 &quot;百分比&quot; 的行内块元素。<br />
+      行内块元素的宽度之和分别 <strong>小于</strong>、<strong>等于</strong>、<strong>大于</strong> 浮动元素的宽度。</p>
+      <p>这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6(Q) IE7(Q) IE8(Q)</th>
+          <th>IE6(S)</th>
+          <th>IE7(S)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RX8017/ib_IEQ.gif" alt="IE6(Q) IE7(Q) IE8(Q)" /></td>
+          <td><img src="../../tests/RX8017/ib_IE6S.gif" alt="IE6(S)" /></td>
+          <td><img src="../../tests/RX8017/ib_IE7S.gif" alt="IE7(S)" /></td>
+          <td><img src="../../tests/RX8017/ib_IE8S.gif" alt="IE8(S) Firefox Chrome Safari Opera" /></td>
+        </tr>
+      </table>
+      <p>上面这段代码在 IE6 IE7 IE8(Q) 中出现了与其他浏览器不同的效果。首先看 <em>IE8(S) Firefox Chrome Safari Opera</em> 中的算法：</p>
+      <p>浮动元素的宽度计算使用 &quot;shrink-to-fit&quot; 算法，&quot;shrink-to-fit&quot; 需要参照子元素的宽度，而此例中子元素的宽度单位为百分比，即子元素的宽度需要参照其包含块。所以这里出现了包含块与其子元素宽度计算相互制约、相互依赖的现象。<br />
+      在 <em>IE8(S) Firefox Chrome Safari Opera</em> 中，浏览器首先忽略子元素的百分比宽度，假设它们的宽度为默认的 'auto'，在此基础上计算 <span class="hl_2">首选最小宽度</span>、<span class="hl_4">可用宽度</span>、<span class="hl_1">首选宽度</span> 这三个 &quot;shrink-to-fit&quot; 算法依赖的三个宽度数据：</p>
+      <ul>
+        <li><span class="hl_2">首选最小宽度</span>：由于子元素可以按照单独字母折行，这里的首选最小宽度即为一个 16px 宋体英文字符的宽度——8px。</li>
+        <li><span class="hl_4">可用宽度</span>：浮动元素的包含块的可用宽度为 200px。</li>
+        <li><span class="hl_1">首选宽度</span>：子元素没有明确的换行，则首选宽度为 20 个 16px 宋体英文字符的宽度，即 160px。</li>
+      </ul>
+      <p>根据 &quot;shrink-to-fit&quot; 的计算公式得到<strong>此时</strong>的 &quot;shrink-to-fit&quot; 宽度为 min ( max ( <span class="hl_2">8</span>, <span class="hl_4">200</span> ), <span class="hl_1">160</span> ) = 160px。<br />
+      则浮动元素的计算后宽度为 160px。这时浮动元素的各百分比宽度的子元素在根据其 'width' 特性所设定的百分比例计算出最终宽度。如：<br />
+      对于第一组，两个 display:inline-block 的元素的宽度设定分别为 40% 与 30%。那么它们的计算后宽度则分别为 160px * 40% = 64px 与 160px * 30% = 48px。<br />
+      对于子元素宽度之和 <strong>小于</strong>、<strong>等于</strong>、<strong>大于</strong> 浮动元素的宽度时，计算方法均相同。</p>
+      <p>下面分别探讨所有版本的 IE(Q)，以及 IE6(S)、IE7(S) 中这种情况下浮动元素及其子元素的宽度计算方式：</p>
+      <ul>
+        <li>在 <em>IE6(Q) IE7(Q) IE8(Q)</em> 中，仍然是无法确定浮动元素的 &quot;shrink-to-fit&quot; 宽度，此时浏览器浏览器直接将子元素的百分比宽度之和作为浮动元素的 &quot;shrink-to-fit&quot; 宽度，以此确定了浮动元素的最终宽度。然后其子元素的宽度也可以确定。<br />
+        针对第一组，浮动元素子元素的宽度之和为 40% + 30% = 70%，浮动元素的宽度也为 70%，即 200px * 70% = 140px。然后子元素的宽度为 140px * 40% = 56px 及 140px * 30% = 42px。<br />
+        针对第二组，浮动元素子元素的宽度之和为 40% + 60% = 100%，浮动元素的宽度也为 100%，刚好等于其包含块的宽度，即 200px。然后子元素的宽度为 200px * 40% = 80px 及 200px * 60% = 120px。<br />
+        针对第三组，浮动元素子元素的宽度值和为 80% + 90% = 170% > 100%，此时包含块的宽度绝对不足以容纳它们，需要换行。此时浮动元素的宽度为最宽的那个元素的设定宽度，即 200px * 90% = 180px。然后子元素的宽度为 180px * 80% = 144px 及 180px * 90% = 162px。</li>
+        <li>在 <em>IE6(S)</em> 中，计算出的浮动元素的宽度与上一条中相同，但是在计算子元素的宽度时并不是将子元素的百分比宽度与浮动元素的计算后的宽度相乘，而是以子元素的宽度之比做分配。如第一组中子元素的宽度之比为 40%:30%，即 4:3，则第一个子元素的宽度为 140px * 4/7 = 80px，第二个子元素的宽度为 140px * 3/7 = 60px。</li>
+        <li>在 <em>IE7(S)</em> 中，在 IE6(S) 的基础上出现了更加过度的收缩现象。</li>
+      </ul>
+      <p>可以通过一组动画更加直观的看到各浏览器在这种情况下计算 &quot;shrink-to-fit&quot; 宽度的差别：<em>ani.html</em> （源代码较长不再贴出，请参见底部的测试页面）</p>
+      <table class="compare">
+        <tr>
+          <th>IE6(Q) IE7(Q) IE8(Q)</th>
+          <th>IE6(S)</th>
+          <th>IE7(S)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RX8017/ani_IEQ.gif" alt="IE6(Q) IE7(Q) IE8(Q)" /></td>
+          <td><img src="../../tests/RX8017/ani_IE6S.gif" alt="IE6(S)" /></td>
+          <td><img src="../../tests/RX8017/ani_IE7S.gif" alt="IE7(S)" /></td>
+          <td><img src="../../tests/RX8017/ani_IE8S.gif" alt="IE8(S) Firefox Chrome Safari Opera" /></td>
+        </tr>
+      </table>
+      <p>将上例中的 <em>display:inline-block;</em> 换为 <em>float:left|right</em> 结果相同。</p>
+      <br />
+      <p>下面看另一组例子：<em>f_all.html</em></p>
+      <p class="comment">
+        【注】下面的例子中所述的文档模式包含：<br />
+        1. &quot;Standards Mode&quot;，用缩写 S 表示。<span class="hl_3">DOCTYPE: <code><strong>&lt;!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"&gt;</strong></code></span>；<br />
+        2. &quot;Almost Standards Mode&quot;，用缩写 A 表示。<span class="hl_3">DOCTYPE: <code><strong>&lt;!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"&gt;</strong></code></span>；<br />
+        3. &quot;Quirks Mode&quot;，用缩写 Q 表示。<span class="hl_3"><strong>无</strong> DOCYTPE</span>。
+      </p>
+      <pre>&lt;!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta http-equiv="Content-Type" content="text/html; charset=utf-8" /&gt;
+&lt;script&gt;
+  window.onload = function () {
+    function $(id) { return document.getElementById(id); }
+    $("info1").innerHTML = $("sub11").offsetWidth + "+" + $("sub12").offsetWidth + "/" + $("cont1").offsetWidth;
+    $("info2").innerHTML = $("sub21").offsetWidth + "+" + $("sub22").offsetWidth + "/" + $("cont2").offsetWidth;
+    $("info3").innerHTML = $("sub31").offsetWidth + "+" + $("sub32").offsetWidth + "/" + $("cont3").offsetWidth;
+  }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body style="font:16px/1.5 宋体; margin:0;"&gt;
+&lt;div style="width:150px; background:#ddd; overflow:hidden;"&gt;
+  &lt;div id="cont1" style="<span class="hl_1">float:left;</span> background:khaki; word-wrap:break-word; word-break:break-all;"&gt;
+    &lt;div id="sub11" style="<span class="hl_4">width:40%;</span> background:cornflowerblue; <em>float:left;</em>"&gt;
+      &lt;span style="background:lavender;"&gt;XXXXXXXXXX&lt;/span&gt;
+    &lt;/div&gt;<span class="hl_2">&lt;br /&gt;</span>&lt;div id="sub12" style="<span class="hl_4">width:30%;</span> background:chocolate; <em>float:left;</em>"&gt;
+      &lt;span style="background:wheat;"&gt;XXXXXXXXXX&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div id="info1" style="font:12px Arial; clear:both;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div style="width:160px; background:#ddd; overflow:hidden;"&gt;
+  &lt;div id="cont2" style="<span class="hl_1">float:left;</span> background:khaki; word-wrap:break-word; word-break:break-all;"&gt;
+    &lt;div id="sub21" style="<span class="hl_4">width:40%;</span> background:cornflowerblue; <em>float:left;</em>"&gt;
+      &lt;span style="background:lavender;"&gt;XXXXXXXXXX&lt;/span&gt;
+    &lt;/div&gt;<span class="hl_2">&lt;br /&gt;</span>&lt;div id="sub22" style="<span class="hl_4">width:30%;</span> background:chocolate; <em>float:left;</em>"&gt;
+      &lt;span style="background:wheat;"&gt;XXXXXXXXXX&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div id="info2" style="font:12px Arial; clear:both;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div style="width:170px; background:#ddd; overflow:hidden;"&gt;
+  &lt;div id="cont3" style="<span class="hl_1">float:left;</span> background:khaki; word-wrap:break-word; word-break:break-all;"&gt;
+    &lt;div id="sub31" style="<span class="hl_4">width:40%;</span> background:cornflowerblue; <em>float:left;</em>"&gt;
+      &lt;span style="background:lavender;"&gt;XXXXXXXXXX&lt;/span&gt;
+    &lt;/div&gt;<span class="hl_2">&lt;br /&gt;</span>&lt;div id="sub32" style="<span class="hl_4">width:30%;</span> background:chocolate; <em>float:left;</em>"&gt;
+      &lt;span style="background:wheat;"&gt;XXXXXXXXXX&lt;/span&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div id="info3" style="font:12px Arial; clear:both;"&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上述代码和第一段测试代码结构类似，区别仅为浮动元素的子元素 <em>display:inline-block;</em> 换为 <em>float:left;</em>，子元素直接插入了一个换行符 <span class="hl_2">&lt;br /&gt;</span>。</p>
+      <p>这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6(Q) IE7(Q) IE8(Q)</th>
+          <th>IE6(S)</th>
+          <th>IE7(S)</th>
+          <th>IE8(A)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RX8017/fl_IEQ.gif" alt="IE6(Q) IE7(Q) IE8(Q)" /></td>
+          <td><img src="../../tests/RX8017/fl_IE6S.gif" alt="IE6(S)" /></td>
+          <td><img src="../../tests/RX8017/fl_IE7S.gif" alt="IE7(S)" /></td>
+          <td><img src="../../tests/RX8017/fl_IE8A.gif" alt="IE8(A)" /></td>
+          <td><img src="../../tests/RX8017/fl_IE8S.gif" alt="IE8(S) Firefox Chrome Safari Opera" /></td>
+        </tr>
+      </table>
+      <p>在本例中，除 IE8(A) 意外的其他浏览器中浮动元素的 &quot;shrink-to-fit&quot; 算法与上例大致相同，但 <em>IE8(A)</em> 中出现了较大的差异。</p>
+      <p>IE8 在这种情况下 &quot;Almost Standards Mode&quot; 与 &quot;Standards Mode&quot; 出现了较大差异。<br />
+      IE8(A) 中，当浮动父元素的包含块的宽度<strong>小于</strong>浮动元素内的子元素的 <span class="hl_1">首选宽度</span> 之和的时候，其宽度计算方法与 IE6(S) 中类似。当浮动父元素的包含块的宽度<strong>大于</strong>浮动元素内的子元素的 <span class="hl_1">首选宽度</span> 之和的时候，其宽度计算方法与 IE7(S) 中类似。</p>
+      <br />
+      <p>综合上面所有的测试样例及截图，虽然 CSS2.1 规范没有明确定义当出现这种父子元素直接宽度计算相互依赖时的具体算法，但在 <em>IE8(S) Firefox Chrome Safari Opera</em> 中的处理更符合常理，且计算后的父子元素的宽度值关系也符合作者的设定值以及 CSS2.1 规范。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>1. 明确为浮动元素设置一个宽度值，避免其在进行 &quot;shrink-to-fit&quot; 计算时在不同浏览器之间出现的宽度计算差异。<br />
+      2. 若浮动元素出于某些情况必须使用 &quot;shrink-to-fit&quot; 宽度时，则应尽量保证其内子元素的宽度不依赖其自身宽度，如使用 px 为单位的宽度值。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="KB001">KB001: 兼容性问题与浏览器的内核及渲染模式</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.3<br />
+              Chrome 6.0.408.1 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.53
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RX8017/all.html">all.html</a><br />
+            <a href="../../tests/RX8017/ani.html">ani.html</a><br />
+            <a href="../../tests/RX8017/f_all.html">f_all.html</a><br />
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-13</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>shrink-to-fit width percent float algorithm 百分比 浮动 宽度</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

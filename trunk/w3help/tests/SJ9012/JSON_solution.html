@@ -1,0 +1,18 @@
+<script type="text/javascript">
+	window.onload = function(){
+		var info = document.getElementById("info"),
+			jsonStr = '{"name": "w3help", "url": "www.w3help.org", "tech": ["js", "HTML", "CSS", 5, 4.01, 2.1],'
+					+ '"online": true, "category": {"RCA": "Root Cause Artical", "KB":"Knowledge Base"},'
+					+ '"version": 1}', p, w3help;
+				
+		json1 = eval("(" + jsonStr + ")"),
+		json2 = (new Function("return " + jsonStr))();
+		
+		for(p in json1)
+			info.innerHTML += p + " : " + json1[p] + "<br/>";
+		info.innerHTML += "-----------------------<br />";
+		for(p in json2)
+			info.innerHTML += p + " : " + json2[p] + "<br/>";
+	}
+</script>
+<div id="info" style="width:350px;"></div>

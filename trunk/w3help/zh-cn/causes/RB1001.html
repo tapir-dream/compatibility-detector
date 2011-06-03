@@ -1,0 +1,160 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RB1001: IE6 IE7 IE8(Q) 负边距 (margin) 导致元素溢出 hasLayout 容器时显示异常</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据W3C <a href="http://www.w3.org/TR/CSS21/box.html#margin-properties">CSS2.1规范第8.3节</a>中的描述，边距属性设置了一个框的边距区的宽度。<a href="http://www.w3.org/TR/CSS21/box.html#propdef-margin">'margin'</a> 缩写属性设置所有四边的边距，而其它的边距属性（ <a href="http://www.w3.org/TR/CSS21/box.html#propdef-margin-top">'margin-top'</a> ，<a href="http://www.w3.org/TR/CSS21/box.html#propdef-margin-right">'margin-right'</a> ， <a href="http://www.w3.org/TR/CSS21/box.html#propdef-margin-bottom">'margin-bottom'</a> 及 <a href="http://www.w3.org/TR/CSS21/box.html#propdef-margin-left">'margin-left'</a> ）只设置它们代表的那一边的边距。</p>
+      <p>边距属性的取值可以是下面值之一： </p>
+      <ul>
+      <li><strong>&lt;length&gt; </strong>指定一个固定的宽度。</li>
+      <li><strong>&lt;percentage&gt; </strong>百分比的计算基于生成的框的包含块的宽度。</li>
+      <li><strong>auto </strong>其表现细节请参见宽度和边距的计算一章。</li>
+      </ul>
+<pre>边距属性允许有负值，不过可能有与实现相关的限制。 </pre>
+
+
+      <h2 id="description">问题描述</h2>
+      <p>IE6 IE7 IE8(Q) 负边距 (margin) 导致元素溢出 hasLayout 容器时显示异常。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>严重的情况下会破坏整体布局。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>对于此问题，我们通过以下的测试用例来说明。</p>
+      <p>分析以下代码：</p>
+<pre>
+&lt;div style=&quot;width:100px; height:100px; border:1px solid red;&quot;&gt;
+    &lt;div style=&quot;border:1px solid blue; margin:-5px;&quot;&gt;123&lt;/div&gt;
+&lt;/div&gt;
+</pre>
+      <p>一个100x100像素的红色边框 DIV 元素内包含了一个没有设置宽度和高度的蓝色边框的 DIV 元素，且这个子元素四个方向各设置了-5px的 'margin' 。这段代码在不同的浏览器环境中的表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7(Q) IE8(Q)</th>
+          <th>IE7(S)</th>
+          <th>IE8(S) Firefox Opera Safari Chrome</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RB1001/01.png" alt=""></td>
+          <td><img src="../../tests/RB1001/02.png" alt=""></td>
+          <td><img src="../../tests/RB1001/03.png" alt=""></td>
+        </tr>
+      </table>
+      <P>在实际情况中，当给一个块级元素设置了负值的 'margin' ，如果该元素的父容器 'overflow' 为 'visible' （ 'overflow' 的默认值就是 'visible' ），这个块级元素可能会由于负值的 'margin' 而使其父容器无法全容纳其自身，其会部分“溢出”父容器并在父容器之外被渲染。关于盒模型的详细资料，请参考 W3C CSS2.1 规范中的内容： <a href="http://www.w3.org/TR/CSS21/box.html">Box Model</a> 。</P>
+      <p>然而根据上面的测试代码的结果可见，</p>
+      <ul>
+      <li>在 <em>IE6 IE7(Q) IE8(Q)</em> 下，由于负值的 'margin' 导致子元素 DIV 超出其父容器部分，均被父元素隐藏，而其 'margin-bottom' 由于没有超出父容器则被显示出来。</li>
+      <li>在 <em>IE7(S)</em> 下情况比较特殊， 'margin-top' 与 'margin-right' 与 IE6 中一样，超出父容器的部分被父容器隐藏。而 'margin-bottom' 虽然并没有因为其负值而超出父容器，但浏览器却将子元素 DIV 的内部裁去了5px。而 'margin-left' 则没有因为负值的影响而被父容器隐藏，反而显示了出来。</li>
+      <li>在 <em>IE8(S) Firefox Chrome Safari  Opera</em> 下，浏览器按照 W3C 的规范对代码进行解释，为我们预期的效果。</li>
+      </ul>
+      <p>上面测试代码中容器由于设置了宽度及高度而触发了其 hasLayout 属性，下面看看若容器的 hasLayout 为 false，IE 对由负的 'margin' 溢出容器的子元素的处理：</p>
+<pre>
+&lt;div style=&quot;border:1px solid red;&quot;&gt;
+    &lt;div style=&quot;border:1px solid blue; margin:-5px;&quot;&gt;123&lt;/div&gt;
+&lt;/div&gt;
+</pre>
+      <p>上述代码中的元素均没有触发IE中的hasLayout属性，这段代码在不同的浏览器环境中的表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6(Q)</th>
+          <th>IE6(S)</th>
+          <th>IE7(Q) IE8(Q)</th>
+          <th>IE7(S)</th>
+          <th>IE8(S)</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RB1001/04.png" alt=""></td>
+          <td><img src="../../tests/RB1001/05.png" alt=""></td>
+          <td><img src="../../tests/RB1001/06.png" alt=""></td>
+          <td><img src="../../tests/RB1001/07.png" alt=""></td>
+          <td><img src="../../tests/RB1001/08.png" alt=""></td>
+        </tr>
+      </table>
+      <p>在容器没有触发hasLayout属性后，出现了更加怪异的效果，且无法找到其规律。</p>
+
+      <h2 id="solutions">解决方案</h2>
+            <p>在确保元素的容器触发 hasLayout 的前提下，为该元素同时设置 'position:relative' 和 'zoom:1'。</p>
+      <p>首先需要保证容器在IE中触发 <a href="http://msdn.microsoft.com/en-us/library/ms533776%28VS.85%29.aspx">hasLayout</a> 属性，可以通过<span class="hl_1">zoom:1</span>实现。</p>
+      <p>在 <em>IE7(S)</em> 中，当使设置了负值 'margin' 的元素的 <a href="http://msdn.microsoft.com/en-us/library/ms533776%28VS.85%29.aspx">hasLayout</a> 属性为 'true' ，即触发该元素的 <a href="http://msdn.microsoft.com/en-us/library/ms533776%28VS.85%29.aspx">hasLayout</a> 特性后，此 Bug 现象消失，例如为该元素设置宽度或高度，或者在完全不影响该元素盒模型的情况下使用 <span class="hl_1">zoom:1</span> 来触发 <a href="http://msdn.microsoft.com/en-us/library/ms533776%28VS.85%29.aspx">hasLayout</a> 从而消除此 Bug 。</p>
+      <p>在 <em>IE6 IE7(Q) IE8(Q)</em> 中，仅仅触发 <a href="http://msdn.microsoft.com/en-us/library/ms533776%28VS.85%29.aspx">hasLayout</a> 特性并不一定能消除此 Bug ，同时还需要为该元素设置 'position:relative'，即在完全不影响该元素盒模型的情况下使用 <span class="hl_1">zoom:1</span> 'position:relative' 。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>&nbsp;</td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-16</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>margin negative overflow container 负边距</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>
+

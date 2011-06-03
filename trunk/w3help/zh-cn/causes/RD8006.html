@@ -1,0 +1,133 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RD8006: IE6 IE7 IE8(Q) 中右浮动元素会撑大其祖先级元素的宽度</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 CSS2.1 规范中的描述，浮动元素将尽可能的向左或向右浮动，直到该元素的外边界碰到其包含块的边界或另一个浮动元素的外边界。</p>
+      <p>换句话说，当浮动元素的包含块能够在横向完全容纳该元素时，该元素不会再继续撑大其包含块。</p>
+      <p>关于浮动元素的详细资料，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/visuren.html#floats">9.5 Floats</a> 中的内容。</p>
+      <p>关于包含块的详细资料，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/visudet.html#containing-block-details">10.1 Definition of "containing block"</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 IE7 IE8(Q) 中，一个右浮动元素将尽可能的向右布局，并撑大其所有宽度为 'auto' 的祖先级元素的宽度，直到遇到一个明确设定了宽度的祖先级元素为止。</p>
+      <p class="comment">注：这种现象仅在该元素有宽度为 shrink-to-fit 的的祖先级元素时才可以看到。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>这个问题将导致一些元素在各浏览器中的实际尺寸或布局不一致。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+<pre>&lt;div id="<strong>Container</strong>" style="width:300px; position:relative;"&gt;
+    &lt;div id="<strong>STF_1</strong>" style="height:50px; background:lightgrey; position:absolute;"&gt;
+        &lt;div id="<strong>STF_2</strong>" style="float:left; height:40px; background:darkgray;"&gt;
+            &lt;div id="<strong>Wrapper</strong>" style="border-top:10px solid dimgray;"&gt;
+                &lt;div id="<strong>Right</strong>" style="<span class="hl_1">float:right</span>; width:100px; height:30px; background:url(x.gif);"&gt;&lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</pre>
+      <ul>
+        <li><strong>Container</strong> 是容器，设置宽度为 300px 的目的是限制其内容的最大宽度。设置了 'position:relative' 是为了使其成为 <strong>STF_1</strong> 的包含块，以使 <strong>STF_1</strong> 的最大宽度也是 300px。</li>
+        <li><strong>STF_1</strong> 是一个没有设置 'width'（默认值是 'auto'）、'left' 和 'right' 的绝对定位元素，因此它的宽度将是 shrink-to-fit。它的高度被设置为 50px，超出 <strong>Right</strong> 的高度以便观察其最终宽度。</li>
+        <li><strong>STF_2</strong> 是一个没有设置 'width'（默认值是 'auto'）的左浮动元素，因此它的宽度也将是 shrink-to-fit。它的高度被设置为 40px，超出 <strong>Right</strong> 的高度以便观察其最终宽度。</li>
+        <li><strong>Wrapper</strong> 的宽度为 'auto'，设置 border-top 以便于观察其最终宽度。</li>
+        <li><strong>Right</strong> 是一个 100px * 30px 的右浮动元素，设置了一个网格状的图片背景。</li>
+      </ul>
+      <p>根据 shrink-to-fit 的计算公式，可以计算出 <strong>STF_1</strong> 和 <strong>STF_2</strong> 的宽度均应该为 100px。<br />
+      <strong>Wrapper</strong> 的宽度为 auto，它的宽度应该等于 <strong>STF_2</strong> 的宽度，也是 100px。</p>
+      <p>这段代码在不同的浏览器环境中表现如下：</p>
+      <p><img width="315" height="185" src="006/1.png" alt="Snapshot" /></p>
+      <p>删除 <strong>STF_1</strong> 和 <strong>Wrapper</strong> 后：</p>
+      <p><img width="315" height="145" src="006/2.png" alt="Snapshot" /></p>
+      <p>可见，在 <em>IE6 IE7 IE8(Q)</em> 中，第一张图中的 <strong>STF_1</strong>、<strong>STF_2</strong> 和 <strong>Wrapper</strong>，以及第二张图中的 <strong>STF_2</strong> 的最终宽度都是 300px，与预期的结果不符。<strong>Right</strong> 被尽可能的在最右侧被渲染，直到其所有宽度为 'auto' 的祖先级元素的宽度到达极限为止。<br />
+      在其他浏览器中，第一张图中的 <strong>STF_1</strong>、<strong>STF_2</strong> 和 <strong>Wrapper</strong>，以及第二张图中的 <strong>STF_2</strong> 的最终宽度均为 100px，是正确的值。</p>
+      <p>这个差异是由 <em>IE6 IE7 IE8(Q)</em> 中布局右浮动元素时的 Bug 造成的。</p>
+      <p class="comment">注：如果受影响的元素的 'direction' 是 'rtl' ，情况又有不同，并且在 IE6 IE7(Q) IE8(Q) 中与 IE7(S) 中的表现也不相同。将 'direction' 设置为 'rtl' 的情况并不常见，因此本文不做分析。</p>
+      <p>该 Bug 将导致受影响的元素的宽度尽可能的大。</p>
+      <p>该 Bug 在 IE8(S) 中被修复。</p>
+      <p>如果一个页面在 IE6(S) IE7(S) 或 IE6(Q) IE7(Q) IE8(Q) 中被设计，并且触发了该 Bug，那么这个页面在其他浏览器中的布局将与预期的不符。部分内容将更加紧凑。</p>
+      <p>关于 shrink-to-fit 算法的详细资料，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/visudet.html#float-width">10.3.5 Floating, non-replaced elements</a>、<a href="http://www.w3.org/TR/CSS21/visudet.html#abs-non-replaced-width">10.3.7 Absolutely positioned, non-replaced elements</a> 和 <a href="http://www.w3.org/TR/CSS21/visudet.html#inlineblock-width">10.3.9 'Inline-block', non-replaced elements in normal flow</a> 中的内容。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>如果有一个右浮动元素，应注意避免其祖先级元素的宽度为 shrink-to-fit，即给它们设定一个明确的宽度。以使页面布局在各浏览器中的表现一致。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="RM1004">RM1004: IE6 IE7 IE8(Q) 中零高度的浮动元素会阻挡其兄弟浮动元素</a></li>
+        <li><a href="RD8004">RD8004: IE6 IE7 IE8(Q) 中浮动元素宽度的 shrink-to-fit 算法与标准规定的算法不同</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RD8006/float_right.html">float_right.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-06-21</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>float right shrink-to-fit 右浮动 父元素 祖先级元素 宽度 撑大</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

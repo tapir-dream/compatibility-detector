@@ -1,0 +1,180 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RC3005: 各浏览器中背景图片起始位置的作用位置存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 CSS2.1 规范中的描述，'background-image' 特性可以设定元素的背景图片，此特性可应用于所有元素。<br />
+      'background-position' 特性指定了拥有背景图片的元素背景图片的初始位置。当此特性取值为 <a href="http://www.w3.org/TR/CSS21/syndata.html#value-def-percentage">&lt;percentage&gt;</a> 和 <a href="http://www.w3.org/TR/CSS21/syndata.html#value-def-length">&lt;length&gt;</a> 时，图片位置的偏移均参照元素的 padding box，即若没有明确设定 'background-position' 特性，其初始值为 &quot;0% 0%&quot;，背景图片的起始点应刚好起始于元素的 padding edge 的左上角。</p>
+      <p>在 CSS3 草案的背景及边框模块定义中新增加了 'background-origin' 特性，这个特性可以指定背景图片的位置区域，其取值可以为 'padding-box'、'border-box'、'content-box'，分别可以将背景图片的起始位置设定在这些框上。</p>
+      <p>关于 背景 的详细信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/colors.html#background">14.2 The background</a> 及 CSS3 草案 <a href="http://www.w3.org/TR/css3-background/">CSS Backgrounds and Borders Module Level 3</a> 中的内容。</p>
+      
+      <h2 id="description">问题描述</h2>
+      <p>若设定了背景图片的元素在 IE6 IE7 IE8(Q) 中没有触发 hasLayout 特性，则此时在 IE6 IE7 IE8(Q) 中元素背景图片的位置会与其他浏览器出现差异。</p>
+      
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题会导致背景图片在不同浏览器中出现差异，可能导致依赖背景图片的设计在某些浏览器中异常。</p>
+      
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：<em>bg_tiling.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  .bg { background-image:url(bg.gif); border:30px double brown; padding:30px; }
+  .child { width:80px; height:30px; background:wheat; opacity:0.5; filter:alpha(opacity=50); }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body style=&quot;margin:0;&quot;&gt;
+&lt;div style=&quot;float:left;&quot;&gt;
+  &lt;div class=&quot;bg&quot;&gt;
+    &lt;div class=&quot;child&quot;&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div style=&quot;zoom:1; clear:left; margin-top:5px;&quot;&gt;
+  &lt;div style=&quot;float:left;&quot; class=&quot;bg&quot;&gt;
+    &lt;div class=&quot;child&quot;&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码中 .bg 设定了背景图片 <img src="../../tests/RC3005/bg.gif" alt="" />，为了便于查看图片的起始位置，特地将图片左上角放置了一个 20*20 的半透明方块。第二组元素比第一组多设定了 'zoom' 特性，则此特性在 IE6 IE7 IE8(Q) 中会触发元素的 hasLayout 特性。</p>
+      <p>这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RC3005/bg1.gif" alt="" /></td>
+          <td><img src="../../tests/RC3005/bg2.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>可见，</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8(Q)</em> 中，未设定 'zoom' 特性 (即未触发 hasLayout 特性) 的元素的背景图片的默认起始位置为元素的 border box，而当为元素在 IE 中触发了 hasLayout 特性后，其背景图片的起始位置变为 padding box；</li>
+        <li>在 <em>其他浏览器</em> 中，背景图片的起始位置始终为 padding box，与规范相符。</li>
+      </ul>
+      <p>下面观察各浏览器对 CSS3 新特性 'background-origin' 的支持情况：<em>bgorigin.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+  * { font:12px 'Trebuchet MS'; }
+  .bg { background-image:url(bg.gif); border:10px double brown; padding:10px; }
+  .child { width:120px; height:30px; line-height:30px; text-align:center; background:wheat; opacity:0.7; filter:alpha(opacity=70); }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;div style=&quot;float:left;&quot;&gt;
+  &lt;div class=&quot;bg&quot; style=&quot;<span class="hl_1">background-origin:border-box;</span>&quot;&gt;
+    &lt;div class=&quot;child&quot;&gt;border-box&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div style=&quot;float:left; clear:left; margin-top:5px;&quot;&gt;
+  &lt;div class=&quot;bg&quot; style=&quot;<span class="hl_1">background-origin:padding-box;</span>&quot;&gt;
+    &lt;div class=&quot;child&quot;&gt;padding-box&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div style=&quot;float:left; clear:left; margin-top:5px;&quot;&gt;
+  &lt;div class=&quot;bg&quot; style=&quot;<span class="hl_1">background-origin:content-box;</span>&quot;&gt;
+    &lt;div class=&quot;child&quot;&gt;content-box&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox<sup>1</sup></th>
+          <th>Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RC3005/bgo1.gif" alt="" /></td>
+          <td><img src="../../tests/RC3005/bgo2.gif" alt="" /></td>
+          <td><img src="../../tests/RC3005/bgo3.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>可见，Chrome、Safari、Opera 已经支持 CSS3 新特性 <span class="hl_1">background-origin</span>。</p>
+      <p class="comment">注 1: IE9 beta 以及 Firefox 4.0 beta 的最新版本已经支持 <span class="hl_1">background-origin</span>。</p>
+      
+      <h2 id="solutions">解决方案</h2>
+      <p>在为元素设定 'background-image' 特性时，若元素拥有边框，则需要使其在 IE6 IE7 IE8(Q) 中触发 hasLayout 特性。</p>
+      
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td> IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.11<br />
+              Chrome 8.0.552.5 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.63
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RC3005/bg_tiling.html">bg_tiling.html</a><br />
+            <a href="../../tests/RC3005/bgorigin.html">bgorigin.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-20</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>background background-image tile CSS3 背景 图片 background-origin border-box padding-box</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+</head>
+<body>
+reload 参数：<input value="http://www.google.com/"><br />
+<button onclick="location.reload(document.getElementsByTagName('input')[0].value)">
+使用 location.reload 方法点击此按钮刷新本页 <br />
+参数为上一个 input 的当前 value 字符串
+</button><br />
+<button onclick="location.reload(1000)">
+ location.reload(1000)
+</button><br />
+<button onclick=" location.reload(true)">
+ location.reload(true)
+</button><br />
+<button onclick=" location.reload(false)">
+ location.reload(false)
+</button><br />
+<button onclick=" location.reload({})">
+ location.reload({})
+</button>
+</body>
+</html>

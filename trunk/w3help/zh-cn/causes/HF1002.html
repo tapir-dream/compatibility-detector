@@ -1,0 +1,477 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HF1002: 不能以 size 属性精确控制 INPUT 文本框或密码框的宽度</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 W3C HTML4.01 规范中的描述，当INPUT元素的 &quot;type&quot; 属性值为 &quot;text&quot; （文本框）或 &quot;password&quot; 时（密码框）， &quot;size&quot; 属性可以使输入框的宽度能够显示指定数目的字符。</p>
+      <p>关于 &quot;size&quot; 属性的详细信息，请参考 HTML 4.01规范 <a href="http://www.w3.org/TR/html401/interact/forms.html#h-17.4">17.4</a> 中的内容。</p>
+      <p></p>
+      <h2 id="description">问题描述</h2>
+      <p>字体样式会影响根据 INPUT 元素的 &quot;size&quot; 属性计算的文本框宽度。其中包括 &quot;font-family&quot; 、 &quot;font-size&quot; 、 &quot;font-weight&quot; 、 &quot;font-style&quot; 、 &quot;letter- spacing&quot; 等。而在不同的浏览器中，INPUT[type=text/password] 的默认样式也是不同的。</p>
+      <h2 id="influence">造成的影响</h2>
+      <p>若仅仅为 INPUT 元素设置 &quot;size&quot; 属性，却没有显式地设定宽度，则在不同的浏览器中 INPUT 元素会出现不同的宽度，可能导致布局上的差异。</p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>在具体分析 size 属性对 INPUT 元素计算宽度的影响之前，先了解一下 INPUT[type=text/password] 元素的默认字体样式。<sup>1</sup></p>
+      <p></p>
+      <p></p>
+      <p>下面统计 <strong>INPUT[type=text]</strong> 元素在各浏览器中默认字体样式的差异：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8 @GB2312<sup>2</sup></th>
+          <th>IE6 IE7 IE8 @UTF-8</th>
+          <th>Firefox</th>
+          <th>Chrome</th>
+          <th>Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <th>font-family</th>
+          <td>SimSun</td>
+          <td>Arial</td>
+          <td>SimSun</td>
+          <td>Arial</td>
+          <td>SimSun</td>
+          <td>宋体</td>
+        </tr>
+        <tr>
+          <th>font-size</th>
+          <td>10pt<sup>3</sup></td>
+          <td>10pt</td>
+          <td>13px</td>
+          <td>13px</td>
+          <td>13px</td>
+          <td>13px</td>
+        </tr>
+      </table>
+      <p>下面统计<strong>INPUT[type=password]</strong>元素在各浏览器中默认字体样式的差异：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE8 IE8(EmulateIE7) @GB2312/UTF-8<sup>4</sup></th>
+          <th>IE7 @GB2312/UTF-8</th>
+          <th>Firefox</th>
+          <th>Chrome</th>
+          <th>Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <th>font-family</th>
+          <td>Tahoma</td>
+          <td>SimSun</td>
+          <td>SimSun</td>
+          <td>Arial</td>
+          <td>SimSun</td>
+          <td>宋体</td>
+        </tr>
+        <tr>
+          <th>font-size</th>
+          <td>10pt<sup>3</sup></td>
+          <td>10pt</td>
+          <td>13px</td>
+          <td>13px</td>
+          <td>13px</td>
+          <td>13px</td>
+        </tr>
+      </table>
+      <p class="comment"> 【注】<br />
+        1. INPUT 元素的其他样式上的差异请参考 &quot;各元素在不同浏览器下的默认样式差异&quot; 一文。本文仅关注字体样式的差异。<br />
+        2. 字体的默认样式在 IE 中是受页面编码影响的，在其他浏览器中则直接受浏览器语言版本的影响（本文提及的浏览器均为简体中文版）。<br />
+        3. INPUT 元素文本框在所有浏览器中默认字号在IE中是10pt，在其他浏览器中是13px。但在使用屏幕媒体（显示器）查看网页时，二者的大小在绝大多数情况下（96dpi）是完全一致的。（10pt * 1/72in * 96dpi = 13.3333px ≈ 13px）。<br />
+        4. 对于密码框，除 IE 外，其他浏览器均与 INPUT[type=&quot;text&quot;] 文本框一致。而 IE6 与 IE8 中对于 INPUT[type=&quot;password&quot;] 密码框则均为 &quot;Tahoma&quot; ，IE7 中则为 &quot;宋体&quot; 。对于密码框各浏览器在 &quot;UTF-8&quot; 与 &quot;GB2312&quot; 两种编码下的默认字体样式相同。 </p>
+      <p>因为 INPUT[type=text/password] 元素的 &quot;size&quot; 属性将根据其值决定该元素的宽度，而各浏览器中该元素的默认字体也有差异，所以设置了相同 &quot;size&quot; 的 INPUT[type=text/password] 元素在各浏览器中的宽度也会有差异。</p>
+      <p class="comment">注意：INPUT 元素继承的字体特性将被覆盖</p>
+      <p>各浏览器中，为表单控件设置的默认样式是包括 &quot;字体样式&quot; 的，也就是说，表单控件被明确设定了字体样式。因此，表单控件继承自其祖先级元素的字体样式设置将被覆盖。</p>
+      <p>换句话说，除非用户明确设定表单控件的字体样式，否则这些控件看起来并没有从它们的祖先级元素继承下来任何字体样式。</p>
+      <p>请参考以下测试代码：</p>
+      <pre>&lt;div style=&quot;<span class="hl_3">font-size:24px;</span> font-family:Tahoma;&quot;&gt;
+    Tahoma 24px;
+    &lt;input type=&quot;text&quot; value=&quot;ABC123&quot; /&gt;
+&lt;/div&gt;</pre>
+      <p>这段代码在所有浏览器中运行后，INPUT 元素的字号字体特性仍为其默认样式，不受父元素的影响：</p>
+      <img src="../../tests/HF1002/inputfontsizeinherit.gif" alt="INPUT font-size style inherit" />
+      <p>下面看看在相同的字体设置下根据size属性计算出来的宽度的差异</p>
+      <p>在相同的字体设置下，IE Firefox Chrome计算出的文本框的宽度比较接近，Safari Opera 则显得比其他浏览器更小。</p>
+      <p>分析以下代码：</p>
+      <pre>&lt;style&gt;
+    input { font:12px Simsun; margin:0; padding:0; border:0; }
+&lt;/style&gt;
+&lt;script&gt;
+    for (var i = 1; i &lt; 13; i++) {
+        document.write('&lt;input type=&quot;text&quot; size=&quot;' + i + '&quot; /&gt;&lt;br /&gt;');
+    }
+&lt;/script&gt;</pre>
+      <p>将 INPUT 元素的 margin、padding和 border 都清零，字体均为宋体 12px，查看 &quot;size&quot; 属性值为 1 至 12 时的宽度（单位：px）：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE(Q)</th>
+          <th>IE6(S)</th>
+          <th>IE7(S)</th>
+          <th>IE8(S)</th>
+          <th>Firefox</th>
+          <th>Chrome</th>
+          <th>Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <th>size=&quot;1&quot;</th>
+          <td>14</td>
+          <td>12</td>
+          <td>12</td>
+          <td>12</td>
+          <td>14</td>
+          <td>14</td>
+          <td>8</td>
+          <td>6</td>
+        </tr>
+        <tr>
+          <th>size=&quot;2&quot;</th>
+          <td>20<span class="hl_1">(↑6)</span></td>
+          <td>18<span class="hl_1">(↑6)</span></td>
+          <td>18<span class="hl_1">(↑6)</span></td>
+          <td>18<span class="hl_1">(↑6)</span></td>
+          <td>20<span class="hl_1">(↑6)</span></td>
+          <td>20<span class="hl_1">(↑6)</span></td>
+          <td>14<span class="hl_1">(↑6)</span></td>
+          <td>12<span class="hl_1">(↑6)</span></td>
+        </tr>
+        <tr>
+          <th>size=&quot;3&quot;</th>
+          <td>26<span class="hl_1">(↑6)</span></td>
+          <td>24<span class="hl_1">(↑6)</span></td>
+          <td>24<span class="hl_1">(↑6)</span></td>
+          <td>24<span class="hl_1">(↑6)</span></td>
+          <td>26<span class="hl_1">(↑6)</span></td>
+          <td>26<span class="hl_1">(↑6)</span></td>
+          <td>20<span class="hl_1">(↑6)</span></td>
+          <td>18<span class="hl_1">(↑6)</span></td>
+        </tr>
+        <tr>
+          <th>size=&quot;4&quot;</th>
+          <td>32<span class="hl_1">(↑6)</span></td>
+          <td>30<span class="hl_1">(↑6)</span></td>
+          <td>30<span class="hl_1">(↑6)</span></td>
+          <td>30<span class="hl_1">(↑6)</span></td>
+          <td>32<span class="hl_1">(↑6)</span></td>
+          <td>32<span class="hl_1">(↑6)</span></td>
+          <td>26<span class="hl_1">(↑6)</span></td>
+          <td>24<span class="hl_1">(↑6)</span></td>
+        </tr>
+        <tr>
+          <th>size=&quot;5&quot;</th>
+          <td>38<span class="hl_1">(↑6)</span></td>
+          <td>36<span class="hl_1">(↑6)</span></td>
+          <td>36<span class="hl_1">(↑6)</span></td>
+          <td>36<span class="hl_1">(↑6)</span></td>
+          <td>38<span class="hl_1">(↑6)</span></td>
+          <td>38<span class="hl_1">(↑6)</span></td>
+          <td>32<span class="hl_1">(↑6)</span></td>
+          <td>30<span class="hl_1">(↑6)</span></td>
+        </tr>
+        <tr>
+          <th>size=&quot;6&quot;</th>
+          <td>44<span class="hl_1">(↑6)</span></td>
+          <td>42<span class="hl_1">(↑6)</span></td>
+          <td>42<span class="hl_1">(↑6)</span></td>
+          <td>42<span class="hl_1">(↑6)</span></td>
+          <td>44<span class="hl_1">(↑6)</span></td>
+          <td>44<span class="hl_1">(↑6)</span></td>
+          <td>38<span class="hl_1">(↑6)</span></td>
+          <td>36<span class="hl_1">(↑6)</span></td>
+        </tr>
+        <tr>
+          <th>size=&quot;7&quot;</th>
+          <td>50<span class="hl_1">(↑6)</span></td>
+          <td>48<span class="hl_1">(↑6)</span></td>
+          <td>48<span class="hl_1">(↑6)</span></td>
+          <td>48<span class="hl_1">(↑6)</span></td>
+          <td>50<span class="hl_1">(↑6)</span></td>
+          <td>50<span class="hl_1">(↑6)</span></td>
+          <td>44<span class="hl_1">(↑6)</span></td>
+          <td>42<span class="hl_1">(↑6)</span></td>
+        </tr>
+        <tr>
+          <th>size=&quot;8&quot;</th>
+          <td>56<span class="hl_1">(↑6)</span></td>
+          <td>54<span class="hl_1">(↑6)</span></td>
+          <td>54<span class="hl_1">(↑6)</span></td>
+          <td>54<span class="hl_1">(↑6)</span></td>
+          <td>56<span class="hl_1">(↑6)</span></td>
+          <td>56<span class="hl_1">(↑6)</span></td>
+          <td>50<span class="hl_1">(↑6)</span></td>
+          <td>48<span class="hl_1">(↑6)</span></td>
+        </tr>
+        <tr>
+          <th>size=&quot;9&quot;</th>
+          <td>62<span class="hl_1">(↑6)</span></td>
+          <td>60<span class="hl_1">(↑6)</span></td>
+          <td>60<span class="hl_1">(↑6)</span></td>
+          <td>60<span class="hl_1">(↑6)</span></td>
+          <td>62<span class="hl_1">(↑6)</span></td>
+          <td>62<span class="hl_1">(↑6)</span></td>
+          <td>56<span class="hl_1">(↑6)</span></td>
+          <td>54<span class="hl_1">(↑6)</span></td>
+        </tr>
+        <tr>
+          <th>size=&quot;10&quot;</th>
+          <td>68<span class="hl_1">(↑6)</span></td>
+          <td>66<span class="hl_1">(↑6)</span></td>
+          <td>66<span class="hl_1">(↑6)</span></td>
+          <td>66<span class="hl_1">(↑6)</span></td>
+          <td>68<span class="hl_1">(↑6)</span></td>
+          <td>68<span class="hl_1">(↑6)</span></td>
+          <td>62<span class="hl_1">(↑6)</span></td>
+          <td>60<span class="hl_1">(↑6)</span></td>
+        </tr>
+        <tr>
+          <th>size=&quot;11&quot;</th>
+          <td>74<span class="hl_1">(↑6)</span></td>
+          <td>72<span class="hl_1">(↑6)</span></td>
+          <td>72<span class="hl_1">(↑6)</span></td>
+          <td>72<span class="hl_1">(↑6)</span></td>
+          <td>74<span class="hl_1">(↑6)</span></td>
+          <td>74<span class="hl_1">(↑6)</span></td>
+          <td>68<span class="hl_1">(↑6)</span></td>
+          <td>66<span class="hl_1">(↑6)</span></td>
+        </tr>
+        <tr>
+          <th>size=&quot;12&quot;</th>
+          <td>80<span class="hl_1">(↑6)</span></td>
+          <td>78<span class="hl_1">(↑6)</span></td>
+          <td>78<span class="hl_1">(↑6)</span></td>
+          <td>78<span class="hl_1">(↑6)</span></td>
+          <td>80<span class="hl_1">(↑6)</span></td>
+          <td>80<span class="hl_1">(↑6)</span></td>
+          <td>74<span class="hl_1">(↑6)</span></td>
+          <td>72<span class="hl_1">(↑6)</span></td>
+        </tr>
+      </table>
+      <p>宋体为等宽字体，在 12px 下每个字符宽度为 6px ，可以看到所有浏览器各 &quot;size&quot; 值相差均为6px，即一个 12px 宋体英文字符的宽度，size=&quot;1&quot; 时各浏览器中文本框的宽度有很大不同，这也导致后面所有 &quot;size&quot; 值下宽度的不同。在相同的更宽字体下，IE Firefox Chrome 中的宽度比较接近，且偏大；而 Safari Opera 中的宽度则比较小。</p>
+      <br />
+      <p>下面将字体改为 &quot;Arial&quot; ，字号仍然为 12px，查看 &quot;size&quot; 属性值为 1 至 12 时的宽度（ 单位：px ）：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE(Q)</th>
+          <th>IE6(S)</th>
+          <th>IE7(S)</th>
+          <th>IE8(S)</th>
+          <th>Firefox</th>
+          <th>Chrome</th>
+          <th>Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <th>size=&quot;1&quot;</th>
+          <td>34</td>
+          <td>32</td>
+          <td>32</td>
+          <td>32</td>
+          <td>33</td>
+          <td>34</td>
+          <td>9</td>
+          <td>11</td>
+        </tr>
+        <tr>
+          <th>size=&quot;2&quot;</th>
+          <td>39<span class="hl_1">(↑5)</span></td>
+          <td>37<span class="hl_1">(↑5)</span></td>
+          <td>37<span class="hl_1">(↑5)</span></td>
+          <td>37<span class="hl_1">(↑5)</span></td>
+          <td>38<span class="hl_1">(↑5)</span></td>
+          <td>39<span class="hl_1">(↑5)</span></td>
+          <td>16<span class="hl_4">(↑7)</span></td>
+          <td>22<span class="hl_3">(↑11)</span></td>
+        </tr>
+        <tr>
+          <th>size=&quot;3&quot;</th>
+          <td>44<span class="hl_1">(↑5)</span></td>
+          <td>42<span class="hl_1">(↑5)</span></td>
+          <td>42<span class="hl_1">(↑5)</span></td>
+          <td>42<span class="hl_1">(↑5)</span></td>
+          <td>43<span class="hl_1">(↑5)</span></td>
+          <td>44<span class="hl_1">(↑5)</span></td>
+          <td>23<span class="hl_4">(↑7)</span></td>
+          <td>27<span class="hl_1">(↑5)</span></td>
+        </tr>
+        <tr>
+          <th>size=&quot;4&quot;</th>
+          <td>49<span class="hl_1">(↑5)</span></td>
+          <td>47<span class="hl_1">(↑5)</span></td>
+          <td>47<span class="hl_1">(↑5)</span></td>
+          <td>47<span class="hl_1">(↑5)</span></td>
+          <td>48<span class="hl_1">(↑5)</span></td>
+          <td>49<span class="hl_1">(↑5)</span></td>
+          <td>30<span class="hl_4">(↑7)</span></td>
+          <td>32<span class="hl_1">(↑5)</span></td>
+        </tr>
+        <tr>
+          <th>size=&quot;5&quot;</th>
+          <td>54<span class="hl_1">(↑5)</span></td>
+          <td>52<span class="hl_1">(↑5)</span></td>
+          <td>52<span class="hl_1">(↑5)</span></td>
+          <td>52<span class="hl_1">(↑5)</span></td>
+          <td>53<span class="hl_1">(↑5)</span></td>
+          <td>54<span class="hl_1">(↑5)</span></td>
+          <td>37<span class="hl_4">(↑7)</span></td>
+          <td>37<span class="hl_1">(↑5)</span></td>
+        </tr>
+        <tr>
+          <th>size=&quot;6&quot;</th>
+          <td>59<span class="hl_1">(↑5)</span></td>
+          <td>57<span class="hl_1">(↑5)</span></td>
+          <td>57<span class="hl_1">(↑5)</span></td>
+          <td>57<span class="hl_1">(↑5)</span></td>
+          <td>58<span class="hl_1">(↑5)</span></td>
+          <td>59<span class="hl_1">(↑5)</span></td>
+          <td>44<span class="hl_4">(↑7)</span></td>
+          <td>42<span class="hl_1">(↑5)</span></td>
+        </tr>
+        <tr>
+          <th>size=&quot;7&quot;</th>
+          <td>64<span class="hl_1">(↑5)</span></td>
+          <td>62<span class="hl_1">(↑5)</span></td>
+          <td>62<span class="hl_1">(↑5)</span></td>
+          <td>62<span class="hl_1">(↑5)</span></td>
+          <td>63<span class="hl_1">(↑5)</span></td>
+          <td>64<span class="hl_1">(↑5)</span></td>
+          <td>51<span class="hl_4">(↑7)</span></td>
+          <td>47<span class="hl_1">(↑5)</span></td>
+        </tr>
+        <tr>
+          <th>size=&quot;8&quot;</th>
+          <td>69<span class="hl_1">(↑5)</span></td>
+          <td>67<span class="hl_1">(↑5)</span></td>
+          <td>67<span class="hl_1">(↑5)</span></td>
+          <td>67<span class="hl_1">(↑5)</span></td>
+          <td>68<span class="hl_1">(↑5)</span></td>
+          <td>69<span class="hl_1">(↑5)</span></td>
+          <td>58<span class="hl_4">(↑7)</span></td>
+          <td>52<span class="hl_1">(↑5)</span></td>
+        </tr>
+        <tr>
+          <th>size=&quot;9&quot;</th>
+          <td>74<span class="hl_1">(↑5)</span></td>
+          <td>72<span class="hl_1">(↑5)</span></td>
+          <td>72<span class="hl_1">(↑5)</span></td>
+          <td>72<span class="hl_1">(↑5)</span></td>
+          <td>73<span class="hl_1">(↑5)</span></td>
+          <td>74<span class="hl_1">(↑5)</span></td>
+          <td>65<span class="hl_4">(↑7)</span></td>
+          <td>57<span class="hl_1">(↑5)</span></td>
+        </tr>
+        <tr>
+          <th>size=&quot;10&quot;</th>
+          <td>79<span class="hl_1">(↑5)</span></td>
+          <td>77<span class="hl_1">(↑5)</span></td>
+          <td>77<span class="hl_1">(↑5)</span></td>
+          <td>77<span class="hl_1">(↑5)</span></td>
+          <td>78<span class="hl_1">(↑5)</span></td>
+          <td>79<span class="hl_1">(↑5)</span></td>
+          <td>72<span class="hl_4">(↑7)</span></td>
+          <td>62<span class="hl_1">(↑5)</span></td>
+        </tr>
+        <tr>
+          <th>size=&quot;11&quot;</th>
+          <td>84<span class="hl_1">(↑5)</span></td>
+          <td>82<span class="hl_1">(↑5)</span></td>
+          <td>82<span class="hl_1">(↑5)</span></td>
+          <td>82<span class="hl_1">(↑5)</span></td>
+          <td>83<span class="hl_1">(↑5)</span></td>
+          <td>84<span class="hl_1">(↑5)</span></td>
+          <td>79<span class="hl_4">(↑7)</span></td>
+          <td>67<span class="hl_1">(↑5)</span></td>
+        </tr>
+        <tr>
+          <th>size=&quot;12&quot;</th>
+          <td>89<span class="hl_1">(↑5)</span></td>
+          <td>87<span class="hl_1">(↑5)</span></td>
+          <td>87<span class="hl_1">(↑5)</span></td>
+          <td>87<span class="hl_1">(↑5)</span></td>
+          <td>88<span class="hl_1">(↑5)</span></td>
+          <td>89<span class="hl_1">(↑5)</span></td>
+          <td>86<span class="hl_4">(↑7)</span></td>
+          <td>72<span class="hl_1">(↑5)</span></td>
+        </tr>
+      </table>
+      <p> &quot;Arial&quot; 字体为非等宽字体，浏览器在根据 &quot;size&quot; 属性计算宽度是产生了比较大的差异，并且通过测试发现，虽然设置了 size=&quot;12&quot;，计算出的宽度并不一定能装下12个英文字母里最宽的 &quot;w&quot; 。</p>
+      <p>在非等宽字体下，仍然是 IE Chrome Firefox 中的宽度比较接近，且偏大；Safari 在 size=&quot;1&quot; 时的宽度初始值较小，然而随着 &quot;size&quot; 属性的值的增大，其 &quot;增幅&quot; 比 IE Firefox Chrome 大，所以 Safari 中的文本框宽度会比其他浏览器宽很多；Opera 中只有在 size=&quot;1&quot; 与 size=&quot;2&quot; 时宽度比较特殊，之后其 &quot;增幅&quot; 也与 IE 相同。</p>
+      <p>可见：即便能保证 INPUT[type=text/password] 元素的字体样式在各浏览器中完全一致，该元素的最终宽度也可能出现差异。</p>
+      <h2 id="solutions">解决方案</h2>
+      <p>不要试图通过设置 &quot;size&quot; 属性使 INPUT[type=text/password] 元素在所有浏览器中的宽度一致，这是不可能的。在需要对这类元素做精确的控制时，应使用 CSS 的 'width' 和 'height' 特性。</p>
+      <p>另外不同浏览器的默认字体的区别会导致文本框内文字表现的差异，最好为 INPUT 元素显式设置字体样式覆盖其默认值，以保证文本框在所有浏览器中有相同的呈现效果。</p>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td> IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.2<br />
+              Chrome 5.0.356.2 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.51 </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HF1002/inputsize.html">inputsize.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-03</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>INPUT size text password 文本框 密码框 大小 宽度 字体样式</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

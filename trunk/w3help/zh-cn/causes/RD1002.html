@@ -1,0 +1,287 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RD1002: IE6 IE7(Q) IE8(Q) 中一个非替换元素的 'overflow' 为 'visible' 时其尺寸会为了容纳其非绝对定位的内容而变大</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>一个元素的 'overflow' 特性定义了当该元素的内容溢出该元素的内容区域时是否被剪切。它的默认值是 'visible'，即不进行剪切，这可能导致该元素的内容在该元素的内容区域之外被渲染。</p>
+      <p>关于 'overflow' 的更多信息，请参考 CSS 2.1 规范 <a href="http://www.w3.org/TR/CSS21/visufx.html#overflow">11.1.1 Overflow: the 'overflow' property</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 IE7(Q) IE8(Q) 中，如果一个非替换元素的 'overflow' 为 'visible'，当该元素无法完全容纳其非绝对定位的内容时，该元素的尺寸将被其内容撑大。</p>
+      <p>在上述情况发生时，为这个非替换元素设置的 'width' 和 'height' 与 CSS 2.1 中的 '<a href="http://www.w3.org/TR/CSS21/visudet.html#propdef-min-width">min-width</a>' 和 '<a href="http://www.w3.org/TR/CSS21/visudet.html#propdef-min-height">min-height</a>' 的作用类似：设定值不是最终的实际值，实际值可能更大。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>这个问题将导致一些元素的实际尺寸在 IE 和非 IE 浏览器中不一致，从而引起布局混乱、内容重叠等现象。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7(Q) IE8(Q)</th>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <h3>几种不同情况下的测试</h3>
+      <p>为了描述方便，我们将受此问题影响的元素称为 <strong>Container</strong>，其内容称为 <strong>Content</strong>。</p>
+      <h4>1. Content 位于 normal flow</h4>
+      <h4>1.1. Container 设定了尺寸</h4>
+      <p>基本测试代码：</p>
+<pre>
+&lt;div id="<strong>Container</strong>" style="width:100px; height:100px; background:silver;"&gt;
+  &lt;div id="<strong>Content</strong>" style="width:150px; height:150px; background:url(x.gif);"&gt;&lt;/div&gt;
+&lt;/div&gt;
+</pre>
+      <ul>
+        <li><strong>Container</strong> 的尺寸为 100px*100px，没有设置 'overflow'，因此其值为默认值 'visible'。</li>
+        <li><strong>Content</strong> 的尺寸为 150px*150px，设置了一个网格状的图片背景。它的尺寸比 <strong>Container</strong> 的尺寸大。</li>
+      </ul>
+      <p>根据 CSS 2.1 规范中的描述可知，<strong>Content</strong> 未被 <strong>Container</strong> 容纳的部分会溢出 <strong>Container</strong> 并在 <strong>Container</strong> 的内容区域之外被渲染。</p>
+      <p>这段代码在不同浏览器中的表现：</p>
+      <table class="compare list" width="400">
+        <tr><th width="50%">IE6 IE7(Q) IE8(Q)</th><th width="50%">其他浏览器</th></tr>
+        <tr>
+          <td><img width="150" height="150" src="002/1_01.png" alt="Snapshot"/></td>
+          <td><img width="150" height="150" src="002/1_02.png" alt="Snapshot"/></td>
+        </tr>
+      </table>
+      <p>在 <em>IE6 IE7(Q) IE8(Q)</em> 中，<strong>Container</strong> 设定的尺寸失效，实际尺寸被撑大。</p>
+      <p>在 <em>其他浏览器</em> 中表现正确。</p>
+      <p>在基本测试代码的基础上，给 <strong>Container</strong> 设置 'overflow:hidden' 后：</p>
+      <table class="compare list" width="200">
+        <tr><th>所有浏览器</th></tr>
+        <tr>
+          <td><img width="100" height="100" src="002/1_03.png" alt="Snapshot"/></td>
+        </tr>
+      </table>
+      <p>'overflow' 不为 'visible' 时，在所有浏览器中的表现一致。</p>
+      <p>在基本测试代码的基础上，给 <strong>Container</strong> 设置 'overflow:auto' 或 'overflow:scroll' 后：</p>
+      <table class="compare list" width="200">
+        <tr><th>所有浏览器</th></tr>
+        <tr>
+          <td><img width="100" height="100" src="002/1_04.png" alt="Snapshot"/></td>
+        </tr>
+      </table>
+      <p>同上，'overflow' 不为 'visible' 时，在所有浏览器中的表现一致。</p>
+      <p>在基本测试代码的基础上，给 <strong>Container</strong> 设置 'overflow-x:scroll' 后<sup>1</sup>：</p>
+      <table class="compare list" width="400">
+        <tr><th width="50%">IE6 IE7(Q) IE8(Q)</th><th width="50%">其他浏览器</th></tr>
+        <tr>
+          <td><img width="100" height="167" src="002/1_05.png" alt="Snapshot"/></td>
+          <td><img width="100" height="100" src="002/1_04.png" alt="Snapshot"/></td>
+        </tr>
+      </table>
+      <p>'overflow-y' 为 'visible'，在 <em>IE6 IE7(Q) IE8(Q)</em> 中，<strong>Container</strong> 设定的高度失效，实际高度被撑大。</p>
+      <p>设置 'overflow-x' 为 'auto'，结果相同。</p>
+      <p>设置 'overflow-y' 为 'scroll' 或 'auto'，而 'overflow-x' 为 'visible'，结果与上述结果类似，<strong>Container</strong> 设定的宽度失效，实际宽度被撑大。</p>
+      <p>不论如何设置 'overflow-x' 和 'overflow-y'，在 <em>其他浏览器</em> 中均表现正确。</p>
+      <p class="comment">
+        注：<br/>
+        1. 'overflow-x' 和 'overflow-y' 是 CSS 3 草案中引入的特性，虽然目前的 CSS 2.1 中没有对这两个特性的描述，但本文涉及的所有浏览器都支持它们。关于他们的更多信息（也会有兼容性问题）请参考 <a href="http://www.w3help.org/zh-cn/causes/RV1001">RV1001: 各浏览器中当 'overflow-x' 和 'overflow-y' 一个值为 'hidden' 另一个值为 'visible' 时的组合渲染结果存在差异</a> 中的内容。
+      </p>
+      <h4>1.2. Container 没有设定尺寸</h4>
+      <p>分析以下代码：</p>
+<pre>
+&lt;div style="width:100px; height:100px;"&gt;
+  &lt;div id="<strong>Container</strong> style="background:silver;"&gt;
+    &lt;div id="<strong>Content</strong>" style="width:150px; height:150px; background:url(x.gif);"&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</pre>
+      <ul>
+        <li><strong>Container</strong> 并没有设定尺寸，其父容器尺寸为 100px*100px。</li>
+        <li><strong>Content</strong> 的尺寸为 150px*150px。根据 CSS 2.1 'width' 和 'height' 的描述，<strong>Container</strong> 的尺寸应为 100px*150px。</li>
+      </ul>
+      <p>这段代码在不同浏览器中的表现：</p>
+      <table class="compare list" width="400">
+        <tr><th width="50%">IE6 IE7(Q) IE8(Q)</th><th width="50%">其他浏览器</th></tr>
+        <tr>
+          <td><img width="150" height="150" src="002/1_01.png" alt="Snapshot"/></td>
+          <td><img width="150" height="150" src="002/1_06.png" alt="Snapshot"/></td>
+        </tr>
+      </table>
+      <p>在 <em>IE6 IE7(Q) IE8(Q)</em> 中，<strong>Container</strong> 的实际宽度被撑大。</p>
+      <p>在 <em>其他浏览器</em> 中表现正确。</p>
+      <p>修改 'overflow' 的测试结果与 1.1 类似，故省略。</p>
+      <h4>2. Content 是浮动元素</h4>
+      <p>分析以下代码：</p>
+<pre>
+&lt;div id="<strong>Container</strong>" style="width:100px; height:100px; background:silver;"&gt;
+  &lt;div id="<strong>Content</strong>" style="float:left; width:150px; height:150px; background:url(x.gif);"&gt;&lt;/div&gt;
+&lt;/div&gt;
+</pre>
+      <ul>
+        <li><strong>Container</strong> 的尺寸为 100px*100px，没有设置 'overflow'，因此其值为默认值 'visible'。</li>
+        <li><strong>Content</strong> 的尺寸为 150px*150px，设置了一个网格状的图片背景。它是一个浮动元素。它的尺寸比 <strong>Container</strong> 的尺寸大。</li>
+      </ul>
+      <p>这段代码在不同浏览器中的表现：</p>
+      <table class="compare list" width="400">
+        <tr><th width="50%">IE6 IE7(Q) IE8(Q)</th><th width="50%">其他浏览器</th></tr>
+        <tr>
+          <td><img width="150" height="150" src="002/1_01.png" alt="Snapshot"/></td>
+          <td><img width="150" height="150" src="002/1_02.png" alt="Snapshot"/></td>
+        </tr>
+      </table>
+      <p>与 <strong>1.1 Content 位于 normal flow</strong> 中的测试一样，在 <em>IE6 IE7(Q) IE8(Q)</em> 中，<strong>Container</strong> 设定的尺寸失效，实际尺寸被撑大。</p>
+      <p>在 <em>其他浏览器</em> 中表现正确。</p>
+      <p><strong>Container</strong> 不设定尺寸的测试结果与 1.2 类似，故省略。</p>
+      <h4>3. Content 有负的外边距</h4>
+      <p>分析以下代码：</p>
+<pre>
+&lt;div id="<strong>Container</strong>" style="width:100px; height:100px; background:silver;"&gt;
+  &lt;div id="<strong>Content</strong>" style="width:150px; height:150px; margin-left:-20px; background:url(x.gif);"&gt;&lt;/div&gt;
+&lt;/div&gt;
+</pre>
+      <ul>
+        <li><strong>Container</strong> 的尺寸为 100px*100px，没有设置 'overflow'，因此其值为默认值 'visible'。</li>
+        <li><strong>Content</strong> 的尺寸为 150px*150px，设置了一个网格状的图片背景，并有一个负的左外边距。它的尺寸比 Container 的尺寸大。</li>
+      </ul>
+      <p>这段代码在不同浏览器中的表现：</p>
+      <table class="compare list" width="400">
+        <tr><th width="50%">IE6 IE7(Q) IE8(Q)</th><th width="50%">其他浏览器</th></tr>
+        <tr>
+          <td><img width="130" height="150" src="002/1_07.png" alt="Snapshot"/></td>
+          <td><img width="150" height="150" src="002/1_08.png" alt="Snapshot"/></td>
+        </tr>
+      </table>
+      <p>在 <em>IE6 IE7(Q) IE8(Q)</em> 中，<strong>Content</strong> 溢出的部分会被裁切<sup>1</sup>，仍能显示在 <strong>Container</strong> 内的部分会撑大 <strong>Container</strong>。</p>
+      <p>在 <em>其他浏览器</em> 中表现正确。</p>
+      <p><strong>Container</strong> 不设定尺寸的测试结果与 1.2 类似，故省略。</p>
+      <p class="comment">
+        注：<br/>
+        1. 这是 <em>IE6 IE7(Q) IE8(Q)</em> 中的另一个兼容性问题，具体请参考 <a href="http://www.w3help.org/zh-cn/causes/RB1001">RB1001: IE6 IE7 IE8(Q) 负边距 (margin) 导致元素溢出 hasLayout 容器时显示异常</a> 中的内容。
+      </p>
+      <h4>4. Content 相对定位</h4>
+      <p>分析以下代码：</p>
+<pre>
+&lt;div id="<strong>Container</strong>" style="width:100px; height:100px; background:silver;"&gt;
+  &lt;div id="<strong>Content</strong>" style="position:relative; left:20px; top:-20px; width:150px; height:150px; background:url(x.gif);"&gt;&lt;/div&gt;
+&lt;/div&gt;
+</pre>
+      <ul>
+        <li><strong>Container</strong> 的尺寸为 100px*100px，没有设置 'overflow'，因此其值为默认值 'visible'。</li>
+        <li><strong>Content</strong> 的尺寸为 150px*150px，设置了一个网格状的图片背景。它是一个相对定位元素，并且设置了偏移量。它的尺寸比 Container 的尺寸大。</li>
+      </ul>
+      <p>这段代码在不同浏览器中的表现：</p>
+      <table class="compare list" width="400">
+        <tr><th width="50%">IE6 IE7(Q) IE8(Q)</th><th width="50%">其他浏览器</th></tr>
+        <tr>
+          <td><img width="170" height="170" src="002/1_09.png" alt="Snapshot"/></td>
+          <td><img width="170" height="150" src="002/1_10.png" alt="Snapshot"/></td>
+        </tr>
+      </table>
+      <p>在 <em>IE6 IE7(Q) IE8(Q)</em> 中，<strong>Content</strong> 虽然有偏移量，但与 <strong>3. Content 有负的外边距</strong> 的情况不同，<strong>Container</strong> 仍会被 <strong>Content</strong> 撑大，就像 <strong>Content</strong> 不是相对定位元素时一样。</p>
+      <p>在 <em>其他浏览器</em> 中表现正确。</p>
+      <p><strong>Container</strong> 不设定尺寸的测试结果与 1.2 类似，故省略。</p>
+      <h4>5. Content 绝对定位</h4>
+      <p>分析以下代码：</p>
+<pre>
+&lt;div id="<strong>Container</strong>" style="width:100px; height:100px; background:silver;"&gt;
+  &lt;div id="<strong>Content</strong>" style="position:absolute; width:150px; height:150px; background:url(x.gif);"&gt;&lt;/div&gt;
+&lt;/div&gt;
+</pre>
+      <ul>
+        <li><strong>Container</strong> 的尺寸为 100px*100px，没有设置 'overflow'，因此其值为默认值 'visible'。</li>
+        <li><strong>Content</strong> 的尺寸为 150px*150px，设置了一个网格状的图片背景。它是一个绝对定位元素。它的尺寸比 Container 的尺寸大。</li>
+      </ul>
+      <p>这段代码在不同浏览器中的表现：</p>
+      <table class="compare list" width="200">
+        <tr><th>所有浏览器</th></tr>
+        <tr>
+          <td><img width="150" height="150" src="002/1_02.png" alt="Snapshot"/></td>
+        </tr>
+      </table>
+      <p>在 <em>所有浏览器</em> 中表现都没有差异。</p>
+      <h3>结论</h3>
+      <p>在 <em>IE6 IE7(Q) IE8(Q)</em> 中，对于 'overflow' 的错误处理在某些情况下会导致元素的实际尺寸与预期不符。</p>
+      <p>这个问题在 <em>IE6 IE7(Q) IE8(Q)</em> 中存在，在满足以下条件的元素上被触发：</p>
+      <ol>
+        <li>该元素是一个非替换元素。<sup>1</sup></li>
+        <li>该元素的 'overflow' 为 'visible'。<sup>2</sup></li>
+        <li>该元素的尺寸不能完全容纳其非绝对定位元素，或设置了负的外边距后未被剪切掉的子孙级元素的内容。</li>
+      </ol>
+      <p>这个问题将导致该元素的尺寸被其内容撑大。</p>
+      <p>这个问题在 IE7(S) 中被修复。</p>
+      <p class="comment">
+        注：<br/>
+        1. 这个问题一般发生在<strong>块级</strong>非替换元素上，但在受影响的浏览器中，如果一个<strong>行内</strong>非替换元素触发了 hasLayout，也将受此问题影响。<br/>
+        2. 可以细化为该元素的 'overflow-x' 为 'visible' 或 'overflow-y' 为 'visible'，这将导致在横向或纵向溢出的非绝对定位元素或设置了负的外边距后未被剪切掉的子孙级元素的内容在横向或纵向撑大其尺寸。
+      </p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>
+      使用能触发标准模式 (S) 的 DTD，以将受此问题影响的浏览器的范围缩小到仅 IE6(S)。<br />
+      如果不能保证一个希望尺寸固定的非替换元素总是能容纳其内容，请将该元素的 'overflow' 设置为非 'visible' 的值。
+      </p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="RV1001">RV1001: 各浏览器中当 'overflow-x' 和 'overflow-y' 一个值为 'hidden' 另一个值为 'visible' 时的组合渲染结果存在差异</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RD1002/expand.html">expand.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-05-19</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>overflow visible 非替换元素 尺寸 撑大 内容 溢出</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

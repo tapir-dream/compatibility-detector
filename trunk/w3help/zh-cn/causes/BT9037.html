@@ -1,0 +1,194 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BT9037: IE 中页面内 OBJECT 对象相对其他浏览器额外包含了其引入的 ActiveX 插件的部分私有属性</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>OBJECT 元素定义一个嵌入的对象。允许规定插入 HTML 文档中的对象的数据和参数，以及可用来显示和操作数据的代码。</p>
+      <p>对应到 DOM 中则为 HTMLObjectElement 对象，这个接口定义如下：</p>
+<pre>
+interface HTMLObjectElement : HTMLElement {
+  readonly attribute HTMLFormElement form;
+           attribute DOMString       code;
+           attribute DOMString       align;
+           attribute DOMString       archive;
+           attribute DOMString       border;
+           attribute DOMString       codeBase;
+           attribute DOMString       codeType;
+           attribute DOMString       data;
+           attribute boolean         declare;
+           attribute DOMString       height;
+           attribute long            hspace;
+           attribute DOMString       name;
+           attribute DOMString       standby;
+           attribute long            tabIndex;
+           attribute DOMString       type;
+           attribute DOMString       useMap;
+           attribute long            vspace;
+           attribute DOMString       width;
+  // Introduced in DOM Level 2:
+  readonly attribute Document        contentDocument;
+};
+</pre>
+      <p>关于 OBJECT 元素的详细信息，请参考 HTML 4.01 规范 <a href="http://www.w3.org/TR/html401/struct/objects.html#h-13.3">13.3 Generic inclusion: the OBJECT element</a> 中的内容。</p>
+      <p>关于 HTMLObjectElement 对象的详细信息，请参考 HTML 4.01 规范 <a href="http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-9893177">1.6.5. Object definitions - Interface HTMLObjectElement</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE 中页面内每一个 OBJECT 元素创建的对应 DOM 对象不完全是 W3C 规范中标准的 HTMLObjectElement 对象，这个对象额外包含了其引入的 ActiveX 插件的一些私有属性。而这些属性在非 IE 浏览器中均不存在。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>由于对于 OBJECT 元素所对应的 DOM 对象 HTMLObjectElement，IE 和 Chrome、Safari 中的对象类型有本质区别，这将导致若直接访问 OBJECT 元素所引入的插件的私有属性，将仅在 IE 中可以正常返回，其他浏览器均会报错。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+<pre>
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;object id=&quot;A&quot; classid=&quot;clsid:6BF52A52-394A-11d3-B153-00C04F79FAA6&quot; style=&quot;width:100px; height:100px;&quot;&gt;
+&lt;param name=&quot;url&quot; value=&quot;Kalimba.mp3&quot; /&gt;
+&lt;/object&gt;
+&lt;script&gt;
+alert(document.getElementById(&quot;A&quot;));
+for (var i in document.getElementById(&quot;A&quot;)) {
+document.write(i + '&lt;br&gt;');
+}
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+      <p>上面代码通过 OBJECT 元素创建了一个 Media Player 插件，并使用 PARAM 元素引入了一个 MP3 文件。<strong>由于 Firefox 和 Opera 不支持这种方式，所以本文不考虑这两种浏览器。</strong></p>
+      <p>这段代码在各浏览器中运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE8<sup>1</sup></th>
+          <th>Chrome Safari</th>
+        </tr>
+        <tr>
+          <td>[Object]</td>
+          <td>[HTMLObjectElement]</td>
+        </tr>
+      </table>
+      <p class="comment">
+        1. IE6  IE7 无法正确返回一个 DOM 对象的接口类型，如 DIV 元素，返回的只是 [Object] 而不是 [HTMLDivElement]。但在 IE8(S) 中开始支持同 Chrome、Firefox 一样返回一个 DOM 对象的实际接口类型。
+      </p>
+      <p>在 IE8(S) 中没有返回预期的“HTMLObjectElement”。通过对这个对象的遍历，得到的 key 中，IE 比 Chrome、Safari 多了很多，如：URL、openState、playState、controls 等。这些都是用于控制 Media Player 的特殊属性或对象。且不属于 W3C 规范中定义的 HTMLObjectElement 对象。<br />
+      所以在 IE 中，返回的 OBJECT 元素对应的 DOM 对象并不是 W3C 规范中的 HTMLObjectElement，而是 IE 对这个对象所扩展之后的私有对象类型。</p>
+      <p>下面继续看一个例子：</p>
+<pre>
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;object id=&quot;A&quot; classid=&quot;clsid:6BF52A52-394A-11d3-B153-00C04F79FAA6&quot; style=&quot;width:100px; height:100px;&quot;&gt;
+&lt;param name=&quot;url&quot; value=&quot;Kalimba.mp3&quot; /&gt;
+&lt;/object&gt;
+&lt;script&gt;
+alert(document.getElementById(&quot;A&quot;).url);
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+      <p>这段代码在各浏览器中运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE</th>
+          <th>Chrome Safari</th>
+        </tr>
+        <tr>
+          <td>XXXXXXXXXXXXXX/Kalimba.mp3</td>
+          <td>undefined</td>
+        </tr>
+      </table>
+      <p>这里由于 IE 对应的 OBJECT 元素对应的 DOM 对象相比 HTMLObjectElement 多了很多其引入插件的私有属性，且这些属性的名称是和 OBJECT 元素内的 PARAM 元素的 name、value 属性相对应的。所以在 IE 中可以返回这些属性值（即由 PARAM 属性设置的 value 值）。<br />
+      而在 Chrome Safari 中，由于 OBJECT 元素对应的 DOM 对象为标准的 HTMLObjectElement，并没有这些属性，所以返回了 undefined。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>ActiveX 技术为微软的专有技术，仅在Windows 下的 IE 浏览器中可以得到支持。<br />
+      其他浏览器如 Firefox Opera 则不支持这项技术。<br />
+      而 WebKit 内核的 Chrome  Safari 则实现了有限支持，包括：Flash, Media Player, Director, QuickTime, RealAudio。其原理为将它们的在 Windows 系统中的 classid 与其对应的 Mime-Type 相关联，所以可以和 IE 一样仅仅通过 OBJECT 元素的 classid 属性创建出这些插件。但并不能支持由 IE 扩展的 OBJECT 元素对应的对象所扩展的属性及方法。<br />
+      所以在开发跨浏览器的插件时，应为非 IE 浏览器提供更通用的 NPAPI 接口的对应插件，完成 ActiveX 插件相同的功能。</p>
+      <p>针对本文中所引用的 Media Player 插件，可以考虑使用 Flash，或者合理的利用 IE 对 Media Player 的支持及其其他浏览器对 HTML5 的新标签 VIDEO 与 AUDIO 的支持在不同浏览器中达到相类似的效果。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+            <a href="../../tests/BT9037/object.html">object.html</a><br />
+            <a href="../../tests/BT9037/object_param.html">object_param.html</a>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-15</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>OBJECT HTMLObjectElement param 插件</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

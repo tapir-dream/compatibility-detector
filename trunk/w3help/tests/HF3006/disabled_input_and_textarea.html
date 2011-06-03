@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+</head>
+<body>
+<style>
+	* { font:12px/1 Arial; }
+	input.i, textarea.t {  width:12px; height:12px; padding:0; margin:0; border:0 none; color:#aaa; float:left; overflow:hidden; resize:none; outline:none;}
+</style>
+<select id="aaa"><option>11</option></select><input id="" type="text" value="W" style="color:#aaa;background:#eaeaea" disabled />
+<div style="width:192px; overflow:hidden; margin-bottom:5px;">
+	<script>
+		function enableInput(dis) {
+			for (var i = 255; i >= 0; i--) {
+				document.getElementById('i' + i).disabled = dis;
+			}
+		}
+		for (var i = 255; i >= 0; i--) {
+			document.write('<input id="i' + i + '" class="i" type="text" value="W" style="background:rgb(' + i + ',' + i + ',' + i + ');" disabled />');
+		}
+	</script>
+	<div style="float:left; width:100%; height:20px; line-height:1.2;">
+		INPUT: <input type="checkbox" id="i" onclick="enableInput(this.checked);" checked /><label for="i">disabled</label>
+	</div>
+</div>
+<div style="width:192px; overflow:hidden;">
+	<script>
+		function enableTextarea(dis) {
+			for (var i = 255; i >= 0; i--) {
+				document.getElementById('t' + i).disabled = dis;
+			}
+		}
+
+		for (var i = 255; i >= 0; i--) {
+			document.write('<textarea id="t' + i + '" class="t" type="text" style="background:rgb(' + (255 - parseInt(i / 2)) + ',' + (255 - i * 2) + ',' + (128 + parseInt(i / 2)) + ');" disabled>W</textarea>');
+		}
+	</script>
+	<div style="float:left; width:100%; height:20px; line-height:1.2;">
+		TEXTAREA: <input type="checkbox" id="t" onclick="enableTextarea(this.checked);" checked /><label for="t">disabled</label>
+	</div>
+</div>
+</body>
+</html>

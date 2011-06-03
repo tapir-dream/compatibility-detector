@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	* { outline:none; border:0 none; margin:0; padding:0; font:16px Arial; }
+</style>
+</head>
+<body>
+<div style="width:200px; overflow:hidden; background:wheat; padding:10px 0; ">
+	<input id="input" type="text" style="width:1000px; background-image:url(google.gif); font:40px Arial;" />
+</div>
+<div>
+	<div id="hint"></div>
+	<div id="pos"></div>
+	<div id="text"></div>
+</div>
+<script>
+	function $(id) { return document.getElementById(id); }
+	var input, hint, pos, ua, ln, text;
+	window.onload = function () {
+		input = $('input');
+		input.value = "";
+		hint = $('hint');
+		pos = $('pos');
+		text = $('text');
+		setInterval(function () { autoInput(input, 'w'); }, 100);
+	}
+	ua = navigator.userAgent;
+	var isIE = /msie/gi.test(ua);
+	var isFF = /firefox/gi.test(ua);
+	var isWK = /safari/gi.test(ua);
+	var isOP = /opera/gi.test(ua);
+	
+	function autoInput(el, chara) {
+		(el.value.length > 50) && (el.value = "");
+		ln = el.value.length;
+		var event,tr;
+		
+		(isIE) ? (
+			tr = el.createTextRange(),
+			tr.moveStart('character', ln),
+			tr.moveEnd('character', ln),
+			tr.select(),
+			tr.text = chara
+		) : (
+			(isWK || isFF) ? (
+				event = document.createEvent((isWK) ? 'TextEvent' : 'KeyboardEvent'),
+				(isWK) ? (
+					event.initTextEvent('textInput', true, true, null, chara)
+				) : (
+					event.initKeyEvent('keypress', true, true, window, false, false, false, false, 0, chara.charCodeAt(0))
+				),
+				el.selectionStart = el.selectionEnd = ln,
+				el.dispatchEvent(event)
+			) : ( hint.innerHTML = 'Please input some text.' )
+		)
+		
+		pos.innerHTML = 'input position: ' + input.getBoundingClientRect().left + 'px';
+		text.innerHTML = 'input length: ' + ln;
+	}
+</script>
+</body>
+</html>

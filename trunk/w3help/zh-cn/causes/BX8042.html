@@ -1,0 +1,129 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX8042: 各主流浏览器均不支持非标准的 LAYER 元素</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>LAYER 元素不是 W3C 规范中的标准元素，它由 NetScape Navigator 4.0 引入，用于创建定位的块，相当于现在 CSS 中的绝对定位元素（position:absolute）。通过其 left、top 属性可以定义其定位的位置。<br />
+      此元素为 NetScape 4.x 专有，其他浏览器甚至他版本的 NetScape 均不支持。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>LAYER 元素已不被当前所有主流浏览器所支持，但是一些早期的页面或者脚本中仍会带有此元素，常见于早期页面，一般为试图使用其在 NetScape 浏览器中创建定位元素，通过诸如  &quot;document.all&quot;、 &quot;document.layers&quot; 判断浏览器是 IE 或是 NetScape，而在非 IE 浏览器中，可能会通过 document.write 向页面写入了 LAYER 元素，此时由于这些浏览器不支持 LAYER 元素而出现布局异常。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>NetScape 6.0 及以后其他所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>针对 LAYER 元素，IE 将其当做错误标签进行了修复处理，Firefox、Opera 将 LAYER 元素当做普通行内元素处理，Chrome Safari 将 LAYER 元素当做块级元素处理。</p>
+      <p>分析以下代码：</p>
+      <pre>&lt;<span class="hl_4">layer</span> left=&quot;50&quot; width=&quot;100&quot; height=&quot;100&quot; bgcolor=&quot;gray&quot;&gt;LAYER&lt;/<span class="hl_4">layer</span>&gt;
+&lt;<span class="hl_4">layer</span> left=&quot;100&quot; top=&quot;20&quot; width=&quot;30&quot; height=&quot;30&quot; bgcolor=&quot;#CCCCCC&quot;&gt;LAYER&lt;/<span class="hl_4">layer</span>&gt;</pre>
+      <p>上面代码中创建了两个 LAYER 元素，设置了一些该元素的属性。<br />
+      这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>NetScape 4.79</th>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox Opera NetScape 6</th>
+          <th>Chrome Safari</th>
+        </tr>
+        <tr>
+          <td rowspan="2"><img src="../../tests/BX8042/a.gif" alt="" /></td>
+          <td colspan="2"><img src="../../tests/BX8042/b.gif" alt="" /></td>
+          <td><img src="../../tests/BX8042/d.gif" alt="" /></td>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BX8042/e.gif" alt="" /></td>
+          <td><img src="../../tests/BX8042/f.gif" alt="" /></td>
+          <td><img src="../../tests/BX8042/g.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>可见，NetScape 4.79 由于支持 LAYER 元素而将其解析出来，对于其他不支持此元素的主流浏览器：</p>
+      <ul>
+          <li>在 <em>IE6 IE7 IE8</em> 中，LAYER 元素被当做错误的标签被浏览器修复，其内容变成了纯文本节点；</li>
+          <li>在 <em>Firefox Opera NetScape 6</em> 中，LAYER 元素被当做了普通的行内元素处理；</li>
+          <li>在 <em>Chrome Safari</em> 中，LAYER 元素被当做了块级元素处理，因而占据了一整行。</li>
+      </ul>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>放弃使用 LAYER 元素，改用 CSS 中的绝对定位样式 'position:absloute' 处理相关情况。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.3<br />
+              Chrome 6.0.422.0 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.53<br />
+              NetScape Communicator 4.79<br />
+              Netscape 6</td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-15</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>layer NetScape</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

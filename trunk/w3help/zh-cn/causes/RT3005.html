@@ -1,0 +1,247 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RT3005: 'text-overflow:ellipsis' 会引起兼容性问题</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>
+        'text-overflow' 是 CSS3 中的新特性，处于草案阶段；该特性可以作用于块级元素、行内元素和单元格，当其值是 'ellipsis' 时，被剪除的文本将用省略号表示。
+      </p>
+      <p>
+        关于 'text-overflow' 特性的详细信息，请参照 W3C CSS3 规范草案 <a href="http://dev.w3.org/csswg/css3-text/#text-overflow">'text-overflow'</a> 。
+      </p>
+
+      <h2 id="description">问题描述</h2>
+      <p>
+        'text-overflow' 特性是 CSS3 中的新特性，处于草案阶段，各浏览器对 'text-overflow:ellipsis' 的支持情况各不相同。
+        其中，IE 支持的最好，Webkit 浏览器只支持不包含块级元素的元素，Firefox 彻底不支持。
+      </p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>
+        当意图使用 'text-overflow:ellipsis' 将溢出的内容使用省略号替代时，由于各浏览器对 'text-overflow' 特性支持程度不同，导致应用了该特性的元素显示效果产生差异。
+      </p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>对于此问题，我们通过以下的测试用例来说明。</p>
+      <p>分析以下代码：</p>
+<pre>
+&lt;div id="DIV1" style="width:100px; overflow:hidden; text-overflow:ellipsis; border:1px solid red;"&gt;
+    XXXXXXXXXXXXXXXXXXXXXXXXX
+    &lt;span style="background-color: silver;"&gt;
+        &lt;span&gt;XXXXXXXXXXXXXXXXXXXXXXXXX&lt;/span&gt;
+    &lt;/span&gt;
+&lt;/div&gt;
+&lt;br/&gt;
+&lt;div id="DIV2" style="width:100px; overflow:hidden; text-overflow:ellipsis; border:1px solid red;"&gt;
+    XXXXXXXXXXXXXXXXXXXXXXXXX
+    &lt;div&gt;XXXXXXXXXXXXXXXXXXXXXXXXX&lt;/div&gt;
+    &lt;span style="background-color: silver;"&gt;
+        &lt;span&gt;XXXXXXXXXXXXXXXXXXXXXXXXX&lt;/span&gt;
+    &lt;/span&gt;
+&lt;/div&gt;
+</pre>
+
+      <ul>
+        <li>DIV1 和 DIV2 的内容用 XXXXXXXXXXXXXXXXXXXXXXXXX，因为它是一个不可折行的字符串；</li>
+        <li>DIV1 和 DIV2 的宽度都是 100px，小于其中文本的宽度；</li>
+        <li>DIV1 中只包含行内元素和文本，DIV2 内含有一个 DIV（块级元素）。</li>
+      </ul>
+
+      <p>根据草案，DIV1 和 DIV2 中的文本，被剪除的部分都应该用省略号表示。</p>
+      <p>这段代码在不同的浏览器环境中表现如下：<sup>1</sup></p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S)</th>
+          <th>Chrome Safari</th>
+          <th>Firefox</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RT3005/RT3005-1.jpg" alt="" /></td>
+          <td><img src="../../tests/RT3005/RT3005-2.jpg" alt="" /></td>
+          <td><img src="../../tests/RT3005/RT3005-3.jpg" alt="" /></td>
+          <td><img src="../../tests/RT3005/RT3005-4.jpg" alt="" /></td>
+        </tr>
+      </table>
+      <p class="comment">注1：忽略 'text-overflow:ellipsis' 对背景色的影响。</p>
+
+      <p>可见：</p>
+      <ol>
+        <li>Firefox 彻底不支持 'text-overflow:ellipsis'；</li>
+        <li>Webkit 浏览器中，在元素只包含行内元素和文本时，'text-overflow:ellipsis' 对其本身包含的文本及子孙元素包含的文本同样有效。当包含块级元素时，则完全失去效果；</li>
+        <li>IE 对 'text-overflow:ellipsis' 支持的良好，而且在 IE6 IE7 IE8(Q) 中，对其子孙元素中的文本同样有效；</li>
+        <li>在 IE8(S) 中有个特殊情况，'text-overflow:ellipsis' 对其块级子元素内的文本没有作用。</li>
+      </ol>
+
+      <p>
+        另外，在 Webkit 浏览器中，':after' 伪元素如果被设置成一个块级元素，'text-overflow:ellipsis' 会失效。
+      </p>
+      <p>分析以下代码：</p>
+<pre>
+&lt;style type="text/css"&gt;
+    #block:after {
+        content: "after";
+        display: block;
+    }
+
+    #inline:after {
+        content: "after";
+        display: inline;
+    }
+&lt;/style&gt;
+&lt;div id="block" style="width:100px; overflow:hidden; text-overflow:ellipsis; border:1px solid red;"&gt;
+    BLOCKBLOCKBLOCKBLOCKBLOCKBLOCK
+&lt;/div&gt;
+&lt;div id="inline" style="width:100px; overflow:hidden; text-overflow:ellipsis; border:1px solid red;"&gt;
+    INLINEINLINEINLININLINEINLINE
+&lt;/div&gt;
+</pre>
+
+      <ul>
+        <li>DIV[id="block"] 和 DIV[id="inline"] 的内容分别为 'BLOCKBLOCKBLOCKBLOCKBLOCKBLOCK' 和 'INLINEINLINEINLININLINEINLINE' ，它们都是不可折行的字符串。</li>
+        <li>两个 DIV 的宽度小于文本字符串宽度。</li>
+        <li>两个 DIV 的 ':after' 伪元素向其后增加了一个块级的 'after' 文本。</li>
+      </ul>
+      <p>根据草案，两个 DIV 中的文本，被剪除的部分都应该用省略号表示。</p>
+      <p>这段代码在不同的浏览器环境中表现如下：<sup>2</sup></p>
+
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q) </th>
+          <th>IE8(S)</th>
+          <th>Chrome Safari</th>
+          <th>Firefox</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RT3005/RT3005-5.png" alt="" /></td>
+          <td><img src="../../tests/RT3005/RT3005-6.png" alt="" /></td>
+          <td><img src="../../tests/RT3005/RT3005-7.png" alt="" /></td>
+          <td><img src="../../tests/RT3005/RT3005-8.png" alt="" /></td>
+        </tr>
+      </table>
+      <p class="comment">注2：IE6 IE7 IE8(Q) 不支持 :after 伪元素，所以没有 'after' 的文本。</p>
+      <p>可见：</p>
+      <p>
+        在 Webkit 浏览器中，如果元素的 :after 伪元素是一个块级元素，会使该元素的 'text-overflow:ellipsis' 失效。
+      </p>
+
+      <h2 id="solutions">解决方案</h2>
+            <p>不要在包含块级元素的元素上使用 'text-overflow:ellipsis'，并且当使用 :after 伪元素时，确保伪元素不是块级元素。Firefox 中可以通过 XUL 实现 'text-overflow:ellipsis' 的效果。</p>
+      <p>针对 Firefox 使用 XUL 实现 'text-overflow:ellipsis' 效果的参考代码如下：</p>
+      <p>定义专用在 Firefox 下名为 'ellipsis' 的 class ：</p>
+<pre>
+.ellipsis {
+    -moz-binding: url('ellipsis.xml#ellipsis');
+}
+</pre>
+      <p>使用 Firefox 的 XUL 实现 'text-overflow:ellipsis' 的 ellipsis.xml ：</p>
+<pre>
+&lt;?xml version="1.0"?&gt;
+&lt;bindings
+ xmlns="http://www.mozilla.org/xbl"
+ xmlns:xbl="http://www.mozilla.org/xbl"
+ xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+&gt;
+    &lt;binding id="ellipsis"&gt;
+        &lt;content&gt;
+            &lt;xul:description crop="end" xbl:inherits="value=xbl:text"&gt;
+                &lt;children/&gt;
+            &lt;/xul:description&gt;
+        &lt;/content&gt;
+    &lt;/binding&gt;
+&lt;/bindings&gt;
+</pre>
+
+      <p>测试代码：</p>
+<pre>
+&lt;div class="ellipsis" style="width:100px;border: 1px solid red;overflow:hidden;"&gt;
+    XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+&lt;/div&gt;
+</pre>
+      <p>在 Firefox 中表现如下：</p>
+      <p>
+        <img src="../../tests/RT3005/RT3005-9.png" alt="" />
+      </p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 5.0.356.2 dev<br />
+              Safari 4.0.4
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+              <a href="../../tests/RT3005/text-overflow.html">text-overflow.html</a><br />
+              <a href="../../tests/RT3005/text-overflow_after.html">text-overflow_after.html</a><br />
+              <a href="../../tests/RT3005/text-overflow_firefox.html">text-overflow_firefox.html</a><br/>
+              <a href="../../tests/RT3005/ellipsis.xml">ellipsis.xml</a>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-19</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>text-overflow ellipsis 省略号</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+window.onload = function () {
+	function $(id) {
+		return document.getElementById(id);
+	}
+	
+	function stateChange () {
+		if (xmlhttp.readyState == 4) {
+			if (xmlhttp.status == 200) {
+				$("test").innerHTML = xmlhttp.responseText;
+			} else {
+				$("test").innerHTML = "Error!";
+			}
+		}
+	}
+	
+	var xmlhttp = null;
+	
+	function init(file) {
+		if (window.XMLHttpRequest) {  // for IE7+, Firefox, Chrome, Opera, Safari
+		    xmlhttp=new XMLHttpRequest();
+		} else {  // for IE6, IE5
+		    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+		}
+		xmlhttp.onreadystatechange = stateChange;
+		xmlhttp.open("GET", file + ".html", false);
+	}
+	
+	$("b1").onclick = function () {
+		try {
+			init(1);
+			xmlhttp.send(null);
+		} catch(e) {
+			$("test").innerHTML = "Error!";
+		}
+	}
+	$("b2").onclick = function () {
+		try {
+			init(2);
+			xmlhttp.SEND(null);
+		} catch(e) {
+			$("test").innerHTML = "Error: " + e;
+		}
+	}
+}
+</script>
+</head>
+<body>
+	<div>
+		Get:
+		<button id="b1">xmlhttp.send()</button>
+		<button id="b2">xmlhttp.SEND()</button>
+	</div>
+	<div id="test"></div>
+</body>
+</html>

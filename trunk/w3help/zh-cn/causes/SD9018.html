@@ -1,0 +1,145 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SD9018: IE6 IE7 IE8(Q) 在某些情况下 DOM 元素的 offsetTop、offsetLeft 的返回值参照元素以及 offsetParent 为距离其最近的触发了 hasLayout 的祖先级元素</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 IE7 IE8(Q) 中，一个 'position' 特性值为 'static' 的元素的 offsetParent 可能会是其最近的、触发了 hasLayout 的父元素。<br />
+      同时其 offsetTop、offsetLeft 的返回值参照元素也是距离其最近的触发了 hasLayout 的祖先级元素。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>对于元素的 offetParent，由于可能取得的元素不一致，造成页面脚本运行出现不一致或出错。另外由于元素的 offsetLeft、offsetTop 计算值都参照它的 offsetParent，因此元素的 offsetLeft、offsetTop 值也会不一致。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>元素 A 的 offsetParent 的计算遵从下面的算法：</p>
+      <ol>
+        <li>若以下任何一种情况为真，则返回 null 并停止此算法：
+          <ul>
+            <li>A 没有关联一个 CSS 布局框。</li>
+            <li>A 是根元素。</li>
+            <li>A 是 HTML 文档中的 BODY 元素。</li>
+            <li>A 的 'position' 特性的计算值为 'fixed'。</li>
+          </ul>
+        </li>
+        <li>
+          若 A 是一个 AREA 元素，且其某个祖先元素是 MAP 元素，则返回其最近的 MAP 祖先元素并停止此算法。
+        </li>
+        <li>
+          返回 A 的最近的一个存在着的祖先元素并停止此算法，当下列条件至少满足一条时：
+          <ul>
+            <li>祖先元素的 'position' 特性的计算值不为 'static'。</li>
+            <li>祖先元素为 HTML 文档中的 BODY 元素。</li>
+            <li>A 的 'position' 特性的计算值为 'static'，且祖先元素是下列 HTML 元素之一：TD、TH 或 TABLE。</li>
+          </ul>
+        </li>
+        <li>返回 null。</li>
+      </ol>
+      <p>关于 offsetTop、offsetLeft、offsetParent 的更多信息，请参考 CSSOM View Module 草案 <a href="http://www.w3.org/TR/cssom-view/#dom-htmlelement-offsetparent">8.1 The offsetParent, offsetTop, offsetLeft, offsetWidth, and offsetHeight attributes</a> 中的内容。</p>
+      <br />
+      <p>测试以下代码：</p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;script&gt;
+  function $(id) { return document.getElementById(id); }
+  window.onload = function () {
+    $('info').innerHTML += '&lt;br /&gt;P\'s offsetParent: ' + $('P').offsetParent.tagName;
+    $('info').innerHTML += '&lt;br /&gt;P\'s offsetTop: ' + $('P').offsetTop;
+    $('info').innerHTML += '&lt;br /&gt;P\'s offsetLeft: ' + $('P').offsetLeft;
+  }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body style=&quot;margin:0; font:18px 'Trebuchet MS';&quot;&gt;
+&lt;div style=&quot;<span class="hl_1">float:left;</span> margin:50px; background:wheat;&quot;&gt;
+  &lt;p id=&quot;P&quot; style=&quot;width:50px; height:50px; margin:50px; background:plum;&quot;&gt;P&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&quot;info&quot; style=&quot;clear:left;&quot;&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>此例中，依照 W3C 草案的规则，P 的 offsetParent 应为 BODY 元素，且其 offsetTop、offsetLeft 的返回值也均参照 BODY 元素。</p>
+      <p>实际结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/SD9018/offset1.gif" alt="" /></td>
+          <td><img src="../../tests/SD9018/offset2.gif" alt="" /></td>
+        </tr>
+      </table>
+      <p>可见 <em>IE6 IE7 IE8(Q)</em> 中，P (position:static) 的 offsetParent 不是 BODY 元素，触发了 hasLayout 特性的元素 (由于设定了 'float' 特性导致 P.currentStyle.hasLayout = true) 也可以被当作 offsetParent 返回，同时其 offsetTop、offsetLeft 的返回值也是参照的该触发了 hasLayout 的祖先元素。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>可考虑对于为在 IE 中触发了 hasLayout 特性的元素设置 'position' 特性值为非 'static' 值，如 'relative'，或避免使用元素的 offsetTop、offsetLeft、offsetParent 属性。</p>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.12<br />
+              Chrome 8.0.552.18 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.63
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/SD9018/offsetParent.html">offsetParent.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-28</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>offsetParent offsetLeft offsetTop hasLayout position static</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RD8022: 各浏览器中宽度为 0% 的 IMG 元素的包含块的 shrink-to-fit 算法存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>shrink-to-fit 可以理解为 &quot;收缩至合适&quot; ，代表了浏览器对于计算后宽度为 'auto' 时的非替换浮动元素宽度计算所要遵循的标准。此外除了非替换浮动元素，对非替换绝对定位元素、非替换行内块元素的宽度为 auto 时也遵循此计算方式。</p>
+      <p>根据 W3C CSS2.1 规范中的描述，shrink-to-fit 的宽度计算方法与 'table-layout' 特性为 'auto'（即自动表格布局）时对于单元格的宽度计算方法类似。大致为：</p>
+      <ul>
+        <li>计算格式化内容时除了发生明确的换行外不发生换行的时<span class="hl_4">首选宽度 (preferred width) </span>，以及<span class="hl_2">首选最小宽度 (preferred minimum width) </span>，比如，尝试所有可能的换行。而 CSS2.1 没有定义精确的算法。</li>
+        <li>其次，在这种情况下，找出<span class="hl_3">可用宽度（available width）</span>，这个宽度为包含块减去 'margin-left'、'border-left-width'、'padding-left'、'padding-right'、'border-right-width'、'margin-right'以及所有相关滚动条的宽度。</li>
+      </ul>
+      <p>综上所述：</p>
+      <pre>shrink-to-fit 的宽度 = min ( max (<span class="hl_2">首选最小宽度</span>, <span class="hl_3">可用宽度</span>) , <span class="hl_4">首选宽度</span>)</pre>
+      <p>关于 shrink-to-fit 的更多资料，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/visudet.html#float-width">10.3.5 Floating, non-replaced elements</a> 中的内容。</p>
+      
+      <h2 id="description">问题描述</h2>
+      <p>对于宽度为 0% 的 IMG 元素的包含块的 shrink-to-fit 算法，Firefox Chrome Safari 与 IE6 IE7 IE8 Opera 存在差异。</p>
+      
+      <h2 id="influence">造成的影响</h2>
+      <p>当宽度为 0% 的 IMG 元素的包含块的宽度由 shrink-to-fit 算法决定的时候，各浏览器中的显示效果可能存在差异，严重的情况下会造成局部布局混乱。</p>
+      
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tbody>
+          <tr>
+            <th>所有浏览器</th>
+            <td>&nbsp;</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>该问题的根本原因在于包含 'width : 0%' 的 IMG 元素的包含块使用 shrink-to-fit 算法计算宽度的时候各浏览器取的<span class="hl_4">首选宽度 (preferred width) </span>不同。</p>
+      <p>分析以下代码：</p>
+<pre>
+&lt;html&gt;
+  &lt;head&gt;&lt;/head&gt;
+  &lt;body&gt;
+available width: 180px; width:0%;
+&lt;div style=&quot;width:200px;background:red;padding:5px;&quot;&gt;
+  &lt;div id=&quot;stf1&quot; style=&quot;float:left;border:5px solid;padding:5px;background:gold;&quot;&gt;
+    &lt;img src=&quot;google_small.gif&quot; style=&quot;width:0%;&quot; /&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;
+available width: 20px; width:0%;
+&lt;div style=&quot;width:40px;background:red;padding:5px;&quot;&gt;
+  &lt;div id=&quot;stf2&quot; style=&quot;float:left;border:5px solid;padding:5px;background:gold;&quot;&gt;
+    &lt;img src=&quot;google_small.gif&quot; style=&quot;width:0%;&quot; /&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;br/&gt;&lt;br/&gt;&lt;br/&gt;
+&lt;div id=&quot;info&quot;&gt;&lt;/div&gt;
+&lt;script type=&quot;text/javascript&quot;&gt;
+window.onload = function(){
+  var $ = function(id){return document.getElementById(id);};
+  function info(msg){
+    $(&quot;info&quot;).innerHTML += &quot;computed width : &quot; + msg + &quot;px&lt;br /&gt;&quot;; 
+  }
+  
+  var cs1 = window.getComputedStyle ? window.getComputedStyle($(&quot;stf1&quot;),null) : $(&quot;stf1&quot;).currentStyle,
+    cs2 = window.getComputedStyle ? window.getComputedStyle($(&quot;stf2&quot;),null) : $(&quot;stf2&quot;).currentStyle;
+    
+  info($(&quot;stf1&quot;).offsetWidth - parseInt(cs1.paddingLeft) - parseInt(cs1.paddingRight) - parseInt(cs1.borderLeftWidth) - parseInt(cs1.borderRightWidth));
+  info($(&quot;stf2&quot;).offsetWidth - parseInt(cs2.paddingLeft) - parseInt(cs2.paddingRight) - parseInt(cs2.borderLeftWidth) - parseInt(cs2.borderRightWidth));
+}
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+      <p>上述代码中需要使用 shrink-to-fit 计算宽度的元素是 DIV[id=&quot;stf1&quot;] 和 DIV[id=&quot;stf2&quot;] (以下简称 &quot;stf1&quot; 和 &quot;stf2&quot;) 。
+      参考以上代码我们首先可以确定它们各自的<span class="hl_3">可用宽度 (available width) </span>为 180px 和 20px，
+      而图片 &quot;google_small.gif&quot; 内在宽度为 114px，分别小于和大于 &quot;stf1&quot; 和 &quot;stf2&quot; shrink-to-fit 算法的可用宽度。
+      通过对比两者的渲染结果和宽度的计算值，我们基本可以得出各浏览器对于 &quot;stf1&quot; 和 &quot;stf2&quot; 不同的 shrink-to-fit 算法。
+      </p>
+      <p>各浏览器中表现如下：<sup>1</sup></p>
+      <table class="compare"><tbody>
+        <tr>
+          <th>IE6 IE7 IE8 Opera</th>
+          <th>Firefox Chrome Safari</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RD8022/ie678_opera.png" alt="" /></td>
+          <td><img src="../../tests/RD8022/firefox_webkit.png" alt="" /></td>
+        </tr>
+      </tbody></table>
+      <p class="comment">注1：这里忽略一些不相干的问题的影响，比如 IE6 IE7 IE8(Q) 中浮动元素会影响其 hasLayout 的包含块高度的计算。</p>
+      
+      <p>根据测试结果，我们猜测在各浏览器中 'stf1' 和 'stf2' 的计算公式为：</p>
+      <table class="compare"><tbody>
+        <tr>
+          <th>shrink-to-fit Element</th>
+          <th>IE6 IE7 IE8 Opera</th>
+          <th>Firefox Chrome Safari</th>
+        </tr>
+        <tr>
+          <th>stf1</th>
+          <td><strong>0px = min (max (0px, 180px), 0px)</strong></td>
+          <td><strong>114px = min (max (0px, 180px), 114px)</strong></td>
+        </tr>
+        <tr>
+          <th>stf2</th>
+          <td><strong>0px = min (max (0px, 20px), 0px)</strong></td>
+          <td><strong>20px = min (max (0px, 20px), 114px)</strong></td>
+        </tr>
+      </tbody></table>
+      
+      <p><strong>即 IE6 IE7 IE8 Opera 中宽度为 0% 的 IMG 元素的包含块宽度 'shrink-to-fit' 算法中首选宽度总为0，
+      而在 Firefox Chrome Safari 中首选宽度为图片内在宽度。</strong></p>
+      
+      <p>进一步可以推测出，当使用宽度为 0% 的 IMG 元素参与计算 'shrink-to-fit' 的首选宽度时，IE6 IE7 IE8 Opera 会先将 IMG 元素的宽度计算为 0，
+      再计算其包含块的宽度；而其它浏览器则先使用 IMG 元素的内在宽度计算包含块的宽度，再计算 0% 的 IMG 元素的宽度。</p>
+      
+      <h2 id="solutions">解决方案</h2>
+      <p>尽量避免设置 IMG 元素的宽度为 0%，可以用 0px 替代。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="RX8017">RX8017: IE 对浮动非替换元素内包含宽度单位为百分比的元素时的 &quot;shrink-to-fit&quot; 宽度算法有误</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.524.0 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62</td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RD8022/IMG_width_0percent.html">IMG_width_0percent.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-19</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>shrink-to-fit IMG width percent</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX9013: 动态引入的外部 JS 文件在各浏览器中的加载顺序不一致</h1>
+      <ul class="toc">
+        <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+        <li><a href="#description">问题描述</a> <span>•</span></li>
+        <li><a href="#influence">造成的影响</a> <span>•</span></li>
+        <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+        <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+        <li><a href="#solutions">解决方案</a> <span>•</span></li>
+        <li><a href="#see_also">参见</a></li>
+      </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+      <h2 id="description">问题描述</h2>
+      <p>现在页面开发过程中，为了减少由于加载时外部 JS 文件静态引用过多导致阻塞页面内容下载及渲染的情况出现，一般情况下会采用页面内容加载完成后采用动态引入的外部 JavaScript 文件的方法来解决此类问题，这就导致了各种常用动态引入的外部脚本文件在各浏览器中的执行顺序不一致。</p>
+      <h2 id="influence">造成的影响</h2>
+      <p>对于动态插入的 SCRIPT 文件，不能保证在各浏览器能阻塞其后脚本的执行。</p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+            <tr>
+              <th>所有浏览器</th>
+              <td>&nbsp;</td>
+            </tr>
+          </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <h3>使用 appenChild insertBefore 等方法向文档中动态插入 SCRIPT 节点后，各浏览器中对脚本的执行顺序存在差异。</h3>
+      <p>以下例子中均使用脚本代码插入远程文件：http://code.jquery.com /jquery-1.4.2.js ( jQuery 源码 )，该文件中定义了全局变量 $，当远程脚本文件加载完成后该变量将可用 。</p>
+      <h3>情况1：</h3>
+      <pre>
+&lt;script&gt;
+var js = document.createElement(&quot;script&quot;);
+document.getElementsByTagName(&quot;head&quot;)[0].appendChild(js);
+js.src = 'http://code.jquery.com/jquery-1.4.2.js';
+&lt;/script&gt;
+
+&lt;script type=&quot;text/javascript&quot;&gt;
+alert($)
+&lt;/script&gt;
+</pre>
+          <p>代码首先创建 SCRIPT 标记并插入到 HEAD 标记中，再将 SCRIPT 的 src 属性指向外部 JS 文件，由之后的 SCRIPT 标记中代码调用外部程序全局变量。</p>
+          <p>各浏览器表现及分析如下：</p>
+          <table class="compare">
+            <tbody>
+              <tr>
+                <th>IE Firefox Opera<br /></th>
+                <td>弹出($)函数体。此方法中动态附加进文档的 js 文件会阻断下一个 SCRIPT 标记内的代码解析，直至它全部解析完。</td>
+              </tr>
+              <tr>
+                <th>Chrome Safari<br /></th>
+                <td>脚本出错,&quot;$ is not defined&quot;。此方法中动态附加进文档的 js 文件不会阻断下一个 SCRIPT 标记内的代码解析。</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <p>&nbsp;</p>
+          <h3>情况2：</h3>
+<pre>
+&lt;script type="text/javascript"&gt;
+var js = document.createElement("script");
+js.src = 'http://code.jquery.com/jquery-1.4.2.js';
+document.getElementsByTagName("head")[0].appendChild(js);
+&lt;/script&gt;
+
+&lt;script type="text/javascript"&gt;
+alert($)
+&lt;/script&gt;
+</pre>
+
+          <p>代码首先创建 SCRIPT 标记，将 src 属性指向外部 JS 文件。最后插入到 HEAD 标记中，由之后的 SCRIPT 标记中代码调用外部程序全局变量。</p>
+          <p>各浏览器表现及分析如下：<br />
+</p>
+          <table class="compare">
+            <tbody>
+              <tr>
+                <th> Firefox Opera<br /></th>
+                <td>弹出($)函数体。此方法中动态附加进文档的 js 文件会阻断下一个 SCRIPT 标记内的代码解析，直至它全部解析完。</td>
+              </tr>
+              <tr>
+                <th>IE Chrome Safari<br /></th>
+                <td>脚本出错,&quot;$ is not defined&quot;。此方法中动态附加进文档的 js 文件不会阻断下一个 SCRIPT 标记内的代码解析。</td>
+              </tr>
+            </tbody>
+                    </table>
+          <p>&nbsp;</p>
+          <h3>情况3：</h3>
+<pre>
+&lt;script type="text/javascript"&gt;
+var js = document.createElement("script");
+document.getElementsByTagName("head")[0].appendChild(js);
+js.src = 'http://code.jquery.com/jquery-1.4.2.js';
+alert($)
+&lt;/script&gt;
+</pre>
+
+          <p>代码首先创建 SCRIPT 标记，将 src 属性指向外部 JS 文件。最后插入到 HEAD 标记中，其后代码立即调用外部程序全局变量。</p>
+          <p>各浏览器表现及分析如下：<br />
+          </p>
+          <table class="compare">
+            <tbody>
+              <tr>
+                <th> 所有浏览器<br /></th>
+                <td>脚本出错,&quot;$ is not defined&quot;。此方法中动态附加进文档的 js 文件不会阻断同一个 SCRIPT 标记内的代码解析。</td>
+              </tr>
+            </tbody>
+          </table>
+          <p>&nbsp;</p>
+          <h3>情况4：</h3>
+<pre>
+&lt;script id=&quot;a&quot;&gt;&lt;/script&gt;
+<br />&lt;script type=&quot;text/javascript&quot;&gt;<br />var a=document.getElementById('a');<br />a.src = 'http://code.jquery.com/jquery-1.4.2.js';<br />alert($)<br />&lt;/script&gt;  </pre>
+          <p>代码获取某个 SCRIPT 标记的引用，在将其 src 属性指向外部 JS 文件，其后代码立即调用外部程序全局变量。</p>
+          <p>各浏览器表现及分析如下：<br />
+          </p>
+          <table class="compare">
+            <tbody>
+              <tr>
+                <th> 所有浏览器<br /></th>
+                <td>脚本出错,&quot;$ is not defined&quot;。此方法中动态附加进文档的 js 文件不会阻断同一个 SCRIPT 标记内的代码解析。</td>
+              </tr>
+            </tbody>
+          </table>
+          <p>&nbsp;</p>
+          <h3>情况5：</h3>
+          <pre>
+&lt;script id=&quot;a&quot; &gt;&lt;/script&gt;
+<br />&lt;script type=&quot;text/javascript&quot;&gt;<br />var a=document.getElementById('a');<br />a.src = 'http://code.jquery.com/jquery-1.4.2.js';<br />&lt;/script&gt;
+
+&lt;script type=&quot;text/javascript&quot;&gt;
+alert($)
+&lt;/script&gt;
+</pre>
+          <p>代码获取某个 SCRIPT 标记的引用，在将其 src 属性值变更为外部 JS 文件，由之后的 SCRIPT 标记中代码调用外部程序全局变量。</p>
+          <p>各浏览器表现及分析如下：<br />
+          </p>
+          <table class="compare">
+            <tbody>
+              <tr>
+                <th>IE Firefox Opera<br /></th>
+                <td>弹出($)函数体。此方法中动态附加进文档的 js 文件会阻断下一个 SCRIPT 标记内的代码解析，直至它全部解析完。</td>
+              </tr>
+              <tr>
+                <th>Chrome Safari<br /></th>
+                <td>脚本出错,&quot;$ is not defined&quot;。此方法中动态附加进文档的 js 文件不会阻断下一个 SCRIPT 标记内的代码解析。</td>
+              </tr>
+            </tbody>
+          </table>
+          <p>&nbsp;</p>
+          <h3> 综合以上情况，对于动态插入的 SCRIPT 文件，使用不同的插入方法将有不同的表现，不能保证在各浏览器能阻塞其后脚本的执行。</h3>
+          <p>&nbsp;</p>
+          <h2 id="solutions">解决方案</h2>
+          <p>对于必须动态附加到文档的外部 js 文件，要保证动态引入的脚本全部执行完成后，才能执行后续代码。</p>
+          <p>可以将此部分代码封装后调用，如：</p>
+          <pre>
+function loadJS (url, onload) {
+  var domscript = document.createElement('script');
+  domscript.src = url;
+  if ( onload ) {
+    domscript.onloadDone = false;
+    domscript.onload = onload;
+    domscript.onreadystatechange = function() {
+      if ( &quot;loaded&quot; === domscript.readyState &amp;&amp; domscript.onloadDone ) {
+        domscript.onloadDone = true;
+        domscript.onload();
+        domscript.removeNode(true);
+        }
+    }
+  }
+  document.getElementsByTagName('head')[0].appendChild(domscript);
+}
+//执行加载外部 JS 文件
+loadJS('a.js',function (){
+   loadJS('b.js',function (){
+    loadJS('c.js',function (){
+      alert('ok');
+    });
+   });
+});
+          </pre>
+          <h2 id="see_also">参见</h2>
+          <h3>知识库</h3>
+          <ul class="see_also">
+            <li><a href="#">...</a></li>
+          </ul>
+          <h3>相关问题</h3>
+          <ul class="see_also">
+            <li><a href="#">...</a></li>
+          </ul>
+          <div class="appendix">
+            <h2>测试环境</h2>
+            <table class="list">
+              <tr>
+                <th>操作系统版本:</th>
+                <td>Windows 7 Ultimate build 7600</td>
+              </tr>
+              <tr>
+                <th>浏览器版本:</th>
+                <td> IE6<br />
+                  IE7<br />
+                  IE8<br />
+                  Firefox 3.6.3<br />
+                  Opera 10.50<br />
+                  Chrome 5.0.375.17 dev<br />
+                  Safari 4.0.4 </td>
+              </tr>
+              <tr>
+                <th>测试页面:</th>
+                <td><a href="../../tests/BX9013/load_js_01.html">load_js_01.html</a><br />
+                  <a href="../../tests/BX9013/load_js_02.html">load_js_02.html</a><br />
+                    <a href="../../tests/BX9013/load_js_03.html">load_js_03.html</a><br />
+                    <a href="../../tests/BX9013/load_js_04.html">load_js_04.html</a><br />
+                    <a href="../../tests/BX9013/load_js_05.html">load_js_05.html</a>
+                </td>
+              </tr>
+              <tr>
+                <th>本文更新时间:</th>
+                <td>2010-07-19</td>
+              </tr>
+            </table>
+            <h2>关键字</h2>
+            <!-- keywords begin -->
+            <p> appenChild insertBefore script 脚本阻塞 外部 JS 文件</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

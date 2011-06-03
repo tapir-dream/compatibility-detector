@@ -1,0 +1,65 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<script>
+	function OnStateChangeImage(image) {
+		document.getElementById('img-info').innerHTML += '<br /> The image readyState: ' + image.readyState;
+	}
+	function OnStateChangeScript(script) {
+		document.getElementById('script-info').innerHTML += '<br /> The script readyState: ' + script.readyState;
+	}
+	function OnStateChangeLink(link) {
+		document.getElementById('link-info').innerHTML += '<br />The link readyState: ' + link.readyState;
+	}
+	function loadJS(url) {
+		var domScript = document.createElement('script');
+		domScript.onreadystatechange = function() {
+			var divElement = document.createElement('div');
+			divElement.appendChild(document.createTextNode('readyState:'+ domScript.readyState +' 动态创建的 SCRIPT 标记可以触发 onreadystatechange 事件'));
+			document.body.appendChild(divElement);
+		}
+		domScript.src = url;
+		document.getElementsByTagName('head')[0].appendChild(domScript);
+	}
+	function loadIMG(url) {
+		var domImage = document.createElement('img');
+		domImage.onreadystatechange = function() {
+			var divElement = document.createElement('div');
+			divElement.appendChild(document.createTextNode('readyState:'+ domImage.readyState +' 动态创建的 IMG 标记可以触发 onreadystatechange 事件'));
+			document.body.appendChild(divElement);
+		}
+		domImage.src = url;
+		document.getElementsByTagName('head')[0].appendChild(domImage);
+	}
+	function loadCSS(url) {
+		var domLink = document.createElement('link');
+		domLink.onreadystatechange = function() {
+			var divElement = document.createElement('div');
+			divElement.appendChild(document.createTextNode('readyState:'+ domLink.readyState +' 动态创建的 LINK 标记可以触发 onreadystatechange 事件'));
+			document.body.appendChild(divElement);
+		}
+		domLink.rel = 'stylesheet';
+		domLink.type = 'text/css';
+		domLink.href = url;
+		document.getElementsByTagName('head')[0].appendChild(domLink);
+	}
+	window.onload=function (){
+		//执行动态加载外部 JS 文件
+		loadJS('http://code.jquery.com/jquery-1.4.js');
+		//执行动态加载图片文件
+		loadIMG('w3c.png');
+		//执行动态加载css文件
+		loadCSS('../../../../../css/article.css');
+	}
+</script>
+<link rel="stylesheet" type="text/css" href="../../../../../css/article.css" onreadystatechange="OnStateChangeLink(this)" />
+</head>
+<body>
+<span id="link-info" >The link is loading.</span><br />
+<span id="img-info"  >The image is loading.</span> <br />
+<span id="script-info" >The script is loading.</span><br />
+<img src="w3c.png" onreadystatechange="OnStateChangeImage(this)"/> <br />
+<script src="http://code.jquery.com/jquery-1.4.js" onreadystatechange= "OnStateChangeScript(this)"></script>
+</body>
+</html>

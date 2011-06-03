@@ -1,0 +1,203 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SD9027: 各浏览中某些标记通过鼠标触发 Click 事件后不会获得焦点并触发 Focus 事件</h1>
+  <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 W3C HTML4.01 规范中的描述，onFocus 是 HTML 中的标准属性，它在元素通过鼠标或者键盘 TAB 导航获得焦点时触发，一般应用在 A、AREA、LABEL、INPUT、SELECT、TEXTAREA、BUTTON 元素上。此事件不冒泡。</p>
+      <p>根据 W3C DOM Level 2 (HTML) 规范中的描述，HTMLSelectElement、HTMLInputElement、HTMLTextAreaElement、HTMLAnchorElement 这几个接口（对应 HTML 标签为 SELECT、INPUT、TEXTAREA、A）存在 Focus() 方法，此方法可以使当前元素获得键盘焦点。</p>
+      <p>关于 Focus 的更多资料，请参见 HTML4.01 规范 <a href="http://www.w3.org/TR/html401/interact/scripts.html#h-18.2.3">18.2.3 Intrinsic events</a>、DOM Level 2 (HTML) 规范 <a href="http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-32130014">1.6.5. Object definitions</a>、DOM Level 2 (Event) 规范 <a href="http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-eventgroupings-htmlevents">1.6.5. HTML event types</a> 中的内容。</p>
+      <p>其中 W3C DOM Level 2 (Event) 和 HTML4.01 这两个规范在 Focus 事件的可触发元素说明存在不一致。</p>
+      <p>W3C DOM Level 2 (Event) 规范中说明可以触发 Focus 事件的元素为 LABEL, INPUT, SELECT, TEXTAREA, BUTTON 之外，而在 HTML 4.01 规范中还存在 A 和 AREA 元素。</p>
+      <p>另外，在用户单击某元素时，会触发一系列相关事件发生，他们的执行顺序为 MouseDown、MouseUp、Click，相关说明请参照 DOM-Level-2-Events 规范 <a href="http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-eventgroupings-mouseevents">1.6.2. Mouse event types</a> 中的 click 部分。</p>
+      <h2 id="description">问题描述</h2>
+      <p>在用户通过鼠标操作触发 click 事件时，基本的事件触发流程为：MouseDown 事件 --&gt;  MouseUp  事件 --&gt; Click 事件。</p>
+      <p>如果用户点击的元素可以获得焦点，并且当前还没有获得焦点时，会在 MouseUp 事件前先触发 Focus 事件，再依次触发其后事件。</p>
+      <p>此时就会出现问题，如果被点击的元素无法通过点击操作获得焦点，则 Focus 事件不会被触发，他的事件函数也不会因点击操作而运行，这就有可能导致功作者设计的功能无法按预期效果执行。</p>
+      <h2 id="influence">造成的影响</h2>
+      <p>当页面开发者将关键事件处理程序放置到 Focus 事件中，并期望使用鼠标单击操作触发 Focus 事件内处理函数时，可能会导致无法触发相应事件。</p>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+              <tr>
+                <th>所有浏览器</th>
+                <td></td>
+              </tr>
+            </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>根据相关事件规范说明，一般情况下可以触发 Focus 事件的元素为 A, AREA, LABEL, INPUT, SELECT, TEXTAREA, BUTTON，它们均可使用设备指针（鼠标）和 TAB 键切换到相应的元素标签上，并触发焦点事件。</p>
+      <p>实际上各个浏览器对使用设备指针触发的 Focus 事件处理情况不一，我们将常用 HTML 标签依次绑定 click 和 Focus 事件监听处理函数，依次点击各个标签元素，在右侧的事件信息框中观察执行情况。</p>
+      <p> 由于相关的测试代码较多，故不在页面上展示，具体代码请参见页面底部<strong><a href="../../tests/SD9027/click_and_focus.html">测试页面</a></strong>部分。 </p>
+      <p>汇总测试程序数据，可得出各浏览器运行结果表，如下：</p>
+      <table class="compare">
+      <tr>
+                <th>click 标记是否可以获得焦点</th>
+                <th>IE6 IE7 IE8</th>
+                <th>Firefox</th>
+                <th>Chrome Safari</th>
+                <th>Opera</th>
+          </tr>
+              <tr>
+                <th>A</th>
+                <td><span class="hl_2">可</span></td>
+                <td><span class="hl_2">可</span></td>
+                <td><span class="hl_1">否</span></td>
+                <td><span class="hl_2">可</span></td>
+              </tr>
+              <tr>
+                <th>AREA</th>
+                <td><span class="hl_2">可</span></td>
+                <td><span class="hl_2">可</span></td>
+                <td><span class="hl_1">否</span></td>
+                <td><span class="hl_2">可</span></td>
+              </tr>
+              <tr>
+                <th>LABEL</th>
+                <td><span class="hl_1">否</span></td>
+                <td><span class="hl_1">否</span></td>
+                <td><span class="hl_1">否</span></td>
+                <td><span class="hl_1">否</span></td>
+              </tr>
+              <tr>
+                <th>INPUT[type=text]<br />
+INPUT[type=password]</th>
+                <td><span class="hl_2">可</span></td>
+                <td><span class="hl_2">可</span></td>
+                <td><span class="hl_2">可</span></td>
+                <td><span class="hl_2">可</span></td>
+              </tr>
+              <tr>
+                <th>SELECT
+                TEXTAREA</th>
+                <td><span class="hl_2">可</span></td>
+                <td><span class="hl_2">可</span></td>
+                <td><span class="hl_2">可</span></td>
+                <td><span class="hl_2">可</span></td>
+              </tr>
+              <tr>
+                <th>BUTTON<br />
+                  INPUT[type=radio]<br />
+INPUT[type=checkbox]<br />
+                INPUT[type=button]<br />
+                INPUT[type=submit]</th>
+                <td><span class="hl_2">可</span></td>
+                <td><span class="hl_2">可</span></td>
+                <td><span class="hl_1">否</span></td>
+                <td><span class="hl_2">可</span></td>
+              </tr>
+              <tr>
+                <th>  EMBED</th>
+                <td><span class="hl_2">可</span></td>
+                <td><span class="hl_2">可</span></td>
+                <td><span class="hl_1">否</span></td>
+                <td><span class="hl_1">否</span></td>
+              </tr>
+              <tr>
+                <th>IFRAME</th>
+                <td><span class="hl_2">可</span></td>
+                <td><span class="hl_1">否</span></td>
+                <td><span class="hl_1">否</span></td>
+                <td><span class="hl_1">否</span></td>
+              </tr>
+              <tr>
+                <th>TABLE CAPTION TD</th>
+                <td><span class="hl_2">可</span></td>
+                <td><span class="hl_1">否</span></td>
+                <td><span class="hl_1">否</span></td>
+                <td><span class="hl_1">否</span></td>
+              </tr>
+              <tr>
+                <th>FIELDSET</th>
+                <td><span class="hl_2">可</span></td>
+                <td><span class="hl_1">否</span></td>
+                <td><span class="hl_1">否</span></td>
+                <td><span class="hl_1">否</span></td>
+              </tr>
+              <tr>
+                <th>其他 HTML 元素 <sup>1</sup> </th>
+                <td><span class="hl_1">否</span></td>
+                <td><span class="hl_1">否</span></td>
+                <td><span class="hl_1">否</span></td>
+                <td><span class="hl_1">否</span></td>
+              </tr>
+            </table>
+      <p  class="comment">
+      注 1：这些 HTML 元素包括：  TD DIV SPAN CODE LEGEND TBODY TFOOT THEAD ABBR ACRONYM ADDRESS B BDO BIG BLOCKQUOTE CENTER CITE DD DEL DIR DFN DL DT EM FONT FORM H1 H2 H3 H4 H5 H6 I INS INS KBD LI MENU OL OBJECT P PRE Q S SAMP SMALL STRIKE STRONG SUB SUP TH TR TT U UL VAR。</p>
+      <p> 可以看到各浏览器对于 A AREA BUTTON INPUT SELECT TEXTAREA EMBED IFRAME TABLE CAPTION TD FIELDSET 这几个元素，通过设备指针（鼠标）的点击操作时触发 Focus 事件的情况，在实现中存在差异。</p>
+      <h2 id="solutions">解决方案</h2>
+          <ul>
+      <li>只在 INPUT[type=text]
+INPUT[type=password] SELECT
+            TEXTAREA 元素中，使用 Focus 事件替代 click 事件触发相关业务逻辑处理程序。</li>
+      <li>其他标记中的 Focus 事件无法使用鼠标指针的 click 操作触发，仅能通过 TAB 键切到可触发 Focus 事件的元素中才会生效。</li>
+          </ul>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="SD2021">SD2021: 各浏览器对元素在没有设置 tabindex 属性时触发 onFocus 事件以及通过其 Focus() 方法获得焦点的情况有差异</a></li>
+      </ul>
+
+<div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.8<br />
+              Chrome 7.0.517.0 dev<br />
+              Safari 5.0.1 <br />
+                            Opera 10.61
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/SD9027/click_and_focus.html">click_and_Focus.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-09-03</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>A AREA BUTTON INPUT SELECT TEXTAREA EMBED IFRAME TABLE CAPTION TD FIELDSET CLICK Focus 鼠标 点击 焦点</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

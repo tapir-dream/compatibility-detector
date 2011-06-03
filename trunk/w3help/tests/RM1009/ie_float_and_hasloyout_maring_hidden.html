@@ -1,0 +1,41 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+</head>
+<body>
+<div style="float:left; width:100%; height:20px; background:#DDD;"></div>
+<p style="float:left; width:100%; background:gray;">P</p>
+<h1 style="float:left; width:100%; background:gray;">H1</h1>
+<div style="float:left; width:100%; height:20px; background:#DDD;"></div>
+<div style="float:left; width:100%; height:20px; background:#DDD; margin-top:30px;"></div>
+<p style="float:left; width:100%; background:gray; margin:10px 0;">P</p>
+<h1 style="float:left; width:100%; background:gray; margin:10px 0;">H1</h1>
+<div style="float:left; width:100%; height:20px; background:#DDD;"></div>
+<hr/>
+<div>P元素，默认样式，容器触发hasLayout：</div>
+<div style="border:5px solid black; zoom:1;">
+    <p style="background:gray;">P</p>
+    <p style="background:gray;">P</p>
+</div>
+<br />
+<div>H3 元素，默认样式，容器触发hasLayout：</div>
+<div style="border:5px solid black; zoom:1;">
+    <h3 style="background:gray;">H3</h3>
+    <h3 style="background:gray;">H3</h3>
+</div>
+<br />
+<div>P元素，用户样式，容器触发hasLayout：</div>
+<div style="border:5px solid black; zoom:1;">
+    <p style="background:gray; margin:10px;">P</p>
+    <p style="background:gray; margin:10px;">P</p>
+</div>
+<br />
+<div>H3元素，用户样式，容器触发hasLayout：</div>
+<div style="border:5px solid black; zoom:1;">
+    <h3 style="background:gray; margin:10px;">H3</h3>
+    <h3 style="background:gray; margin:10px;">H3</h3>
+</div>
+
+
+</html>

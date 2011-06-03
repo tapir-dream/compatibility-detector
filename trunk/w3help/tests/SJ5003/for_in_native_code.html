@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+</head>
+<body>
+<script>
+  Array.prototype.pop = function() {};
+  var a = [];
+  document.writeln('<p style="background:#CCC" >for in Array : </p>');
+  for(var i in a)
+    document.write(i, ' ');
+
+  String.prototype.charCodeAt = function() {};
+  var s = '';
+  document.writeln('<p style="background:#CCC" >for in String :</p>');
+  for(var i in s)
+    document.write(i, ' ');
+
+  Date.prototype.getFullYear = function() {};
+  var d = new Date();
+  document.writeln('<p style="background:#CCC" >for in Date :</p>');
+  for(var i in d)
+    document.write(i, ' ');
+
+  Math.abs = function() {};
+  document.writeln('<p style="background:#CCC" >for in Math :</p>');
+  for(var i in Math)
+    document.write(i, ' ');
+
+  Number.prototype.toFixed = function() {}
+  Number.prototype.valueOf = function() {}
+  Number.prototype.toString = function() {}
+  var n = new Number(1);
+  document.writeln('<p style="background:#CCC" >for in Number :</p>');
+  for(var i in n)
+    document.write(i, ' ');
+
+  Object.prototype.valueOf = function() {};
+  Object.prototype.toString = function() {};
+  var o = new Object();
+  document.writeln('<p style="background:#CCC" >for in Object :</p>');
+  for(var i in o)
+    document.write(i, ' ');
+
+  document.writeln('<p style="background:#CCC" >for in Function :</p>');
+  document.writeln('Function.prototype.valueOf is:', Function.prototype.valueOf ? true : false);
+  Function.prototype.valueOf = function() {};
+  Function.prototype.toString = function() {};
+  var f = function(){};
+
+  for(var i in f)
+    document.write(i, ' ');
+
+</script>
+</body>
+</html>

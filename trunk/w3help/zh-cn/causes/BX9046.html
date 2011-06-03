@@ -1,0 +1,192 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX9046: 各浏览器对 HTML 对象的 innerHTML 属性的读写支持存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE6 IE7 IE8 浏览器中对 APPLET、AREA、BR、COL、COLGROUP、FRAME、HEAD、HR、HTML、IFRAME、IMG、INPUT、ISINDEX、META、NOFRAMES、NOSCRIPT、OBJECT、PARAM、SCRIPT、STYLE、TABLE、TBODY、TFOOT、THEAD、TITLE、TR 元素设置 innerHTML 属性时会抛异常。其中 IE6 对 ABBR 元素设置 innerHTML 属性时也会抛异常。<br />
+      Safari 对 AREA、BASE、BR、COL、COLGROUP、FRAME、FRAMESET、HEAD、HR、IMG、INPUT、ISINDEX、META、PARAM 对象设置 innerHTML 属性时会抛异常。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>若对问题描述中的对象设置 innerHTML 属性，则可能在 IE、Safari 中抛出异常，导致代码停止运行。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>MSDN 中描述对象的 innerHTML 方法为获取或设置对象起始和结束标签之间的 HTML 代码。<br />
+      MDC 中描述对象的 innerHTML 方法为设置或获取元素子孙元素的 HTML 格式代码。</p>
+      <p>更多关于 innerHTML 方法的信息，参见 MSDN <a href="http://msdn.microsoft.com/en-us/library/ms533897(VS.85).aspx">innerHTML Property</a> 及 Mozilla Developer Center <a href="https://developer.mozilla.org/en/dom:element.innerhtml">element.innerHTML</a> 中的内容。<br />
+      同时 innerHTML 方法已经成为 HTML5 草案的一部分，参见 <a href="http://www.w3.org/TR/html5/apis-in-html-documents.html#dom-innerhtml">3.5.5 innerHTML</a>。</p>
+      <p>测试代码：<em>innerHTML.html</em><sup>1</sup></p>
+      <p class="comment">注 1: 由于代码较多，正文不再贴出，具体代码参见 &quot;测试页面&quot;。</p>
+      <p>HTML4.01 规范中的元素对象的 innerHTML 方法设置权限情况在各浏览器中的运行效果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6</th>
+          <th>IE7 IE8</th>
+          <th>Safari</th>
+          <th>Firefox Chrome Safari</th>
+        </tr>
+        <tr>
+          <th>ABBR<sup>1</sup></th>
+          <td class="hl_1"><span>未知的运行时错误</span></td>
+          <td class="hl_2"><span>OK</span></td>
+          <td class="hl_2"><span>OK</span></td>
+          <td class="hl_2"><span>OK</span></td>
+        </tr>
+        <tr>
+          <th>APPLET NOFRAMES NOSCRIPT OBJECT SCRIPT STYLE TABLE TBODY TFOOT THEAD TR</th>
+          <td class="hl_1"><span>未知的运行时错误</span></td>
+          <td class="hl_1"><span>未知的运行时错误</span></td>
+          <td class="hl_2"><span>OK</span></td>
+          <td class="hl_2"><span>OK</span></td>
+        </tr>
+        <tr>
+          <th>AREA BASE BASEFONT BR COL COLGROUP HR IMG INPUT ISINDEX META PARAM</th>
+          <td class="hl_1"><span>未知的运行时错误</span></td>
+          <td class="hl_1"><span>未知的运行时错误</span></td>
+          <td class="hl_1"><span>NO_MODIFICATION_ALLOWED_ERR: <br />
+            DOM Exception 7</span></td>
+          <td class="hl_2"><span>OK</span></td>
+        </tr>
+        <tr>
+          <th>FRAME</th>
+          <td class="hl_1"><span>对象不支持此属性或方法</span></td>
+          <td class="hl_1"><span>对象不支持此属性或方法</span></td>
+          <td class="hl_1"><span>NO_MODIFICATION_ALLOWED_ERR: <br />
+            DOM Exception 7</span></td>
+          <td class="hl_2"><span>OK</span></td>
+        </tr>
+        <tr>
+          <th>FRAMESET</th>
+          <td class="hl_2"><span>OK</span></td>
+          <td class="hl_2"><span>OK</span></td>
+          <td class="hl_1"><span>NO_MODIFICATION_ALLOWED_ERR: <br />
+            DOM Exception 7</span></td>
+          <td class="hl_2"><span>OK</span></td>
+        </tr>
+        <tr>
+          <th>IFRAME</th>
+          <td class="hl_1"><span>对象不支持此属性或方法</span></td>
+          <td class="hl_1"><span>对象不支持此属性或方法</span></td>
+          <td class="hl_2"><span>OK</span></td>
+          <td class="hl_2"><span>OK</span></td>
+        </tr>
+        <tr>
+          <th>HTML TITLE</th>
+          <td class="hl_1"><span>无法设置 innerHTML 属性。<br /> 
+            该操作的目标元件无效。 </span></td>
+          <td class="hl_1"><span>无法设置 innerHTML 属性。 <br />
+            该操作的目标元件无效。 </span></td>
+          <td class="hl_2"><span>OK</span></td>
+          <td class="hl_2"><span>OK</span></td>
+        </tr>
+        <tr>
+          <th>HEAD</th>
+          <td class="hl_1"><span>无法设置 innerHTML 属性。 <br />
+            该操作的目标元件无效。 </span></td>
+          <td class="hl_1"><span>无法设置 innerHTML 属性。<br /> 
+            该操作的目标元件无效。 </span></td>
+          <td class="hl_1"><span>NO_MODIFICATION_ALLOWED_ERR:<br /> 
+            DOM Exception 7</span></td>
+          <td class="hl_2"><span>OK</span></td>
+        </tr>
+        <tr>
+          <th>其他 HTML 元素对象</th>
+          <td class="hl_2"><span>OK</span></td>
+          <td class="hl_2"><span>OK</span></td>
+          <td class="hl_2"><span>OK</span></td>
+          <td class="hl_2"><span>OK</span></td>
+        </tr>
+      </table>
+      <ul>
+        <li><em>IE6 IE7 IE8</em> 除 MSDN 上所列举的 CO、COLGROUP、FRAMESET、HEAD、HTML、STYLE、TABLE、TBODY、TFOOT、THEAD、TITLE、TR 这些元素的 innerHTML 属性是只读之外，上表中列举的其他一些 HTML 元素对象的 innerHTML 属性也为只读，无法对其进行设置操作，其中 IE6 对 ABBR 元素设置 innerHTML 属性时也会抛异常。</li>
+        <li><em>Safari</em> 所有的自闭和元素及 FRAMESET、HEAD、COLGROUP 元素的 innerHTML 方法为只读。</li>
+        <li><em>Firefox Chrome Opera</em> 所有 HTML 元素对象均可以设置其 innerHTML 属性，即 innerHTML 属性均为可读写。</li>
+      </ul>
+      <p class="comments">注 1: 关于 ABBR 元素在 IE6 中的的怪异表现，本文不再单独分析，请参见相关问题。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>首先自闭和元素由于其不具备结束标签，所以其 innerHTML 方法本身并无意义。此外，某些浏览器针对一些特殊结构的元素取消了其 innerHTML 属性的设置权限。所以在为 HTML 元素对象设置其 innerHTML 属性时需格外注意，避免为可能抛出异常的元素设置其 innerHTML 属性。</p>
+      
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="BT9023">BT9023: IE6 中对 ABBR 元素的相关脚本实现处理有误</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.10<br />
+              Chrome 7.0.517.17 dev<br />
+              Safari 5.0.2<br />
+              Opera 10.62
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/BX9046/innerHTML.html">innerHTML.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-10-09</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>innerHTML</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

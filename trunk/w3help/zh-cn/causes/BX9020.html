@@ -1,0 +1,292 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">BX9020: 各浏览器对 URI 中非 ASCII 字符的发送形式存在差异，Flash接收时会导致接收 GET 参数值时编码识别有误。</h1>
+<ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 W3C HTML4.01 规范中的描述，虽然 URI 不包含非 ASCII 值，用户有时候却会在属性类型为 %URI; 的值中指定包含有非 ASCII 字符的 URI。比如下例中的 href 属性值是<strong>不合法的</strong>：<br /><code>&lt;A href="http://foo.org/Håkon"&gt;...&lt;/A&gt;</code></p>
+      <p>建议用户端在这种情况下采取以下协定处理非 ASCII 字符：</p>
+      <ol>
+        <li>将 UTF-8 中的每个字符用一个或多个字节表示；</li>
+        <li>用 URI 转码机制对这些字节进行转码（escape）。如：每个字节转换为 %HH，其中的 HH 为字节的值的十六进制表示。</li>
+      </ol>
+      <p>关于 URI 类型 及 URI 属性值中的非 ASCII 字符（Non-ASCII characters in URI attribute values）的详细信息，请参考 HTML4.01 规范 <a href="http://www.w3.org/TR/html4/types.html#type-uri">6.4 URIs</a> 及 <a href="http://www.w3.org/TR/html4/appendix/notes.html#h-B.2.1">附录B.2.1</a> 中的内容。</p>
+      <p></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>IE 默认情况下对 src 属性中字符统一使用 Unicode 编码。</p>
+      <p>Firefox Chrome Safari Opera 则根据页面实际字符内码情况，将<strong>非 ASCII 字符内容转化为该页内码编码值</strong>，然后将其编码值按照 URI 形式组装为内码为 Unicode 编码的字符串。</p>
+      <p>这将引发一些兼容性问题。如：<br /> 
+        所有浏览器对于直接使用 IFRAME 元素引入的 Flash 均会自动生成 EMBED 元素去加载该 Flash，但是真正传入 Flash 文件内解析的文字内码可能是 Unicode 编码、转为 UTF-8 编码表现形式的 Unicode 编码或者以该页内码编码为依据的 UTF-8 编码表现形式的 Unicode 编码。他们会导致 Flash 取得 GET 参数值后进的自动编码转换有误。</p>
+      <h2 id="influence">造成的影响</h2>
+      <p>若直接使用 IFRAME 元素引入包含中文的 Flash 地址，则可能造成在非 IE 浏览器中接收到的字符串为编码后的，若 Flash 程序内部处理不当，则可能造成其显示出乱码，甚至某些功能不可用。<br />
+      若直接使用未经解码的 src 属性值中的内容，则可能造成在非 IE 浏览器中得到的字符串格式不正确。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>src 属性为 IFRAME、FRAME、IMG、INPUT、EMBED、SCRIPT 等元素所有，首先分析与 IFRAME 元素有关的问题。</p>
+      <p>编写如下 ActionScript 3.0 代码，功能为显示传入参数的程序：<em>showpara.fla</em></p>
+<pre>
+//字符串转为其对应的内码函数
+function StrToByteArray( strValue:String):ByteArray {
+  var byAaryR:ByteArray = new ByteArray();
+  byAaryR.endian=Endian.BIG_ENDIAN;
+  for (var i:int = 0; i &lt; strValue.length; i++) {
+    byAaryR.writeShort(strValue.charCodeAt(i));
+  }
+  return byAaryR;
+}
+
+var tf:TextField = new TextField();
+tf.type=TextFieldType.INPUT;
+tf.border=true;
+tf.x=5;
+tf.y=5;
+tf.width=190;
+tf.height=900;
+tf.multiline=true;
+tf.wordWrap=true;
+var str:String="参数：";
+var kv:String;
+var paras:Object=LoaderInfo(this.root.loaderInfo).parameters;
+for (kv in paras) {
+  str+="\n"+kv+":"+paras[kv].toString();
+}
+
+str+="\nURL："+LoaderInfo(this.root.loaderInfo).url;
+tf.htmlText="&lt;div style='font-size:16px;'&gt;"+str+"&lt;/div&gt;";
+//依次将get参数内每个字符的内码输出
+tf.htmlText +="&lt;div style='font-size:16px;'&gt;实际内码：&lt;/div&gt;";
+var byteArray:ByteArray=StrToByteArray(LoaderInfo(this.root.loaderInfo).url.split("?wd=")[1]);
+for (var i:int = 0; i &lt; byteArray.length; i++) {
+  tf.htmlText+=byteArray[i].toString(16).toLocaleUpperCase();
+}
+addChild(tf);
+</pre>
+
+
+      <p>编写如下静态测试代码，页面编码为 <strong>GBK</strong>：</p>
+<pre>&lt;iframe src="showpara.swf<span class="hl_4">?wd=中文A</span>" style="width:200px; height:300px;"&gt;&lt;/iframe&gt;</pre>
+      <p>上面代码直接使用 IFRAME 元素的 src 属性引入了一个 Flash 的地址“showpara.swf<span class="hl_4">?wd=中文A</span>”，并且通过 URL 查询部分为 Flash 程序传入参数，且参数中包含中文汉字。</p>
+      <p>这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>页面 GBK 编码</th>
+          <th>IE6 IE7 IE8</th>
+            <th>Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <th>页面内 GET 字符串内码</th>
+          <td>D6D0 CEC4 0041</td>
+          <td><span class="hl_1">D6D0 CEC4 0041</span></td>
+        </tr>
+        <tr>
+          <th>显示出的 GET 字符串</th>
+          <td>中文A</td>
+          <td><span class="hl_1">%D6%D0%CE%C4A</span></td>
+        </tr>
+        <tr>
+          <th>得到的 GET 字符串内码</th>
+          <td>4E2D 6587 0041</td>
+          <td>0025 0044 0036 0025 0044 0030 0025 0043 0045 0025 0043 0034 0041</td>
+        </tr>
+        <tr>
+                  <th>编码名称</th>
+          <td>Unicode 编码的参数字符 </td>
+          <td>URI 编码表现形式的 Unicode 编码</td>
+        </tr>
+        <tr>
+                  <th>实际显示字符</th>
+          <td>中文A</td>
+          <td>ÖÐÎÄA</td>
+        </tr>
+      </table>
+      <p>对于直接通过 IFRAME 元素的 src 属性引入 Flash，各浏览器的处理方式类似，即使用目前所有主流浏览器均支持的 EMBED 元素加载 Flash，并修复缺失的 BODY、HTML 等元素。如下：</p>
+      <pre>&lt;iframe src="showpara.swf?wd=中文A" style="width:200px; height:100px;"&gt;
+  &lt;html&gt;
+    &lt;body marginwidth="0" marginheight="0"&gt;
+      &lt;embed width="100%" height="100%" name="plugin" <span class="hl_1">src="XXX"</span> type="application/x-shockwave-flash"/&gt;
+    &lt;/body&gt;
+  &lt;/html&gt;
+&lt;/iframe&gt;</pre>
+      <p>不同浏览器对 URL 字符串编码区别就在 EMBED 元素的 src 这个属性上，结合上表可以看出：</p>
+<ul>
+        <li>在 <em>IE</em> 中，src 的值与 IFRAME 元素的 src 属性值相同，同时 URL 字符不进行相应 encodeURI 操作，在Flash接收端收到的字符实际内码为 Unicode；</li>
+    <li>在 <em>FIrefox Chrome Safari Opera</em> 中，src 的值是由页面文字内码值决定，该值被 URI 编码了，<strong>这个编码是页面内码的编码值</strong>， URL 字符串与该 URI 编码显示一致。</li>
+      </ul>
+      <p>在 Flash 程序真正接收到的参数实际上为浏览器动态生成的 EMBED 元素的 src 属性中的参数，而不是 IFRAME 元素中的。</p>
+      <p>由于以上原因，Flash 内可能接受到实际为 Unicode 码的 URI 格式字符串。在 Flash 自动内码转换机制中，会将由 <em>Chrome Safari Opera</em> 发送过来的实际是 GBK 内码的 URI 字符串在 UTF-8 编码的内码表中寻找对应字符输出，最终导致 Flash 程序输出的接收参数结果不同。</p>
+      <br />
+      <p>下面再通过更多的测试检查其他元素的 src 属性在各浏览器中的编码情况。</p>
+      <p>分析以下代码：<em>src.html</em></p>
+      <pre>&lt;html&gt;
+&lt;head&gt;
+&lt;meta charset="gbk" /&gt;
+&lt;style&gt;
+  body, table { font:12px Arial; }
+  table { border-collapse:collapse; }
+  th, td { border:1px solid #666; }
+  th { background:#ddd; text-align:right; }
+&lt;/style&gt;
+&lt;script&gt;
+  function $(id) { return document.getElementById(id); }
+  
+  window.onload = function () {
+    $("info1").innerHTML = $("im").src.replace(/.+\/(.+\.[^\?]+)(?:\?.+)?/g, '$1');
+    $("info2").innerHTML = decodeURI($("im").src.replace(/.+\/(.+\.[^\?]+)(?:\?.+)?/g, '$1'));
+    $("info3").innerHTML = $("ii").src.replace(/.+\/(.+\.[^\?]+)(?:\?.+)?/g, '$1');
+    $("info4").innerHTML = decodeURI($("ii").src.replace(/.+\/(.+\.[^\?]+)(?:\?.+)?/g, '$1'));
+    $("info5").innerHTML = $("sc").src.replace(/.+\/(.+\.[^\?]+)(?:\?.+)?/g, '$1');
+    $("info6").innerHTML = decodeURI($("sc").src.replace(/.+\/(.+\.[^\?]+)(?:\?.+)?/g, '$1'));
+  }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div&gt;
+  &lt;h3&gt;IMG&lt;/h3&gt;
+  &lt;img id="im" src="谷歌.gif" /&gt;
+  &lt;table&gt;
+    &lt;tr&gt;
+      &lt;th&gt;src&lt;/th&gt;
+      &lt;td id="info1"&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;decodeURI src&lt;/th&gt;
+      &lt;td id="info2"&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/table&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div&gt;
+  &lt;h3&gt;INPUT[type="image"]&lt;/h3&gt;
+  &lt;input id="ii" type="image" src="谷歌.gif" /&gt;
+  &lt;table&gt;
+    &lt;tr&gt;
+      &lt;th&gt;src&lt;/th&gt;
+      &lt;td id="info3"&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;decodeURI src&lt;/th&gt;
+      &lt;td id="info4"&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/table&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div&gt;
+  &lt;h3&gt;SCRIPT&lt;/h3&gt;
+  &lt;script id="sc" src="谷歌.js"&gt;&lt;/script&gt;
+  &lt;table&gt;
+    &lt;tr&gt;
+      &lt;th&gt;src&lt;/th&gt;
+      &lt;td id="info5"&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;decodeURI src&lt;/th&gt;
+      &lt;td id="info6"&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/table&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码分别测试了 INPUT、IMG、SCRIPT 元素通过 src 属性引入了包含中文的 URI，之后分别显示出这些元素的 src 属性值及经过 decodeURI 方法解码后的属性值。</p>
+      <p>这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/BX9020/src_1.gif" alt="运行效果截图" /></td>
+          <td><img src="../../tests/BX9020/src_2.gif" alt="运行效果截图" /></td>
+        </tr>
+      </table>
+      <p>结果同上面测试样例相同，IE 不会对 src 属性值进行任何的编码操作而保持原样。其他浏览器则会将其进行 encodeURI 编码。所以直接通过 src 属性取得的值是编码后的，必须使用 decodeURI 方法解码才可以得到原始的值。</p>
+      
+      
+      
+
+      <h2 id="solutions">解决方案</h2>
+      <p>首先不要使用 IFRAME 元素直接引入 Flash。其次应该避免直接通过 URI 向 Flash 程序传递参数。</p>
+      <p>针对所有 HTML 中属性类型的 uri 的属性，若需要在 URI 中使用非 ASCII 字符，则应先对字符进行 encodeURI 编码，之后再通过 decodeURI 解码。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="HD9001">HD9001: 各浏览器对 URI 中非 ASCII 字符的处理有差异</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.3<br />
+              Chrome 6.0.401.1 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.53
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+              <a href="../../tests/BX9020/iframe_flash.html">iframe_flash.html</a><br />
+              Flash 源文件：<a href="../../tests/BX9016/showpara.fla">showpara.fla</a><br />
+              <a href="../../tests/BX9020/src.html">src.html</a>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-24</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>Flash IFRAME location EMBED URI ASCII 中文 地址 乱码 escape unescape encodeURI decodeURI</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

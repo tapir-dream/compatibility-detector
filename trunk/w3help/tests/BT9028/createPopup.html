@@ -1,0 +1,25 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<script type="text/javascript">
+function show_popup() {
+    try {
+	var p = window.createPopup();
+	var pbody = p.document.body;
+	pbody.style.backgroundColor = "lime";
+	pbody.style.border = "solid black 1px";
+	pbody.innerHTML = "This is a pop-up! Click outside to close.";
+	p.show(10, 50, 200, 50, document.body);
+    } catch(err) {
+	document.getElementById("info").innerHTML = err;
+    }
+
+}
+</script>
+</head>
+<body>
+<button onclick="show_popup()">Create pop-up!</button>
+<div id="info" style="color:red;"></div>
+</body>
+</html>

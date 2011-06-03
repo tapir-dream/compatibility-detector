@@ -1,0 +1,223 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HF3003: 各浏览器中密码框掩码的外观不完全一致</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 W3C HTML 4.01 规范中的描述，INPUT[type=&quot;<strong>password</strong>&quot;]（密码框）与 INPUT[type=&quot;text&quot;]（文本框）类似，但输入的文本以一种（如星号）方式渲染去隐藏其字符。这种控件通常用来进行密码输入。其当前值（current value）为用户实际输入的文本，而不是用户端实际渲染的文本。</p>
+      <p>而 W3C 没有规定用户端用于隐藏用户实际输入文本的 &quot;掩码&quot;的文字编码及其相关字体特性。</p>
+      <p>关于密码框 &quot;INPUT[type=<strong>password</strong>]&quot; 的详细信息，请参考 HTML 4.01 规范 <a href="http://www.w3.org/TR/html401/interact/forms.html#h-17.4.1">17.4.1</a> 中的内容。</p>
+      <p></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>密码框中的掩码用来覆盖密码明文，它没有相应的规范指定统一显示样式，因此导致不同系统与不同览器中密码框 &quot;INPUT[type=<strong>password</strong>]&quot; 的掩码字符均有很大的差异。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>密码框掩码的差异会在视觉上产生不同，但不会造成布局上的差异。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>通过每个浏览器的开发工具，或以下代码，我们可以检查浏览器对于 input[type=password] 标记的相关默认字体样式设置：</p>
+<pre>
+&lt;input id=&quot;A&quot; type=&quot;password&quot; value=&quot;&quot;/&gt;
+&lt;script&gt;
+if(!window.getComputedStyle){
+  window.getComputedStyle=function($target){
+    return $target.currentStyle;
+  };
+}
+document.write('fontFamily :' , getComputedStyle(document.getElementById('A'),null).fontFamily, '&lt;br /&gt;');
+document.write('fontWeight :' , getComputedStyle(document.getElementById('A'),null).fontWeight, '&lt;br /&gt;');
+&lt;/script&gt;
+</pre>
+      <p>汇总后得到如下字体样式的差异表：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE8 IE8(EmulateIE7)</th>
+          <th>IE7 Firefox</th>
+          <th>Safari</th>
+          <th>Chrome</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <th>font-family</th>
+          <td>Tahoma</td>
+          <td>SimSun</td>
+          <td>SimSun</td>
+          <td>Arial</td>
+          <td>宋体</td>
+        </tr>
+        <tr>
+          <th>font-weight</th>
+          <td>400</td>
+          <td>400</td>
+          <td>normal</td>
+          <td>normal</td>
+          <td>400</td>
+        </tr>
+        <tr>
+          <th>font-size</th>
+          <td>13px</td>
+          <td>13px</td>
+          <td>13px</td>
+          <td>13px</td>
+          <td>13px</td>
+        </tr>
+      </table>
+      <p>可见各浏览器中 'font-weight' 及 'font-size' 定义没有差异。</p>
+      <br />
+      <p>查看掩码字符，过滤的众多可疑的圆点字符后，总结出下表：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE7 Firefox</th>
+          <th>IE6 IE8 Chrome Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <th>TEXT-UNICODE</th>
+          <td>0x25cf</td>
+          <td>0x2022</td>
+          <td>0x002a</td>
+        </tr>
+      </table>
+      <br />
+      <p>将上下两表结合，重现各浏览中掩码字符的默认样式如下：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE8 IE8(EmulateIE7)</th>
+          <th>IE7 Firefox</th>
+          <th>Safari</th>
+          <th>Chrome</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <th>font-family</th>
+          <td>Tahoma</td>
+          <td>SimSun</td>
+          <td>SimSun</td>
+          <td>Arial</td>
+          <td>宋体</td>
+        </tr>
+        <tr>
+          <th>font-weight</th>
+          <td>400</td>
+          <td>400</td>
+          <td>normal</td>
+          <td>normal</td>
+          <td>400</td>
+        </tr>
+        <tr>
+          <th>font-size</th>
+          <td>13px</td>
+          <td>13px</td>
+          <td>13px</td>
+          <td>13px</td>
+          <td>13px</td>
+        </tr>
+        <tr>
+          <th>TEXT-UNICODE</th>
+          <td>0x2022</td>
+          <td>0x25cf</td>
+          <td>0x2022</td>
+          <td>0x2022</td>
+          <td>0x002a</td>
+        </tr>
+        <tr>
+          <th>显示效果</th>
+          <td><span style="font-family:Tahoma">●●●</span></td>
+          <td><span style="font-family:Simsun">●●●</span></td>
+          <td><span style="font-family:Simsun">•••</span></td>
+          <td><span style="font-family:Arial">•••</span></td>
+          <td><span style="font-family:宋体">***</span></td>
+        </tr>
+      </table>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>由于掩码字符无法被修改，因此仅通过 CSS 统一密码输入框的掩码样式是不可能的。且这种差异可以忽略不计。</p>
+      <p>这里给出两种解决思路：</p>
+      <ul>
+        <li>通过 CSS hack 方式对不同的浏览器设置不同的字体和字号，除去 Opera 外，可以减小掩码样式的差异。</li>
+        <li>或者使用 JavaScript 对普通的文本输入框做输入监听编程，用自定义掩码字符填充输入框来制做自定义密码输入框效果。</li>
+      </ul>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.2<br />
+              Chrome 5.0.356.2 dev<br />
+              Safari 4.0.5<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HF3003/input_password.html">input_password.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-08-03</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>INPUT password 密码 文本框 掩码 字符 编码</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

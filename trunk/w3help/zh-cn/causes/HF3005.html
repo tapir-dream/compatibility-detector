@@ -1,0 +1,184 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">HF3005: 仅在 IE6 IE7 IE8中 'disabled' 属性可以作用于非表单控件元素</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>在 W3C HTML 4.01 的<a href="http://www.w3.org/TR/html4/index/attributes.html">属性表</a>中属性 &quot;<strong>disabled</strong>&quot; 一行中标示出了这个布尔型属性应用于以下表单类元素：</p>
+      <ul>
+        <li>BUTTON；</li>
+        <li>INPUT；</li>
+        <li>OPTGROUP；</li>
+        <li>OPTION；</li>
+        <li>SELECT；</li>
+        <li>TEXTAREA。</li>
+      </ul>
+      <p>另外 HTML 4.01 规范关于失效的控件（<strong>Disabled</strong> controls）的描述中也对 <strong>disabled</strong> 属性进行了详细介绍：被设置 <strong>disabled</strong> 属性的表单控件将不再允许用户输入。而 <strong>disabled</strong> 属性使一个元素出现如下特征：</p>
+      <ul>
+        <li>无法再获得<a href="http://www.w3.org/TR/html401/interact/forms.html#focus">输入焦点</a>；</li>
+        <li>被跳过<a href="http://www.w3.org/TR/html401/interact/forms.html#tabbing-navigation">TAB键导航</a>（即通过TAB键在控件直接跳转输入焦点时，此元素将被忽略）；</li>
+        <li>不是 <a href="http://www.w3.org/TR/html401/interact/forms.html#successful-controls">successful controls。</a></li>
+      </ul>
+
+      <p>关于 <strong>disabled</strong> 属性及表单相关 的详细信息，请参考 HTML 4 .01 规范 <a href="http://www.w3.org/TR/html401/interact/forms.html#adef-disabled">17.12.1</a> 中的内容。</p>
+      <p></p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在所有版本IE中，<strong>&quot;disabled&quot;</strong> 属性对非表单控件元素同样有效果，被设置了 <strong>&quot;disabled&quot;</strong> 属性的元素的前景色将被渲染为灰色且带有白色阴影。<strong>&quot;disabled&quot;</strong> 属性可以被子元素继承。但对于表单控件元素，继承而来的 <strong>&quot;disabled&quot;</strong> 属性仅影响其外观渲染，并不能使其功能失效。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>由于 IE 中的对于 &quot;disabled&quot; 属性的使用是不标准的，这将造成 IE6 IE7 IE8 浏览器与其他浏览器产生不同的渲染效果。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>首先看一组关于 &quot;<strong>disabled&quot;</strong> 属性的例子。</p>
+      <p>分析以下代码：</p>
+<pre>&lt;div style=&quot;background:#DDD;&quot;&gt;
+    None of Disabled
+    &lt;div&gt;&lt;a href=&quot;#&quot; style=&quot;color:blue;&quot;&gt;Anchor Element&lt;/a&gt;&lt;/div&gt;
+    &lt;p style=&quot;background:gold;&quot;&gt;Paragraph Element&lt;/p&gt;
+    &lt;input type=&quot;text&quot; /&gt;&lt;input type=&quot;submit&quot; onclick=&quot;alert('A');&quot; /&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div style=&quot;background:#CCC;&quot;&gt;
+    Part of Disabled
+    &lt;div&gt;&lt;a href=&quot;#&quot; <span class="hl_3">disabled=&quot;disabled&quot;</span>&gt;Anchor Element&lt;/a&gt;&lt;/div&gt;
+    &lt;p style=&quot;background:gold;&quot;&gt;Paragraph Element&lt;/p&gt;
+    &lt;input type=&quot;text&quot; <span class="hl_3">disabled=&quot;disabled&quot;</span> /&gt;&lt;input type=&quot;submit&quot; <span class="hl_3">disabled=&quot;disabled&quot;</span> onclick=&quot;alert('A');&quot; /&gt;
+&lt;/div&gt;
+&lt;br /&gt;
+&lt;div <span class="hl_3">disabled=&quot;disabled&quot;</span> style=&quot;background:#BBB;&quot;&gt;
+    All Disabled
+    &lt;div&gt;&lt;a href=&quot;#&quot;&gt;Anchor Element&lt;/a&gt;&lt;/div&gt;
+    &lt;p style=&quot;background:gold;&quot;&gt;Paragraph Element&lt;/p&gt;
+    &lt;input type=&quot;text&quot; /&gt;&lt;input type=&quot;submit&quot; onclick=&quot;alert('A');&quot;/&gt;
+&lt;/div&gt;</pre>
+      <p>以上代码分为三组：</p>
+      <ol>
+        <li>第一组：最外层父元素及其所有子元素均没有 <strong>&quot;disabled&quot;</strong> 属性；</li>
+        <li>第二组：最外层父元素没有 <strong>&quot;disabled&quot;</strong> 属性，子元素中A、INPUT[type=&quot;text&quot;] INPUT[type=&quot;submit&quot;] 这三个元素设置了 &quot;<strong>disabled&quot;</strong> 属性；</li>
+        <li>第三组：最外层父元素设置了 &quot;<strong>disabled&quot;</strong> 属性，子元素均没有 <strong>&quot;disabled&quot;</strong> 属性。</li>
+      </ol>
+      <p>根据 W3C HTML4 规范对 <strong>&quot;disabled&quot;</strong> 属性的规定，<strong>&quot;disabled&quot;</strong> 属性只对表单控件类元素有效，其他元素不应对此属性有任何解释，即 <strong>&quot;disabled&quot; 属性对非表单控件类元素无效</strong>。</p>
+      <p>以上代码在不同的浏览器环境中的表现：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox Opera Safari Chrome</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/HF3005/IE_attr_disabled.gif" alt="运行效果截图" /></td>
+          <td><img src="../../tests/HF3005/non-IE_attr_disabled.gif" alt="运行效果截图" /></td>
+        </tr>
+      </table>
+      <p>对第二组和第三组在 <em>IE</em> 中进一步测试，测试 A、INPUT[type=&quot;text&quot;] INPUT[type=&quot;submit&quot;] 这些可获得输入焦点的元素：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <th>第二组</th>
+          <th>第三组</th>
+        </tr>
+        <tr>
+          <th>元素点击后是否可以跳转</th>
+          <td><span class="hl_2">可以</span></td>
+          <td><span class="hl_2">可以</span></td>
+        <tr>
+          <th>INPUT[type=&quot;text&quot;] 是否可以输入文字</th>
+          <td><span class="hl_1">不可以</span></td>
+          <td><span class="hl_2">可以</span></td>
+        <tr>
+          <th>INPUT[type=&quot;submit&quot;] 点击后是否可以相应 onclick 事件</th>
+          <td><span class="hl_1">不可以</span></td>
+          <td><span class="hl_2">可以</span></td>
+        </tr>
+      </table>
+      <p>可见：</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8</em> 中，<strong>&quot;disabled&quot;</strong> 属性会影响非表单控件类元素的渲染，且仅影响这些元素的外观渲染；
+        <br />
+        <strong>&quot;disabled</strong>&quot; 属性可以被子元素继承，被继承而来的 <strong>&quot;disabled&quot;</strong> 属性对于表单元素仅影响其外观渲染，并不能使其真正的失效；</li>
+        <li>在 <em>Firefox Safari Chrome Opera</em> 中，按照 W3C 规范对 <strong>&quot;disabled</strong>&quot; 属性进行处理，&quot;<strong>disabled</strong>&quot; 属性仅支持：BUTTON, INPUT, OPTGROUP, OPTION, SELECT, and TEXTAREA。</li>
+      </ul>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>应避免在非表单控件类元素上使用 <strong>&quot;disabled&quot;</strong> 属性。</p>
+      <p>若需要使一个普通元素呈现出 <em>IE</em> 中为其设置 &quot;<strong>disabled</strong>&quot; 属性后的效果，可以用 CSS 设计其展现形式，以保证在所有浏览器下达到一致的显示。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 5.0.342.2 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.50
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/HF3005/form_disabled.html">form_disabled.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-06-22</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>disabled form a anchor 失效 表单 焦点</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,4 @@
+h1{width:100px; height:100px; background:red;}
+@charset "UTF-8";
+h1{background:blue;}
+h1{font:bold 14px/100px Verdana; color:white;}

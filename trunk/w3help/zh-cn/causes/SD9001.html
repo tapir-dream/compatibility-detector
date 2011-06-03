@@ -1,0 +1,128 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SD9001: IE6 IE7 IE8(Q) 中的 getElementById 方法能以 name 属性为参数获取某些元素</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>getElementById 是 Document 接口提供的方法，用于获取一个元素，该方法传入的参数应该是目标元素的 id 属性的值：</p>
+<pre>Element getElementById(in DOMString elementId);</pre>
+      <p>关于 getElementById 方法的详细信息，请参考 DOM-1-HTML <a href="http://www.w3.org/TR/REC-DOM-Level-1/level-one-html.html#ID-1006298752">Interface HTMLDocument</a> 及 DOM-2-Core <a href="http://www.w3.org/TR/DOM-Level-2-Core/core.html#i-Document">Interface Document</a> 中的相关内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 IE7 IE8(Q) 中，支持以 document.getElementById(<span class="hl_1">elementName</span>) 的方式获取 name 属性值为 <span class="hl_1">elementName</span> 的 A APPLET BUTTON FORM IFRAME IMG INPUT MAP META OBJECT EMBED SELECT TEXTAREA 元素。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>该问题将导致在某些浏览器内无法获取到目标元素。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td></td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：</p>
+<pre>
+&lt;body&gt;
+&lt;div id="output"&gt;&lt;/div&gt;
+&lt;script&gt;
+var $=function(id){return document.getElementById(id);};
+var tags=['A','ABBR','ACRONYM','ADDRESS','APPLET','AREA','B','BDO','BIG','BLOCKQUOTE','BR','BUTTON','CAPTION','CENTER','CITE','CODE','COL','COLGROUP','DD','DEL','DIR','DIV','DFN','DL','DT','EM','FIELDSET','FONT','FORM','FRAME','FRAMESET','H1','H6','HR','I','IFRAME','IMG','INPUT','INS','ISINDEX','KBD','LABEL','LEGEND','LI','LINK','MAP','MENU','META','NOFRAMES','NOSCRIPT','OBJECT','OL','OPTGROUP','OPTION','EMBED','P','PRE','Q','S','SAMP','SCRIPT','SELECT','SMALL','SPAN','STRIKE','STRONG','STYLE','SUB','SUP','TABLE','TBODY','TD','TEXTAREA','TFOOT','TH','THEAD','TITLE','TR','TT','U','UL','VAR','XMP'] ;
+for(i=0;i&lt;tags.length;i++){
+  var tag=tags[i];
+  document.writeln('&lt;'+tag+' name="name_'+tag+'"&gt;&lt;/'+tag+'&gt;');
+  $('output').innerHTML+=$('name_'+tag)?tag+" ":"";
+}
+&lt;/script&gt;
+&lt;/body&gt;
+</pre>
+      <p>以上代码在页面中顺次创建各元素，并尝试以 document.getElementById(elementName) 的方式来获取各元素。</p>
+      <p>在各浏览器输出如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>其他浏览器</th>
+        </tr>
+        <tr>
+          <td>A APPLET BUTTON FORM IFRAME IMG INPUT MAP META OBJECT EMBED SELECT TEXTAREA</td>
+          <td>(无)</td>
+        </tr>
+      </table>
+      <p>可见：在 IE6 IE7 IE8(Q) 中，支持以 document.getElementById(elementName) 的方式获取 A APPLET BUTTON FORM IFRAME IMG INPUT MAP OBJECT EMBED SELECT TEXTAREA 元素，而其他浏览器的任何元素均不支持该方式。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>在使用 document.getElementById 方法获取页面元素时，应传入元素的 id 属性值，而不能使用元素的 name 属性值。同时需注意页面中的元素的 id 属性值不能与其他元素的 name 属性值有重复。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6<br />
+              Chrome 4.0.302.3 dev<br />
+              Safari 4.0.4<br />
+              Opera 10.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="#">...</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-09</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>IE getElementById name tagName A APPLET BUTTON FORM IFRAME IMG INPUT MAP OBJECT EMBED SELECT TEXTAREA</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>

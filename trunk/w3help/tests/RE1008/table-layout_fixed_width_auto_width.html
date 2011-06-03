@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+	* { font:20px Arial; }
+</style>
+</head>
+<body>
+	<div style="width:50px;">
+		<table id="t1" cellspacing="0" cellpadding="0" style="table-layout:fixed;">
+			<tr>
+				<td id="td1" style="width:200px; background:pink;">test text</td>
+			</tr>
+		</table>
+	</div>
+	<div id="info1"></div>
+	<br />
+	<div style="width:50px;">
+		<table id="t2" cellspacing="0" cellpadding="0" style="table-layout:auto;">
+			<tr>
+				<td id="td2" style="width:200px; background:pink;">test text</td>
+			</tr>
+		</table>
+	</div>
+	<div id="info2"></div>
+	<script>
+		function $(id) { return document.getElementById(id); }
+		$("info1").innerHTML = 'table-layout:fixed<br />TD1 width:' + $("td1").offsetWidth;
+		$("info2").innerHTML = 'table-layout:auto<br />TD2 width:' + $("td2").offsetWidth;
+	</script>
+</body>
+</html>
