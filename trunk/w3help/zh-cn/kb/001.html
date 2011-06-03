@@ -1,0 +1,345 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="../../zh-cn/css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../../zh-cn/css/article.css" media="all" />
+</head>
+<body>
+<!-- body_content { -->
+<div class="body_content">
+			<!-- 足迹/标题/目录 { -->
+			<!--<p id="printButton"><a href="javascript:printArticle()" title="打印本文">打印</a></p> -->
+			<h1 class="title">KB001: 兼容性问题与浏览器的内核及渲染模式</h1>
+			<ul class="toc">
+				<li><a href="#header_1">兼容性问题</a> <span>•</span></li>
+				<li><a href="#header_2">浏览器的内核</a> <span>•</span></li>
+				<li><a href="#header_3">浏览器的工作模式</a> <span>•</span></li>
+				<li><a href="#header_4">建议</a></li>
+			</ul>
+			<!-- } -->
+			<!-- 文章正文 { -->
+			<div id="w3h_content">
+				<h2 id="header_1">兼容性问题</h2>
+				<p>目前市面上流行的浏览器有多种，这些浏览器在处理一个相同的页面时，表现或行为有时会有差异。</p>
+				<p>这种差异可能很小，甚至不会被注意到；也可能很大，甚至造成在某个浏览器下无法正常浏览。</p>
+				<p>我们把引起这些差异的问题统称为“浏览器兼容性问题”。</p>
+
+				<h2 id="header_2">浏览器的内核</h2>
+				<p>各品牌浏览器的内核是不同的，不同的内核处理同一段代码的时候思路不同。因此可以说，<em>浏览器间内核的差异是产生兼容性问题的根本原因</em>。</p>
+				<p>“内核”也称为“引擎”。常见的浏览器及其渲染引擎（又称排版引擎）、脚本引擎的列表<sup>1</sup>如下：</p>
+				<table class="compare">
+					<tr>
+						<th>Browser Name</th>
+						<th>Layout Engine</th>
+						<th>ECMAScript Engine</th>
+					</tr>
+					<tr>
+						<td>Internet Explorer 6 - 8</td>
+						<td>Trident</td>
+						<td>JScript</td>
+					</tr>
+					<tr>
+						<td>Firefox 3.5</td>
+						<td>Gecko</td>
+						<td>TraceMonkey</td>
+					</tr>
+					<tr>
+						<td>Chrome 4</td>
+						<td>WebKit</td>
+						<td>V8</td>
+					</tr>
+					<tr>
+						<td>Safari 4</td>
+						<td>WebKit</td>
+						<td>SquirrelFish Extreme</td>
+					</tr>
+					<tr>
+						<td>Opera 10</td>
+						<td>Presto</td>
+						<td>Carakan</td>
+					</tr>
+				</table>
+
+				<p class="comment">注：</p>
+				<ol class="comment">
+					<li>关于浏览器内核的更多信息，请参考 <a href="http://zh.wikipedia.org/zh-cn/%E6%8E%92%E7%89%88%E5%BC%95%E6%93%8E">维基百科 - 排版引擎</a> 及 <a href="http://zh.wikipedia.org/zh-cn/%E7%B6%B2%E9%A0%81%E7%80%8F%E8%A6%BD%E5%99%A8%E6%AF%94%E8%BC%83">维基百科 - 网页浏览器比较</a> 中的相关内容。</li>
+				</ol>
+
+				<h2 id="header_3">浏览器的工作模式</h2>
+				<h3>工作模式简介</h3>
+				<p><em>浏览器的工作模式</em>常被称为“渲染模式”。实际上浏览器不同的工作模式不仅对渲染有影响，对代码的解析以及脚本的行为也同样有影响。</p>
+				<p>从更广泛的角度来看，浏览器的工作模式的差异不仅体现在处理 HTML 页面的时候，处理 XML 及一些非 WEB 内容时也有模式上的差异，但本文仅讨论浏览器在处理 HTML 页面时工作模式。<sup>1</sup></p>
+
+				<p class="comment">注：</p>
+				<ol class="comment">
+					<li>关于浏览器的工作模式的更多信息，请参考 <a href="http://hsivonen.iki.fi/doctype/">Activating Browser Modes with Doctype</a>。</li>
+				</ol>
+
+
+				<h3>工作模式的来源及变迁</h3>
+				<p>微软于 2001 年 8 月 27 日发布的 IE6（Internet Explorer 6）增强了对 CSS1 的兼容<sup>1</sup>，这使得 IE6 对 CSS 的解析及渲染与它的前一个版本 IE5.5 有了很大的差别，如对盒模型的理解<sup>2</sup>、表格尺寸的算法<sup>3</sup>等。</p>
+				<p>
+				为了保持良好的向后兼容性，微软为用户提供了一个“开关”，来决定<em>浏览器的工作模式</em><sup>4</sup>，这个“开关”就是页面顶部的 DTD。<br />
+				某些 DTD 将使 IE6 工作在“标准兼容模式”（即“标准模式”），这种模式使用了 IE6 最新的处理方式，包括对 CSS1 的兼容及一些 DHTML 方面的增强。<br />
+				而另一些 DTD，包括不设置 DTD 将使 IE6 工作在“向后兼容模式”（即“混杂模式”），这种模式对页面的处理是与 IE5.5 保持一致的，这样就可以保证对一些在 IE5.5 中表现良好的页面在 IE6 中也能达到同样的效果。<br />
+				微软在后续推出的 IE7、IE8 中，也使用了上述“开关”，与 IE6 一样，在 IE7、IE8 的“混杂模式”下，对页面处理方式仍与 IE5.5 一致。因此可以说，IE 系列的“混杂模式”，将浏览器的行为冻结在了 IE5.5 这个版本，虽然 IE 各版本的混杂模式也略有区别<sup>5</sup>，但它们的本意都是向后兼容。
+				</p>
+				<p>随着时间的推进和标准的进步，IE6、IE7 的“标准模式”逐渐已经变得不够标准了，2009年3月19日发布的 IE8 重新定义了“标准模式”，再次增强了对标准规范的支持，同时为了保持对 IE7 的兼容，IE8 增加了一种工作模式：“接近标准模式”。于是，IE8 的工作模式就分成了三种：“标准模式”、“接近标准模式”和“混杂模式”<sup>6</sup>。</p>
+				<p>目前所有主流浏览器对于向后兼容问题的处理都与 IE 系列一样，提供了不同的模式<sup>7</sup>来保证向后兼容。</p>
+				<p><em>浏览器的工作模式</em>就是在这种背景下诞生的，它很好的解决了浏览器对标准支持上的不断增强及对一些错误的修复而导致的向后兼容问题，但也将浏览器在不同情况下的表现及行为变得更加复杂多样。</p>
+				<p>通过以上的内容，我们可以得出结论：<em>如果一个页面能使各浏览器都工作在“标准模式”下，那么各浏览器都将尽量兼容标准，因此各浏览器之间表现出的差异是很少的。相反，如果一个页面使各浏览器都工作在“混杂模式”下，那么各浏览器都将尽量向后兼容，因此各浏览器之间表现出的差异将会最大化。</em></p>
+
+				<p class="comment">注：</p>
+				<ol class="comment">
+					<li>关于 IE6 的更多信息，请参考 <a href="http://zh.wikipedia.org/zh-cn/Internet_Explorer_6">维基百科 - Internet Explorer 6</a>。</li>
+					<li>关于此问题，请参考 <a href="/zh-cn/causes/RD8001">W3H - RD8001: 各浏览器中 'width' 和 'height' 在某些元素上的作用位置有差异</a>。</li>
+					<li>关于此问题，请参考 <a href="/zh-cn/causes/RE8017">W3H - RE8017: IE Firefox Opera 的混杂模式对于 TD 元素的百分比高度计算错误</a>。</li>
+					<li>关于 IE6 对浏览器工作模式的区分的详细信息，请参考 <a href="http://msdn.microsoft.com/en-us/library/bb250395.aspx">MSDN - CSS Enhancements in Internet Explorer 6</a>。</li>
+					<li>
+						比如 IE6 的混杂模式有著名的“双边距 Bug”，而 IE7 和 IE8 的混杂模式则没有这个问题。<br />
+						关于此问题，请参考 <a href="http://www.w3help.org/zh-cn/causes/RX2001">W3H - RX2001: IE5.0 IE5.5 IE6 中浮动元素在某些情况下会有双倍外边距</a>。
+					</li>
+					<li>
+						document.compatMode 最先出现在 IE6 中，它的值标示了浏览器的工作模式，“标准模式”返回“CSS1Compat”，“混杂模式”返回“BackCompat”。这一做法到目前为止仍被所有主流浏览器所采用。<br />
+						需要注意的是：在后来出现的“接近标准模式”中，document.compatMode 的返回值与“标准模式”一致，为“CSS1Compat”。也就是说，不能通过 document.compatMode 来详细区分浏览器的工作模式，只能用来判断浏览器是否工作在“混杂模式”下。<br />
+						因为“标准模式”与“接近标准模式”之间的差异并不大，所以这个方法至今仍被广泛使用。
+					</li>
+					<li>关于 Firefox 中 DTD 与浏览器工作模式的详细信息，请参考 <a href="https://developer.mozilla.org/en/Mozilla's_DOCTYPE_sniffing">Mozilla's DOCTYPE sniffing</a>，关于 Opera 中 DTD 与浏览器工作模式的详细信息，请参考 <a href="http://www.opera.com/docs/specs/doctype/">DOCTYPE Switches support in Opera Presto 2.6</a>。</li>
+				</ol>
+				
+				<h3><a name="common_dtd"></a>附录: 一些常见的 doctype</h3>
+				<p class="comment"><span class="hl_1">Q</span> 代表“混杂模式”，<span class="hl_4">A</span> 代表“接近标准模式”，<span class="hl_2">S</span> 代表“标准模式”。</p>
+				<table class="compare">
+					<tr>
+						<th>doctype</th>
+						<th>IE6<br />Opera 7.0</th>
+						<th>IE7<br />Opera 7.1</th>
+						<th>IE8<br />Opera 9.5</th>
+						<th>Opera 9.0</th>
+						<th>Firefox<br />Chrome<br />Safari<br />Opera 10</th>
+					</tr>
+					<tr>
+						<th>&lt;!DOCTYPE html&gt; <span class="hl_1">(推荐！)</a></th>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_2">S</span></td>
+						<td><span class="hl_2">S</span></td>
+						<td><span class="hl_2">S</span></td>
+					</tr>
+					<tr>
+						<th>
+							<a name="-//W3C//DTD HTML 3.2 Final//EN"></a>
+							&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 3.2 Final//EN&quot;&gt;
+						</th>
+						<td><span class="hl_1">Q</span></td>
+						<td><span class="hl_1">Q</span></td>
+						<td><span class="hl_1">Q</span></td>
+						<td><span class="hl_1">Q</span></td>
+						<td><span class="hl_1">Q</span></td>
+					</tr>
+					<tr>
+						<th>
+							<a name="-//W3C//DTD HTML 4.0//EN"></a>
+							&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot;&gt;
+						</th>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_2">S</span></td>
+						<td><span class="hl_2">S</span></td>
+					</tr>
+					<tr>
+						<th>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/html4/strict.dtd&quot;&gt;</th>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_2">S</span></td>
+						<td><span class="hl_2">S</span></td>
+					</tr>
+					<tr>
+						<th>
+							<a name="-//W3C//DTD HTML 4.01//EN"></a>
+							&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.01//EN&quot;&gt;
+						</th>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_2">S</span></td>
+						<td><span class="hl_2">S</span></td>
+					</tr>
+					<tr>
+						<th>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.01//EN&quot; &quot;http://www.w3.org/TR/html4/strict.dtd&quot;&gt;</th>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_2">S</span></td>
+						<td><span class="hl_2">S</span></td>
+					</tr>
+					<tr>
+						<th>
+							<a name="-//W3C//DTD HTML 4.0 Transitional//EN"></a>
+							&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0 Transitional//EN&quot;&gt;
+						</th>
+						<td><span class="hl_1">Q</span></td>
+						<td><span class="hl_1">Q</span></td>
+						<td><span class="hl_1">Q</span></td>
+						<td><span class="hl_1">Q</span></td>
+						<td><span class="hl_1">Q</span></td>
+					</tr>
+					<tr>
+						<th>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0 Transitional//EN&quot; &quot;http://www.w3.org/TR/html4/loose.dtd&quot;&gt;</th>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_1">Q</span></td>
+						<td><span class="hl_1">Q</span></td>
+					</tr>
+					<tr>
+						<th>
+							<a name="-//W3C//DTD HTML 4.01 Transitional//EN"></a>
+							&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.01 Transitional//EN&quot;&gt;
+						</th>
+						<td><span class="hl_1">Q</span></td>
+						<td><span class="hl_1">Q</span></td>
+						<td><span class="hl_1">Q</span></td>
+						<td><span class="hl_1">Q</span></td>
+						<td><span class="hl_1">Q</span></td>
+					</tr>
+					<tr>
+						<th>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.01 Transitional//EN&quot; &quot;http://www.w3.org/TR/html4/loose.dtd&quot;&gt;</th>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_4">A</span></td>
+					</tr>
+					<tr>
+						<th>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.01 Transitional//EN&quot; &quot;http://www.w3.org/TR/1999/REC-html401-19991224/loose.dtd&quot;&gt;</th>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_4">A</span></td>
+					</tr>
+					<tr>
+						<th>
+							<a name="-//W3C//DTD XHTML 1.1//EN"></a>
+							&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.1//EN&quot; &quot;http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd&quot;&gt;
+						</th>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_2">S</span></td>
+						<td><span class="hl_2">S</span></td>
+						<td><span class="hl_2">S</span></td>
+					</tr>
+					<tr>
+						<th>
+							<a name="-//W3C//DTD XHTML Basic 1.0//EN"></a>
+							&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML Basic 1.0//EN&quot; &quot;http://www.w3.org/TR/xhtml-basic/xhtml-basic10.dtd&quot;&gt;
+						</th>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_2">S</span></td>
+						<td><span class="hl_2">S</span></td>
+						<td><span class="hl_2">S</span></td>
+					</tr>
+					<tr>
+						<th>
+							<a name="-//W3C//DTD XHTML 1.0 Strict//EN"></a>
+							&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Strict//EN&quot; &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd&quot;&gt;
+						</th>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_2">S</span></td>
+						<td><span class="hl_2">S</span></td>
+						<td><span class="hl_2">S</span></td>
+					</tr>
+					<tr>
+						<th>
+							<a name="-//W3C//DTD XHTML 1.0 Transitional//EN"></a>
+							&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD XHTML 1.0 Transitional//EN&quot; &quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd&quot;&gt;
+						</th>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_4">A</span></td>
+					</tr>
+					<tr>
+						<th>
+							<a name="ISO/IEC 15445:1999//DTD HyperText Markup Language//EN"></a>
+							&lt;!DOCTYPE HTML PUBLIC &quot;ISO/IEC 15445:1999//DTD HyperText Markup Language//EN&quot;&gt;
+						</th>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_4">A</span></td>
+						<td><span class="hl_2">S</span></td>
+						<td><span class="hl_2">S</span></td>
+						<td><span class="hl_2">S</span></td>
+					</tr>
+					<tr>
+						<th>
+							<a name="ISO/IEC 15445:2000//DTD HTML//EN"></a>
+							&lt;!DOCTYPE HTML PUBLIC &quot;ISO/IEC 15445:2000//DTD HTML//EN&quot;&gt;
+						</th>
+						<td><span class="hl_1">Q</span></td>
+						<td><span class="hl_1">Q</span></td>
+						<td><span class="hl_1">Q</span></td>
+						<td><span class="hl_1">Q</span></td>
+						<td><span class="hl_2">S</span></td>
+					</tr>
+					<tr>
+						<th>
+							<a name="ISO/IEC 15445:1999//DTD HTML//EN"></a>
+							&lt;!DOCTYPE HTML PUBLIC &quot;ISO/IEC 15445:1999//DTD HTML//EN&quot;&gt;
+						</th>
+						<td><span class="hl_1">Q</span></td>
+						<td><span class="hl_1">Q</span></td>
+						<td><span class="hl_1">Q</span></td>
+						<td><span class="hl_1">Q</span></td>
+						<td><span class="hl_2">S</span></td>
+					</tr>
+				</table>
+
+				<h2 id="header_4">建议</h2>
+				<p>在编写一个页面时，要使用可以触发各浏览器“标准模式”的DTD，并书写符合规范的代码，以保证您的页面在各浏览器中可以最大程度的兼容。</p>
+
+
+				<div class="appendix">
+					<h2>测试环境</h2>
+					<table class="list">
+						<tr>
+							<th>操作系统版本:</th>
+							<td>Windows 7 Ultimate build 7600</td>
+						</tr>
+						<tr>
+							<th>浏览器版本:</th>
+							<td>
+								IE6<br />
+								IE7<br />
+								IE8<br />
+								Firefox 3.6<br />
+								Chrome 4.0.302.3 dev<br />
+								Safari 4.0.4<br />
+					       		Opera 10.50</td>
+						</tr>
+						<tr>
+							<th>测试页面:</th>
+							<td>&nbsp;</td>
+						</tr>
+						<tr>
+							<th>本文更新时间:</th>
+							<td>2010-07-22</td>
+						</tr>
+					</table>
+
+					<h2>关键字</h2>
+					<p>浏览器 兼容性 内核 渲染模式</p>
+				</div>
+			</div>
+			<!-- } -->
+	</div>
+<!-- } body_content -->
+</body>
+</html>
+
