@@ -163,15 +163,15 @@ function loadTemplate(templateFile) {
 
 function main(sourceDir, destDir, templateFile, idListFile, csdnListFile) {
   if (!sourceDir)
-    sourceDir = '.\\w3help\\zh-cn\\causes\\';
+    sourceDir = '..\\w3help\\zh-cn\\causes\\';
   if (!destDir)
-    destDir = '.\\w3help\\zh-cn\\output\\';
+    destDir = '..\\w3help\\zh-cn\\output\\';
   if (!templateFile)
-    templateFile = '.\\w3help\\zh-cn\\causes\\template_cause.html';
+    templateFile = '..\\w3help\\zh-cn\\causes\\template_cause.html';
   if (!idListFile)
-    idListFile = '.\\id_list.txt';
+    idListFile = 'id_list.txt';
   if (!csdnListFile)
-    idListFile = '.\\csdn_list.txt';
+    idListFile = 'csdn_list.txt';
 
   loadTemplate(templateFile);
   createCSDNForumUrlMap(trim(loadFromFile(csdnListFile)));
