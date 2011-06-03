@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>${title} - W3Help</title>
+<meta name="keywords" content="${keywords}" />
+<meta name="description" content="${title}" />
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+<script type="text/javascript" src="../js/global.js"></script>
+</head>
+<body>
+<div id="w3h_container">
+  <div id="w3h_header">
+    <div class="header_sidebar">
+      <h1 class="logo"><a href="http://w3help.org/"><span>W3Help</span></a></h1>
+    </div>
+    <div class="header_content">
+      <ul class="navigation">
+        <li class="first_item"><a href="http://w3help.org/">首页</a></li>
+        <li><a href="../home/events.html">活动</a></li>
+        <li><a href="../home/news.html">新闻</a></li>
+        <li><a href="../home/forum.html">论坛</a></li>
+        <li class="last_item"><a href="../home/about.html">关于我们</a></li>
+        <li class="search_item">
+          <form action="../home/search.html" method="get">
+            <p>
+              <input name="key" id="keyInput" value="" onfocus="focusKey(this)" onblur="blurKey(this)" title="搜索" class="text" />
+            </p>
+            <p>
+              <input id="search_submit" type="image" src="../images/search_button.gif" alt="搜索" />
+            </p>
+          </form>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div id="w3h_body">
+    <div class="body_sidebar">
+      <div class="logo_shadow"></div>
+      <h2 class="category"><span><a href="../home/standards.html">标准</a></span></h2>
+      <ul class="theme">
+        <li><a href="../standards">W3C 标准</a></li>
+        <li><a href="../home/glossary.html">词汇表</a></li>
+      </ul>
+      <h2 class="category"><span><a href="../home/compatibility.html">兼容性</a></span></h2>
+      <ul class="theme">
+        <li><a href="../causes/index.html" class="current">根本原因</a></li>
+        <li><a href="../kb">知识库</a></li>
+        <li><a href="../casestudies">案例分析</a></li>
+      </ul>
+    </div>
+    <div class="body_content">
+      <p id="printButton"><a href="javascript:printArticle()" title="打印本文">打印</a></p>
+      ${toc}
+      <div id="w3h_content">
+        ${w3hContent}
+        <div id="forumLink">
+          <div>本篇文章正在公测阶段，错误在所难免，欢迎大家提出宝贵的意见和建议。</div>
+          <a href="${csdnForum}">发表评论 »</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="w3h_footer">
+  <div class="footer_content">
+    <ul>
+      <li><a href="http://www.google.com"><img src="../logo/google.gif" alt="Google" /></a></li>
+      <li><a href="http://www.chinaw3c.org"><img src="../logo/w3c-china.gif" alt="W3C-China" /></a></li>
+      <li><a href="http://www.mozillaonline.com"><img src="../logo/firefox.gif" alt="FireFox" /></a></li>
+      <li><a href="http://www.csdn.net"><img src="../logo/csdn.gif" alt="CSDN" /></a></li>
+      <li><a href="http://www.w3school.com.cn"><img src="../logo/w3school.gif" alt="W3School" /></a></li>
+      <li><a href="http://www.w3ctech.com"><img src="../logo/web-club.gif" alt="w3ctech" /></a></li>
+    </ul>
+    <p class="copyright">Copyright &copy; 2010&nbsp;&nbsp;&nbsp;<a href="http://www.miibeian.gov.cn/">京ICP备10208242号</a></p>
+    <p class="w3cIcon">
+      <a href="http://validator.w3.org/check?uri=referer"><img src="../images/valid-xhtml10.gif" alt="Valid XHTML 1.0 Strict" height="31" width="88" /></a>
+    </p>
+  </div>
+</div>
+<script type="text/javascript">
+var _gaq = _gaq || [];
+_gaq.push(['_setAccount', 'UA-18304141-1']);
+_gaq.push(['_trackPageview']);
+(function() {
+  var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+  ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+  var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+})();
+</script>
+</body>
+</html>
