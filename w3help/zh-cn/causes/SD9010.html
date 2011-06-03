@@ -1,9 +1,4 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<!--
-$Revision: 1369 $
-$LastChangedBy: dongguo $
-$LastChangedDate: 2010-11-23 18:35:36 +0800 (周二, 2010-11-23) $
--->
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -13,218 +8,220 @@ $LastChangedDate: 2010-11-23 18:35:36 +0800 (周二, 2010-11-23) $
 </head>
 <body>
 <div id="w3h_body">
-	<div class="body_content">
-		<!-- 足迹/标题/目录 { -->
-		<h1 class="title">SD9010: 仅 IE 中的 createElement 方法支持传入 HTML String 做参数</h1>
-		<ul class="toc">
-			<li><a href="#standard_reference">标准参考</a> <span>•</span></li>
-			<li><a href="#description">问题描述</a> <span>•</span></li>
-			<li><a href="#influence">造成的影响</a> <span>•</span></li>
-			<li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
-			<li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
-			<li><a href="#solutions">解决方案</a> <span>•</span></li>
-			<li><a href="#see_also">参见</a></li>
-		</ul>
-		<!-- } -->
-		<!-- 文章正文 { -->
-		<div id="w3h_content">
-			<h2 id="standard_reference">标准参考</h2>
-			<p>根据 W3C DOM Level2 Core 规范中的描述，Document 接口下的 createElement 方法可以创建一个元素节点对象实例。它可以传入一个字符串参数 tagName，在 HTML 中，这个参数可以是任何形式，必须是映射到可由 DOM 实现的符合规范的大写形式。即，tagName 应为一个合法的标签名。</p>
-			<p>若 tagName 中出现不合法的字符，则应抛出 INVALID_CHARACTER_ERR 异常。</p>
-			<p>关于 createElement 方法的更多资料，请参考 DOM Level2 Core 规范 <a href="http://www.w3.org/TR/DOM-Level-2-Core/core.html#ID-2141741547">Interface Document</a> 的内容。</p>
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SD9010: 仅 IE 中的 createElement 方法支持传入 HTML String 做参数</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 W3C DOM Level2 Core 规范中的描述，Document 接口下的 createElement 方法可以创建一个元素节点对象实例。它可以传入一个字符串参数 tagName，在 HTML 中，这个参数可以是任何形式，必须是映射到可由 DOM 实现的符合规范的大写形式。即，tagName 应为一个合法的标签名。</p>
+      <p>若 tagName 中出现不合法的字符，则应抛出 INVALID_CHARACTER_ERR 异常。</p>
+      <p>关于 createElement 方法的更多资料，请参考 DOM Level2 Core 规范 <a href="http://www.w3.org/TR/DOM-Level-2-Core/core.html#ID-2141741547">Interface Document</a> 的内容。</p>
 
-			<h2 id="description">问题描述</h2>
-			<p>在 IE6 IE7 IE8 中，createElement 方法不仅可以通过合法的标签名创建节点对象，还可以通过传入一段合法的 HTML 代码字符串作为参数创建节点对象。</p>
+      <h2 id="description">问题描述</h2>
+      <p>在 IE6 IE7 IE8 中，createElement 方法不仅可以通过合法的标签名创建节点对象，还可以通过传入一段合法的 HTML 代码字符串作为参数创建节点对象。</p>
 
-			<h2 id="influence">造成的影响</h2>
-			<p>若使用了 IE 特有的通过为 createElement 传入一段合法的 HTML 代码字符串作为参数创建节点对象的方法，则在其他浏览器中将会抛出异常，并导致后续代码无法执行。</p>
+      <h2 id="influence">造成的影响</h2>
+      <p>若使用了 IE 特有的通过为 createElement 传入一段合法的 HTML 代码字符串作为参数创建节点对象的方法，则在其他浏览器中将会抛出异常，并导致后续代码无法执行。</p>
 
-			<h2 id="impacted_browsers">受影响的浏览器</h2>
-			<table class="list">
-				<tr>
-					<th>IE6 IE7 IE8</th>
-					<td>&nbsp;</td>
-				</tr>
-			</table>
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
 
-			<h2 id="analysis_of_issues">问题分析</h2>
-			<p>根据 MSDN 中的关于 createElement 方法的描述，</p>
-			<pre>Attributes can be included with the sTag as long as <strong>the entire string is valid HTML</strong>.</pre>
-			<p>IE 中的 createElement 方法不仅可以通过合法的标签名创建节点对象，还可以通过传入一段合法的 HTML 代码字符串作为参数创建节点对象。</p>
-			<p>关于 IE 中 createElement 方法的更多资料，请参考 MSDN <a href="http://msdn.microsoft.com/en-us/library/ms536389(VS.85).aspx">createElement Method</a> 中的内容。</p>
-			<p>分析以下代码：</p>
-			<pre>&lt;html&gt;
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>根据 MSDN 中的关于 createElement 方法的描述，</p>
+      <pre>Attributes can be included with the sTag as long as <strong>the entire string is valid HTML</strong>.</pre>
+      <p>IE 中的 createElement 方法不仅可以通过合法的标签名创建节点对象，还可以通过传入一段合法的 HTML 代码字符串作为参数创建节点对象。</p>
+      <p>关于 IE 中 createElement 方法的更多资料，请参考 MSDN <a href="http://msdn.microsoft.com/en-us/library/ms536389(VS.85).aspx">createElement Method</a> 中的内容。</p>
+      <p>分析以下代码：</p>
+      <pre>&lt;html&gt;
 &lt;head&gt;
 &lt;/head&gt;
 &lt;body&gt;
 &lt;script&gt;
 window.onload = function () {
-	var div1 = document.createElement('div');
-	div1.style.cssText = &quot;width:300px; height:50px; background:coral;&quot;;
-	div1.innerHTML = &quot;document.createElement('div')&quot;;
-	document.body.appendChild(div1);
+  var div1 = document.createElement('div');
+  div1.style.cssText = &quot;width:300px; height:50px; background:coral;&quot;;
+  div1.innerHTML = &quot;document.createElement('div')&quot;;
+  document.body.appendChild(div1);
 
-	try {
-		var div2 = document.createElement('&lt;div style=&quot;width:300px; height:50px; background:khaki;&quot;&gt;');
-		div2.innerHTML = &quot;document.createElement('&amp;lt;div&amp;gt;')&quot;;
-		document.body.appendChild(div2);
-	} catch (e) {
-		alert(e);
-	}
+  try {
+    var div2 = document.createElement('&lt;div style=&quot;width:300px; height:50px; background:khaki;&quot;&gt;');
+    div2.innerHTML = &quot;document.createElement('&amp;lt;div&amp;gt;')&quot;;
+    document.body.appendChild(div2);
+  } catch (e) {
+    alert(e);
+  }
 }
 &lt;/script&gt;
 &lt;/body&gt;
 &lt;/html&gt;</pre>
-			<p>上面代码首先通过 createElement 方法创建了一个粉红色 DIV 元素并追加至 BODY 上，随后又创建了一个土黄色 DIV 元素也追加至 BODY 上，但第二个 DIV 元素创建时传入的不是标签名“DIV”而是一串字符串构成的 HTML 代码。</p>
-			<p>在各浏览器中运行结果为：</p>
-			<table class="compare">
-				<tr>
-					<th>IE6 IE7 IE8</th>
-					<th>Firefox</th>
-					<th>Chrome</th>
-					<th>Safari</th>
-					<th>Opera</th>
-				</tr>
-				<tr>
-					<td><img src="../../tests/SD9010/ce1.gif" alt="IE6 IE7 IE8" /></td>
-					<td colspan="4"><img src="../../tests/SD9010/ce2.gif" alt="IE6 IE7 IE8" /></td>
-				</tr>
-				<tr>
-					<th colspan="5">错误提示：</th>
-				</tr>
-				<tr>
-					<td>无</td>
-					<td>[Exception... &quot;String contains an invalid character&quot;  code: &quot;5&quot; nsresult: &quot;0x80530005 (NS_ERROR_DOM_INVALID_CHARACTER_ERR)&quot;</td>
-					<td colspan="2">Error: INVALID_CHARACTER_ERR: DOM Exception 5</td>
-					<td>Error: INVALID_CHARACTER_ERR</td>
-				</tr>
-			</table>
-			<p>可见，仅 IE6 IE7 IE8 中的 createElement 方法支持传入一段合法的 HTML 代码字符串做为参数。<br />
-			而其他浏览器均遵照规范抛出了 INVALID_CHARACTER_ER 异常。</p>
-			<br />
-			<p>看似使用 W3C 规范中的标准的为 createElement 方法传入标签名的做法在各浏览器中均可以正确创建出节点，但在 IE6 IE7 IE8 中却有一些问题，看如下代码：</p>
-			<pre>&lt;html&gt;
+      <p>上面代码首先通过 createElement 方法创建了一个粉红色 DIV 元素并追加至 BODY 上，随后又创建了一个土黄色 DIV 元素也追加至 BODY 上，但第二个 DIV 元素创建时传入的不是标签名“DIV”而是一串字符串构成的 HTML 代码。</p>
+      <p>在各浏览器中运行结果为：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8</th>
+          <th>Firefox</th>
+          <th>Chrome</th>
+          <th>Safari</th>
+          <th>Opera</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/SD9010/ce1.gif" alt="IE6 IE7 IE8" /></td>
+          <td colspan="4"><img src="../../tests/SD9010/ce2.gif" alt="IE6 IE7 IE8" /></td>
+        </tr>
+        <tr>
+          <th colspan="5">错误提示：</th>
+        </tr>
+        <tr>
+          <td>无</td>
+          <td>[Exception... &quot;String contains an invalid character&quot;  code: &quot;5&quot; nsresult: &quot;0x80530005 (NS_ERROR_DOM_INVALID_CHARACTER_ERR)&quot;</td>
+          <td colspan="2">Error: INVALID_CHARACTER_ERR: DOM Exception 5</td>
+          <td>Error: INVALID_CHARACTER_ERR</td>
+        </tr>
+      </table>
+      <p>可见，仅 IE6 IE7 IE8 中的 createElement 方法支持传入一段合法的 HTML 代码字符串做为参数。<br />
+      而其他浏览器均遵照规范抛出了 INVALID_CHARACTER_ER 异常。</p>
+      <br />
+      <p>看似使用 W3C 规范中的标准的为 createElement 方法传入标签名的做法在各浏览器中均可以正确创建出节点，但在 IE6 IE7 IE8 中却有一些问题，看如下代码：</p>
+      <pre>&lt;html&gt;
 &lt;head&gt;
 &lt;/head&gt;
 &lt;body&gt;
 &lt;script&gt;
 window.onload = function () {
-	var iframe = document.createElement('iframe');
-	iframe.name = &quot;iframe&quot;;
-	iframe.width = 100;
-	iframe.height = 100;
-	document.body.appendChild(iframe);
+  var iframe = document.createElement('iframe');
+  iframe.name = &quot;iframe&quot;;
+  iframe.width = 100;
+  iframe.height = 100;
+  document.body.appendChild(iframe);
 
-	var input = document.createElement('input');
-	input.name = &quot;input&quot;;
-	input.type = &quot;checkbox&quot;;
-	input.checked = true;
-	document.body.appendChild(input);
+  var input = document.createElement('input');
+  input.name = &quot;input&quot;;
+  input.type = &quot;checkbox&quot;;
+  input.checked = true;
+  document.body.appendChild(input);
 
-	alert(window.frames[&quot;iframe&quot;]);
-	alert(document.getElementsByName(&quot;input&quot;).length);
+  alert(window.frames[&quot;iframe&quot;]);
+  alert(document.getElementsByName(&quot;input&quot;).length);
 }
 &lt;/script&gt;
 &lt;/body&gt;
 &lt;/html&gt;</pre>
-			<p>上面代码动态创建了一个 IFRAME 元素和一个 type 为 checkbox 的 INPUT 元素，均追加至 BODY 中。随后检测了这两个元素的 name 属性是否有效。</p>
-			<p>在各浏览器中运行结果为：</p>
-			<table class="compare">
-				<tr>
-					<th>&nbsp;</th>
-					<th>IE6 IE7 IE8(Q)</th>
-					<th>IE8(S) Firefox Chrome Safari Opera</th>
-				</tr>
-				<tr>
-					<th>&nbsp;</th>
-					<td><img src="../../tests/SD9010/if1.gif" alt="IE6 IE7 IE8(Q)" /></td>
-					<td><img src="../../tests/SD9010/if2.gif" alt="IE8(S) Firefox Chrome Safari Opera" /></td>
-				</tr>
-				<tr>
-					<th>window.frames[&quot;iframe&quot;]</th>
-					<td>undefined</td>
-					<td>[object Window]</td>
-				</tr>
-				<tr>
-					<th>document.getElementsByName(&quot;input&quot;).length</th>
-					<td>0</td>
-					<td>1</td>
-				</tr>
-			</table>
-			<ul>
-				<li>在 <em>IE6 IE7 IE8(Q)</em> 中，通过 createElement 方法传入符合规范的标签名后，通过 DOM 方式设置 IFRAME 元素的 name 属性、INPUT 元素的 name 及 checked 属性会无效。</li>
-				<li>在 <em>其他浏览器</em> 中，不存在上一条中所述问题。</li>
-			</ul>
-			<p>这时候 IE 特有的通过为 createElement 传入一段合法的 HTML 代码字符串作为参数创建节点对象的方法就可以派上用场，若上面的测试代码改为：</p>
-			<pre>...
-	var iframe = (document.all) ? document.createElement('&lt;iframe name=&quot;iframe&quot;&gt;') : document.createElement('iframe');
-	iframe.name = &quot;iframe&quot;;
-	iframe.width = 100;
-	iframe.height = 100;
-	document.body.appendChild(iframe);
+      <p>上面代码动态创建了一个 IFRAME 元素和一个 type 为 checkbox 的 INPUT 元素，均追加至 BODY 中。随后检测了这两个元素的 name 属性是否有效。</p>
+      <p>在各浏览器中运行结果为：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <th>&nbsp;</th>
+          <td><img src="../../tests/SD9010/if1.gif" alt="IE6 IE7 IE8(Q)" /></td>
+          <td><img src="../../tests/SD9010/if2.gif" alt="IE8(S) Firefox Chrome Safari Opera" /></td>
+        </tr>
+        <tr>
+          <th>window.frames[&quot;iframe&quot;]</th>
+          <td>undefined</td>
+          <td>[object Window]</td>
+        </tr>
+        <tr>
+          <th>document.getElementsByName(&quot;input&quot;).length</th>
+          <td>0</td>
+          <td>1</td>
+        </tr>
+      </table>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8(Q)</em> 中，通过 createElement 方法传入符合规范的标签名后，通过 DOM 方式设置 IFRAME 元素的 name 属性、INPUT 元素的 name 及 checked 属性会无效。</li>
+        <li>在 <em>其他浏览器</em> 中，不存在上一条中所述问题。</li>
+      </ul>
+      <p>这时候 IE 特有的通过为 createElement 传入一段合法的 HTML 代码字符串作为参数创建节点对象的方法就可以派上用场，若上面的测试代码改为：</p>
+      <pre>...
+  var iframe = (document.all) ? document.createElement('&lt;iframe name=&quot;iframe&quot;&gt;') : document.createElement('iframe');
+  iframe.name = &quot;iframe&quot;;
+  iframe.width = 100;
+  iframe.height = 100;
+  document.body.appendChild(iframe);
 
-	var input = (document.all) ? document.createElement('&lt;input name=&quot;input&quot; checked /&gt;') : document.createElement('input');
-	input.name = &quot;input&quot;;
-	input.type = &quot;checkbox&quot;;
-	input.checked = true;
-	document.body.appendChild(input);
+  var input = (document.all) ? document.createElement('&lt;input name=&quot;input&quot; checked /&gt;') : document.createElement('input');
+  input.name = &quot;input&quot;;
+  input.type = &quot;checkbox&quot;;
+  input.checked = true;
+  document.body.appendChild(input);
 
-	alert(window.frames[&quot;iframe&quot;]);
-	alert(document.getElementsByName(&quot;input&quot;).length);
+  alert(window.frames[&quot;iframe&quot;]);
+  alert(document.getElementsByName(&quot;input&quot;).length);
 ...</pre>
-			<p>这时候在所有浏览器中均可以返回正常的结果。</p>
+      <p>这时候在所有浏览器中均可以返回正常的结果。</p>
 
 
-			<h2 id="solutions">解决方案</h2>
-			<p>对于一般的非替换元素，在各浏览器中均使用 W3C 规范中的标准的为 createElement 方法传入标签名的做法。<br />
-			对于一些 IE 处理有问题的替换元素，则注意判断浏览器，针对 IE 使用其特有的通过为 createElement 传入一段合法的 HTML 代码字符串作为参数的方法，非 IE 浏览器仍然使用 W3C 规范的标准方法。</p>
+      <h2 id="solutions">解决方案</h2>
+      <p>对于一般的非替换元素，在各浏览器中均使用 W3C 规范中的标准的为 createElement 方法传入标签名的做法。<br />
+      对于一些 IE 处理有问题的替换元素，则注意判断浏览器，针对 IE 使用其特有的通过为 createElement 传入一段合法的 HTML 代码字符串作为参数的方法，非 IE 浏览器仍然使用 W3C 规范的标准方法。</p>
 
-			<h2 id="see_also">参见</h2>
-			<h3>知识库</h3>
-			<ul class="see_also">
-				<li><a href="#">...</a></li>
-			</ul>
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
 
-			<h3>相关问题</h3>
-			<ul class="see_also">
-				<li><a href="#">...</a></li>
-			</ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
 
-			<div class="appendix">
-				<h2>测试环境</h2>
-				<table class="list">
-					<tr>
-						<th>操作系统版本:</th>
-						<td>Windows 7 Ultimate build 7600</td>
-					</tr>
-					<tr>
-						<th>浏览器版本:</th>
-						<td>
-							IE6<br />
-							IE7<br />
-							IE8<br />
-							Firefox 3.6.7<br />
-							Chrome 6.0.472.0 dev<br />
-							Safari 5.0<br />
-							Opera 10.60
-						</td>
-					</tr>
-					<tr>
-						<th>测试页面:</th>
-						<td><a href="../../tests/SD9010/createElement.html">createElement.html</a></td>
-					</tr>
-					<tr>
-						<th>本文更新时间:</th>
-						<td>2010-07-23</td>
-					</tr>
-				</table>
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              Firefox 3.6.7<br />
+              Chrome 6.0.472.0 dev<br />
+              Safari 5.0<br />
+              Opera 10.60
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/SD9010/createElement.html">createElement.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2010-07-23</td>
+          </tr>
+        </table>
 
-				<h2>关键字</h2>
-				<p>document createElement element html string tagName attribute 创建 </p>
-			</div>
-		</div>
-		<!-- } -->
-	</div>
+        <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>document createElement element html string tagName attribute 创建 </p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
 </div>
 </body>
 </html>
