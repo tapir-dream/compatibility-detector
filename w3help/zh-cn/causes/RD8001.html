@@ -103,7 +103,7 @@
       <p>当给一个非替换元素设置 'width'、'height' 时，它们在 <em>IE6(Q) IE7(Q) IE8(Q)</em> 中被作用到了该元素的 border box，也就是说在这些浏览器中，'width'、'height' 并不被认为是“内容尺寸”。</p>
       <p>这个差异的影响范围很广，常被称为“<strong>IE盒模型Bug</strong>”。只要一个页面使浏览器运行在混杂模式 (Q) 下，在 IE 和非 IE 浏览器中的页面布局都可能产生较大差异。</p>
       <p>请参考下图：</p>
-      <p><img width="600" height="295" src="001/box_model.png" alt="box_model" /></p>
+      <p><img width="600" height="295" src="../../tests/RD8001/box_model.png" alt="box_model" /></p>
       <p>也就是说，在 <em>IE6(Q) IE7(Q) IE8(Q)</em> 下，设置的 'width' 和 'height' 将包含该元素的内容尺寸 + 'padding' 尺寸 + 'border-width' 尺寸。</p>
       <p>该问题在 IE6(S) 中被修复。</p>
 

@@ -65,9 +65,9 @@
       <p>根据 shrink-to-fit 的计算公式，可以计算出 <strong>STF_1</strong> 和 <strong>STF_2</strong> 的宽度均应该为 100px。<br />
       <strong>Wrapper</strong> 的宽度为 auto，它的宽度应该等于 <strong>STF_2</strong> 的宽度，也是 100px。</p>
       <p>这段代码在不同的浏览器环境中表现如下：</p>
-      <p><img width="315" height="185" src="006/1.png" alt="Snapshot" /></p>
+      <p><img width="315" height="185" src="../../tests/RD8006/1.png" alt="Snapshot" /></p>
       <p>删除 <strong>STF_1</strong> 和 <strong>Wrapper</strong> 后：</p>
-      <p><img width="315" height="145" src="006/2.png" alt="Snapshot" /></p>
+      <p><img width="315" height="145" src="../../tests/RD8006/2.png" alt="Snapshot" /></p>
       <p>可见，在 <em>IE6 IE7 IE8(Q)</em> 中，第一张图中的 <strong>STF_1</strong>、<strong>STF_2</strong> 和 <strong>Wrapper</strong>，以及第二张图中的 <strong>STF_2</strong> 的最终宽度都是 300px，与预期的结果不符。<strong>Right</strong> 被尽可能的在最右侧被渲染，直到其所有宽度为 'auto' 的祖先级元素的宽度到达极限为止。<br />
       在其他浏览器中，第一张图中的 <strong>STF_1</strong>、<strong>STF_2</strong> 和 <strong>Wrapper</strong>，以及第二张图中的 <strong>STF_2</strong> 的最终宽度均为 100px，是正确的值。</p>
       <p>这个差异是由 <em>IE6 IE7 IE8(Q)</em> 中布局右浮动元素时的 Bug 造成的。</p>

@@ -55,9 +55,9 @@
       </ul>
       <p>根据 CSS2.1 规范中的描述可知，当一个浮动元素的高度为零（即不可见）时，该元素将不能阻挡其他的浮动元素，因为它的外边界也是不可见的。</p>
       <p>这段代码在不同的浏览器环境中表现如下：</p>
-      <p><img width="275" height="142" src="004/1.png" alt="Snapshot" /></p>
+      <p><img width="275" height="142" src="../../tests/RM1014/1.png" alt="Snapshot" /></p>
       <p>将 <strong>Zero_Height</strong> 和 <strong>Floating</strong> 的 'float' 特性值由 'left' 修改为 'right' 后：</p>
-      <p><img width="275" height="142" src="004/2.png" alt="Snapshot" /></p>
+      <p><img width="275" height="142" src="../../tests/RM1014/2.png" alt="Snapshot" /></p>
       <p>可见，在 <em>IE6 IE7 IE8(Q)</em> 中，<strong>Zero_Height</strong> 总是能阻挡与其向相同方向浮动的 <strong>Floating</strong>，这与规范中的描述不符。<br />
       在 <em>IE8(S) Firefox Safari Chrome Opera</em>  中，则按照规范进行了正确的处理：<strong>Floating</strong> 没有被 <strong>Zero_Height</strong> 阻挡。</p>
       <p>这个差异是由 <em>IE6 IE7 IE8(Q)</em> 中处理浮动元素之间的关系的 Bug 造成的，它在 IE8(S) 中被修复。</p>
