@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+* {
+  font: bold 12px/1 Arial;
+}
+body {
+  margin: 0;
+}
+table {
+  border: 1px solid black;
+  height: 100px;
+  width: 200px;
+}
+table tr.bgimage {
+  background-image: url(google.gif);
+}
+table tr.bgcolor {
+  background-color: #aaa;
+}
+table td {
+  border: 5px solid black;
+}
+</style>
+</head>
+<body>
+<h1>TR element with background-image</h1>
+<table cellspacing="10">
+  <tr class="bgimage">
+    <td>cell</td>
+    <td>cell</td>
+  </tr>
+</table>
+<br />
+
+<h1>TR element with background-color</h1>
+<table cellspacing="10">
+  <tr class="bgcolor">
+    <td>cell</td>
+    <td>cell</td>
+  </tr>
+</table>
+<br />
+
+<h1>'display:table-row' element with background-image</h1>
+<div style="border: 1px solid black; border-spacing:10px; display: table; height: 100px; width: 200px;">
+  <div style="background-image: url(google.gif); display: table-row;">
+    <div style="border: 5px solid black; display: table-cell">cell</div>
+    <div style="border: 5px solid black; display: table-cell">cell</div>
+  </div>
+</div>
+</body>
+</html>

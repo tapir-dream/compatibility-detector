@@ -1,0 +1,191 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RC3006: 各浏览器中 table-row (TR) 元素的背景图片渲染位置存在差异</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <h2 id="standard_reference">标准参考</h2>
+      <p>根据 CSS2.1 规范中的描述，'background-image' 特性可以设定元素的背景图片，此特性可应用于 <strong>所有元素</strong>。<br />
+      <p>关于 背景 的详细信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS21/colors.html#background">14.2 The background</a> 中的内容。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>若为 TR 元素及设定了 'display:table-row' 的元素设置了背景图片 'background-image'，则在 IE6 IE7 IE8(Q) IE9(Q) Chrome Safari Opera(Q) 中，背景图片会分别作用于其内部的每一个单元格上。<br />
+      而 IE8(S) IE9(S) Firefox Opera(S) 中虽然背景图片均作用到了 TR 元素及设定了 'display:table-row' 的元素之上，但其具体作用的盒子也存在差异。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>此问题会导致表格中行的背景图片在不同浏览器中出现差异，可能导致依赖背景图片的设计在某些浏览器中异常。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p>分析以下代码：<em>tr_bg.html</em></p>
+      <pre>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+* {
+  font: bold 12px/1 Arial;
+}
+body {
+  margin: 0;
+}
+table {
+  border: 1px solid black;
+  height: 100px;
+  width: 200px;
+}
+table tr.bgimage {
+  <span class="hl_3">background-image: url(google.gif);</span>
+}
+table tr.bgcolor {
+  <span class="hl_4">background-color: #aaa;</span>
+}
+table td {
+  border: 5px solid black;
+}
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;h1&gt;TR element with background-image&lt;/h1&gt;
+&lt;table cellspacing=&quot;10&quot;&gt;
+  &lt;tr class=&quot;bgimage&quot;&gt;
+    &lt;td&gt;cell&lt;/td&gt;
+    &lt;td&gt;cell&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;br /&gt;
+
+&lt;h1&gt;TR element with background-color&lt;/h1&gt;
+&lt;table cellspacing=&quot;10&quot;&gt;
+  &lt;tr class=&quot;bgcolor&quot;&gt;
+    &lt;td&gt;cell&lt;/td&gt;
+    &lt;td&gt;cell&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <p>上面代码中，两组表格内的 TR 元素均设置了背景，其中第一组为背景图片 <span class="hl_3">background-image: url(google.gif);</span>，第二组为背景色 <span class="hl_4">background-color: #aaa;</span>。</p>
+      <p>这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8(Q) IE9(Q) Chrome Safari Opera(Q)</th>
+          <th>IE8(S) IE9(S)<sup>1</sup></th>
+          <th>Firefox</th>
+          <th>Opera(S)</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RC3006/tr_bg1.gif" alt="IE6 IE7 IE8(Q) IE9(Q) Chrome Safari Opera(Q)" /></td>
+          <td><img src="../../tests/RC3006/tr_bg2.gif" alt="IE8(S) IE9(S)" /></td>
+          <td><img src="../../tests/RC3006/tr_bg3.gif" alt="Firefox" /></td>
+          <td><img src="../../tests/RC3006/tr_bg4.gif" alt="Opera(S)" /></td>
+        </tr>
+      </table>
+      <p>可见，对于 TR 元素设置背景色，各浏览器没有任何差异；对于 TR 元素设置背景图片，</p>
+      <ul>
+        <li>在 <em>IE6 IE7 IE8(Q) IE9(Q) Chrome Safari Opera(Q)</em> 中，TR 元素的背景图片并没有作用到 TR 元素之上，而是背景图片分别作用于其内部的每一个单元格上，图片在每一个单元格内重复；</li>
+        <li>在 <em>IE8(S) IE9(S)</em> 中，TR 元素的背景图片作用到了 TR 元素之上，并且作用的盒子为 padding-box；</li>
+        <li>在 <em>Firefox</em> 中，TR 元素的背景图片作用到了 TR 元素之上，并且作用的盒子为 border-box；</li>
+        <li>在 <em>Opera(S)</em> 中，TR 元素的背景图片作用到了 TR 元素之上，但作用的盒子比较特殊，无法判断。</li>
+      </ul>
+      <p class="comment">注 1: IE10 Platform Preview 的结论与 IE9 相同。</p>
+      <p>以上代码测试了原生 'display:table-row' 的 TR 元素，下面针对设定了 'display:table-row' 的元素对于背景图片的渲染：</p>
+      <pre>&lt;div style=&quot;border: 1px solid black; border-spacing:10px; display: table; height: 100px; width: 200px;&quot;&gt;
+  &lt;div style=&quot;background-image: url(google.gif); display: table-row;&quot;&gt;
+    &lt;div style=&quot;border: 5px solid black; display: table-cell&quot;&gt;cell&lt;/div&gt;
+    &lt;div style=&quot;border: 5px solid black; display: table-cell&quot;&gt;cell&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+      <p>这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>Chrome Safari Opera(Q)</th>
+          <th>IE8(S) IE9(S)<sup>1</sup></th>
+          <th>Firefox</th>
+          <th>Opera(S)</th>
+        </tr>
+        <tr>
+          <td><img src="../../tests/RC3006/tr_bg5.gif" alt="Chrome Safari Opera(Q)" /></td>
+          <td><img src="../../tests/RC3006/tr_bg6.gif" alt="IE8(S) IE9(S)" /></td>
+          <td><img src="../../tests/RC3006/tr_bg7.gif" alt="Firefox" /></td>
+          <td><img src="../../tests/RC3006/tr_bg8.gif" alt="Opera(S)" /></td>
+        </tr>
+      </table>
+      <p>可见， 'display:table-row' 的元素对于背景图片的渲染的结果与 TR 元素相符。</p>
+      <p class="comment">注 1: 由于 IE6 IE7 IE8(Q) 不支持 'display' 特性关于表格类的替代值，所以下面的测试不再考虑这些浏览器。<br />
+      IE10 Platform Preview 的结论与 IE9 相同。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>TR 元素及 'display:table-row' 的元素作为表格中包裹一行单元格的容器，其渲染较其他块级元素更为特殊，而 CSS 规范中也没有明确说明此类元素的背景图片如何渲染。我们在利用背景图片布局时应避免设定到表格的行元素之上。可以利用为各单元格分别设定背景并通过合理的拼接达到类似的效果。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td> IE6<br />
+              IE7<br />
+              IE8<br />
+              IE9<br />
+              Firefox 4.0.1<br />
+              Chrome 11.0.696.71<br />
+              Safari 5.0.5<br />
+              Opera 11.11
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RC3006/tr_bg.html">tr_bg.html</a></td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2011-06-01</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>background background-image tile CSS3 背景 图片 background-origin border-box padding-box</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>
