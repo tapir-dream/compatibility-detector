@@ -25,5 +25,24 @@ http://img.ph.126.net/CkGzdvRix97hL0Oscc_cyg==/3395151169085260845.jpg
 
 = 脚本注入以及消息传递机制说明  =
 
+由于 Chrome Extensions 机制约束，background.html popup.html option.html 页面均运行在一个独立后端进程。与这些页面通信需要通过IPC异步管道机制，幸好 Chrome 为我们提供了此类API的封装，具体可见扩展开发的通信API部分：
+[http://code.google.com/chrome/extensions/extension.html http://code.google.com/chrome/extensions/extension.html]
+
+此外，Chrome Extensions 机制中还规定了 Content Script 约束条件，它虽然执行在页面进程中，但是它与页面中的脚本仅共享DOM，脚本内容本身是隔离的。
+
+下图说明了这种机制：
+
+* Chrome Extensions 机制图示 *
+http://img104.ph.126.net/3MC8WeiEHNvEdNfhDnsoEg==/705094816662455827.jpg
+http://img624.ph.126.net/1t_BMDtn7M40Rc9EKzzwbQ==/1714182608169715238.jpg
+
+由于这种机制的存在，我们必须将脚本注入到页面内，才可以使原本写在 *Content Script* 的代码可以运行在用户页面环境中，这样才有可能执行脚本钩子机制，对页面中某些 JS 方法做钩子注册。否则，在  *Content Script* 中注册的钩子是无法响应用户页面脚本程序触发的。
+
+为了实现脚本钩子目的，我们在 *loader.js* 中建立了一种机制，先将 *Content Script* 内代码转换为字符串，再将代码字符串放置到 HTML 指定属性内，*通过 DOM 事件*将此字符串在页面内调用执行，从而达到检测代码注入用户页面的目的。
+
+此外，由于这种注入代码方式跨越了 *Extensions* 的脚本隔离机制，我们又做出一项改进，即只有用户在点击高级检测选项卡后，才重新刷新页面，将检测程序注入页面，然后再经行检测工作。这种改进使得用户在不需要运行页面检测时，所执行的页面是干净无污染的。
+
+基于以上原因，此项目的消息传递机制稍微复杂，同时会拥有扩展开发的标准通信API，内容还有基于 DOM 事件的消息传递内容。其中标准通信API由于是跨进程的，它是*异步*的， 而基于 DOM 的事件派发机制，由于JS的单线程机制，可以认为它是 *同步* 的。
+
 * 消息传递模型图示 *
 http://img616.ph.126.net/75PhJ8ad_2sKbsTiqQcrZw==/1989465135393179347.jpg
