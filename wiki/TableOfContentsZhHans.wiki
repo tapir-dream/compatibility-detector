@@ -1,8 +1,8 @@
 #summary 中文目录
 
-  * [IntroductionZhHans 项目介绍]
-  * [NewsZhHans 项目新闻]
-  * [FaqZhHans 常见问题]
-  * [HowToParticipateZhHans 如何参与项目]
+  * [IntroductionZhHans 项目介绍]
+  * [NewsZhHans 项目新闻]
+  * [FaqZhHans 常见问题]
+  * [HowToParticipateZhHans 如何参与项目]
   * [DetectorDevelopmentProcessZhHans 检测代码开发流程]
   * [CodeStructureZhHans 源代码目录结构]
