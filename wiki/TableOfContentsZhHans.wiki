@@ -8,7 +8,4 @@
     * [CodeStructureZhHans 源代码目录结构]
     * [FrameworkDetailsZhHans 框架代码说明]
     * [KeyProblemsAndSolutionsZhHans 关键问题及解决方案]
-
-<wiki:comment>
-  * [DevelopmentProcessZhHans 开发流程]
-</wiki:comment>
+    * [DevelopmentProcessZhHans 开发流程]
