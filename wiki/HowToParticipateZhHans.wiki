@@ -1,4 +1,5 @@
 #summary 如何参与项目：帮助我们了解需求、修改问题、增加功能。
+#sidebar TableOfContentsZhHans
 
 = 如何参与项目 =
 
