@@ -2,11 +2,11 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>W3Help - 兼容性 - 知识库</title>
-<meta name="keywords" content="web标准,W3C标准,兼容性" />
-<meta name="description" content="系统的介绍某些知识点，帮助开发者正确理解该知识点的概念及与其他知识点的关联性，梳理知识体系。在这些知识点中，有些是经常被错误理解的，有些是经常被人忽视但很重要的，还有些虽然目前尚未形成'W3C 标准'，但已被广泛应用的技术。" />
+<title>${title} - W3Help</title>
+<meta name="keywords" content="${keywords}" />
+<meta name="description" content="${title}" />
 <link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
-<link rel="stylesheet" type="text/css" href="../css/compatibility_index.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
 <script type="text/javascript" src="../js/global.js"></script>
 </head>
 <body>
@@ -55,30 +55,16 @@
       <ul class="breadcrumbs">
         <li><a href="http://w3help.org/" name="top">首页</a> <span>»</span></li>
         <li><a href="../home/compatibility.html">兼容性</a> <span>»</span></li>
-        <li class="current"><a href="index.html">知识库</a></li>
+        <li><a href="index.html">知识库</a> <span>»</span></li>
+        <li class="current">文章正文</li>
       </ul>
-      <!-- content begin -->
-      <h1 class="title">知识库内容列表</h1>
-      <ul id="root" class="folder open expand">
-        <li class="item"><a href="../kb/001">KB001: 兼容性问题与浏览器的内核及渲染模式</a></li>
-        <li class="item"><a href="../kb/002">KB002: CSS 特性和值</a></li>
-        <li class="item"><a href="../kb/003">KB003: CSS 解析错误的处理规则</a></li>
-        <li class="item"><a href="../kb/004">KB004: 设置 CSS 的特性值 </a></li>
-        <li class="item"><a href="../kb/005">KB005: CSS 层叠 </a></li>
-        <li class="item"><a href="../kb/006">KB006: CSS 框模型( Box module ) </a></li>
-        <li class="item"><a href="../kb/007">KB007: 可视化格式模型( visual formatting model )简介 </a></li>
-        <li class="item"><a href="../kb/008">KB008: 包含块( Containing block ) </a></li>
-        <li class="item"><a href="../kb/009">KB009: CSS 定位体系概述 </a></li>
-        <li class="item"><a href="../kb/010">KB010: 常规流( Normal flow ) </a></li>
-        <li class="item"><a href="../kb/011">KB011: 浮动( Floats ) </a></li>
-        <li class="item"><a href="../kb/012">KB012: 绝对定位( Absolute positioning )</a></li>
-        <li class="item"><a href="../kb/013">KB013: 分层的显示( Layered presentation )</a></li>
-      </ul>
-      <!-- content end -->
+      ${toc}
+      <div id="w3h_content">
+        ${w3hContent}
+      </div>
     </div>
   </div>
 </div>
-
 <div id="w3h_footer">
   <div class="footer_content">
     <ul>
