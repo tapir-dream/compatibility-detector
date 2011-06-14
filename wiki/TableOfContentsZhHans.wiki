@@ -1,18 +1,15 @@
 #summary 中文目录
 
   * [IntroductionZhHans 项目介绍]
-  * [HowToParticipateZhHans 如何参与项目]
-
-<wiki:comment>
   * [NewsZhHans 项目新闻]
   * [FaqZhHans 常见问题]
-</wiki:comment>
+  * [HowToParticipateZhHans 如何参与项目]
 
 开发文档
-<wiki:comment>
-  * [DevelopmentProcessZhHans 开发流程]
-</wiki:comment>
-
   * [CodeStructureZhHans 源代码目录结构]
   * [FrameworkDetailsZhHans 框架代码说明]
   * [KeyProblemsAndSolutionsZhHans 关键问题及解决方案]
+
+<wiki:comment>
+  * [DevelopmentProcessZhHans 开发流程]
+</wiki:comment>
