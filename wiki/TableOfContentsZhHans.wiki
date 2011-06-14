@@ -4,5 +4,10 @@
   * [NewsZhHans 项目新闻]
   * [FaqZhHans 常见问题]
   * [HowToParticipateZhHans 如何参与项目]
+
+开发文档
+<wiki:comment>
   * [DetectorDevelopmentProcessZhHans 检测代码开发流程]
+</wiki:comment>
   * [CodeStructureZhHans 源代码目录结构]
+  * [FrameworkDetails 框架代码说明]
