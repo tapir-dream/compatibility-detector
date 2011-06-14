@@ -11,3 +11,14 @@
   * 报告问题
   * 增加和完善文档
   * 编写代码
+  * 翻译文档
+
+== 提出需求 ==
+
+需求是开发的源头。这个工具是否有助于解决你在网页开发中遇到的浏览器兼容性问题？有什么地方做得还不够？你还有什么需求，哪怕和兼容性问题无关的？
+
+可以给我们发邮件: [mailto:compatibility-detector-discuss@googlegroups.com compatibility-detector-discuss@googlegroups.com]
+
+或者使用流行的微博，加上关键字: #浏览器兼容性检测工具#
+
+报告问题可以采用同样的方式。
