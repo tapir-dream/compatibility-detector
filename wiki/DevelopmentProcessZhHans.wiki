@@ -1,7 +1,7 @@
-#summary 如何参与项目
+#summary 开发流程
 #sidebar TableOfContentsZhHans
 
-= 如何参与项目 =
+= 开发流程 =
 
 == 如何获取原始代码 ==
 项目源码保存在 Google Code 提供的 SVN 内，获取源码需要安装 SVN 客户端。
@@ -47,13 +47,88 @@
 
 [http://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml  http://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml]
 
-其后要注意每个源文件应该在文件的顶部适当的版权声明和Apache2.0许可声明。
+
+每个源文件应该在文件的顶部适当的版权声明和Apache2.0许可声明。
+{{{
+/*
+ * Copyright 2011 Google Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+}}}
+
+每个检测算法源文件在版权说明下需要适当加入算法说明以及背景说明。如：
+{{{
+/**
+ * @fileoverview Check the differences in performance of the 'text-align'
+ * property on block level elements.
+ * @bug https://code.google.com/p/compatibility-detector/issues/detail?id=34
+ *
+ * The 'text-align' property can apply to all kinds of elements including the
+ * block level elements in W3C CSS 1 specification which IE6, IE7 and IE8
+ * quirks mode follow, but in CSS2.1 specification, it changes to applying to
+ * only the inline level elements or contents. So, this property can apply to
+ * the block level elements in IE6/7/8.
+ *
+ * In CSS 1 specification, 'text-align' property describes how text is aligned
+ * within the element, and all block-level elements in this element will be
+ * affected.
+ * IE6 IE7 IE8(Q) implemented in accordance with this specification.
+ * In CSS2.1 specification, 'text-align' property describes how inline-level
+ * content of a block container is aligned, so block-level elements in this
+ * element will be affected.
+ * IE8(S) Chrome implemented in accordance with this specification.
+ *
+ * This detector will check all nodes as the following:
+ * 1. Ignore all text nodes, invisible elements and the elements having no
+ *    parent.
+ * 2. Ignore sub-elmement is have floats layout.
+ * 3. Check the elements set the 'text-align' property, and it is not empty
+ *    node, its offsetHeight is bigger than 0.
+ * 4. Check for child elements whose width is less than the parent.
+ */
+}}}
 
 所有的源文件都应该是英文的，包括注释哦。
 
 谨慎的使用第三方的来源代码，别忘了在文件顶部注明第三方的许可证协议。
 
+一定要注意，一行代码不可以超过 80 个字符，一次缩进为 2 个空格。
 
+
+=== 单元测试 ===
+
+  # 每个检测算法至少包含一个单元测试文件。
+  # 单元测试文件放置在 /tests/ 目录内，测试文件需要与检测算法文件命名一致。如果某个检测需要多于一个单元测试文件，那么可以在 /tests/目录内建立与检测算法文件命名一致的目录来存放它们。
+  # 如果单元测试运行在不同的文档模式下，请将文件名最后分别加上'`*_q*`'或'`*_s*`'，用来表示混杂模式或标准模式。用于检测近乎标准模式的页面建议是用'`*_a*`'结尾。
+  # 单元测试文件应使用自动测试结构如下：
+    # 在HTML标签，宣布该检测器进行测试：
+      <html chrome_comp_test="detector_name">
+    # 在每个预期有问题的元素的上声明预期的问题：
+      <button expectedProblems="SG9001 SD2002">
+    # 对于非元素节点，可以在父元素上申报预期的问题：
+      <button expectedProblemsChild8="ST3002" expectedProblemsChild10="AB2003">
+      expectedProblemsChild[数值]是表示预计其后第几个子内容有问题
+    # 对于脚本问题，请使用：
+      chrome_comp.expectProblems(javascript_expression, "AB1234");
+
+当一个单元测试运行时，所声明的 chrome_comp_test属性将生效，表示这是单元测试文件，浏览器加载它时，检测工具将处于开启单元测试模式。如果有任何预期结果与实际结果不匹配，该机制将在开发工具的控制台中给出提示。检测器的作者应消除当前单元测试中所有不匹配的项后，才可进行代码 code review 流程。
+
+单元测试的编码要求请具体参考项目中的实际单元测试文件，此处仅做简要说明：
+  # 单元测试文件必须包含完整的 HTML HEAD BODY 标签。
+  # 单元测试内的样式表设定尽可能达到最简化，样式表声明需按照字母顺序排列。
+  # 单元测试的有问题内容放置在一起，并尽量靠上，无问题内容放置在一起，并尽可能靠下；他们之间使用 <hr/> <h2>The followings don't have problems</h2> 代码分割。
+  # 单元测试最后需用 <p>(End of test)</p> 代码表示用例结束。
 
 
 === CODE REVIEW ===
