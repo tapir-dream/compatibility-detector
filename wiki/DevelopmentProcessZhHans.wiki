@@ -1,0 +1,61 @@
+#summary 如何参与项目
+#sidebar TableOfContentsZhHans
+
+= 如何参与项目 =
+
+== 如何获取原始代码 ==
+项目源码保存在 Google Code 提供的 SVN 内，获取源码需要安装 SVN 客户端。
+
+只读的源代码获取地址为：
+
+[http://compatibility-detector.googlecode.com/svn/trunk/ http://compatibility-detector.googlecode.com/svn/trunk/]
+
+如果你已经是项目组成员，可以通过如下地址获取拥有提交权限的代码：
+
+[https://compatibility-detector.googlecode.com/svn/trunk https://compatibility-detector.googlecode.com/svn/trunk]
+
+== 如何提交代码 ==
+
+=== 项目组成员如何提交代码 ===
+项目组成员需要使用 [http://codereview.appspot.com/ http://codereview.appspot.com/] 平台提供检测内容，在没有通过其他成员review确认前，不能向代码库提交源码。
+这是个流程规定，并没有硬性阻止向 SVN Commit 代码，但是如果没有经过 code review 会遭到其他成员谴责，该代码可能会从代码库中移除，直至通过 code review 为止。
+详细内容可见*开发流程说明*。
+
+=== 非项目组成员如何提交代码 ===
+非项目组成员可以将自己编写的检测代码发到项目组内，邮箱为: compatibility-detector-discuss[at]googlegroups.com
+提交的代码由组内固定成员负责review，通过邮件组形式沟通实现细节，代码审核通过后由组内成员负责提交。
+
+
+== 如何获取项目组成员资格 ==
+
+=== 固定成员 ===
+固定成员可以直接向源码库提交检测代码，修复bug，review 其他成员代码质量。
+固定成员可以由临时成员或项目组外其他成员，通过提交代码形式获得，我们的一般原则是：
+同过邮件向组内提供三次检测源码，并均由其他固定成员 review 合格的，就可以转为项目的固定成员。
+
+当然，由于开源项目基于Google的服务，我们希望成员注册一个Google账户（如Gmail）以便使用 code review 平台。
+
+=== 临时成员 ===
+获得两个或两个以上项目组成员推荐就可获得临时成员资格。
+临时成员可以直接向源码库中提交代码，经过其他成员复审合格共三次后，可成为项目组固定成员。
+项目组某固定成员很长时间(2个月)未对项目作出贡献，将暂时划分到临时成员，直至提交代码三次复审合格后可恢复成员资格。
+
+== 开发流程 ==
+
+=== 代码风格 ===
+在编写代码前，请参照 Google 开源的 JavaScript 代码风格说明:
+
+[http://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml  http://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml]
+
+其后要注意每个源文件应该在文件的顶部适当的版权声明和Apache2.0许可声明。
+
+所有的源文件都应该是英文的，包括注释哦。
+
+谨慎的使用第三方的来源代码，别忘了在文件顶部注明第三方的许可证协议。
+
+
+
+
+=== CODE REVIEW ===
+  # 注册一个Google账号（Gmail），它用来加入邮件组，并且用来登录  [http://codereview.appspot.com/ http://codereview.appspot.com/] 平台。
+  # 
