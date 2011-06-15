@@ -1,0 +1,315 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="../../zh-cn/css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../../zh-cn/css/article.css" media="all" />
+</head>
+<body>
+<!-- body_content { -->
+<div class="body_content">
+    <h1 class="title">KB006: CSS 框模型( Box module ) </h1>
+    <ul class="toc">
+        <li><a href="#header_1">框和布局</a> <span>•</span></li>
+        <li><a href="#header_2">框的构成以及相关 CSS 特性( property )</a> <span>•</span></li>
+        <li><a href="#header_3">外边距折叠( Collapsing margins )</a> <span>•</span></li>
+        <li><a href="#header_4">引申阅读</a></li>
+    </ul>
+    <!-- } -->
+    <!-- 文章正文 { -->
+    <div id="w3h_content">
+        <address class="author">作者：武利剑</address>
+        <h2 id="header_1">框和布局</h2>
+        <p>在 <a href="005.html">KB005: CSS 层叠</a> 中已经介绍了 CSS 的重要之处。CSS 可以说是页面表现的基础，
+        CSS 可以控制布局，控制元素的渲染。</p>
+        <p>布局是讲在电影画面构图中，对环境的布置、人物地位的调度、人物之间的关系、人物和景物的关系等的安排。大同小异，CSS 的布局也是一样。</p>
+        <p>CSS 的布局，包含两个大部分：
+        <ul>
+            <li>元素：元素及其组成，类似电影布局中人物的高矮胖瘦、衣着配饰等，以及场景中的桌椅板凳，物品等等。</li>
+            <li>定位：元素的位置， 类似电影场景的中对环境的设置，人物作为元素，他们之间的关系会影响其在场景中的位置。</li>
+        </ul>
+        <p>总的说来，CSS 的布局比电影场景布局简单的多，因为 CSS 中要控制的元素都是死的，而人是活的有思想的（无思想的道具除外~~）。</p>
+
+        <h3>元素和框模型</h3>
+        <p>观察页面的构成元素，其中包括 SPAN DIV TABLE INPUT IMG 等等。</p>
+        <p>仔细观察每个元素，它们的形状都是矩形的，严格的说，元素形成了一个矩形的区域，这个区域就是 CSS 中最基本的布局要素，
+           常被称作 &quot;box&quot;，你可以在很多 W3C CSS2.1 规范的原文中看到 &quot;box&quot; 这个字眼。本篇文章要讲的主要内容，
+           就是关于 &quot;box&quot; 组成及其变化的一系列规则，也就是今天要讲的内容：&quot;Box Module&quot;，通常被译作“盒子模型”，有的地方被译作“框模型”。
+           因为 W3C 的很多地方用到了 &quot;box&quot; 这个词，有些地方译作“盒子”不大通顺，权且统统译作“框”。</p>
+        <p>本部分主要包括两部分：框的组成以及相关特性( property )，外边距折叠( Collapsing margins )。</p>
+
+        <h2 id="header_2">框的构成以及相关 CSS 特性( property )</h2>
+        <h3>结构</h3>
+        <p>为了给文档树中的各个元素排版定位（布局），浏览器会根据渲染模型<sup>1</sup>为每个元素生成四个嵌套的矩形框，
+            分别称作 content box、padding box、border box 和 margin box，它们是不可分割的，并可能会重合，
+            这就是 CSS 规范中描述的“框模型”（box model）。它是以 CSS 的角度去看一个元素被渲染后的抽象形态。
+            是一个元素自身的构成部分，不同于布局：多个元素在页面上的定位。</p>
+        <p class="comment"><img src="006/boxdim.png" alt="框模型" />
+            <br/>
+            注：padding、border 和 margin 区域都包括 top、right、bottom、left 四部分。如图所示（&quot;LM&quot; 代表 left margin，&quot;RP&quot; 代表 right padding，&quot;TB&quot; 代表 top border……）。
+        </p>
+        <p>上面的大框，代表一个元素生成的矩形区域( box )，每一个 box 都包括一个 content 区域（元素的内容，如文本，图形等）以及环绕其四周的 padding (元素的内边距，填充部分)、border (元素的边框) 和 margin (元素的外边距) 区域。</p>
+
+        <p class="comment">注：</p>
+        <ol class="comment">
+            <li>元素在页面上定位及布局的规则，包括 'position' 和 'float' 等等，详见： <a href="http://www.w3.org/TR/CSS2/visuren.html"> W3C CSS2.1 -- 9 Visual formatting model</a></li>
+        </ol>
+
+        <h3>边界</h3>
+        <p>上述四个区域（content、 padding、border 和 margin）分别有他们自己的边界，细化来说，每个区域都有 top、right、bottom、left 四个边界。</p>
+        <ul>
+            <li><b>Content 边界/内边界</b>：Content 边界环绕在由该元素的宽和高决定的一个矩形上，这个尺寸通常由该元素渲染后的内容决定。
+                这四个 content 边界组成的矩形框就是该元素的 content box。</li>
+            <li><b>Padding 边界</b>：Padding 边界环绕在该元素的 padding 区域的四周，顾名思义，填充背景色，在此范围内有效。如果 padding 的宽度为0，
+                则 padding 边界与 content 边界重合。这四个 padding 边界组成的矩形框就是该元素的 Padding box。</li>
+            <li><b>Border 边界</b>：Border 边界环绕在该元素的 border 区域的四周，如果 border 的宽度为0，则 border 边界与 padding 边界重合。
+                这四个 border 边界组成的矩形框就是该元素的 border box。</li>
+            <li><b>Margin 边界/外边界</b>：Margin 边界环绕在该元素的 margin 区域的四周，如果 margin 的宽度为0，则 margin 边界与 border 边界重合。
+                这四个 margin 边界组成的矩形框就是该元素的 margin box。</li>
+        </ul>
+        <p>一个简单的例子，来自 W3C 官方：</p>
+        <pre>
+&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.01//EN&quot;&gt;
+&lt;HTML&gt;
+&lt;HEAD&gt;
+    &lt;TITLE&gt;Examples of margins, padding, and borders&lt;/TITLE&gt;
+    &lt;STYLE type=&quot;text/css&quot;&gt;
+        UL {
+            background: yellow;
+            margin: 12px 12px 12px 12px;
+            padding: 3px 3px 3px 3px;
+                                    /* No borders set */
+        }
+        LI {
+            color: white; /* text color is white */
+            background: blue; /* Content, padding will be blue */
+            margin: 12px 12px 12px 12px;
+            padding: 12px 0px 12px 12px; /* Note 0px padding right */
+            list-style: none /* no glyphs before a list item */
+                            /* No borders set */
+        }
+        LI.withborder {
+            border-style: dashed;
+            border-width: medium; /* sets border width on all sides */
+            border-color: lime;
+        }
+    &lt;/STYLE&gt;
+&lt;/HEAD&gt;
+&lt;BODY&gt;
+&lt;UL&gt;
+    &lt;LI&gt;First element of list&lt;/LI&gt;
+    &lt;LI class=&quot;withborder&quot;&gt;Second element of list is
+        a bit longer to illustrate wrapping.&lt;/LI&gt;
+&lt;/UL&gt;
+&lt;/BODY&gt;
+&lt;/HTML&gt;</pre>
+        <p>示意图：</p>
+        <p><img src="006/boxdimeg.png" alt="边界示意图" /></p>
+
+
+        <h3>相关 CSS 特性：padding、margin 和 border<sup>1</sup></h3>
+        <h4>1). margin</h4>
+        <p>'margin' 是 'margin-top', 'margin-right', 'margin-bottom', 'margin-left' 的简写，表明 margin 的大小范围。
+        它的值可以是 宽度值、百分比值或 'auto' 这3者之一，注意：宽度值必须带有单位。</p>
+
+        <p>margin 非 table 类型的元素，以及 table 类型中 table-caption, table 和 inline-table 这3类。例如 TD TR TH 等，margin 是不适用的。
+            并且，对于行内非替换元素（例如 SPAN），垂直方向的 margin 不起作用。</p>
+        <pre>
+&lt;div style=&quot;border:1px solid red;&quot;&gt;
+    &lt;span style=&quot;<span class="hl_2">margin:100px;</span> background:gray;&quot;&gt;ddd&lt;/span&gt;
+&lt;/div&gt;</pre>
+        <p>可以看到，DIV 的上下 border 紧贴着灰色的 SPAN 元素。</p>
+        <p>另外，垂直方向上的不同元素的相邻的 margin 在某些情况下，会发生折叠的现象。</p>
+        <h4>2). padding</h4>
+        <p>padding 是 'padding-top', 'padding-right', 'padding-bottom', 'padding-left' 的缩写。默认值是 0。</p>
+        <p>可以应用到的元素：除 display 值是 ‘table-row-group’，‘table-header-group’，
+            ‘table-footer-group’， ‘table-row’， ‘table-column-group’ 和 ’table-column’ 的所有元素。</p>
+
+        <h4>3). border</h4>
+        <p>border 是 'border- top', 'border-right', 'border-bottom', 'border-left' 的缩写。</p>
+        <p>border 包含3个部分，’border-width’，’border- color’，’border-style’，分别用来设置它的宽度，颜色和样式。适用于任何元素。</p>
+        <p>border-width 是 'border-top-width', 'border-right-width', 'border-bottom-width', 'border-left-width'。默认值是0。
+            可用值有‘thin’，‘medium’，‘thick’，以及常用的数值带单位的宽度值。</p>
+        <p>border-color 是 'border-top-color', 'border-right-color', 'border-bottom-color', 'border-left-color' 的简写。默认值是 ‘color’ 特性的值。</p>
+        <p>border-style 是 'border-top-style', 'border-right-style', 'border-bottom-style', 'border-left-style' 的简写。默认值是 none 特性的值。
+            可用值有：’none’，’hidden’，’dotted’，’dashed’，’solid’，’double’，’groove’，’ridge’，’inset’等。</p>
+
+        <p class="comment">注：</p>
+        <ol>
+            <li>详见：<a href="http://www.w3.org/TR/CSS2/box.html">W3C CSS2.1 - 8 Box model</a></li>
+        </ol>
+
+        <h2 id="header_3">外边距折叠( Collapsing margins )<sup>1</sup></h2>
+        <p>在介绍 margin 特性的时候，简单的介绍了外边距折叠。</p>
+        <p>Collapsing margins，即外边距折叠，指的是<span class="hl_1">毗邻</span>的两个或多个外边距 (margin) 会合并成一个外边距。</p>
+        <p>其中所说的 margin 毗邻，可以归结为以下两点：</p>
+        <ul>
+            <li>这两个或多个外边距<b>没有被</b><span class="hl_1">非空内容</span>、<span class="hl_2">padding</span>、<span class="hl_3">border</span> 或 <span class="hl_4">clear</span> <b>分隔开</b>。</li>
+            <li>这些 margin 都<span class="hl_5">处于普通流中</span><sup>2</sup>。</li>
+        </ul>
+        <p>下面详细的介绍其规则。</p>
+
+        <p class="comment">注：</p>
+        <ol class="comment">
+            <li>详见：<a href="http://www.w3.org/TR/CSS2/box.html#collapsing-margins">W3C CSS2.1 - 8.3.1 Collapsing margins</a></li>
+            <li>既 in-flow，非浮动元素，非定位元素</li>
+        </ol>
+
+        <h3>两个或多个毗邻的普通流中的块元素垂直方向上的 margin 会折叠</h3>
+        <h4>关键词解析</h4>
+        <p><strong>两个或多个</strong></p>
+        <p>说明其数量必须是大于一个，又说明，折叠是元素与元素间相互的行为，不存在 A 和 B 折叠，B 没有和 A 折叠的现象。</p>
+        <p><strong>毗邻</strong></p>
+        <p>是指没有被非空内容、padding、border 或 clear 分隔开，说明其位置关系。</p>
+        <p>注意一点，在没有被分隔开的情况下，一个元素的 margin-top 会和它普通流中的第一个子元素(非浮动元素等)的 margin-top 相邻；
+            只有在一个元素的 height 是 &quot;auto&quot; 的情况下，它的 margin-bottom 才会和它普通流中的最后一个子元素(非浮动元素等)的 margin-bottom 相邻。</p>
+        <p>示例代码：</p>
+        <pre>
+&lt;div style=&quot;border:1px solid red; width:100px;&quot;&gt;
+    &lt;div style=&quot;margin:50px 0; background-color:green; height:50px; width:50px;&quot;&gt;
+       &lt;div style=&quot;margin:20px 0;&quot;&gt;
+           &lt;div style=&quot;margin:100px 0;&quot;&gt;B&lt;/div&gt;
+       &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</pre>
+        <p>效果图：<br/><img alt="margin 折叠举例" src="006/margin c1.png" /></p>
+        <p>以上代码中，margin 会把 B 的包含块撑开。</p>
+        <p>如果一个元素的 height 特性的值不是 auto，那么它的 margin-bottom 和它子元素的 margin-bottom 不算相邻，因此，不会发生折叠。
+        margin-top 没有此限制，所以是 100px，margin-bottom 没有折叠，只有 50px。</p>
+        <p><strong>垂直方向</strong></p>
+        <p>是指具体的方位，只有垂直方向的 margin 才会折叠，也就是说，水平方向的 margin 不会发生折叠的现象。</p>
+
+        <h3>折叠后 margin 的计算</h3>
+        <h4>1). 参与折叠的 margin 都是正值</h4>
+        <p>例子：</p>
+        <pre>
+&lt;div style=&quot;height:50px; <span class="hl_3">margin-bottom:50px;</span> width:50px; background-color: red;&quot;&gt;A&lt;/div&gt;
+&lt;div style=&quot;height:50px; <span class="hl_4">margin-top:100px;</span> width:50px; background-color: green;&quot;&gt;B&lt;/div&gt;</pre>
+        <p>示意图：<br/><img src="006/margin c2.png" /></p>
+        <p>在 margin 都是正数的情况下，取其中 margin 较大的值为最终 margin 值。</p>
+
+        <h4>2). 参与折叠的 margin 都是负值</h4>
+        <p>当 margin 都是负值的时候，取的是其中绝对值较大的，然后，从 0 位置，负向位移。</p>
+        <p>示例代码：</p>
+        <pre>
+&lt;div style=&quot;height:100px; <span class="hl_2">margin-bottom:-75px;</span> width:100px; background-color: red;&quot;&gt;A&lt;/div&gt;
+&lt;div style=&quot;height:100px; <span class="hl_3">margin-top:-50px;</span> margin-left:50px; width:100px; background-color: green;&quot;&gt;B&lt;/div&gt;</pre>
+        <p>示意图：<br/>
+            <img src="006/margin c4.png" /></p>
+
+        <h4>3). 参与折叠的 margin 中有正值，有负值</h4>
+        <p>如果，毗邻的 margin 中有正值，同时存在负值会怎样呢？有正有负，先取出负 margin 中绝对值中最大的，然后，和正 margin 值中最大的 margin 相加。</p>
+        <p>示例代码：</p>
+        <pre>
+&lt;div style=&quot;height:50px; <span class="hl_2">margin-bottom:-50px;</span> width:50px; background-color: red;&quot;&gt;A&lt;/div&gt;
+&lt;div style=&quot;height:50px; <span class="hl_4">margin-top:100px;</span> width:50px; background-color: green;&quot;&gt;B&lt;/div&gt;</pre>
+        <p>示意图：<br/>
+        <img src="006/margin c3.png" /></p>
+        <p>上面的例子最终的 margin 应该是 100 + (-50) = 50px。</p>
+
+        <h4>4). 相邻的 margin 要一起参与计算，不得分步计算</h4>
+        <p>要注意，相邻的元素不一定非要是兄弟节点，父子节点也可以，即使不是兄弟父子节点也可以相邻。</p>
+        <p>而且，在计算时，相邻的 margin 要一起参与计算，不得分步计算。</p>
+        <p>一个复杂的实例：</p>
+        <pre>
+&lt;div style=&quot;<span class="hl_1">margin:50px 0;</span> background-color:green; width:50px;&quot;&gt;
+    &lt;div style=&quot;<span class="hl_2">margin:-60px 0;</span>&quot;&gt;
+           &lt;div style=&quot;<span class="hl_3">margin:150px 0;</span>&quot;&gt;A&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;div style=&quot;<span class="hl_4">margin:-100px 0;</span> background-color:green; width:50px;&quot;&gt;
+    &lt;div style=&quot;<span class="hl_5">margin:-120px 0;</span>&quot;&gt;
+           &lt;div style=&quot;<span class="hl_2">margin:200px 0;</span>&quot;&gt;B&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</pre>
+        <p>错误的计算方式：算 A 和 B 之间的 margin，分别算 A 和其父元素的折叠，然后与其父元素的父元素的折叠，这个值算出来之后，应该是 90px。依此法算出 B 的为 80px；然后，A和B折叠，margin 为 90px。</p>
+        <p>请注意，多个 margin 相邻折叠成一个 margin，所以计算的时候，应该<span class="hl_5">取所有相关的值一起计算</span>，而<span class="hl_2">不能分开分步</span>来算。</p>
+        <p>以上例子中，A 和 B 之间的 margin 折叠产生的 margin，是6个相邻 margin 折叠的结果。将其 margin 值分为两组：</p>
+        <ul>
+            <li>正值：50px，150px，200px</li>
+            <li>负值：-60px，-100px，-120px</li>
+        </ul>
+        <p>根据有正有负时的计算规则，正值的最大值为 200px，负值中绝对值最大的是 -120px，所以，最终折叠后的 margin 应该是 200 + (-120) = 80px。</p>
+
+        <h3>浮动元素、inline-block 元素、绝对定位元素的 margin 不会和垂直方向上其他元素的 margin 折叠</h3>
+        <p>浮动元素的 margin 在垂直方向上也不会发生 margin 折叠，即使和它相邻的子元素也不会。</p>
+        <pre>
+&lt;div style=&quot;<span class="hl_1">margin-bottom:50px;</span> width:50px; height:50px; background-color:green;&quot;&gt;A&lt;/div&gt;
+&lt;div style=&quot;<span class="hl_2">margin-top:50px;</span> width:100px; height:100px; background-color:green; <span class="hl_5">float:left;</span>&quot;&gt;
+    &lt;div style=&quot;<span class="hl_3">margin-top:50px;</span> background-color:gold;&quot;&gt;B&lt;/div&gt;
+&lt;/div&gt;</pre>
+        <p>示意图：<br/><img src="006/margin c5.png" /></p>
+        <p>两个绿色的块儿之间，相距100px，而若 B 和它的浮动包含块发生 margin 折叠的话，金色的条应该位于绿色块的最上方，显然，没有发生折叠。/p>
+
+        <h3>创建了块级格式化内容<sup>1</sup>的元素，不和它的子元素发生 margin 折叠</h3>
+        <p>以 “overflow : hidden” 的元素为例：</p>
+        <pre>
+&lt;div style=&quot;margin-top:50px; width:100px; height:100px; background-color:green; overflow:hidden;&quot;&gt;
+    &lt;div style=&quot;margin-top:50px; background-color:gold;&quot;&gt;B&lt;/div&gt;
+&lt;/div&gt;</pre>
+        <p>若 B 和它的 &quot;overflow:hidden&quot; 包含块发生 margin 折叠的话，金色的条应该位于绿色块的最上方，否则，没有发生。</p>
+        <p>示意图：<br/><img src="006/margin c6.png" /></p>
+
+        <h3>元素自身的 margin-bottom 和 margin-top 相邻时也会折叠</h3>
+        <p>自身 margin-bottom 和 margin-top 相邻，只能是自身内容为空，垂直方向上 border、padding 为 0。</p>
+        <p>示例：</p>
+        <pre>
+&lt;div style=&quot;border:1px solid red; width:100px;&quot;&gt;
+    &lt;div style=&quot;<span class="hl_2">margin-top: 100px;</span><span class="hl_4">margin-bottom: 50px;</span>&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+        <p>以上代码运行后，我们讲得到的是红色边框的正方形，方框的宽高都应该是 100px，高度不应该是 150px。</p>
+        <p>示意图：<br/><img src="006/margin c7.png" /></p>
+
+        <p class="comment">注：</p>
+        <ol class="comment">
+            <li>既，Block formatting contexts，参考<a href="http://www.w3.org/TR/CSS2/visuren.html#block-formatting">W3C CSS2.1 - 9.4.1 Block formatting contexts</a></li>
+        </ol>
+
+        <h2 id="header_4">引申阅读</h2>
+        <p>相关浏览器对此部分内容引起的兼容性问题，可以参考：</p>
+        <ul class="see_also">
+            <li><a href="/zh-cn/causes/RB1001">RB1001: IE6 IE7 IE8(Q) 负边距 (margin) 导致元素溢出 hasLayout 容器时显示异常</a></li>
+            <li><a href="/zh-cn/causes/RB5002">RB5002: Chrome Safari 中为处于浮动元素后创建了 in-flow 的 Block Formatting Context 的元素设置的 'margin-left' 或 'margin-right' 特性会出错</a></li>
+            <li><a href="/zh-cn/causes/RB1003">RB1003: Firefox 中 'display:table '的元素的外边距不会与包含块的外边距折叠</a></li>
+            <li><a href="/zh-cn/causes/RB8004">RB8004: IE6 IE7 IE8(Q) 中浮动元素和定位元素某些情况下会影响普通流中毗邻 'margin' 的折叠</a></li>
+            <li><a href="/zh-cn/causes/RB1005">RB1005: IE6 IE7 IE8(Q) 中父元素或子元素触发 hasLayout 时子元素的 margin 值与期望值不符</a></li>
+        </ul>
+
+        <div class="appendix">
+            <h2>测试环境</h2>
+            <table class="list">
+                <tr>
+                    <th>操作系统版本:</th>
+                    <td>Windows 7 Ultimate build 7600</td>
+                </tr>
+                <tr>
+                    <th>浏览器版本:</th>
+                    <td>
+                        IE6<br />
+                        IE7<br />
+                        IE8<br />
+                        Firefox 3.6.10<br />
+                        Chrome 7.0.517.0 dev<br />
+                        Safari 5.0.2<br />
+                        Opera 10.62
+                    </td>
+                </tr>
+                <tr>
+                    <th>测试页面:</th>
+                  <td>&nbsp;</td>
+              </tr>
+                <tr>
+                    <th>本文更新时间:</th>
+                    <td>2010-09-19</td>
+                </tr>
+            </table>
+
+            <h2>关键字</h2>
+            <p>框模型 Box module Collapsing margin 折叠</p>
+        </div>
+    </div>
+    <!-- } -->
+</div>
+<!-- } body_content -->
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="../../zh-cn/css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../../zh-cn/css/article.css" media="all" />
+</head>
+<body>
+<!-- body_content { -->
+<div class="body_content">
+  <h1 class="title">KB009: CSS 定位体系概述 </h1>
+  <ul class="toc">
+    <li><a href="#header_1">三种定位体系简介</a> <span>•</span></li>
+    <li><a href="#header_2">选择定位方案：'position' 特性</a> <span>•</span></li>
+    <li><a href="#header_3">'display'、'position' 和 'float' 的相互关系</a></li>
+  </ul>
+  <!-- } -->
+  <!-- 文章正文 { -->
+  <div id="w3h_content">
+    <address class="author">作者：武利剑</address>
+    <h2 id="header_1">三种定位体系简介</h2>
+    <p>框( box )布局影响因素之一，便是定位体系。定位体系也是其最为重要的影响因素。</p>
+    <p>CSS2.1 中，一个框可以根据三种定位体系布局。CSS2.1 中的定位体系帮助作者使他们的文档更容易理解，并不需要使用标记的手段（如，不可见的图片）达到布局的效果。</p>
+    <h3>常规流( Normal flow )</h3>
+    <p>常规流，是对 &quot;normal flow&quot; 的直译。</p>
+    <p>之称之为常规流，是因为这是相对于后面的浮动和绝对定位的一个概念，浮动和绝对定位元素都脱离了当前的常规流。</p>
+    <p>在 CSS2.1中，常规流包括块框( block boxes )的块格式化( block formatting )，
+      行内框( inline boxes )的行内格式化( inline formatting )，块框或行内框的相对定位，以及插入框的定位。</p>
+    <h3>浮动( Floats )</h3>
+    <p>浮动，顾名思义，相对于常规流来讲，它漂浮在常规流的上方。</p>
+    <p>在浮动模型中，一个框( box )首先根据常规流布局，再将它从流中取出并尽可能地向左或向右偏移。内容可以沿浮动区的侧面排列。
+      因为它首先要根据常规布局后才偏移，所以效率较常规流低。</p>
+    <p>用 'float' 特性声明浮动，特性值可以是：&quot;none&quot;、&quot;left&quot;、&quot;right&quot;。</p>
+    <h3>绝对定位( Absolute positioning )</h3>
+    <p>在绝对定位模型中，一个框整个地从常规流中脱离（它对后续的兄弟元素没有影响），并根据它的包含块<sup>1</sup>来分配其位置。</p>
+    <p class="comment">注：</p>
+    <ol class="comment">
+      <li>关于包含块的概念，请参见： <a href="/zh-cn/kb/008.html">W3Help - KB008: 包含块( Containing block ) </a></li>
+    </ol>
+    <h2 id="header_2">选择定位方案：'position' 特性</h2>
+    <p>'float' 和 'position' 特性决定了使用哪种 CSS2.1 定位算法来计算框的位置。</p>
+    <p>'position' 特性介绍表：</p>
+    <table class="compare">
+      <tr>
+        <td>值</td>
+        <td>static | relative | absolute | fixed | inherit</td>
+      </tr>
+      <tr>
+        <td>初始值</td>
+        <td>static </td>
+      </tr>
+      <tr>
+        <td>适用于</td>
+        <td>所有元素</td>
+      </tr>
+      <tr>
+        <td>可否继承</td>
+        <td>否</td>
+      </tr>
+      <tr>
+        <td>百分比值</td>
+        <td> N/A </td>
+      </tr>
+      <tr>
+        <td>计算值</td>
+        <td>同设定值</td>
+      </tr>
+    </table>
+    <h3>特性值的含义</h3>
+    <h4>static</h4>
+    <p>该框是一个常规框，布局根据常规流。'left' 、'right'、'bottom' 和 'top' 属性不适用。</p>
+    <p></p>
+    <h4>relative</h4>
+    <p>框的位置根据常规流计算（被称为常规流中的位置）。然后框相对于它的常规位置而偏移。如果框 B 是相对定位的，其后框的定位计算并不考虑 B 的偏移。
+      table-row-group, table-header-group, table-footer-group, table-row, table-column-group, table-column,
+      table-cell, 和 table-caption 元素的 'position:relative' 效果没有被定义。</p>
+    <p>示例代码：</p>
+    <pre>
+&lt;div style=&quot;<span class="hl_4">position:static;</span> width:100px;&quot;&gt;
+    &lt;div id=&quot;A&quot; style=&quot;background-color:green;&quot;&gt;A&lt;/div&gt;
+    &lt;div id=&quot;B&quot; style=&quot; <span class="hl_2">position:relative;</span> top:70px; left:50px; background-color:red;&quot;&gt;B&lt;/div&gt;
+    &lt;div id=&quot;C&quot; style=&quot;background-color:blue;&quot;&gt;C&lt;/div&gt;
+&lt;/div&gt;</pre>
+    <p>根据标准，B 的位置应该相比自身原位置偏移，而 C 在放置的时候，会认为 B 仍然在原位置。</p>
+    <p>示意图： <img src="009/relative_position.png" alt="" /></p>
+    <p>注意，相对定位的元素处于常规流中，没有脱离常规流。</p>
+    <h4>absolute</h4>
+    <p>框的位置（可能还有它的尺寸）是由'left'，'right'，'top'和'bottom'特性决定。这些特性指定了框相对于它包含块<sup>1</sup>的偏移量。
+      绝对定位的框从常规流向中脱离。这意味着它们对其后的兄弟元素的定位没有影响。另外，尽管绝对定位框有外边距(margin)，
+      它们不会和其它任何外边距发生折叠（Collapsing margins）<sup>2</sup>。</p>
+    <p>示例代码：</p>
+    <pre>
+&lt;div style=&quot;<span class="hl_5">position:absolute;</span> width:300px; border:2px solid yellow;&quot;&gt;
+    &lt;div id=&quot;A&quot; style=&quot;background-color:green; height:50px;&quot;&gt;A&lt;/div&gt;
+    &lt;div id=&quot;B&quot; style=&quot;<span class="hl_4">position:absolute;</span> top:70px; left:50px; height:50px; background-color:red;&quot;&gt;B&lt;/div&gt;
+    &lt;div id=&quot;C&quot; style=&quot;background-color:blue; height:50px;&quot;&gt;C&lt;/div&gt;
+&lt;/div&gt;</pre>
+    <p> 示意图：<br/>
+      <img src="009/absolute_position.png" alt="" /> </p>
+    <h4>fixed</h4>
+    <p>框位置的计算根据 'absolute' 模型，不过框要额外地根据一些参考而得到固定。跟绝对定位一样，固定定位元素的外边距不会和任何其他外边距发生折叠。
+      应用于手持终端、投影设备、屏幕、TTY、电视媒体类型时，框相对于可视窗口<sup>3</sup>固定，滚动时不移动。应用于打印媒介类型时，框被渲染于每一页，
+      并相对于页框固定，就好象是通过可视窗口查看该页一样（例如，打印预览）。对于其他的媒介类型，表现没有被定义。</p>
+    <p>对根元素的 'position'，用户端(UA)可以视为 &quot;static&quot;。</p>
+    <p class="comment">注：</p>
+    <ol class="comment">
+      <li>关于包含块的概念，请参见： <a href="/zh-cn/kb/008.html">W3Help - KB008: 包含块( Containing block )</a></li>
+      <li>关于外边距折叠，请参见 <a href="/zh-cn/kb/006.html">W3Help - KB006: CSS 框模型( Box module )</a> 的外边距折叠部分。</li>
+      <li>既 viewport，请见 <a href="/zh-cn/kb/007.html">W3Help - KB007: 可视化格式模型( visual formatting model )简介</a> 的视口( viewport )部分。</li>
+    </ol>
+    <h3>框偏移: 'top'，'right'，'bottom'，'left'</h3>
+    <p>如果一个元素的 'position' 特性值不是 &quot;static&quot;，该元素被称为定位元素。定位的元素生成定位框，其定位基于四个特性：'top'，'right'，'bottom'，'left'。</p>
+    <table class="compare">
+      <tr>
+        <td>值</td>
+        <td> 这四个特性的值<sup>1</sup>可以是： <span class="hl_1">&lt;length&gt;</span> | <span class="hl_2">&lt;percentage&gt;</span> | <span class="hl_5">auto</span> | inherit 之一
+          <ul>
+            <li><span class="hl_1">&lt;length&gt;</span>：偏移量是距离参照边的固定值。</li>
+            <li><span class="hl_2">&lt;percentage&gt;</span>：偏移量是包含块宽度（对于'left'和'right'）或高度（对于'top' 和'bottom'）的百分比。
+              对于'top'和'bottom'，如果包含块的高度没有显式指定（即它取决于内容的高度），百分比值将解释为'auto'。</li>
+            <li><span class="hl_5">auto</span>：该值的效果取决于与之相关的属性中的哪一个也设置了 'auto'。</li>
+          </ul></td>
+      </tr>
+      <tr>
+        <td>初始值</td>
+        <td>auto</td>
+      </tr>
+      <tr>
+        <td>适用于</td>
+        <td>定位的元素，即 'position' 特性的值为非 &quot;static&quot; 的元素。</td>
+      </tr>
+      <tr>
+        <td>可否继承</td>
+        <td>否</td>
+      </tr>
+      <tr>
+        <td>百分比值</td>
+        <td>百分比值基于包含块的高度(top, bottom)或者宽度(left, right)</td>
+      </tr>
+      <tr>
+        <td>计算值</td>
+        <td>对于 &quot;position:relative&quot; 参见相对定位；对于 &quot;position:static&quot; 取值 &quot;auto&quot;；
+          其他情况，如果值为长度，取相应的绝对长度，如果标值为百分比，取指定的值，否则，取 &quot;auto&quot;。</td>
+      </tr>
+      <tr>
+        <td>定位作用的具体位置</td>
+        <td><img src="009/position_edge.png" alt="" style="float:left" /> 对于绝对定位元素( absolutely positioned )的框，这四个特性的值表示，元素的外边界( margin 边界)相对于 包含块 的边界的位移。<br/>
+          而对于相对定位元素( relatively positioned )的框，偏移量相对于它自己的相应的边界。比如，top 是相对于它的顶边界，right 相对于右边界。 </td>
+      </tr>
+    </table>
+    <p class="comment">注：</p>
+    <ol class="comment">
+      <li>关于特性的值，请参见： <a href="/zh-cn/kb/002.html">W3Help - KB002: CSS 特性和值</a></li>
+    </ol>
+    <h2 id="header_3">'display'、'position' 和 'float' 的相互关系</h2>
+    <p>总流程图：</p>
+    <p><img src="009/display_float_position.png" alt="" /></p>
+    <p>转换对应表：</p>
+    <table class="compare">
+      <tr>
+        <th>设定值</th>
+        <th>计算值</th>
+      </tr>
+      <tr>
+        <td>inline-table </td>
+        <td>table</td>
+      </tr>
+      <tr>
+        <td>inline, run-in, table-row-group, table-column, table-column-group, table-header-group, <br/>
+          table-footer-group, table-row, table-cell, table-caption, inline-block </td>
+        <td>block</td>
+      </tr>
+      <tr>
+        <td>其他</td>
+        <td>同设定值</td>
+      </tr>
+    </table>
+    <p>这一节是为了调和三种布局和框形成的关键特性( display )之间的关系而设。总的来说，可以把它看作是一个类似优先级的机制，
+      &quot;position:absolute&quot; 和 &quot;position:fixed&quot; 优先级最高，有它存在的时候，浮动不起作用，'display' 的值也需要调整；
+      其次，元素的 'float' 特性的值不是 &quot;none&quot; 的时候或者它是根元素的时候，调整 'display' 的值；
+      最后，非根元素，并且非浮动元素，并且非绝对定位的元素，'display' 特性值同设置值。</p>
+    <p>这从另一个侧面说明了一个问题：<span class="hl_4">浮动或绝对定位的元素，只能是块元素或表格。</span></p>
+    <h3>1. 'display' 的值为 'none'</h3>
+    <p>如果 'display' 的值为 'none'，那么 'position' 和 'float' 不起作用。在这种情况下，元素不产生框。因此浮动和定位无效。</p>
+    <h3>2. 'position' 的值是 'absolute' 或 'fixed'</h3>
+    <p>否则，如果 'position' 的值是 'absolute' 或 'fixed'，框就是绝对定位的，'float' 计算后的值应该是 'none'，并且，'display' 会被按照下表设置。
+      框的位置将由 'top'，'right'，'bottom' 和 'left' 属性和该框的包含块确定。</p>
+    <p>也就是说，当元素是绝对定位时，浮动失效，'display' 会被按规则重置。</p>
+    <p>示例代码：</p>
+    <pre>
+&lt;script type=&quot;text/javascript&quot;&gt;
+    function getStyle(obj, style) {
+       var _style = (style == &quot;float&quot;) ? &quot;styleFloat&quot; : style;
+       return document.defaultView ? document.defaultView.getComputedStyle(obj, null).getPropertyValue(style) : obj.currentStyle[_style.replace(/-[a-z]/g, function() {
+           return arguments[0].charAt(1).toUpperCase();
+       })];
+    }
+    window.onload = function() {
+       document.getElementById(&quot;info&quot;).innerHTML = &quot;float : &quot; + getStyle(document.getElementById(&quot;test&quot;), &quot;float&quot;) +
+               &quot;&lt;br/&gt;display : &quot; + getStyle(document.getElementById(&quot;test&quot;), &quot;display&quot;);
+    }
+&lt;/script&gt;
+&lt;div id=&quot;test&quot; style=&quot;<span class="hl_1">position:absolute;</span> <span class="hl_5">float:left;</span> display:inline;&quot;&gt;&lt;/div&gt;
+&lt;div id=&quot;info&quot;&gt;&lt;/div&gt;</pre>
+    <p>上面代码中有一个既是绝对定位又是浮动的元素，以上代码可取出其 'display' 和 'float' 的计算值<sup>1</sup>。</p>
+    <p>IE 中，'float' 值和 'display' 的特性值未发生变化，还是 &quot;float: left; display: inline&quot;。</p>
+    <p>其他浏览器中计算后的结果是：&quot;float: none; display: block&quot;。</p>
+    <p></p>
+    <h3>3. 'float' 的值不是 &quot;none&quot;</h3>
+    <p>如果 'float' 的值不是 &quot;none&quot;，该框浮动并且 'display' 会被按照转换对应表设置。</p>
+    <pre>
+&lt;!DOCTYPE html&gt;
+&lt;script type=&quot;text/javascript&quot;&gt;
+    function getStyle(obj, style) {
+       var _style = (style == &quot;float&quot;) ? &quot;styleFloat&quot; : style;
+       return document.defaultView ? document.defaultView.getComputedStyle(obj, null).getPropertyValue(style) : obj.currentStyle[_style.replace(/-[a-z]/g, function() {
+           return arguments[0].charAt(1).toUpperCase();
+       })];
+    }
+    window.onload = function() {
+       document.getElementById(&quot;info&quot;).innerHTML = &quot;display : &quot; + getStyle(document.getElementById(&quot;test&quot;), &quot;display&quot;);
+    }
+&lt;/script&gt;
+&lt;span id=&quot;test&quot; style=&quot;width:100px; height:100px; border:1px solid red; <span class="hl_2">float:left;</span>&quot;&gt;float span&lt;/span&gt;
+&lt;div id=&quot;info&quot;&gt;&lt;/div&gt;</pre>
+    <p>按照规则，SPAN 是行内元素，因此不能够设置其宽度和高度。但是浮动后，'display' 值按照转换对应表设置后，成为块级元素。</p>
+    <p>IE 中截图：<br/>
+      <img src="009/float_display_relation2.png" alt="" /></p>
+    <p>其他浏览器中：<br/>
+      <img src="009/float_display_relation1.png" alt="" /></p>
+    <h3>4. 元素是根元素</h3>
+    <p>如果元素是根元素，'display' 的值按照转换对应表设置。</p>
+    <h3>5. 否则，应用指定的 'display' 特性值。</h3>
+    <p class="comment">注：</p>
+    <ol class="comment">
+      <li>关于计算值的解释，请参考：<a href="/zh-cn/kb/004.html">W3Help - KB004: 设置 CSS 的特性值</a></li>
+    </ol>
+    <div class="appendix">
+      <h2>测试环境</h2>
+      <table class="list">
+        <tr>
+          <th>操作系统版本:</th>
+          <td>Windows 7 Ultimate build 7600</td>
+        </tr>
+        <tr>
+          <th>浏览器版本:</th>
+          <td> IE6<br />
+            IE7<br />
+            IE8<br />
+            Firefox 3.6.10<br />
+            Chrome 7.0.517.0 dev<br />
+            Safari 5.0.2<br />
+            Opera 10.62 </td>
+        </tr>
+        <tr>
+          <th>测试页面:</th>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <th>本文更新时间:</th>
+          <td>2010-09-21</td>
+        </tr>
+      </table>
+      <h2>关键字</h2>
+      <p>position 定位 浮动 常规流 display</p>
+    </div>
+  </div>
+  <!-- } -->
+</div>
+<!-- } body_content -->
+</body>
+</html>
