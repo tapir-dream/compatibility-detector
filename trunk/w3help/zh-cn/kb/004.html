@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="../../zh-cn/css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../../zh-cn/css/article.css" media="all" />
+</head>
+<body>
+<!-- body_content { -->
+<div class="body_content">
+    <h1 class="title">KB004: 设置 CSS 的特性值 </h1>
+    <ul class="toc">
+        <li><a href="#header_1">CSS 值的解析</a> <span>•</span></li>
+        <li><a href="#header_2">指定值</a> <span>•</span></li>
+        <li><a href="#header_3">计算值</a> <span>•</span></li>
+        <li><a href="#header_4">使用值</a> <span>•</span></li>
+        <li><a href="#header_5">实际值</a></li>
+    </ul>
+    <!-- } -->
+    <!-- 文章正文 { -->
+    <div id="w3h_content">
+        <address class="author">作者：武利剑</address>
+        <h2 id="header_1">CSS 值的解析</h2>
+        <p>CSS 中的声明，由 CSS 的特性和值，中间以 &quot;:&quot; 隔开组成<sup>1</sup>。</p>
+        <p>我们可以使用 CSS 选择器，为选中的元素设置需要的样式。</p>
+        <p>在介绍 CSS 的特性和值的时候，特地的提到了浏览器应该怎样处理错误的值 -- 应该将包含错误值，不符合句法的值的声明直接忽略。然而有些浏览器却按照自己的方式做了某些纠正，也就是浏览器容错。</p>
+        <p>那么，有没有想过，在我们给予一个特性正确的值的情况下，浏览器应该怎样处理呢？是否最终你看到的就是你设置的值呢？答案是否定的！</p>
+        <p>当浏览器解析了一个文档 ( document ) 并且生成了文档树 ( document tree )，那么，它必须为文档树中的每一个元素，根据目标媒介类型所适用的每一个特性，指定一个值。 </p>
+        <p>而开发者给某个元素的 CSS 特性设置某个值，到这个元素的特性值被计算渲染，也就是得到最终的值，需要经过四步计算：</p>
+        <ul>
+            <li>通过指定值 ( specified value ) 确定这个值；</li>
+            <li>将这个值分解为一个可以用来继承的值，即计算后的值 ( computed value )；</li>
+            <li>必要情况下把计算后的值转换成一个绝对的值，即使用值 ( used value )</li>
+            <li>根据显示环境的限制，改变使用值以使之能够显示在用户端，最后这个值被称作实际值 ( actual value )。</li>
+        </ul>
+        <p>这些值的计算过程类似工资的计算过程，你的应得工资是一个设置值，实际工资还要减掉你的缺勤，保险，个人所得税等……实际计算出来的数字才是应用到你身上的具体数额。</p>
+        <p>下面来详细的介绍这四个步骤的四种值。</p>
+
+        <p class="comment">注：</p>
+        <ol class="comment">
+            <li>关于 CSS 的特性和值，以及 CSS 声明，见 ：<a href="/zh-cn/kb/002.html">W3Help - KB002: CSS 特性和值</a></li>
+        </ol>
+
+        <h2 id="header_2">指定值</h2>
+        <p>一般来讲，开发者设定的值，即为指定值，但是最终这个值的确定还需考虑其他几个方面( 按照优先顺序排列 )。</p>
+        <h3>层叠顺序</h3>
+        <p>首先考虑有层叠顺序的情况，即开发者明确了设置了 CSS 特性的值。</p>
+        <p>层叠顺序会影响开发者设定的值，所以，应该根据层叠顺序来确定声明的优先级别，优先级高的声明才会起作用。关于层叠顺序，后续会有详细的说明。</p>
+        <p>例如，开发者在定义样式的时候，加了 '!important' 的声明要优于未加 '!important' 的声明。</p>
+        <pre>
+div{
+    height : 100px;
+    height : 130px <span class="hl_2">!important</span>;
+}</pre>
+        <p>其中，带有 '<span class="hl_2">!important</span>' 的 height 声明才是 <span class="hl_5">指定值</span>。</p>
+
+        <h3>继承( inheritance  )</h3>
+        <p>如果没有明确的设置这个值，那么会先考虑它是否继承了父元素的值。这时候指定值使用它父元素的值，通常是父元素的计算值。</p>
+        <p>例如：</p>
+        <pre>
+&lt;p style=&quot;color:red;&quot;&gt;The greet <span class="hl_3">&lt;em>is&lt;/em&gt;</span> good!&lt;/p&gt;</pre>
+        <p>EM 元素没有指定颜色，他将继承父元素的颜色用来显示字符串 "is"。因此，EM 元素是红色。EM 元素 'color' 特性的指定值在没有层叠影响的情况下，就是 "red"。</p>
+
+        <h3>初始值</h3>
+        <p>最后，在不存在以上两种情况的时候，使用元素的初始值。</p>
+        <p>如果不设置元素的 'width'，它的指定值就是 "auto"；对于 'font-size'，不设置的情况下，其指定值是 "medium"。</p>
+
+        <p>关于指定值在 JavaScript 中的获取方法，可以使用 "element.style.property" 语句模式：</p>
+        <pre>
+&lt;p id=&quot;container&quot; style=&quot;color:red;&quot;&gt;The headline &lt;em id=&quot;sub&quot;&gt;is&lt;/em&gt; important!&lt;/p&gt;
+&lt;div id=&quot;info&quot;&gt;&lt;/div&gt;
+&lt;script type=&quot;text/javascript&quot;&gt;
+    window.onload = function() {
+        var container = document.getElementById(&quot;container&quot;);
+        var sub = document.getElementById(&quot;sub&quot;);
+        var info = document.getElementById(&quot;info&quot;);
+        info.innerHTML = &quot;container width :　&quot; + <span class="hl_4">container.style.width</span>
+                +&quot;&lt;br/&gt;container color : &quot; + <span class="hl_3">container.style.color</span>
+                +&quot;&lt;br/&gt;sub color : &quot; + <span class="hl_2">sub.style.color</span>;
+    }
+&lt;/script&gt;</pre>
+      <p>经过测试可知，此种方式只适合获取设置的值，对于初始值和继承后的值都没有取到。</p>
+
+        <h2 id="header_3">计算值</h2>
+        <p>指定值在层叠的过程中被分解成计算值。例如，URI 会被解析成绝对地址，而 'em' 和 'ex' 单位会被计算为 pixel 或者绝对长度。</p>
+        <p>例如: </p>
+        <pre>
+&lt;div style=&quot;width:1<span class="hl_4">em</span>; &quot;&gt;hello!&lt;/div&gt;</pre>
+        <p>浏览器默认 ‘font-size’ 是 ‘16px’，所以 ‘1em’ 计算值应该是 ‘16px’。</p>
+        <p>当指定值不是 ‘inherit’ 的时候，计算值应该是 CSS 特性定义的 &quot;计算后的值&quot;一行所标明的值。例如对 'border-top-width'<sup>1</sup>的特性说明的最后一行：</p>
+        <p><span class="hl_2">Computed value: absolute length; '0' if the border style is 'none' or 'hidden'</span></p>
+        <p>以上标明，边框宽度的计算值是一个绝对长度 <sup>2</sup>，当 border 的设置值是 ‘none’ 或 ‘hidden’ 的时候，计算值为 0。</p>
+        <p>当 CSS 特性不适合元素时，计算值还是存在的。</p>
+        <pre>
+&lt;div style=&quot;width:1em; <span class="hl_3">left:1em;</span>&quot;&gt;hello!&lt;/div&gt;</pre>
+        <p>如上代码中，DIV 元素设置 'left' 值为 &quot;1em&quot;，计算后的值为 &quot;16px&quot;；但是，'left' 特性并不适合于非定位元素 <sup>3</sup>。</p>
+
+        <p class="comment">注：</p>
+        <ol class="comment">
+            <li>见： <a href="http://www.w3.org/TR/CSS2/box.html#border-width-properties">W3C CSS2.1 - 8.5.1 Border width: 'border-top-width', 'border-right-width', 'border-bottom-width', 'border-left-width', and 'border-width'</a></li>
+            <li>关于绝对长度，参见： <a href="/zh-cn/kb/002.html">W3Help - KB002: CSS 特性和值</a> 的长度值部分。</li>
+            <li>例如， <a href="http://www.w3.org/TR/CSS2/visuren.html#position-props">9.3.2 Box offsets: 'top', 'right', 'bottom', 'left'</a>中，关于 left 的说明，其中有：
+                <span class="hl_4">Applies to: positioned elements</span>  </li>
+        </ol>
+
+        <h2 id="header_4">使用值</h2>
+        <p>在处理计算值的过程中，文档没有被格式化，因此，有些值是无法确定的。比如，百分比宽度的元素，最终宽度是与它包含块的宽度有关，
+        所以，值只有在包含块确定下来之后才能确定。</p>
+        <p></p>
+        <p>可以说，使用值是将计算值和有依赖关系的值最终转化成的绝对的值。</p>
+        <p>利用 JavaScript 来获取元素的使用值，可以采用如下函数：</p>
+        <pre>
+function getStyle(obj, style) {
+      var _style = (style == &quot;float&quot;) ? &quot;styleFloat&quot; : style;
+      return document.defaultView ? document.defaultView.getComputedStyle(obj, null).getPropertyValue(style) : obj.currentStyle[_style.replace(/-[a-z]/g, function() {
+          return arguments[0].charAt(1).toUpperCase();
+      })];
+}</pre>
+        <p>其中，需要注意的是，在 IE 里，浮动的计算值不能直接使用 'float' 特性来取，
+            需要使用的是 'styleFloat'，可能 IE 中还存在其他类似的情况。请根据实际用途修改函数。</p>
+
+        <p>最后，关于使用值，可以直接使用浏览器开发者工具查看，在 Firebug 中，使用值就是 &quot;计算出的样式&quot;。Chrome 里则是 &quot;Computed Style&quot;。</p>
+
+        <h2 id="header_5">实际值</h2>
+        <p>经过以上三个步骤的处理，使用值基本上成为渲染所需要的值。但是用户端可能不能够在当前环境中使用这个值。例如：</p>
+        <pre>
+div{
+    width: <span class="hl_1">3.1415926px</span>;
+}</pre>
+        <p>在某些浏览器中，只能显示整数类型的长度，因此，虽然上面的宽度在计算后的值与设置的相同，但是，浏览器却没有办法按小数来显示。</p>
+        <p>Firefox Chrome 等浏览器都会以以一定的方式对值做一些取舍。Firefox 采用了四舍五入的形式，Chrome 中却会直接取整，在这点上需要特别注意哦。</p>
+
+        <div class="appendix">
+            <h2>测试环境</h2>
+            <table class="list">
+                <tr>
+                    <th>操作系统版本:</th>
+                    <td>Windows 7 Ultimate build 7600</td>
+                </tr>
+                <tr>
+                    <th>浏览器版本:</th>
+                    <td>
+                        IE6<br />
+                        IE7<br />
+                        IE8<br />
+                        Firefox 3.6.10<br />
+                        Chrome 7.0.517.0 dev<br />
+                        Safari 5.0.2<br />
+                        Opera 10.62
+                    </td>
+                </tr>
+                <tr>
+                    <th>测试页面:</th>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <th>本文更新时间:</th>
+                    <td>2010-09-16</td>
+                </tr>
+            </table>
+
+            <h2>关键字</h2>
+            <p>CSS 值的解析 指定值 计算值 使用值 实际值 层叠顺序 继承 初始值</p>
+      </div>
+    </div>
+    <!-- } -->
+</div>
+<!-- } body_content -->
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="../../zh-cn/css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../../zh-cn/css/article.css" media="all" />
+</head>
+<body>
+<!-- body_content { -->
+<div class="body_content">
+    <h1 class="title">KB012: 绝对定位( Absolute positioning ) </h1>
+    <ul class="toc">
+        <li><a href="#header_1">绝对定位( Absolute positioning )</a> <span>•</span></li>
+        <li><a href="#header_2">固定定位( Fixed positioning )</a> <span>•</span></li>
+        <li><a href="#header_3">引申阅读</a></li>
+    </ul>
+    <!-- } -->
+    <!-- 文章正文 { -->
+    <div id="w3h_content">
+        <address class="author">作者：武利剑</address>
+        <h2 id="header_1">绝对定位( Absolute positioning )</h2>
+        <p>之前在介绍<a href="/zh-cn/kb/009/">定位体系</a>的时候，已经简单的介绍了绝对定位和固定定位。一般情况下，这两种定位的元素，
+            在 3D 的可视化模型中，处于浮动元素的上方，或者说比浮动元素更靠前<sup>1</sup>。</p>
+        <h3>参照元素</h3>
+        <p>绝对定位（Absolute positioning）元素定位的参照物是其包含块，既相对于其包含块<sup>2</sup>进行定位，不一定是其父元素。</p>
+        <p>示例代码：</p>
+        <pre>
+&lt;div style=&quot;<span class="hl_1">position:relative;</span> width:300px; height:300px; background-color:silver; border:5px solid red;&quot;&gt;
+    &lt;div style=&quot;width:100px; height:100px; background-color:blue;&quot;&gt;&lt;/div&gt;
+    &lt;div style=&quot;margin:0 0 0 100px; width:200px; height:200px; background-color:gold;&quot;&gt;
+        &lt;div style=&quot;<span class="hl_2">position:absolute;</span> <span class="hl_3">left:100px;</span> <span class="hl_4">top:100px;</span> width:100px; height:100px; background-color:green;&quot;&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</pre>
+        <p>示意图：<br/><img src="012/absolute_positioned.png" alt="绝对定位元素相对于包含块定位"/></p>
+
+        <h3>绝对定位元素完全脱离了常规流</h3>
+        <p>绝对定位元素完全脱离了常规流<sup>3</sup>（对后继的兄弟节点没有影响）。</p>
+        <p>常规流中的框，都在同一个层上，浮动框是处于常规流之上的一个特殊层，它可能会对常规流中的框的定位产生影响。但绝对定位的框不会，
+            每个绝对定位的框都可以看做一个单独的图层，不会对其他层框的定位产生影响。这与层叠级别和层叠上下文<sup>1</sup>有关。</p>
+        <p>有一点需要注意，那就是绝对元素定位的 top 和 left 值跟绝对元素未脱离常规流之前在常规流中位置有关。</p>
+        <pre>
+&lt;div style=&quot;<span class="hl_1">position:absolute;</span> width:100px; height:100px; background-color:red;&quot;&gt; absolute&lt;/div&gt;
+&lt;div style=&quot;height:50px; border:1px solid blue; width:200px;&quot;&gt;DIV 中的普通文本元素&lt;/div&gt;
+&lt;div style=&quot;<span class="hl_2">position:absolute;</span> left:60px; width:100px; height:100px; background-color:green;&quot;&gt; absolute&lt;/div&gt;</pre>
+        <p>示意图：<br/><img src="012/auto_top_absolute.png" alt="top的auto值"/></p>
+        <p>两个绝对定位框中间的 DIV 在常规流中，影响了后面的绝对定位元素的位置，但没有受到其前面的绝对定位框的影响。</p>
+
+        <h3>绝对定位框生成的包含块</h3>
+        <p>一个绝对定位框会为它的常规流子元素和定位子元素(不包含 fiexed 定位的元素)生成一个新的包含块。
+            不过，绝对定位元素的内容不会在其它框的周围排列。</p>
+
+        <h3>层叠级别</h3>
+        <p>绝对定位框可能会掩盖另一个框的内容，或者被另外一个框掩盖，这取决于互相重合的框的层叠级别<sup>1</sup>。</p>
+
+        <p class="comment">注：</p>
+        <ol class="comment">
+            <li>具体关于元素的层叠级别和层叠上下文的资料，请参见： <a href="013.html">W3Help - KB013: 分层的显示( Layered presentation )</a></li>
+            <li>关于包含块的判定，请参见： <a href="008.html">W3Help - KB008: 包含块( Containing block ) </a></li>
+            <li>关于常规流，请参见： <a href="009.html">W3Help - KB009: CSS 定位体系概述 </a></li>
+        </ol>
+
+        <h2 id="header_2">固定定位( Fixed positioning )</h2>
+        <p>固定定位是绝对定位的一个子类。唯一的区别是，对于固定定位框，它的包含块由可视窗口( viewport<sup>1</sup> )创建。对于连续媒介，固定定位框并不随着文档的滚动而移动。从这个意义上说，它们类似于固定的背景图形。对于页面媒介，固定定位框在每页里重复。对于需要在每一页底部放置一个签名时，这个方法非常有用。</p>
+        <p>注意，IE6 中不支持固定定位( Fixed positioning )定位，通常的做法是使用绝对定位代替，并使用 Javascript 脚本控制绝对定位框的位置，使随页面滚动而相应的变化。</p>
+        <p>以下示例代码是修改自 W3C 官方使用固定定位布局的一个例子：</p>
+        <pre>
+&lt;!DOCTYPE HTML&gt;
+&lt;HTML&gt;
+&lt;HEAD&gt;&lt;TITLE&gt;A frame document with CSS2.1&lt;/TITLE&gt;
+    &lt;STYLE type=&quot;text/css&quot;&gt;  BODY {
+        height: 8.5in
+    }
+
+    div {
+        border: 1px solid red;
+    }
+
+    /* Required for percentage heights below */
+    #header {
+        <span class="hl_1">position: fixed;</span>
+        width: 100%;
+        height: 15%;
+        top: 0;
+        right: 0;
+        bottom: auto;
+        left: 0;
+    }
+
+    #sidebar {
+        <span class="hl_5">position: fixed;</span>
+        width: 10em;
+        height: auto;
+        top: 15%;
+        right: auto;
+        bottom: 100px;
+        left: 0;
+    }
+
+    #main {
+        <span class="hl_3">position: fixed;</span>
+        width: auto;
+        height: auto;
+        top: 15%;
+        right: 0;
+        bottom: 100px;
+        left: 10em;
+    }
+
+    #footer {
+        <span class="hl_4">position: fixed;</span>
+        width: 100%;
+        height: 100px;
+        top: auto;
+        right: 0;
+        bottom: 0;
+        left: 0;
+    }  &lt;/STYLE&gt;
+&lt;/HEAD&gt;
+&lt;BODY&gt;
+&lt;DIV id=&quot;header&quot;&gt; ...&lt;/DIV&gt;
+&lt;DIV id=&quot;sidebar&quot;&gt; ...&lt;/DIV&gt;
+&lt;DIV id=&quot;main&quot;&gt; ...&lt;/DIV&gt;
+&lt;DIV id=&quot;footer&quot;&gt; ...&lt;/DIV&gt;
+&lt;/BODY&gt;
+&lt;/HTML&gt;</pre>
+        <p>示意图：<br/><img src="012/fixed_layout.png" alt="固定定位布局"/></p>
+        <p>无论如何滚动页面，布局区域始终位于可视窗口中。</p>
+
+        <p class="comment">注：</p>
+        <ol class="comment">
+            <li>请参见： <a href="007.html">W3Help - KB007: 可视化格式模型( visual formatting model )简介 </a></li>
+        </ol>
+
+        <h2 id="header_3">引申阅读</h2>
+        <p>此部分涉及到的部分兼容性问题，请参见以下 W3Help 中的根本原因文章:</p>
+        <ul class="see_also">
+            <li><a href="/zh-cn/causes/RM8011">W3Help - RM8011: Firefox 浏览器对 TABLE 中绝对定位元素包含块的判定有错误，某些情况下会导致绝对定位元素位置跟其他浏览器中有差异</a></li>
+            <li><a href="/zh-cn/causes/RM8013">W3Help - RM8013: IE6 IE7(Q) IE8(Q) 不支持固定定位（position:fixed）</a></li>
+            <li><a href="/zh-cn/causes/RM8018">W3Help - RM8018: IE6 IE7(Q) IE8(Q) 中包含块若未触发 hasLayout 则会影响参照其定位的绝对定位元素的偏移位置计算</a></li>
+        </ul>
+
+        <div class="appendix">
+            <h2>测试环境</h2>
+            <table class="list">
+                <tr>
+                    <th>操作系统版本:</th>
+                    <td>Windows 7 Ultimate build 7600</td>
+                </tr>
+                <tr>
+                    <th>浏览器版本:</th>
+                    <td>
+                        IE6<br />
+                        IE7<br />
+                        IE8<br />
+                        Firefox 3.6.10<br />
+                        Chrome 7.0.517.0 dev<br />
+                        Safari 5.0.2<br />
+                        Opera 10.62
+                    </td>
+                </tr>
+                <tr>
+                    <th>测试页面:</th>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <th>本文更新时间:</th>
+                    <td>2010-09-27</td>
+                </tr>
+            </table>
+
+            <h2>关键字</h2>
+            <p>绝对定位 固定定位 absolute fixed</p>
+        </div>
+    </div>
+    <!-- } -->
+</div>
+<!-- } body_content -->
+</body>
+</html>

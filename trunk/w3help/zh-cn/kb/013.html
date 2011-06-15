@@ -1,0 +1,172 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="../../zh-cn/css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../../zh-cn/css/article.css" media="all" />
+</head>
+<body>
+<!-- body_content { -->
+<div class="body_content">
+    <h1 class="title"> KB013: 分层的显示( Layered presentation )</h1>
+    <ul class="toc">
+        <li><a href="013.html#header_1">层叠级别( Stack level )概述</a> <span>•</span></li>
+        <li><a href="013.html#header_2">指定层叠级别：'z-index' 特性</a> <span>•</span></li>
+        <li><a href="013.html#header_3">层叠规则</a> <span>•</span></li>
+        <li><a href="013.html#header_4">引申阅读</a></li>
+    </ul>
+    <!-- } -->
+    <!-- 文章正文 { -->
+    <div id="w3h_content">
+        <address class="author">作者：武利剑</address>
+        <h2 id="header_1">层叠级别( Stack level )概述</h2>
+        <p>在前面的文章中已将 CSS 核心布局基础讲解完毕。主要涉及到3种布局方式，既：常规流，浮动和绝对定位<sup>1</sup>。使用这 3 种定位方式，
+            可以把框放到任何需要的地方。</p>
+        <p>为了说明方便，我们把浏览器的可视窗口看作二维的坐标系，以左上角为原点。
+            假设两个元素分别形成了 &quot;100px×100px&quot; 的框，把 A 的左上角放到坐标为(100, 200)的地方，B 的左上角也放到坐标值是 (100, 200)的地方。
+            那么 A 和 B 哪个显示在前面，能被用户看到呢？</p>
+        <p>以上的问题就涉及到可视化格式模型的 3D 模型<sup>1</sup>了。需要确定 A 和 B 在 Z 轴上的位置，也就是确定它们所处的层哪个显示层级更靠上。</p>
+        <p>对于 A 和 B 在 Z 轴方向上所属的层的级别，或者叫层级，类似 Photoshop 中的图层顺序。CSS 中将他规范命名为：层叠级别(Stack level)。</p>
+
+        <p class="comment">注：</p>
+        <ol class="comment">
+            <li>见， <a href="/zh-cn/kb/007/">W3Help - KB007: 可视化格式模型( visual formatting model )简介 </a></li>
+        </ol>
+
+        <h2 id="header_2">指定层叠级别：'z-index' 特性</h2>
+        <table class="compare">
+            <tr>
+                <td>值：</td>
+                <td>auto | &lt;integer&gt; | inherit</td>
+            </tr>
+            <tr>
+                <td>初始值：</td>
+                <td> auto </td>
+            </tr>
+            <tr>
+                <td>适用于</td>
+                <td>定位元素</td>
+            </tr>
+            <tr>
+                <td>可否继承</td>
+                <td>否</td>
+            </tr>
+            <tr>
+                <td>计算值</td>
+                <td>同设定值</td>
+            </tr>
+        </table>
+
+        <h3>'z-index' 特性值的意义</h3>
+        <h4>&lt;integer&gt;<sup>2</sup></h4>
+        <p>该整数是生成框在当前层叠上下文中的层叠级别。同时，该框也会生成一个局部层叠上下文，在其中它的层叠级别是 '0'。</p>
+        <p class="comment">注2：此处的 integer 等同于 C 中数据类型 int 的取值范围，从 -2^31 (-2,147,483,648) 到 2^31 - 1 (2,147,483,647) 的整型数据。</p>
+      <h4>auto</h4>
+        <p>生成框在当前层叠上下文中的层叠级别和它的父框相同。<span class="hl_4">该框不生成新的局部层叠上下文</span>。</p>
+
+      <h3>'z-index' 作用</h3>
+        <p>对于一个定位框，'z-index' 特属性指定了：</p>
+        <ul>
+            <li>框在当前层叠上下文中的层叠级别。</li>
+            <li>框是否生成局部层叠上下文。</li>
+        </ul>
+
+        <h2 id="header_3">层叠规则</h2>
+        <p>层叠规则，就是解决框在 Z 轴方向上谁前谁后的问题。大致来讲，就是层叠级别高的遮住层叠级别低的。</p>
+        <p>示例代码：</p>
+        <pre>
+&lt;div style=&quot;<span class="hl_1">position:absolute;</span> <span class="hl_2">z-index:3;</span> width:100px; height:100px; background-color:green;&quot;&gt;
+    A
+    &lt;div style=&quot;<span class="hl_3">position:relative;</span> <span class="hl_4">z-index:2;</span> width:125px; height:25px; background-color:yellow;&quot;&gt; C &lt;/div&gt;
+    &lt;div style=&quot;<span class="hl_5">position:relative;</span> width:25px; height:25px; top:-10px; background-color:blue;&quot;&gt; D &lt;/div&gt;
+&lt;/div&gt;
+&lt;div style=&quot;<span class="hl_4">position:absolute;</span> width:100px; height:100px; background-color:red; top:20px; left:90px; text-align:right;&quot;&gt;
+    B
+&lt;/div&gt;</pre>
+        <p>效果示意图：<br/><img src="013/eg_img.png" alt="实例效果图"/></p>
+        <p>从图中可以看出， A 遮住了 B，C 遮住了 D 和 A。</p>
+        <p>A 、B、 C、D 都是定位元素。其中，A 的 'z-index' 是 &quot;1&quot;，所以，A 会创建一个局部的层叠上下文，
+            因此， C 、D 就处于 A 创建的局部层叠上下文中。同时，A 和 B 处于同一个层叠上下文中，A 的层叠级别是 1，
+            B 的层叠上下文同其父框的层叠上下文。D 在 A 形成的层叠上下文中，层叠级别同 A，是 &quot;0&quot;。所以，从后到前的顺序应该是： B -> A -> D -> C。</p>
+        <h3>层叠上下文( Stacking context )</h3>
+        <p>在本文中，&quot;在……前面&quot; 指的是当用户面向可视窗口的时候离用户更近。</p>
+        <p>CSS 中的层叠关系虽然与 Photoshop 的图层结构类似，但又有不同。层叠关系的结构比图层更加复杂，更加立体。</p>
+        <p>层叠的结构，涉及层叠上下文，层叠上下文是一个抽象的容器，它可以包含层，也可以包含其子元素创建的层叠上下文。</p>
+        <p>在层叠上下文内部，各层按照规则在 Z 轴方向上从后向前排列。</p>
+        <p>从一个父层叠上下文的角度来看，层叠上下文本身是其中一个不可分割的最小单位；其他层叠上下文中的框，不可能出现在它里面的框的中间位置。
+           也就是说，层叠上下文本身被看作一个单独的层处理，它在 Z 轴上的顺序与其子层无关。比如，在上面例子中，A 和 B 处于全局的层叠上下文中，
+            A 和 B 就是那个层叠上下文中的最小单位；同时，C、D 处于同一个层叠上下文中，B 中的框不可能在 Z 轴上处于 C 和 D 之间。</p>
+        <p>在文档中，每个元素属于一个层叠上下文。在给定的层叠上下文中，每个元素都有一个整型的层叠级别，它描述了在相同层叠上下文中元素在“Z轴”上的显示顺序。</p>
+        <p>同一个层叠上下文中，层叠级别大的显示在上，层叠级别小的显示在下，相同层叠级别的框会根据文档树中的位置，按照前后倒置的方式显示。</p>
+        <p>根元素形成根层叠上下文。其他层叠上下文由任何 'z-index' 计算后的值不是 &quot;auto&quot; 的定位元素生成。</p>
+        <p>不同层叠上下文中，元素显示顺序以父级层叠上下文的层叠级别来决定显示的先后顺序。与自身的层叠级别无关。</p>
+
+        <h3>层叠上下文的构成</h3>
+
+        <p>每个层叠上下文都有如下的层组成（显示顺序从后到前）：</p>
+        <ol>
+            <li>形成层叠上下文的元素的背景和边框</li>
+            <li>层叠级别为负值的后代层叠上下文</li>
+            <li>常规流内非行内非定位的子元素组成的层</li>
+            <li>非定位的浮动子元素和它们的内容组成的层</li>
+            <li>常规流内行内非定位子元素组成的层</li>
+            <li>任何 z-index 是 auto 的定位子元素，以及 z-index 是 0 的层叠上下文组成的层</li>
+            <li>层叠级别为正值的后代层叠上下文</li>
+        </ol>
+        <p>示意图：<br/><img src="013/stacklevel.png" alt="层叠级别示意图"/></p>
+        <p>示例代码：</p>
+        <pre>
+&lt;div style=&quot;<span class="hl_1">position:relative;</span> <span class="hl_2">z-index:0;</span> width:150px; height:150px; border:50px solid silver; padding:10px; background-color:green;&quot;&gt;
+    &lt;div style=&quot;<span class="hl_3">position:absolute;</span> <span class="hl_4">z-index:-1;</span> width:100px; height:100px; top:-20px; left:-20px; border:5px solid blue; padding:10px; background-color:yellow; &quot;&gt;&lt;/div&gt;
+    &lt;br/&gt;
+    &lt;div style=&quot;<span class="hl_5">float:left;</span> width:100px; margin-left:20px; height:100px; padding:10px; border:5px solid gold; background-color:blue;&quot;&gt;&lt;/div&gt;
+    &lt;div style=&quot;width:100px; height:100px; margin-top:-20px; padding:10px; border:5px solid pink; background-color:white;&quot;&gt;&lt;/div&gt;
+    &lt;div style=&quot;<span class="hl_4">position:absolute;</span> top:50px; left:50px; width:100px; height:100px; border:5px solid white; padding:10px; background-color:black;&quot;&gt;&lt;/div&gt;
+    &lt;div style=&quot;<span class="hl_2">position:absolute;</span>  <span class="hl_1">z-index:1;</span> top:70px; left:70px; width:100px; height:100px; border:5px solid red; padding:10px; background-color:yellow;&quot;&gt;&lt;/div&gt;
+&lt;/div&gt;</pre>
+        <p>示意图: <br/><img src="013/consist_of_stack_context.png" alt="上下文构成例子示意图"/></p>
+
+        <h2 id="header_4">引申阅读</h2>
+        <p>此部分涉及到的部分兼容性问题，请参见以下 W3Help 中的根本原因文章:</p>
+        <ul class="see_also">
+            <li><a href="/zh-cn/causes/RM8015">W3Help - RM8015: IE6 IE7 IE8(Q) 中定位元素 'z-index' 为默认值在某些情况下会产生新的层叠上下文</a></li>
+        </ul>
+
+        <div class="appendix">
+            <h2>测试环境</h2>
+            <table class="list">
+                <tr>
+                    <th>操作系统版本:</th>
+                    <td>Windows 7 Ultimate build 7600</td>
+                </tr>
+                <tr>
+                    <th>浏览器版本:</th>
+                    <td>
+                        IE6<br />
+                        IE7<br />
+                        IE8<br />
+                        Firefox 3.6.10<br />
+                        Chrome 7.0.517.0 dev<br />
+                        Safari 5.0.2<br />
+                        Opera 10.62
+                    </td>
+                </tr>
+                <tr>
+                    <th>测试页面:</th>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <th>本文更新时间:</th>
+                    <td>2010-09-28</td>
+                </tr>
+            </table>
+
+            <h2>关键字</h2>
+            <p>层叠级别 层叠上下文 stacking level context z-index</p>
+        </div>
+    </div>
+    <!-- } -->
+</div>
+<!-- } body_content -->
+</body>
+</html>

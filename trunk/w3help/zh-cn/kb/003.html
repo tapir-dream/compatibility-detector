@@ -1,0 +1,258 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="../../zh-cn/css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../../zh-cn/css/article.css" media="all" />
+</head>
+<body>
+<!-- body_content { -->
+<div class="body_content">
+    <h1 class="title">KB003: CSS 解析错误的处理规则</h1>
+    <ul class="toc">
+        <li><a href="#header_1">CSS 句法( CSS Syntax )</a> <span>•</span></li>
+        <li><a href="#header_2">CSS 解析错误</a> <span>•</span></li>
+        <li><a href="#header_3">CSS 解析错误的处理规则</a> <span>•</span></li>
+        <li><a href="#header_4">引申阅读</a> <span>•</span></li>
+        <li><a href="#header_5">建议</a></li>
+    </ul>
+    <!-- } -->
+    <!-- 文章正文 { -->
+    <div id="w3h_content">
+        <address class="author">作者：武利剑</address>
+        <h2 id="header_1">CSS 句法( CSS Syntax )</h2>
+        <p>语法<sup>1</sup>是语言表达的规则。各种语言都有不同的语法，包括人类语言和计算机语言等。</p>
+        <p>语法有时候也指句法( syntax )，指的是句子由词汇构成的规律。也可以将它看作组成句子的规则。它包含两个方面的涵义：</p>
+        <ul>
+            <li>词汇：即，可以构成句子的有效用词。例如，英语中的单词，JavaScript 中的 &quot;var&quot;、&quot;for&quot; 等等；</li>
+            <li>规律：也可以将它看作规则，即，如何使用有效的词汇组成句子。比如，JavaScript 中要用 'var toolName;' 定义变量，
+                但是 Java 中却应该使用 'String toolName;' 等定义变量。 不同的语言，组成句子的规则不同。</li>
+        </ul>
+        <p>CSS，同我们所认识的其他语言，例如 JavaScript 一样，有它自己的句法，适用于任何版本的 CSS。后续版本的应该坚持使用此核心句法，当然可以增加句法规则。</p>
+        <p>CSS 句法<sup>2</sup>描述了 CSS 的关键字、厂商扩展、可用字符集、规则集合、声明块、选择器、特性以及注释等所有 CSS 的构成部分。</p>
+        <p>如常用的 Class 选择器命名规范被定义为：</p>
+        <pre>class : '.' IDENT</pre>
+		<p>他由 '.' 字符开头，其后跟随 IDENT 规则。因此，根据断词书写规则检查 IDENT 书写规范如下：</p>
+		<table class="compare">
+          <tr>
+            <th> Macro </th>
+            <th> Definition </th>
+          </tr>
+
+          <tr>
+            <td>ident</td>
+            <td>[-]?{nmstart}{nmchar}*</td>
+          </tr>
+          <tr>
+            <td>nmstart</td>
+            <td>[_a-z]|{nonascii}|{escape}</td>
+          </tr>
+          <tr>
+            <td>nmchar</td>
+            <td>[_a-z0-9-]|{nonascii}|{escape}</td>
+          </tr>
+          <tr>
+            <td>nonascii</td>
+            <td> [^\0-\177]</td>
+          </tr>
+          <tr>
+            <td> escape </td>
+            <td> {unicode}|\\[^\n\r\f0-9a-f] </td>
+          </tr>
+          <tr>
+            <td>unicode</td>
+            <td> \\[0-9a-f]{1,6}(\r\n|[ \n\r\t\f])? </td>
+          </tr>
+          <tr>
+            <td>nmstart</td>
+            <td>[_a-z]|{nonascii}|{escape}</td>
+          </tr>
+          <tr>
+            <td>nmchar</td>
+            <td>[_a-z0-9-]|{nonascii}|{escape}</td>
+          </tr>
+          <tr>
+            <td>nonascii</td>
+            <td> [^\0-\177]</td>
+          </tr>
+          <tr>
+            <td> escape </td>
+            <td> {unicode}|\\[^\n\r\f0-9a-f] </td>
+          </tr>
+          <tr>
+            <td>unicode</td>
+            <td> \\[0-9a-f]{1,6}(\r\n|[ \n\r\t\f])? </td>
+          </tr>
+        </table>
+		<p>对照表中内容可以组合出 Class 整体命名规范表达式为：</p>
+		<pre>class : '.' [-]?([_a-z]|[^\0-\177]|\\[0-9a-f]{1,6}(\r\n|[ \n\r\t\f])?|\\[^\n\r\f0-9a-f])([_a-z0-9-]|[^\0-\177]|\\[0-9a-f]{1,6}(\r\n|[ \n\r\t\f])?|\\[^\n\r\f0-9a-f])*</pre>
+	  <p class="comment">注：</p>
+<ol class="comment">
+            <li>关于 语法 的更多信息，请参考 <a href="http://zh.wikipedia.org/zh-cn/%E8%AF%AD%E6%B3%95">维基百科 - 语法</a></li>
+            <li>关于 CSS 句法的详细内容，请参考：<a href="http://www.w3.org/TR/CSS2/syndata.html#syntax">W3C CSS2.1 - 4.1 Syntax</a></li>
+        <li>关于 CSS 书写断词规范，请参考： <a href="http://www.w3.org/TR/CSS2/syndata.html#tokenization">W3C CSS2.1 - 4.1.1 Tokenization</a> 与 A<a href="http://www.w3.org/TR/CSS2/grammar.html">ppendix G. Grammar of CSS 2.1 </a></li>
+        </ol>
+
+      <h2 id="header_2">CSS 解析错误</h2>
+        <p>CSS 代码，可以看作是依照 CSS 句法所写的句子，而读这个句子的人，就是浏览器。因此，错误可能出自两个地方，一是不遵照 CSS 句法写代码的人，
+            一是不能正确解析 CSS 代码的浏览器。</p>
+        <p>在符合句法的情况下，一段 CSS 代码的解析，也可能在各个浏览器中都相同，但在不符合句法的时候，浏览器可能要加入自己的处理方式。正是因为浏览器的多样化，
+            才造成了对同一段 CSS 代码解析方式的多样化。</p>
+        <p>这里所讲的 CSS 解析错误，指的是，如果浏览器遇到不遵循句法(不合法)的 CSS 代码，会因无法正确的解析，而产生的错误。</p>
+        <p>某些不合句法的 CSS 错误，W3C 给出了确切的处理规则。</p>
+
+        <h2 id="header_3">CSS 解析错误的处理规则</h2>
+        <h3>错误处理总则</h3>
+        <p>对于不合法的 CSS 代码，浏览器需要忽略一部分不合法的样式表。</p>
+        <p>CSS2.1 及所有后继版本中，对于任何以破折号、下划线开头的 'property:value' 组合<sup>1</sup>和不包含标识符的 @-keywords 组合，都以忽略的方式处理。</p>
+        <p>分析以下代码：</p>
+        <pre>
+div{
+    <span class="hl_2">_height: 19px;</span>
+    width:100px;
+}</pre>
+        <p>对于此类样式中的 '_height' 特性，浏览器应该以忽略的方式处理。经解析错误处理后的样式应该是：</p>
+        <pre>
+div{
+    <del>_height: 19px;</del>
+    width:100px;
+}</pre>
+
+        <h3>未知的特性( properties )</h3>
+        <p>未知的特性，即属于以上所说不属于它句法中有效词汇的词汇。浏览器必须忽略带有未知特性的声明。</p>
+        <p>例:</p>
+        <pre>
+div{
+    <span class="hl_1">yes:100px;</span>
+    width:100px;
+}</pre>
+        <p>其中，'yes' 不是 CSS 的特性，因此上述的声明 'yes:100px;' 应该被忽略。</p>
+
+        <h3>不合法的值</h3>
+        <p>不合法的值，也属于句法中无效的词汇。浏览器必须忽略带有不合法值的声明。</p>
+        <p>例:</p>
+        <pre>
+div{
+    <span class="hl_3">height:100;</span>
+    width:100px;
+}</pre>
+        <p>'height' 特性的值<sup>2</sup>应该是一个数字后加一个单位构成的值。只有一个数字的值是不合法的，应当忽略<sup>3</sup>。</p>
+
+        <h3>畸形的声明</h3>
+        <p>当浏览器解析一个声明时，读取它的代码直到这个声明的结束，同时，检查 (), [], {}, &quot;&quot;, 和 '' 的匹配规则，
+            并且正确的处理编码，这时候，浏览器必须处理它所遇到的意外出现的标记。 怎样处理？标准没有明确指出。
+      因为针对不同的情况，应该采取不同的处理手段。</p>
+        <p>例：</p>
+        <pre>
+p{<span class="hl_4">height</span>} /* 丢失了 ”:” 和后面的值，此属性应被忽略 */
+<span class="hl_2">({)</span>P{width:100px}   /* 多余的  ({)，此行应被忽略*/</pre>
+        <p>这两条声明都是畸形的声明，应该被忽略。</p>
+
+        <h3>不可用的 @ 关键字</h3>
+        <p>本条类似于未知的特性。</p>
+        <p>例:</p>
+        <pre>
+<span class="hl_2">@google</span>{
+    height:100px;
+    width:100px;
+}</pre>
+        <p>@google 不是标准中的 @ 关键字，声明应当被忽略。</p>
+
+        <h3>样式表的意外结束</h3>
+        <p>浏览器必须自动闭合敞开的结构(如，块，字符串和注解等)</p>
+        <p>例:</p>
+        <pre>
+p{
+    height:100px;
+    width:100px;
+</pre>
+        <p>缺少了闭合的大括号，浏览器应该自动补齐：</p>
+        <pre>
+p{
+    height:100px;
+    width:100px;
+<span class="hl_1">}</span></pre>
+
+        <h3>字符串的意外结束</h3>
+        <p>若值为字符串，却没有用单双引号闭合的情况。用户端应该在一行的结尾处，闭合字符串，一般都是以分号结尾。</p>
+        <p>例:</p>
+        <pre>
+p {
+    color: green;
+    font-family: <span class="hl_2">'Courier New Times</span>
+    color: red;
+    color: yellow;
+}</pre>
+        <p>以上代码相当于：</p>
+        <pre>
+p {
+    color: green;
+    color: yellow;
+}</pre>
+        <p>以分号为界限，&quot;font-family: 'Courier New Times color: red;&quot; 这条声明中，‘font-family’ 的值不合法，应当被忽略。实际情况是，在 IE 中被忽略的是 &quot;font-family: 'Courier New Times color: red; color: yellow;&quot;</p>
+
+        <p class="comment">注：</p>
+        <ol class="comment">
+            <li>比较具有讽刺意味的是，此类组合常被用于 IE 的 CSS hack，请参考:
+                <ul>
+                    <li><a href="/zh-cn/causes/RY8003">W3Help - RY8003: 各浏览器对 CSS 错误解析规则的差异及 CSS hack</a></li>
+                    <li><a href="http://topic.csdn.net/u/20100715/17/6306e40a-1ea1-4f0f-a1c3-acd7470800ea.html?18677">CSDN - 【分享】CSS Hack的基本原理、常用CSS hack及使用原则</a></li>
+                </ul>
+            </li>
+            <li>关于特性的值，可参考： <a href="http://www.w3.org/TR/CSS2/syndata.html#values">CSS 2.1 - 4.3 Values</a></li>
+            <li>此例子涉及到一个兼容性问题，请参考：<a href="/zh-cn/causes/RY8002"> W3Help - RY8002: 各浏览器对 CSS 代码及 CSS 相关 DOM 操作中长度 &quot;&lt;length&gt;&quot; 类型的值缺失单位的容错程度存在差异</a> </li>
+        </ol>
+
+        <h2 id="header_4">引申阅读</h2>
+        <p>相关浏览器对错误解析的处理引起的兼容性问题（容错），可以参考：</p>
+        <ul class="see_also">
+            <li><a href="/zh-cn/causes/RY1001">W3Help - RY1001: IE6 IE7 IE8(Q) 会自动修复 'font-family' 特性的值是由一个引号包括了整个字体家族时的错误书写的代码</a></li>
+            <li><a href="/zh-cn/causes/RY8002">W3Help - RY8002: 各浏览器对 CSS 代码及 CSS 相关 DOM 操作中长度 &quot;&lt;length&gt;&quot; 类型的值缺失单位的容错程度存在差异</a></li>
+            <li><a href="/zh-cn/causes/RY8003">W3Help - RY8003: 各浏览器对 CSS 错误解析规则的差异及 CSS hack</a></li>
+            <li><a href="/zh-cn/causes/RY8004">W3Help - RY8004: 各浏览器对不合法的类选择器名称的容错程度存在差异</a></li>
+            <li><a href="/zh-cn/causes/RY8005">W3Help - RY8005: 各浏览器对于计算后宽度和高度为含有小数的长度值时，其最终值会不一致</a></li>
+        </ul>
+
+        <h2 id="header_5">建议</h2>
+        <p>虽然 W3C 明确规定了这些解析错误的处理规则，但各浏览器的处理还是不尽相同。而且，从上面的规则例子中可以看到，所有的错误都是人为的疏忽造成的，也有的是故意为之。
+            因此，为了更好的避免浏览器兼容性问题，一定要仔细检查，尽量不要出现 CSS 句法错误。</p>
+
+
+        <div class="appendix">
+            <h2>测试环境</h2>
+            <table class="list">
+                <tr>
+                    <th>操作系统版本:</th>
+                    <td>Windows 7 Ultimate build 7600</td>
+                </tr>
+                <tr>
+                    <th>浏览器版本:</th>
+                    <td>
+                        IE6<br />
+                        IE7<br />
+                        IE8<br />
+                        Firefox 3.6.8<br />
+                        Chrome 7.0.517.0 dev<br />
+                        Safari 5.02<br />
+			            Opera 10.62
+                    </td>
+                </tr>
+                <tr>
+                    <th>测试页面:</th>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <th>本文更新时间:</th>
+                    <td>2010-09-15</td>
+                </tr>
+            </table>
+
+            <h2>关键字</h2>
+            <p>CSS syntax Tokenization 错误解析 句法 书写规则 断词</p>
+      </div>
+    </div>
+    <!-- } -->
+</div>
+<!-- } body_content -->
+</body>
+</html>

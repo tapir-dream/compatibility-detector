@@ -1,0 +1,243 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="../../zh-cn/css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../../zh-cn/css/article.css" media="all" />
+</head>
+<body>
+<!-- body_content { -->
+<div class="body_content">
+    <h1 class="title">KB002: CSS 特性和值</h1>
+    <ul class="toc">
+        <li><a href="#header_1">CSS 声明和特性</a> <span>•</span></li>
+        <li><a href="#header_2">CSS 特性的值</a> <span>•</span></li>
+        <li><a href="#header_3">不存在的特性和不合法的值</a> <span>•</span></li>
+        <li><a href="#header_4">引申阅读</a></li>
+    </ul>
+    <!-- } -->
+    <!-- 文章正文 { -->
+    <div id="w3h_content">
+        <address class="author">作者：武利剑</address>
+        <h2 id="header_1">CSS 声明和特性</h2>
+        <h3>CSS 声明( Declarations  )</h3>
+        <p>CSS 声明<sup>1</sup>可以为空，或者由 CSS 特性( property )，后加一个冒号 &quot;:&quot;，跟着是一个特性的值构成。中间可以有空格将它们隔开。</p>
+        <p>可用以下方式表达：</p>
+        <pre>
+property : value;</pre>
+        <p>其中 property 指代的是所有 CSS 特性，value 指的是这个特性的值。</p>
+        <p>例如：</p>
+        <pre>
+p{
+    height:100px;
+}</pre>
+        <p>其中，height 是特性，而 &quot;100px&quot; 是值。CSS 声明的基础是 CSS 特性。</p>
+
+        <h3>CSS 特性( properties )</h3>
+        <p>CSS 是用于（增强）控制网页样式并允许将样式信息与网页内容分离的一种标记性语言。
+        其中的样式信息，其实就是用户对于如何设置元素渲染方式的设置信息。</p>
+        <p>自提倡 Web 数据与分离理念以来，CSS 作为不可或缺的一部分参与了这项伟大运动。</p>
+        <p> 以 TABLE 为例，设置它的高度，可以表示为</p>
+        <pre>
+&lt;table <span class="hl_1">height=&quot;100&quot;</span>&gt;
+    &lt;tr&gt;
+        &lt;td&gt;hello&lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;</pre>
+        <p>这种表示方式的坏处是不利于 TABLE 元素的统一管理，比如，页面上有 1 万个 TABLE 元素，
+        我已经用了 1 万次粘贴(当然，你可以借助工具)，将所有的高度置成了 100，如果要改成150，那么，又是 1 万次。
+        利用 CSS 完全可以摆脱这种窘境，修改 TABLE 的高度，只需这样：</p>
+        <pre>
+&lt;style type=&quot;text/css&quot;&gt;
+    table {
+        <span class="hl_2">height: 100px;</span>
+    }
+&lt;/style&gt;
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;td&gt;hello&lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;</pre>
+        <p>其中的 height 就是 CSS 特性的一种，每个 CSS 特性都有一个名字，可以赋予它 CSS 值，以达到不同的渲染效果。你可以让所有的 TABLE 变得更高，设置它的 height 特性的值为 &quot;150px&quot; 就可以了。</p>
+        <p>这里有一个W3C 官方的 CSS 特性全表：<a href="http://www.w3.org/TR/CSS21/propidx.html">W3C - Full property table</a>，
+        可以查阅 CSS 特性，关于它的值的表示看不明白？不要紧，下面的内容将会就此做详细的讲解。</p>
+
+        <p class="comment">注：</p>
+        <ol class="comment">
+            <li>关于 声明和特性 的更多信息，请参考 <a href="http://www.w3.org/TR/CSS2/syndata.html#declaration">W3C CSS2.1 - 4.1.8 Declarations and properties</a></li>
+        </ol>
+
+        <h2 id="header_2">CSS 特性的值<sup>1</sup></h2>
+        <h3>整数和数字</h3>
+        <p>有些值类型可能会包含整数和实数。实数和整数都只能用十进制的数来表示。</p>
+        <p>整数值表示为 <span class="hl_2">&lt;integer&gt;</span>，是由数字 0～9，和前面的正负号组成。例如：0，-2，-7，7。</p>
+        <p>实数值表示为 <span class="hl_3">&lt;number&gt;</span>，是由 0～9，小数点以及前面的正负号组成。例如：-1.5，3.1415926，实数包括整数。</p>
+        <p>注意，有时候，某些特性会给定实数和整数的确切范围，比如，经常用到的非负整数。</p>
+        <p>使用此类值的 CSS 特性有：'line-height'、'pitch-range'、'richness'、'z-index' 和 'widows' 等。</p>
+        <p>比如其中的 'z-index' 表示为：</p>
+        <p>'z-index' : auto | <span class="hl_2">&lt;integer&gt;</span> | inherit</p>
+
+        <h3>长度值</h3>
+        <p>长度值适用于水平或垂直方向的尺寸。</p>
+        <p>长度值表示为 <span class="hl_4">&lt;length&gt;</span>。长度值的格式是：
+            <span class="hl_3">&lt;number&gt;</span> + 单位( e.g., px, em, etc.)，注意，一定要有单位，除非这个值是0。
+            如果长度值是0，单位可有可无。</p>
+        <p>可用此类值的 CSS 特性很多，例如，'margin'、'padding'、'height' 和 'width'等。</p>
+        <p>有些特性支持负的长度值，比如 ‘margin’。但是如果给一个不支持负长度值的特性设置一个负的值，那么这个声明会被忽略。</p>
+        <p>长度的单位有两种：相对长度和绝对长度。下面对这两类单位详细介绍。</p>
+
+        <h4>1). 相对长度</h4>
+        <p>相对长度会随着它参考值的变化而变化，不是固定的值。</p>
+        <ul>
+            <li>em : 与 'font-size' 的大小有关，与作用到元素上的 'font-size' 的值大小相等；</li>
+            <li>ex : 一个小写字母 x 的高度<sup>2</sup>； </li>
+            <li>px : 像素数( pixels )。</li>
+        </ul>
+        <p>例如：</p>
+        <pre>
+h1 { margin: 0.5 <span class="hl_1">em</span> }      /* em */
+h1 { margin: 1 <span class="hl_2">ex</span> }        /* ex */
+p  { font-size: 12 <span class="hl_3">px</span> }    /* px */</pre>
+
+        <h4>2). 绝对长度</h4>
+        <ul>
+            <li>in : 英寸 — 等于2.54厘米</li>
+            <li>cm : 厘米</li>
+            <li>mm : 毫米</li>
+            <li>pt : 点 — CSS 2.1里 1pt 等于 1/72 英寸</li>
+            <li>pc : 皮卡 — 1pc 等于 12pt，也就是 1/6 英寸</li>
+        </ul>
+        <p>例如：</p>
+<pre>
+h1 { margin: 0.5<span class="hl_1">in</span> }      /* inches  */
+h2 { line-height: 3<span class="hl_2">cm</span> }   /* centimeters */
+h3 { word-spacing: 4<span class="hl_3">mm</span> }  /* millimeters */
+h4 { font-size: 12<span class="hl_4">pt</span> }    /* points */
+h4 { font-size: 1<span class="hl_5">pc</span> }     /* picas */</pre>
+
+        <h3>百分比值</h3>
+        <p>百分比值表示为 <span class="hl_5">&lt;percentage&gt;</span>。它的格式是：<span class="hl_3">&lt;number&gt;</span> + %。</p>
+        <p>常见可用百分比为值的 CSS 特性如：'height'、'width' 等。</p>
+        <p>百分比值总是跟其他的值有关，比如长度值。</p>
+
+        <h3>URL 和 URI</h3>
+        <p>Web 上可用的每种资源 - HTML 文档、图像、视频片段、程序等 - 由一个通用资源标志符（Uniform Resource Identifier, 简称 &quot;URI&quot; ）进行定位 <sup>3</sup>。
+        </p>
+        <p>URL 是Uniform Resource Location的缩写，译为 “统一资源定位符” 。它是 URI 命名机制的一个子集。</p>
+        <p>URI 表示为 <span class="hl_4">&lt;uri&gt;</span>。注意，定义 URI 使用 “url()” 。</p>
+      <p>比如，'background-image' 特性的描述：</p>
+        <p>'background-image' :	<span class="hl_4">&lt;uri&gt;</span> | none | inherit</p>
+        <p>而在设置该特性的时候：</p>
+<pre>
+background-image:<span class="hl_3">url</span>(...)</pre>
+
+        <h3>计数器</h3>
+        <p>计数器使用<b>大小写敏感</b>的标识符来表示。参考特性：
+            <a href="http://www.w3.org/TR/CSS2/generate.html#propdef-counter-increment">'counter-increment'</a>
+            和 <a href="http://www.w3.org/TR/CSS2/generate.html#propdef-counter-reset">'counter-reset'</a>。</p>
+        <p>计数器的标记是 'counter(<span class="hl_4">&lt;identifier&gt;</span>)' 或者 'counter(<span class="hl_4">&lt;identifier&gt;</span>, &lt;'list-style-type'&gt;)'，其中 'list-style-type' 默认为 “decimal”，即小数点。</p>
+        <p>注意，IE 浏览器从 IE8 才开始支持计数器。</p>
+
+        <h3>颜色</h3>
+        <p>颜色值用 <span class="hl_3">&lt;color&gt;</span> 来表示。可以是一个 RGB 的颜色数值，也可以是关键词。</p>
+        <p>颜色的关键词列表是：aqua、 black、 blue、 fuchsia、 gray、 green、 lime、 maroon、 navy、 olive、 orange、 purple、 red、 silver、 teal、 white 和 yellow。</p>
+        <p>来自 W3C 官方的截图：</p>
+        <p><img src="002/color_shotcut.png" alt="W3C 颜色截图" /></p>
+        <p>除此之外，用户还可以使用用户环境中某些对象的颜色 <sup>4</sup>。</p>
+        <p>当然，这些关键词，浏览器可以扩展，比如：‘gold’、‘darkgray’ 等。</p>
+        <p>RGB 颜色被用于数值表示颜色。例如，用不同的表示方法表示红色：</p>
+<pre>
+em { color : <span class="hl_1">#f00</span> }              /* #rgb */
+em { color : <span class="hl_2">#ff0000</span> }           /* #rrggbb */
+em { color : <span class="hl_3">rgb(255,0,0)</span> }
+em { color : <span class="hl_4">rgb(100%, 0%, 0%)</span> }</pre>
+        <p>十六进制的 RGB 颜色值必须含有 “#” 前缀，后跟三个或六个十六进制字符。
+            其中，三位的和六位之间的转换是：'#rgb' 等于 '#rrggbb'，所以，'#FFFFFF' 可以简写成 '#FFF'。</p>
+        <p>函数记号的 RGB 颜色值，rgb(……)，括号里面是三个逗号分隔的 0～255 的值，或者是三个百分比值。百分比值 p 和整数值 v 的关系是 v=255×p。</p>
+        <p>超过有效范围的值，应该被处理为可用范围内的值，如：</p>
+<pre>
+em { color : rgb(255, 0, 0) }        /* 范围 0 - 255 */
+em { color : rgb(<span class="hl_1">300</span>, 0, 0) }       /* 修剪为 rgb(255, 0, 0) */
+em { color : rgb(255, <span class="hl_3">-10</span>, 0) }     /* 修剪为 rgb(255, 0, 0) */
+em { color : rgb(<span class="hl_5">110%</span>, 0%, 0%) }    /* 修剪为 rgb(100%, 0%, 0%) */</pre>
+
+        <h3>字符串</h3>
+        <p>字符串可以被写在单引号或双引号中。</p>
+        <p>字符串表示为：<span class="hl_2">&lt;string&gt;</span>。</p>
+        <p>一个字符串不能直接包含一个新行。想要达到此目的，可以使用转义字符 ISO-10646 (U+000A)，它表示换行符。</p>
+
+
+        <p class="comment">注：</p>
+        <ol class="comment">
+            <li>参见 W3C 原文：<a href="http://www.w3.org /TR/CSS2/syndata.html#values">W3C CSS2.1 - 4.3 Values</a></li>
+            <li>x-height 为英文字体设计中的一个术词，它的标准高是一个小写字母 x 的高度单位；</li>
+            <li>详细信息，见 <a href="http://www.ietf.org/rfc/rfc3986.txt">rfc3986</a>；
+                也可以通过 IBM 了解的更清楚： <a href="http://www.ibm.com/developerworks/cn/xml/x-urlni.html">分清 URI、URL 和 URN</a></li>
+            <li>更多信息，请参照： <a href="http://www.w3.org/TR/CSS2/ui.html#system-colors">system colors</a></li>
+        </ol>
+
+        <h2 id="header_3">不存在的特性和不合法的值<sup>1</sup></h2>
+        <p>对于不存在的特性和不合法的值，用户端都应该以忽略此声明的方式予以处理。比如：</p>
+<pre>
+p{
+    <span class="hl_2">W3Help</span> : &quot;good&quot;;
+    height : <span class="hl_5">&quot;hello&quot;</span>;
+}</pre>
+        <p> 此样式中 W3Help 字符虽然存在，但是却不存在 W3Help 这个 CSS 特性，也不存在 &quot;hello&quot; 的 height 特性的值。所以，这两条样式声明都应该被忽略。</p>
+        <p>不合法的值可能引起的浏览器兼容性问题，其中有一种情况是人为的错误，被不同的浏览器以不同的方式处理，还有一种情况是，某些浏览器支持其他浏览器所不支持的值，比如：</p>
+<pre>
+cursor : '<span class="hl_5">hand</span>';</pre>
+        <p>恐怕，只有 IE 以及他的追随者还有使用 IE 渲染引擎的国内特色&quot;山寨&quot;浏览器，支持 'cursor' 特性的 &quot;hand&quot; 值。</p>
+
+        <p class="comment">注：</p>
+        <ol class="comment">
+            <li>关于 CSS 解析错误处理的规则，详见： <a href="http://www.w3.org/TR/CSS2/syndata.html#parsing-errors">W3C CSS2.1 - 4.2 Rules for handling parsing errors</a></li>
+        </ol>
+
+        <h2 id="header_4">引申阅读</h2>
+        <p>相关兼容性问题，可以参考：</p>
+        <ul class="see_also">
+            <li><a href="/zh-cn/causes/RY8002">W3Help - RY8002: 各浏览器对 CSS 代码及 CSS 相关 DOM 操作中长度 &quot;&lt;length&gt;&quot; 类型的值缺失单位的容错程度存在差异</a></li>
+            <li><a href="/zh-cn/causes/RY8003">W3Help - RY8003: 各浏览器对 CSS 错误解析规则的差异及 CSS hack</a></li>
+            <li><a href="/zh-cn/causes/RY8005">W3Help - RY8005: 各浏览器对于计算后宽度和高度为含有小数的长度值时，其最终值会不一致</a></li>
+            <li><a href="/zh-cn/causes/RU3001">W3Help - RU3001: 只有 IE 和 Opera 支持 'cursor:hand'</a></li>
+        </ul>
+
+        <div class="appendix">
+            <h2>测试环境</h2>
+            <table class="list">
+                <tr>
+                    <th>操作系统版本:</th>
+                    <td>Windows 7 Ultimate build 7600</td>
+                </tr>
+                <tr>
+                    <th>浏览器版本:</th>
+                    <td>
+                        IE6<br />
+                        IE7<br />
+                        IE8<br />
+                        Firefox 3.6.8<br />
+                        Chrome 7.0.517.0 dev<br />
+                        Safari 5.02<br />
+                        Opera 10.52
+                    </td>
+                </tr>
+                <tr>
+                    <th>测试页面:</th>
+                    <td>&nbsp;</td>
+              </tr>
+                <tr>
+                    <th>本文更新时间:</th>
+                    <td>2010-09-14</td>
+                </tr>
+            </table>
+
+            <h2>关键字</h2>
+            <p>CSS 特性 值 声明</p>
+        </div>
+    </div>
+    <!-- } -->
+</div>
+<!-- } body_content -->
+</body>
+</html>

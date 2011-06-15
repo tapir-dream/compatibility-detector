@@ -1,0 +1,204 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="../../zh-cn/css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../../zh-cn/css/article.css" media="all" />
+</head>
+<body>
+<!-- body_content { -->
+<div class="body_content">
+    <h1 class="title">KB008: 包含块( Containing block ) </h1>
+    <ul class="toc">
+        <li><a href="#header_1">包含块简介</a> <span>•</span></li>
+        <li><a href="#header_2">包含块判定及其范围</a> <span>•</span></li>
+        <li><a href="#header_3">引申阅读</a> </li>
+    </ul>
+    <!-- } -->
+    <!-- 文章正文 { -->
+    <div id="w3h_content">
+        <address class="author">作者：武利剑</address>
+        <h2 id="header_1">包含块简介</h2>
+        <p>在 CSS2.1 中，很多框的定位和尺寸的计算，都取决于一个矩形的边界，这个矩形，被称作是包含块( containing block )。
+            一般来说，(元素)生成的框会扮演它子孙元素包含块的角色；我们称之为：一个(元素的)框为它的子孙节点建造了包含块。包含块是一个相对的概念。</p>
+        <pre>
+&lt;div&gt;
+    &lt;table&gt;
+        &lt;tr&gt;
+            &lt;td&gt;hi&lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/table&gt;
+&lt;/div&gt;</pre>
+        <p>以上代码为例，DIV 和 TABLE 都是包含块。DIV 是 TABLE 的包含块，同时 TABLE 又是 TD 的包含块，不是绝对的。</p>
+        <p>“一个框的包含块”，指的是“该框所存在的那个包含块”，并不是它建造的包含块。比如，上述代码中，TABLE 的包含块，说的是 DIV 建造的包含块，而不是 TABLE 自身建造的包含块。TABLE 建造的包含块，可以称作 TD 的包含块。</p>
+        <p>每个框关于它的包含块都有一个位置，但是它不会被包含块限制；它可以溢出(包含块)。包含块上可以通过设置 'overflow' 特性达到处理溢出的子孙元素的目的。</p>
+        <p>包含块的概念很重要，因为可视化格式模型中很多的理论性知识都跟这个概念有关系，比如，宽度高度自动值的计算，浮动元素的定位，绝对定位元素的定位等等。不了解包含块，就掌握不好以它为基础的后续理论。</p>
+
+        <h2 id="header_2">包含块判定及其范围</h2>
+        <p>由上面内容可知，元素框的定位和尺寸与其包含块有关，而元素会为它的子孙元素创建包含块。</p>
+        <p>那么，是不是说，元素的包含块就是它的父元素呢？包含块的区域是不是父元素的内容区域呢？
+           答案是否定的。此节中，将给出各类元素包含块的判断以及包含块的区域范围。
+           如果不存在符合判断标准的祖先元素，那么元素的包含块就是初始包含块。</p>
+        <p>包含块判定总流程图如下：</p>
+        <p><img src="008/CB4.png" alt="" /></p>
+
+        <h3>根元素</h3>
+        <p>根元素，就是处于文档树最顶端的元素，它没有父节点。</p>
+        <p>根元素存在的包含块，被叫做初始包含块 (initial containing block)。具体，跟用户端有关。</p>
+        <ul>
+            <li>在 (X)HTML 中，根元素是 html 元 素（尽管有的浏览器会不正确地使用 body 元素）。</li>
+            <li>而初始包含块的 direction 属性与根元素相同。</li>
+        </ul>
+
+        <h3>静态定位元素和相对定位元素</h3>
+        <p>如果该元素的定位（position）为 &quot;relative&quot; （相对定位）或者 &quot;static&quot;（静态定位），它的包含块由它最近的块级、单元格（table cell）或者行内块（inline-block）祖先元素的
+            <span class="hl_4">内容框</span><sup>1</sup>创建。</p>
+        <p>元素如果未声明 'position' 特性，那么就会采用 'position' 的默认值 &quot;static&quot;。</p>
+        <pre>
+&lt;table id=&quot;table1&quot;&gt;
+  &lt;tr&gt;
+      &lt;td id=&quot;td1&quot;&gt;
+          &lt;div id=&quot;div1&quot; style=&quot;padding:20px;border:1px solid red;&quot;&gt;
+               &lt;span&gt;
+                   &lt;strong id=”greed” style=&quot;<span class="hl_2">position:relative;</span>&quot;&gt;greed is&lt;/strong&gt;
+                   good 999999
+              &lt;/span&gt;
+          &lt;/div&gt;
+      &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;</pre>
+        <p>包含块关系表：</p>
+        <table class="compare">
+            <tr>
+                <th> 元素 </th>
+                <th> 包含块 </th>
+            </tr>
+            <tr>
+                <td>table1</td>
+                <td>body</td>
+            </tr>
+            <tr>
+                <td>td1</td>
+                <td>table1</td>
+            </tr>
+            <tr>
+                <td>div1</td>
+                <td>td1</td>
+            </tr>
+            <tr>
+                <td>greed</td>
+                <td>div1</td>
+            </tr>
+         </table>
+        <p>SPAN 元素中包含的文本在 div1 中的位置可以看出，div1 创建的包含块的区域是它的内容边界，也就是内边界。</p>
+
+        <h3>固定定位元素</h3>
+        <p>如果元素是固定定位 (&quot;position:fixed&quot;) 元素，那么它的包含块是当前可视窗口<sup>2</sup>。</p>
+
+        <h3>绝对定位元素</h3>
+        <p>总的来说，绝对定位（&quot;position: absolute&quot;）元素的包含块由离它最近的 'position' 属性为 'absolute'、'relative' 或者 'fixed' 的祖先元素创建。</p>
+      <h4>如果其祖先元素是行内元素，则包含块取决于其祖先元素的 'direction' 特性</h4>
+        <p><strong>1). 如果 'direction' 是 'ltr'，包含块的顶、左边是祖先元素生成的第一个框的顶、左内边距边界(padding edges) ，右、下边是祖先元素生成的最后一个框的右、下内边距边界(padding edges)</strong> </p>
+        <p>示例代码：</p>
+        <pre>
+&lt;p style=&quot;border:1px solid red; width:200px; padding:20px;&quot;&gt;
+    T
+    &lt;span style=&quot;background-color:#C0C0C0; <span class="hl_3">position:relative;</span>&quot;&gt;
+            这段文字从左向右排列，红 XX 和 蓝 XX 和黄 XX 都是绝对定位元素，它的包含块是相对定位的SPAN。 可以通过它们绝对定位的位置来判断它们包含块的边缘。
+            &lt;em style=&quot;<span class="hl_1">position:absolute;</span> color:red; top:0; left:0;&quot;&gt;XX&lt;/em&gt;
+            &lt;em style=&quot;<span class="hl_2">position:absolute;</span> color:yellow; top:20px; left:0;&quot;&gt;XX&lt;/em&gt;
+            &lt;em style=&quot;<span class="hl_4">position:absolute;</span> color:blue; bottom:0; right:0;&quot;&gt;XX&lt;/em&gt;
+    &lt;/span&gt;
+&lt;/p&gt;</pre>
+        <p>以上代码中，文字采取默认从左到右的方式排列。红 XX 和 蓝 XX 和黄 XX 都是绝对定位元素，它的包含块是相对定位的 SPAN。
+            它们定位需要参照包含块，按照标准来说，它们包含块的左顶边是 SPAN 形成的第一个框（即第一行的灰色部分）的顶、左内边距边，包含块的右、下边是 SPAN 生成的最后一个框（最后一行灰色的部分）的右、下内边距边界。</p>
+        <p>示意图：<br/><img src="008/CB1.png" alt="" /></p>
+        <p>行内元素内形成的包含块，在各浏览器中各不相同，存在兼容性问题。可以通过上面的例子可以证明这一点。蓝色的 &quot;XX&quot; 的位置在各浏览器中都不一样。</p>
+        <p>包含块的宽度可能是<span class="hl_2">负</span>的。</p>
+        <p>示例代码：</p>
+        <pre>
+&lt;p style=&quot;border:1px solid red; width:200px; padding:20px;&quot;&gt;
+    TEXT TEXT TEXT
+    &lt;span style=&quot;background-color:#C0C0C0; <span class="hl_1">position:relative;</span>&quot;&gt;
+        这段文字从左向右排列，红 XX 和 蓝 XX 和黄 XX 都是绝对定位元素，它的包含块是相对定位的SPAN。 可以通过它们绝对定位的位置来判断它们包含块的边缘。
+        &lt;em style=&quot;<span class="hl_2">position:absolute;</span> color:red; top:0; left:0;&quot;&gt;XX&lt;/em&gt;
+        &lt;em style=&quot;<span class="hl_5">position:absolute;</span> color:yellow; top:20px; left:0;&quot;&gt;XX&lt;/em&gt;
+        &lt;em style=&quot;<span class="hl_4">position:absolute;</span> color:blue; bottom:0; right:0;&quot;&gt;XX&lt;/em&gt;
+    &lt;/span&gt;
+&lt;/p&gt;</pre>
+        <p>示意图：<br/><img src="008/CB2.png" alt="" /></p>
+        <p>以上的边界无法围成一个区域，在这种情况下，包含块的宽度是负的。</p>
+        <p><strong>2). 如果 'direction' 是 'rtl'，包含块的顶、右边是祖先元素生成的第一个框的顶、右内边距边界 (padding edges) ，左、下边是祖先元素生成的最后一个框的左、下内边距边界 (padding edges)</strong></p>
+        <p>示例代码：</p>
+        <pre>
+&lt;p style=&quot;border:1px solid red; width:200px; padding:20px; <span class="hl_5">direction:rtl;</span>&quot;&gt;
+    T
+    &lt;span style=&quot;background-color:#C0C0C0; <span class="hl_3">position:relative;</span>&quot;&gt;
+         这段文字从右向左排列，红 XX 和 蓝 XX 和黄 XX 都是绝对定位元素，它的包含块是相对定位的SPAN。可以通过它们绝对定位的位置来判断它们……
+        &lt;em style=&quot;<span class="hl_1">position:absolute;</span> color:red; top:0; left:0;&quot;&gt;XX&lt;/em&gt;
+        &lt;em style=&quot;<span class="hl_4">position:absolute;</span> color:yellow; top:20px; left:0;&quot;&gt;XX&lt;/em&gt;
+        &lt;em style=&quot;<span class="hl_2">position:absolute;</span> color:blue; bottom:0; right:0;&quot;&gt;XX&lt;/em&gt;
+    &lt;/span&gt;
+&lt;/p&gt;</pre>
+        <p>示意图：<br/><img src="008/CB3.png" alt="" /></p>
+        <h4>其他情况下，如果祖先元素不是行内元素，那么包含块的区域应该是祖先元素的<span class="hl_2">内边距</span>边界</h4>
+        <p>示例代码：</p>
+        <pre>
+&lt;div id=&quot;container&quot; style=&quot;padding:50px; background-color:#c0c0c0; <span class="hl_1">position:relative;</span> width:200px; height:200px;&quot;&gt;
+    &lt;div id=&quot;div1&quot; style=&quot;width:100%; height:100%; border:2px solid blue;&quot;&gt;
+        &lt;div id=&quot;content&quot; style=&quot;border:1px solid red; <span class="hl_4">position:absolute;</span> left:0; top:0;&quot;&gt;absolute element&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</pre>
+        <p>以上代码中，content 的父元素虽是 div1，但，按照标准它的包含块应该是 container。</p>
+
+        <p class="comment">注：</p>
+        <ol class="comment">
+            <li>关于内容框，请参照： <a href="006.html">W3Help - KB006: CSS 框模型( Box module )</a></li>
+            <li>见 <a href="007.html">W3Help - KB007: 可视化格式模型( visual formatting model )简介</a>中的视口( viewport )</li>
+        </ol>
+
+        <h2 id="header_3">引申阅读</h2>
+        <p>相关浏览器对包含块判定引起的兼容性问题，可以参考：</p>
+        <ul class="see_also">
+            <li><a href="/zh-cn/causes/RM8011">RM8011: Firefox 浏览器对 TABLE 中绝对定位元素包含块的判定有错误，某些情况下会导致绝对定位元素位置跟其他浏览器中有差异</a></li>
+            <li><a href="/zh-cn/causes/RM8014">RM8014: IE6 IE7 IE8(Q) 中某些情况下浮动元素会在其浮动方向溢出其包含块</a></li>
+        </ul>
+
+        <div class="appendix">
+            <h2>测试环境</h2>
+            <table class="list">
+                <tr>
+                    <th>操作系统版本:</th>
+                    <td>Windows 7 Ultimate build 7600</td>
+                </tr>
+                <tr>
+                    <th>浏览器版本:</th>
+                    <td>
+                        IE6<br />
+                        IE7<br />
+                        IE8<br />
+                        Firefox 3.6.10<br />
+                        Chrome 7.0.517.0 dev<br />
+                        Safari 5.0.2<br />
+                        Opera 10.62
+                    </td>
+                </tr>
+                <tr>
+                    <th>测试页面:</th>
+                    <td>&nbsp;</td>
+              </tr>
+                <tr>
+                    <th>本文更新时间:</th>
+                    <td>2010-09-20</td>
+                </tr>
+            </table>
+
+            <h2>关键字</h2>
+            <p>包含块 containing block</p>
+        </div>
+    </div>
+    <!-- } -->
+</div>
+<!-- } body_content -->
+</body>
+</html>

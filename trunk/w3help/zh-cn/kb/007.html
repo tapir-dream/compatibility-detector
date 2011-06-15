@@ -1,0 +1,106 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="../../zh-cn/css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../../zh-cn/css/article.css" media="all" />
+</head>
+<body>
+<!-- body_content { -->
+<div class="body_content">
+    <h1 class="title">KB007: 可视化格式模型( visual formatting model )简介 </h1>
+    <ul class="toc">
+        <li><a href="#header_1">三维的可视化格式模型</a> <span>•</span></li>
+        <li><a href="#header_2">框( box )布局影响因素</a> <span>•</span></li>
+        <li><a href="#header_3">视口（viewport）</a></li>
+    </ul>
+    <!-- } -->
+    <!-- 文章正文 { -->
+    <div id="w3h_content">
+        <address class="author">作者：武利剑</address>
+        <h2 id="header_1">三维的可视化格式模型</h2>
+        <p>可视化格式模型是非常抽象的概念。它是 CSS 布局的核心，通过它，框( box )可以获得应有的尺寸，放到需要的位置。</p>
+        <p>我们通常所看到的页面都是平面 2D 的效果，但可视化模型却是 3D 的，除了 X 轴，Y 轴，还有决定元素显示顺序<sup>1</sup>的 Z 轴。
+           Z 轴垂直穿过计算机屏幕，面向用户的一侧是正轴，框在 Z 轴方向上离用户越近，显示越是靠前。</p>
+        <p>类似 Photoshop<sup>2</sup> 中图层的概念，我们可以把可视化格式模型想像成是一张一张叠起来的透明胶片，
+            每个透明胶片上都有一个或多个由元素形成的框，框的内容区域有图片文字等内容，
+            改变图层的顺序和属性(透明度以及图层叠加方式)可以改变图像的最后效果。</p>
+
+        <p>可视化格式模型的官方说法是，它规定了<span class="hl_1">用户端</span>在<span class="hl_2">媒介</span>中如何处理<span class="hl_4">文档树( document tree )</span>。以下是对其中关键词的解释：</p>
+        <ul>
+            <li><span class="hl_1">用户端</span>：对我们来说一般指浏览器。</li>
+            <li><span class="hl_2">媒介</span>：展现页面的介质。例如，纸媒介，听觉浏览器和显示器等<sup>3</sup>。</li>
+            <li><span class="hl_4">文档树( document tree )</span>：源文档中元素树的编码。树中，每一个元素恰好由一个父元素。根元素是例外，它没有父元素。就是 document 和页面上的元素所构成的类似树形的结构。</li>
+        </ul>
+        <p>可视化格式模型，不会规定所有格式的细节（比如，它并不是指字间距）。</p>
+        <p>本部分会涉及很多新概念，如包含块、元素的类型、定位体系、块级格式化上下文、行内格式化上下文、浮动、绝对定位和 z-index，以及可视化格式模型的细节部分，自动宽度高度的计算等。</p>
+
+        <p class="comment">注：</p>
+        <ol class="comment">
+            <li>框显示的前后顺序由 z-index 的值和元素的特性决定，详细的资料请参考：<a href="http://www.w3.org/TR/CSS2/zindex.html">W3C CSS2.1 - Appendix E. Elaborate description of Stacking Contexts</a></li>
+            <li>Photoshop 是 Adobe 公司旗下最为出名的图像处理软件之一。</li>
+            <li>关于媒介的详细介绍，请参照： <a href="http://www.w3.org/TR/CSS2/media.html">W3C CSS2.1 - 7 Media types</a></li>
+        </ol>
+
+        <h2 id="header_2">框( box )布局影响因素</h2>
+        <p>在可视化格式模型中，每一个元素都会根据框模型产生 0 个或多个框，而这些框的布局受某些因素的影响。下面一一介绍。</p>
+        <h3>框的尺寸和类型</h3>
+        <p>框的类型是指 display 特性所决定的元素类型，如：DIV 是块级元素，SPAN 是行内元素等。这个特性会使元素产生相应的控制框<sup>1</sup>。</p>
+        <h3>定位体系</h3>
+        <p>框在布局时，根据三种定位体系定位。分别是，常规流、浮动和绝对定位<sup>2</sup>。</p>
+        <h3>文档树中元素之间的关系</h3>
+        <p>比如，一个块元素包含两个互为兄弟节点的浮动元素，后面那个浮动元素的布局，会受前面元素以及它包含块<sup>3</sup>的影响。</p>
+        <h3>外部信息</h3>
+        <p>比如，可视窗口的大小会对布局有影响。有的页面要求自适应窗口大小，就是因为窗口大小对布局有影响。再比如，图片的固有尺寸，会影响行内替换元素的尺寸，进而影响这个布局。</p>
+
+        <p class="comment">注：</p>
+        <ol class="comment">
+            <li>关于控制框，请参考：<a href="http://www.w3.org/TR/CSS2/visuren.html#box-gen">W3C CSS2.1 - 9.2 Controlling box generation</a></li>
+            <li>这三种定位体系的详细内容会在后面讲到。请参考：<a href="http://www.w3.org/TR/CSS2/visuren.html#positioning-scheme">W3C CSS2.1 - 9.3 Positioning schemes</a></li>
+            <li>关于包含块的内容，请参见： <a href="http://www.w3.org/TR/CSS2/visudet.html#containing-block-details">W3C CSS2.1 - 10.1 Definition of "containing block"</a></li>
+        </ol>
+
+        <h2 id="header_3">视口（viewport）</h2>
+        <p>视口，即可视窗口。当可视窗口的尺寸大小改变时，浏览器应该改变文档的布局。
+            比如，有些值依赖于可视窗口的大小，DIV 'width' 的 "auto" 值，等等。</p>
+        <p>当可视窗口的尺寸小于文档渲染的画布（也就是页面）的大小时，浏览器应该提供滚动机制。
+            每个画布最多有一个可视窗口。但是，浏览器可以同时渲染多个画布。</p>
+
+        <div class="appendix">
+            <h2>测试环境</h2>
+            <table class="list">
+                <tr>
+                    <th>操作系统版本:</th>
+                    <td>Windows 7 Ultimate build 7600</td>
+                </tr>
+                <tr>
+                    <th>浏览器版本:</th>
+                    <td>
+                        IE6<br />
+                        IE7<br />
+                        IE8<br />
+                        Firefox 3.6.10<br />
+                        Chrome 7.0.517.0 dev<br />
+                        Safari 5.0.2<br />
+                        Opera 10.62
+                    </td>
+                </tr>
+                <tr>
+                    <th>测试页面:</th>
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <th>本文更新时间:</th>
+                    <td>2010-09-20</td>
+                </tr>
+            </table>
+
+            <h2>关键字</h2>
+            <p>可视格式化模型 布局 包含块 三维</p>
+        </div>
+    </div>
+    <!-- } -->
+</div>
+<!-- } body_content -->
+</body>
+</html>
