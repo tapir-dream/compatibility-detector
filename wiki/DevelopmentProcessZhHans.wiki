@@ -127,10 +127,58 @@
 单元测试的编码要求请具体参考项目中的实际单元测试文件，此处仅做简要说明：
   # 单元测试文件必须包含完整的 HTML HEAD BODY 标签。
   # 单元测试内的样式表设定尽可能达到最简化，样式表声明需按照字母顺序排列。
-  # 单元测试的有问题内容放置在一起，并尽量靠上，无问题内容放置在一起，并尽可能靠下；他们之间使用 <hr/> <h2>The followings don't have problems</h2> 代码分割。
+  # 单元测试的有问题内容放置在一起，并尽量靠上，无问题内容放置在一起，并尽可能靠下；他们之间使用` <hr/> <h2>The followings don't have problems</h2>` 代码分割。
   # 单元测试最后需用 <p>(End of test)</p> 代码表示用例结束。
 
 
 === CODE REVIEW ===
-  # 注册一个Google账号（Gmail），它用来加入邮件组，并且用来登录  [http://codereview.appspot.com/ http://codereview.appspot.com/] 平台。
-  # 
+  # 注册一个Google账号（Gmail），它用来加入邮件组，并且用来登录 [http://codereview.appspot.com/ http://codereview.appspot.com/] 平台。
+  # 获取 depot 工具，地址为: [http://www.chromium.org/developers/how-tos/install-depot-tools http://www.chromium.org/developers/how-tos/install-depot-tools]。用它来创建修改列表以及执行codereview 流程。其常用命令说明如下：
+    # gcl change your_change_list_name  ——用来建立一个CL（Change List），或者用来修改一个LC，为其修改说明或增减内容。
+    # gcl changes ——列出所有已建立的CL。
+    # gcl rename your_old_change_list_name your_new_change_list_name ——用来修改一个LC的名称。
+    # gcl upload your_change_list_name  -scodereview.appspot.com -r reviewer_mail --cc compatibility-detector-dev@googlegroups.com --send_mail ——用来将CL提交codereview，需要注意的是 -s 参数后面没有空格；-r参数用来指定一个或多个你希望review你代码的人，如果是多个人中间用逗号分割；--cc 参数将此review信息抄送全组；--send_mail 用来指定是以邮件形式发送此信息。
+    # gcl commit  your_change_list_name ——完成review后使用此命令提交CL到源码库中。
+    # gcl delete  your_change_list_name ——删除无用的CL。
+
+万事俱备后，我们来看看整体 codereview 流程：
+  # 修改代码，使用 gcl change 命令创建一个 CL；
+  # 在弹出的记事本窗口中选择你需要的文件列表，它们可能显示如下：
+{{{
+[HR9001] Detector meta tag charset
+BUG=https://code.google.com/p/compatibility-detector/issues/detail?id=146
+TEST=None
+
+---All lines above this line become the description.
+---Repository Root: D:\ProgramData\Windows\Desktop\comp-meta-charset
+---Paths in this changelist (meta-charset):
+
+A      src\detectors\meta_charset_and_http_header_charset.js
+A      tests\charset_testcase.html
+M      src\_locales\zh_CN\messages.json
+M      src\_locales\en\messages.json
+M      src\w3help_issues.js
+
+---Paths modified but not in any changelist:
+A     src\manifest.json
+}}}
+  我们要做的是，将不需提交修改的文件放置在 `*---Paths modified but not in any changelist:*` 行下，将要修改的放置在 `*---Paths in this changelist(xxxx)*` 行下。并且要在第一行注明标准格式：
+
+  {{{
+    [W3Help问题标号] Detector 检测问题简要说明
+    BUG=compatibility-detector issues url
+    TEST=None
+  }}}
+
+  其中 `*compatibility-detector issues url*` 可以在 [https://code.google.com/p/compatibility-detector/issues/ https://code.google.com/p/compatibility-detector/issues/] 中找到，如果没有可以在此URL下自己创建一个，并写到 `BUG=` 字符之后。
+
+  完成这些操作后，保存当前记事本，并关闭它，这样就建立好了一个CL。
+
+  # 保证CL无误后，执行 gcl upload 命令，将此CL提交至 [http://codereview.appspot.com/ http://codereview.appspot.com/] 平台等待review（命令行中会提示这个CL的URL地址）。 
+  # 当 Reviewer 对你的CL提出修改建议后，你可以收到邮件并链接到 [http://codereview.appspot.com/ http://codereview.appspot.com/] 平台回应修改。
+  # 如果你觉得某条 Reviewer 的建议你可以修正，就在平台中此条目内容中回复 `*Done*`；否则在回复中说明你的理由。
+  # 将 Reviewer 所有建议处理完毕后，修正代码，执行 gcl upload 命令再次提交此CL。
+  # 在 [http://codereview.appspot.com/ http://codereview.appspot.com/] 平台中点击 `*Publish+Mail Comments*` 链接，勾选 `*Send Mail*` 选项后，点击 `*Publish All My Drafts*` 按键通知 Reviewer 你已经处理完成。
+  # Reviewer 收到通知后会继续审核你的代码。
+  # 重复执行 3-5 步，直到你指定的所有 Reviewer 都在平台中给出了 `*LGTM*` (Look Good To Me) 回复后，说明代码已经通过审核。
+  # 现在可以毫不犹豫的在你本地执行 gcl commit 命令，将以完成审核的CL提交至源码库。
