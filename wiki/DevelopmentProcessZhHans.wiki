@@ -22,7 +22,7 @@
 详细内容可见*开发流程说明*。
 
 === 非项目组成员如何提交代码 ===
-非项目组成员可以将自己编写的检测代码发到项目组内，邮箱为: compatibility-detector-discuss[at]googlegroups.com
+非项目组成员可以将自己编写的检测代码发到项目组内，邮箱为: `*compatibility-detector-discuss[at]googlegroups.com*`
 提交的代码由组内固定成员负责review，通过邮件组形式沟通实现细节，代码审核通过后由组内成员负责提交。
 
 
