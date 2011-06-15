@@ -6,7 +6,7 @@
 == 如何获取原始代码 ==
 项目源码保存在 Google Code 提供的 SVN 内，获取源码需要安装 SVN 客户端。
 
-只读的源代码获取地址为：
+无提交权限的源代码针对任何对此项目感兴趣的人，它的获取地址为：
 
 [http://compatibility-detector.googlecode.com/svn/trunk/ http://compatibility-detector.googlecode.com/svn/trunk/]
 
