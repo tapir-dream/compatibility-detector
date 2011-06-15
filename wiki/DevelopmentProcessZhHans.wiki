@@ -43,7 +43,7 @@
 == 开发流程 ==
 
 === 代码风格 ===
-在编写代码前，请参照 Google 开源的 JavaScript 代码风格说明:
+在编写代码前，请参照 Google 开源的 `JavaScript` 代码风格说明:
 
 [http://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml  http://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml]
 
