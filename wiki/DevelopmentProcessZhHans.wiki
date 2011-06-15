@@ -110,7 +110,7 @@
 
   # 每个检测算法至少包含一个单元测试文件。
   # 单元测试文件放置在 /tests/ 目录内，测试文件需要与检测算法文件命名一致。如果某个检测需要多于一个单元测试文件，那么可以在 /tests/目录内建立与检测算法文件命名一致的目录来存放它们。
-  # 如果单元测试运行在不同的文档模式下，请将文件名最后分别加上'`*_q*`'或'`*_s*`'，用来表示混杂模式或标准模式。用于检测近乎标准模式的页面建议是用'`*_a*`'结尾。
+  # 如果单元测试运行在不同的文档模式下，请将文件名最后分别加上'*`_q`*'或'*`_s`*'，用来表示混杂模式或标准模式。用于检测近乎标准模式的页面建议是用'*`_a`*'结尾。
   # 单元测试文件应使用自动测试结构如下：
     # 在HTML标签，宣布该检测器进行测试：
       <html chrome_comp_test="detector_name">
@@ -162,7 +162,7 @@ M      src\w3help_issues.js
 ---Paths modified but not in any changelist:
 A     src\manifest.json
 }}}
-  我们要做的是，将不需提交修改的文件放置在 `*---Paths modified but not in any changelist:*` 行下，将要修改的放置在 `*---Paths in this changelist(xxxx)*` 行下。并且要在第一行注明标准格式：
+  我们要做的是，将不需提交修改的文件放置在 *`---Paths modified but not in any changelist:`* 行下，将要修改的放置在 *`---Paths in this changelist(xxxx)`* 行下。并且要在第一行注明标准格式：
 
   {{{
     [W3Help问题标号] Detector 检测问题简要说明
@@ -170,15 +170,15 @@ A     src\manifest.json
     TEST=None
   }}}
 
-  其中 `*compatibility-detector issues url*` 可以在 [https://code.google.com/p/compatibility-detector/issues/ https://code.google.com/p/compatibility-detector/issues/] 中找到，如果没有可以在此URL下自己创建一个，并写到 `BUG=` 字符之后。
+  其中 *`compatibility-detector issues url`* 可以在 [https://code.google.com/p/compatibility-detector/issues/ https://code.google.com/p/compatibility-detector/issues/] 中找到，如果没有可以在此URL下自己创建一个，并写到 `BUG=` 字符之后。
 
   完成这些操作后，保存当前记事本，并关闭它，这样就建立好了一个CL。
 
   # 保证CL无误后，执行 gcl upload 命令，将此CL提交至 [http://codereview.appspot.com/ http://codereview.appspot.com/] 平台等待review（命令行中会提示这个CL的URL地址）。 
   # 当 Reviewer 对你的CL提出修改建议后，你可以收到邮件并链接到 [http://codereview.appspot.com/ http://codereview.appspot.com/] 平台回应修改。
-  # 如果你觉得某条 Reviewer 的建议你可以修正，就在平台中此条目内容中回复 `*Done*`；否则在回复中说明你的理由。
+  # 如果你觉得某条 Reviewer 的建议你可以修正，就在平台中此条目内容中回复 *`Done`*；否则在回复中说明你的理由。
   # 将 Reviewer 所有建议处理完毕后，修正代码，执行 gcl upload 命令再次提交此CL。
-  # 在 [http://codereview.appspot.com/ http://codereview.appspot.com/] 平台中点击 `*Publish+Mail Comments*` 链接，勾选 `*Send Mail*` 选项后，点击 `*Publish All My Drafts*` 按键通知 Reviewer 你已经处理完成。
+  # 在 [http://codereview.appspot.com/ http://codereview.appspot.com/] 平台中点击 *`Publish+Mail Comments`* 链接，勾选 *`Send Mail`* 选项后，点击 *`Publish All My Drafts`* 按键通知 Reviewer 你已经处理完成。
   # Reviewer 收到通知后会继续审核你的代码。
-  # 重复执行 3-5 步，直到你指定的所有 Reviewer 都在平台中给出了 `*LGTM*` (Look Good To Me) 回复后，说明代码已经通过审核。
+  # 重复执行 3-5 步，直到你指定的所有 Reviewer 都在平台中给出了 *`LGTM`* (Look Good To Me) 回复后，说明代码已经通过审核。
   # 现在可以毫不犹豫的在你本地执行 gcl commit 命令，将以完成审核的CL提交至源码库。
