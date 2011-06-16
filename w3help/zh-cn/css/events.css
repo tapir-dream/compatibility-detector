@@ -1,0 +1,32 @@
+.events li {
+	margin-bottom: 50px;
+}
+.events p {
+	margin: 8px 10px;
+}
+.register {
+	padding: 0 10px;
+	zoom: 1;
+}
+.register h3 {
+	font-size: 100%;
+	line-height: 160%;
+	color: #036;
+}
+.register p {
+	padding: 3px 0;
+	font-size: 12px;
+}
+.register .text {
+	display: block;
+	width: 92%;
+	margin-top: 2px;
+	padding: 3px 2px;
+	border: 1px solid #E8E8E8;
+	font-size: 14px;
+	color: #666;
+}
+.submitButton{
+	height:24px;
+	width:50px;
+}

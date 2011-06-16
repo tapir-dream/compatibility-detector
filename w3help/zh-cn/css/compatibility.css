@@ -1,0 +1,23 @@
+.compatibility {
+	padding-top: 10px;
+}
+.compatibility li {
+	margin: 10px 20px 30px;
+	padding: 0 0 20px 55px;
+	border-bottom: 1px solid #DDD;
+}
+.compatibility h3 {
+	font-size: 150%;
+}
+.compatibility p {
+	margin: 5px 0;
+}
+.causes {
+	background: url(../images/icon_causes.gif) no-repeat left top;
+}
+.kb {
+	background: url(../images/icon_kb.gif) no-repeat left top;
+}
+.casestudies {
+	background: url(../images/icon_casestudies.gif) no-repeat left top;
+}

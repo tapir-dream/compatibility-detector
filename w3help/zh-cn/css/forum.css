@@ -1,0 +1,12 @@
+.forum li {
+	margin-bottom: 50px;
+}
+.forum p {
+	margin: 8px 30px 8px 10px;
+}
+.forum img {
+	vertical-align: text-bottom;
+}
+.our_forum {
+	font-size: 200%;
+}

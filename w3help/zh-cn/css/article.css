@@ -1,0 +1,214 @@
+#w3h_content {
+	line-height: 1.5;
+}
+#w3h_content h2 {
+	margin: 20px 20px 10px;
+	font-size: 150%;
+	font-weight: normal;
+	color: #036;
+}
+#w3h_content h3 {
+	margin: 15px 20px 10px;
+	font-size: 120%;
+	font-weight: normal;
+	color: #025A9A;
+}
+#w3h_content h4 {
+	margin: 10px 20px;
+	font-size: 100%;
+	font-weight: normal;
+	color: #025A9A;
+}
+#w3h_content p {
+	margin: 10px 20px;
+	line-height: 1.5;
+}
+#w3h_content .section {
+	font-size: 120%;
+}
+#w3h_content .comment {
+	font-size: 12px;
+	color: #505050;
+}
+#w3h_content a:link, #w3h_content a:visited {
+	border-bottom: 2px solid #A8CFBF;
+}
+#w3h_content a:hover {
+	border-bottom: 2px solid #009C5A;
+}
+#w3h_content em {
+	font-style: normal;
+	text-decoration: underline;
+}
+#w3h_content sup {
+	margin-left: 2px;
+	padding: 1px 3px;
+	border-radius: 6px;
+	-moz-border-radius: 6px;
+	-webkit-border-radius: 6px;
+	-khtml-border-radius: 6px;
+	background: #000;
+	vertical-align: top;
+	font: 9px Verdana;
+	color: #FFF;
+}
+#w3h_content pre {
+	margin: 10px 20px;
+	padding: 8px;
+	border: 1px solid #E0E0E0;
+	border-radius: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	-khtml-border-radius: 5px;
+	background: #F5F5F5;
+	font-size: 100%;
+	line-height: 120%;
+	font-family: Consolas, 'Lucida Console', Monaco, monospace;
+	white-space: pre-wrap;
+	white-space: -moz-pre-wrap;
+	white-space: -pre-wrap;
+	white-space: -o-pre-wrap;
+	word-wrap: break-word;
+	word-break: break-all;
+	color: #000066;
+}
+#w3h_content table{
+	*table-layout:fixed;
+}
+#w3h_content th{
+	*width:15%;
+	*word-wrap: break-word;
+	*word-break: break-all;
+}
+#w3h_content td{
+	*word-wrap: break-word;
+	*word-break: break-all;
+}
+#w3h_content ol pre, #w3h_content ul pre, #w3h_content dl pre {
+	margin-left: 0;
+}
+#w3h_content table.list {
+	margin: 0 20px;
+	border-collapse: collapse;
+	border: none;
+}
+#w3h_content table.list th, #w3h_content table.list td {
+	padding-right: 1em;
+	vertical-align: top;
+}
+#w3h_content table.list th {
+	text-align: left;
+}
+#w3h_content table.compare {
+	margin: 0 20px;
+	border-collapse: collapse;
+}
+#w3h_content table.compare th, #w3h_content table.compare td {
+	padding: 3px 5px;
+	border: 1px solid #C0C0C0;
+}
+#w3h_content table.compare th {
+	background: #E0E0E0;
+	font-weight: normal;
+	text-align: center;
+}
+#w3h_content li table.compare {
+	margin-bottom: 20px;
+}
+#w3h_content dl {
+	margin: 10px 20px;
+}
+#w3h_content dt {
+	font-weight: bold;
+}
+#w3h_content dd {
+	margin-left: 20px;
+}
+#w3h_content ol,
+#w3h_content ul {
+	margin: 10px 20px;
+	padding: 0 0 0 20px;
+}
+#w3h_content li {
+	list-style: square;
+	margin: 5px 0;
+}
+#w3h_content ol li {
+	list-style: decimal;
+	margin: 5px 0;
+}
+#w3h_content ul.see_also {
+	padding: 0;
+}
+#w3h_content ul.see_also li {
+	list-style: none;
+	margin: 3px 0;
+	background: url(../images/see_also.gif) no-repeat scroll left 3px;
+}
+#w3h_content ul.see_also a {
+	margin-left: 16px;
+}
+#w3h_content div.appendix {
+	margin: 50px 0;
+	border-top: 1px dashed #808080;
+	border-bottom: 1px dashed #808080;
+}
+#w3h_content div.appendix h2 {
+	margin: 20px 20px 10px;
+	font-size: 130%;
+	color: #000;
+}
+.hl_1, .hl_2, .hl_3, .hl_4, .hl_5 {
+	padding: 2px 5px;
+	border-radius: 3px;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	-khtml-border-radius: 3px;
+	white-space: nowrap;
+	-white-space: normal;
+	color: #000;
+}
+.hl_1 {
+	background: #FF6347;
+}
+.hl_2 {
+	background: #9ACD32;
+}
+.hl_3 {
+	background: #1E90FF;
+}
+.hl_4 {
+	background: #FFD700;
+}
+.hl_5 {
+	background: #000;
+	color:#FFF;
+}
+.tHeader{
+	text-align:center;
+	background: #E0E0E0;
+}
+#forumLink {
+	margin:20px 0;
+	padding:10px 20px;
+	height:38px;
+	background:#f5f5f5;
+	font-size:16px;
+}
+#forumLink div {
+	float:left;
+	padding:8px 5px 0 0;
+}
+#forumLink a {
+	display:block;
+	float:left;
+	font-size:20px;
+	text-decoration:none;
+	background:url(../images/discussion.gif) no-repeat;
+	height:36px;
+	padding:5px 0 0 56px;
+	white-space:nowrap;
+}
+#forumLink a:visited, #forumLink a:link {
+	border:0px;
+}

@@ -1,0 +1,10 @@
+.news li {
+	margin-bottom: 50px;
+}
+.news p {
+	margin: 8px 30px 8px 10px;
+}
+.news p.datetime {
+	margin: -15px 30px -8px;
+	text-align: right;
+}
