@@ -158,6 +158,15 @@
 	font-size: 130%;
 	color: #000;
 }
+#w3h_content .author {
+  background-color: #D2FAFA;
+  border-top: 1px solid #CCC;
+  color: #146464;
+  font-size: 14px;
+  font-style: normal;
+  padding: 5px 20px;
+}
+
 .hl_1, .hl_2, .hl_3, .hl_4, .hl_5 {
 	padding: 2px 5px;
 	border-radius: 3px;
