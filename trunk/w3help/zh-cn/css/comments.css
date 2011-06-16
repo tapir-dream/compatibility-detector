@@ -1,0 +1,195 @@
+.commentBox{
+	border-bottom:1px solid #DCE3E7;
+	/*background-color:#DCE3E7;*/
+	margin-bottom:10px;
+}
+.commentArea{
+	padding:10px 10px 20px 10px;
+	background-color:#fff;
+	background-image:url('../images/comment_title_bg.jpg');
+	background-repeat:repeat-x;
+	
+}
+.commentTop{
+	font-size:12px;
+	color:#999;
+	padding-bottom:10px;
+}
+#commentBar{
+	padding-top:2px;
+	height:18px;
+	background:#DCE3E7;
+	border-bottom:1px solid #829CAA;
+}
+#buttonBar{
+	cursor:pointer;
+}
+.loading{
+	width:95px;
+	height:7px;
+	font-size:0;
+	background:url('../images/loading.gif');
+}
+#commentsList{
+	clear:left;
+	padding-top:5px;
+}
+#commentsList .loading{
+	margin:20px;
+}
+#cBIcon, .cFloatLeft{
+	float:left;
+}
+#rightButtons{
+	float:right;
+}
+.cCollapsed{
+	background:url('../images/tree_icon.gif') no-repeat -16px -7px;
+}
+.cExpanded{
+	background:url('../images/tree_icon.gif') no-repeat -16px -38px;
+}
+#rightButtons a{
+	padding-left:8px;
+	background:url('../images/arrow.gif') no-repeat 0 4px;
+}
+#commentContainer a,#commentBar a{
+	color:#315EA2;
+	font-size:12px;
+	text-decoration:none;
+}
+#commentContainer a:hover,#commentBar a:hover{
+	text-decoration:underline;
+}
+#cButton{
+	width:100px;
+}
+#cBtnBox{
+	white-space:nowrap;
+	padding:0 10px 0 18px;
+}
+.reviewerInfo{
+	width:300px;
+	white-space:nowrap;
+}
+.commentArea, .commentArea td, .commentArea input,.reviewerInfo{
+	font-size:12px;
+}
+.commentArea, .commentArea td, .commentArea a{
+	font-family:Arial;
+}
+.blod{
+	font-weight:700;
+}
+/* form start */
+.fForm{
+	padding:15px 0 5px 0;
+}
+.fTitle{
+	font-size:16px;
+	font-weight:700;
+	color:#394847;
+}
+.formInput{
+	font-size:12px;
+	border:1px solid #ccc;
+}
+.fHeader input{
+	line-height:100%;
+	height:12px;
+	width:120px;
+}
+.commentText{
+	width:350px;
+	height:80px;
+}
+.fComment{
+	clear:left;
+	padding-top:5px;
+}
+.fComment textArea{
+	width:500px;
+	height:120px;
+}
+.fButton{
+	padding:5px 0 0 38px;
+}
+/* form end */
+/* list start */
+.cmName, .cmName a{
+	text-decoration:none;
+	font-size:14px;
+	color:#0B2A4C;
+	font-weight:700;
+}
+.cmName a:hover{
+	text-decoration:underline;
+}
+.cmContent{
+	font-size:12px;
+	line-height:150%;
+	color:#2C2C2C;
+	width:600px;
+}
+.cmInfo{
+	font-size:10px;
+	color:#666;
+	padding-bottom:10px;
+}
+.says{
+	font-size:10px;
+}
+#cPagination a{
+	color:#4F7BA4;
+	text-decoration:none;
+}
+#cPagination a:hover{
+	text-decoration:underline;
+}
+/* list end */
+/* add reviewer form start */
+#msgBox{
+	position:absolute;
+	top:10px;
+	left:500px;
+	border:1px solid #316834;
+	background:#fff;
+}
+#msgBox td, #msgBox input{
+	font-size:12px;
+}
+#msgTitle{
+	border-bottom:1px solid #316834;
+	height:25px;
+	padding-left:5px;
+	background:url('../images/msg_box_title_bg.gif') repeat-x;
+}
+#msgBody input{
+	line-height:100%;
+	height:16px;
+	border:1px solid #ccc;
+}
+#msgButton{
+	padding-bottom:10px;
+	text-align:center;
+}
+/* add reviewer form end */
+#leftBox{
+	width:50%;
+}
+#searchBox{
+	background-color:#DCE3E7;
+	border:1px solid #829CAA;
+}
+#searchBox input{
+	font-size:12px;
+}
+#searchResultBox div{
+	padding:5px;
+}
+#searchResultPage{
+	padding:5px;
+}
+.inputTip{
+	color:#999;
+}

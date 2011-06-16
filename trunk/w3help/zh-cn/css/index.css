@@ -1,0 +1,109 @@
+/* 2.2.1.1 新闻列表 */
+.news_list {
+	margin: 0 20px;
+}
+.news_list li {
+	border-bottom:1px solid #DDD;
+}
+.news_list h3 {
+	margin: 20px 0 10px;
+	font-weight: normal;
+	font-size: 120%;
+	color: #036;
+}
+.news_list p {
+	margin: 8px 0;
+}
+/* 2.2.1.2 规范及兼容性 */
+.category_list {
+	margin: 30px 0 10px;
+	background-color: #EEE;
+	overflow: hidden;
+	zoom: 1;
+}
+.unit {
+	background: url(../images/list_bg_left.gif) no-repeat left top;
+}
+.list {
+	background: url(../images/list_bg_right.gif) no-repeat right top;
+}
+.standards {
+	float: left;
+	width: 50%;
+	-margin-right: -3px;
+}
+.compatibility {
+	overflow: hidden;
+	zoom: 1;
+}
+.list h2 {
+	height: 35px;
+	margin: 0 20px 20px;
+	padding: 6px 10px 0;
+	background: #F9F9F9 url(../images/list_bg.gif) repeat-x left bottom;
+	overflow: hidden;
+}
+.list li {
+	margin: 0 20px 30px;
+	padding-left: 55px;
+	zoom: 1;
+}
+.w3c_standards {
+	background: url(../images/icon_standards.gif) no-repeat left top;
+}
+.glossary {
+	background: url(../images/icon_glossary.gif) no-repeat left top;
+}
+.causes {
+	background: url(../images/icon_causes.gif) no-repeat left top;
+}
+.kb {
+	background: url(../images/icon_kb.gif) no-repeat left top;
+}
+.casestudies {
+	background: url(../images/icon_casestudies.gif) no-repeat left top;
+}
+.list h3 {
+	font-size: 100%;
+}
+.list h2 a:hover {
+	border-bottom:0px;
+}
+.list p {
+	margin: 5px 0;
+	font-size: 86%;
+}
+/* 2.2.2.1 活动列表 */
+.events {
+	zoom: 1;
+}
+.events li {
+	padding-bottom: 30px;
+	zoom: 1;
+}
+.date {
+	float: left;
+	width: 42px;
+	height: 45px;
+	margin-left: 5px;
+	background: #AAA url(../images/calendar.gif) no-repeat left top;
+	line-height: 1;
+	text-align: center;
+}
+.date span {
+	font-weight: bold;
+	font-size: 86%;
+}
+.yyyy {
+	color: #FFF;
+}
+.info {
+	margin: 0 5% 0 55px;
+}
+.event_title {
+	font-size: 100%;
+	color: #036;
+}
+.event_time, .event_location, .event_host {
+	font-size: 86%;
+}

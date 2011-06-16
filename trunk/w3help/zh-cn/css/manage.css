@@ -1,0 +1,482 @@
+/* common start */
+body, form{
+	margin:0;
+	padding:0;
+}
+body{
+	font-family:"Microsoft YAHEI";
+}
+td{
+	font-family:Arial, Helvetica, sans-serif;
+}
+*{
+	margin:0px;
+	padding:0px;
+	font-size:12px;
+	color:#1F1F1F;
+}
+a{
+	text-decoration: none;
+	color:#000;
+}
+a:hover{
+	color:#437C3A;
+	text-decoration:underline;
+}
+.field{
+	text-align:right;
+	font-weight:700;
+}
+.fInput{
+	line-height:100%;
+	height:12px;
+	font-size:12px;
+}
+.spaceBox{
+	height:20px;
+}
+.comment{
+	color:#999;
+}
+.nodata{
+	padding:20px;
+}
+.input{
+	padding:2px;
+}
+.input, select{
+	border:1px inset #ccc;
+	background:#eee;
+	font:normal 12px "Microsoft Yahei","Tahoma";
+	FILTER:progid:DXImageTransform.Microsoft.Gradient(gradientType=0,startColorStr=#eeeeee,endColorStr=#ffffff);
+	color:#000;
+}
+.textarea{
+	border:1px inset #ccc;
+	background:#eee;
+	padding:2px;
+	overflow:auto;
+	font:normal 12px "Microsoft Yahei","Tahoma";
+	FILTER:progid:DXImageTransform.Microsoft.Gradient(gradientType=0,startColorStr=#eeeeee,endColorStr=#ffffff);
+	color:#000;
+}
+.button{
+	margin:3px;
+	padding:0px 11px;
+}
+.clear{
+	clear:both;
+}
+/* common end */
+/* table start */
+.tableBox{
+	background-color:#9AB6DA;
+}
+.actionHead, .tHead{
+	text-align:center;
+	font-weight:700;
+}
+.tHead{
+	background:#D0E3F7;
+}
+.actionHead{
+	background-color:#BED8F3;
+}
+.rCheckbox{
+	width:35px;
+}
+.rIndex{
+	width:40px;
+}
+.rActions{
+	width:15%;
+}
+.rCheckbox, .rIndex, .rTitle, .rActions{
+	background:#fff;
+}
+.rCheckbox, .rIndex, .rActions{
+	text-align:center;
+}
+/* table end */
+/* header start */
+#m_header{
+	height:60px;
+	background-color:#049D38;
+	border-bottom:3px solid #333;
+}
+.left_box,.mid_box,.right_box,.m_logo,.m_name,.m_menu,.m_menu,.m_t_left{
+	float:left;
+}
+.m_logo{
+    width:128px;
+	height:42px;
+	background:url('../images/w3h_admin_logo.gif');
+	margin:12px 0 0 20px;
+}
+.m_name{
+	color:#fff;
+	font-size:14px;
+	margin:35px 0 0 15px;
+}
+.m_name span{
+	font-size:7px;
+	vertical-align:super;
+	font-family:Arial;
+}
+#m_header *{
+	color:#F5FCF3;
+	text-decoration:none;
+}
+.m_header a:hover{
+	text-decoration:underline;
+}
+.m_menu,.m_menu a:link, .m_menu a:visited, .m_menu a:active{
+	color:#DCF4CA;/*color:#C6EDA9;*/
+	text-decoration:none;
+}
+.mid_box{
+	padding:10px 0 0 20px;
+}
+.m_menu a:hover{
+	color:#fff;
+}
+.m_menu span{
+	font-size:9px;
+}
+.m_menu{
+	padding-top:13px;
+}
+.right_box{
+	float:right;
+	text-align:right;
+	padding:10px 10px 0 0;
+}
+.search_input{
+	border:0;
+	line-height:100%;
+}
+.m_search{
+	padding-top:10px;
+	float:right;
+	text-align:right;
+}
+.m_search_bar{
+	height:16px;
+	background:#fff;
+	border:1px solid #ccc;
+	overflow:hidden;
+}
+.m_search_bar .img{
+	cursor:pointer;
+}
+.m_search_bar .input{
+	border:0;
+	height:16px;
+	padding-left:2px;
+	line-height:100%;
+}
+.top{
+	height:35px;
+	background:#478228;
+	border-bottom:3px solid #B1C388;
+	text-align:right;
+	color:#fff;
+	font-size:14px;
+	line-height:30px;
+}
+.top b{
+	color:#EDC03C;
+	font-size:14px;
+	cursor:pointer;
+}
+.top a{
+	color:#fff;
+}
+.top a:hover{
+	text-decoration:none;
+	color:#EDC03C;
+}
+/* header end */
+/* left start */
+dl.leftmenu{
+	margin:5px;
+	padding:5px;
+	height:500px;
+	border:1px solid #50803E;
+	background-color:#E3F2E4;
+	text-align:center;
+}
+dl.leftmenu dt{
+	padding:3px;
+	background-color:#50803E;
+	font:bold 14px "Microsoft Yahei","Tahoma";
+	color:#fff;
+}
+dl.leftmenu a{
+	display:block;
+	margin:3px;
+	text-decoration:none;
+	font:normal 12px "Microsoft Yahei","Tahoma";
+	line-height:24px;
+	color:#333;
+}
+dl.leftmenu a:hover{
+	text-decoration:none;
+	background-color:#DCEFD3;
+	color:#000;
+}
+dl.leftmenu .current{
+	background:#DCEFD3;
+	color:#000;
+}
+/* left end */
+/* box start*/
+.title{
+	height:30px;
+	border-bottom:4px solid #478228;
+}
+.title td{
+	font-weight:bold;
+	font-size:14px;
+	color:#478228;
+}
+.title a{
+	display:block;
+	float:right;
+	margin:0 0 2px 5px;
+}
+.title a,.linkButton{
+	font:normal 12px "Microsoft Yahei","Tahoma";
+	text-decoration:none;
+	padding:4px 10px;
+	background:#478228;
+	color:#fff;
+}
+.title a:hover,.linkButton:hover{
+	text-decoration:none;
+	color:#fff;
+}
+.item{
+	clear:both;
+	margin:2px 4px;
+	background:#fff;
+	line-height:150%;
+}
+.rightActions{
+	text-align:right;
+	padding-right:20px;
+}
+/* box end*/
+/* list start */
+ul.list{
+	padding:0px;
+	list-style: none none outside;
+	margin:0px;
+}
+ul.list li {
+	padding-left:10px;
+	height:25px;
+	line-height:25px;
+}
+.table_list{
+	font-size:14px;
+	background:#ccc;
+	width:100%;
+	table-layout:fixed;
+}
+.table_list tr{
+	height:25px;
+}
+.table_list td{
+	background:#fff;
+}
+.table_list td.caption{
+	font:bold 12px Tahoma;
+	background:#eee;
+	color:#666;
+}
+.table_list td.datetime{
+	font:normal 10px Arial;
+	color:#999;
+}
+.table_list a{
+	font-size:12px;
+	text-decoration:none;
+	color:#333;
+}
+.table_list a:hover{
+	color:#00497E;
+}
+/* list end */
+/* pagination start */
+.pagebar{
+	font:normal 12px "Tahoma";
+	hieght:22px;
+	line-height:22px;
+}
+.pagebar a{
+	background:#fff;
+	padding:5px 8px;
+	margin-right:2px;
+	text-decoration:none;
+	color:#555;
+}
+.pagebar a:hover{
+	background:#829852;
+	color:#fff;
+}
+.pagebar span.current{
+	background:#829852;
+	padding:5px 8px;
+	margin-right:3px;
+	color:#fff;
+}
+.pagebar span.info{
+	padding:5px 8px;
+	margin-right:2px;
+	color:#555;
+}
+/* pagination end */
+/* menu start */
+.list{
+	position:relative;
+	margin:10px;
+	padding:10px;
+	padding-left:50px;
+	border:1px solid #eee;
+}
+.list .no{
+	position:absolute;
+	left:10px;
+	top:8px;
+	padding:3px 8px;
+	background:#478228;
+	color:#fff;
+}
+.list .name{
+	font:bold 14px "Microsoft Yahei","Tahoma";
+	color:#444;
+}
+.list .description{
+	font:normal 12px "Microsoft Yahei","Tahoma";
+	color:#ccc;
+}
+.list .button{
+	margin-right:5px;
+	float:right;
+	padding:3px 8px;
+	background:#478228;
+	color:#fff;
+}
+/* menu end */
+/* content start */
+.content_list{
+	position:relative;
+	padding:5px;
+	padding-left:50px;
+	border-bottom:1px solid #eee;
+}
+.content_no{
+	margin:2px 5px;
+	display:block;
+	text-align:center;
+	padding:3px 8px;
+	background:#478228;
+	color:#fff;
+}
+.content_name{
+	font:bold 14px "Microsoft Yahei","Tahoma";
+	line-height:40px;
+	color:#444;
+}
+.items{
+	margin-right:5px;
+	float:right;
+	padding:3px 8px;
+	background:#478228;
+	color:#fff;
+}
+/* content end */
+.clearfix:after{
+	content:".";
+	display:block;
+	height:0;
+	clear:both;
+	visibility:hidden;
+}
+.clearfix{
+	display:inline-block;
+}
+* html .clearfix{
+	height:1%;
+}
+.clearfix{
+	display:block;
+}
+.ui-tab-container{
+	width:90%;
+}
+.ui-tab-container ul{
+	border-bottom:1px solid #ccc;
+}
+.ui-tab-container ul li{
+	float:left;
+	border-style:solid;
+	border-width:1px;
+	border-color:#ccc;
+	padding:3px 10px;
+	margin:5px;
+	background:#f4f4f4;
+	cursor:pointer;
+	border-bottom:none;
+}
+.ui-tab-container ul li.ui-tab-active{
+	background:#fff;
+	margin-bottom:-1px;
+	border-bottom:1px solid #fff;
+	color:#444;
+}
+.ui-tab-container .ui-tab-content{
+	padding:10px;
+	border-top:none;
+}
+.rowLine{
+	height:1px;
+	font-size:0;
+	overflow:hidden;
+	background:#eeeeee;
+}
+.tableHeader td{
+	background:#DEEDDC;
+	font-weight:700;
+	height:30px;
+}
+.subInfo{
+	font-size:10px;
+	color:#ccc;
+}
+.rowItem{
+	border-bottom:1px solid #eee;
+}
+#pagination a{
+	color:#3F7335;
+	text-decoration:none;
+}
+#pagination a:hover{
+	text-decoration:underline;
+}
+.tdField{
+	height:30;
+}
+.infoSpace{
+	padding-right:20px;
+}
+.rightMainBox{
+	padding:5px;
+}
+#m_body{
+	background:url('../images/admin_body_bg.gif') repeat-x;
+}
+#pagination{
+	padding-left:10px;
+}

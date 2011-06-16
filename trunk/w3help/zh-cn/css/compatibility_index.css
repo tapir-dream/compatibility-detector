@@ -1,0 +1,72 @@
+.readme {
+	float: left;
+	padding: 20px;
+}
+.readme a {
+	margin-right: 20px;
+	padding-left: 20px;
+	background: url(../images/file_icon.gif) no-repeat left top;
+}
+.readme a:hover {
+	border: none;
+	text-decoration: underline;
+}
+.view_control {
+	float: right;
+	padding: 20px;
+}
+.view_control a {
+	margin-left: 10px;
+}
+#root {
+	clear: both;
+	min-height: 300px;
+}
+#root li {
+	list-style: none;
+	margin: 5px 0;
+}
+#root ul {
+	margin-left: 38px;
+}
+.expand {
+	margin: 20px;
+}
+.folder h2 {
+	margin: 5px 0;
+	padding: 5px 0 5px 25px;
+	background: #D4EDC9 url(../images/tree_icon.gif) no-repeat -10px 3px;
+	font-weight: normal;
+	font-size: 150%;
+	cursor: pointer;
+	zoom: 1;
+}
+.folder h2:hover {
+	text-decoration: underline;
+}
+.folder ul {
+	display: none;
+	margin: 15px 0 15px 30px;
+}
+.open h2 {
+	background: #D4EDC9 url(../images/tree_icon.gif) no-repeat -10px -27px;
+}
+.open ul {
+	display: block;
+}
+.section {
+	font-size: 120%;
+	background: #EEE;
+}
+.item a {
+	padding-left: 20px;
+	background: url(../images/file_icon.gif) no-repeat left top;
+	zoom: 1;
+}
+.item a:visited {
+	color: #102197;
+}
+.item a:hover {
+	border: none;
+	text-decoration: underline;
+}

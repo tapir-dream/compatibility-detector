@@ -1,0 +1,86 @@
+.readme {
+	padding: 20px 0 5px 20px;
+	line-height:160%;
+}
+.view_control {
+	text-align:right;
+	padding: 10px;
+}
+.view_control a {
+	margin-left: 10px;
+}
+#root {
+	clear: both;
+	min-height: 300px;
+}
+#root li {
+	list-style: none;
+	margin: 5px 0;
+}
+#root ul {
+	margin-left: 38px;
+}
+.expand {
+	margin: 20px;
+}
+.folder h2 {
+	margin: 5px 0;
+	padding: 5px 0 5px 25px;
+	background: #D4EDC9 url(../images/tree_icon.gif) no-repeat -10px 3px;
+	font-weight: normal;
+	font-size: 150%;
+	cursor: pointer;
+	zoom: 1;
+}
+.folder h2:hover {
+	text-decoration: underline;
+}
+.folder .table {
+	display: none;
+	margin: 15px 20px;
+}
+.open h2 {
+	background: #D4EDC9 url(../images/tree_icon.gif) no-repeat -10px -27px;
+}
+.open .table {
+	display: block;
+}
+.section {
+	font-size: 120%;
+}
+.table a {
+}
+.table a:visited {
+	color: #102197;
+}
+.table a:hover {
+	border: none;
+	text-decoration: underline;
+}
+.table h3 {
+	margin: 0 0 0 5px;
+	padding: 0;
+	font-weight: normal;
+	font-size: 120%;
+}
+.table .more {
+	margin: 5px 5px 15px;
+	text-align: left;
+}
+.table table {
+	table-layout: fixed;
+	border-spacing: 0;
+	width: 100%;
+	margin-bottom: 20px;
+	border-top: 2px solid #DADABB;
+}
+.table td{
+	padding: 5px;
+	border-bottom: 1px solid #DADABB;
+}
+.table .date_col {
+	width: 100px;
+}
+.table .state_col {
+	width: 200px;
+}

@@ -1,0 +1,19 @@
+.g_header {
+	padding: 10px 0;
+}
+.glossary {
+	width: 98%;
+	border-collapse: collapse;
+	border: 1px solid #DADABB;
+}
+.glossary td {
+	padding: 3px 3px 3px 5px;
+	border: 1px solid #DADABB;
+}
+.glossary th {
+	width: 50%;
+	padding: 2px 2px 2px 5px;
+	background-color: #D4EDC9;
+	font-weight: 700;
+	text-align: left;
+}
