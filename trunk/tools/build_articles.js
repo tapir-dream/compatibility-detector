@@ -123,10 +123,11 @@ function processFile(id, sourceDir, destDir) {
   log('The file process finished. ' );
 }
 
-function getTemplateData(text) {
+function getTemplateData(text, type) {
   var keywordsRegExp = '<!--\\s*keywords\\s*begin\\s*-->\\s*<p>' +
-    '([\\w\\W]+?)<\\/p>\\s*<!--\\s*keywords\\s*end\\s*-->';
+      '([\\w\\W]+?)<\\/p>\\s*<!--\\s*keywords\\s*end\\s*-->';
   keywordsRegExp = new RegExp(keywordsRegExp,'i');
+
   var titleRegExp =
       /<h1\s+class\=\"title\">([\w\W]*?)<\/h1>/i;
   var tocRegExp =
@@ -134,19 +135,25 @@ function getTemplateData(text) {
   var w3hcontentRegExp =
       /<!--\s*content\s*begin\s*-->([\w\W]*?)<!--\s*content\s*end\s*-->/i;
 
-  var keywords = getStandardKeyWords(text.match(keywordsRegExp)[1]);
   var title = text.match(titleRegExp)[1];
   var toc = text.match(tocRegExp)[1];
   var w3hContent = text.match(w3hcontentRegExp)[1];
-  var csdnForum = getCSDNForumUrl(getRCAId(title));
+  var keywords = getStandardKeyWords(text.match(keywordsRegExp)[1]);
 
   var data = {
-    csdnForum: csdnForum,
     keywords: keywords,
     title: title,
     toc: toc,
     w3hContent: w3hContent
   };
+
+  // RCA template page need csdnFrum data data.
+  if ('RCA' == buildType)  {
+    data.csdnForum = getCSDNForumUrl(getRCAId(title));
+  }
+  // TODO: other template page Special treatment.
+  // ...
+
   return data;
 }
 
@@ -188,20 +195,57 @@ function loadTemplate(templateFile) {
   template = loadFromFile(templateFile);
 }
 
-function main(sourceDir, destDir, templateFile, idListFile, csdnListFile) {
+// RCA is Root Causes page.
+// KB is Knowledge Base page.
+// CS is Case Studies page.
+var BUILD_DEFAULT_CONF = {
+  RCA: {
+    sourceDir: '..\\w3help\\zh-cn\\causes\\',
+    desDir: 'w3help\\zh-cn\\output\\causes\\',
+    templateFile: '..\\w3help\\zh-cn\\causes\\template_cause.html',
+    idListFile: 'RCA_id_list.txt',
+    csdnListFile: 'csdn_list.txt'
+  },
+  KB: {
+    sourceDir: '..\\w3help\\zh-cn\\KB\\',
+    desDir: 'w3help\\zh-cn\\output\\KB\\',
+    templateFile: '..\\w3help\\zh-cn\\KB\\template_cause.html',
+    idListFile: 'KB_id_list.txt'
+  },
+  CS: {
+    sourceDir: '..\\w3help\\zh-cn\\causes\\',
+    desDir: 'w3help\\zh-cn\\output\\causes\\',
+    templateFile: '..\\w3help\\zh-cn\\causes\\casestudies.html',
+    idListFile: 'CS_id_list.txt'
+  }
+};
+
+var buildType = 'RCA';
+
+function main(type, sourceDir, destDir, templateFile, idListFile, csdnListFile) {
+  if (!BUILD_DEFAULT_CONF[type]) {
+    log('Error!! Need build param in RCA or KB or CS.');
+    return;
+  }
+  buildType = type;
   if (!sourceDir)
-    sourceDir = '..\\w3help\\zh-cn\\causes\\';
+    sourceDir = BUILD_DEFAULT_CONF[type][sourceDir];
   if (!destDir)
-    destDir = 'w3help\\zh-cn\\output\\';
+    destDir = BUILD_DEFAULT_CONF[type][destDir];
   if (!templateFile)
-    templateFile = '..\\w3help\\zh-cn\\causes\\template_cause.html';
+    templateFile = BUILD_DEFAULT_CONF[type][templateFile];
   if (!idListFile)
-    idListFile = 'id_list.txt';
-  if (!csdnListFile)
-    csdnListFile = 'csdn_list.txt';
+    idListFile = BUILD_DEFAULT_CONF[type][idListFile];
+
+  // RCA template page need CSDN froum links.
+  if ('RCA' == type && !csdnListFile) {
+    csdnListFile = BUILD_DEFAULT_CONF[type][csdnListFile];
+    createCSDNForumUrlMap(trim(loadFromFile(csdnListFile)));
+  }
+  // TODO: other template page Special treatment.
+  // ...
 
   loadTemplate(templateFile);
-  createCSDNForumUrlMap(trim(loadFromFile(csdnListFile)));
   var ids = trim(loadFromFile(idListFile)).split(NEW_LINE_CHAR);
 
   for (var i = 0; i < ids.length; ++i) {
@@ -211,10 +255,11 @@ function main(sourceDir, destDir, templateFile, idListFile, csdnListFile) {
 }
 
 // Arguments list:
-// 1. content page directory
-// 2. the build directory
-// 3. template files path
-// 4. id list file path
-// 5. csdn forum list file path
+// 1. build type
+// 2. content page directory
+// 3. the build directory
+// 4. template files path
+// 5. id list file path
+// 6. csdn forum list file path (RCA page bulid)
 main(WScript.Arguments(0), WScript.Arguments(1), WScript.Arguments(2),
-    WScript.Arguments(3), WScript.Arguments(4));
+    WScript.Arguments(3), WScript.Arguments(4), WScript.Arguments(5));

@@ -2,9 +2,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="keywords" content="web标准,W3C标准,兼容性" />
-<meta name="description" content="系统的介绍某些知识点，帮助开发者正确理解该知识点的概念及与其他知识点的关联性，梳理知识体系。在这些知识点中，有些是经常被错误理解的，有些是经常被人忽视但很重要的，还有些虽然目前尚未形成'W3C 标准'，但已被广泛应用的技术。" />
-<title>W3Help - 兼容性 - 知识库</title>
+<meta name="keywords" content="兼容性案例,W3C标准案例分析,兼容性,CSS兼容性,HTML标准,Javascript兼容性" />
+<meta name="description" content="针对具体案例的详细分析，是兼容性问题的一个或多个'根本原因'的具体表现。" />
+<title>W3Help - 兼容性 - 案例分析</title>
 <link rel="stylesheet" type="text/css" href="/zh-cn/css/common.css" media="all" />
 <link rel="stylesheet" type="text/css" href="/zh-cn/css/compatibility_index.css" media="all" />
 <script type="text/javascript" src="/zh-cn/js/global.js"></script>
@@ -24,7 +24,7 @@
 				<li class="last_item"><a href="/zh-cn/home/about.html">关于我们</a></li>
 				<li class="search_item">
 					<form action="/zh-cn/home/search.html" method="get">
-						<p><input name="key" id="keyInput" value="" onfocus="focusKey(this)" onblur="blurKey(this)" title="搜索" class="text" /></p>
+						<p><input name="key" value="" onfocus="focusKey(this)" onblur="blurKey(this)" title="搜索" class="text" /></p>
 						<p><input id="search_submit" type="image" src="/zh-cn/images/search_button.gif" alt="搜索" /></p>
 					</form>
 				</li>
@@ -34,43 +34,32 @@
 	<div id="w3h_body">
 		<div class="body_sidebar">
 			<div class="logo_shadow"></div>
-				<h2 class="category"><span><a href="/zh-cn/home/standards.html">标准</a></span></h2>
-				<ul class="theme">
-					<li><a href="/zh-cn/standards" >W3C 标准</a></li>
-					<li><a href="/zh-cn/home/glossary.html" >词汇表</a></li>
-				</ul>
-				<h2 class="category"><span><a href="/zh-cn/home/compatibility.html">兼容性</a></span></h2>
-				<ul class="theme">
-					<li><a href="/zh-cn/causes/index.html" >根本原因</a></li>
-					<li><a href="/zh-cn/kb"  class="current">知识库</a></li>
-					<li><a href="/zh-cn/casestudies" >案例分析</a></li>
-				</ul>
+			<h2 class="category"><span><a href="/zh-cn/home/standards.html">标准</a></span></h2>
+			<ul class="theme">
+				<li><a href="/zh-cn/standards/">W3C 标准</a></li>
+				<li><a href="/zh-cn/home/glossary.html">词汇表</a></li>
+			</ul>
+			<h2 class="category"><span><a href="/zh-cn/home/compatibility.html">兼容性</a></span></h2>
+			<ul class="theme">
+				<li><a href="/zh-cn/causes/">根本原因</a></li>
+				<li><a href="/zh-cn/kb/">知识库</a></li>
+				<li><a href="/zh-cn/casestudies/" class="current">案例分析</a></li>
+			</ul>
 		</div>
 		<!-- body_content { -->
-		<div class="body_content"> 			<ul class="breadcrumbs">
-			<li><a href="/zh-cn/" name="top">首页</a> <span>»</span></li>
-			<li><a href="/zh-cn/home/compatibility.html">兼容性</a> <span>»</span></li>
-<li class="current">知识库</li>
-		</ul>
-		<h1 class="title">知识库内容列表</h1>
-			<ul id="root" class="folder open expand">
-				<li class="item"><a href="/zh-cn/kb/001">KB001: 兼容性问题与浏览器的内核及渲染模式</a></li>
-				<li class="item"><a href="/zh-cn/kb/002">KB002: CSS 特性和值</a></li>
-				<li class="item"><a href="/zh-cn/kb/003">KB003: CSS 解析错误的处理规则</a></li>
-				<li class="item"><a href="/zh-cn/kb/004">KB004: 设置 CSS 的特性值 </a></li>
-				<li class="item"><a href="/zh-cn/kb/005">KB005: CSS 层叠 </a></li>
-				<li class="item"><a href="/zh-cn/kb/006">KB006: CSS 框模型( Box module ) </a></li>
-				<li class="item"><a href="/zh-cn/kb/007">KB007: 可视化格式模型( visual formatting model )简介 </a></li>
-				<li class="item"><a href="/zh-cn/kb/008">KB008: 包含块( Containing block ) </a></li>
-                <li class="item"><a href="/zh-cn/kb/009">KB009: CSS 定位体系概述 </a></li>
-                <li class="item"><a href="/zh-cn/kb/010">KB010: 常规流( Normal flow ) </a></li>
-			    <li class="item"><a href="/zh-cn/kb/011">KB011: 浮动( Floats ) </a></li>
-			    <li class="item"><a href="/zh-cn/kb/012">KB012: 绝对定位( Absolute positioning )</a></li>
-			    <li class="item"><a href="/zh-cn/kb/013">KB013: 分层的显示( Layered presentation )</a></li>
+		<div class="body_content">
+			<ul class="breadcrumbs">
+				<li><a href="/zh-cn/" name="top">首页</a> <span>»</span></li>
+				<li><a href="/zh-cn/home/compatibility.html">兼容性</a> <span>»</span></li>
+				<li class="current">案例分析</li>
 			</ul>
-
-	  </div>
-
+			<h1 class="title">案例分析内容列表</h1>
+			<ul id="root" class="folder open expand">
+				<li class="item"><a href="/zh-cn/casestudies/001">CS001: 常见清理浮动方式与对应规范分析</a></li>
+				<li class="item"><a href="/zh-cn/casestudies/002">CS002: DOCTYPE 与浏览器模式分析</a></li>
+			</ul>
+		</div>
+		<!-- } body_content -->
 	</div>
 </div>
 <div id="w3h_footer">
@@ -92,7 +81,7 @@
     </p>
 	</div>
 </div>
-
+<!-- Google Analytics start -->
 <script type="text/javascript">
   var _gaq = _gaq || [];
   _gaq.push(['_setAccount', 'UA-18304141-1']);
@@ -103,6 +92,6 @@
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
   })();
 </script>
-
+<!-- Google Analytics end -->
 </body>
 </html>
