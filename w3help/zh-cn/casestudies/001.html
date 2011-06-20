@@ -1,0 +1,213 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="../../zh-cn/css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../../zh-cn/css/article.css" media="all" />
+</head>
+<body>
+<div class="body_content">
+    <!-- toc begin -->
+			<h1 class="title">CS001: 清理浮动的几种方法以及对应规范说明</h1>
+			<ul class="toc">
+				<li><a href="#header_1">前言</a> <span>•</span></li>
+				<li><a href="#header_2">使用 clear 样式清除</a> <span>•</span></li>
+				<li><a href="#header_3">使用伪元素 :after 清除</a> <span>•</span></li>
+				<li><a href="#header_4">使用 overflow 清除</a> <span>•</span></li>
+				<li><a href="#header_5">使用 display:table 清除</a> <span>•</span></li>
+				<li><a href="#header_6">使用表格类元素作为浮动元素容器</a> <span>•</span></li>
+				<li><a href="#header_7">使用浮动父元素清除</a> <span>•</span></li>
+				<li><a href="#header_8">触发 hasLayout 清除</a> <span>•</span></li>
+				<li><a href="#header_9">建议</a></li>
+			</ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+        <!-- content begin -->
+        <address class="author">作者：钱宝坤</address>
+				<h2 id="header_1">前言</h2>
+				<p>浮动 Floats 是 CSS  中的一种布局方式。它的渲染位置在行框与包含块之间，这样就可以使行框内文字与浮动元素不重叠并且环绕它显示。在布局过程中也经常会使用它来达到左右并排布局的效果。但是，由于浮动特性，容器如果没有明确设定高度，会依照普通流内元素高度设置，这样就会导致脱离普通流的浮动元素溢出容器，影响其后元素布局。</p>
+				<p>我们将现有已知的清楚浮动元素方法罗列下：</p>
+				<ol>
+					<li>采用一个HTML标签，以及css的clear属性，来手工清理浮动；</li>
+					<li>采用伪类:after，动态建立一个块元素，设定 clear 属性，清理之前的浮动元素；</li>
+					<li>采用CSS overflow 非 visible 值(overflow:auto/overflow:hidden)设定使父容器包含浮动元素；</li>
+					<li>采用display:table/display:table-cell 等table系列属性将父元素变成 table 形式自动包含浮动元素；</li>
+					<li>使用 TABLE 以及 TD 标签作为浮动元素容器；</li>
+					<li>采用 float:left/float:right 方式将父元素同样浮动，就可以包含浮动内容；</li>
+					<li>在 IE 6/7 的标准文档模式中设置 “width/height/zoom” 等样式来自动清理浮动。</li>
+				</ol>
+				<p>对这些方式我们一一来对照 CSS 标准（或者浏览器特性）来解释下。</p>
+
+				<h2 id="header_2">使用 clear 样式清除</h2>
+				<p>样例：</p>
+				<pre>.clear-float {clear:both;} </pre>
+
+				<p>clear 属性是 CSS 1 就提供的用来清除浮动的样式，设置了 clear 属性的元素，其上边框位置会紧贴浮动元素的 margin-bottom 边界位置渲染，忽略其 margin-top 设置。这样，父容器高度未设定(值是 auto)时，由于定义的清理浮动样式元素所在位置处于浮动元素之下，容器计算后的实际高度就包含了浮动元素。</p>
+				<p class="comment">注：规范原文链接：<a href="http://www.w3.org/TR/CSS21/visuren.html#propdef-clear">9.5.2 Controlling flow next to floats: the 'clear' property</a></p>
+
+				<h2 id="header_3">使用伪元素 :after 清除</h2>
+				<p>样例：</p>
+				<pre>.after-clear-float :after{content:””; display:block; clear:both;}</pre>
+				<p>:after 伪元素是在 CSS 2 规范内提出的，IE 6/7 并不支持。它的作用是在指定该伪元素元素内，所有子元素最后自动生成一个伪元素，并可以为这个伪元素设定样式。在设定样式中，使用 clear 属性即可达到与手工添加元素指定清理的效果。</p>
+				<p>注意兼容问题：<br />
+				:after 伪元素在 IE6/7 中并不被支持，这是由于之前的 IE 版本仅完全实现了 CSS 1 规范标准，以及一部分 CSS 2 规范，恰巧 :after 伪元素不在实现之例。<br />
+				此部分详细内容可参考：<a href="http://www.w3help.org/zh-cn/causes/RS8010">RS8010: IE6 IE7 IE8(Q) 不支持 ':before' 和 ':after' 伪元素</a></p>
+				<p class="comment">注：规范原文链接：<a href="http://www.w3.org/TR/CSS21/selector.html#x59">5.12.3 The :before and :after pseudo-elements</a></p>
+
+				<h2 id="header_4">使用 overflow 清除</h2>
+				<p>样例：</p>
+				<pre>.overflow-clear-float {overflow:hidden;}
+或者
+.overflow-clear-float {overflow:auto;}</pre>
+				<p>overflow 样式值为 非 visilbe 时，实际上是创建了 CSS 2.1 规范定义的 Block Formatting Contexts。创建了它的元素，会重新计算其内部元素位置，从而获得确切高度。这样父容器也就包含了浮动元素高度。这个名词过于晦涩，在 CSS 3 草案中被变更为名词 Root Flow，顾名思义，是创建了一个新的根布局流，这个布局流是独立的，不影响其外部元素的。实际上，这个特性与 早期 IE 的 hasLayout 特性十分相似。</p>
+				<p>注意兼容问题：<br />
+				Block Formatting Contexts 概念是在 CSS 2.1 规范内被提出。因此 IE6/7 中并不被支持，这是由于之前的 IE 版本仅完全实现了 CSS 1 规范标准，以及一部分 CSS 2.0 规范。在 IE 7 中，overflow 值为非 visible 时，可以触发 hasLayout 特性。这同样使得 IE 7 同样可以使容器包含浮动元素。<br />
+				此部分详细内容可参考：<a href="http://www.w3help.org/zh-cn/causes/RM8002">RM8002: 不能同时在 IE6 IE7 IE8(Q) 中触发 hasLayout 并在其他浏览器中创建 Block Formatting Context 的元素在各浏览器中的表现会有差异</a></p>
+				<p class="comment">注：规范原文链接：<a href="http://www.w3.org/TR/CSS21/visuren.html#block-formatting">9.4.1 Block formatting contexts</a></p>
+				<p class="comment">注：IE hasLayout 特性厂商说明链接：<a href="http://msdn.microsoft.com/en-us/library/ms533776%28VS.85%29.aspx">hasLayout Property</a></p>
+
+				<h2 id="header_5">使用 display:table 清除</h2>
+				<p>样例：</p>
+				<pre>.table-clear-float {display:table}
+或者
+.table-clear-float {display:table-cell}</pre>
+				<p>当元素 display 值被设定为 table 或 table-cell 时，同样也创建了  CSS 2.1 规范定义的 Block Formatting Contexts。这样父容器也就包含了浮动元素高度。</p>
+				<p>注意兼容问题：<br />
+				除去 Block Formatting Contexts 在 IE 6/7  中的兼容性外，display:talbe 系列样式设定也不在 IE6/7 的支持范围之内。<br />
+				此部分详细内容可参考：<a href="http://www.w3help.org/zh-cn/causes/RM8001">RM8001: 各浏览器对 'display' 特性值的支持程度不同</a></p>
+				<p class="comment">注：规范原文链接：<a href="http://www.w3.org/TR/CSS21/visuren.html#block-formatting">9.4.1 Block formatting contexts</a></p>
+
+				<h2 id="header_6">使用表格类元素作为浮动元素容器</h2>
+				<p>样例：</p>
+				<pre>&lt;table&gt;
+  &lt;tr&gt;
+     &lt;td&gt;
+       &lt;div style=”float:left”&gt;&lt;/div&gt;
+    &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;</pre>
+				<p>当使用 TABLE TD TH 等 TABLE 系列标签时， 元素的 display 值实际上说是 display: table 系列，这同样也创建了  CSS 2.1 规范定义的 Block Formatting Contexts。这样父容器也就包含了浮动元素高度。同时在 IE 6/7 中，TABLE TD TH 等 TABLE 系列标签天然拥有 haslayout 特性，这也可以使容器自动包含浮动元素高度。</p>
+				<p class="comment">注：规范原文链接：<a href="http://www.w3.org/TR/CSS21/visuren.html#block-formatting">9.4.1 Block formatting contexts</a></p>
+				<p class="comment">注：IE hasLayout 特性厂商说明链接：<a href="http://msdn.microsoft.com/en-us/library/ms533776%28VS.85%29.aspx">hasLayout Property</a></p>
+
+
+				<h2 id="header_7">使用浮动父元素清除</h2>
+				<p>当元素设置  float:left/float:right 时 ，同样也创建了  CSS 2.1 规范定义的 Block Formatting Contexts。这样父容器也就包含了浮动元素高度。同时，这个样式也会在 IE 6/7 内触发 hasLayout 特性，拥有这个特性的元素也可以计算出浮动元素的高度，使父元素包含他们。</p>
+				<p>实际问题：<br />
+				虽然这种方式并没有兼容问题，但实际使用中并不推荐。因为很容易推断出，页面中只要有一个浮动元素，使用该方法清理浮动将不可避免的使页面所有元素都浮动才可以达到预期效果。</p>
+				<p class="comment">注：规范原文链接：<a href="http://www.w3.org/TR/CSS21/visuren.html#block-formatting">9.4.1 Block formatting contexts</a></p>
+
+				<h2 id="header_8">触发 hasLayout 清除</h2>
+				<p>样例：</p>
+				<pre>haslayout-clear-float:{width:1px}
+或
+.haslayout-clear-float:{height:1px}
+或
+.haslayout-clear-float:{zoom:1}</pre>
+				<p>'Layout' 是 IE 的专有概念，它决定了元素如何对其内容进行定位和尺寸计算，与其他元素的关系和相互作用，以及对应用还有使用者的影响。</p>
+				<p>'Layout' 可以被某些 CSS property（特性）不可逆的触发，而某些 HTML 元素本身就具有 layout 。</p>
+				<p>'Layout' 在 IE 中可以通过 hasLayout 属性来判断一个元素是否拥有 layout ，如 object.currentStyle.hasLayout 。</p>
+				<p>'Layout' 是 IE 浏览器渲染引擎的一个内部组成部分。在 IE 浏览器中，一个元素要么自己对自身的内容进行组织和计算大小， 要么依赖于包含块来计算尺寸和组织内容。为了协调这两种方式的矛盾，渲染引擎采用了 'hasLayout' 属性，属性值可以为 true 或 false。 当一个元素的 'hasLayout' 属性值为 true 时，我们说这个元素有一个布局（layout），或拥有布局。</p>
+				<ul>
+            <li>
+              <span>默认拥有布局的元素：</span>
+<pre>
+&lt;html&gt;, &lt;body&gt;
+&lt;table&gt;, &lt;tr&gt;, &lt;th&gt;, &lt;td&gt;
+&lt;img&gt;
+&lt;hr&gt;
+&lt;input&gt;, &lt;button&gt;, &lt;select&gt;, &lt;textarea&gt;, &lt;fieldset&gt;, &lt;legend&gt;
+&lt;iframe&gt;, &lt;embed&gt;, &lt;object&gt;, &lt;applet&gt;
+&lt;marquee&gt;
+</pre>
+            </li>
+            <li>
+              <span>可触发 hasLayout 的 CSS 特性：</span>
+<pre>
+display: inline-block
+height: (除 auto 外任何值)
+width: (除 auto 外任何值)
+float: (left 或 right)
+position: absolute
+writing-mode: tb-rl
+zoom: (除 normal 外任意值)
+</pre>
+            </li>
+            <li>
+              <span>IE7 还有一些额外的属性(不完全列表)可以触发 hasLayout ：</span>
+<pre>
+min-height: (任意值)
+min-width: (任意值)
+max-height: (除 none 外任意值)
+max-width: (除 none 外任意值)
+overflow: (除 visible 外任意值，仅用于块级元素)
+overflow-x: (除 visible 外任意值，仅用于块级元素)
+overflow-y: (除 visible 外任意值，仅用于块级元素)
+position: fixed
+</pre>
+            </li>
+            <li>
+              IE6 以前的版本（也包括 IE6 及以后所有版本的混杂模式，其实这种混杂模式在渲染方面就相当于 IE 5.5），
+              通过设置任何元素的 'width' 或 'height'（非auto）都可以触发 hasLayout ；
+              但在 IE6 和 IE7 的标准模式中的行内元素上却不行，设置 'display:inline-block' 才可以。
+            </li>
+          </ul>
+        </li>
+      </ul>
+				<p>注意兼容问题：<br />
+				haslayout 特性仅 IE 支持，其他浏览器并无此特性。可以依靠计算布局清理浮动的 haslayout 特性仅在 IE 6/7 中存在，IE8 之后将使用 CSS 2.1 的 Block Formatting Contexts 定义来达到同样效果。</p>
+				<p class="comment">注：IE hasLayout 特性厂商说明链接：<a href="http://msdn.microsoft.com/en-us/library/ms533776%28VS.85%29.aspx">hasLayout Property</a></p>
+
+
+				<p>以上内容是常见清理浮动手段生效的规范（和浏览器厂商特性）原理。我们希望页面开发者们，根据他们的兼容性特征以及实际情况来组合使用，以便达到实际项目目标。</p>
+
+
+				<h2 id="header_9">建议</h2>
+				<p>对于初学者我们推荐如下方式之一来清理浮动元素，它们均相对简单可靠：</p>
+				<ul>
+					<li>采用一个HTML标签，以及css的clear属性，来手工清理浮动；</li>
+					<li>为元素设置 overflow:hidden 或 overflow:auto 值，配合可以设置 zoom:1 样式触发  IE6 haslayout 特性，来达到兼容所有浏览器清理浮动的目的。</li>
+					<li>采用伪元素:after，配合可以设置 zoom:1 样式触发  IE6/7 haslayout 特性，来达到兼容所有浏览器清理浮动的目的。</li>
+				</ul>
+
+
+
+				<div class="appendix">
+					<h2>测试环境</h2>
+					<table class="list">
+						<tr>
+							<th>操作系统版本:</th>
+							<td>Windows 7 Ultimate build 7600</td>
+						</tr>
+						<tr>
+							<th>浏览器版本:</th>
+							<td>
+								IE6<br />
+								IE7<br />
+								IE8<br />
+								IE9<br />
+								Firefox 4.0.1<br />
+								Chrome 12.0.742.100<br />
+								Safari 5.0.5<br />
+					       		Opera 11.11</td>
+						</tr>
+						<tr>
+							<th>测试页面:</th>
+							<td>&nbsp;</td>
+						</tr>
+						<tr>
+							<th>本文更新时间:</th>
+							<td>2011-06-17</td>
+						</tr>
+					</table>
+
+					<h2>关键字</h2>
+					<!-- keywords begin -->
+					<p>clear table td overflow table-cell hasLayout float 浮动 block formatting context 清理 清理浮动 清除浮动</p>
+            <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+</div>
+</body>
+</html>
