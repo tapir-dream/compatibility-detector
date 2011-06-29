@@ -158,7 +158,6 @@
   "RD1002_suggestion": { "message": "Use a DTD that makes the page rendered in Standards Mode, so that only IE6(S) will be affected." },
   "RD1014": { "message": "The width and height style for inline non-replaced elements are only valid in IE quirks mode" },
   "RD1014_suggestion": { "message": "Put <!DOCTYPE html> in the beginning of the document to make it rendered in Stardards Mode." },
-
   "BX8037": { "message": "For invisible elements that run out of the normal flow, their containing block's scroll bar is not the same" },
   "BX8037_suggestion": { "message": "Avoid using invisible elements that run out of the normal flow and out of the containing block." },
   "HE1003": { "message": "IE supports noWrap attribute for some elements other than TD and TH" },
@@ -169,10 +168,13 @@
   "HG8001_suggestion": { "message": "Make sure that there is no non blank characters before the DTD declaration." },
   "RD8001": { "message": "The width / height style has different effect in IE quicks mode" },
   "RD8001_suggestion": { "message": "Use a DTD that makes the page rendered in Standards Mode." },
+  "RD8006": { "message": "The right-floating element will stretch the width of its ancestor elements in IE6 IE7 IE8 (Q)" },
+  "RD8006_suggestion": { "message": "Set a specific width to right-floating element and its ancestor element." },
   "SD9025": { "message": "IE6 IE7 IE8 Opera support click method for elements other than INPUT and BUTTON" },
   "SD9025_suggestion": { "message": "Avoid using the click method for elements other than INPUT and BUTTON" },
   "SD9030": {"message": "There are some non-standard operations for manipulating options for  SELECT element in some browsers"},
   "SD9030_suggestion": { "message": "Use options.add(option, index) to insert a new OPTION element." },
-
+  "HR9001": {"message": "The charset of the page is different from the charset set in the META element."},
+  "HR9001_suggestion": { "message": "Please make sure that the charset defined in the HTTP header is the same with the charset of the page, the charset in the META element should also be set and be the same with the charset defined in the HTTP header." },
   "lastLine": { "message": "lastLine" }
 }
