@@ -5,4 +5,4 @@ set template=..\w3help\zh-cn\casestudies\template_casestudies.html
 set idlist=CS_id_list.txt
 cd %~dp0
 mkdir %dest%
-cscript //nologo build_articles.js %type% %source% %dest% %template% %idlist% null
+node build_articles.js %type% %source% %dest% %template% %idlist% null

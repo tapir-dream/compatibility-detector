@@ -21,79 +21,18 @@
 var DEFAULT_CSDN_FORUM = 'http://forum.csdn.net/SList/CrossBrowser/';
 
 function log(message) {
-  WScript.Echo(message);
+  console.log(message);
 }
 
-// These ADODB.Stream object constants should be consistent
-// to MS's definition, do not use CONSTANT_VAR coding style here.
-var adReadAll = -1;
-var adReadLine = -2;
-var adTypeBinary = 1;
-var adTypeText = 2;
-var adSaveCreateNotExist = 1;
-var adSaveCreateOverWrite = 2;
+var fs = require('fs');
 
-/**
- * Reference
- * Stream Object Properties, Methods, and Events
- * http://msdn.microsoft.com/en-us/library/ms677486(v=vs.85).aspx
- */
-function saveToFile(filename, text) {
-  var stream = new ActiveXObject('ADODB.Stream');
-  try{
-    stream.Open();
-    stream.Charset = 'utf-8';
-    stream.WriteText(text);
-    stream.SaveToFile(filename, adSaveCreateOverWrite);
-    removeBOM(filename);
-  } catch(exception) {
-    log(exception.message)
-  } finally {
-    stream.Close();
-    stream = null;
-  }
-}
-
-/**
- * Reference
- * ReadText Method
- * http://msdn.microsoft.com/en-us/library/ms678077(v=vs.85).aspx
- */
 function loadFromFile(filename) {
-  var stream = new ActiveXObject('ADODB.Stream');
-  try {
-    stream.Open();
-    stream.Charset = 'utf-8';
-    stream.LoadFromFile(filename);
-    var text = stream.ReadText(adReadAll);
-  } catch(exception) {
-    log(exception.message)
-  } finally {
-    stream.Close();
-    stream = null;
-  }
-  return text;
+  return fs.readFileSync(filename, 'utf-8');
 }
 
-function removeBOM(filename){
-  try {
-    var stream = new ActiveXObject("ADODB.Stream");
-    stream.Type = adTypeBinary;
-    stream.Open();
-    stream.LoadFromFile(filename);
-    stream.Position = 3; // ignore first 3 bytes (UTF-8 BOM)
-    var byteArr = stream.Read(adReadAll);
-    stream.Close();
-    stream.Open();
-    stream.Write(byteArr);
-    stream.SaveToFile(filename, adSaveCreateOverWrite);
-    stream.Flush();
-  } catch(exception) {
-    log(exception.message);
-  } finally {
-    stream.Close();
-    stream = null;
-  }
+function saveToFile(filename, text) {
+  var fd = fs.openSync(filename, 'w+');
+  fs.writeSync(fd, text , 0);
 }
 
 var LEADING_WHITESPACES = /^[ \t\r\n]+/;
@@ -246,6 +185,7 @@ function main(type, sourceDir, destDir, templateFile, idListFile, csdnListFile) 
   // ...
 
   loadTemplate(templateFile);
+
   var ids = trim(loadFromFile(idListFile)).split(NEW_LINE_CHAR);
 
   for (var i = 0; i < ids.length; ++i) {
@@ -261,5 +201,6 @@ function main(type, sourceDir, destDir, templateFile, idListFile, csdnListFile) 
 // 4. template files path
 // 5. id list file path
 // 6. csdn forum list file path (RCA page bulid)
-main(WScript.Arguments(0), WScript.Arguments(1), WScript.Arguments(2),
-    WScript.Arguments(3), WScript.Arguments(4), WScript.Arguments(5));
+//log(process.argv.join())
+main(process.argv[2], process.argv[3], process.argv[4],
+    process.argv[5], process.argv[6], process.argv[7]);
