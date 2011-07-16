@@ -6,4 +6,4 @@ set idlist=RCA_id_list.txt
 set csdnlist=csdn_list.txt
 cd %~dp0
 mkdir %dest%
-cscript //nologo build_articles.js %type% %source% %dest% %template% %idlist% %csdnlist%
+node build_articles.js %type% %source% %dest% %template% %idlist% %csdnlist%
