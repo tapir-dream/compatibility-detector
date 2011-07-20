@@ -239,9 +239,9 @@
     &lt;div style=&quot;<span class="hl_3">margin-top:50px;</span> background-color:gold;&quot;&gt;B&lt;/div&gt;
 &lt;/div&gt;</pre>
         <p>示意图：<br/><img src="006/margin c5.png" /></p>
-        <p>两个绿色的块儿之间，相距100px，而若 B 和它的浮动包含块发生 margin 折叠的话，金色的条应该位于绿色块的最上方，显然，没有发生折叠。/p>
+        <p>两个绿色的块儿之间，相距100px，而若 B 和它的浮动包含块发生 margin 折叠的话，金色的条应该位于绿色块的最上方，显然，没有发生折叠。</p>
 
-        <h3>创建了块级格式化内容<sup>1</sup>的元素，不和它的子元素发生 margin 折叠</h3>
+        <h3>创建了块级格式化上下文<sup>1</sup>的元素，不和它的子元素发生 margin 折叠</h3>
         <p>以 “overflow : hidden” 的元素为例：</p>
         <pre>
 &lt;div style=&quot;margin-top:50px; width:100px; height:100px; background-color:green; overflow:hidden;&quot;&gt;
