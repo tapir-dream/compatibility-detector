@@ -1,0 +1,154 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="../../zh-cn/css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../../zh-cn/css/article.css" media="all" />
+</head>
+<body>
+<div class="body_content">
+			<!-- toc begin -->
+			<h1 class="title">querySelector 和 querySelectorAll 方法浏览器实现无误，避免将其与 JQuery 的选择器混淆</h1>
+			<ul class="toc">
+				<li><a href="#header_1">规范定义</a> <span>•</span></li>
+				<li><a href="#header_2">JQuery 的 Selector</a> <span>•</span></li>
+				<li><a href="#header_3">两者间差异</a> <span>•</span></li>
+				<li><a href="#header_4">建议</a></li>
+			</ul>
+			<!-- toc end -->
+			<div id="w3h_content">
+        <!-- content begin -->
+        <address class="author">作者：钱宝坤</address>
+				<h2 id="header_1">规范定义</h2>
+				<p>querySelector和 querySelectorAll 方法是 <a herf="http://www.w3.org/TR/selectors-api/"> W3C Selectors API Level 1 </a> 规范中定义的。他们的作用是根据 CSS选择器规范，便捷定位文档中指定元素。</p>
+				<p>目前几乎主流浏览器均支持了他们。包括 IE8(含) 以上版本、 Firefox、 Chrome、Safari、Opera。</p>
+        <p>querySelector 和 querySelectorAll 在规范中定义了如下接口：</p>
+				<pre>module dom {
+ [Supplemental, NoInterfaceObject]
+ interface NodeSelector {
+  Element querySelector(in DOMString selectors);
+  NodeList querySelectorAll(in DOMString selectors);
+ };
+ Document implements NodeSelector;
+ DocumentFragment implements NodeSelector;
+ Element implements NodeSelector;
+};</pre>
+				<p>其实就是任何 NodeList 、Element 的实例对象和 Document DocumentFragment 的实例对象都有这两个方法。如：</p>
+				<ul>
+					<li>document.querySelectorAll</li>
+					<li>document.querySelector</li>
+					<li>nodeList.querySelectorAll</li>
+					<li>nodeList.querySelector</li>
+					<li>element.querySelectorAll</li>
+					<li>element.querySelector</li>
+				</ul>
+				<p>querySelectorAll 返回符合 Selector 条件的所有节点内容，是个 NodeList；querySelector 仅返回符合 Selector 条件的第一个节点内容，是个 Node。</p>
+				<p>如何用querySelectorAll或querySelector呢？来看个例子：</p>
+        <pre>HTML CODE:
+&lt;DOCTYPE html&gt;
+&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;Selectors API Example&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id=\&quot;foo\&quot;&gt;
+      &lt;p class=\&quot;warning\&quot;&gt;This is a sample warning&lt;/p&gt;
+      &lt;p &gt;This is a sample error&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div id=\&quot;bar\&quot;&gt;
+      &lt;p&gt;...&lt;/p&gt;
+    &lt;/div&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+
+JAVASCRIPT CODE:
+var alerts = document.querySelectorAll("p.warning, p.error");
+// 返回 [&lt;p class="warning"&gt;This is a sample warning&lt;/p&gt;,&lt;p&gt;This is a sample error&lt;/p&gt;]
+        </pre>
+        <p>哈哈，是不是很好用啊。<p>
+
+        <h2 id="header_2">JQuery 的 Selector</h2>
+        <p>那我们怎么兼容低版本的浏览器呢？不用着急，有JQuery呢，这个火爆的东东早早就实现了Selectors。</p>
+        <pre>JAVASCRIPT JQuery CODE:
+var alerts = $(\&quot;p.warning, p.error\&quot;);
+// 返回 [&lt;p class=\&quot;warning\&quot;&gt;This is a sample warning&lt;/p&gt;,&lt;p &gt;This is a sample error&lt;/p&gt;]</pre>
+        <p>这与使用 和querySelectorAll 结果一致。</p>
+
+        <h2 id="header_3">两者间差异</h2>
+        <p>再用用 element.querySelectorAll 看看：</p>
+        <pre>JAVASCRIPT CODE:
+var foo= document.getElementById(\&quot;foo\&quot;);
+foo.document.querySelectorAll(\&quot;div &gt; p\&quot;);
+// 返回 [&lt;p class=\&quot;warning\&quot;&gt;This is a sample warning&lt;/p&gt;,&lt;p &gt;This is a sample error&lt;/p&gt;]
+        </pre>
+
+        <pre>JAVASCRIPT JQuery CODE:
+var foo= document.getElementById(\&quot;foo\&quot;);
+$(foo).find(“div &gt; p”)
+// 返回 []</pre>
+
+        <p>玩砸了……为什么两者返回结果不一致了呢？</p>
+        <p>我们看下传入的选择器字符串含义，不就是在 &lt;div id=”foo”&gt; 节点下寻找 div 标签下的 p 标签么？</p>
+        <p>&lt;div id=”foo”&gt; 节点下没有 div 标签了，当然应该返回一个空 nodeList。JQuery 返回的结果是正确的。很奇怪，难道说所有实现了 querySelector和 querySelectorAll 方法的浏览器都没遵守规范？这也太坑爹了！！</p>
+        <p>等等，我们还是先看看规范定义怎么说：</br>
+<pre><strong>querySelectorAll</strong> : when invoked, return a NodeList containing all of the matching Element nodes within the node’s subtrees, in document order. </pre></p>
+        <p>规范定义为选择器在文档内找全部符合选择器描述的节点，判断返回的的nodelist是否在element子树内，将在element子树内的节点组成 NodeList 返回。</p>
+        <p>根据这个定义，我们看浏览器实现：</p>
+        <ul>
+          <li>先是在文档中找到所有处于 div 标签内的 p 子节点，他们是 [&lt;p class=\&quot;warning\&quot;&gt;This is a sample warning&lt;/p&gt;, &lt;p &gt;This is a sample error&lt;/p&gt;,&lt;p&gt;...&lt;/p&gt;]；
+          <li>然后对比 &lt;div id=”foo”&gt; 节点的子树中是否含有这些 p 元素。&lt;div id=”foo”&gt; 节点的子树中仅含有[&lt;p class=\&quot;warning\&quot;&gt;This is a sample warning&lt;/p&gt;, &lt;p &gt;This is a sample error&lt;/p&gt;]，那么就返回他们吧。这与之前问题例子返回结果一致。</li>
+        </ul>
+        <p>这么说，浏览器实现没错？好吧，我们可以再做个更离谱的测试来看看：</p>
+        <pre>JAVASCRIPT CODE:
+var foo= document.getElementById(\&quot;foo\&quot;);
+foo.document.querySelectorAll(\&quot;html body div &gt; p\&quot;);
+// 返回 [&lt;p class=\&quot;warning\&quot;&gt;This is a sample warning&lt;/p&gt;,&lt;p &gt;This is a sample error&lt;/p&gt;]</pre>
+
+        <p>这次的例子是在 &lt;div id=”foo”&gt; 节点下寻找 html 标签中的body 标签中的 div 标签的直接子标签 P。</p>
+        <p>他的返回结果依然是 [&lt;p class=\&quot;warning\&quot;&gt;This is a sample warning&lt;/p&gt;,&lt;p &gt;This is a sample error&lt;/p&gt;]</p>
+        <p>这与规范说明一致。</p>
+        <p>这么说，浏览器本身实现并没有问题，而是JQuery有问题了？其实这也并不尽然，JQuery 本身并没有宣布遵守 W3C Selectors API Level 1 规范实现查找结果，他的选择器 API 实现是私有的。</p>
+        <p><strong>对于 Element 下的选择器范围，JQuery 认为是从当前元素开始查找，返回符合的结果集。而规范恰恰指出的是选择器只针对当前文档，选择出的结果集再与当前元素的子树比较。</strong></p>
+        <p>正是由于以上的不同导致了他们返回结果不一致。</p>
+
+        <h2 id="header_4">建议</h2>
+        <p>切记不要在实际使用中混淆 W3C Selectors API Level 1 规范中选择器的实现机理和 JQuery 中选择器实现机理，它们是不同的。</p>
+
+				<div class="appendix">
+					<h2>测试环境</h2>
+					<table class="list">
+						<tr>
+							<th>操作系统版本:</th>
+							<td>Windows 7 Ultimate build 7600</td>
+						</tr>
+						<tr>
+							<th>浏览器版本:</th>
+							<td>
+								IE8<br />
+								IE9<br />
+								Firefox 4.0.1<br />
+								Chrome 12.0.742.100<br />
+								Safari 5.0.5<br />
+					      Opera 11.11</td>
+						</tr>
+						<tr>
+							<th>测试页面:</th>
+							<td>&nbsp;</td>
+						</tr>
+						<tr>
+							<th>本文更新时间:</th>
+							<td>2011-05-17</td>
+						</tr>
+					</table>
+
+					<h2>关键字</h2>
+          <!-- keywords begin -->
+					<p>JQuery selector querySelectorAll querySelector 选择器</p>
+          <!-- keywords end -->
+				</div>
+        <!-- content end -->
+			</div>
+	</div>
+</body>
+</html>
+
