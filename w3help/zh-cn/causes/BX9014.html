@@ -23,7 +23,7 @@
     <!-- toc end -->
     <div id="w3h_content">
       <!-- content begin -->
-      <address class="author">作者：钱宝坤</address>
+      <address class="author">作者：钱宝坤 权一</address>
       <h2 id="standard_reference">标准参考</h2>
       <p>关于 document.write 方法请参考标准文档：DOM Level 2 HTML 规范 <a href="http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-75233634">1.5. Objects related to HTML documents</a>。</p>
       <h2 id="description">问题描述</h2>
@@ -64,8 +64,8 @@ document.write(&quot;This is h1.js&quot;+&quot;&lt;br/&gt;&quot;);</pre>
       <p>即 IE 是在当前 SCRIPT 标记内所有的 document.write 向文档中输出内容完成后，再处理以 document.write 方式引入的 JS 文件内的 document.write 写入流。</p>
       <p>对于其他浏览器，则根据代码执行顺序依次处理 document.write 方式写入的内容。</p>
       <p>&nbsp;</p>
-      <p>此外，使用 document.write 方式写入 JavaScript 内容后，非 IE Opera 浏览器并不会立即更新 DOM 树。</p>
-      <p>分析以下下代码 B：</p>
+      <p>此外，使用 document.write 方式写入<strong>可引用的外部</strong> JavaScript 内容后，非 IE Opera 浏览器并不会立即更新 DOM 树。</p>
+      <p>分析以下代码 B：</p>
 <pre>&lt;script&gt;
 document.write('&lt;script src=&quot;a.js&quot;&gt;&lt;\/script&gt;');
 document.write('&lt;DIV id=&quot;d1&quot;&gt;&lt;/DIV&gt;');
@@ -78,15 +78,37 @@ alert(document.getElementById('d1')===null);
       <table class="compare">
         <tr>
           <th>IE6 IE7 IE8 Opera</th>
-          <th>Firefox Chrome Safari Opera</th>
+          <th>Firefox Chrome Safari</th>
         </tr>
         <tr>
           <td>false</td>
           <td>true</td>
         </tr>
       </table>
-      <p>对于以上测试代码，IE Opera 表现为在执行到语句 &quot;document.write('&lt;DIV id=&quot;d1&quot;&gt;&lt;/DIV&gt;');&quot; 后立即更细了文档的 DOM 结构（向文档内插入了 ID 为 d1 的 DIV 标记）。</p>
+      <p>对于以上测试代码，IE Opera 表现为在执行到语句 &quot;document.write('&lt;DIV id=&quot;d1&quot;&gt;&lt;/DIV&gt;');&quot; 后立即更新了文档的 DOM 结构（向文档内插入了 ID 为 d1 的 DIV 标记）。</p>
       <p>而在其他浏览器里，在当前 SCRIPT 标记的执行流运行完成后，才更新文档的 DOM 结构。</p>
+
+      <p>此外，还存在另外问题，分析以下代码 C :</p>
+<pre>&lt;script&gt;
+document.write('&lt;script id=&quot;d1&quot; src=&quot;a.js&quot;&gt;&lt;\/script&gt;');
+document.write('&lt;script id=&quot;d2&quot;&gt;&lt;/scirpt&gt;');
+alert([document.getElementById('d1'),document.getElementById('d2'));
+&lt;/script&gt;</pre>
+
+<pre>/* a.js */
+//可以不包含代码</pre>
+    <p>各浏览器表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>IE6 IE7 IE8 Opera</th>
+          <th>Firefox Chrome Safari</th>
+        </tr>
+        <tr>
+          <td>[Element, Element]</td>
+          <td>[Element, null]</td>
+        </tr>
+      </table>
+     <p>本例中，Firefox Safari Chrome 浏览器下，id=&quot;d2&quot; 的 Script 元素将输出 null。 除非 d1 不是加载外部资源，d2 元素才可能会立即被获取到；或者同上例一般，在当前脚本块执行流完后才可以访问到 d2、这个问题原因不明，Firefox Safari Chrome 这些浏览器可能因为脚本元素 d1 的外部资源加载而导致 d2 元素没有被及时放入 DOM Tree。</p>
 
      <h2 id="solutions">解决方案</h2>
          <p>如果外部引用的 JS 文件内程序，要求在执行顺序上一致，请避免使用 document.write 语句引入的 JS 程序文件中再次使用他来加载外部 JS 文件。</p>
