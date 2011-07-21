@@ -1,0 +1,182 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">RX8018: IE6 IE7 IE8(Q) 中可被渲染的绝对和固定定位元素将消除其后紧邻它的触发了 hasLayout 特性的块级元素的 margin-top</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <address class="author">作者：钱宝坤</address>
+      <h2 id="standard_reference">标准参考</h2>
+      <p>无</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>当某块级元素设置了 margin-top ，并且之前存在着可被渲染的绝对定位元素时，其 margin-top 在 IE6 IE7 IE8(Q) 会失效。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>导致元素间基于 margin-top 产生的间隙不被渲染。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <p><strong>本文中所阐述的问题比较复杂，其触发条件可分为以下几个：</strong></p>
+      <ol>
+        <li>元素被设置为块元素<sup>1</sup>（display:block/list-item/table）；</li>
+        <li>该元素触发了 IE 的 hasLayout 特性<sup>2</sup>；</li>
+        <li>该节点之前存在一个可被渲染的绝对定或固定定位元素<sup>3</sup>；</li>
+        <li>该元素设置了不等于 0 的 margin-top 值（正负 margin-top 值均可）。</li>
+      </ol>
+      <p class="comment">【注1】：IE6 IE7 IE8(Q) 并不支持 display: table 特性值设置。具体可参考：<a href="RM8001">RM8001: 各浏览器对 'display' 特性值的支持程度不同</a></p>
+      <p class="comment">【注2】：有关 IE hasLayout 特性详细说明，可以参看 MSDN 上的官方文档： <a href="http://msdn.microsoft.com/en-us/library/ms533776(VS.85).aspx">http://msdn.microsoft.com/en-us/library/ms533776(VS.85).aspx</a></p>
+      <p class="comment">【注3】：由于 IE6 IE7(Q) IE8(Q) 不支持固定定位 'position:fixed' 特性值设置，因此 IE6 中仅有绝对定位元素可以触发本问题 。具体可参考：<a href="RM8013">RM8013: IE6 IE7(Q) IE8(Q) 不支持固定定位（position:fixed）</a></p>
+      <p>分析以下代码：</p>
+      <pre>&lt;p&gt;A1.1&lt;/p&gt;
+&lt;div style=&quot;background:red;&quot;&gt;block&lt;/div&gt;
+&lt;div style=&quot;background:blue; position:absolute;&quot;&gt;postion:absolute block&lt;/div&gt;
+&lt;span style=&quot;background:green; margin-top:30px; display:block; height:16px;&quot;&gt;haslayout block and set margin-top is 30px&lt;/span&gt;
+
+&lt;p&gt;A1.2&lt;/p&gt;
+&lt;div style=&quot;background:red;&quot;&gt;block&lt;/div&gt;
+&lt;div style=&quot;background:blue; position:absolute;&quot;&gt;postion:absolute block&lt;/div&gt;
+&lt;span style=&quot;background:green; margin-top:-10px; display:block; height:16px;&quot;&gt;haslayout block and set margin-top is -10px&lt;/span&gt;
+
+
+&lt;p&gt;A2&lt;/p&gt;
+&lt;div style=&quot;background:red;&quot;&gt;block&lt;/div&gt;
+&lt;div style=&quot;background:blue; position:relative;&quot;&gt;postion:relative block&lt;/div&gt;
+&lt;span style=&quot;background:green; margin-top:30px; display:block; height:16px;&quot;&gt;haslayout block and set margin-top&lt;/span&gt;
+
+
+&lt;p&gt;A3&lt;/p&gt;
+&lt;div style=&quot;background:red;&quot;&gt;block&lt;/div&gt;
+&lt;div style=&quot;background:blue;&quot;&gt;block&lt;/div&gt;
+&lt;span style=&quot;background:green; margin-top:30px; display:block; height:16px;&quot;&gt;haslayout block and set margin-top&lt;/span&gt;
+
+&lt;p&gt;A4&lt;/p&gt;
+&lt;div style=&quot;background:red;&quot;&gt;block&lt;/div&gt;
+&lt;div style=&quot;background:blue; position:absolute;&quot;&gt;postion:absolute block&lt;/div&gt;
+&lt;span style=&quot;background:green; margin-top:30px; height:16px;&quot;&gt;haslayout inline-block and set margin-top&lt;/span&gt;
+
+&lt;p&gt;A5&lt;/p&gt;
+&lt;div style=&quot;background:red;&quot;&gt;block&lt;/div&gt;
+&lt;div style=&quot;background:blue; position:absolute;&quot;&gt;postion:absolute block&lt;/div&gt;
+&lt;span style=&quot;background:green; margin-top:30px; display:block;&quot;&gt;block and set margin-top&lt;/span&gt;
+</pre>
+      <p>上面五组代码中，第一组中俩项均符合问题触发条件，唯一不同的是 margin-top 值分别被 30px 与 -10px。</p>
+      <p>这段代码在不同浏览器中运行结果如下：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8(Q)</th>
+          <th>IE8(S) IE9 Firefox Safari Chrome Opera</th>
+        </tr>
+        <tr>
+          <th>A1.1</th>
+          <td><img src="../../tests/RX8018/01.png" alt="IE6 IE7 IE8(Q)" /></td>
+          <td><img src="../../tests/RX8018/02.png" alt="IE8(S) IE9 Firefox Safari Chrome Opera" /></td>
+        </tr>
+        <tr>
+          <th>A1.2</th>
+          <td><img src="../../tests/RX8018/03.png" alt="IE6 IE7 IE8(Q)" /></td>
+          <td><img src="../../tests/RX8018/04.png" alt="IE8(S) IE9 Firefox Safari Chrome Opera" /></td>
+        </tr>
+        <tr>
+          <th>A2</th>
+          <td colspan="2"><img src="../../tests/RX8018/05.png" alt="IE6 IE7 IE8 IE9 Firefox Safari Chrome Opera" /></td>
+        </tr>
+        <tr>
+          <th>A3</th>
+          <td colspan="2"><img src="../../tests/RX8018/06.png" alt="IE6 IE7 IE8 IE9 Firefox Safari Chrome Opera" /></td>
+        </tr>
+        <tr>
+        <th>A4</th>
+          <td colspan="2"><img src="../../tests/RX8018/07.png" alt="IE6 IE7 IE8 IE9 Firefox Safari Chrome Opera" /></td>
+        </tr>
+        <tr>
+        <th>A5</th>
+          <td colspan="2"><img src="../../tests/RX8018/08.png" alt="IE6 IE7 IE8 IE9 Firefox Safari Chrome Opera" /></td>
+        </tr>
+      </table>
+      <p>从上表中可以明确看出，A1.1 与 A1.2 组内，块级元素一旦触发了 IE 的hasLayout 特性，并且存在 margin 设置，只要处于以被渲染出的绝对定位元素<sup>1</sup>之下，其 margin-top 不被渲染出来。</p>
+      <p>A2 至 A5 组，将以上限定条件打破任意打破一项后，margin-top 均可被正常渲染。由此可见，本问题是由于低版本 IE 的渲染引擎实现缺陷造成的，为浏览器 bug 范畴。</p>
+      <p class="comment">【注】：对于 'position:fixed' 设置导致仅 IE7 出现间隙消失的问题，本文测试用里中不再给出特定说明，具体可看其后的测试用例页面。</p>
+
+      <h2 id="solutions">解决方案</h2>
+      <p>针对这类低版本 IE 浏览器的 bug，请尽量避免满足其所有触发条件。如本例中所需间隙可以采用其它设置元素的 margin-bottom或问题元素的 padding-top 等方式来弥补。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="RM8001">RM8001: 各浏览器对 'display' 特性值的支持程度不同</a></li>
+        <li><a href="RM8013">RM8013: IE6 IE7(Q) IE8(Q) 不支持固定定位（position:fixed）</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              IE9<br />
+              Firefox 5.0<br />
+              Chrome 14.0.825.0 dev<br />
+              Safari 5.0.5<br />
+              Opera 11.50
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td><a href="../../tests/RX8018/absolute_remove_margin_top.html">absolute_remove_margin_top.html</a><br />
+            <a href="../../tests/RX8018/position_fixed_remove_margin_top.html">position_fixed_remove_margin_top.html</a> 
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2011-7-21</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>block-level display block list-item margin-top hasLayout zoom</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>
