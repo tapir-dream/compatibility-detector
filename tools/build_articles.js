@@ -27,12 +27,11 @@ function log(message) {
 var fs = require('fs');
 
 function loadFromFile(filename) {
-  return fs.readFileSync(filename, 'utf-8');
+  return fs.readFileSync(filename, 'utf8');
 }
 
 function saveToFile(filename, text) {
-  var fd = fs.openSync(filename, 'w+');
-  fs.writeSync(fd, text , 0);
+  fs.writeFileSync(filename, text);
 }
 
 var LEADING_WHITESPACES = /^[ \t\r\n]+/;
