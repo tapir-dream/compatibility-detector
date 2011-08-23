@@ -27,7 +27,7 @@
       <h2 id="standard_reference">标准参考</h2>
       <p>无。</p>
       <h2 id="description">问题描述</h2>
-      <p>现在页面开发过程中，为了减少由于加载时外部 JS 文件静态引用过多导致阻塞页面内容下载及渲染的情况出现，一般情况下会采用页面内容加载完成后采用动态引入的外部 JavaScript 文件的方法来解决此类问题，这就导致了各种常用动态引入的外部脚本文件在各浏览器中的执行顺序不一致。</p>
+      <p>页面开发过程中，为了避免页面加载时引入过多外部 JS 文件，导致阻塞页面内容下载及渲染的情况出现。将会采用页面内容加载完成后，动态加载外部 JavaScript 文件的方法来解决此类问题。但是，需要注意的是，常用动态插入外部脚本文件的方法在各浏览器中的执行顺序并不一致。</p>
       <h2 id="influence">造成的影响</h2>
       <p>对于动态插入的 SCRIPT 文件，不能保证在各浏览器能阻塞其后脚本的执行。</p>
       <h2 id="impacted_browsers">受影响的浏览器</h2>
@@ -166,21 +166,18 @@ alert($)
           <p>对于必须动态附加到文档的外部 js 文件，要保证动态引入的脚本全部执行完成后，才能执行后续代码。</p>
           <p>可以将此部分代码封装后调用，如：</p>
           <pre>
-function loadJS (url, onload) {
-  var domscript = document.createElement('script');
-  domscript.src = url;
-  if ( onload ) {
-    domscript.onloadDone = false;
-    domscript.onload = onload;
-    domscript.onreadystatechange = function() {
-      if ( &quot;loaded&quot; === domscript.readyState &amp;&amp; domscript.onloadDone ) {
-        domscript.onloadDone = true;
-        domscript.onload();
-        domscript.removeNode(true);
-        }
+function loadJS(url, success) {
+  var domScript = document.createElement('script');
+  domScript.src = url;
+  success = success || function(){};
+  domScript.onload = domScript.onreadystatechange = function() {
+    if (!this.readyState || 'loaded' === this.readyState || 'complete' === this.readyState) {
+      success();
+      this.onload = this.onreadystatechange = null;
+      this.parentNode.removeChild(this);
     }
   }
-  document.getElementsByTagName('head')[0].appendChild(domscript);
+  document.getElementsByTagName('head')[0].appendChild(domScript);
 }
 //执行加载外部 JS 文件
 loadJS('a.js',function (){
