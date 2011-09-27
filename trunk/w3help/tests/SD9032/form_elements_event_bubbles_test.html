@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script>
+window.onload = function() {
+    var addEvent = (document.addEventListener)
+        ? (function(el, type, fn) {
+            el.addEventListener(type, fn, false);
+          })
+        : (function(el, type, fn) {
+            el.attachEvent('on' + type, fn)
+          });
+		  
+	var stopDefault = function(e) {
+		(window.event)
+			? window.event.returnValue = false
+			: e.preventDefault();
+	};
+  
+	var output = function (msg) {
+		pElement.innerHTML += msg + '<br />';
+	};
+	
+	var addOutputMessageByTargets = function(targets, targetNames, targetEventNames) {
+		for (var i = 0, c = targets.length; i < c; ++i) {
+			for (var j = 0, len = targetEventNames.length; j < len; ++j) {
+				addEvent(targets[i], targetEventNames[j], 
+					(function(targetName, eventName) {
+						return function(event) {
+							if (targetName === 'HTMLFormElement' &&
+								eventName === 'submit') { 
+								stopDefault(event);
+							}
+							output(targetName + ' triggered ' + 
+									eventName + ' event.');
+						}
+					})(targetNames[i], targetEventNames[j])
+				);
+			}
+		}
+	};
+	
+	var pElement = document.getElementsByTagName('p')[0];
+	var divElement = document.getElementsByTagName('div')[0];	  
+	var formElement = document.getElementsByTagName('form')[0];
+	var inputTextElement = document.getElementsByTagName('input')[0];
+	var inputCheckboxElement = document.getElementsByTagName('input')[1];
+	var inputRadioElement = document.getElementsByTagName('input')[2];
+	var selectElement = document.getElementsByTagName('select')[0];
+	var textareaElement = document.getElementsByTagName('textarea')[0];
+	var clearMessageElement = document.getElementsByTagName('button')[0]; 
+
+	addOutputMessageByTargets(
+		[window, document, document.body, divElement],
+		['DOMWindow', 'Document', 'HTMLBodyElement', 'HTMLDivElement'],
+		['submit', 'reset', 'change', 'select']
+	);
+
+	addOutputMessageByTargets(
+		[formElement],
+		['HTMLFormElement'],
+		['submit', 'reset']
+	);
+
+	addOutputMessageByTargets(
+		[
+			inputTextElement, 
+			inputCheckboxElement, 
+			inputRadioElement,
+			selectElement, 
+			textareaElement
+		],
+		[
+			'HTMLInputElement type is text', 
+			'HTMLInputElement type is checkbox', 
+			'HTMLInputElement type is radio', 
+			'HTMLSelectElement', 
+			'HTMLTextareaElement'
+		],
+		['change']
+	);
+	
+	addOutputMessageByTargets(
+		[inputTextElement, selectElement, textareaElement],
+		[
+			'HTMLInputElement type is text', 
+			'HTMLSelectElement', 
+			'HTMLTextareaElement'
+		],
+		['select']
+	);
+	
+	addEvent(clearMessageElement, 'click', function() {
+		pElement.innerHTML = '';
+	})
+};
+</script>
+</head>
+<body>
+<div>
+	<h3>Place change From: </h3>
+	<form>
+		<input type="text"/> <br />
+		<input type="checkbox" /> <br />
+		<input type="radio" name="radio"/> <br />
+		<select> 
+			<option>1</option>
+			<option>2</option>
+		</select> <br />
+		<textarea></textarea> <br />
+		<input type="submit" value="submit" />
+		<input type="reset" value="reset"/> 
+	</form>
+</div>
+<h3>output message: </h3>
+<p></p>
+<button>clear message</button>
+</body>
+</html>
