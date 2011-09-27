@@ -1,0 +1,304 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SD9032: IE6 IE7 IE8 IE9(Q) 中表单元素常见事件不产生事件冒泡</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <address class="author">作者：钱宝坤</address>
+      <h2 id="standard_reference">标准参考</h2>
+ 
+      <p>表单元素常用事件有 change、select、submit、reset，他们在 <a href="http://www.w3.org/TR/DOM-Level-2-Events/events.html#Events-eventgroupings-htmlevents">Document Object Model Events</a> 规范中均被标注为可冒泡(Bubbles: Yes)。</p>
+      
+      <h2 id="description">问题描述</h2>
+      <p>IE6 IE7 IE8 IE9(Q) 中 change、select、submit、reset 事件均不产生事件冒泡。</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>如果将事件处理委托给产生这些事件的父元素或祖先元素处理，在 Chrome Safari Firefox 中均是没有问题的。但是由于 IE6 IE7 IE8 中这些事件不产生事件冒泡，将会导致位于祖先元素的事件委托没有被执行，可能会导致错误数据提交或页面UI不正常等情况出现。 </p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tr>
+          <th>IE6 IE7 IE8 IE9(Q)</th>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+      <h3></h3>
+      <p>最早的 <a href="http://www.w3.org/TR/1999/WD-DOM-Level-2-19990304/events.html#Level-2-Events-eventgroupings-htmlevents" >DOM Level 2 Event Model</a> 版本为 1999 年 3 月成文，变更至今日均指定了 change、select、submit、reset 事件均可产生事件冒泡：</p>
+    <dl>
+    <dt><b>select</b></dt>
+    <dd>The select event occurs when a user selects some text in a text
+    field. This event is valid for INPUT and TEXTAREA elements. 
+    <ul>
+      <li><span class="hl_2">Bubbles: Yes</span></li>
+      <li>Cancelable: No</li>
+      <li>Context Info: None</li>
+    </ul>
+    </dd>
+    
+    <dt><b>change</b></dt>
+    <dd>The change event occurs when a control loses the input focus
+    and its value has been modified since gaining focus. This event is
+    valid for INPUT, SELECT, and TEXTAREA. element. 
+    <ul>
+      <li><span class="hl_2">Bubbles: Yes</span></li>
+      <li>Cancelable: No</li>
+      <li>Context Info: None</li>
+    </ul>
+    </dd>
+
+    <dt><b>submit</b></dt>
+    <dd>The submit event occurs when a form is submitted. This event
+    only applies to the FORM element. 
+    <ul>
+      <li><span class="hl_2">Bubbles: Yes</span></li>
+      <li>Cancelable: Yes</li>
+      <li>Context Info: None</li>
+    </ul>
+    </dd>
+
+    <dt><b>reset</b></dt>
+    <dd>The reset event occurs when a form is reset. This event only
+    applies to the FORM element. 
+    <ul>
+    <li><span class="hl_2">Bubbles: Yes</span></li>
+    <li>Cancelable: No</li>
+    <li>Context Info: None</li>
+    </ul>
+    </dd>
+  </dl>
+  <p>规范的成文时间已经涵盖了 IE6 开发时间，因此可以基本推断早期的 IE 版本如果遵循了此规范，那么事件将会冒泡到祖先元素上。</p>
+  <p>事实是否如此呢？我们看一组测试用例：</p>
+<pre>
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;script&gt;
+window.onload = function() {
+    var addEvent = (document.addEventListener)
+        ? (function(el, type, fn) {
+            el.addEventListener(type, fn, false);
+          })
+        : (function(el, type, fn) {
+            el.attachEvent('on' + type, fn)
+          });
+      
+  var stopDefault = function(e) {
+    (window.event)
+      ? window.event.returnValue = false
+      : e.preventDefault();
+  };
+  
+  var output = function (msg) {
+    pElement.innerHTML += msg + '&lt;br /&gt;';
+  };
+  
+  var addOutputMessageByTargets = function(targets, targetNames, targetEventNames) {
+    for (var i = 0, c = targets.length; i &lt; c; ++i) {
+      for (var j = 0, len = targetEventNames.length; j &lt; len; ++j) {
+        addEvent(targets[i], targetEventNames[j], 
+          (function(targetName, eventName) {
+            return function(event) {
+              if (targetName === 'HTMLFormElement' &amp;&amp;
+                eventName === 'submit') { 
+                stopDefault(event);
+              }
+              output(targetName + ' triggered ' + 
+                  eventName + ' event.');
+            }
+          })(targetNames[i], targetEventNames[j])
+        );
+      }
+    }
+  };
+  
+  var pElement = document.getElementsByTagName('p')[0];
+  var divElement = document.getElementsByTagName('div')[0];    
+  var formElement = document.getElementsByTagName('form')[0];
+  var inputTextElement = document.getElementsByTagName('input')[0];
+  var inputCheckboxElement = document.getElementsByTagName('input')[1];
+  var inputRadioElement = document.getElementsByTagName('input')[2];
+  var selectElement = document.getElementsByTagName('select')[0];
+  var textareaElement = document.getElementsByTagName('textarea')[0];
+  var clearMessageElement = document.getElementsByTagName('button')[0]; 
+
+  addOutputMessageByTargets(
+    [window, document, document.body, divElement],
+    ['DOMWindow', 'Document', 'HTMLBodyElement', 'HTMLDivElement'],
+    ['submit', 'reset', 'change', 'select']
+  );
+
+  addOutputMessageByTargets(
+    [formElement],
+    ['HTMLFormElement'],
+    ['submit', 'reset']
+  );
+
+  addOutputMessageByTargets(
+    [
+      inputTextElement, 
+      inputCheckboxElement, 
+      inputRadioElement,
+      selectElement, 
+      textareaElement
+    ],
+    [
+      'HTMLInputElement type is text', 
+      'HTMLInputElement type is checkbox', 
+      'HTMLInputElement type is radio', 
+      'HTMLSelectElement', 
+      'HTMLTextareaElement'
+    ],
+    ['change']
+  );
+  
+  addOutputMessageByTargets(
+    [inputTextElement, selectElement, textareaElement],
+    [
+      'HTMLInputElement type is text', 
+      'HTMLSelectElement', 
+      'HTMLTextareaElement'
+    ],
+    ['select']
+  );
+  
+  addEvent(clearMessageElement, 'click', function() {
+    pElement.innerHTML = '';
+  })
+};
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div&gt;
+  &lt;h3&gt;Place change From: &lt;/h3&gt;
+  &lt;form&gt;
+    &lt;input type=&quot;text&quot;/&gt; &lt;br /&gt;
+    &lt;input type=&quot;checkbox&quot; /&gt; &lt;br /&gt;
+    &lt;input type=&quot;radio&quot; name=&quot;radio&quot;/&gt; &lt;br /&gt;
+    &lt;select&gt; 
+      &lt;option&gt;1&lt;/option&gt;
+      &lt;option&gt;2&lt;/option&gt;
+    &lt;/select&gt; &lt;br /&gt;
+    &lt;textarea&gt;&lt;/textarea&gt; &lt;br /&gt;
+    &lt;input type=&quot;submit&quot; value=&quot;submit&quot; /&gt;
+    &lt;input type=&quot;reset&quot; value=&quot;reset&quot;/&gt; 
+  &lt;/form&gt;
+&lt;/div&gt;
+&lt;h3&gt;output message: &lt;/h3&gt;
+&lt;p&gt;&lt;/p&gt;
+&lt;button&gt;clear message&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</pre>
+  <p>用例中，我们将这些表单事件依次委托绑定给他们的父元素 DIV、祖先元素 BODY、以及位于事件冒泡顶层的 window 与 document 对象。</p>
+  <p>如果事件可冒泡，则我们将看到 DIV、BODY、document 与 window 均会在输出事件触发信息。反之，则可看到，仅触发事件的元素自身发出了事件消息。同时，还可以根据消息输出判断出是否有事件没有按照 DIV、BODY、Document、Window 的轨迹向上冒泡执行。</p>
+  <p>各浏览器中事件冒泡表现如下：</p>
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>IE6 IE7 IE8 IE9(Q)<sup>1</sup></th>
+          <th>IE9(S)<sup>2</sup> Firefox Chrome Safari Opera</th>
+        </tr>
+        <tr>
+          <td>change 事件</td>
+          <td><span class="hl_1">不冒泡</span></td>
+          <td><span class="hl_2">可冒泡至 window</span></td>
+        </tr>
+    <tr>
+          <td>select 事件</td>
+          <td><span class="hl_1">不冒泡</span></td>
+          <td><span class="hl_2">可冒泡至 window</span></td>
+        </tr>
+    <tr>
+          <td>submit 事件</td>
+          <td><span class="hl_1">不冒泡</span></td>
+          <td><span class="hl_2">可冒泡至 window</span></td>
+        </tr>
+    <tr>
+          <td>reset 事件</td>
+          <td><span class="hl_1">不冒泡</span></td>
+          <td><span class="hl_2">可冒泡至 window</span></td>
+        </tr>
+      </table>
+      <p class="comment">【注1】：IE9(Q) 基本上是模拟 IE5.5 的整体表现方式，因此同样没有遵循规范中指定的事件冒泡规则。 </p>
+      <p class="comment">【注2】：IE10 平台预览版第二版的标准文档模式与 IE9(S) 表现一致，事件均可冒泡，由于此篇成文时为非正式版本，故仅做提示而不入上表。</p>
+      <p>如上表所示，IE6 IE7 IE8 IE9(Q) 版本浏览器中 change、select、submit、reset 事件均不产生事件冒泡，导致其冒泡路径上的事件委托均没有被正常执行。</p>
+      <p>此现象说明 IE6 IE7 IE8 IE9(Q) 的 change、select、submit、reset 事件事实上都没有参照规范定义产生事件冒泡。</p>
+      <p class="comment">【注】：如果仅从直觉上来判断 IE6-8 的此部分处理是符合使用者预期的，这些事件应如同 focus、blur 事件一样不产生冒泡更合理。但是，考虑到可以触发这些事件的元素基本上都不可以被嵌套，那么规范如此定义将会为事件处理带来更大的灵活性。</p>
+     
+      <h2 id="solutions">解决方案</h2>
+      <p>为了兼容低版本的 IE 浏览器，建议 change、select、submit、reset 事件均不要依赖事件冒泡机制委托给其祖先元素处理。</p>
+      
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 7 Ultimate build 7600</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE6<br />
+              IE7<br />
+              IE8<br />
+              IE9<br />
+              Firefox 6.0<br />
+              Chrome 16.0.891.0 dev-m<br />
+              Safari 5.1(7534.50)<br />
+              Operea 11.51
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+              <a href="../../tests/SD9032/form_elements_event_bubbles_test.html">form_elements_event_bubbles_test.html</a><br />
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2011-09-27</td>
+          </tr>
+        </table>
+        <h2>关键字</h2>  
+        <!-- keywords begin -->
+        <p>change select submit reset input textarea form 表单 表单元素 事件委托 事件冒泡</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>
