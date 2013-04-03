@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+</head>
+<body>
+<div>
+<pre>
+var result = document.getElementById("result");
+var test10Elements = [7, 6, 5, 4, 3, 2, 1, 0, 8, 9];
+var test11Elements = [7, 6, 5, 4, 3, 2, 1, 0, 10, 9, 8];
+var compareFn = function (x, y) {
+  return x &gt; y;
+};
+test10Elements.sort(compareFn);
+test11Elements.sort(compareFn);
+</pre>
+  <p>执行结果:</p>
+</div>
+<div id="result"></div>
+<script>
+  window.onload = function () {
+    var result = document.getElementById("result");
+    var test10Elements = [7, 6, 5, 4, 3, 2, 1, 0, 8, 9];
+    var test11Elements = [7, 6, 5, 4, 3, 2, 1, 0, 10, 9, 8];
+    var compareFn = function (x, y) {
+      return x > y;
+    };
+    test10Elements.sort(compareFn);
+    test11Elements.sort(compareFn);
+    result.innerHTML += "<p>sorted test10Elements:" + test10Elements + "</p>";
+    result.innerHTML += "<p>sorted test11Elements:" + test11Elements + "</p>";
+  }
+</script>
+</body>
+</html>
