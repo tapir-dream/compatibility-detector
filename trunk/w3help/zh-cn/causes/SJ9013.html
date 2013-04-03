@@ -1,0 +1,450 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link rel="stylesheet" type="text/css" href="../css/common.css" media="all" />
+<link rel="stylesheet" type="text/css" href="../css/article.css" media="all" />
+</head>
+<body>
+<div id="w3h_body">
+  <div class="body_content">
+    <!-- toc begin -->
+    <h1 class="title">SJ9013: Array.prototype.sort当使用了 comparefn 后返回值不为 -1、0、1时，各引擎实现排序结果不一致</h1>
+    <ul class="toc">
+      <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
+      <li><a href="#description">问题描述</a> <span>•</span></li>
+      <li><a href="#influence">造成的影响</a> <span>•</span></li>
+      <li><a href="#impacted_browsers">受影响的浏览器</a> <span>•</span></li>
+      <li><a href="#analysis_of_issues">问题分析</a> <span>•</span></li>
+      <li><a href="#solutions">解决方案</a> <span>•</span></li>
+      <li><a href="#see_also">参见</a></li>
+    </ul>
+    <!-- toc end -->
+    <div id="w3h_content">
+      <!-- content begin -->
+      <address class="author">作者：钱宝坤 宋雅儒</address>
+      <h2 id="standard_reference">标准参考</h2>
+      <p>在 ECMAScript 第三、五版中，Array.prototype.sort(comparefn) 如果定义了 comparefn 这个方法，它接受两个参数 x 和 y。要求的返回值是一个正数 (x &gt; y)，零 (x = y) 或者是负数 (x &lt; y)。</p>
+
+      <p>关于 sort 语法的说明，请参考 <a href="http://www.ecma-international.org/publications/files/ECMA-ST/Ecma-262.pdf"> ECMAScript 5th Edition</a> 15.4.4.11  Array.prototype.sort。</p>
+
+      <h2 id="description">问题描述</h2>
+      <p>ECMAScript 中并没有明确说明 comparefn 返回值是布尔型时应该如何处理，它仅仅描述 comparefn 调用的返回值应当是 -1、0、1 这三种情况之一。comparefn 的返回值规范实现约束是 “引擎开发者” 还是 “脚本使用者” 并没有明确表述<sup>1</sup></p>
+			<p>这导致不同引擎对于 comparefn 返回值为非 -1、0、1 范围时具体处理不一致，从而使排序结果非预期。</p>
+			<p class="comment">【注】：一般认为 ECMAScript 是脚本引擎实现与开发者的桥梁，它的规范内容对两者都有约束效力。
+			因此我们无法明确认定 comparefn 的返回值范围是约束的实现方还是开发方。
+			尽管规范中有描述到 ：“Calling comparefn(a,b) always returns the same value v when given a specific pair of values a and b as its two arguments. Furthermore, Type(v) is Number, and v is not NaN.”，
+			这表示 comparefn 的返回值必须是个非 NaN 的 Number 类型，这两个类型都为 JS 使用者所知，但是提示使用 Type(v) 是约束引擎实现方的。实际仍然没有明确两者的约束关系。
+			</p>
+
+      <h2 id="influence">造成的影响</h2>
+      <p>Array.prototype.sort 方法在使用 comparefn 辅助排序时，如果 comparefn 返回值非规范规定的 -1、0、1 值范围，返回的排序结果可能与预期不一致。</p>
+
+      <h2 id="impacted_browsers">受影响的浏览器</h2>
+      <table class="list">
+        <tbody>
+        <tr>
+          <th>所有浏览器</th>
+          <td>&nbsp;</td>
+        </tr>
+        </tbody>
+      </table>
+
+      <h2 id="analysis_of_issues">问题分析</h2>
+			<p>各浏览器使用的脚本引擎不同，导致对于 ECMAScript 相关规范细节实现并不一致。常见的浏览器以及脚本引擎如下表所示，此文将基于此表的脚本引擎常用名做描述。</p>
+			
+      <table class="compare">
+        <tr>
+          <th>Browser Name</th>
+          <th>ECMAScript Engine</th>
+        </tr>
+        <tr>
+          <th>Internet Explorer 6 - 8</th>
+          <td>JScript</td>
+        </tr>
+        <tr>
+          <th>Internet Explorer 9 - 10</th>
+          <td>Chakra</td>
+        </tr>
+        <tr>
+          <th>Firefox</th>
+          <td>IonMonkey(Monkey系列引擎)</td>
+        </tr>
+        <tr>
+          <th>Chrome</th>
+          <td>V8</td>
+        </tr>
+        <tr>
+          <th>Safair</th>
+          <td>JavaScriptCore(SquirrelFish Extreme)</td>
+        </tr>
+        <tr>
+          <th>Opera</th>
+          <td>Carakan</td>
+        </tr>				
+      </table>
+			
+      <p>分析以下代码，预期将数组元素进行升序排序：</p>
+<pre>
+var result = document.getElementById("result");
+var test10Elements = [7, 6, 5, 4, 3, 2, 1, 0, 8, 9];
+var comparefn = function (x, y) {
+  return x &gt; y;
+};
+test10Elements.sort(comparefn);
+</pre>
+      <p>代码中，comparefn 函数返回值为 bool 类型，并非为规范规定的 -1、0、1 值。那么执行此代码，各 JS 脚本引擎实现情况如何？</p>
+
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>输出结果</th>
+          <th>是否符合预期</th>
+        </tr>
+        <tr>
+          <th>JScript</th>
+          <td>[2, 3, 5, 1, 4, 6, 7, 0, 8, 9]</td>
+					<td><span class="hl_1">否</span></td>
+        </tr>
+        <tr>
+          <th>Carakan</th>
+          <td>[0, 1, 3, 8, 2, 4, 9, 5, 6, 7]</td>
+					<td><span class="hl_1">否</span></td>
+        </tr>
+        <tr>
+          <th>Chakra & JavaScriptCore</th>
+          <td>[7, 6, 5, 4, 3, 2, 1, 0, 8, 9]</td>
+					<td><span class="hl_1">否</span></td>
+        </tr>
+        <tr>
+          <th>IonMonkey</th>
+          <td>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]</td>
+					<td><span class="hl_2">是</span></td>
+        </tr>
+        <tr>
+          <th>V8</th>
+          <td>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]</td>
+					<td><span class="hl_2">是</span></td>
+        </tr>
+      </table>
+			
+			<p><strong>根据表中数据可见，当数组内元素个数小于等于 10 时：</strong></p>
+      <ul>
+        <li>JScript & Carakan 排序结果有误</li>
+        <li>Chakra & JavaScriptCore 看起来没有进行排序</li>
+        <li>IonMonkey 返回了预期的正确结果</li>
+        <li>V8 暂时看起来排序正确</li>
+      </ul>
+			
+			<p><strong>将数组元素扩大至 11 位：</strong></p>
+<pre>
+var result = document.getElementById("result");
+var test11Elements = [7, 6, 5, 4, 3, 2, 1, 0, 10, 9, 8];
+var comparefn = function (x, y) {
+  return x &gt; y;
+};
+test11Elements.sort(comparefn);
+</pre>
+
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>输出结果</th>
+          <th>是否符合预期</th>
+        </tr>
+        <tr>
+          <th>JScript</th>
+          <td>[2, 3, 5, 1, 4, 6, 7, 0, 8, 9, 10]</td>
+					<td><span class="hl_1">否</span></td>
+        </tr>
+        <tr>
+          <th>Carakan</th>
+          <td>[0, 1, 3, 8, 2, 4, 9, 5, 10, 6, 7]</td>
+					<td><span class="hl_1">否</span></td>
+        </tr>
+        <tr>
+          <th>Chakra & JavaScriptCore</th>
+          <td>[7, 6, 5, 4, 3, 2, 1, 0, 10, 8, 9]</td>
+					<td><span class="hl_1">否</span></td>
+        </tr>
+        <tr>
+          <th>IonMonkey</th>
+          <td>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]</td>
+					<td><span class="hl_2">是</span></td>
+        </tr>
+        <tr>
+          <th>V8</th>
+          <td>[5, 0, 1, 2, 3, 4, 6, 7, 8, 9, 10]</td>
+					<td><span class="hl_1">否</span></td>
+        </tr>
+      </table>
+			<p><strong>根据表中数据可见，当数组内元素个数大于 10 时：</strong></p>
+      <ul>
+        <li>JScript & Carakan 排序结果有误</li>
+        <li>Chakra & JavaScriptCore 看起来没有进行排序</li>
+        <li>IonMonkey 返回了预期的正确结果</li>
+        <li>V8 <strong>排序结果由正确转为不正确</strong></li>
+      </ul>
+			
+			<h3>单引擎多种排序实现</h3>
+			<p>由于规范中并不要求引擎采用何种排序算法来实现 sort 函数。因此同一引擎对于所需排序元素总体数量不同，可能会采用不同的优化排序算方法。
+      <p><strong>V8 正是使用了这种多排序算法，参照 V8 : v8/src/array.js</strong></p>
+<pre>
+  var QuickSort = function QuickSort(a, from, to) {
+    var third_index = 0;
+    while ( true) {
+      // Insertion sort is faster for short arrays.
+      if (to - from &lt;= 10) {
+        InsertionSort(a, from, to);
+        return;
+      }
+      if (to - from &gt; 1000) {
+        third_index = GetThirdIndex(a, from, to);
+      } else {
+        third_index = from + ((to - from) &gt;&gt; 1);
+      }
+      ...
+    }
+		...
+ }
+</pre>
+      <p>当待排序的数组长度小于或等于 10 的时候，使用的是插入排序，大于 10 使用的是快速排序。</p>
+			<p>先看小于等于 10 位数据时，使用的插入排序实现：</p>
+<pre> 
+  var InsertionSort = function InsertionSort(a, from, to) {
+    for (var i = from + 1; i < to; i++) {
+      var element = a[i];
+      for (var j = i - 1; j >= from; j--) {
+        var tmp = a[j];
+        var order = %_CallFunction(receiver, tmp, element, comparefn);
+        <span class="hl_1">if (order > 0) {</span>
+          a[j + 1] = tmp;
+        } else {
+          break;
+        }
+      }
+      a[j + 1] = element;
+    }
+  };
+</pre>
+      <p>可见，当 comparefn 函数调用后，其返回值需要判断是否大于 0。
+			由于 TestCase 中 comparefn 函数返回值为 true 或 false，隐式类型转换后 true 为 1 false 为 0。
+			他们恰好使此判断返回预期的 true 、false 值，因此排序结果正常。</p>
+
+			<p>再看大于 10 个数据时使用的快速排序实现：</p>
+<pre>
+  var QuickSort = function QuickSort(a, from, to) {
+    var third_index = 0;
+    while ( true) {
+      // Insertion sort is faster for short arrays.
+      if (to - from &lt;= 10) {
+        InsertionSort(a, from, to);
+        return;
+      }
+      if (to - from &gt; 1000) {
+        third_index = GetThirdIndex(a, from, to);
+      } else {
+        third_index = from + ((to - from) &gt;&gt; 1);
+      }
+      // Find a pivot as the median of first, last and middle element.
+      var v0 = a[from];
+      var v1 = a[to - 1];
+      var v2 = a[third_index];
+      var c01 = %_CallFunction(receiver, v0, v1, comparefn);
+      <span class="hl_1">if (c01 > 0) {</span>
+        // v1 < v0, so swap them.
+        var tmp = v0;
+        v0 = v1;
+        v1 = tmp;
+      } // v0 <= v1.
+      var c02 = %_CallFunction(receiver, v0, v2, comparefn);
+      <span class="hl_1">if (c02 >= 0) {</span>
+        // v2 <= v0 <= v1.
+        var tmp = v0;
+        v0 = v2;
+        v2 = v1;
+        v1 = tmp;
+      } else {
+        // v0 <= v1 && v0 < v2
+        var c12 = %_CallFunction(receiver, v1, v2, comparefn);
+        <span class="hl_1">if (c12 > 0) {</span>
+          // v0 <= v2 < v1
+          var tmp = v1;
+          v1 = v2;
+          v2 = tmp;
+        }
+      }
+    }
+		...
+ }
+</pre>
+      <p>根据 TestCase 中用例情况， comparefn 被调用后进入 if (c02 >= 0) 分支。
+			此时，如果 comparefn 返回的是布尔值，那么 c02 &gt;= 0 结果永远是 true。
+			元素被不符合使用者预期的调换了位置，这导致了 V8 高于 10 位元素时排序结果不符合预期<sup>1</sup>。</p>
+      <p class="comment">【注】：在 V8 的测试工程中(v8/test/mjsunit/array-sort.js) TestNumberSort 方法中的测试用例覆盖不全，最长的测试用例是 10 个元素的数组，快排分支没有被检测到。</p>
+
+
+      <h3>返回值类型转为某种数值类型与 0 做比较</h3>
+      <p>观看 JavaScriptCore 中此问题的具体实现， <strong>参照 JavaScriptCore/runtime/JSArray.cpp</strong></p>
+<pre>int compare_key_key(key va, key vb)
+  {
+    ASSERT(!va.isUndefined());
+    ASSERT(!vb.isUndefined());
+
+    if (m_exec-&gt;hadException())
+      return 1;
+
+    double compareResult;
+    if (m_cachedCall) {
+      m_cachedCall-&gt;setThis(jsUndefined());
+      m_cachedCall-&gt;setArgument(0, va);
+      m_cachedCall-&gt;setArgument(1, vb);
+      compareResult = m_cachedCall-&gt;call().toNumber(m_cachedCall-&gt;newCallFrame(m_exec));
+    } else {
+      MarkedArgumentBuffer arguments;
+      arguments.append(va);
+      arguments.append(vb);
+      compareResult = call(m_exec, m_compareFunction, m_compareCallType, *m_compareCallData, jsUndefined(), arguments).toNumber(m_exec);
+    }
+    return <span class="hl_1">(compareResult &lt; 0) ? -1 : 1;</span> // Not passing equality through, because we need to store all values, even if equivalent.
+  }
+</pre>
+      <p>JavaScriptCord 的实现中，引擎先将 bool 转为 double 类型，并采用具体逻辑语句将其转为符合规范描述的 -1 、1 值范围。</p>
+			<p>TestCase 中 comparefn 返回结果是布尔类型，引擎采用 double 类型来接受此值，并且判断它是否小于 0。 因此 bool 被转为 1 或 0，不管如何表达式都返回 false，并被适配到 1 值上。</p>
+			<p>于是元素没有被交换位置，<strong>导致看起来排序后结果与原数组顺序一致</strong>。将 comparefn 的返回值强制设置为 -1，可发现其实际上进行了排序。</p>
+<pre>
+var result = document.getElementById("result");
+var test11Elements = [7, 6, 5, 4, 3, 2, 1, 0, 10, 9, 8];
+var comparefn = function (x, y) {
+  return -1;
+};
+test11Elements.sort(comparefn);
+</pre>			
+      <table class="compare">
+        <tr>
+          <th>&nbsp;</th>
+          <th>输出结果</th>
+        </tr>
+        <tr>
+          <th>Chakra & JavaScriptCore</th>
+          <td>[8, 9, 10, 0, 1, 2, 3, 4, 5, 6, 7]</td>
+        </tr>
+      </table>
+			<p>同时可以发现，Chakra 引擎排序结果与 JavaScriptCore 一致，可推断出此处其实现方式与 JavaScriptCore 可能一致<sup>1</sup>。 </p>
+			<p class="comment">【注】: Chakra 引擎并不开源，无法根据其源码得出可靠结论，此处仅根据测试现象得出推测。</p>
+			
+			
+			<h3>返回值转为符合规范的值范围</h3>
+      <p>IonMonkey 引擎为何 TestCase 的排序结总符合预期呢？<strong>参照 Firefox : js/src/jsarray.cpp</strong></p>
+<pre>
+double cmp;
+if (!ToNumber(cx, ag.rval(), &amp;cmp))
+  return false;
+*lessOrEqualp = (MOZ_DOUBLE_IS_NaN(cmp) || cmp &lt;= 0);
+</pre>
+      <p>其中 ToNumber 会调用 js/src/jsnum.cpp 的 ToNumberSlow</p>
+<pre>
+js::ToNumberSlow(JSContext *cx, Value v, double *out){
+  ...
+  if (v.isNumber()) {
+    *out = v.toNumber();
+    return true;
+  }
+  skip_int_double:
+    if (v.isString())
+      return StringToNumberType&lt; double&gt;(cx, v.toString(), out);
+    if (v.isBoolean()) {
+      if (v.toBoolean()) {
+       <span class="hl_1">*out = 1.0;</span>
+       return true;
+      }
+      <span class="hl_1">*out = 0.0;</span>
+      return true;
+    }
+    if (v.isNull()) {
+      <span class="hl_1">*out = 0.0;</span>
+      return true;
+    }
+    if (v.isUndefined())
+      break;
+
+    JS_ASSERT(v.isObject());
+    if (!ToPrimitive(cx, JSTYPE_NUMBER, &amp;v))
+      return false;
+    if (v.isObject())
+      break;
+  }
+
+  *out = js_NaN;
+  return true;
+}
+</pre>
+      <p>我们可以发现，ToNumberSlow 方法会判断 comparefn 执行后的返回结果的数据类型，并将这个结果统一转换为 double 且值范围为符合规范的 0 、1。所以当 return x &gt; y 返回布尔型的结果总能进行正确排序。</p>
+			
+			<h3>无法知晓返回值处理规则的引擎</h3>
+			<p><strong>最后关于 JScript、Chakra、Carakan 引擎，</strong>它们均非开源项目，无法一窥源码分析出实际问题点。
+			但从以上其它引擎的实现分析中可以看出，他们都采用了类似的排序算法，区别仅在与是否以及如何约束 comparefn 返回值在 -1、0、1 范围内。
+			这导致了当 comparefn 返回非规范值范围时：
+			</p>
+			<ul>
+				<li>无视规范要求，直接使用返回值转为 bool 型交换前后数据位置，从而得到非预期的排序结果。</li>
+			  <li>根据规范要求，直接使用返回转为数值类型得出交换值 -1、0、1，从而得到非预期的排序结果。</li>
+			  <li>根据规范要求，可能存在其它类型被转为某种数值类型与 0 做某种逻辑判断后，得出交换值 -1、0、1，从而得到非预期的排序结果。</li>
+			</ul>
+			
+      <h2 id="solutions">解决方案</h2>
+      <p>调用 Array.prototype.sort 函数并需要依赖 comparefn 处理排序结果时，应遵循规将 comparefn 函数返回值约束在 -1、0、1 范围内。</p>
+
+      <h2 id="see_also">参见</h2>
+      <h3>知识库</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <h3>相关问题</h3>
+      <ul class="see_also">
+        <li><a href="#">...</a></li>
+      </ul>
+
+      <div class="appendix">
+        <h2>测试环境</h2>
+        <table class="list">
+          <tr>
+            <th>操作系统版本:</th>
+            <td>Windows 8 r9200</td>
+          </tr>
+          <tr>
+            <th>浏览器版本:</th>
+            <td>
+              IE 6-10<br />
+              Firefox 19.0.2<br />
+              Chrome 26.0.1410.43m<br />
+              Safari 5.17<br />
+              Opera 12.14
+            </td>
+          </tr>
+          <tr>
+            <th>测试页面:</th>
+            <td>
+              <a href="../../tests/SJ9013/sort.html">sort.html</a>
+            </td>
+          </tr>
+          <tr>
+            <th>本文更新时间:</th>
+            <td>2013-04-02</td>
+          </tr>
+        </table>
+
+        <h2>关键字</h2>
+        <!-- keywords begin -->
+        <p>Array prototype sort comparefn</p>
+        <!-- keywords end -->
+      </div>
+      <!-- content end -->
+    </div>
+  </div>
+</div>
+</body>
+</html>
