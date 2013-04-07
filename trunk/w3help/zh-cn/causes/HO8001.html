@@ -76,7 +76,7 @@
       <p>这段代码在各浏览器中运行效果如下：</p>
       <table class="compare">
         <tr>
-          <th>IE6 IE7 IE8 Chrome Safari</th>
+          <th>IE6 IE7 IE8 Chrome<sup>1</sup> Safari</th>
           <th>Firefox Opera</th>
         </tr>
         <tr>
@@ -86,6 +86,7 @@
       </table>
       <p>Firefox 和 Opera 由于不支持 ActiveX 技术所有无法通过 OBJECT 元素及 classid 属性引入 Flash，则此时 OBJECT 元素宽度和高度均为 0。<br />
       然而 Chrome 和 Safari 却正确的加载了 Flash 文件，这是由于 WebKit 内核对 ActiveX 提供了有限的支持，对于比较通用的 ActiveX 插件（如 Flash, Media Player, Director, QuickTime, RealAudio），浏览器会将它们的在 Windows 系统中的 classid 与其对应的 Mime-Type 相关联，所以可以和 IE 一样仅仅通过 OBJECT 元素的 classid 属性引入这些插件。</p>
+      <p class="comment">【注】：Chrome 后续版本对此处实现做了修正，已无法通过 classid 来加载 Flash 文件。</p>
       <br />
       <h3>2. 使用 OBJECT 元素 type、data 属性：<em>flash_object_type.html</em></h3>
       <pre>&lt;div style="border:5px solid black; padding:5px; float:left;"&gt;
