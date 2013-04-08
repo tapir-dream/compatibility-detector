@@ -114,7 +114,7 @@ test10Elements.sort(comparefn);
 					<td><span class="hl_1">否</span></td>
         </tr>
         <tr>
-          <th>Chakra & JavaScriptCore</th>
+          <th>Chakra &amp; JavaScriptCore</th>
           <td>[7, 6, 5, 4, 3, 2, 1, 0, 8, 9]</td>
 					<td><span class="hl_1">否</span></td>
         </tr>
@@ -132,8 +132,8 @@ test10Elements.sort(comparefn);
 			
 			<p><strong>根据表中数据可见，当数组内元素个数小于等于 10 时：</strong></p>
       <ul>
-        <li>JScript & Carakan 排序结果有误</li>
-        <li>Chakra & JavaScriptCore 看起来没有进行排序</li>
+        <li>JScript &amp; Carakan 排序结果有误</li>
+        <li>Chakra &amp; JavaScriptCore 看起来没有进行排序</li>
         <li>IonMonkey 返回了预期的正确结果</li>
         <li>V8 暂时看起来排序正确</li>
       </ul>
@@ -165,7 +165,7 @@ test11Elements.sort(comparefn);
 					<td><span class="hl_1">否</span></td>
         </tr>
         <tr>
-          <th>Chakra & JavaScriptCore</th>
+          <th>Chakra &amp; JavaScriptCore</th>
           <td>[7, 6, 5, 4, 3, 2, 1, 0, 10, 8, 9]</td>
 					<td><span class="hl_1">否</span></td>
         </tr>
@@ -182,19 +182,19 @@ test11Elements.sort(comparefn);
       </table>
 			<p><strong>根据表中数据可见，当数组内元素个数大于 10 时：</strong></p>
       <ul>
-        <li>JScript & Carakan 排序结果有误</li>
-        <li>Chakra & JavaScriptCore 看起来没有进行排序</li>
+        <li>JScript &amp; Carakan 排序结果有误</li>
+        <li>Chakra &amp; JavaScriptCore 看起来没有进行排序</li>
         <li>IonMonkey 返回了预期的正确结果</li>
         <li>V8 <strong>排序结果由正确转为不正确</strong></li>
       </ul>
 			
 			<h3>单引擎多种排序实现</h3>
-			<p>由于规范中并不要求引擎采用何种排序算法来实现 sort 函数。因此同一引擎对于所需排序元素总体数量不同，可能会采用不同的优化排序算方法。
+			<p>由于规范中并不要求引擎采用何种排序算法来实现 sort 函数。因此同一引擎对于所需排序元素总体数量不同，可能会采用不同的优化排序算方法。</p>
       <p><strong>V8 正是使用了这种多排序算法，参照 V8 : v8/src/array.js</strong></p>
 <pre>
   var QuickSort = function QuickSort(a, from, to) {
     var third_index = 0;
-    while ( true) {
+    while (true) {
       // Insertion sort is faster for short arrays.
       if (to - from &lt;= 10) {
         InsertionSort(a, from, to);
@@ -214,12 +214,12 @@ test11Elements.sort(comparefn);
 			<p>先看小于等于 10 位数据时，使用的插入排序实现：</p>
 <pre> 
   var InsertionSort = function InsertionSort(a, from, to) {
-    for (var i = from + 1; i < to; i++) {
+    for (var i = from + 1; i &lt; to; i++) {
       var element = a[i];
-      for (var j = i - 1; j >= from; j--) {
+      for (var j = i - 1; j &gt;= from; j--) {
         var tmp = a[j];
         var order = %_CallFunction(receiver, tmp, element, comparefn);
-        <span class="hl_1">if (order > 0) {</span>
+        <span class="hl_1">if (order &gt; 0) {</span>
           a[j + 1] = tmp;
         } else {
           break;
@@ -237,7 +237,7 @@ test11Elements.sort(comparefn);
 <pre>
   var QuickSort = function QuickSort(a, from, to) {
     var third_index = 0;
-    while ( true) {
+    while (true) {
       // Insertion sort is faster for short arrays.
       if (to - from &lt;= 10) {
         InsertionSort(a, from, to);
@@ -253,24 +253,24 @@ test11Elements.sort(comparefn);
       var v1 = a[to - 1];
       var v2 = a[third_index];
       var c01 = %_CallFunction(receiver, v0, v1, comparefn);
-      <span class="hl_1">if (c01 > 0) {</span>
-        // v1 < v0, so swap them.
+      <span class="hl_1">if (c01 &gt; 0) {</span>
+        // v1 &lt; v0, so swap them.
         var tmp = v0;
         v0 = v1;
         v1 = tmp;
-      } // v0 <= v1.
+      } // v0 &lt;= v1.
       var c02 = %_CallFunction(receiver, v0, v2, comparefn);
-      <span class="hl_1">if (c02 >= 0) {</span>
-        // v2 <= v0 <= v1.
+      <span class="hl_1">if (c02 &gt;= 0) {</span>
+        // v2 &lt;= v0 &lt;= v1.
         var tmp = v0;
         v0 = v2;
         v2 = v1;
         v1 = tmp;
       } else {
-        // v0 <= v1 && v0 < v2
+        // v0 &lt;= v1 &amp;&amp; v0  &lt; v2
         var c12 = %_CallFunction(receiver, v1, v2, comparefn);
-        <span class="hl_1">if (c12 > 0) {</span>
-          // v0 <= v2 < v1
+        <span class="hl_1">if (c12 &gt; 0) {</span>
+          // v0  &lt;= v2  &lt; v1
           var tmp = v1;
           v1 = v2;
           v2 = tmp;
@@ -280,7 +280,7 @@ test11Elements.sort(comparefn);
 		...
  }
 </pre>
-      <p>根据 TestCase 中用例情况， comparefn 被调用后进入 if (c02 >= 0) 分支。
+      <p>根据 TestCase 中用例情况， comparefn 被调用后进入 if (c02 &gt;= 0) 分支。
 			此时，如果 comparefn 返回的是布尔值，那么 c02 &gt;= 0 结果永远是 true。
 			元素被不符合使用者预期的调换了位置，这导致了 V8 高于 10 位元素时排序结果不符合预期<sup>1</sup>。</p>
       <p class="comment">【注】：在 V8 的测试工程中(v8/test/mjsunit/array-sort.js) TestNumberSort 方法中的测试用例覆盖不全，最长的测试用例是 10 个元素的数组，快排分支没有被检测到。</p>
@@ -328,7 +328,7 @@ test11Elements.sort(comparefn);
           <th>输出结果</th>
         </tr>
         <tr>
-          <th>Chakra & JavaScriptCore</th>
+          <th>Chakra &amp; JavaScriptCore</th>
           <td>[8, 9, 10, 0, 1, 2, 3, 4, 5, 6, 7]</td>
         </tr>
       </table>
