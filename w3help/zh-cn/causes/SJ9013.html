@@ -311,7 +311,7 @@ test11Elements.sort(comparefn);
     return <span class="hl_1">(compareResult &lt; 0) ? -1 : 1;</span> // Not passing equality through, because we need to store all values, even if equivalent.
   }
 </pre>
-      <p>JavaScriptCord 的实现中，引擎先将 bool 转为 double 类型，并采用具体逻辑语句将其转为符合规范描述的 -1 、1 值范围。</p>
+      <p>JavaScriptCore 的实现中，引擎先将 bool 转为 double 类型，并采用具体逻辑语句将其转为符合规范描述的 -1 、1 值范围。</p>
 			<p>TestCase 中 comparefn 返回结果是布尔类型，引擎采用 double 类型来接受此值，并且判断它是否小于 0。 因此 bool 被转为 1 或 0，不管如何表达式都返回 false，并被适配到 1 值上。</p>
 			<p>于是元素没有被交换位置，<strong>导致看起来排序后结果与原数组顺序一致</strong>。将 comparefn 的返回值强制设置为 -1，可发现其实际上进行了排序。</p>
 <pre>
