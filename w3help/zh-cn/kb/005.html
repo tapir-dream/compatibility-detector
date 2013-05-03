@@ -82,7 +82,7 @@ p{ color:blue; }</pre>
 
         <h2 id="header_2">!important 规则<sup>1</sup></h2>
         <p>根据 CSS2.1 规范中的描述，'!important' 可以提高样式的优先级，它对样式优先级的影响是巨大的。
-           注意，'!important' 规则在 IE7 以前的版本中是不被支持的。因此，经常被用作 CSS hack<sup>2</sup>。</p>
+           注意，'!important' 规则在 IE7 以前的版本中是被支持不完善。因此，经常被用作 CSS hack<sup>2</sup>。</p>
         <p>为了平衡开发者设置的样式和浏览器用户设定的样式，默认开发者的样式优于浏览器用户设置的样式；另外，声明了 '!important' 的样式优于普通声明。</p>
 
         <p class="comment">注：</p>
@@ -90,6 +90,7 @@ p{ color:blue; }</pre>
             <li>关于 '!important' 的详细信息，请参考 CSS2.1 规范 <a href="http://www.w3.org/TR/CSS2/cascade.html#important-rules">6.4.2 !important rules</a> 中的内容；</li>
             <li>见：<ul>
                     <li><a href="/zh-cn/causes/RY8003">W3Help - RY8003: 各浏览器对 CSS 错误解析规则的差异及 CSS hack</a></li>
+										<li><a href="/zh-cn/causes/RA8003">W3Help - RA8003: IE6 IE7(Q) IE8(Q) 不完全支持 !important 规则</a></li>
                     <li><a href="http://topic.csdn.net/u/20100715/17/6306e40a-1ea1-4f0f-a1c3-acd7470800ea.html?18677">CSDN - 【分享】CSS Hack的基本原理、常用CSS hack及使用原则</a></li>
                 </ul></li>
         </ol>
