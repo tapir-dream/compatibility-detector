@@ -10,7 +10,7 @@
 <div id="w3h_body">
   <div class="body_content">
     <!-- toc begin -->
-    <h1 class="title">RB1005: IE6 IE7 IE8(Q) 中父元素带有 hasLayout 时，子元素如果存在带有 margin-bottom 的左浮动，则其 margin-bottom 值与期望值不符</h1>
+    <h1 class="title">RB1005: IE6 IE7 IE8(Q) 中父元素带有 hasLayout 时，其左浮动子元素果存在带有非零值的 margin-bottom 时，则该子元素的 margin-bottom 设置失效</h1>
     <ul class="toc">
       <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
       <li><a href="#description">问题描述</a> <span>•</span></li>
@@ -67,6 +67,7 @@
       </ul>
       <h2 id="solutions">解决方案</h2>
       <p>为容器显式地设置高度。若容器高度不定，则要避免在触发了 hasLayout 的容器内的浮动子元素上设置 'margin-bottom' 特性，可以通过为容器设置 'padding-bottom' 达到相似的效果。</p>
+			<p>只要不同时触发父元素hasLayout、子元素左浮动、左浮动子元素拥有非零的 margin-bottom 值，这三个条件中任意一项，均可解决此问题。</p>
       <h2 id="see_also">参见</h2>
 
       <h3>知识库</h3>
