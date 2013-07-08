@@ -10,7 +10,7 @@
 <div id="w3h_body">
   <div class="body_content">
     <!-- toc begin -->
-    <h1 class="title">RB1005: IE6 IE7 IE8(Q) 中父元素或子元素触发 hasLayout 时子元素的 margin 值与期望值不符</h1>
+    <h1 class="title">RB1005: IE6 IE7 IE8(Q) 中父元素带有 hasLayout 时，子元素如果存在带有 margin-bottom 的左浮动，则其 margin-bottom 值与期望值不符</h1>
     <ul class="toc">
       <li><a href="#standard_reference">标准参考</a> <span>•</span></li>
       <li><a href="#description">问题描述</a> <span>•</span></li>
@@ -27,7 +27,7 @@
       <h2 id="standard_reference">标准参考</h2>
       <p>无</p>
       <h2 id="description">问题描述</h2>
-      <p>在 IE6 IE7 IE8(Q)下，容器触发 hasLayout 导致其浮动子元素 'margin-bottom' 消失。</p>
+      <p>在 IE6 IE7 IE8(Q)下，容器触发 hasLayout 导致其左浮动子元素 'margin-bottom' 消失。</p>
       <h2 id="influence">造成的影响</h2>
       <p>此问题导致的边距消失可能影响到页面的布局，如段落过于紧凑，甚至是文字重叠。</p>
       <h2 id="impacted_browsers">受影响的浏览器</h2>
@@ -45,8 +45,9 @@
 &lt;span&gt;content_text&lt;/span&gt;
 </pre>
       <p>
-        测试代码中 DIV 容器内包含一个左浮动元素，左浮动元素宽度和高度均为50px，四个方向均有20px的边距。容器设置了 '<strong>zoom:1; overflow:hidden;' </strong>。
+        测试代码中 DIV 容器内包含一个<strong>左浮动</strong>子元素，左浮动<sup>1</sup>元素宽度和高度均为50px，四个方向均有20px的边距。容器设置了 '<strong>zoom:1; overflow:hidden;' </strong>。
       </p>
+			<p class="comment">【注】：右浮动元素没有这个问题，很显然这是早期版本 IE 在布局计算中存在失误。</p>
 
       <p>各浏览器表现如下：</p>
       <table class="compare">

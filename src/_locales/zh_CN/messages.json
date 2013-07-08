@@ -127,7 +127,7 @@
   "RB5002": { "message": "Chrome Safari 中为处于浮动元素后创建了 in-flow 的 Block Formatting Context 的元素设置的 'margin-left' 或 'margin-right' 特性会出错" },
   "RB1003": { "message": "Firefox 中 'display:table '的元素的外边距不会与包含块的外边距折叠" },
   "RB8004": { "message": "IE6 IE7 IE8(Q) 中浮动元素和定位元素某些情况下会影响普通流中毗邻 'margin' 的折叠" },
-  "RB1005": { "message": "IE6 IE7 IE8(Q) 中父元素或子元素触发 hasLayout 时子元素的 margin 值与期望值不符" },
+  "RB1005": { "message": "RB1005: IE6 IE7 IE8(Q) 中父元素带有 hasLayout 时，子元素如果存在带有 margin-bottom 的左浮动，则其 margin-bottom 值与期望值不符" },
   "RM8001": { "message": "IE6 IE7 IE8(Q) 不支持 'display' 的替代值" },
   "RM8002": { "message": "不能在 IE6 IE7 IE8(Q) 中触发 hasLayout 并在其他浏览器中创建 Block Formatting Context 的元素的表现会有差异" },
   "RM8003": { "message": "各浏览器中浮动元素与相邻的 Block Formatting Context 之间的关系有差异" },
